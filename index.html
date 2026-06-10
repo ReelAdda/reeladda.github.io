@@ -242,7 +242,7 @@
 
   <section>
     <div class="section-head">
-      <h2>In Theatres</h2><span class="count">TOP 5</span>
+      <h2>In Theatres</h2><span class="count" id="theatreCount">TOP 5</span>
       <span class="sub">Latest big-screen releases</span>
     </div>
     <div class="grid" id="moviesGrid"><div class="skeleton"></div><div class="skeleton"></div></div>
@@ -384,6 +384,12 @@ function render() {
   const hideMsg = myListOnly ? '<div class="error-box">Showing only My List above — tap ⭐ again to see everything.</div>' : '<div class="error-box">No releases match this filter.</div>';
   document.getElementById('moviesGrid').innerHTML = t.map((it) => card(it, DATA.theatres.indexOf(it), 'theatres')).join('') || hideMsg;
   document.getElementById('ottGrid').innerHTML = o.map((it) => card(it, DATA.ott.indexOf(it), 'ott')).join('') || hideMsg;
+  const cs = DATA.comingSoon || [];
+  const csShown = activeLang === 'All' ? cs : cs.filter(x => x.language === activeLang);
+  document.getElementById('soonStrip').innerHTML = csShown.map((it) => soonCard(it, cs.indexOf(it))).join('') ||
+    '<div class="error-box" style="flex:1">' + (cs.length ? 'No upcoming ' + esc(activeLang) + ' releases in the next scan.' : 'Upcoming releases will appear after the next scan.') + '</div>';
+  const tc = document.getElementById('theatreCount');
+  if (tc && DATA.theatres.length) tc.textContent = 'TOP ' + DATA.theatres.length;
   updateWLCount();
 }
 
@@ -465,6 +471,7 @@ document.getElementById('sortSel').addEventListener('change', e => { sortMode = 
 
 function setLang(l, el) {
   activeLang = l;
+  try { localStorage.setItem('filmychill-lang', l); } catch {}
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
   el.classList.add('on');
   render();
@@ -519,16 +526,18 @@ fetch('data.json?v=' + Date.now())
       };
     }
 
-    // Language chips
-    const langs = ['All', ...new Set(all.map(x => x.language).filter(Boolean))];
-    document.getElementById('chips').innerHTML = langs.map(l =>
-      `<button class="chip${l === 'All' ? ' on' : ''}" onclick="setLang('${esc(l)}', this)">${esc(l)}</button>`).join('');
+    // Language chips: counts shown, ordered by this week's volume, choice remembered
+    const allCS = [...all, ...(data.comingSoon || [])];
+    const counts = {};
+    allCS.forEach(x => { if (x.language) counts[x.language] = (counts[x.language] || 0) + 1; });
+    const langs = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+    let savedLang = 'All';
+    try { savedLang = localStorage.getItem('filmychill-lang') || 'All'; } catch {}
+    activeLang = langs.includes(savedLang) ? savedLang : 'All';
+    document.getElementById('chips').innerHTML = ['All', ...langs].map(l =>
+      `<button class="chip${l === activeLang ? ' on' : ''}" onclick="setLang('${esc(l)}', this)">${esc(l)}${l === 'All' ? '' : ` <span style="opacity:.65">${counts[l]}</span>`}</button>`).join('');
 
     render();
-
-    // Coming soon
-    document.getElementById('soonStrip').innerHTML = (data.comingSoon || []).map(soonCard).join('') ||
-      '<div class="error-box" style="flex:1">Upcoming releases will appear after the next scan.</div>';
 
     const d = new Date(data.generatedAt);
     const days = Math.floor((new Date() - d) / 86400000);
