@@ -144,6 +144,37 @@
     color: #fff; font-weight: 800; font-size: 14px; padding: 11px 22px; border-radius: 10px; text-decoration: none; }
   .trailer-btn:hover { filter: brightness(1.07); }
 
+
+  /* ---- Watchlist ---- */
+  .save-btn { position: absolute; top: 12px; right: 12px; background: var(--bg); border: 1px solid var(--line);
+    border-radius: 8px; width: 34px; height: 34px; font-size: 17px; cursor: pointer; line-height: 1;
+    color: var(--marigold-dk); transition: all .15s; z-index: 2; }
+  .save-btn:hover { border-color: var(--marigold); transform: scale(1.08); }
+  .save-btn.saved { background: var(--marigold); border-color: var(--marigold); }
+  .mylist-btn { background: var(--card); border: 1px solid var(--line); color: var(--ink); border-radius: 999px;
+    padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 700; }
+  .mylist-btn.active { background: var(--marigold); border-color: var(--marigold); }
+  .mylist-btn:focus-visible, .tonight-btn:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+
+  /* ---- Tonight mood shuffle ---- */
+  .tonight-btn { background: var(--indigo); border: none; color: #fff; border-radius: 999px;
+    padding: 9px 18px; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 13px; cursor: pointer; }
+  .tonight-btn:hover { filter: brightness(1.1); }
+  .mood-box { background: var(--card); border-radius: 18px; max-width: 460px; width: 100%; padding: 28px;
+    text-align: center; position: relative; box-shadow: 0 24px 60px rgba(36,29,82,0.35); }
+  .mood-box h2 { font-size: 21px; font-weight: 800; }
+  .mood-box p { color: var(--mute); font-size: 13.5px; margin-top: 6px; }
+  .mood-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+  .mood { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 16px 10px;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: all .15s; }
+  .mood:hover { border-color: var(--indigo); transform: translateY(-2px); }
+  .mood .emo { font-size: 26px; }
+  .mood .lbl { font-size: 13px; font-weight: 700; margin-top: 6px; color: var(--ink); }
+
+  /* ---- Countdown ---- */
+  .soon-days { display: inline-block; background: var(--coral); color: #fff; font-size: 10.5px; font-weight: 800;
+    padding: 2px 8px; border-radius: 5px; letter-spacing: 0.5px; margin-left: 6px; }
+
   /* ---- States ---- */
   .skeleton { background: var(--card); border: 1px solid var(--line); border-radius: 14px; height: 150px;
     position: relative; overflow: hidden; }
@@ -181,6 +212,8 @@
 </div>
 
 <div class="toolbar">
+  <button class="tonight-btn" onclick="openMood()">🎲 What to watch tonight?</button>
+  <button class="mylist-btn" id="mylistBtn" onclick="toggleMyList()">⭐ My List (<span id="wlCount">0</span>)</button>
   <div class="chips" id="chips"></div>
   <select id="sortSel" aria-label="Sort by">
     <option value="default">Sort: Trending</option>
@@ -191,6 +224,14 @@
 </div>
 
 <main>
+  <section id="mylistSection" style="display:none">
+    <div class="section-head">
+      <h2>⭐ My List</h2>
+      <span class="sub">Saved on this device</span>
+    </div>
+    <div class="grid ott" id="mylistGrid"></div>
+  </section>
+
   <section>
     <div class="section-head">
       <h2>In Theatres</h2><span class="count">TOP 5</span>
@@ -220,6 +261,20 @@
   <div class="modal" id="modal"></div>
 </div>
 
+<div class="overlay" id="moodOverlay" role="dialog" aria-modal="true">
+  <div class="mood-box">
+    <button class="modal-close" onclick="closeMood()" aria-label="Close" style="background:var(--bg);color:var(--ink)">×</button>
+    <h2>🎲 What's the mood tonight?</h2>
+    <p>I'll pick something from this week's releases</p>
+    <div class="mood-grid">
+      <button class="mood" onclick="moodPick('light')"><div class="emo">😂</div><div class="lbl">Light & Fun</div></button>
+      <button class="mood" onclick="moodPick('thrill')"><div class="emo">🔥</div><div class="lbl">Edge of Seat</div></button>
+      <button class="mood" onclick="moodPick('feels')"><div class="emo">💔</div><div class="lbl">In the Feels</div></button>
+      <button class="mood" onclick="moodPick('family')"><div class="emo">👨‍👩‍👧</div><div class="lbl">Family Time</div></button>
+    </div>
+  </div>
+</div>
+
 <footer>
   <b>ReelAdda</b> rescans automatically every Friday.<br>
   Film data and ratings from <a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.
@@ -231,6 +286,29 @@ function esc(s) { const d = document.createElement('div'); d.textContent = s == 
 let DATA = { theatres: [], ott: [], comingSoon: [] };
 let activeLang = 'All';
 let sortMode = 'default';
+let myListOnly = false;
+
+// ---- Watchlist (stored on this device) ----
+function loadWL() { try { return JSON.parse(localStorage.getItem('reeladda-wl') || '[]'); } catch { return []; } }
+function saveWL(wl) { try { localStorage.setItem('reeladda-wl', JSON.stringify(wl)); } catch {} updateWLCount(); }
+function wlKey(item) { return item.tmdbId || item.title; }
+function isSaved(item) { return loadWL().some(x => wlKey(x) === wlKey(item)); }
+function toggleSave(listKey, i) {
+  const item = listKey === 'wl' ? loadWL()[i] : DATA[listKey][i];
+  if (!item) return;
+  let wl = loadWL();
+  if (wl.some(x => wlKey(x) === wlKey(item))) wl = wl.filter(x => wlKey(x) !== wlKey(item));
+  else wl.push(item);
+  saveWL(wl);
+  render();
+}
+function updateWLCount() { document.getElementById('wlCount').textContent = loadWL().length; }
+function toggleMyList() {
+  myListOnly = !myListOnly;
+  document.getElementById('mylistBtn').classList.toggle('active', myListOnly);
+  render();
+  if (myListOnly) document.getElementById('mylistSection').scrollIntoView({ behavior: 'smooth' });
+}
 
 function fmtDate(d) {
   if (!d) return '';
@@ -240,7 +318,9 @@ function fmtDate(d) {
 function card(item, i, listKey) {
   const scores = (item.scores || []).map(s => `<div class="score">${esc(s.source)}: <b>${esc(s.score)}</b></div>`).join('');
   const poster = item.poster ? `<img class="poster" src="${esc(item.poster)}" alt="${esc(item.title)} poster" loading="lazy">` : '';
+  const saved = isSaved(item);
   return `<div class="card${item.poster ? '' : ' no-poster'}" onclick="openDetail('${listKey}', ${i})" tabindex="0" onkeydown="if(event.key==='Enter')openDetail('${listKey}', ${i})">
+    <button class="save-btn${saved ? ' saved' : ''}" onclick="event.stopPropagation(); toggleSave('${listKey}', ${i})" aria-label="${saved ? 'Remove from' : 'Add to'} My List">${saved ? '★' : '☆'}</button>
     <div class="rank">${String(i + 1).padStart(2, '0')}</div>
     ${poster}
     <div>
@@ -257,11 +337,19 @@ function card(item, i, listKey) {
   </div>`;
 }
 
+function daysAway(dateStr) {
+  if (!dateStr) return null;
+  const diff = Math.ceil((new Date(dateStr) - new Date().setHours(0,0,0,0)) / 86400000);
+  if (diff <= 0) return 'Out now';
+  if (diff === 1) return 'Tomorrow';
+  return 'In ' + diff + ' days';
+}
 function soonCard(item) {
+  const dd = daysAway(item.released);
   return `<div class="soon-card">
     ${item.poster ? `<img src="${esc(item.poster)}" alt="${esc(item.title)} poster" loading="lazy">` : '<div style="height:200px"></div>'}
     <div class="soon-body">
-      <div class="soon-date">${esc(fmtDate(item.released))}</div>
+      <div class="soon-date">${esc(fmtDate(item.released))}${dd ? `<span class="soon-days">${esc(dd)}</span>` : ''}</div>
       <div class="soon-title">${esc(item.title)}</div>
       <div class="soon-meta">${esc(item.language || '')}${item.genre ? ' · ' + esc(item.genre) : ''}</div>
     </div>
@@ -277,14 +365,20 @@ function applyFilters(list) {
 }
 
 function render() {
-  const t = applyFilters(DATA.theatres);
-  const o = applyFilters(DATA.ott);
-  document.getElementById('moviesGrid').innerHTML = t.map((it, i) => card(it, DATA.theatres.indexOf(it), 'theatres')).join('') || '<div class="error-box">No theatre releases match this filter.</div>';
-  document.getElementById('ottGrid').innerHTML = o.map((it, i) => card(it, DATA.ott.indexOf(it), 'ott')).join('') || '<div class="error-box">No OTT releases match this filter.</div>';
+  const wl = loadWL();
+  const mySec = document.getElementById('mylistSection');
+  mySec.style.display = wl.length ? 'block' : 'none';
+  document.getElementById('mylistGrid').innerHTML = wl.map((it, i) => card(it, i, 'wl')).join('');
+  const t = myListOnly ? [] : applyFilters(DATA.theatres);
+  const o = myListOnly ? [] : applyFilters(DATA.ott);
+  const hideMsg = myListOnly ? '<div class="error-box">Showing only My List above — tap ⭐ again to see everything.</div>' : '<div class="error-box">No releases match this filter.</div>';
+  document.getElementById('moviesGrid').innerHTML = t.map((it) => card(it, DATA.theatres.indexOf(it), 'theatres')).join('') || hideMsg;
+  document.getElementById('ottGrid').innerHTML = o.map((it) => card(it, DATA.ott.indexOf(it), 'ott')).join('') || hideMsg;
+  updateWLCount();
 }
 
 function openDetail(listKey, i) {
-  const item = DATA[listKey][i];
+  const item = listKey === 'wl' ? loadWL()[i] : DATA[listKey][i];
   if (!item) return;
   const provs = (item.providers || []).map(p => `<span class="pill prov">${esc(p)}</span>`).join('');
   const facts = [
@@ -306,6 +400,7 @@ function openDetail(listKey, i) {
       </div>
       <div class="verdict">▸ ${esc(item.verdict || '')}</div>
       ${item.trailer ? `<a class="trailer-btn" href="${esc(item.trailer)}" target="_blank" rel="noopener">▶ Watch trailer</a>` : ''}
+      <a class="trailer-btn" style="background:var(--marigold);color:var(--ink);margin-left:8px" href="#" onclick="event.preventDefault(); toggleSave('${listKey}', ${i}); closeDetail();">${isSaved(item) ? '★ Remove from My List' : '☆ Add to My List'}</a>
     </div>`;
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -324,6 +419,26 @@ function setLang(l, el) {
   el.classList.add('on');
   render();
 }
+
+// ---- Tonight mood shuffle ----
+const MOODS = {
+  light:  ['Comedy', 'Romance', 'Animation', 'Family', 'Music'],
+  thrill: ['Thriller', 'Action', 'Crime', 'Horror', 'Mystery', 'Science Fiction'],
+  feels:  ['Drama', 'Romance', 'History', 'War'],
+  family: ['Family', 'Animation', 'Adventure', 'Fantasy'],
+};
+function openMood() { document.getElementById('moodOverlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeMood() { document.getElementById('moodOverlay').classList.remove('open'); document.body.style.overflow = ''; }
+function moodPick(mood) {
+  const all = [...DATA.theatres.map((x, i) => ({ x, k: 'theatres', i })), ...DATA.ott.map((x, i) => ({ x, k: 'ott', i }))];
+  const wanted = MOODS[mood] || [];
+  let pool = all.filter(e => wanted.some(g => (e.x.genre || '').includes(g)));
+  if (!pool.length) pool = all;
+  const chosen = pool[Math.floor(Math.random() * pool.length)];
+  closeMood();
+  if (chosen) openDetail(chosen.k, chosen.i);
+}
+document.getElementById('moodOverlay').addEventListener('click', e => { if (e.target.id === 'moodOverlay') closeMood(); });
 
 function shareWeek() {
   const top = DATA.theatres.slice(0, 3).map((x, i) => `${i + 1}. ${x.title} (${x.platform})`).join('\n');
