@@ -144,8 +144,13 @@
   .credits b { color: var(--ink); }
   .modal .verdict { margin-top: 12px; font-size: 14px; }
   .trailer-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; background: var(--coral);
-    color: #fff; font-weight: 800; font-size: 14px; padding: 11px 22px; border-radius: 10px; text-decoration: none; }
+    color: #fff; font-weight: 800; font-size: 14px; padding: 11px 22px; border-radius: 10px; text-decoration: none; border: none; cursor: pointer; font-family: inherit; }
   .trailer-btn:hover { filter: brightness(1.07); }
+  .trailer-frame { position: relative; width: 100%; padding-top: 56.25%; margin-top: 18px; border-radius: 12px; overflow: hidden; background: #000; }
+  .trailer-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .share-film-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; margin-left: 8px; background: #25D366;
+    color: #fff; font-weight: 800; font-size: 14px; padding: 11px 22px; border-radius: 10px; text-decoration: none; border: none; cursor: pointer; font-family: inherit; }
+  .share-film-btn:hover { filter: brightness(1.07); }
 
 
   /* ---- Watchlist ---- */
@@ -381,6 +386,37 @@ function render() {
   updateWLCount();
 }
 
+function slugify(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+
+function findBySlug(slug) {
+  for (const k of ['theatres', 'ott', 'comingSoon']) {
+    const i = (DATA[k] || []).findIndex(x => slugify(x.title) === slug);
+    if (i !== -1) return { k, i };
+  }
+  return null;
+}
+
+function ytId(url) {
+  const m = /youtube\.com\/watch\?v=([\w-]{6,})/.exec(url || '');
+  return m ? m[1] : null;
+}
+
+function playTrailer(id) {
+  const box = document.getElementById('trailerBox');
+  if (!box) return;
+  box.outerHTML = `<div class="trailer-frame"><iframe src="https://www.youtube-nocookie.com/embed/${esc(id)}?autoplay=1&rel=0" title="Trailer" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`;
+}
+
+function shareFilm(listKey, i) {
+  const item = listKey === 'wl' ? loadWL()[i] : DATA[listKey][i];
+  if (!item) return;
+  const link = location.origin + location.pathname + '#' + slugify(item.title);
+  const when = item.released ? (item.released > new Date().toISOString().slice(0, 10) ? 'Releases ' : 'Released ') + fmtDate(item.released) : '';
+  const bits = [item.platform, item.language, when].filter(Boolean).join(' · ');
+  const text = `🎬 *${item.title}*${bits ? '\n' + bits : ''}${item.verdict ? '\n▸ ' + item.verdict : ''}\n\nTrailer & details:\n${link}`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
 function openDetail(listKey, i) {
   const item = listKey === 'wl' ? loadWL()[i] : DATA[listKey][i];
   if (!item) return;
@@ -404,13 +440,21 @@ function openDetail(listKey, i) {
         ${(item.cast && item.cast.length) ? `<b>Cast:</b> ${esc(item.cast.join(', '))}` : ''}
       </div>
       ${item.verdict ? `<div class="verdict">▸ ${esc(item.verdict)}</div>` : ''}
-      ${item.trailer ? `<a class="trailer-btn" href="${esc(item.trailer)}" target="_blank" rel="noopener">▶ Watch trailer</a>` : ''}
+      ${(() => {
+        const id = ytId(item.trailer);
+        if (id) return `<button class="trailer-btn" id="trailerBox" onclick="playTrailer('${esc(id)}')">▶ Watch trailer</button>`;
+        if (item.trailer) return `<a class="trailer-btn" href="${esc(item.trailer)}" target="_blank" rel="noopener">▶ Find trailer</a>`;
+        return '';
+      })()}
+      <button class="share-film-btn" onclick="shareFilm('${listKey}', ${i})">📲 Share</button>
       <a class="trailer-btn" style="background:var(--marigold);color:var(--ink);margin-left:8px" href="#" onclick="event.preventDefault(); toggleSave('${listKey}', ${i}); closeDetail();">${isSaved(item) ? '★ Remove from My List' : '☆ Add to My List'}</a>
     </div>`;
+  history.replaceState(null, '', '#' + slugify(item.title));
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 function closeDetail() {
+  history.replaceState(null, '', location.pathname + location.search);
   document.getElementById('overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
@@ -488,6 +532,16 @@ fetch('data.json?v=' + Date.now())
     const d = new Date(data.generatedAt);
     const days = Math.floor((new Date() - d) / 86400000);
     document.getElementById('lastScan').textContent = days <= 0 ? 'Updated today' : days === 1 ? 'Updated yesterday' : 'Updated ' + days + ' days ago';
+
+    // Deep link: open the film if the URL has a #slug (e.g. /#carry-on-jatta-4)
+    const openFromHash = () => {
+      const slug = decodeURIComponent(location.hash.slice(1));
+      if (!slug) return;
+      const hit = findBySlug(slug);
+      if (hit) openDetail(hit.k, hit.i);
+    };
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
   })
   .catch(() => {
     document.getElementById('lastScan').textContent = 'Fresh picks arriving soon';
