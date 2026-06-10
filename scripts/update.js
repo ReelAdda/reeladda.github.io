@@ -144,18 +144,28 @@ async function main() {
   // ---------- COMING SOON (next releases in India) ----------
   const today = new Date().toISOString().slice(0, 10);
   const upcoming = await tmdb("/movie/upcoming", { region: "IN", page: "1" });
-  const comingSoon = upcoming.results
+  const soonBase = upcoming.results
     .filter((m) => m.release_date && m.release_date > today)
     .sort((a, b) => a.release_date.localeCompare(b.release_date))
-    .slice(0, 8)
-    .map((m) => ({
+    .slice(0, 8);
+
+  const comingSoon = [];
+  for (const m of soonBase) {
+    const item = {
       title: m.title,
       released: m.release_date,
       genre: genres(m.genre_ids),
       language: LANG[m.original_language] || m.original_language,
       review: trim(m.overview, 120),
       poster: img(m.poster_path),
-    }));
+      kind: "movie",
+      tmdbId: m.id,
+    };
+    // Full details so the modal can show trailer, backdrop, cast, runtime
+    try { Object.assign(item, await enrich("movie", m.id)); } catch (e) { console.warn(`soon ${m.id}: ${e.message}`); }
+    comingSoon.push(item);
+    await sleep(150);
+  }
 
   // ---------- PICK OF THE WEEK ----------
   const all = [...theatres, ...ott];
