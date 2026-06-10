@@ -113,7 +113,10 @@
   /* ---- Coming soon strip ---- */
   .soon-strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
   .soon-card { flex: 0 0 150px; scroll-snap-align: start; background: var(--card); border: 1px solid var(--line);
-    border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+    border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
+    cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .soon-card:hover, .soon-card:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(36,29,82,0.18); }
+  .soon-hint { font-size: 10.5px; color: var(--indigo); font-weight: 700; margin-top: 5px; }
   .soon-card img { width: 100%; height: 200px; object-fit: cover; display: block; background: var(--bg); }
   .soon-body { padding: 10px 12px 12px; }
   .soon-date { font-size: 11px; font-weight: 800; color: var(--coral); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -344,14 +347,15 @@ function daysAway(dateStr) {
   if (diff === 1) return 'Tomorrow';
   return 'In ' + diff + ' days';
 }
-function soonCard(item) {
+function soonCard(item, i) {
   const dd = daysAway(item.released);
-  return `<div class="soon-card">
+  return `<div class="soon-card" onclick="openDetail('comingSoon', ${i})" tabindex="0" role="button" aria-label="${esc(item.title)} details" onkeydown="if(event.key==='Enter')openDetail('comingSoon', ${i})">
     ${item.poster ? `<img src="${esc(item.poster)}" alt="${esc(item.title)} poster" loading="lazy">` : '<div style="height:200px"></div>'}
     <div class="soon-body">
       <div class="soon-date">${esc(fmtDate(item.released))}${dd ? `<span class="soon-days">${esc(dd)}</span>` : ''}</div>
       <div class="soon-title">${esc(item.title)}</div>
       <div class="soon-meta">${esc(item.language || '')}${item.genre ? ' · ' + esc(item.genre) : ''}</div>
+      <div class="soon-hint">${item.trailer ? '▶ Trailer →' : 'Details →'}</div>
     </div>
   </div>`;
 }
@@ -386,19 +390,20 @@ function openDetail(listKey, i) {
     item.cert ? `<span class="pill">🔖 ${esc(item.cert)}</span>` : '',
     item.rating ? `<span class="pill">⭐ ${esc(String(item.rating))}/10 (${esc(String(item.votes))} ratings)</span>` : '',
   ].join('');
+  const relLabel = item.released && item.released > new Date().toISOString().slice(0, 10) ? 'Releases' : 'Released';
   document.getElementById('modal').innerHTML = `
     ${item.backdrop ? `<img class="modal-backdrop" src="${esc(item.backdrop)}" alt="">` : ''}
     <button class="modal-close" onclick="closeDetail()" aria-label="Close">×</button>
     <div class="modal-inner">
       <h2>${esc(item.title)} ${item.isNew ? '<span class="new-badge">New</span>' : ''}</h2>
-      <div class="meta">${esc(item.genre || '')}${item.language ? ' · ' + esc(item.language) : ''}${item.released ? ' · Released ' + esc(fmtDate(item.released)) : ''}</div>
+      <div class="meta">${esc(item.genre || '')}${item.language ? ' · ' + esc(item.language) : ''}${item.released ? ' · ' + relLabel + ' ' + esc(fmtDate(item.released)) : ''}</div>
       <div class="pill-row">${facts}${provs}</div>
       <div class="review">${esc(item.fullReview || item.review || 'No description available.')}</div>
       <div class="credits">
         ${item.director ? `<b>Director:</b> ${esc(item.director)}<br>` : ''}
         ${(item.cast && item.cast.length) ? `<b>Cast:</b> ${esc(item.cast.join(', '))}` : ''}
       </div>
-      <div class="verdict">▸ ${esc(item.verdict || '')}</div>
+      ${item.verdict ? `<div class="verdict">▸ ${esc(item.verdict)}</div>` : ''}
       ${item.trailer ? `<a class="trailer-btn" href="${esc(item.trailer)}" target="_blank" rel="noopener">▶ Watch trailer</a>` : ''}
       <a class="trailer-btn" style="background:var(--marigold);color:var(--ink);margin-left:8px" href="#" onclick="event.preventDefault(); toggleSave('${listKey}', ${i}); closeDetail();">${isSaved(item) ? '★ Remove from My List' : '☆ Add to My List'}</a>
     </div>`;
