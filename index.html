@@ -4,21 +4,21 @@
   <meta name="google-site-verification" content="4ku0At0NWvCsep-7Vor9IVMcAxscMMt6CPQDrC2bCW4" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ReelAdda — Latest Movie & OTT Releases with Reviews, Updated Weekly</title>
-<meta name="description" content="ReelAdda scans the latest theatre releases and new OTT releases on Netflix, Prime Video, JioHotstar and more — with trailers, ratings and verdicts, auto-updated every week.">
+<title>FilmyChill — Latest Movie & OTT Releases with Reviews, Updated Weekly</title>
+<meta name="description" content="FilmyChill scans the latest theatre releases and new OTT releases on Netflix, Prime Video, JioHotstar and more — with trailers, ratings and verdicts, auto-updated every week.">
 <meta name="keywords" content="latest movie releases, new OTT releases, what to watch this week, new on Netflix India, new on Prime Video, movie reviews, upcoming movies India">
-<link rel="canonical" href="https://reeladda.github.io/">
-<meta property="og:title" content="ReelAdda — What's worth watching this week">
+<link rel="canonical" href="https://filmychill.com/">
+<meta property="og:title" content="FilmyChill — What's worth watching this week">
 <meta property="og:description" content="Top theatre releases + Top OTT picks with trailers, ratings and verdicts. Auto-updated weekly.">
-<meta property="og:site_name" content="ReelAdda">
+<meta property="og:site_name" content="FilmyChill">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://reeladda.github.io/og-image.png">
+<meta property="og:image" content="https://filmychill.com/og-image.png">
 <meta name="theme-color" content="#4038C7">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","name":"ReelAdda","url":"https://reeladda.github.io/"}
+{"@context":"https://schema.org","@type":"WebSite","name":"FilmyChill","url":"https://filmychill.com/"}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -201,7 +201,7 @@
 <body>
 
 <header>
-  <div class="logo">REEL<span>ADDA</span></div>
+  <div class="logo">FILMY<span>CHILL</span></div>
   <div class="tagline">What's worth watching this week</div><br>
   <div class="updated"><div class="dot"></div><span id="lastScan">Loading fresh picks…</span></div>
 </header>
@@ -284,7 +284,7 @@
 </div>
 
 <footer>
-  <b>ReelAdda</b> — fresh picks every day.<br>
+  <b>FilmyChill</b> — fresh picks every day.<br>
   Film data and ratings from <a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.
 </footer>
 
@@ -297,8 +297,8 @@ let sortMode = 'default';
 let myListOnly = false;
 
 // ---- Watchlist (stored on this device) ----
-function loadWL() { try { return JSON.parse(localStorage.getItem('reeladda-wl') || '[]'); } catch { return []; } }
-function saveWL(wl) { try { localStorage.setItem('reeladda-wl', JSON.stringify(wl)); } catch {} updateWLCount(); }
+function loadWL() { try { const v = localStorage.getItem('filmychill-wl') || localStorage.getItem('reeladda-wl') || '[]'; return JSON.parse(v); } catch { return []; } }
+function saveWL(wl) { try { localStorage.setItem('filmychill-wl', JSON.stringify(wl)); } catch {} updateWLCount(); }
 function wlKey(item) { return item.tmdbId || item.title; }
 function isSaved(item) { return loadWL().some(x => wlKey(x) === wlKey(item)); }
 function toggleSave(listKey, i) {
@@ -492,7 +492,7 @@ document.getElementById('moodOverlay').addEventListener('click', e => { if (e.ta
 function shareWeek() {
   const top = DATA.theatres.slice(0, 3).map((x, i) => `${i + 1}. ${x.title} (${x.platform})`).join('\n');
   const ott = DATA.ott.slice(0, 3).map((x, i) => `${i + 1}. ${x.title} (${x.platform})`).join('\n');
-  const text = `🎬 *This week on ReelAdda*\n\n*In Theatres:*\n${top}\n\n*Streaming:*\n${ott}\n\nFull list with trailers & verdicts:\n${location.href}`;
+  const text = `🎬 *This week on FilmyChill*\n\n*In Theatres:*\n${top}\n\n*Streaming:*\n${ott}\n\nFull list with trailers & verdicts:\n${location.href}`;
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
 
