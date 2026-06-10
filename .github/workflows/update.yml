@@ -1,9 +1,9 @@
-name: Weekly ReelAdda Update
+name: Daily ReelAdda Update
 
 on:
   schedule:
-    # Every Friday at 9:00 AM IST (3:30 AM UTC) — fresh for the weekend
-    - cron: "30 3 * * 5"
+    # Every day at 9:00 AM IST (3:30 AM UTC)
+    - cron: "30 3 * * *"
   workflow_dispatch: {}   # also lets you run it manually anytime with one click
 
 permissions:
@@ -31,5 +31,5 @@ jobs:
           git config user.name "reeladda-bot"
           git config user.email "actions@github.com"
           git add data.json
-          git diff --staged --quiet || git commit -m "Weekly release scan: $(date -u +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "Daily release scan: $(date -u +%Y-%m-%d)"
           git push
