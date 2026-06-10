@@ -195,7 +195,7 @@
 <header>
   <div class="logo">REEL<span>ADDA</span></div>
   <div class="tagline">What's worth watching this week</div><br>
-  <div class="updated"><div class="dot"></div><span id="lastScan">Loading this week's scan…</span></div>
+  <div class="updated"><div class="dot"></div><span id="lastScan">Loading fresh picks…</span></div>
 </header>
 
 <div class="hero" id="hero" style="display:none">
@@ -276,7 +276,7 @@
 </div>
 
 <footer>
-  <b>ReelAdda</b> rescans automatically every Friday.<br>
+  <b>ReelAdda</b> — fresh picks every day.<br>
   Film data and ratings from <a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.
 </footer>
 
@@ -481,10 +481,11 @@ fetch('data.json?v=' + Date.now())
       '<div class="error-box" style="flex:1">Upcoming releases will appear after the next scan.</div>';
 
     const d = new Date(data.generatedAt);
-    document.getElementById('lastScan').textContent = 'Last scanned: ' + d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    const days = Math.floor((new Date() - d) / 86400000);
+    document.getElementById('lastScan').textContent = days <= 0 ? 'Updated today' : days === 1 ? 'Updated yesterday' : 'Updated ' + days + ' days ago';
   })
   .catch(() => {
-    document.getElementById('lastScan').textContent = 'First scan has not run yet — run the workflow once on GitHub.';
+    document.getElementById('lastScan').textContent = 'Fresh picks arriving soon';
     document.getElementById('moviesGrid').innerHTML = '<div class="error-box">No data yet — run the workflow in the Actions tab.</div>';
     document.getElementById('ottGrid').innerHTML = '<div class="error-box">No data yet.</div>';
   });
