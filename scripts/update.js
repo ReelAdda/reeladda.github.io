@@ -112,11 +112,52 @@ async function main() {
     };
   }
 
-  // ---------- TOP 5 IN THEATRES ----------
-  const nowPlaying = await tmdb("/movie/now_playing", { region: "IN", page: "1" });
-  const theatreRaw = nowPlaying.results.sort((a, b) => b.popularity - a.popularity).slice(0, 5);
+  // ---------- IN THEATRES (blended score + language representation, flexible 4-7) ----------
+  // Score = log10(popularity) x rating weight. Popularity still matters, but quality gets a vote.
+  // Films with <20 votes get a neutral 6.0 so brand-new releases aren't punished or boosted.
+  const np1 = await tmdb("/movie/now_playing", { region: "IN", page: "1" });
+  await sleep(150);
+  const np2 = await tmdb("/movie/now_playing", { region: "IN", page: "2" });
+  const seen = new Set();
+  const pool = [...np1.results, ...(np2.results || [])].filter((m) => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
+
+  const effRating = (m) => (m.vote_count >= 20 ? m.vote_average : 6.0);
+  const blended = (m) => Math.log10((m.popularity || 0) + 1) * (effRating(m) / 10);
+  // Quality bar: rated films below 5.5 never make the list, however loud they are.
+  const clearsBar = (m) => !(m.vote_count >= 20 && m.vote_average < 5.5);
+
+  const ranked = pool.filter(clearsBar).sort((a, b) => blended(b) - blended(a));
+  const MIN_PICKS = 4, MAX_PICKS = 7, BASE_PICKS = 5;
+  let picks = ranked.slice(0, Math.min(BASE_PICKS, ranked.length));
+
+  // Language representation: best film of each major Indian language earns a slot
+  // if it clears a higher quality bar (>=6.5 with real votes) and isn't already in.
+  // If the list is full, it may displace the weakest pick whose language already
+  // holds 2+ slots — diversity beats a redundant third film in the same language.
+  const INDIAN_LANGS = ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"];
+  for (const lang of INDIAN_LANGS) {
+    if (picks.some((m) => m.original_language === lang)) continue;
+    const best = ranked.find((m) => m.original_language === lang && m.vote_count >= 20 && m.vote_average >= 6.5);
+    if (!best) continue;
+    if (picks.length < MAX_PICKS) { picks.push(best); continue; }
+    const redundant = picks
+      .filter((m) => picks.filter((x) => x.original_language === m.original_language).length >= 2)
+      .sort((a, b) => blended(a) - blended(b))[0];
+    if (redundant) picks[picks.indexOf(redundant)] = best;
+  }
+  // Never show an emaciated list: pad back toward MIN_PICKS from the ranked pool.
+  for (const m of ranked) {
+    if (picks.length >= MIN_PICKS) break;
+    if (!picks.includes(m)) picks.push(m);
+  }
+  picks = picks.slice(0, MAX_PICKS).sort((a, b) => blended(b) - blended(a));
+
   const theatres = [];
-  for (const m of theatreRaw) {
+  for (const m of picks) {
     const item = { ...baseItem(m, "movie"), platform: "Theatres" };
     try { Object.assign(item, await enrich("movie", m.id)); } catch (e) { console.warn(`enrich movie ${m.id}: ${e.message}`); }
     theatres.push(item);
