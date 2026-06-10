@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="google-site-verification" content="4ku0At0NWvCsep-7Vor9IVMcAxscMMt6CPQDrC2bCW4" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReelAdda — Latest Movie & OTT Releases with Reviews, Updated Weekly</title>
+<meta name="description" content="ReelAdda scans the latest theatre releases and new OTT releases on Netflix, Prime Video, JioHotstar and more — with trailers, ratings and verdicts, auto-updated every week.">
+<meta name="keywords" content="latest movie releases, new OTT releases, what to watch this week, new on Netflix India, new on Prime Video, movie reviews, upcoming movies India">
+<link rel="canonical" href="https://reeladda.github.io/">
+<meta property="og:title" content="ReelAdda — What's worth watching this week">
+<meta property="og:description" content="Top theatre releases + Top OTT picks with trailers, ratings and verdicts. Auto-updated weekly.">
+<meta property="og:site_name" content="ReelAdda">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://reeladda.github.io/og-image.png">
+<meta name="theme-color" content="#4038C7">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"ReelAdda","url":"https://reeladda.github.io/"}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF7EC;          /* warm sunlit paper */
+    --card: #FFFFFF;
+    --ink: #241D52;         /* deep indigo text */
+    --indigo: #4038C7;      /* primary */
+    --marigold: #FFAD1F;    /* festival accent */
+    --marigold-dk: #A66B00; /* readable accent on light */
+    --coral: #FF4B3E;       /* NEW badge / hot */
+    --mute: #837C9B;
+    --line: #EFE6D6;
+    --shadow: 0 4px 18px rgba(64,56,199,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; min-height: 100vh; }
+  a { color: inherit; }
+
+  /* ---- Header ---- */
+  header { text-align: center; padding: 46px 24px 8px; }
+  .logo { font-family: 'Anton', sans-serif; font-size: clamp(42px, 8vw, 72px); letter-spacing: 2px; line-height: 1; color: var(--indigo); }
+  .logo span { color: var(--marigold); -webkit-text-stroke: 1.5px var(--indigo); }
+  .tagline { margin-top: 8px; color: var(--mute); font-size: 13.5px; letter-spacing: 2.5px; text-transform: uppercase; }
+  .updated { margin-top: 16px; display: inline-flex; align-items: center; gap: 8px; background: var(--card);
+    border: 1px solid var(--line); border-radius: 999px; padding: 8px 18px; font-size: 13px; color: var(--mute); box-shadow: var(--shadow); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #2EBD6B; }
+
+  /* ---- Hero: Pick of the Week ---- */
+  .hero { max-width: 1100px; margin: 28px auto 0; padding: 0 24px; }
+  .hero-card { position: relative; border-radius: 20px; overflow: hidden; background: var(--indigo); color: #fff;
+    display: flex; align-items: flex-end; min-height: 280px; box-shadow: 0 12px 36px rgba(64,56,199,0.25); cursor: pointer; }
+  .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.45; }
+  .hero-grad { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(36,29,82,0.1) 20%, rgba(36,29,82,0.92) 100%); }
+  .hero-content { position: relative; padding: 26px 28px; width: 100%; }
+  .hero-eyebrow { display: inline-block; background: var(--marigold); color: var(--ink); font-weight: 800; font-size: 11.5px;
+    letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 12px; border-radius: 6px; }
+  .hero-title { font-family: 'Anton', sans-serif; font-size: clamp(26px, 5vw, 44px); letter-spacing: 1px; margin-top: 12px; }
+  .hero-meta { margin-top: 6px; font-size: 14px; opacity: 0.85; }
+  .hero-verdict { margin-top: 10px; font-weight: 700; color: var(--marigold); font-size: 15px; }
+
+  /* ---- Toolbar ---- */
+  .toolbar { max-width: 1100px; margin: 26px auto 0; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--card); border: 1px solid var(--line); color: var(--mute); border-radius: 999px;
+    padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; transition: all .15s; }
+  .chip:hover { border-color: var(--indigo); color: var(--indigo); }
+  .chip.on { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+  .chip:focus-visible, .share-btn:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+  select { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; }
+  .share-btn { margin-left: auto; background: #25D366; color: #fff; border: none; border-radius: 999px;
+    padding: 9px 18px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px; }
+  .share-btn:hover { filter: brightness(1.06); }
+
+  /* ---- Sections ---- */
+  main { max-width: 1100px; margin: 0 auto; padding: 18px 24px 70px; }
+  section { margin-top: 40px; }
+  .section-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; }
+  .section-head h2 { font-family: 'Anton', sans-serif; font-size: 24px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink); }
+  .section-head .count { color: var(--marigold-dk); font-family: 'Anton', sans-serif; font-size: 24px; }
+  .section-head .sub { color: var(--mute); font-size: 13px; margin-left: auto; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 720px) { .grid.ott { grid-template-columns: 1fr 1fr; } }
+
+  /* ---- Cards ---- */
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px;
+    display: grid; grid-template-columns: 44px 72px 1fr; gap: 16px; cursor: pointer; box-shadow: var(--shadow);
+    transition: transform .18s, box-shadow .18s; position: relative; }
+  .card.no-poster { grid-template-columns: 44px 1fr; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(64,56,199,0.16); }
+  @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
+  .rank { font-family: 'Anton', sans-serif; font-size: 26px; color: var(--line); line-height: 1; padding-top: 2px; }
+  .grid .card:first-child .rank { color: var(--marigold); -webkit-text-stroke: 1px var(--marigold-dk); }
+  .poster { width: 72px; height: 106px; object-fit: cover; border-radius: 8px; background: var(--bg); }
+  .title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .card h3 { font-size: 17px; font-weight: 800; }
+  .platform { font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: #fff;
+    background: var(--indigo); border-radius: 5px; padding: 3px 9px; font-weight: 700; }
+  .new-badge { font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: #fff;
+    background: var(--coral); border-radius: 5px; padding: 3px 8px; font-weight: 800; }
+  .meta { color: var(--mute); font-size: 12.5px; margin-top: 4px; }
+  .review { margin-top: 9px; font-size: 13.5px; line-height: 1.6; color: #4A4366; }
+  .bottom-row { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .score { font-size: 12px; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 4px 9px; color: var(--mute); }
+  .score b { color: var(--ink); }
+  .verdict { font-size: 12.5px; font-weight: 800; color: var(--marigold-dk); }
+  .more-hint { margin-top: 8px; font-size: 11.5px; color: var(--indigo); font-weight: 600; }
+
+  /* ---- Coming soon strip ---- */
+  .soon-strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; }
+  .soon-card { flex: 0 0 150px; scroll-snap-align: start; background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+  .soon-card img { width: 100%; height: 200px; object-fit: cover; display: block; background: var(--bg); }
+  .soon-body { padding: 10px 12px 12px; }
+  .soon-date { font-size: 11px; font-weight: 800; color: var(--coral); text-transform: uppercase; letter-spacing: 0.5px; }
+  .soon-title { font-size: 13.5px; font-weight: 700; margin-top: 3px; line-height: 1.3; }
+  .soon-meta { font-size: 11.5px; color: var(--mute); margin-top: 3px; }
+
+  /* ---- Detail modal ---- */
+  .overlay { position: fixed; inset: 0; background: rgba(36,29,82,0.55); backdrop-filter: blur(3px);
+    display: none; align-items: flex-start; justify-content: center; padding: 4vh 16px; z-index: 50; overflow-y: auto; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--card); border-radius: 18px; max-width: 640px; width: 100%; overflow: hidden;
+    position: relative; box-shadow: 0 24px 60px rgba(36,29,82,0.35); }
+  .modal-backdrop { width: 100%; height: 200px; object-fit: cover; display: block; background: var(--indigo); }
+  .modal-close { position: absolute; top: 12px; right: 12px; background: rgba(36,29,82,0.65); border: none; color: #fff;
+    font-size: 22px; cursor: pointer; line-height: 1; width: 36px; height: 36px; border-radius: 50%; }
+  .modal-inner { padding: 22px 26px 28px; }
+  .modal h2 { font-size: 24px; font-weight: 800; }
+  .modal .meta { font-size: 13.5px; margin-top: 6px; }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .pill { font-size: 12px; font-weight: 700; background: var(--bg); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 12px; color: var(--ink); }
+  .pill.prov { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+  .modal .review { font-size: 14.5px; margin-top: 14px; }
+  .credits { margin-top: 14px; font-size: 13px; color: var(--mute); line-height: 1.7; }
+  .credits b { color: var(--ink); }
+  .modal .verdict { margin-top: 12px; font-size: 14px; }
+  .trailer-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; background: var(--coral);
+    color: #fff; font-weight: 800; font-size: 14px; padding: 11px 22px; border-radius: 10px; text-decoration: none; }
+  .trailer-btn:hover { filter: brightness(1.07); }
+
+  /* ---- States ---- */
+  .skeleton { background: var(--card); border: 1px solid var(--line); border-radius: 14px; height: 150px;
+    position: relative; overflow: hidden; }
+  .skeleton::after { content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(64,56,199,0.06), transparent); animation: sweep 1.4s infinite; }
+  @keyframes sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+  @media (prefers-reduced-motion: reduce) { .skeleton::after { animation: none; } }
+  .error-box { background: var(--card); border: 1px solid var(--coral); border-radius: 14px; padding: 24px;
+    text-align: center; color: var(--mute); font-size: 14px; grid-column: 1 / -1; }
+  footer { border-top: 1px solid var(--line); text-align: center; padding: 26px; color: var(--mute); font-size: 12.5px; line-height: 1.8; }
+  footer b { color: var(--indigo); }
+  footer a { color: var(--mute); }
+  @media (max-width: 480px) { .card, .card.no-poster { grid-template-columns: 1fr; } .rank { display: none; } .poster { display: none; } .share-btn { margin-left: 0; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">REEL<span>ADDA</span></div>
+  <div class="tagline">What's worth watching this week</div><br>
+  <div class="updated"><div class="dot"></div><span id="lastScan">Loading this week's scan…</span></div>
+</header>
+
+<div class="hero" id="hero" style="display:none">
+  <div class="hero-card" id="heroCard">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-grad"></div>
+    <div class="hero-content">
+      <span class="hero-eyebrow">🏆 Pick of the Week</span>
+      <div class="hero-title" id="heroTitle"></div>
+      <div class="hero-meta" id="heroMeta"></div>
+      <div class="hero-verdict" id="heroVerdict"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="chips" id="chips"></div>
+  <select id="sortSel" aria-label="Sort by">
+    <option value="default">Sort: Trending</option>
+    <option value="rating">Sort: Highest rated</option>
+    <option value="date">Sort: Newest first</option>
+  </select>
+  <button class="share-btn" onclick="shareWeek()">📲 Share on WhatsApp</button>
+</div>
+
+<main>
+  <section>
+    <div class="section-head">
+      <h2>In Theatres</h2><span class="count">TOP 5</span>
+      <span class="sub">Latest big-screen releases</span>
+    </div>
+    <div class="grid" id="moviesGrid"><div class="skeleton"></div><div class="skeleton"></div></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Streaming Now</h2><span class="count">TOP 10</span>
+      <span class="sub">New on Netflix, Prime, JioHotstar &amp; more</span>
+    </div>
+    <div class="grid ott" id="ottGrid"><div class="skeleton"></div><div class="skeleton"></div></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Coming Soon</h2>
+      <span class="sub">Mark your calendar</span>
+    </div>
+    <div class="soon-strip" id="soonStrip"></div>
+  </section>
+</main>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true">
+  <div class="modal" id="modal"></div>
+</div>
+
+<footer>
+  <b>ReelAdda</b> rescans automatically every Friday.<br>
+  Film data and ratings from <a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.
+</footer>
+
+<script>
+function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+let DATA = { theatres: [], ott: [], comingSoon: [] };
+let activeLang = 'All';
+let sortMode = 'default';
+
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+
+function card(item, i, listKey) {
+  const scores = (item.scores || []).map(s => `<div class="score">${esc(s.source)}: <b>${esc(s.score)}</b></div>`).join('');
+  const poster = item.poster ? `<img class="poster" src="${esc(item.poster)}" alt="${esc(item.title)} poster" loading="lazy">` : '';
+  return `<div class="card${item.poster ? '' : ' no-poster'}" onclick="openDetail('${listKey}', ${i})" tabindex="0" onkeydown="if(event.key==='Enter')openDetail('${listKey}', ${i})">
+    <div class="rank">${String(i + 1).padStart(2, '0')}</div>
+    ${poster}
+    <div>
+      <div class="title-row">
+        <h3>${esc(item.title)}</h3>
+        <span class="platform">${esc(item.platform)}</span>
+        ${item.isNew ? '<span class="new-badge">New</span>' : ''}
+      </div>
+      <div class="meta">${esc(item.genre || '')}${item.language ? ' · ' + esc(item.language) : ''}${item.runtime ? ' · ' + esc(String(item.runtime)) + ' min' : ''}${item.cert ? ' · ' + esc(item.cert) : ''}</div>
+      <div class="review">${esc(item.review || '')}</div>
+      <div class="bottom-row">${scores}<span class="verdict">▸ ${esc(item.verdict || '')}</span></div>
+      <div class="more-hint">Tap for trailer & full details →</div>
+    </div>
+  </div>`;
+}
+
+function soonCard(item) {
+  return `<div class="soon-card">
+    ${item.poster ? `<img src="${esc(item.poster)}" alt="${esc(item.title)} poster" loading="lazy">` : '<div style="height:200px"></div>'}
+    <div class="soon-body">
+      <div class="soon-date">${esc(fmtDate(item.released))}</div>
+      <div class="soon-title">${esc(item.title)}</div>
+      <div class="soon-meta">${esc(item.language || '')}${item.genre ? ' · ' + esc(item.genre) : ''}</div>
+    </div>
+  </div>`;
+}
+
+function applyFilters(list) {
+  let out = list;
+  if (activeLang !== 'All') out = out.filter(x => x.language === activeLang);
+  if (sortMode === 'rating') out = [...out].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  if (sortMode === 'date') out = [...out].sort((a, b) => (b.released || '').localeCompare(a.released || ''));
+  return out;
+}
+
+function render() {
+  const t = applyFilters(DATA.theatres);
+  const o = applyFilters(DATA.ott);
+  document.getElementById('moviesGrid').innerHTML = t.map((it, i) => card(it, DATA.theatres.indexOf(it), 'theatres')).join('') || '<div class="error-box">No theatre releases match this filter.</div>';
+  document.getElementById('ottGrid').innerHTML = o.map((it, i) => card(it, DATA.ott.indexOf(it), 'ott')).join('') || '<div class="error-box">No OTT releases match this filter.</div>';
+}
+
+function openDetail(listKey, i) {
+  const item = DATA[listKey][i];
+  if (!item) return;
+  const provs = (item.providers || []).map(p => `<span class="pill prov">${esc(p)}</span>`).join('');
+  const facts = [
+    item.runtime ? `<span class="pill">⏱ ${esc(String(item.runtime))} min</span>` : '',
+    item.cert ? `<span class="pill">🔖 ${esc(item.cert)}</span>` : '',
+    item.rating ? `<span class="pill">⭐ ${esc(String(item.rating))}/10 (${esc(String(item.votes))} ratings)</span>` : '',
+  ].join('');
+  document.getElementById('modal').innerHTML = `
+    ${item.backdrop ? `<img class="modal-backdrop" src="${esc(item.backdrop)}" alt="">` : ''}
+    <button class="modal-close" onclick="closeDetail()" aria-label="Close">×</button>
+    <div class="modal-inner">
+      <h2>${esc(item.title)} ${item.isNew ? '<span class="new-badge">New</span>' : ''}</h2>
+      <div class="meta">${esc(item.genre || '')}${item.language ? ' · ' + esc(item.language) : ''}${item.released ? ' · Released ' + esc(fmtDate(item.released)) : ''}</div>
+      <div class="pill-row">${facts}${provs}</div>
+      <div class="review">${esc(item.fullReview || item.review || 'No description available.')}</div>
+      <div class="credits">
+        ${item.director ? `<b>Director:</b> ${esc(item.director)}<br>` : ''}
+        ${(item.cast && item.cast.length) ? `<b>Cast:</b> ${esc(item.cast.join(', '))}` : ''}
+      </div>
+      <div class="verdict">▸ ${esc(item.verdict || '')}</div>
+      ${item.trailer ? `<a class="trailer-btn" href="${esc(item.trailer)}" target="_blank" rel="noopener">▶ Watch trailer</a>` : ''}
+    </div>`;
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDetail() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeDetail(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+document.getElementById('sortSel').addEventListener('change', e => { sortMode = e.target.value; render(); });
+
+function setLang(l, el) {
+  activeLang = l;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  render();
+}
+
+function shareWeek() {
+  const top = DATA.theatres.slice(0, 3).map((x, i) => `${i + 1}. ${x.title} (${x.platform})`).join('\n');
+  const ott = DATA.ott.slice(0, 3).map((x, i) => `${i + 1}. ${x.title} (${x.platform})`).join('\n');
+  const text = `🎬 *This week on ReelAdda*\n\n*In Theatres:*\n${top}\n\n*Streaming:*\n${ott}\n\nFull list with trailers & verdicts:\n${location.href}`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+fetch('data.json?v=' + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    DATA = data;
+    DATA.theatres = data.theatres || [];
+    DATA.ott = data.ott || [];
+
+    // Hero — Pick of the Week
+    const all = [...DATA.theatres, ...DATA.ott];
+    const pick = all.find(x => x.title === data.pick) || all[0];
+    if (pick) {
+      document.getElementById('hero').style.display = 'block';
+      if (pick.backdrop) document.getElementById('heroBg').style.backgroundImage = `url(${pick.backdrop})`;
+      document.getElementById('heroTitle').textContent = pick.title;
+      document.getElementById('heroMeta').textContent = [pick.platform, pick.genre, pick.language].filter(Boolean).join(' · ');
+      document.getElementById('heroVerdict').textContent = '▸ ' + (pick.verdict || '');
+      document.getElementById('heroCard').onclick = () => {
+        const listKey = DATA.theatres.includes(pick) ? 'theatres' : 'ott';
+        openDetail(listKey, DATA[listKey].indexOf(pick));
+      };
+    }
+
+    // Language chips
+    const langs = ['All', ...new Set(all.map(x => x.language).filter(Boolean))];
+    document.getElementById('chips').innerHTML = langs.map(l =>
+      `<button class="chip${l === 'All' ? ' on' : ''}" onclick="setLang('${esc(l)}', this)">${esc(l)}</button>`).join('');
+
+    render();
+
+    // Coming soon
+    document.getElementById('soonStrip').innerHTML = (data.comingSoon || []).map(soonCard).join('') ||
+      '<div class="error-box" style="flex:1">Upcoming releases will appear after the next scan.</div>';
+
+    const d = new Date(data.generatedAt);
+    document.getElementById('lastScan').textContent = 'Last scanned: ' + d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  })
+  .catch(() => {
+    document.getElementById('lastScan').textContent = 'First scan has not run yet — run the workflow once on GitHub.';
+    document.getElementById('moviesGrid').innerHTML = '<div class="error-box">No data yet — run the workflow in the Actions tab.</div>';
+    document.getElementById('ottGrid').innerHTML = '<div class="error-box">No data yet.</div>';
+  });
+</script>
+</body>
+</html>
