@@ -54,10 +54,12 @@ async function enrich(kind, id) {
     cert = d.content_ratings?.results?.find((r) => r.iso_3166_1 === "IN")?.rating || null;
   }
 
-  // Trailer
+  // Trailer — fall back to a YouTube search link if TMDB has no video yet
   const vids = d.videos?.results || [];
   const t = vids.find((v) => v.site === "YouTube" && v.type === "Trailer") || vids.find((v) => v.site === "YouTube");
-  const trailer = t ? `https://www.youtube.com/watch?v=${t.key}` : null;
+  const trailer = t
+    ? `https://www.youtube.com/watch?v=${t.key}`
+    : `https://www.youtube.com/results?search_query=${encodeURIComponent(`${d.title || d.name || ""} official trailer`)}`;
 
   // Streaming platforms in India
   const inProv = d["watch/providers"]?.results?.IN;
