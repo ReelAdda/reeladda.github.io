@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>FilmyChill — Channel Post Kit</title>
+<style>
+  :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background:#F7F5FF; color:var(--ink); margin:0; padding:24px 16px; }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; } h1 span { color: var(--indigo); }
+  .sub { color: var(--mute); font-size: 14px; margin: 0 0 20px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:16px; }
+  .label { font-size:12px; font-weight:700; letter-spacing:1px; color:var(--mute); margin-bottom:8px; }
+  pre { white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: 15px; line-height: 1.55; margin: 0 0 14px; }
+  button { background: var(--indigo); color:#fff; border:none; border-radius:10px; font-size:15px; font-weight:700; padding:12px 20px; cursor:pointer; width:100%; }
+  button.alt { background:#25D366; margin-top:10px; }
+  button:active { transform: scale(0.99); }
+  ol { font-size:14px; color:var(--mute); line-height:1.7; padding-left:20px; margin:0; }
+  .ok { color:#1D9E75; font-weight:700; font-size:14px; text-align:center; margin-top:10px; display:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><span>FilmyChill</span> — channel post kit</h1>
+  <p class="sub">Auto-written from today's scan. Your Friday ritual: copy → open channel → paste → attach the status card.</p>
+
+  <div class="card">
+    <div class="label">TODAY'S POST</div>
+    <pre id="post">Loading today's data…</pre>
+    <button onclick="copyPost()">📋 Copy post text</button>
+    <button class="alt" onclick="window.open('https://wa.me/','_blank')">📱 Open WhatsApp</button>
+    <div class="ok" id="ok">✓ Copied — now paste it in your channel</div>
+  </div>
+
+  <div class="card">
+    <div class="label">THE 30-SECOND RITUAL</div>
+    <ol>
+      <li>Tap <b>Copy post text</b> above</li>
+      <li>On filmychill.com, tap <b>📸 WhatsApp Status</b> and choose your <b>FilmyChill channel</b> in the share sheet — the card attaches as the post image</li>
+      <li>Paste the copied text as the caption, send</li>
+    </ol>
+  </div>
+</div>
+<script>
+function buildPost(d) {
+  const all = [...(d.theatres||[]), ...(d.ott||[])];
+  const pick = all.find(x => x.title === d.pick);
+  const slug = t => String(t||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  const lines = [];
+  if (pick) {
+    lines.push(`🏆 *Pick of the Week: ${pick.title}*`);
+    const bits = [pick.platform, pick.language, pick.rating ? '★ ' + Number(pick.rating).toFixed(1) : null].filter(Boolean).join(' · ');
+    if (bits) lines.push(bits);
+    if (pick.verdict) lines.push(`▸ ${pick.verdict}`);
+    lines.push(`https://filmychill.com/#${slug(pick.title)}`);
+    lines.push('');
+  }
+  const top = (d.theatres||[]).slice(0,3);
+  if (top.length) {
+    lines.push('🎬 *This week in theatres:*');
+    top.forEach((x,i) => lines.push(`${i+1}. ${x.title}${x.rating ? ' — ★ ' + Number(x.rating).toFixed(1) : ''}`));
+    lines.push('');
+  }
+  lines.push('Full list, trailers & verdicts:');
+  lines.push('https://filmychill.com');
+  return lines.join('\n');
+}
+let postText = '';
+fetch('data.json?v=' + Date.now())
+  .then(r => r.json())
+  .then(d => { postText = buildPost(d); document.getElementById('post').textContent = postText; })
+  .catch(() => { document.getElementById('post').textContent = 'Could not load data.json — open this page from filmychill.com/post.html'; });
+function copyPost() {
+  navigator.clipboard.writeText(postText).then(() => {
+    document.getElementById('ok').style.display = 'block';
+  }).catch(() => {
+    const r = document.createRange(); r.selectNodeContents(document.getElementById('post'));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand('copy'); s.removeAllRanges();
+    document.getElementById('ok').style.display = 'block';
+  });
+}
+</script>
+</body>
+</html>
