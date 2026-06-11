@@ -1,4 +1,4 @@
-name: Daily ReelAdda Update
+name: Daily FilmyChill Update
 
 on:
   schedule:
@@ -26,9 +26,22 @@ jobs:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: node scripts/update.js
 
+      - name: Validate data before publishing
+        run: |
+          node -e "
+            const d = require('./data.json');
+            const fail = (m) => { console.error('VALIDATION FAILED: ' + m); process.exit(1); };
+            if (!Array.isArray(d.theatres) || d.theatres.length < 1) fail('theatres empty');
+            if (!Array.isArray(d.ott) || d.ott.length < 3) fail('ott suspiciously small');
+            if (!d.generatedAt) fail('missing generatedAt');
+            const bad = [...d.theatres, ...d.ott].find(x => !x.title);
+            if (bad) fail('item without title');
+            console.log('data.json OK:', d.theatres.length, 'theatre,', d.ott.length, 'ott,', (d.comingSoon||[]).length, 'upcoming. Pick:', d.pick);
+          "
+
       - name: Commit updated data
         run: |
-          git config user.name "reeladda-bot"
+          git config user.name "filmychill-bot"
           git config user.email "actions@github.com"
           git add data.json
           git diff --staged --quiet || git commit -m "Daily release scan: $(date -u +%Y-%m-%d)"
