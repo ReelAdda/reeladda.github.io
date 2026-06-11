@@ -28,23 +28,38 @@
   <p class="sub">Auto-written from today's scan. Your Friday ritual: copy → open channel → paste → attach the status card.</p>
 
   <div class="card">
-    <div class="label">TODAY'S POST</div>
-    <pre id="post">Loading today's data…</pre>
-    <button onclick="copyPost()">📋 Copy post text</button>
-    <button class="alt" onclick="window.open('https://wa.me/','_blank')">📱 Open WhatsApp</button>
-    <div class="ok" id="ok">✓ Copied — now paste it in your channel</div>
+    <div class="label">TODAY'S CARD</div>
+    <img id="preview" alt="Status card preview" style="width:100%; border-radius:10px; display:block; background:#EEEDFE; min-height:200px;">
+    <div id="cardBtns" style="display:none">
+      <button onclick="downloadCard()" style="margin-top:12px">📥 Download card image</button>
+      <div class="ok" id="ok2"></div>
+    </div>
   </div>
 
   <div class="card">
-    <div class="label">THE 30-SECOND RITUAL</div>
+    <div class="label">TODAY'S POST</div>
+    <pre id="post">Loading today's data…</pre>
+    <button onclick="copyPost()">📋 Copy post text</button>
+    <button class="alt" id="openChannel" style="display:none">📢 Open my channel</button>
+    <div class="ok" id="ok"></div>
+  </div>
+
+  <div class="card">
+    <div class="label">THE 60-SECOND RITUAL</div>
     <ol>
-      <li>Tap <b>Copy post text</b> above</li>
-      <li>On filmychill.com, tap <b>📸 WhatsApp Status</b> and choose your <b>FilmyChill channel</b> in the share sheet — the card attaches as the post image</li>
-      <li>Paste the copied text as the caption, send</li>
+      <li><b>Download</b> the card image above (lands in your gallery)</li>
+      <li><b>Copy</b> the post text</li>
+      <li>Open WhatsApp → <b>Updates</b> → your <b>FilmyChill</b> channel</li>
+      <li>Tap <b>attach 📎 → Gallery</b>, pick the card, <b>paste</b> the text as caption, send</li>
     </ol>
   </div>
 </div>
 <script>
+// Paste your WhatsApp Channel invite link here to enable the "Open my channel" button
+const WHATSAPP_CHANNEL_URL = '';
+
+let postText = '', cardBlob = null, DATA = null;
+
 function buildPost(d) {
   const all = [...(d.theatres||[]), ...(d.ott||[])];
   const pick = all.find(x => x.title === d.pick);
@@ -68,20 +83,87 @@ function buildPost(d) {
   lines.push('https://filmychill.com');
   return lines.join('\n');
 }
-let postText = '';
-fetch('data.json?v=' + Date.now())
-  .then(r => r.json())
-  .then(d => { postText = buildPost(d); document.getElementById('post').textContent = postText; })
-  .catch(() => { document.getElementById('post').textContent = 'Could not load data.json — open this page from filmychill.com/post.html'; });
+
+function rr(x, X, Y, W2, H2, R) {
+  if (x.roundRect) { x.roundRect(X, Y, W2, H2, R); return; }
+  x.moveTo(X+R, Y); x.arcTo(X+W2, Y, X+W2, Y+H2, R); x.arcTo(X+W2, Y+H2, X, Y+H2, R);
+  x.arcTo(X, Y+H2, X, Y, R); x.arcTo(X, Y, X+W2, Y, R); x.closePath();
+}
+function loadPoster(url) {
+  return new Promise(res => { const im = new Image(); im.crossOrigin = 'anonymous';
+    im.onload = () => res(im); im.onerror = () => res(null); im.src = url; });
+}
+async function makeCard() {
+  const films = (DATA.theatres||[]).slice(0,3);
+  const W = 1080, H = 1920, cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  const g = x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#4038C7'); g.addColorStop(1,'#2A2488');
+  x.fillStyle = g; x.fillRect(0,0,W,H);
+  x.fillStyle = 'rgba(109,84,159,0.45)'; x.beginPath(); x.arc(W+60,140,420,0,Math.PI*2); x.fill();
+  x.fillStyle = '#C4C4EB'; x.font = '700 38px sans-serif'; x.fillText('THIS WEEK IN INDIA · ON', 80, 150);
+  x.font = '700 110px sans-serif';
+  x.fillStyle = '#FFF7EC'; x.fillText('FILMY', 80, 268);
+  x.fillStyle = '#FFAD1F'; x.fillText('CHILL', 80 + x.measureText('FILMY').width, 268);
+  x.fillStyle = '#C4C4EB'; x.font = '400 34px sans-serif';
+  x.fillText(new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}), 80, 330);
+  const posters = await Promise.all(films.map(f => f.poster ? loadPoster(f.poster) : null));
+  const blockY = 420, blockH = 430;
+  films.forEach((f,i) => {
+    const y = blockY + i*blockH;
+    if (posters[i]) { x.save(); x.beginPath(); rr(x,80,y,250,375,18); x.clip(); x.drawImage(posters[i],80,y,250,375); x.restore(); }
+    else { x.fillStyle = '#322B9E'; x.beginPath(); rr(x,80,y,250,375,18); x.fill(); }
+    const tx = 370;
+    x.fillStyle = 'rgba(255,247,236,0.25)'; x.font = '700 110px sans-serif'; x.fillText(String(i+1), tx, y+100);
+    x.fillStyle = '#FFF7EC'; x.font = '700 52px sans-serif';
+    const words = String(f.title).split(' '); let line=''; const lines=[];
+    for (const wd of words) { if (x.measureText(line+wd).width > 600 && line) { lines.push(line.trim()); line = wd+' '; } else line += wd+' '; }
+    lines.push(line.trim());
+    lines.slice(0,2).forEach((l,li) => x.fillText(l, tx, y+180+li*62));
+    x.fillStyle = '#C4C4EB'; x.font = '400 34px sans-serif';
+    x.fillText(`${f.language||''}${f.genre ? ' · ' + f.genre.split(' / ')[0] : ''}`, tx, y+300);
+    let xoff = tx;
+    if (f.rating != null) { x.fillStyle = '#FFAD1F'; x.font = '700 40px sans-serif'; x.fillText('★ ' + Number(f.rating).toFixed(1), xoff, y+372); xoff += 170; }
+    if (f.verdict) { x.font = '700 30px sans-serif'; const vw = x.measureText(f.verdict).width + 44;
+      x.fillStyle = 'rgba(10,8,40,0.45)'; x.beginPath(); rr(x, xoff, y+338, vw, 50, 25); x.fill();
+      x.fillStyle = '#FFAD1F'; x.fillText(f.verdict, xoff+22, y+373); }
+  });
+  x.fillStyle = '#FFAD1F'; x.beginPath(); x.moveTo(80,1755); x.lineTo(80,1805); x.lineTo(125,1780); x.closePath(); x.fill();
+  x.fillStyle = '#FFF7EC'; x.font = '700 56px sans-serif'; x.fillText('filmychill.com', 150, 1800);
+  x.fillStyle = '#C4C4EB'; x.font = '400 32px sans-serif'; x.fillText('Fresh picks every morning', 150, 1850);
+  cardBlob = await new Promise(r => cv.toBlob(r, 'image/png'));
+  document.getElementById('preview').src = URL.createObjectURL(cardBlob);
+  document.getElementById('cardBtns').style.display = 'block';
+}
+
+function downloadCard() {
+  if (!cardBlob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(cardBlob); a.download = 'filmychill-this-week.png'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  show('ok2', '✓ Saved to your gallery / downloads');
+}
+
 function copyPost() {
-  navigator.clipboard.writeText(postText).then(() => {
-    document.getElementById('ok').style.display = 'block';
-  }).catch(() => {
+  navigator.clipboard.writeText(postText).then(() => show('ok','✓ Copied — paste it as the caption'))
+  .catch(() => {
     const r = document.createRange(); r.selectNodeContents(document.getElementById('post'));
     const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand('copy'); s.removeAllRanges();
-    document.getElementById('ok').style.display = 'block';
+    show('ok','✓ Copied — paste it as the caption');
   });
 }
+function show(id, t) { const e = document.getElementById(id); e.textContent = t; e.style.display = 'block'; }
+
+if (WHATSAPP_CHANNEL_URL) {
+  const b = document.getElementById('openChannel');
+  b.style.display = 'block';
+  b.onclick = () => window.open(WHATSAPP_CHANNEL_URL, '_blank');
+}
+
+fetch('data.json?v=' + Date.now())
+  .then(r => r.json())
+  .then(d => { DATA = d; postText = buildPost(d); document.getElementById('post').textContent = postText; makeCard(); })
+  .catch(() => { document.getElementById('post').textContent = 'Could not load data.json — open this page at filmychill.com/post.html'; });
 </script>
 </body>
 </html>
