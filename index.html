@@ -231,7 +231,7 @@
     <option value="date">Sort: Newest first</option>
   </select>
   <button class="share-btn" onclick="shareWeek()">📲 Share on WhatsApp</button>
-  <button class="share-btn" style="background:var(--indigo)" id="statusBtn" onclick="shareStatusCard()">📸 Status Card</button>
+  <button class="share-btn" style="background:var(--indigo)" id="statusBtn" onclick="shareStatusCard()">📸 WhatsApp Status</button>
 </div>
 
 <main>
@@ -519,7 +519,7 @@ async function shareStatusCard() {
   const btn = document.getElementById('statusBtn');
   const films = (DATA.theatres || []).slice(0, 3);
   if (!films.length) return;
-  btn.disabled = true; const prev = btn.textContent; btn.textContent = '⏳ Making card…';
+  btn.disabled = true; const prev = btn.textContent; btn.textContent = '⏳ Making your status…';
   try {
     if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch {} }
     const W = 1080, H = 1920, cv = document.createElement('canvas');
