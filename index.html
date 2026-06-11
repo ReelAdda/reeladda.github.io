@@ -232,6 +232,7 @@
   </select>
   <button class="share-btn" onclick="shareWeek()">📲 Share on WhatsApp</button>
   <button class="share-btn" style="background:var(--indigo)" id="statusBtn" onclick="shareStatusCard()">📸 WhatsApp Status</button>
+  <a class="share-btn" id="channelBtn" style="display:none; text-decoration:none" href="#" target="_blank" rel="noopener">📢 Follow Channel</a>
 </div>
 
 <main>
@@ -294,6 +295,10 @@
 
 <script>
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// Paste your WhatsApp Channel invite link here (https://whatsapp.com/channel/...).
+// The Follow button stays hidden until this is filled in.
+const WHATSAPP_CHANNEL_URL = '';
 
 let DATA = { theatres: [], ott: [], comingSoon: [] };
 let activeLang = 'All';
@@ -600,8 +605,15 @@ async function shareStatusCard() {
 function shareWeek() {
   const top = DATA.theatres.slice(0, 3).map((x, i) => `${i + 1}. ${x.title} (${x.platform})`).join('\n');
   const ott = DATA.ott.slice(0, 3).map((x, i) => `${i + 1}. ${x.title} (${x.platform})`).join('\n');
-  const text = `🎬 *This week on FilmyChill*\n\n*In Theatres:*\n${top}\n\n*Streaming:*\n${ott}\n\nFull list with trailers & verdicts:\n${location.href}`;
+  const channel = WHATSAPP_CHANNEL_URL ? `\n\nFollow for weekly picks:\n${WHATSAPP_CHANNEL_URL}` : '';
+  const text = `🎬 *This week on FilmyChill*\n\n*In Theatres:*\n${top}\n\n*Streaming:*\n${ott}\n\nFull list with trailers & verdicts:\n${location.href}${channel}`;
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+if (WHATSAPP_CHANNEL_URL) {
+  const cb = document.getElementById('channelBtn');
+  cb.href = WHATSAPP_CHANNEL_URL;
+  cb.style.display = '';
 }
 
 fetch('data.json?v=' + Date.now())
