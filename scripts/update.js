@@ -211,14 +211,22 @@ async function main() {
   }
 
   // ---------- PICK OF THE WEEK ----------
+  // An endorsement must be earned: new films need >=6.5 to take the crown.
+  // If no newcomer qualifies, a genuinely great holdover (>=7.0) can be re-featured.
+  // If nothing clears either bar, there is no pick this week — honesty over decoration.
   const all = [...theatres, ...ott];
   const pickPool = all.filter((x) => x.rating != null && x.votes >= 20);
-  const pick = (pickPool.filter((x) => x.isNew).sort((a, b) => b.rating - a.rating)[0]) ||
-               (pickPool.sort((a, b) => b.rating - a.rating)[0]) || all[0] || null;
+  const pick = (pickPool.filter((x) => x.isNew && x.rating >= 6.5).sort((a, b) => b.rating - a.rating)[0]) ||
+               (pickPool.filter((x) => x.rating >= 7.0).sort((a, b) => b.rating - a.rating)[0]) || null;
 
   const data = { generatedAt: new Date().toISOString(), pick: pick ? pick.title : null, theatres, ott, comingSoon };
   fs.writeFileSync("data.json", JSON.stringify(data, null, 1));
   console.log(`Done. ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming. Pick: ${data.pick}`);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  // Never leak the API key into Action logs, even via network error messages
+  const msg = String(e && e.stack || e).split(API_KEY).join('***');
+  console.error(msg);
+  process.exit(1);
+});
