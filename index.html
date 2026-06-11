@@ -21,6 +21,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"FilmyChill","url":"https://filmychill.com/","author":{"@type":"Person","name":"Vikram Sharma"}}
 </script>
+<link rel="preconnect" href="https://image.tmdb.org">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -230,6 +231,7 @@
     <option value="date">Sort: Newest first</option>
   </select>
   <button class="share-btn" onclick="shareWeek()">📲 Share on WhatsApp</button>
+  <button class="share-btn" style="background:var(--indigo)" id="statusBtn" onclick="shareStatusCard()">📸 Status Card</button>
 </div>
 
 <main>
@@ -262,7 +264,7 @@
       <h2>Coming Soon</h2>
       <span class="sub">Mark your calendar</span>
     </div>
-    <div class="soon-strip" id="soonStrip"></div>
+    <div class="soon-strip" id="soonStrip"><div class="skeleton" style="flex:0 0 150px;height:280px"></div><div class="skeleton" style="flex:0 0 150px;height:280px"></div><div class="skeleton" style="flex:0 0 150px;height:280px"></div></div>
   </section>
 </main>
 
@@ -497,6 +499,103 @@ function moodPick(mood) {
   if (chosen) openDetail(chosen.k, chosen.i);
 }
 document.getElementById('moodOverlay').addEventListener('click', e => { if (e.target.id === 'moodOverlay') closeMood(); });
+
+// ---- WhatsApp Status card: 1080x1920 canvas, generated fully client-side ----
+function rr(x, X, Y, W2, H2, R) { // roundRect with fallback for older Safari
+  if (x.roundRect) { x.roundRect(X, Y, W2, H2, R); return; }
+  x.moveTo(X + R, Y); x.arcTo(X + W2, Y, X + W2, Y + H2, R); x.arcTo(X + W2, Y + H2, X, Y + H2, R);
+  x.arcTo(X, Y + H2, X, Y, R); x.arcTo(X, Y, X + W2, Y, R); x.closePath();
+}
+function loadPoster(url) {
+  return new Promise((res) => {
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = () => res(im);
+    im.onerror = () => res(null);
+    im.src = url;
+  });
+}
+async function shareStatusCard() {
+  const btn = document.getElementById('statusBtn');
+  const films = (DATA.theatres || []).slice(0, 3);
+  if (!films.length) return;
+  btn.disabled = true; const prev = btn.textContent; btn.textContent = '⏳ Making card…';
+  try {
+    if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch {} }
+    const W = 1080, H = 1920, cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const x = cv.getContext('2d');
+    const g = x.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#4038C7'); g.addColorStop(1, '#2A2488');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    x.fillStyle = 'rgba(109,84,159,0.45)';
+    x.beginPath(); x.arc(W + 60, 140, 420, 0, Math.PI * 2); x.fill();
+
+    x.fillStyle = '#C4C4EB'; x.font = '700 38px Inter, sans-serif';
+    x.fillText('THIS WEEK ON', 80, 150);
+    x.font = '116px Anton, sans-serif';
+    x.fillStyle = '#FFF7EC'; x.fillText('FILMY', 80, 270);
+    x.fillStyle = '#FFAD1F'; x.fillText('CHILL', 80 + x.measureText('FILMY').width, 270);
+    x.fillStyle = '#C4C4EB'; x.font = '400 34px Inter, sans-serif';
+    x.fillText(new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }), 80, 330);
+
+    const posters = await Promise.all(films.map(f => f.poster ? loadPoster(f.poster) : null));
+    const blockY = 420, blockH = 430;
+    films.forEach((f, i) => {
+      const y = blockY + i * blockH;
+      if (posters[i]) {
+        x.save(); x.beginPath(); rr(x, 80, y, 250, 375, 18); x.clip();
+        x.drawImage(posters[i], 80, y, 250, 375); x.restore();
+      } else {
+        x.fillStyle = '#322B9E'; x.beginPath(); rr(x, 80, y, 250, 375, 18); x.fill();
+      }
+      const tx = 370;
+      x.fillStyle = 'rgba(255,247,236,0.25)'; x.font = '110px Anton, sans-serif';
+      x.fillText(String(i + 1), tx, y + 100);
+      x.fillStyle = '#FFF7EC'; x.font = '700 52px Inter, sans-serif';
+      const words = String(f.title).split(' '); let line = ''; const lines = [];
+      for (const wd of words) {
+        if (x.measureText(line + wd).width > 600 && line) { lines.push(line.trim()); line = wd + ' '; }
+        else line += wd + ' ';
+      }
+      lines.push(line.trim());
+      lines.slice(0, 2).forEach((l, li) => x.fillText(l, tx, y + 180 + li * 62));
+      x.fillStyle = '#C4C4EB'; x.font = '400 34px Inter, sans-serif';
+      x.fillText(`${f.language || ''}${f.genre ? ' · ' + f.genre.split(' / ')[0] : ''}`, tx, y + 300);
+      let xoff = tx;
+      if (f.rating != null) {
+        x.fillStyle = '#FFAD1F'; x.font = '700 40px Inter, sans-serif';
+        x.fillText('★ ' + Number(f.rating).toFixed(1), xoff, y + 372);
+        xoff += 170;
+      }
+      if (f.verdict) {
+        x.font = '700 30px Inter, sans-serif';
+        const vw = x.measureText(f.verdict).width + 44;
+        x.fillStyle = 'rgba(10,8,40,0.45)';
+        x.beginPath(); rr(x, xoff, y + 338, vw, 50, 25); x.fill();
+        x.fillStyle = '#FFAD1F'; x.fillText(f.verdict, xoff + 22, y + 373);
+      }
+    });
+
+    x.fillStyle = '#FFAD1F';
+    x.beginPath(); x.moveTo(80, 1755); x.lineTo(80, 1805); x.lineTo(125, 1780); x.closePath(); x.fill();
+    x.fillStyle = '#FFF7EC'; x.font = '700 56px Inter, sans-serif';
+    x.fillText('filmychill.com', 150, 1800);
+    x.fillStyle = '#C4C4EB'; x.font = '400 32px Inter, sans-serif';
+    x.fillText('Fresh picks every morning', 150, 1850);
+
+    const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    const file = new File([blob], 'filmychill-this-week.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], text: 'This week on FilmyChill 🎬 filmychill.com' });
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'filmychill-this-week.png'; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    }
+  } catch (e) { console.error('status card:', e); }
+  btn.disabled = false; btn.textContent = prev;
+}
 
 function shareWeek() {
   const top = DATA.theatres.slice(0, 3).map((x, i) => `${i + 1}. ${x.title} (${x.platform})`).join('\n');
