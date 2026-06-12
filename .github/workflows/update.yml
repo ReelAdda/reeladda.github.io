@@ -36,13 +36,15 @@ jobs:
             if (!d.generatedAt) fail('missing generatedAt');
             const bad = [...d.theatres, ...d.ott].find(x => !x.title);
             if (bad) fail('item without title');
-            console.log('data.json OK:', d.theatres.length, 'theatre,', d.ott.length, 'ott,', (d.comingSoon||[]).length, 'upcoming. Pick:', d.pick);
+            const pages = require('fs').readdirSync('movie').filter(f => f.endsWith('.html'));
+            if (pages.length < 5) fail('film pages missing');
+            console.log('data.json OK:', d.theatres.length, 'theatre,', d.ott.length, 'ott,', (d.comingSoon||[]).length, 'upcoming. Pick:', d.pick, '| pages:', pages.length);
           "
 
       - name: Commit updated data
         run: |
           git config user.name "filmychill-bot"
           git config user.email "actions@github.com"
-          git add data.json
+          git add data.json movie/ sitemap.xml
           git diff --staged --quiet || git commit -m "Daily release scan: $(date -u +%Y-%m-%d)"
           git push
