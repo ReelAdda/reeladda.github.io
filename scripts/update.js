@@ -224,6 +224,7 @@ async function main() {
   // ---------- PER-FILM PAGES + SITEMAP ----------
   assignSlugs(data);
   generatePages(data);
+  prerenderIndex(data);
 
   fs.writeFileSync("data.json", JSON.stringify(data, null, 1));
   console.log(`Done. ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming. Pick: ${data.pick}`);
@@ -391,6 +392,59 @@ if (process.env.PAGES_ONLY) {
   const d = JSON.parse(fs.readFileSync("data.json", "utf8"));
   assignSlugs(d);
   generatePages(d);
+  prerenderIndex(d);
   fs.writeFileSync("data.json", JSON.stringify(d, null, 1));
   process.exit(0);
+}
+
+// ============================================================
+// PRE-RENDER — inject this week's films as static HTML into
+// index.html between SSR markers, so crawlers (and visitors,
+// pre-hydration) see real content and real links instead of
+// "Loading fresh picks". The page JS replaces it on load.
+// ============================================================
+
+function ssrCard(item, i) {
+  const e = escHtml;
+  const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null].filter(Boolean).map(e).join(" · ");
+  return `<a class="card${item.poster ? "" : " no-poster"}" href="/movie/${e(item.slug)}.html" style="text-decoration:none;color:inherit">
+    <div class="rank">${String(i + 1).padStart(2, "0")}</div>
+    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" loading="lazy">` : ""}
+    <div>
+      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span></div>
+      <div class="meta">${bits}</div>
+      ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>` : ""}
+      ${item.review ? `<p class="review">${e(trim(item.review, 110))}</p>` : ""}
+    </div>
+  </a>`;
+}
+
+function ssrSoonCard(item) {
+  const e = escHtml;
+  return `<a class="soon-card" href="/movie/${e(item.slug)}.html" style="text-decoration:none;color:inherit">
+    ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" loading="lazy">` : ""}
+    <div class="soon-body">
+      <div class="soon-date">${e(item.released || "")}</div>
+      <div class="soon-title">${e(item.title)}</div>
+      <div class="soon-meta">${e(item.language || "")}</div>
+    </div>
+  </a>`;
+}
+
+function replaceBetween(html, tag, inner) {
+  const start = `<!--SSR:${tag}-->`, end = `<!--/SSR:${tag}-->`;
+  const a = html.indexOf(start), b = html.indexOf(end);
+  if (a === -1 || b === -1 || b < a) { console.warn(`SSR markers for ${tag} not found — skipped`); return html; }
+  return html.slice(0, a + start.length) + inner + html.slice(b);
+}
+
+function prerenderIndex(data) {
+  let html;
+  try { html = fs.readFileSync("index.html", "utf8"); }
+  catch { console.warn("index.html not found — prerender skipped"); return; }
+  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i)).join(""));
+  html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCard(x, i)).join(""));
+  html = replaceBetween(html, "SOON", (data.comingSoon || []).map(ssrSoonCard).join(""));
+  fs.writeFileSync("index.html", html);
+  console.log("index.html pre-rendered with this week's films.");
 }
