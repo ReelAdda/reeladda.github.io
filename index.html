@@ -76,6 +76,17 @@
   .personal-note b { color: var(--indigo); }
   .personal-note .pn-cta { margin-left:auto; color:var(--indigo); font-weight:700; cursor:pointer; white-space:nowrap; }
   .personal-note .pn-x { background:none; border:none; font-size:16px; color:var(--mute); cursor:pointer; padding:0 0 0 6px; }
+  .ritual-row { display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--line);
+    border-radius:12px; padding:12px 14px; margin-top:14px; font-size:13.5px; color:var(--mute); }
+  .ritual-row b { color: var(--ink); }
+  .ritual-btn { margin-left:auto; background:var(--indigo); color:#fff; border:none; border-radius:999px;
+    font-size:13px; font-weight:700; padding:9px 16px; cursor:pointer; white-space:nowrap; font-family:inherit; }
+  .install-nudge { display:flex; align-items:center; gap:10px; background:rgba(64,56,199,0.08); border:1px solid var(--line);
+    border-radius:12px; padding:11px 14px; margin-top:16px; font-size:13px; }
+  .install-nudge b { color:var(--indigo); display:block; font-size:13.5px; }
+  .install-nudge .in-btn { margin-left:auto; background:var(--indigo); color:#fff; border:none; border-radius:999px;
+    font-size:12.5px; font-weight:700; padding:8px 14px; cursor:pointer; white-space:nowrap; font-family:inherit; }
+  .install-nudge .in-x { background:none; border:none; font-size:15px; color:var(--mute); cursor:pointer; padding:0 0 0 4px; }
   select { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px;
     font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; }
   .share-btn { margin-left: auto; background: #25D366; color: #fff; border: none; border-radius: 999px;
@@ -238,6 +249,7 @@
   </select>
   <button class="share-btn" onclick="shareWeek()">📲 Share on WhatsApp</button>
   <button class="share-btn" style="background:var(--indigo)" id="statusBtn" onclick="shareStatusCard()">📸 WhatsApp Status</button>
+  <a class="share-btn" style="background:#128C7E; text-decoration:none" href="https://wa.me/?text=My%20Friday%20movie%20guide%20%F0%9F%8D%BF%20https%3A%2F%2Ffilmychill.com" target="_blank" rel="noopener">📌 Save to WhatsApp</a>
   <a class="share-btn" id="channelBtn" style="text-decoration:none" href="https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j" target="_blank" rel="noopener">📢 Follow Channel</a>
 </div>
 
@@ -463,7 +475,12 @@
       <div class="soon-meta">Punjabi</div>
     </div>
   </a><!--/SSR:SOON--></div>
-  </section>
+  
+    <div class="ritual-row">
+      🗓 <span><b>Make it Friday movie night</b> — a weekly nudge in your own calendar, fresh picks every Friday</span>
+      <button class="ritual-btn" onclick="addFridayRitual(this)">+ Add ritual</button>
+    </div>
+</section>
 </main>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true">
@@ -511,10 +528,12 @@ function toggleSave(listKey, i) {
   const item = listKey === 'wl' ? loadWL()[i] : DATA[listKey][i];
   if (!item) return;
   let wl = loadWL();
+  const wasEmpty = wl.length === 0;
   if (wl.some(x => wlKey(x) === wlKey(item))) wl = wl.filter(x => wlKey(x) !== wlKey(item));
   else wl.push(item);
   saveWL(wl);
   render();
+  if (wasEmpty && wl.length === 1) showInstallNudge('personalBar', 'Your list lives on this device', ' — keep FilmyChill on your home screen so it\'s never far');
 }
 function updateWLCount() { document.getElementById('wlCount').textContent = loadWL().length; }
 function toggleMyList() {
@@ -631,6 +650,7 @@ function shareFilm(listKey, i) {
 
 // ---- Personal retention: what changed for YOU since last time ----
 let newForUser = new Set();
+let isReturningVisitor = false;
 
 function computePersonal() {
   const all = [...DATA.theatres, ...DATA.ott, ...(DATA.comingSoon || [])];
@@ -639,6 +659,7 @@ function computePersonal() {
   try { seen = JSON.parse(localStorage.getItem('filmychill-seen') || '[]'); } catch {}
   const seenSet = new Set(seen);
   const firstVisit = seen.length === 0;
+  isReturningVisitor = !firstVisit;
   if (!firstVisit) {
     all.forEach(x => { if (!seenSet.has(slugOf(x))) newForUser.add(slugOf(x)); });
   }
@@ -783,9 +804,81 @@ function moodPick(mood) {
   if (!pool.length) pool = all;
   const chosen = pool[Math.floor(Math.random() * pool.length)];
   closeMood();
-  if (chosen) openDetail(chosen.k, chosen.i);
+  if (chosen) {
+    openDetail(chosen.k, chosen.i);
+    showInstallNudge('modal', "Tonight's sorted 🍿", " — want tomorrow's pick one tap away?");
+  }
 }
 document.getElementById('moodOverlay').addEventListener('click', e => { if (e.target.id === 'moodOverlay') closeMood(); });
+
+// ---- Friday ritual: recurring weekly calendar event, generated client-side ----
+function addFridayRitual(btn) {
+  const now = new Date();
+  const next = new Date(now);
+  next.setDate(now.getDate() + ((5 - now.getDay() + 7) % 7 || 7));
+  const d = next.toISOString().slice(0, 10).replace(/-/g, '');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//FilmyChill//EN', 'BEGIN:VEVENT',
+    `UID:friday-ritual@filmychill.com`,
+    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
+    `DTSTART:${d}T190000`, `DTEND:${d}T220000`,
+    'RRULE:FREQ=WEEKLY;BYDAY=FR',
+    'SUMMARY:🍿 FilmyChill Friday — movie night',
+    "DESCRIPTION:This week's verdicts\\, trailers & where to watch: https://filmychill.com",
+    'URL:https://filmychill.com', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  a.download = 'filmychill-friday.ics'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  if (btn) { btn.textContent = '✓ Added'; btn.disabled = true; }
+}
+
+// ---- Earned install prompt: appears only after a moment of value ----
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
+let nudgeShownThisSession = false;
+
+function installEligible() {
+  try {
+    if (localStorage.getItem('filmychill-install-dismissed')) return false;
+  } catch { return false; }
+  if (!isReturningVisitor) return false;
+  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return false;
+  if (nudgeShownThisSession) return false;
+  return true;
+}
+
+function installNudgeHtml(title, sub) {
+  return `<div class="install-nudge" id="installNudge">📱 <span><b>${esc(title)}</b>${esc(sub)}</span>
+    <button class="in-btn" onclick="triggerInstall()">Add to home</button>
+    <button class="in-x" onclick="dismissInstall()" aria-label="Dismiss">×</button></div>`;
+}
+
+function showInstallNudge(where, title, sub) {
+  if (!installEligible()) return;
+  nudgeShownThisSession = true;
+  const host = document.getElementById(where);
+  if (host) host.insertAdjacentHTML('beforeend', installNudgeHtml(title, sub));
+}
+
+function triggerInstall() {
+  if (deferredInstall) {
+    deferredInstall.prompt();
+    deferredInstall.userChoice.then(() => { deferredInstall = null; removeNudge(); });
+  } else {
+    const el = document.getElementById('installNudge');
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    if (el) el.innerHTML = `📱 <span style="font-size:12.5px">${ios
+      ? 'In Safari: tap <b>Share</b> → <b>Add to Home Screen</b>'
+      : 'In your browser menu (⋮): tap <b>Add to Home screen</b>'}</span>
+      <button class="in-x" onclick="dismissInstall()" aria-label="Dismiss">×</button>`;
+  }
+}
+
+function removeNudge() { const el = document.getElementById('installNudge'); if (el) el.remove(); }
+function dismissInstall() {
+  try { localStorage.setItem('filmychill-install-dismissed', '1'); } catch {}
+  removeNudge();
+}
 
 // ---- WhatsApp Status card: 1080x1920 canvas, generated fully client-side ----
 function rr(x, X, Y, W2, H2, R) { // roundRect with fallback for older Safari
