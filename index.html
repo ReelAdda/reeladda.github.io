@@ -253,9 +253,10 @@
     <option value="date">Sort: Newest first</option>
   </select>
   <button class="share-btn" onclick="shareWeek()" title="Share this week on WhatsApp" aria-label="Share this week on WhatsApp">📲 Share<span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span></button>
-  <button class="share-btn" style="background:#E9E7FB; color:#3A33A0" id="statusBtn" onclick="shareStatusCard()" title="Make a WhatsApp Status image" aria-label="Make a WhatsApp Status image">📸 Status<span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span></button>
-  <a class="share-btn" style="background:transparent; color:var(--indigo); border:1.5px solid #C7C2F0; text-decoration:none" href="https://wa.me/?text=My%20Friday%20movie%20guide%20%F0%9F%8D%BF%20https%3A%2F%2Ffilmychill.com" target="_blank" rel="noopener" title="Save the site link to your WhatsApp" aria-label="Save the site link to your WhatsApp">📌 Save<span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span></a>
   <a class="share-btn" id="channelBtn" style="background:#1A1633; color:#FFF7EC; text-decoration:none" href="https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j" target="_blank" rel="noopener" title="Follow the FilmyChill WhatsApp channel" aria-label="Follow the FilmyChill WhatsApp channel">📢 Follow Channel<span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span></a>
+  <span id="moreActions" style="display:none"><button class="share-btn" style="background:#E9E7FB; color:#3A33A0" id="statusBtn" onclick="shareStatusCard()" title="Make a WhatsApp Status image" aria-label="Make a WhatsApp Status image">📸 Status<span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span></button>
+  <a class="share-btn" style="background:transparent; color:var(--indigo); border:1.5px solid #C7C2F0; text-decoration:none" href="https://wa.me/?text=My%20Friday%20movie%20guide%20%F0%9F%8D%BF%20https%3A%2F%2Ffilmychill.com" target="_blank" rel="noopener" title="Save the site link to your WhatsApp" aria-label="Save the site link to your WhatsApp">📌 Save<span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span></a></span>
+  <button class="share-btn" id="moreBtn" style="background:transparent; color:var(--mute); border:1.5px solid #C7C2F0; padding-left:14px; padding-right:14px" onclick="showMoreActions()" aria-expanded="false" aria-label="More sharing options" title="More sharing options">⋯</button>
 </div>
 
 <main>
@@ -816,6 +817,14 @@ function moodPick(mood) {
 }
 document.getElementById('moodOverlay').addEventListener('click', e => { if (e.target.id === 'moodOverlay') closeMood(); });
 
+
+function showMoreActions() {
+  const more = document.getElementById('moreActions');
+  const btn = document.getElementById('moreBtn');
+  more.style.display = 'contents';
+  btn.style.display = 'none';
+  btn.setAttribute('aria-expanded', 'true');
+}
 // ---- Friday ritual: recurring weekly calendar event, generated client-side ----
 function addFridayRitual(btn) {
   const now = new Date();
