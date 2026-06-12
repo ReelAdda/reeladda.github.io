@@ -3,10 +3,11 @@
 // certificate, all streaming platforms), upcoming releases, and marks
 // what's new since last week's scan. Writes data.json for the website.
 
+const fs = require("fs");
 const API_KEY = process.env.TMDB_API_KEY;
 const BASE = "https://api.themoviedb.org/3";
 
-if (!API_KEY) {
+if (!API_KEY && !process.env.PAGES_ONLY) {
   console.error("Missing TMDB_API_KEY. Add it in GitHub repo Settings → Secrets.");
   process.exit(1);
 }
@@ -220,13 +221,176 @@ async function main() {
                (pickPool.filter((x) => x.rating >= 7.0).sort((a, b) => b.rating - a.rating)[0]) || null;
 
   const data = { generatedAt: new Date().toISOString(), pick: pick ? pick.title : null, theatres, ott, comingSoon };
+  // ---------- PER-FILM PAGES + SITEMAP ----------
+  assignSlugs(data);
+  generatePages(data);
+
   fs.writeFileSync("data.json", JSON.stringify(data, null, 1));
   console.log(`Done. ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming. Pick: ${data.pick}`);
 }
 
-main().catch((e) => {
+if (!process.env.PAGES_ONLY) main().catch((e) => {
   // Never leak the API key into Action logs, even via network error messages
   const msg = String(e && e.stack || e).split(API_KEY).join('***');
   console.error(msg);
   process.exit(1);
 });
+
+// ============================================================
+// PER-FILM STATIC PAGES — one SEO-indexable page per film,
+// written to movie/<slug>.html. Pages are never deleted: the
+// archive accrues search value after films leave the lists.
+// ============================================================
+
+function escHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function slugify(t) {
+  return String(t || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function assignSlugs(data) {
+  const used = new Map(); // slug -> tmdbId
+  for (const list of [data.theatres, data.ott, data.comingSoon]) {
+    for (const item of list || []) {
+      let slug = slugify(item.title) || `film-${item.tmdbId || ""}`;
+      const year = (item.released || "").slice(0, 4);
+      if (used.has(slug) && used.get(slug) !== item.tmdbId && year) slug = `${slug}-${year}`;
+      used.set(slug, item.tmdbId);
+      item.slug = slug;
+    }
+  }
+}
+
+function ytIdOf(url) {
+  const m = /youtube\.com\/watch\?v=([\w-]{6,})/.exec(url || "");
+  return m ? m[1] : null;
+}
+
+function buildFilmPage(item) {
+  const e = escHtml;
+  const year = (item.released || "").slice(0, 4);
+  const upcoming = item.released && item.released > new Date().toISOString().slice(0, 10);
+  const relLabel = upcoming ? "Releases" : "Released";
+  const synopsis = item.fullReview || item.review || "";
+  const desc = trim([item.verdict, synopsis].filter(Boolean).join(". "), 155);
+  const url = `https://filmychill.com/movie/${item.slug}.html`;
+  const ytid = ytIdOf(item.trailer);
+  const cast = Array.isArray(item.cast) ? item.cast.slice(0, 6) : [];
+  const providers = Array.isArray(item.providers) ? item.providers : [];
+
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": item.kind === "tv" ? "TVSeries" : "Movie",
+    name: item.title,
+    url,
+    image: item.poster || undefined,
+    datePublished: item.released || undefined,
+    genre: item.genre || undefined,
+    inLanguage: item.language || undefined,
+    director: item.director ? { "@type": "Person", name: item.director } : undefined,
+    actor: cast.map((c) => ({ "@type": "Person", name: c })),
+  };
+  if (item.rating != null && item.votes >= 10) {
+    ld.aggregateRating = { "@type": "AggregateRating", ratingValue: item.rating, ratingCount: item.votes, bestRating: 10 };
+  }
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${e(item.title)}${year ? " (" + year + ")" : ""} — Review, Rating & Where to Watch in India | FilmyChill</title>
+<meta name="description" content="${e(desc)}">
+<link rel="canonical" href="${e(url)}">
+<meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">
+<meta property="og:description" content="${e(desc)}">
+<meta property="og:type" content="video.movie">
+<meta property="og:url" content="${e(url)}">
+${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
+<meta name="twitter:card" content="summary_large_image">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'">
+<script type="application/ld+json">${JSON.stringify(ld)}</script>
+<style>
+  :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
+  * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
+  .top { background:var(--indigo); padding:14px 16px; } .top a { color:var(--cream); text-decoration:none; font-weight:800; letter-spacing:1px; font-size:18px; }
+  .top a span { color:var(--marigold); }
+  .wrap { max-width:680px; margin:0 auto; padding:20px 16px 40px; }
+  .head { display:grid; grid-template-columns:140px 1fr; gap:16px; }
+  .poster { width:140px; border-radius:12px; display:block; }
+  h1 { font-size:24px; margin:0 0 6px; } .meta { color:var(--mute); font-size:14px; margin-bottom:10px; }
+  .rating { color:var(--indigo); font-weight:800; font-size:18px; }
+  .verdict { display:inline-block; background:rgba(64,56,199,.08); color:var(--indigo); font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; margin-top:8px; }
+  h2 { font-size:16px; margin:24px 0 8px; } p { line-height:1.65; font-size:15px; margin:0; }
+  .pill { display:inline-block; background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px; margin:0 6px 6px 0; }
+  .frame { position:relative; padding-top:56.25%; border-radius:12px; overflow:hidden; background:#000; margin-top:8px; }
+  .frame iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
+  footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
+  @media (max-width:420px){ .head { grid-template-columns:110px 1fr; } .poster { width:110px; } h1 { font-size:20px; } }
+</style>
+</head>
+<body>
+<div class="top"><a href="https://filmychill.com/">FILMY<span>CHILL</span></a></div>
+<div class="wrap">
+  <div class="head">
+    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster">` : "<div></div>"}
+    <div>
+      <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
+      <div class="meta">${[item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert].filter(Boolean).map(e).join(" · ")}</div>
+      ${item.rating != null ? `<div class="rating">★ ${Number(item.rating).toFixed(1)}${item.votes ? ` <span style="color:var(--mute);font-weight:400;font-size:13px">(${e(item.votes)} votes)</span>` : ""}</div>` : ""}
+      ${item.verdict ? `<div class="verdict">▸ ${e(item.verdict)}</div>` : ""}
+      ${item.released ? `<div class="meta" style="margin-top:8px">${relLabel} ${e(item.released)}</div>` : ""}
+    </div>
+  </div>
+  ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
+  ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
+  ${cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
+  ${providers.length ? `<h2>Where to watch in India</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div>` : item.platform === "Theatres" ? `<h2>Where to watch in India</h2><div><span class="pill">In theatres</span></div>` : ""}
+  ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
+  <a class="btn" href="https://filmychill.com/#${e(item.slug)}">🎬 See this week's top picks on FilmyChill →</a>
+</div>
+<footer>
+  Film data and ratings from <a href="https://www.themoviedb.org" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>
+  © 2026 FilmyChill · Made with ❤️ by Vikram Sharma
+</footer>
+</body>
+</html>`;
+}
+
+function generatePages(data) {
+  if (!fs.existsSync("movie")) fs.mkdirSync("movie");
+  const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || [])];
+  let written = 0;
+  for (const item of all) {
+    if (!item.slug) continue;
+    try {
+      fs.writeFileSync(`movie/${item.slug}.html`, buildFilmPage(item));
+      written++;
+    } catch (err) { console.warn(`page ${item.slug}: ${err.message}`); }
+  }
+
+  // Sitemap: homepage + every page in movie/ (the archive included)
+  const today = new Date().toISOString().slice(0, 10);
+  const pages = fs.readdirSync("movie").filter((f) => f.endsWith(".html")).sort();
+  const fresh = new Set(all.map((x) => x.slug + ".html"));
+  const urls = [
+    `  <url><loc>https://filmychill.com/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>`,
+    ...pages.map((f) =>
+      `  <url><loc>https://filmychill.com/movie/${f}</loc>${fresh.has(f) ? `<lastmod>${today}</lastmod>` : ""}<priority>0.7</priority></url>`),
+  ];
+  fs.writeFileSync("sitemap.xml",
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`);
+  console.log(`Pages: ${written} written, ${pages.length} total in archive. Sitemap regenerated.`);
+}
+
+// Manual/local regeneration from existing data.json: PAGES_ONLY=1 node scripts/update.js
+if (process.env.PAGES_ONLY) {
+  const d = JSON.parse(fs.readFileSync("data.json", "utf8"));
+  assignSlugs(d);
+  generatePages(d);
+  fs.writeFileSync("data.json", JSON.stringify(d, null, 1));
+  process.exit(0);
+}
