@@ -71,6 +71,11 @@
   .chip:hover { border-color: var(--indigo); color: var(--indigo); }
   .chip.on { background: var(--indigo); border-color: var(--indigo); color: #fff; }
   .chip:focus-visible, .share-btn:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+  .personal-note { display:flex; align-items:center; gap:10px; background:rgba(64,56,199,0.07); border:1px solid var(--line);
+    border-radius:12px; padding:10px 14px; margin:10px 0 0; font-size:14px; }
+  .personal-note b { color: var(--indigo); }
+  .personal-note .pn-cta { margin-left:auto; color:var(--indigo); font-weight:700; cursor:pointer; white-space:nowrap; }
+  .personal-note .pn-x { background:none; border:none; font-size:16px; color:var(--mute); cursor:pointer; padding:0 0 0 6px; }
   select { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px;
     font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; }
   .share-btn { margin-left: auto; background: #25D366; color: #fff; border: none; border-radius: 999px;
@@ -225,6 +230,7 @@
   <button class="tonight-btn" onclick="openMood()">🎲 What to watch tonight?</button>
   <button class="mylist-btn" id="mylistBtn" onclick="toggleMyList()">⭐ My List (<span id="wlCount">0</span>)</button>
   <div class="chips" id="chips"></div>
+  <div id="personalBar"></div>
   <select id="sortSel" aria-label="Sort by">
     <option value="default">Sort: Trending</option>
     <option value="rating">Sort: Highest rated</option>
@@ -535,7 +541,7 @@ function card(item, i, listKey) {
       <div class="title-row">
         <h3>${esc(item.title)}</h3>
         <span class="platform">${esc(item.platform)}</span>
-        ${item.isNew ? '<span class="new-badge">New</span>' : ''}
+        ${newForUser.has(item.slug || slugify(item.title)) ? '<span class="new-badge">✨ New for you</span>' : item.isNew ? '<span class="new-badge">New</span>' : ''}
       </div>
       <div class="meta">${esc(item.genre || '')}${item.language ? ' · ' + esc(item.language) : ''}${item.runtime ? ' · ' + esc(String(item.runtime)) + ' min' : ''}${item.cert ? ' · ' + esc(item.cert) : ''}</div>
       <div class="review">${esc(item.review || '')}</div>
@@ -623,6 +629,89 @@ function shareFilm(listKey, i) {
   window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
 
+// ---- Personal retention: what changed for YOU since last time ----
+let newForUser = new Set();
+
+function computePersonal() {
+  const all = [...DATA.theatres, ...DATA.ott, ...(DATA.comingSoon || [])];
+  const slugOf = x => x.slug || slugify(x.title);
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem('filmychill-seen') || '[]'); } catch {}
+  const seenSet = new Set(seen);
+  const firstVisit = seen.length === 0;
+  if (!firstVisit) {
+    all.forEach(x => { if (!seenSet.has(slugOf(x))) newForUser.add(slugOf(x)); });
+  }
+  try {
+    localStorage.setItem('filmychill-seen', JSON.stringify(all.map(slugOf)));
+    localStorage.setItem('filmychill-lastvisit', new Date().toISOString());
+  } catch {}
+
+  // Watchlist release alerts: saved films that have now arrived
+  const today = new Date().toISOString().slice(0, 10);
+  let alerted = [];
+  try { alerted = JSON.parse(localStorage.getItem('filmychill-alerted') || '[]'); } catch {}
+  const alertedSet = new Set(alerted);
+  const releases = [];
+  for (const saved of loadWL()) {
+    const sslug = slugOf(saved);
+    if (alertedSet.has(sslug)) continue;
+    for (const k of ['theatres', 'ott']) {
+      const i = DATA[k].findIndex(x => slugOf(x) === sslug);
+      if (i !== -1 && DATA[k][i].released && DATA[k][i].released <= today) {
+        releases.push({ k, i, item: DATA[k][i], slug: sslug });
+        break;
+      }
+    }
+  }
+
+  const bar = document.getElementById('personalBar');
+  let html = '';
+  for (const r of releases.slice(0, 2)) {
+    const where = r.item.platform === 'Theatres' ? 'in theatres' : 'on ' + (r.item.platform || 'OTT');
+    html += `<div class="personal-note" id="pn-${esc(r.slug)}">🎬 <span>From your list: <b>${esc(r.item.title)}</b> is out now ${esc(where)}${r.item.rating ? ' — ★ ' + Number(r.item.rating).toFixed(1) : ''}</span>
+      <span class="pn-cta" onclick="openDetail('${r.k}', ${r.i})">View →</span>
+      <button class="pn-x" onclick="dismissAlert('${esc(r.slug)}')" aria-label="Dismiss">×</button></div>`;
+  }
+  if (newForUser.size > 0) {
+    html += `<div class="personal-note">✨ <span><b>${newForUser.size} new pick${newForUser.size > 1 ? 's' : ''}</b> since your last visit</span></div>`;
+  }
+  bar.innerHTML = html;
+}
+
+function dismissAlert(slug) {
+  try {
+    const a = JSON.parse(localStorage.getItem('filmychill-alerted') || '[]');
+    if (!a.includes(slug)) a.push(slug);
+    localStorage.setItem('filmychill-alerted', JSON.stringify(a));
+  } catch {}
+  const el = document.getElementById('pn-' + slug);
+  if (el) el.remove();
+}
+
+// ---- Calendar reminder (.ics, generated client-side) ----
+function icsEscape(t) { return String(t || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,'); }
+function remindMe(listKey, i) {
+  const item = listKey === 'wl' ? loadWL()[i] : DATA[listKey][i];
+  if (!item || !item.released) return;
+  const d = item.released.replace(/-/g, '');
+  const next = new Date(item.released); next.setDate(next.getDate() + 1);
+  const dEnd = next.toISOString().slice(0, 10).replace(/-/g, '');
+  const slug = item.slug || slugify(item.title);
+  const link = `https://filmychill.com/#${slug}`;
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//FilmyChill//EN', 'BEGIN:VEVENT',
+    `UID:${slug}-${d}@filmychill.com`,
+    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
+    `DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${dEnd}`,
+    `SUMMARY:🍿 ${icsEscape(item.title)} releases today`,
+    `DESCRIPTION:Trailer & verdict on FilmyChill: ${icsEscape(link)}`,
+    `URL:${icsEscape(link)}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  a.download = `${slug}-release.ics`; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
 function openDetail(listKey, i) {
   const item = listKey === 'wl' ? loadWL()[i] : DATA[listKey][i];
   if (!item) return;
@@ -653,6 +742,7 @@ function openDetail(listKey, i) {
         return '';
       })()}
       <button class="share-film-btn" onclick="shareFilm('${listKey}', ${i})">📲 Share</button>
+      ${item.released && item.released > new Date().toISOString().slice(0, 10) ? `<button class="trailer-btn" style="background:var(--marigold);color:var(--ink);margin-left:8px" onclick="remindMe('${listKey}', ${i})">🗓 Remind me</button>` : ''}
       ${item.slug ? `<a class="trailer-btn" style="background:transparent;color:var(--indigo);border:1.5px solid var(--indigo);margin-left:8px" href="/movie/${esc(item.slug)}.html">📄 Full page</a>` : ''}
       <a class="trailer-btn" style="background:var(--marigold);color:var(--ink);margin-left:8px" href="#" onclick="event.preventDefault(); toggleSave('${listKey}', ${i}); closeDetail();">${isSaved(item) ? '★ Remove from My List' : '☆ Add to My List'}</a>
     </div>`;
@@ -841,6 +931,7 @@ fetch('data.json?v=' + Date.now())
     document.getElementById('chips').innerHTML = ['All', ...langs].map(l =>
       `<button class="chip${l === activeLang ? ' on' : ''}" onclick="setLang('${esc(l)}', this)">${esc(l)}${l === 'All' ? '' : ` <span style="opacity:.65">${counts[l]}</span>`}</button>`).join('');
 
+    computePersonal();
     render();
 
     const d = new Date(data.generatedAt);
