@@ -298,7 +298,7 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'
 
 // Paste your WhatsApp Channel invite link here (https://whatsapp.com/channel/...).
 // The Follow button stays hidden until this is filled in.
-const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j';
+const WHATSAPP_CHANNEL_URL = '';
 
 let DATA = { theatres: [], ott: [], comingSoon: [] };
 let activeLang = 'All';
@@ -462,6 +462,7 @@ function openDetail(listKey, i) {
         return '';
       })()}
       <button class="share-film-btn" onclick="shareFilm('${listKey}', ${i})">📲 Share</button>
+      ${item.slug ? `<a class="trailer-btn" style="background:transparent;color:var(--indigo);border:1.5px solid var(--indigo);margin-left:8px" href="/movie/${esc(item.slug)}.html">📄 Full page</a>` : ''}
       <a class="trailer-btn" style="background:var(--marigold);color:var(--ink);margin-left:8px" href="#" onclick="event.preventDefault(); toggleSave('${listKey}', ${i}); closeDetail();">${isSaved(item) ? '★ Remove from My List' : '☆ Add to My List'}</a>
     </div>`;
   history.replaceState(null, '', '#' + slugify(item.title));
