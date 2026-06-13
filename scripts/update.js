@@ -44,7 +44,7 @@ function img(path, size = "w342") {
 
 async function enrich(kind, id) {
   const extra = kind === "movie" ? "release_dates" : "content_ratings";
-  const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,${extra}` });
+  const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,external_ids,${extra}` });
 
   // Certificate (India)
   let cert = null;
@@ -74,8 +74,22 @@ async function enrich(kind, id) {
 
   const runtime = kind === "movie" ? d.runtime : (d.episode_run_time?.[0] || null);
 
+  // IMDb rating via OMDb (optional). IMDb's base has more Indian raters than TMDB,
+  // so this gives a better second opinion on Indian titles. Runs only on the films
+  // we actually display, only if OMDB_API_KEY is set, and never blocks the build.
+  let imdbScore = null;
+  const imdbId = d.external_ids?.imdb_id;
+  if (imdbId && process.env.OMDB_API_KEY) {
+    try {
+      const o = await fetch(`https://www.omdbapi.com/?i=${imdbId}&apikey=${process.env.OMDB_API_KEY}`).then((r) => r.json());
+      if (o && o.Response === "True" && o.imdbRating && o.imdbRating !== "N/A") {
+        imdbScore = `${o.imdbRating}/10`;
+      }
+    } catch (e) { console.warn(`omdb ${imdbId}: ${e.message}`); }
+  }
+
   return {
-    cert, trailer, providers, cast, director, runtime,
+    cert, trailer, providers, cast, director, runtime, imdbScore,
     backdrop: img(d.backdrop_path, "w780"),
     fullReview: trim(d.overview, 600),
   };
@@ -118,6 +132,14 @@ async function main() {
       kind,
       tmdbId: m.id,
     };
+  }
+
+  // Append the IMDb score (from OMDb, set by enrich) as a second labeled chip,
+  // after TMDB. TMDB stays the leading/ranking number; IMDb is a second opinion.
+  function withImdb(item) {
+    if (item.imdbScore) item.scores = [...(item.scores || []), { source: "IMDb", score: item.imdbScore }];
+    delete item.imdbScore;
+    return item;
   }
 
   // ---------- IN THEATRES (blended score + language representation, flexible 4-7) ----------
@@ -182,7 +204,7 @@ async function main() {
   const theatres = [];
   for (const m of picks) {
     const item = { ...baseItem(m, "movie"), platform: "Theatres" };
-    try { Object.assign(item, await enrich("movie", m.id)); } catch (e) { console.warn(`enrich movie ${m.id}: ${e.message}`); }
+    try { Object.assign(item, await enrich("movie", m.id)); withImdb(item); } catch (e) { console.warn(`enrich movie ${m.id}: ${e.message}`); }
     theatres.push(item);
     await sleep(150);
   }
@@ -202,6 +224,7 @@ async function main() {
       const extra = await enrich(c.kind, c.id);
       if (!extra.providers || extra.providers.length === 0) continue; // not streaming in India
       Object.assign(item, extra, { platform: extra.providers[0] });
+      withImdb(item);
       ott.push(item);
     } catch (e) { console.warn(`ott ${c.id}: ${e.message}`); }
     await sleep(150);
