@@ -26,7 +26,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const LANG = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", ml: "Malayalam", kn: "Kannada", ko: "Korean", ja: "Japanese", es: "Spanish", fr: "French", mr: "Marathi", bn: "Bengali", pa: "Punjabi", gu: "Gujarati" };
 
 function verdict(rating, votes) {
-  if (!votes || votes < 10) return "Too new for a verdict";
+  if (!votes || votes < 10) return "Not enough ratings yet";
   if (rating >= 7.5) return "Must watch";
   if (rating >= 6.5) return "Worth a watch";
   if (rating >= 5.5) return "Decent one-time watch";
