@@ -187,25 +187,100 @@ async function main() {
     await sleep(150);
   }
 
-  // ---------- TOP 10 ON OTT ----------
+  // ---------- TOP 10 ON OTT (international + regional mix, max 10) ----------
+  // International picks come from global trending (streaming in India), capped to
+  // leave room for regional. Regional picks are fetched per-language so they appear
+  // at all (global trending is English-skewed). Hindi fills regional slots first.
+  const OTT_MAX = 10, REGIONAL_TARGET = 4, INTL_CAP = OTT_MAX - REGIONAL_TARGET;
+
   const [trMovies, trTv] = await Promise.all([tmdb("/trending/movie/week"), tmdb("/trending/tv/week")]);
   const candidates = [
     ...trMovies.results.map((m) => ({ ...m, kind: "movie" })),
     ...trTv.results.map((t) => ({ ...t, kind: "tv" })),
   ].sort((a, b) => b.popularity - a.popularity);
 
-  const ott = [];
+  // Helper: enrich a TMDB result, return a finished item only if it streams in India.
+  const buildOttItem = async (c) => {
+    const item = baseItem(c, c.kind);
+    const extra = await enrich(c.kind, c.id);
+    if (!extra.providers || extra.providers.length === 0) return null; // not streaming in India
+    Object.assign(item, extra, { platform: extra.providers[0] });
+    return item;
+  };
+
+  // --- International pool (exclude regional-language titles; those come from the regional pass) ---
+  const intl = [];
+  const usedIds = new Set();
   for (const c of candidates) {
-    if (ott.length >= 10) break;
+    if (intl.length >= INTL_CAP) break;
+    if (isRegional(c)) continue; // keep international pass international
     try {
-      const item = baseItem(c, c.kind);
-      const extra = await enrich(c.kind, c.id);
-      if (!extra.providers || extra.providers.length === 0) continue; // not streaming in India
-      Object.assign(item, extra, { platform: extra.providers[0] });
-      ott.push(item);
-    } catch (e) { console.warn(`ott ${c.id}: ${e.message}`); }
+      const item = await buildOttItem(c);
+      if (item) { intl.push(item); usedIds.add(c.id); }
+    } catch (e) { console.warn(`ott-intl ${c.id}: ${e.message}`); }
     await sleep(150);
   }
+
+  // --- Regional pool: Hindi first, then other Indian languages, by weighted rating ---
+  // discover OTT titles per language that actually stream in India (flatrate).
+  const regionalLangOrder = ["hi", ...INDIAN_LANGS.filter((l) => l !== "hi")];
+  const regional = [];
+  for (const lang of regionalLangOrder) {
+    if (regional.length >= REGIONAL_TARGET) break;
+    let pool = [];
+    for (const kind of ["tv", "movie"]) {
+      try {
+        const d = await tmdb(`/discover/${kind}`, {
+          with_original_language: lang,
+          watch_region: "IN",
+          with_watch_monetization_types: "flatrate",
+          sort_by: "popularity.desc",
+          "vote_count.gte": "1",
+          page: "1",
+        });
+        await sleep(150);
+        pool.push(...(d.results || []).map((m) => ({ ...m, kind })));
+      } catch (e) { console.warn(`ott-regional ${lang}/${kind}: ${e.message}`); }
+    }
+    // Highest-rated first (weighted, noise-resistant), drop anything below the 5.5 floor.
+    pool = pool
+      .filter((m) => !usedIds.has(m.id) && !(m.vote_count >= 20 && m.vote_average < 5.5))
+      .sort((a, b) => weightedRating(b) - weightedRating(a));
+    for (const c of pool) {
+      if (regional.length >= REGIONAL_TARGET) break;
+      if (usedIds.has(c.id)) continue;
+      try {
+        const item = await buildOttItem(c);
+        if (item) { regional.push(item); usedIds.add(c.id); }
+      } catch (e) { console.warn(`ott-regional-build ${c.id}: ${e.message}`); }
+      await sleep(150);
+    }
+  }
+
+  // --- If regional fell short, backfill with more international so the list still reaches 10 ---
+  if (regional.length < REGIONAL_TARGET) {
+    for (const c of candidates) {
+      if (intl.length + regional.length >= OTT_MAX) break;
+      if (usedIds.has(c.id) || isRegional(c)) continue;
+      try {
+        const item = await buildOttItem(c);
+        if (item) { intl.push(item); usedIds.add(c.id); }
+      } catch (e) { console.warn(`ott-backfill ${c.id}: ${e.message}`); }
+      await sleep(150);
+    }
+  }
+
+  // --- Interleave so regional stays visible instead of sinking to the bottom ---
+  // Spread regional picks roughly evenly through the international ones.
+  const ott = [];
+  const step = regional.length ? Math.max(1, Math.floor(intl.length / regional.length)) : 0;
+  let ri = 0;
+  for (let i = 0; i < intl.length; i++) {
+    ott.push(intl[i]);
+    if (ri < regional.length && (i + 1) % step === 0) ott.push(regional[ri++]);
+  }
+  while (ri < regional.length) ott.push(regional[ri++]); // any leftover regional
+  ott.length = Math.min(ott.length, OTT_MAX);
 
   // ---------- COMING SOON (next releases in India) ----------
   const today = new Date().toISOString().slice(0, 10);
