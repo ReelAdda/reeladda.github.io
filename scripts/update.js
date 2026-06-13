@@ -96,18 +96,25 @@ async function main() {
   const genres = (ids) => (ids || []).slice(0, 2).map((i) => gmap[i]).filter(Boolean).join(" / ");
 
   function baseItem(m, kind) {
+    const relDate = m.release_date || m.first_air_date;
+    const daysSince = relDate ? (Date.now() - new Date(relDate).getTime()) / 864e5 : 999;
+    // A film released in the last 7 days with under 20 votes is too fresh to rate
+    // honestly — show a "New release" placeholder rather than a noisy thin score.
+    const tooNew = daysSince <= 7 && m.vote_count < 20;
+    const showRating = !tooNew && m.vote_count >= 10;
     return {
       title: m.title || m.name,
       genre: genres(m.genre_ids),
       language: LANG[m.original_language] || m.original_language,
-      released: m.release_date || m.first_air_date,
+      released: relDate,
       review: trim(m.overview),
-      rating: m.vote_count >= 10 ? Number(m.vote_average.toFixed(1)) : null,
-      scores: [{ source: "TMDB", score: m.vote_count >= 10 ? `${m.vote_average.toFixed(1)}/10` : "New release" }],
+      rating: showRating ? Number(m.vote_average.toFixed(1)) : null,
+      scores: [{ source: "TMDB", score: showRating ? `${m.vote_average.toFixed(1)}/10` : "New release" }],
       votes: m.vote_count,
-      verdict: verdict(m.vote_average, m.vote_count),
+      verdict: tooNew ? "Just released — verdict soon" : verdict(m.vote_average, m.vote_count),
       poster: img(m.poster_path),
       isNew: !prevTitles.has(m.title || m.name),
+      isFresh: tooNew,
       kind,
       tmdbId: m.id,
     };
@@ -126,8 +133,23 @@ async function main() {
     return true;
   });
 
-  const effRating = (m) => (m.vote_count >= 20 ? m.vote_average : 6.0);
-  const blended = (m) => Math.log10((m.popularity || 0) + 1) * (effRating(m) / 10);
+  const INDIAN_LANGS = ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"];
+  const isRegional = (m) => INDIAN_LANGS.includes(m.original_language);
+  // Tunable: neutral prior C and smoothing constant M (how many votes before a
+  // rating is trusted on its own). Per-country config can override these later.
+  const PRIOR_C = 6.0, SMOOTH_M = 8;
+  // Regional theatrical films rarely accrue many TMDB votes during their run, so
+  // instead of a hard vote gate we shrink a sparse rating toward the neutral prior:
+  //   weighted = v/(v+M)*R + M/(v+M)*C   (IMDb-style Bayesian average)
+  // A 2-vote 9.0 is pulled most of the way back to 6.0; a 100-vote rating is left
+  // almost untouched. No cliff, no fluke ratings, no excluding films for low votes.
+  // Non-regional films keep the original step behaviour (plenty of votes anyway).
+  const weightedRating = (m) => {
+    const R = m.vote_average || 0, v = m.vote_count || 0;
+    if (!isRegional(m)) return v >= 20 ? R : PRIOR_C;
+    return (v / (v + SMOOTH_M)) * R + (SMOOTH_M / (v + SMOOTH_M)) * PRIOR_C;
+  };
+  const blended = (m) => Math.log10((m.popularity || 0) + 1) * (weightedRating(m) / 10);
   // Quality bar: rated films below 5.5 never make the list, however loud they are.
   const clearsBar = (m) => !(m.vote_count >= 20 && m.vote_average < 5.5);
 
@@ -136,13 +158,13 @@ async function main() {
   let picks = ranked.slice(0, Math.min(BASE_PICKS, ranked.length));
 
   // Language representation: best film of each major Indian language earns a slot
-  // if it clears a higher quality bar (>=6.5 with real votes) and isn't already in.
-  // If the list is full, it may displace the weakest pick whose language already
-  // holds 2+ slots — diversity beats a redundant third film in the same language.
-  const INDIAN_LANGS = ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"];
+  // if its weighted rating clears 6.5 and it isn't already in. No raw vote gate —
+  // the Bayesian shrink already neutralises fluke ratings from tiny samples, so a
+  // well-received regional film surfaces even on thin votes. If the list is full it
+  // may displace the weakest pick whose language already holds 2+ slots.
   for (const lang of INDIAN_LANGS) {
     if (picks.some((m) => m.original_language === lang)) continue;
-    const best = ranked.find((m) => m.original_language === lang && m.vote_count >= 20 && m.vote_average >= 6.5);
+    const best = ranked.find((m) => m.original_language === lang && weightedRating(m) >= 6.5);
     if (!best) continue;
     if (picks.length < MAX_PICKS) { picks.push(best); continue; }
     const redundant = picks
@@ -269,7 +291,7 @@ function ytIdOf(url) {
   return m ? m[1] : null;
 }
 
-function buildFilmPage(item) {
+function buildFilmPage(item, asOf) {
   const e = escHtml;
   const year = (item.released || "").slice(0, 4);
   const upcoming = item.released && item.released > new Date().toISOString().slice(0, 10);
@@ -297,6 +319,15 @@ function buildFilmPage(item) {
     ld.aggregateRating = { "@type": "AggregateRating", ratingValue: item.rating, ratingCount: item.votes, bestRating: 10 };
   }
 
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "FilmyChill", item: "https://filmychill.com/" },
+      { "@type": "ListItem", position: 2, name: item.title, item: url },
+    ],
+  };
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -313,6 +344,7 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
 <meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
+<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>
 <style>
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
@@ -349,7 +381,7 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
   ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
   ${cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
-  ${providers.length ? `<h2>Where to watch in India</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div>` : item.platform === "Theatres" ? `<h2>Where to watch in India</h2><div><span class="pill">In theatres</span></div>` : ""}
+  ${providers.length ? `<h2>Where to watch in India</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${e(asOf || "")} — platforms may change over time.</p>` : item.platform === "Theatres" ? `<h2>Where to watch in India</h2><div><span class="pill">In theatres</span></div>` : ""}
   ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
   <a class="btn" href="https://filmychill.com/#${e(item.slug)}">🎬 See this week's top picks on FilmyChill →</a>
 </div>
@@ -362,13 +394,14 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
 }
 
 function generatePages(data) {
+  const asOf = (data.generatedAt || new Date().toISOString()).slice(0, 10);
   if (!fs.existsSync("movie")) fs.mkdirSync("movie");
   const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || [])];
   let written = 0;
   for (const item of all) {
     if (!item.slug) continue;
     try {
-      fs.writeFileSync(`movie/${item.slug}.html`, buildFilmPage(item));
+      fs.writeFileSync(`movie/${item.slug}.html`, buildFilmPage(item, asOf));
       written++;
     } catch (err) { console.warn(`page ${item.slug}: ${err.message}`); }
   }
@@ -380,7 +413,7 @@ function generatePages(data) {
   const urls = [
     `  <url><loc>https://filmychill.com/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>`,
     ...pages.map((f) =>
-      `  <url><loc>https://filmychill.com/movie/${f}</loc>${fresh.has(f) ? `<lastmod>${today}</lastmod>` : ""}<priority>0.7</priority></url>`),
+      `  <url><loc>https://filmychill.com/movie/${f}</loc>${fresh.has(f) ? `<lastmod>${today}</lastmod><priority>0.7</priority>` : "<priority>0.3</priority>"}</url>`),
   ];
   fs.writeFileSync("sitemap.xml",
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`);
@@ -411,7 +444,7 @@ function ssrCard(item, i) {
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" loading="lazy">` : ""}
     <div>
-      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span></div>
+      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${item.isFresh ? '<span class="fresh-badge">Just released</span>' : ""}</div>
       <div class="meta">${bits}</div>
       ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 110))}</p>` : ""}
@@ -438,6 +471,40 @@ function replaceBetween(html, tag, inner) {
   return html.slice(0, a + start.length) + inner + html.slice(b);
 }
 
+// Homepage structured data: WebSite + dateModified + an ItemList of this
+// week's films, so crawlers see a fresh, ranked collection without running JS.
+function buildHomeJsonLd(data) {
+  const date = (data.generatedAt || new Date().toISOString()).slice(0, 10);
+  const listItems = [...(data.theatres || []), ...(data.ott || [])]
+    .filter((x) => x.slug)
+    .map((x, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `https://filmychill.com/movie/${x.slug}.html`,
+      name: x.title,
+    }));
+  const graph = [
+    {
+      "@type": "WebSite",
+      "@id": "https://filmychill.com/#website",
+      name: "FilmyChill",
+      url: "https://filmychill.com/",
+      author: { "@type": "Person", name: "Vikram Sharma" },
+      datePublished: "2026-01-01",
+      dateModified: data.generatedAt || `${date}T00:00:00.000Z`,
+    },
+    {
+      "@type": "ItemList",
+      name: "What's worth watching this week in India",
+      url: "https://filmychill.com/",
+      dateModified: data.generatedAt || `${date}T00:00:00.000Z`,
+      numberOfItems: listItems.length,
+      itemListElement: listItems,
+    },
+  ];
+  return JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
+}
+
 function prerenderIndex(data) {
   let html;
   try { html = fs.readFileSync("index.html", "utf8"); }
@@ -445,6 +512,7 @@ function prerenderIndex(data) {
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i)).join(""));
   html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCard(x, i)).join(""));
   html = replaceBetween(html, "SOON", (data.comingSoon || []).map(ssrSoonCard).join(""));
+  html = replaceBetween(html, "JSONLD", buildHomeJsonLd(data));
   fs.writeFileSync("index.html", html);
   console.log("index.html pre-rendered with this week's films.");
 }
