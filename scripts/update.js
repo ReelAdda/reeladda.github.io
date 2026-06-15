@@ -269,26 +269,112 @@ async function main() {
     await sleep(150);
   }
 
-  // ---------- TOP 10 ON OTT ----------
+  // ---------- TOP 10 ON OTT (international + fresh regional, IMDb-ranked, max 10) ----------
+  // International from global trending (inherently fresh); regional from per-language
+  // discover gated to recent releases so we never resurface all-time classics. Both
+  // ranked with the same IMDb-preferred quality term as theatres, for consistency.
+  const OTT_MAX = 10, OTT_REGIONAL_TARGET = 4, OTT_INTL_CAP = OTT_MAX - OTT_REGIONAL_TARGET;
+  const FRESH_DAYS = 30;
+  const freshCutoff = new Date(Date.now() - FRESH_DAYS * 864e5).toISOString().slice(0, 10);
+
+  // Resolve IMDb rating for a candidate (detail call -> dataset lookup). Sets _imdbRating
+  // so weightedRating/blended use IMDb as the quality term, exactly like theatres.
+  const attachImdb = async (c) => {
+    try {
+      const d = await tmdb(`/${c.kind}/${c.id}`, { append_to_response: "external_ids" });
+      const imdbId = d.external_ids?.imdb_id;
+      if (imdbId && imdbRatings.has(imdbId)) {
+        const r = imdbRatings.get(imdbId);
+        if (r && r.rating) { c._imdbRating = parseFloat(r.rating); c._imdbVotes = r.votes || 0; }
+      }
+    } catch (e) { /* leave _imdbRating null -> falls back to TMDB rating */ }
+  };
+
+  const buildOttItem = async (c) => {
+    const item = baseItem(c, c.kind);
+    const extra = await enrich(c.kind, c.id);
+    if (!extra.providers || extra.providers.length === 0) return null; // not streaming in India
+    Object.assign(item, extra, { platform: extra.providers[0] });
+    withImdb(item);
+    return item;
+  };
+
+  // --- International pool: global trending (fresh), non-regional, IMDb-ranked ---
   const [trMovies, trTv] = await Promise.all([tmdb("/trending/movie/week"), tmdb("/trending/tv/week")]);
-  const candidates = [
+  let intlCands = [
     ...trMovies.results.map((m) => ({ ...m, kind: "movie" })),
     ...trTv.results.map((t) => ({ ...t, kind: "tv" })),
-  ].sort((a, b) => b.popularity - a.popularity);
+  ].filter((c) => !isRegional(c));
+  for (const c of intlCands) { await attachImdb(c); await sleep(150); }
+  intlCands.sort((a, b) => blended(b) - blended(a));
 
-  const ott = [];
-  for (const c of candidates) {
-    if (ott.length >= 10) break;
-    try {
-      const item = baseItem(c, c.kind);
-      const extra = await enrich(c.kind, c.id);
-      if (!extra.providers || extra.providers.length === 0) continue; // not streaming in India
-      Object.assign(item, extra, { platform: extra.providers[0] });
-      withImdb(item);
-      ott.push(item);
-    } catch (e) { console.warn(`ott ${c.id}: ${e.message}`); }
+  const intl = [], usedIds = new Set();
+  for (const c of intlCands) {
+    if (intl.length >= OTT_INTL_CAP) break;
+    try { const it = await buildOttItem(c); if (it) { intl.push(it); usedIds.add(c.id); } }
+    catch (e) { console.warn(`ott-intl ${c.id}: ${e.message}`); }
     await sleep(150);
   }
+
+  // --- Regional pool: per-language discover, gated to recent releases (anti-staleness),
+  //     Hindi first, IMDb-ranked. This is what surfaces fresh Hindi/regional OTT shows
+  //     that never trend globally. ---
+  const regionalOrder = ["hi", ...INDIAN_LANGS.filter((l) => l !== "hi")];
+  const regional = [];
+  for (const lang of regionalOrder) {
+    if (regional.length >= OTT_REGIONAL_TARGET) break;
+    let cands = [];
+    for (const kind of ["tv", "movie"]) {
+      const dateField = kind === "tv" ? "first_air_date.gte" : "primary_release_date.gte";
+      try {
+        const d = await tmdb(`/discover/${kind}`, {
+          with_original_language: lang,
+          watch_region: "IN",
+          with_watch_monetization_types: "flatrate",
+          sort_by: "popularity.desc",
+          [dateField]: freshCutoff, // only recent releases — never all-time classics
+          page: "1",
+        });
+        await sleep(150);
+        cands.push(...(d.results || []).map((m) => ({ ...m, kind })));
+      } catch (e) { console.warn(`ott-regional ${lang}/${kind}: ${e.message}`); }
+    }
+    cands = cands.filter((c) => !usedIds.has(c.id));
+    for (const c of cands) { await attachImdb(c); await sleep(150); }
+    // Rank by IMDb-preferred quality; drop sub-5.5 where we have a confident rating.
+    cands = cands
+      .filter((c) => !(c._imdbRating != null && c._imdbVotes >= 100 && c._imdbRating < 5.5))
+      .sort((a, b) => blended(b) - blended(a));
+    for (const c of cands) {
+      if (regional.length >= OTT_REGIONAL_TARGET) break;
+      if (usedIds.has(c.id)) continue;
+      try { const it = await buildOttItem(c); if (it) { regional.push(it); usedIds.add(c.id); } }
+      catch (e) { console.warn(`ott-regional-build ${c.id}: ${e.message}`); }
+      await sleep(150);
+    }
+  }
+
+  // --- Backfill with more international if regional fell short, so list reaches 10 ---
+  if (regional.length < OTT_REGIONAL_TARGET) {
+    for (const c of intlCands) {
+      if (intl.length + regional.length >= OTT_MAX) break;
+      if (usedIds.has(c.id)) continue;
+      try { const it = await buildOttItem(c); if (it) { intl.push(it); usedIds.add(c.id); } }
+      catch (e) { console.warn(`ott-backfill ${c.id}: ${e.message}`); }
+      await sleep(150);
+    }
+  }
+
+  // --- Interleave so regional stays visible instead of sinking below the international ---
+  const ott = [];
+  const step = regional.length ? Math.max(1, Math.floor(intl.length / regional.length)) : 0;
+  let ri = 0;
+  for (let i = 0; i < intl.length; i++) {
+    ott.push(intl[i]);
+    if (ri < regional.length && step && (i + 1) % step === 0) ott.push(regional[ri++]);
+  }
+  while (ri < regional.length) ott.push(regional[ri++]);
+  ott.length = Math.min(ott.length, OTT_MAX);
 
   // ---------- COMING SOON (next releases in India) ----------
   const today = new Date().toISOString().slice(0, 10);
