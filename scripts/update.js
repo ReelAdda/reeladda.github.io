@@ -180,7 +180,7 @@ async function main() {
     return item;
   }
 
-  // ---------- IN THEATRES (blended score + language representation, flexible 4-7) ----------
+  // ---------- IN THEATRES (quality-ranked within fresh pool + language representation, 4-7) ----------
   // Score = log10(popularity) x rating weight. Popularity still matters, but quality gets a vote.
   // Films with <20 votes get a neutral 6.0 so brand-new releases aren't punished or boosted.
   const np1 = await tmdb("/movie/now_playing", { region: "IN", page: "1" });
@@ -218,48 +218,59 @@ async function main() {
   // Tunable: neutral prior C and smoothing constant M (how many votes before a
   // rating is trusted on its own). Per-country config can override these later.
   const PRIOR_C = 6.0, SMOOTH_M = 8;
-  // Quality term for the blended score. Prefer IMDb's rating when we have it (better
-  // signal for Indian titles, and present even when TMDB votes are thin); otherwise
-  // fall back to the TMDB Bayesian-weighted rating. Popularity stays the freshness term.
-  const weightedRating = (m) => {
+  // Best available rating/votes: IMDb when present (more raters for Indian titles),
+  // else TMDB. These drive both the quality floor and the ranking score.
+  const bestRating = (m) => {
     if (m._imdbRating != null) return m._imdbRating;
-    const R = m.vote_average || 0, v = m.vote_count || 0;
-    if (!isRegional(m)) return v >= 20 ? R : PRIOR_C;
-    return (v / (v + SMOOTH_M)) * R + (SMOOTH_M / (v + SMOOTH_M)) * PRIOR_C;
+    if ((m.vote_count || 0) >= 10) return m.vote_average || 0;
+    return null; // no usable rating yet
   };
-  const blended = (m) => Math.log10((m.popularity || 0) + 1) * (weightedRating(m) / 10);
-  // Quality bar: a film with a real rating below 5.5 never makes the list. Uses IMDb
-  // rating if present (with enough votes), else TMDB. Thin-data films aren't floored out.
-  const clearsBar = (m) => {
-    if (m._imdbRating != null && m._imdbVotes >= 100) return m._imdbRating >= 5.5;
-    return !(m.vote_count >= 20 && m.vote_average < 5.5);
+  const bestVotes = (m) => (m._imdbRating != null ? (m._imdbVotes || 0) : (m.vote_count || 0));
+  // Freshness is enforced by the POOL, not the ranking. Within the fresh pool we rank on
+  // quality with an ADDITIVE form: rating sets the baseline and vote volume gives a gentle
+  // confidence nudge — score = rating + 0.5*log10(votes+10). This means an excellent film
+  // (e.g. a new Indian release at 8.3) leads on merit and is NOT buried by a merely-good
+  // Hollywood title with huge vote counts; among films of similar rating, the more
+  // widely-confirmed one ranks higher. Popularity is not a factor. Unrated-but-fresh films
+  // fall back to a neutral prior so they still place.
+  const qualityScore = (m) => {
+    const r = bestRating(m);
+    const eff = r == null ? PRIOR_C : r;
+    return eff + 0.5 * Math.log10(bestVotes(m) + 10);
   };
+  const clearsBar = (m) => { const r = bestRating(m); return r == null || r >= 5.5; };
 
-  const ranked = pool.filter(clearsBar).sort((a, b) => blended(b) - blended(a));
+  const ranked = pool.filter(clearsBar).sort((a, b) => qualityScore(b) - qualityScore(a));
   const MIN_PICKS = 4, MAX_PICKS = 7, BASE_PICKS = 5;
   let picks = ranked.slice(0, Math.min(BASE_PICKS, ranked.length));
 
-  // Language representation: best film of each major Indian language earns a slot
-  // if its weighted rating clears 6.5 and it isn't already in. No raw vote gate —
-  // the Bayesian shrink already neutralises fluke ratings from tiny samples, so a
-  // well-received regional film surfaces even on thin votes. If the list is full it
-  // may displace the weakest pick whose language already holds 2+ slots.
+  // Hindi gets up to 2 slots (biggest theatrical market); other Indian languages get 1.
+  // Films must clear the 6.5 weighted-rating bar to earn a representation slot, and the
+  // 5.5 quality floor already applied above — so no weak film is padded in to fill a quota.
+  const HINDI_SLOTS = 2;
+  const langCap = (lang) => (lang === "hi" ? HINDI_SLOTS : 1);
   for (const lang of INDIAN_LANGS) {
-    if (picks.some((m) => m.original_language === lang)) continue;
-    const best = ranked.find((m) => m.original_language === lang && weightedRating(m) >= 6.5);
-    if (!best) continue;
-    if (picks.length < MAX_PICKS) { picks.push(best); continue; }
-    const redundant = picks
-      .filter((m) => picks.filter((x) => x.original_language === m.original_language).length >= 2)
-      .sort((a, b) => blended(a) - blended(b))[0];
-    if (redundant) picks[picks.indexOf(redundant)] = best;
+    const cap = langCap(lang);
+    for (let slot = 0; slot < cap; slot++) {
+      const have = picks.filter((m) => m.original_language === lang).length;
+      if (have >= cap) break;
+      // next-best film in this language not already picked, clearing the rep bar
+      const best = ranked.find((m) => m.original_language === lang && (bestRating(m) ?? 0) >= 6.5 && !picks.includes(m));
+      if (!best) break;
+      if (picks.length < MAX_PICKS) { picks.push(best); continue; }
+      // List full: displace the weakest pick whose language already holds more than its cap.
+      const redundant = picks
+        .filter((m) => picks.filter((x) => x.original_language === m.original_language).length > langCap(m.original_language))
+        .sort((a, b) => qualityScore(a) - qualityScore(b))[0];
+      if (redundant) picks[picks.indexOf(redundant)] = best; else break;
+    }
   }
   // Never show an emaciated list: pad back toward MIN_PICKS from the ranked pool.
   for (const m of ranked) {
     if (picks.length >= MIN_PICKS) break;
     if (!picks.includes(m)) picks.push(m);
   }
-  picks = picks.slice(0, MAX_PICKS).sort((a, b) => blended(b) - blended(a));
+  picks = picks.slice(0, MAX_PICKS).sort((a, b) => qualityScore(b) - qualityScore(a));
 
   const theatres = [];
   for (const m of picks) {
@@ -278,7 +289,7 @@ async function main() {
   const freshCutoff = new Date(Date.now() - FRESH_DAYS * 864e5).toISOString().slice(0, 10);
 
   // Resolve IMDb rating for a candidate (detail call -> dataset lookup). Sets _imdbRating
-  // so weightedRating/blended use IMDb as the quality term, exactly like theatres.
+  // so qualityScore uses IMDb as the rating/votes signal, exactly like theatres.
   const attachImdb = async (c) => {
     try {
       const d = await tmdb(`/${c.kind}/${c.id}`, { append_to_response: "external_ids" });
@@ -299,14 +310,17 @@ async function main() {
     return item;
   };
 
-  // --- International pool: global trending (fresh), non-regional, IMDb-ranked ---
+  // --- International pool: global trending. Trending IS the freshness signal here — it
+  //     captures what people are watching now, including returning seasons of hit shows
+  //     that a release-date gate would wrongly exclude (TMDB dates the series' original
+  //     launch, not the new season). Within this fresh set, rank purely by quality. ---
   const [trMovies, trTv] = await Promise.all([tmdb("/trending/movie/week"), tmdb("/trending/tv/week")]);
   let intlCands = [
     ...trMovies.results.map((m) => ({ ...m, kind: "movie" })),
     ...trTv.results.map((t) => ({ ...t, kind: "tv" })),
   ].filter((c) => !isRegional(c));
   for (const c of intlCands) { await attachImdb(c); await sleep(150); }
-  intlCands.sort((a, b) => blended(b) - blended(a));
+  intlCands.sort((a, b) => qualityScore(b) - qualityScore(a));
 
   const intl = [], usedIds = new Set();
   for (const c of intlCands) {
@@ -341,10 +355,18 @@ async function main() {
     }
     cands = cands.filter((c) => !usedIds.has(c.id));
     for (const c of cands) { await attachImdb(c); await sleep(150); }
-    // Rank by IMDb-preferred quality; drop sub-5.5 where we have a confident rating.
+    // Quality floor on the best rating we have: IMDb if present, else TMDB. A film is
+    // only allowed through unfloored when it has NO usable rating at all (genuinely too
+    // new to judge) — then popularity decides. This stops mediocre thin-data films from
+    // sneaking in while still giving truly-unrated fresh titles a chance.
+    const ottRating = (c) => {
+      if (c._imdbRating != null) return c._imdbRating;
+      if ((c.vote_count || 0) >= 10) return c.vote_average || 0;
+      return null; // no usable rating
+    };
     cands = cands
-      .filter((c) => !(c._imdbRating != null && c._imdbVotes >= 100 && c._imdbRating < 5.5))
-      .sort((a, b) => blended(b) - blended(a));
+      .filter((c) => { const r = ottRating(c); return r == null || r >= 5.5; })
+      .sort((a, b) => qualityScore(b) - qualityScore(a));
     for (const c of cands) {
       if (regional.length >= OTT_REGIONAL_TARGET) break;
       if (usedIds.has(c.id)) continue;
