@@ -162,10 +162,24 @@ async function main() {
     };
   }
 
-  // Append the IMDb score (from OMDb, set by enrich) as a second labeled chip,
-  // after TMDB. TMDB stays the leading/ranking number; IMDb is a second opinion.
+  // After enrich, fold in the IMDb rating (from the dataset). Appends the IMDb chip,
+  // and — crucially — if IMDb has a rating but TMDB's votes were too thin to show one,
+  // surfaces a real rating/verdict instead of the "New release" placeholder. Also stashes
+  // the numeric IMDb rating (_imdbNum) so final picks can be re-sorted preferring it.
   function withImdb(item) {
-    if (item.imdbScore) item.scores = [...(item.scores || []), { source: "IMDb", score: item.imdbScore }];
+    if (item.imdbScore) {
+      item.scores = [...(item.scores || []), { source: "IMDb", score: item.imdbScore }];
+      const num = parseFloat(item.imdbScore); // "7.4/10" -> 7.4
+      if (!isNaN(num)) {
+        item._imdbNum = num;
+        // If TMDB couldn't give a rating (placeholder), let IMDb stand in for display.
+        if (item.rating == null) {
+          item.rating = num;
+          item.verdict = verdict(num, 1000); // enough-votes path: real verdict band
+          item.isFresh = false; // no longer a "no rating yet" placeholder
+        }
+      }
+    }
     delete item.imdbScore;
     return item;
   }
@@ -232,10 +246,19 @@ async function main() {
   const theatres = [];
   for (const m of picks) {
     const item = { ...baseItem(m, "movie"), platform: "Theatres" };
+    // Carry ranking inputs so we can re-sort after IMDb ratings are attached.
+    item._pop = m.popularity || 0;
+    item._tmdbWeighted = weightedRating(m);
     try { Object.assign(item, await enrich("movie", m.id)); withImdb(item); } catch (e) { console.warn(`enrich movie ${m.id}: ${e.message}`); }
     theatres.push(item);
     await sleep(150);
   }
+  // Option A: re-sort the final picks preferring IMDb's rating (better for Indian titles)
+  // where it exists, falling back to the TMDB weighted rating otherwise. Popularity stays
+  // the freshness term, so currency is preserved — this reorders, it doesn't re-select.
+  const blendedFinal = (it) => Math.log10((it._pop || 0) + 1) * ((it._imdbNum ?? it._tmdbWeighted ?? 6.0) / 10);
+  theatres.sort((a, b) => blendedFinal(b) - blendedFinal(a));
+  for (const it of theatres) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; }
 
   // ---------- TOP 10 ON OTT ----------
   const [trMovies, trTv] = await Promise.all([tmdb("/trending/movie/week"), tmdb("/trending/tv/week")]);
@@ -294,6 +317,10 @@ async function main() {
                (pickPool.filter((x) => x.rating >= 7.0).sort((a, b) => b.rating - a.rating)[0]) || null;
 
   const data = { generatedAt: new Date().toISOString(), pick: pick ? pick.title : null, theatres, ott, comingSoon };
+  // Strip internal-only fields (ranking helpers) so they never reach data.json.
+  for (const list of [data.theatres, data.ott, data.comingSoon]) {
+    for (const it of list) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; }
+  }
   // ---------- PER-FILM PAGES + SITEMAP ----------
   assignSlugs(data);
   generatePages(data);
