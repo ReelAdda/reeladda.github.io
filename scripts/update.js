@@ -164,20 +164,16 @@ async function main() {
 
   // After enrich, fold in the IMDb rating (from the dataset). Appends the IMDb chip,
   // and — crucially — if IMDb has a rating but TMDB's votes were too thin to show one,
-  // surfaces a real rating/verdict instead of the "New release" placeholder. Also stashes
-  // the numeric IMDb rating (_imdbNum) so final picks can be re-sorted preferring it.
+  // surfaces a real rating/verdict instead of the "New release" placeholder.
   function withImdb(item) {
     if (item.imdbScore) {
       item.scores = [...(item.scores || []), { source: "IMDb", score: item.imdbScore }];
       const num = parseFloat(item.imdbScore); // "7.4/10" -> 7.4
-      if (!isNaN(num)) {
-        item._imdbNum = num;
-        // If TMDB couldn't give a rating (placeholder), let IMDb stand in for display.
-        if (item.rating == null) {
-          item.rating = num;
-          item.verdict = verdict(num, 1000); // enough-votes path: real verdict band
-          item.isFresh = false; // no longer a "no rating yet" placeholder
-        }
+      if (!isNaN(num) && item.rating == null) {
+        // TMDB couldn't give a rating (placeholder) — let IMDb stand in for display.
+        item.rating = num;
+        item.verdict = verdict(num, 1000); // enough-votes path: real verdict band
+        item.isFresh = false; // no longer a "no rating yet" placeholder
       }
     }
     delete item.imdbScore;
@@ -197,25 +193,47 @@ async function main() {
     return true;
   });
 
+  // Attach IMDb rating to each pool film BEFORE ranking, so IMDb (which has far more
+  // Indian raters than TMDB) drives selection — not just display. One detail call per
+  // film to resolve its IMDb ID, then a cheap lookup in the loaded dataset. Runs once
+  // a day, so the extra calls are immaterial. Any failure leaves _imdbRating null and
+  // the film falls back to its TMDB rating — never blocks ranking.
+  for (const m of pool) {
+    try {
+      const d = await tmdb(`/movie/${m.id}`, { append_to_response: "external_ids" });
+      const imdbId = d.external_ids?.imdb_id;
+      if (imdbId && imdbRatings.has(imdbId)) {
+        const r = imdbRatings.get(imdbId);
+        if (r && r.rating) {
+          m._imdbRating = parseFloat(r.rating);
+          m._imdbVotes = r.votes || 0;
+        }
+      }
+    } catch (e) { console.warn(`imdb-id ${m.id}: ${e.message}`); }
+    await sleep(150);
+  }
+
   const INDIAN_LANGS = ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"];
   const isRegional = (m) => INDIAN_LANGS.includes(m.original_language);
   // Tunable: neutral prior C and smoothing constant M (how many votes before a
   // rating is trusted on its own). Per-country config can override these later.
   const PRIOR_C = 6.0, SMOOTH_M = 8;
-  // Regional theatrical films rarely accrue many TMDB votes during their run, so
-  // instead of a hard vote gate we shrink a sparse rating toward the neutral prior:
-  //   weighted = v/(v+M)*R + M/(v+M)*C   (IMDb-style Bayesian average)
-  // A 2-vote 9.0 is pulled most of the way back to 6.0; a 100-vote rating is left
-  // almost untouched. No cliff, no fluke ratings, no excluding films for low votes.
-  // Non-regional films keep the original step behaviour (plenty of votes anyway).
+  // Quality term for the blended score. Prefer IMDb's rating when we have it (better
+  // signal for Indian titles, and present even when TMDB votes are thin); otherwise
+  // fall back to the TMDB Bayesian-weighted rating. Popularity stays the freshness term.
   const weightedRating = (m) => {
+    if (m._imdbRating != null) return m._imdbRating;
     const R = m.vote_average || 0, v = m.vote_count || 0;
     if (!isRegional(m)) return v >= 20 ? R : PRIOR_C;
     return (v / (v + SMOOTH_M)) * R + (SMOOTH_M / (v + SMOOTH_M)) * PRIOR_C;
   };
   const blended = (m) => Math.log10((m.popularity || 0) + 1) * (weightedRating(m) / 10);
-  // Quality bar: rated films below 5.5 never make the list, however loud they are.
-  const clearsBar = (m) => !(m.vote_count >= 20 && m.vote_average < 5.5);
+  // Quality bar: a film with a real rating below 5.5 never makes the list. Uses IMDb
+  // rating if present (with enough votes), else TMDB. Thin-data films aren't floored out.
+  const clearsBar = (m) => {
+    if (m._imdbRating != null && m._imdbVotes >= 100) return m._imdbRating >= 5.5;
+    return !(m.vote_count >= 20 && m.vote_average < 5.5);
+  };
 
   const ranked = pool.filter(clearsBar).sort((a, b) => blended(b) - blended(a));
   const MIN_PICKS = 4, MAX_PICKS = 7, BASE_PICKS = 5;
@@ -246,19 +264,10 @@ async function main() {
   const theatres = [];
   for (const m of picks) {
     const item = { ...baseItem(m, "movie"), platform: "Theatres" };
-    // Carry ranking inputs so we can re-sort after IMDb ratings are attached.
-    item._pop = m.popularity || 0;
-    item._tmdbWeighted = weightedRating(m);
     try { Object.assign(item, await enrich("movie", m.id)); withImdb(item); } catch (e) { console.warn(`enrich movie ${m.id}: ${e.message}`); }
     theatres.push(item);
     await sleep(150);
   }
-  // Option A: re-sort the final picks preferring IMDb's rating (better for Indian titles)
-  // where it exists, falling back to the TMDB weighted rating otherwise. Popularity stays
-  // the freshness term, so currency is preserved — this reorders, it doesn't re-select.
-  const blendedFinal = (it) => Math.log10((it._pop || 0) + 1) * ((it._imdbNum ?? it._tmdbWeighted ?? 6.0) / 10);
-  theatres.sort((a, b) => blendedFinal(b) - blendedFinal(a));
-  for (const it of theatres) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; }
 
   // ---------- TOP 10 ON OTT ----------
   const [trMovies, trTv] = await Promise.all([tmdb("/trending/movie/week"), tmdb("/trending/tv/week")]);
@@ -319,7 +328,7 @@ async function main() {
   const data = { generatedAt: new Date().toISOString(), pick: pick ? pick.title : null, theatres, ott, comingSoon };
   // Strip internal-only fields (ranking helpers) so they never reach data.json.
   for (const list of [data.theatres, data.ott, data.comingSoon]) {
-    for (const it of list) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; }
+    for (const it of list) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; delete it._imdbRating; delete it._imdbVotes; }
   }
   // ---------- PER-FILM PAGES + SITEMAP ----------
   assignSlugs(data);
