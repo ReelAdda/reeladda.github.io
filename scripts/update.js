@@ -4,6 +4,7 @@
 // what's new since last week's scan. Writes data.json for the website.
 
 const fs = require("fs");
+const zlib = require("zlib");
 const API_KEY = process.env.TMDB_API_KEY;
 const BASE = "https://api.themoviedb.org/3";
 
@@ -42,6 +43,39 @@ function img(path, size = "w342") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
 }
 
+// IMDb's official daily ratings dataset: tconst \t averageRating \t numVotes.
+// Downloaded once per run and parsed into a Map for cheap per-film lookup.
+// Any failure (network, parse) returns an empty Map so ratings simply fall back
+// to TMDB — the dataset is an enhancement, never a hard dependency.
+const IMDB_DATASET_URL = "https://datasets.imdbws.com/title.ratings.tsv.gz";
+async function loadImdbRatings() {
+  const map = new Map();
+  try {
+    const res = await fetch(IMDB_DATASET_URL);
+    if (!res.ok) throw new Error(`dataset HTTP ${res.status}`);
+    const buf = Buffer.from(await res.arrayBuffer());
+    const tsv = zlib.gunzipSync(buf).toString("utf8");
+    let n = 0;
+    for (const line of tsv.split("\n")) {
+      if (!line || line.startsWith("tconst\t")) continue; // skip header and blanks
+      const tab1 = line.indexOf("\t");
+      if (tab1 < 0) continue;
+      const tab2 = line.indexOf("\t", tab1 + 1);
+      if (tab2 < 0) continue;
+      const id = line.slice(0, tab1);
+      const rating = line.slice(tab1 + 1, tab2);
+      const votes = line.slice(tab2 + 1);
+      map.set(id, { rating, votes: parseInt(votes, 10) || 0 });
+      n++;
+    }
+    console.log(`IMDb dataset loaded: ${n} rated titles.`);
+  } catch (e) {
+    console.warn(`IMDb dataset unavailable, falling back to TMDB ratings only: ${e.message}`);
+  }
+  return map;
+}
+let imdbRatings = new Map(); // populated at the start of main()
+
 async function enrich(kind, id) {
   const extra = kind === "movie" ? "release_dates" : "content_ratings";
   const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,external_ids,${extra}` });
@@ -75,17 +109,14 @@ async function enrich(kind, id) {
   const runtime = kind === "movie" ? d.runtime : (d.episode_run_time?.[0] || null);
 
   // IMDb rating via OMDb (optional). IMDb's base has more Indian raters than TMDB,
-  // so this gives a better second opinion on Indian titles. Runs only on the films
-  // we actually display, only if OMDB_API_KEY is set, and never blocks the build.
+  // IMDb rating from the daily dataset (loaded once into imdbRatings). IMDb's base
+  // has more Indian raters than TMDB, so it's a useful second opinion. Cheap in-memory
+  // lookup by IMDb ID — no per-film network call. Missing title -> no chip (fallback).
   let imdbScore = null;
   const imdbId = d.external_ids?.imdb_id;
-  if (imdbId && process.env.OMDB_API_KEY) {
-    try {
-      const o = await fetch(`https://www.omdbapi.com/?i=${imdbId}&apikey=${process.env.OMDB_API_KEY}`).then((r) => r.json());
-      if (o && o.Response === "True" && o.imdbRating && o.imdbRating !== "N/A") {
-        imdbScore = `${o.imdbRating}/10`;
-      }
-    } catch (e) { console.warn(`omdb ${imdbId}: ${e.message}`); }
+  if (imdbId && imdbRatings.has(imdbId)) {
+    const r = imdbRatings.get(imdbId);
+    if (r && r.rating) imdbScore = `${r.rating}/10`;
   }
 
   return {
@@ -96,15 +127,10 @@ async function enrich(kind, id) {
 }
 
 async function main() {
-  // Load last week's data to detect what's new
-  const fs = await import("fs");
-  let prevTitles = new Set();
-  try {
-    const prev = JSON.parse(fs.readFileSync("data.json", "utf8"));
-    for (const x of [...(prev.theatres || []), ...(prev.ott || [])]) prevTitles.add(x.title);
-  } catch { /* first run */ }
-
   const [movieGenres, tvGenres] = await Promise.all([tmdb("/genre/movie/list"), tmdb("/genre/tv/list")]);
+
+  // Load IMDb's daily ratings dataset once (used to attach a second-opinion rating).
+  imdbRatings = await loadImdbRatings();
   const gmap = {};
   for (const g of [...movieGenres.genres, ...tvGenres.genres]) gmap[g.id] = g.name;
   const genres = (ids) => (ids || []).slice(0, 2).map((i) => gmap[i]).filter(Boolean).join(" / ");
