@@ -112,9 +112,11 @@ async function main() {
   function baseItem(m, kind) {
     const relDate = m.release_date || m.first_air_date;
     const daysSince = relDate ? (Date.now() - new Date(relDate).getTime()) / 864e5 : 999;
-    // A film released in the last 7 days with under 20 votes is too fresh to rate
-    // honestly — show a "New release" placeholder rather than a noisy thin score.
-    const tooNew = daysSince <= 7 && m.vote_count < 20;
+    // isRecent: released within 7 days — drives the "New release" badge (what a user
+    // means by new). isFresh: also requires thin votes — drives the rating placeholder
+    // and "verdict soon", since a fresh film with few votes can't be rated honestly yet.
+    const isRecent = daysSince <= 7;
+    const tooNew = isRecent && m.vote_count < 20;
     const showRating = !tooNew && m.vote_count >= 10;
     return {
       title: m.title || m.name,
@@ -127,7 +129,7 @@ async function main() {
       votes: m.vote_count,
       verdict: tooNew ? "Just released — verdict soon" : verdict(m.vote_average, m.vote_count),
       poster: img(m.poster_path),
-      isNew: !prevTitles.has(m.title || m.name),
+      isRecent,
       isFresh: tooNew,
       kind,
       tmdbId: m.id,
@@ -262,7 +264,7 @@ async function main() {
   // If nothing clears either bar, there is no pick this week — honesty over decoration.
   const all = [...theatres, ...ott];
   const pickPool = all.filter((x) => x.rating != null && x.votes >= 20);
-  const pick = (pickPool.filter((x) => x.isNew && x.rating >= 6.5).sort((a, b) => b.rating - a.rating)[0]) ||
+  const pick = (pickPool.filter((x) => x.isRecent && x.rating >= 6.5).sort((a, b) => b.rating - a.rating)[0]) ||
                (pickPool.filter((x) => x.rating >= 7.0).sort((a, b) => b.rating - a.rating)[0]) || null;
 
   const data = { generatedAt: new Date().toISOString(), pick: pick ? pick.title : null, theatres, ott, comingSoon };
@@ -467,7 +469,7 @@ function ssrCard(item, i) {
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" loading="lazy">` : ""}
     <div>
-      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${item.isFresh ? '<span class="fresh-badge">Just released</span>' : ""}</div>
+      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${item.isRecent ? '<span class="fresh-badge">New release</span>' : ""}</div>
       <div class="meta">${bits}</div>
       ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 110))}</p>` : ""}
