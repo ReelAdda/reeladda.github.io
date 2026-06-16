@@ -692,18 +692,28 @@ async function main() {
   } // end buildCountry
 
   // Run the pipeline for every configured country, writing data-<code>.json for each.
-  // India (first) ALSO writes the canonical data.json + per-film pages + sitemap, so the
-  // existing site keeps working unchanged while the geo-detect frontend loads per-country data.
+  // India (first) ALSO writes the canonical data.json + per-film pages. Every country gets its
+  // own indexable page: India at "/", others at "/<code>/". The pristine index.html template is
+  // read ONCE here so per-country injections never stack (India's render writes back to
+  // index.html, which would otherwise corrupt the template for later countries).
+  let pageTemplate;
+  try { pageTemplate = fs.readFileSync("index.html", "utf8"); }
+  catch { pageTemplate = null; console.warn("index.html template not found — page render skipped"); }
+
+  const builtCountries = [];
   for (const cfg of COUNTRIES) {
     const data = await buildCountry(cfg);
     assignSlugs(data);
     fs.writeFileSync(`data-${cfg.code}.json`, JSON.stringify(data, null, 1));
+    builtCountries.push(cfg);
     if (cfg.code === "in") {
-      generatePages(data);
-      prerenderIndex(data);
+      generatePages(data); // per-film pages + sitemap (India only)
       fs.writeFileSync("data.json", JSON.stringify(data, null, 1));
     }
+    if (pageTemplate) renderCountryPage(pageTemplate, cfg, data);
   }
+  // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
+  writeMultiCountrySitemap(builtCountries);
   console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.`);
 }
 
@@ -861,31 +871,34 @@ function generatePages(data) {
       written++;
     } catch (err) { console.warn(`page ${item.slug}: ${err.message}`); }
   }
+  const pages = fs.readdirSync("movie").filter((f) => f.endsWith(".html"));
+  console.log(`Pages: ${written} written, ${pages.length} total in archive (India per-film pages).`);
+}
 
-  // Sitemap: homepage + every page in movie/ (the archive included)
+// Complete sitemap: every country page (with hreflang alternates linking them as the same
+// site for different regions) + India's per-film pages. Built after all countries render.
+function writeMultiCountrySitemap(countries) {
   const today = new Date().toISOString().slice(0, 10);
-  const pages = fs.readdirSync("movie").filter((f) => f.endsWith(".html")).sort();
-  const fresh = new Set(all.map((x) => x.slug + ".html"));
-  const urls = [
-    `  <url><loc>https://filmychill.com/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>`,
-    ...pages.map((f) =>
-      `  <url><loc>https://filmychill.com/movie/${f}</loc>${fresh.has(f) ? `<lastmod>${today}</lastmod><priority>0.7</priority>` : "<priority>0.3</priority>"}</url>`),
-  ];
+  const pathFor = (code) => (code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`);
+  // hreflang alternates: list every country version + x-default (India).
+  const alternates = countries.map((c) =>
+    `    <xhtml:link rel="alternate" hreflang="${c.code === "in" ? "en-IN" : "en-" + c.region}" href="${pathFor(c.code)}"/>`).join("\n")
+    + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/"/>`;
+  const countryUrls = countries.map((c) =>
+    `  <url><loc>${pathFor(c.code)}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority>\n${alternates}\n  </url>`);
+  // India per-film pages (archive). Fresh ones get higher priority.
+  let filmUrls = [];
+  try {
+    const pages = fs.readdirSync("movie").filter((f) => f.endsWith(".html")).sort();
+    filmUrls = pages.map((f) =>
+      `  <url><loc>https://filmychill.com/movie/${f}</loc><lastmod>${today}</lastmod><priority>0.5</priority></url>`);
+  } catch (e) {}
   fs.writeFileSync("sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`);
-  console.log(`Pages: ${written} written, ${pages.length} total in archive. Sitemap regenerated.`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${countryUrls.join("\n")}\n${filmUrls.join("\n")}\n</urlset>\n`);
+  console.log(`Sitemap: ${countries.length} country pages + ${filmUrls.length} film pages.`);
 }
 
 // Manual/local regeneration from existing data.json: PAGES_ONLY=1 node scripts/update.js
-if (process.env.PAGES_ONLY) {
-  const d = JSON.parse(fs.readFileSync("data.json", "utf8"));
-  assignSlugs(d);
-  generatePages(d);
-  prerenderIndex(d);
-  fs.writeFileSync("data.json", JSON.stringify(d, null, 1));
-  process.exit(0);
-}
-
 // ============================================================
 // PRE-RENDER — inject this week's films as static HTML into
 // index.html between SSR markers, so crawlers (and visitors,
@@ -893,10 +906,10 @@ if (process.env.PAGES_ONLY) {
 // "Loading fresh picks". The page JS replaces it on load.
 // ============================================================
 
-function ssrCard(item, i) {
+function ssrCard(item, i, isIndia) {
   const e = escHtml;
   const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null].filter(Boolean).map(e).join(" · ");
-  return `<a class="card${item.poster ? "" : " no-poster"}" href="/movie/${e(item.slug)}.html" style="text-decoration:none;color:inherit">
+  const inner = `
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" loading="lazy">` : ""}
     <div>
@@ -904,8 +917,12 @@ function ssrCard(item, i) {
       <div class="meta">${bits}</div>
       ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 110))}</p>` : ""}
-    </div>
-  </a>`;
+    </div>`;
+  // Per-film pages exist only for India -> link there. Other countries render a non-link card
+  // (the page JS makes it interactive via the detail modal on load), avoiding broken links.
+  return isIndia
+    ? `<a class="card${item.poster ? "" : " no-poster"}" href="/movie/${e(item.slug)}.html" style="text-decoration:none;color:inherit">${inner}</a>`
+    : `<div class="card${item.poster ? "" : " no-poster"}" style="color:inherit">${inner}</div>`;
 }
 
 function ssrSoonCard(item) {
@@ -927,18 +944,51 @@ function replaceBetween(html, tag, inner) {
   return html.slice(0, a + start.length) + inner + html.slice(b);
 }
 
+// Per-country page metadata: title, description, canonical, OG — country-specific so each
+// page ranks for its own market in search. India keeps the established global-but-India-first
+// wording at the root; the others name their country explicitly.
+const COUNTRY_PAGE_META = {
+  in: { name: "India", path: "/" },
+  us: { name: "the US", path: "/us/" },
+  uk: { name: "the UK", path: "/uk/" },
+  au: { name: "Australia", path: "/au/" },
+  de: { name: "Germany", path: "/de/" },
+};
+function buildHeadTags(cfg) {
+  const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name, path: `/${cfg.code}/` };
+  const url = `https://filmychill.com${m.path}`;
+  if (cfg.code === "in") {
+    // Root keeps the multi-country, India-first wording already chosen.
+    return `<title>FilmyChill — Latest Movie & OTT Releases, with Reviews, Updated Daily</title>\n`
+      + `<meta name="description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, IMDb ratings, verdicts, auto-updated daily.">\n`
+      + `<link rel="canonical" href="${url}">\n`
+      + `<meta property="og:title" content="FilmyChill — What's worth watching this week">\n`
+      + `<meta property="og:description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, IMDb ratings, verdicts. Auto-updated daily.">`;
+  }
+  return `<title>FilmyChill — Latest Movie &amp; OTT Releases in ${m.name}, with Reviews, Updated Daily</title>\n`
+    + `<meta name="description" content="Latest theatre and OTT releases in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, IMDb ratings, verdicts, auto-updated daily.">\n`
+    + `<link rel="canonical" href="${url}">\n`
+    + `<meta property="og:title" content="FilmyChill — What's worth watching this week in ${m.name}">\n`
+    + `<meta property="og:description" content="Top theatre releases + OTT picks in ${m.name} with trailers, IMDb ratings and verdicts. Auto-updated daily.">`;
+}
+
 // Homepage structured data: WebSite + dateModified + an ItemList of this
 // week's films, so crawlers see a fresh, ranked collection without running JS.
-function buildHomeJsonLd(data) {
+function buildHomeJsonLd(data, cfg) {
+  const m = COUNTRY_PAGE_META[(cfg && cfg.code) || "in"] || { name: "", path: "/" };
+  const pageUrl = `https://filmychill.com${m.path}`;
   const date = (data.generatedAt || new Date().toISOString()).slice(0, 10);
+  // Per-film pages exist only for India; other countries' list items point to the country page.
+  const isIndia = !cfg || cfg.code === "in";
   const listItems = [...(data.theatres || []), ...(data.ott || [])]
     .filter((x) => x.slug)
     .map((x, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `https://filmychill.com/movie/${x.slug}.html`,
+      url: isIndia ? `https://filmychill.com/movie/${x.slug}.html` : pageUrl,
       name: x.title,
     }));
+  const listName = isIndia ? "What's worth watching this week" : `What's worth watching this week in ${m.name}`;
   const graph = [
     {
       "@type": "WebSite",
@@ -951,8 +1001,8 @@ function buildHomeJsonLd(data) {
     },
     {
       "@type": "ItemList",
-      name: "What's worth watching this week in India",
-      url: "https://filmychill.com/",
+      name: listName,
+      url: pageUrl,
       dateModified: data.generatedAt || `${date}T00:00:00.000Z`,
       numberOfItems: listItems.length,
       itemListElement: listItems,
@@ -961,14 +1011,43 @@ function buildHomeJsonLd(data) {
   return JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
 }
 
+// Render one country's page from the pristine template string and write it to its path
+// (root index.html for India, <code>/index.html for others). The template is read ONCE by
+// the caller and passed in, so per-country injections never stack on each other.
+function renderCountryPage(templateHtml, cfg, data) {
+  const isIndia = cfg.code === "in";
+  let html = templateHtml;
+  html = replaceBetween(html, "HEAD", buildHeadTags(cfg));
+  html = replaceBetween(html, "PAGECODE", `window.__FC_PAGE='${cfg.code}';`);
+  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, isIndia)).join(""));
+  html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCard(x, i, isIndia)).join(""));
+  html = replaceBetween(html, "SOON", (data.comingSoon || []).map(ssrSoonCard).join(""));
+  html = replaceBetween(html, "JSONLD", buildHomeJsonLd(data, cfg));
+  if (isIndia) {
+    fs.writeFileSync("index.html", html);
+  } else {
+    if (!fs.existsSync(cfg.code)) fs.mkdirSync(cfg.code, { recursive: true });
+    fs.writeFileSync(`${cfg.code}/index.html`, html);
+  }
+  console.log(`  page rendered: ${isIndia ? "/ (index.html)" : "/" + cfg.code + "/"}`);
+}
+
+// PAGES_ONLY local regeneration: India only (the canonical page from data.json).
 function prerenderIndex(data) {
   let html;
   try { html = fs.readFileSync("index.html", "utf8"); }
   catch { console.warn("index.html not found — prerender skipped"); return; }
-  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i)).join(""));
-  html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCard(x, i)).join(""));
-  html = replaceBetween(html, "SOON", (data.comingSoon || []).map(ssrSoonCard).join(""));
-  html = replaceBetween(html, "JSONLD", buildHomeJsonLd(data));
-  fs.writeFileSync("index.html", html);
+  renderCountryPage(html, { code: "in", name: "India" }, data);
   console.log("index.html pre-rendered with this week's films.");
+}
+
+// Local regeneration from existing data.json (no API calls): PAGES_ONLY=1 node scripts/update.js
+// Placed at end of file so all const declarations (COUNTRY_PAGE_META etc.) are initialized.
+if (process.env.PAGES_ONLY) {
+  const d = JSON.parse(fs.readFileSync("data.json", "utf8"));
+  assignSlugs(d);
+  generatePages(d);
+  prerenderIndex(d);
+  fs.writeFileSync("data.json", JSON.stringify(d, null, 1));
+  process.exit(0);
 }
