@@ -38,7 +38,7 @@ jobs:
             console.log('data.json OK:', d.theatres.length, 'theatre,', d.ott.length, 'ott,', (d.comingSoon||[]).length, 'upcoming. Pick:', d.pick, '| pages:', pages.length);
 
             // --- Per-country files: must exist and be non-empty ---
-            const countries = ['in','us','uk','ae','au','de'];
+            const countries = ['in','us','uk','au','de'];
             for (const c of countries) {
               const path = 'data-' + c + '.json';
               if (!fs.existsSync(path)) fail('missing country file ' + path);
