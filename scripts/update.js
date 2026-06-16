@@ -24,6 +24,55 @@ async function tmdb(path, params = {}) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Per-country configuration. Each country runs the SAME pipeline parameterised by region,
+// watch_region, priority languages, and soft quotas. INDIA IS FIRST and reproduces the
+// existing single-country behaviour EXACTLY — its regionalLangs order, targets, and soon
+// quota match the previous hardcoded values, so its output stays byte-for-byte identical.
+const COUNTRIES = [
+  {
+    code: "in", name: "India", region: "IN", watchRegion: "IN",
+    priorityLangs: ["hi", "ta", "te"],
+    regionalLangs: ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"], // order = India's regionalOrder
+    theatreTargets: [["hi", 3], ["en", 2], ["ta", 1], ["te", 1]],
+    soonTargets: [["en", 3], ["hi", 2], ["__regional__", 3]],
+  },
+  {
+    code: "us", name: "United States", region: "US", watchRegion: "US",
+    priorityLangs: ["en", "es"],
+    regionalLangs: ["es"],
+    theatreTargets: [["en", 5], ["es", 1]],
+    soonTargets: [["en", 5], ["es", 1], ["__regional__", 2]],
+  },
+  {
+    code: "uk", name: "United Kingdom", region: "GB", watchRegion: "GB",
+    priorityLangs: ["en"],
+    regionalLangs: ["hi", "pa"],
+    theatreTargets: [["en", 6]],
+    soonTargets: [["en", 6], ["__regional__", 2]],
+  },
+  {
+    code: "ae", name: "United Arab Emirates", region: "AE", watchRegion: "AE",
+    priorityLangs: ["en", "hi", "ml", "ta"],
+    regionalLangs: ["hi", "ml", "ta", "te"],
+    theatreTargets: [["en", 5], ["hi", 3]],
+    soonTargets: [["en", 3], ["hi", 2], ["__regional__", 3]],
+  },
+  {
+    code: "au", name: "Australia", region: "AU", watchRegion: "AU",
+    priorityLangs: ["en"],
+    regionalLangs: ["hi", "zh", "ko"],
+    theatreTargets: [["en", 6]],
+    soonTargets: [["en", 6], ["__regional__", 2]],
+  },
+  {
+    code: "de", name: "Germany", region: "DE", watchRegion: "DE",
+    priorityLangs: ["de", "en"],
+    regionalLangs: ["de"],
+    theatreTargets: [["de", 5], ["en", 2]],
+    soonTargets: [["de", 5], ["en", 2], ["__regional__", 1]],
+  },
+];
+
 // Manual exclusion list — films that should NEVER appear regardless of what TMDB returns
 // (banned in India, pulled from release, festival-only, or otherwise mislisted as current
 // theatrical). TMDB exposes no "banned"/"still in theatres" signal, so this is a human
@@ -33,7 +82,7 @@ const EXCLUDE_IDS = new Set([
   1692948, // Chardikala — banned in India / not in theatres
 ]);
 
-const LANG = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", ml: "Malayalam", kn: "Kannada", ko: "Korean", ja: "Japanese", es: "Spanish", fr: "French", mr: "Marathi", bn: "Bengali", pa: "Punjabi", gu: "Gujarati" };
+const LANG = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", ml: "Malayalam", kn: "Kannada", ko: "Korean", ja: "Japanese", es: "Spanish", fr: "French", mr: "Marathi", bn: "Bengali", pa: "Punjabi", gu: "Gujarati", de: "German", it: "Italian", pt: "Portuguese", zh: "Chinese" };
 
 function verdict(rating, votes) {
   if (!votes || votes < 10) return "Not enough ratings yet";
@@ -198,14 +247,17 @@ async function main() {
     return item;
   }
 
+  // Build all sections for one country from its config. Closes over shared helpers
+  // (genres, baseItem, withImdb, verdict). Returns the data object for that country.
+  async function buildCountry(cfg) {
   // ---------- IN THEATRES (quality-ranked within fresh pool + language representation, 4-7) ----------
-  const INDIAN_LANGS = ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"];
+  const INDIAN_LANGS = cfg.regionalLangs;
   const isRegional = (m) => INDIAN_LANGS.includes(m.original_language);
 
-  // Base pool: TMDB's "now playing" for India.
-  const np1 = await tmdb("/movie/now_playing", { region: "IN", page: "1" });
+  // Base pool: TMDB's "now playing" for this country.
+  const np1 = await tmdb("/movie/now_playing", { region: cfg.region, page: "1" });
   await sleep(150);
-  const np2 = await tmdb("/movie/now_playing", { region: "IN", page: "2" });
+  const np2 = await tmdb("/movie/now_playing", { region: cfg.region, page: "2" });
   // Seed `seen` with the manual exclusion list so blocked films (banned/pulled/mislisted)
   // are skipped everywhere the pool is built below — both now_playing and discover.
   const seen = new Set(EXCLUDE_IDS);
@@ -225,11 +277,11 @@ async function main() {
   // Priority languages for theatre representation: Hindi, Tamil, Telugu. Discover queries
   // target these so they reliably enter the pool; now_playing still brings in everything
   // else (English, other regional) so a standout outside these can still earn a slot.
-  const PRIORITY_LANGS = ["hi", "ta", "te"];
+  const PRIORITY_LANGS = cfg.priorityLangs;
   for (const lang of PRIORITY_LANGS) {
     try {
       const d = await tmdb("/discover/movie", {
-        region: "IN",
+        region: cfg.region,
         with_original_language: lang,
         "primary_release_date.gte": theatreCutoff,
         "primary_release_date.lte": todayStr,
@@ -345,7 +397,7 @@ async function main() {
   // is left for the fallback pass, where the best remaining film of ANY language (clearing
   // the 5.5 floor + suspicious guard) takes the slot — so a standout outside the target set
   // can still make the list, and we never pad a slot with a weak film or leave it short.
-  const TARGETS = [["hi", 3], ["en", 2], ["ta", 1], ["te", 1]];
+  const TARGETS = cfg.theatreTargets;
   const REP_BAR = 6.5;
   let picks = [];
   for (const [lang, n] of TARGETS) {
@@ -450,7 +502,7 @@ async function main() {
   // --- Regional pool: per-language discover, gated to recent releases (anti-staleness),
   //     Hindi first, IMDb-ranked. This is what surfaces fresh Hindi/regional OTT shows
   //     that never trend globally. ---
-  const regionalOrder = ["hi", ...INDIAN_LANGS.filter((l) => l !== "hi")];
+  const regionalOrder = INDIAN_LANGS;
   const regional = [];
   for (const lang of regionalOrder) {
     if (regional.length >= OTT_REGIONAL_TARGET) break;
@@ -460,7 +512,7 @@ async function main() {
       try {
         const d = await tmdb(`/discover/${kind}`, {
           with_original_language: lang,
-          watch_region: "IN",
+          watch_region: cfg.watchRegion,
           with_watch_monetization_types: "flatrate",
           sort_by: "popularity.desc",
           [dateField]: freshCutoff, // only recent releases — never all-time classics
@@ -527,8 +579,8 @@ async function main() {
   const today = new Date().toISOString().slice(0, 10);
   const soonHorizon = new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10); // ~3 months out
   const [up1, up2] = await Promise.all([
-    tmdb("/movie/upcoming", { region: "IN", page: "1" }),
-    tmdb("/movie/upcoming", { region: "IN", page: "2" }),
+    tmdb("/movie/upcoming", { region: cfg.region, page: "1" }),
+    tmdb("/movie/upcoming", { region: cfg.region, page: "2" }),
   ]);
   // The /upcoming feed for India under-represents Hollywood and Hindi (it skews to whatever
   // regional industry has the most films dated soon). So — like the theatre pool — we
@@ -540,10 +592,10 @@ async function main() {
   for (const m of [...up1.results, ...(up2.results || [])]) {
     if (!upSeen.has(m.id)) { upSeen.add(m.id); upPoolRaw.push(m); }
   }
-  for (const lang of ["en", "hi"]) {
+  for (const lang of cfg.priorityLangs) {
     try {
       const d = await tmdb("/discover/movie", {
-        region: "IN",
+        region: cfg.region,
         with_original_language: lang,
         "primary_release_date.gte": today,
         "primary_release_date.lte": soonHorizon,
@@ -553,16 +605,19 @@ async function main() {
       for (const m of (d.results || [])) {
         if (!upSeen.has(m.id)) { upSeen.add(m.id); upPoolRaw.push(m); }
       }
-    } catch (e) { console.warn(`soon-discover ${lang}: ${e.message}`); }
+    } catch (e) { console.warn(`soon-discover ${cfg.code}/${lang}: ${e.message}`); }
     await sleep(150);
   }
   const upPool = upPoolRaw
     .filter((m) => m.release_date && m.release_date > today)
     .sort((a, b) => (b.popularity || 0) - (a.popularity || 0)); // most anticipated first
 
-  const SOON_TARGETS = [["en", 3], ["hi", 2], ["__regional__", 3]];
+  const SOON_TARGETS = cfg.soonTargets;
   const SOON_MAX = 8;
-  const isSoonRegional = (m) => INDIAN_LANGS.includes(m.original_language) && m.original_language !== "hi";
+  // "regional" for coming-soon = a regionalLangs language not already a named soon target.
+  // For India (soon targets name en+hi) this excludes hi — identical to the prior behaviour.
+  const soonNamed = new Set(SOON_TARGETS.map(([k]) => k));
+  const isSoonRegional = (m) => INDIAN_LANGS.includes(m.original_language) && !soonNamed.has(m.original_language);
   const soonSeen = new Set();
   const soonBase = [];
   for (const [key, n] of SOON_TARGETS) {
@@ -609,18 +664,29 @@ async function main() {
   const pick = (pickPool.filter((x) => x.isRecent && x.rating >= 6.5).sort((a, b) => b.rating - a.rating)[0]) ||
                (pickPool.filter((x) => x.rating >= 7.0).sort((a, b) => b.rating - a.rating)[0]) || null;
 
-  const data = { generatedAt: new Date().toISOString(), pick: pick ? pick.title : null, theatres, ott, comingSoon };
-  // Strip internal-only fields (ranking helpers) so they never reach data.json.
+  const data = { generatedAt: new Date().toISOString(), country: cfg.code, pick: pick ? pick.title : null, theatres, ott, comingSoon };
+  // Strip internal-only fields (ranking helpers) so they never reach the data file.
   for (const list of [data.theatres, data.ott, data.comingSoon]) {
     for (const it of list) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; delete it._imdbRating; delete it._imdbVotes; }
   }
-  // ---------- PER-FILM PAGES + SITEMAP ----------
-  assignSlugs(data);
-  generatePages(data);
-  prerenderIndex(data);
+  console.log(`[${cfg.code}] ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming. Pick: ${data.pick}`);
+  return data;
+  } // end buildCountry
 
-  fs.writeFileSync("data.json", JSON.stringify(data, null, 1));
-  console.log(`Done. ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming. Pick: ${data.pick}`);
+  // Run the pipeline for every configured country, writing data-<code>.json for each.
+  // India (first) ALSO writes the canonical data.json + per-film pages + sitemap, so the
+  // existing site keeps working unchanged while the geo-detect frontend loads per-country data.
+  for (const cfg of COUNTRIES) {
+    const data = await buildCountry(cfg);
+    assignSlugs(data);
+    fs.writeFileSync(`data-${cfg.code}.json`, JSON.stringify(data, null, 1));
+    if (cfg.code === "in") {
+      generatePages(data);
+      prerenderIndex(data);
+      fs.writeFileSync("data.json", JSON.stringify(data, null, 1));
+    }
+  }
+  console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.`);
 }
 
 if (!process.env.PAGES_ONLY) main().catch((e) => {
