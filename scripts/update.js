@@ -181,17 +181,44 @@ async function main() {
   }
 
   // ---------- IN THEATRES (quality-ranked within fresh pool + language representation, 4-7) ----------
-  // Score = log10(popularity) x rating weight. Popularity still matters, but quality gets a vote.
-  // Films with <20 votes get a neutral 6.0 so brand-new releases aren't punished or boosted.
+  const INDIAN_LANGS = ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"];
+  const isRegional = (m) => INDIAN_LANGS.includes(m.original_language);
+
+  // Base pool: TMDB's "now playing" for India.
   const np1 = await tmdb("/movie/now_playing", { region: "IN", page: "1" });
   await sleep(150);
   const np2 = await tmdb("/movie/now_playing", { region: "IN", page: "2" });
   const seen = new Set();
   const pool = [...np1.results, ...(np2.results || [])].filter((m) => {
-    if (seen.has(m.id)) return false;
-    seen.add(m.id);
-    return true;
+    if (seen.has(m.id)) { return false; } seen.add(m.id); return true;
   });
+
+  // Multi-source supplement: now_playing is incomplete for Indian regional theatrical
+  // releases (distributors/contributors don't always report them), so we also pull recent
+  // THEATRICAL releases per Indian language via discover. release_type 3|2 = theatrical/
+  // limited theatrical (not direct-to-OTT), and a 45-day window keeps it current — wide
+  // enough for films still running, tight enough to avoid resurfacing the back catalogue.
+  // These merge into the pool on equal footing; the normal ranking decides what's picked.
+  const THEATRE_WINDOW_DAYS = 45;
+  const theatreCutoff = new Date(Date.now() - THEATRE_WINDOW_DAYS * 864e5).toISOString().slice(0, 10);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  for (const lang of INDIAN_LANGS) {
+    try {
+      const d = await tmdb("/discover/movie", {
+        region: "IN",
+        with_original_language: lang,
+        "primary_release_date.gte": theatreCutoff,
+        "primary_release_date.lte": todayStr,
+        with_release_type: "3|2",
+        sort_by: "popularity.desc",
+        page: "1",
+      });
+      for (const m of (d.results || [])) {
+        if (!seen.has(m.id)) { seen.add(m.id); pool.push(m); }
+      }
+    } catch (e) { console.warn(`theatre-discover ${lang}: ${e.message}`); }
+    await sleep(150);
+  }
 
   // Attach IMDb rating to each pool film BEFORE ranking, so IMDb (which has far more
   // Indian raters than TMDB) drives selection — not just display. One detail call per
@@ -213,8 +240,6 @@ async function main() {
     await sleep(150);
   }
 
-  const INDIAN_LANGS = ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"];
-  const isRegional = (m) => INDIAN_LANGS.includes(m.original_language);
   // Tunable: neutral prior C and smoothing constant M (how many votes before a
   // rating is trusted on its own). Per-country config can override these later.
   const PRIOR_C = 6.0, SMOOTH_M = 8;
@@ -233,10 +258,24 @@ async function main() {
   // Hollywood title with huge vote counts; among films of similar rating, the more
   // widely-confirmed one ranks higher. Popularity is not a factor. Unrated-but-fresh films
   // fall back to a neutral prior so they still place.
+  // Freshness is BOTH a gate (the pool) and a ranking driver. Within the fresh pool, a
+  // bounded recency bonus makes genuinely-newer films rank above comparable older ones —
+  // this is a "latest releases" site, so among good films the newest should lead. The
+  // bonus is CAPPED (+2.0 at release, linear decay to 0 by 14 days) so it reorders films
+  // of similar quality but can't let a weak fresh film leapfrog a much stronger recent one
+  // (e.g. a 6.0 from today at +2.0 = 8.0 still loses to an 8.5 from last week).
+  const RECENCY_MAX = 2.0, RECENCY_DAYS = 14;
+  const recencyBonus = (m) => {
+    const d = m.release_date || m.first_air_date;
+    if (!d) return 0;
+    const age = (Date.now() - new Date(d).getTime()) / 864e5;
+    if (age < 0 || age > RECENCY_DAYS) return 0;
+    return RECENCY_MAX * (1 - age / RECENCY_DAYS); // full at age 0, 0 at RECENCY_DAYS
+  };
   const qualityScore = (m) => {
     const r = bestRating(m);
     const eff = r == null ? PRIOR_C : r;
-    return eff + 0.5 * Math.log10(bestVotes(m) + 10);
+    return eff + 0.5 * Math.log10(bestVotes(m) + 10) + recencyBonus(m);
   };
   const clearsBar = (m) => { const r = bestRating(m); return r == null || r >= 5.5; };
 
@@ -271,6 +310,30 @@ async function main() {
     if (!picks.includes(m)) picks.push(m);
   }
   picks = picks.slice(0, MAX_PICKS).sort((a, b) => qualityScore(b) - qualityScore(a));
+
+  // Soft top-3 reserve: the first three slots prefer English/Hindi (broad-audience lead),
+  // but this is a preference, not a hard quota — if the best available English/Hindi film
+  // is much weaker than a regional film (gap > TOP3_TOLERANCE in quality score), the
+  // regional film keeps the slot rather than fronting a weak title. Quality still wins
+  // when the difference is large; the preference only breaks near-ties in EN/HI's favour.
+  const TOP3_TOLERANCE = 1.0;
+  const isLead = (m) => m.original_language === "en" || m.original_language === "hi";
+  const reordered = [];
+  const remaining = [...picks]; // already quality-sorted
+  for (let pos = 0; pos < 3 && remaining.length; pos++) {
+    const topRegional = remaining.find((m) => !isLead(m)); // best non-lead by quality
+    const topLead = remaining.find((m) => isLead(m));      // best lead by quality
+    let choice;
+    if (!topLead) choice = remaining[0];          // no EN/HI left — take best available
+    else if (!topRegional) choice = topLead;       // only EN/HI left
+    else {
+      // Prefer the lead film unless a regional film is meaningfully better.
+      choice = (qualityScore(topRegional) - qualityScore(topLead) > TOP3_TOLERANCE) ? topRegional : topLead;
+    }
+    reordered.push(choice);
+    remaining.splice(remaining.indexOf(choice), 1);
+  }
+  picks = [...reordered, ...remaining]; // top 3 settled, rest stay in quality order
 
   const theatres = [];
   for (const m of picks) {
