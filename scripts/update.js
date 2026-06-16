@@ -121,15 +121,15 @@ async function enrich(kind, id) {
   // IMDb rating from the daily dataset (loaded once into imdbRatings). IMDb's base
   // has more Indian raters than TMDB, so it's a useful second opinion. Cheap in-memory
   // lookup by IMDb ID — no per-film network call. Missing title -> no chip (fallback).
-  let imdbScore = null;
+  let imdbScore = null, imdbVotes = null;
   const imdbId = d.external_ids?.imdb_id;
   if (imdbId && imdbRatings.has(imdbId)) {
     const r = imdbRatings.get(imdbId);
-    if (r && r.rating) imdbScore = `${r.rating}/10`;
+    if (r && r.rating) { imdbScore = `${r.rating}/10`; imdbVotes = r.votes || 0; }
   }
 
   return {
-    cert, trailer, providers, cast, director, runtime, imdbScore,
+    cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
     backdrop: img(d.backdrop_path, "w780"),
     fullReview: trim(d.overview, 600),
   };
@@ -168,6 +168,7 @@ async function main() {
       isFresh: tooNew,
       kind,
       tmdbId: m.id,
+      popularity: m.popularity ?? null, // TMDB popularity = buzz/trending signal (for ranking)
     };
   }
 
@@ -178,6 +179,7 @@ async function main() {
     if (item.imdbScore) {
       item.scores = [...(item.scores || []), { source: "IMDb", score: item.imdbScore }];
       const num = parseFloat(item.imdbScore); // "7.4/10" -> 7.4
+      if (!isNaN(num)) item.imdbRating = num;  // persist numeric IMDb rating for ranking
       if (!isNaN(num) && item.rating == null) {
         // TMDB couldn't give a rating (placeholder) — let IMDb stand in for display.
         item.rating = num;
@@ -185,6 +187,9 @@ async function main() {
         item.isFresh = false; // no longer a "no rating yet" placeholder
       }
     }
+    // Persist IMDb vote count (from the dataset, via enrich) so downstream ranking can
+    // weight by vote volume. Null when IMDb has no entry for the title.
+    item.imdbVotes = item.imdbVotes ?? null;
     delete item.imdbScore;
     return item;
   }
