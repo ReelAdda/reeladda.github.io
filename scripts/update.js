@@ -24,6 +24,15 @@ async function tmdb(path, params = {}) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Manual exclusion list — films that should NEVER appear regardless of what TMDB returns
+// (banned in India, pulled from release, festival-only, or otherwise mislisted as current
+// theatrical). TMDB exposes no "banned"/"still in theatres" signal, so this is a human
+// override. To block a film: find its TMDB ID (in data.json as tmdbId, or the TMDB URL,
+// e.g. themoviedb.org/movie/1692948) and add it below with a short note.
+const EXCLUDE_IDS = new Set([
+  1692948, // Chardikala — banned in India / not in theatres
+]);
+
 const LANG = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", ml: "Malayalam", kn: "Kannada", ko: "Korean", ja: "Japanese", es: "Spanish", fr: "French", mr: "Marathi", bn: "Bengali", pa: "Punjabi", gu: "Gujarati" };
 
 function verdict(rating, votes) {
@@ -188,7 +197,9 @@ async function main() {
   const np1 = await tmdb("/movie/now_playing", { region: "IN", page: "1" });
   await sleep(150);
   const np2 = await tmdb("/movie/now_playing", { region: "IN", page: "2" });
-  const seen = new Set();
+  // Seed `seen` with the manual exclusion list so blocked films (banned/pulled/mislisted)
+  // are skipped everywhere the pool is built below — both now_playing and discover.
+  const seen = new Set(EXCLUDE_IDS);
   const pool = [...np1.results, ...(np2.results || [])].filter((m) => {
     if (seen.has(m.id)) { return false; } seen.add(m.id); return true;
   });
@@ -196,13 +207,17 @@ async function main() {
   // Multi-source supplement: now_playing is incomplete for Indian regional theatrical
   // releases (distributors/contributors don't always report them), so we also pull recent
   // THEATRICAL releases per Indian language via discover. release_type 3|2 = theatrical/
-  // limited theatrical (not direct-to-OTT), and a 45-day window keeps it current — wide
+  // limited theatrical (not direct-to-OTT), and a 3-week window keeps it current — wide
   // enough for films still running, tight enough to avoid resurfacing the back catalogue.
   // These merge into the pool on equal footing; the normal ranking decides what's picked.
-  const THEATRE_WINDOW_DAYS = 45;
+  const THEATRE_WINDOW_DAYS = 21; // 3-week freshness filter
   const theatreCutoff = new Date(Date.now() - THEATRE_WINDOW_DAYS * 864e5).toISOString().slice(0, 10);
   const todayStr = new Date().toISOString().slice(0, 10);
-  for (const lang of INDIAN_LANGS) {
+  // Priority languages for theatre representation: Hindi, Tamil, Telugu. Discover queries
+  // target these so they reliably enter the pool; now_playing still brings in everything
+  // else (English, other regional) so a standout outside these can still earn a slot.
+  const PRIORITY_LANGS = ["hi", "ta", "te"];
+  for (const lang of PRIORITY_LANGS) {
     try {
       const d = await tmdb("/discover/movie", {
         region: "IN",
@@ -264,7 +279,7 @@ async function main() {
   // bonus is CAPPED (+2.0 at release, linear decay to 0 by 14 days) so it reorders films
   // of similar quality but can't let a weak fresh film leapfrog a much stronger recent one
   // (e.g. a 6.0 from today at +2.0 = 8.0 still loses to an 8.5 from last week).
-  const RECENCY_MAX = 2.0, RECENCY_DAYS = 14;
+  const RECENCY_MAX = 2.0, RECENCY_DAYS = 21;
   const recencyBonus = (m) => {
     const d = m.release_date || m.first_air_date;
     if (!d) return 0;
@@ -280,31 +295,29 @@ async function main() {
   const clearsBar = (m) => { const r = bestRating(m); return r == null || r >= 5.5; };
 
   const ranked = pool.filter(clearsBar).sort((a, b) => qualityScore(b) - qualityScore(a));
-  const MIN_PICKS = 4, MAX_PICKS = 7, BASE_PICKS = 5;
-  let picks = ranked.slice(0, Math.min(BASE_PICKS, ranked.length));
+  const MIN_PICKS = 4, MAX_PICKS = 7;
 
-  // Hindi gets up to 2 slots (biggest theatrical market); other Indian languages get 1.
-  // Films must clear the 6.5 weighted-rating bar to earn a representation slot, and the
-  // 5.5 quality floor already applied above — so no weak film is padded in to fill a quota.
-  const HINDI_SLOTS = 2;
-  const langCap = (lang) => (lang === "hi" ? HINDI_SLOTS : 1);
-  for (const lang of INDIAN_LANGS) {
-    const cap = langCap(lang);
-    for (let slot = 0; slot < cap; slot++) {
-      const have = picks.filter((m) => m.original_language === lang).length;
-      if (have >= cap) break;
-      // next-best film in this language not already picked, clearing the rep bar
-      const best = ranked.find((m) => m.original_language === lang && (bestRating(m) ?? 0) >= 6.5 && !picks.includes(m));
-      if (!best) break;
-      if (picks.length < MAX_PICKS) { picks.push(best); continue; }
-      // List full: displace the weakest pick whose language already holds more than its cap.
-      const redundant = picks
-        .filter((m) => picks.filter((x) => x.original_language === m.original_language).length > langCap(m.original_language))
-        .sort((a, b) => qualityScore(a) - qualityScore(b))[0];
-      if (redundant) picks[picks.indexOf(redundant)] = best; else break;
-    }
+  // Soft-priority composition: target mix is 3 Hindi, 2 English, 1 Tamil, 1 Telugu (= 7).
+  // Each target slot is filled by the best qualifying film of that language (quality +
+  // freshness ranked, clearing the 6.5 representation bar). It's SOFT: any target that
+  // can't be filled by its language is left for the fallback pass, where the best remaining
+  // film of ANY language (clearing the 5.5 floor) takes the slot — so a standout outside
+  // the target set (e.g. a strong Malayalam or Punjabi release) can still make the list,
+  // and we never pad a slot with a weak film or leave the list short.
+  const TARGETS = [["hi", 3], ["en", 2], ["ta", 1], ["te", 1]];
+  const REP_BAR = 6.5;
+  let picks = [];
+  for (const [lang, n] of TARGETS) {
+    const langFilms = ranked.filter((m) => m.original_language === lang && (bestRating(m) ?? 0) >= REP_BAR && !picks.includes(m));
+    for (let i = 0; i < n && i < langFilms.length; i++) picks.push(langFilms[i]);
   }
-  // Never show an emaciated list: pad back toward MIN_PICKS from the ranked pool.
+  // Soft fallback: fill any remaining slots (up to MAX_PICKS) with the best films of any
+  // language not already picked — this is where exceptional non-target-language films land.
+  for (const m of ranked) {
+    if (picks.length >= MAX_PICKS) break;
+    if (!picks.includes(m)) picks.push(m);
+  }
+  // Guarantee a minimum even in a thin week.
   for (const m of ranked) {
     if (picks.length >= MIN_PICKS) break;
     if (!picks.includes(m)) picks.push(m);
@@ -314,20 +327,18 @@ async function main() {
   // Soft top-3 reserve: the first three slots prefer English/Hindi (broad-audience lead),
   // but this is a preference, not a hard quota — if the best available English/Hindi film
   // is much weaker than a regional film (gap > TOP3_TOLERANCE in quality score), the
-  // regional film keeps the slot rather than fronting a weak title. Quality still wins
-  // when the difference is large; the preference only breaks near-ties in EN/HI's favour.
+  // regional film keeps the slot rather than fronting a weak title.
   const TOP3_TOLERANCE = 1.0;
   const isLead = (m) => m.original_language === "en" || m.original_language === "hi";
   const reordered = [];
   const remaining = [...picks]; // already quality-sorted
   for (let pos = 0; pos < 3 && remaining.length; pos++) {
-    const topRegional = remaining.find((m) => !isLead(m)); // best non-lead by quality
-    const topLead = remaining.find((m) => isLead(m));      // best lead by quality
+    const topRegional = remaining.find((m) => !isLead(m));
+    const topLead = remaining.find((m) => isLead(m));
     let choice;
-    if (!topLead) choice = remaining[0];          // no EN/HI left — take best available
-    else if (!topRegional) choice = topLead;       // only EN/HI left
+    if (!topLead) choice = remaining[0];
+    else if (!topRegional) choice = topLead;
     else {
-      // Prefer the lead film unless a regional film is meaningfully better.
       choice = (qualityScore(topRegional) - qualityScore(topLead) > TOP3_TOLERANCE) ? topRegional : topLead;
     }
     reordered.push(choice);
@@ -381,7 +392,7 @@ async function main() {
   let intlCands = [
     ...trMovies.results.map((m) => ({ ...m, kind: "movie" })),
     ...trTv.results.map((t) => ({ ...t, kind: "tv" })),
-  ].filter((c) => !isRegional(c));
+  ].filter((c) => !isRegional(c) && !EXCLUDE_IDS.has(c.id));
   for (const c of intlCands) { await attachImdb(c); await sleep(150); }
   intlCands.sort((a, b) => qualityScore(b) - qualityScore(a));
 
@@ -416,7 +427,7 @@ async function main() {
         cands.push(...(d.results || []).map((m) => ({ ...m, kind })));
       } catch (e) { console.warn(`ott-regional ${lang}/${kind}: ${e.message}`); }
     }
-    cands = cands.filter((c) => !usedIds.has(c.id));
+    cands = cands.filter((c) => !usedIds.has(c.id) && !EXCLUDE_IDS.has(c.id));
     for (const c of cands) { await attachImdb(c); await sleep(150); }
     // Quality floor on the best rating we have: IMDb if present, else TMDB. A film is
     // only allowed through unfloored when it has NO usable rating at all (genuinely too
