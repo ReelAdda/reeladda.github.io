@@ -292,23 +292,55 @@ async function main() {
     if (age < 0 || age > RECENCY_DAYS) return 0;
     return RECENCY_MAX * (1 - age / RECENCY_DAYS); // full at age 0, 0 at RECENCY_DAYS
   };
-  const qualityScore = (m) => {
-    const r = bestRating(m);
-    const eff = r == null ? PRIOR_C : r;
-    return eff + 0.5 * Math.log10(bestVotes(m) + 10) + recencyBonus(m);
-  };
-  const clearsBar = (m) => { const r = bestRating(m); return r == null || r >= 5.5; };
+  // (qualityScore retired — ranking now uses the 40/35/25 weighted402535 score everywhere)
 
-  const ranked = pool.filter(clearsBar).sort((a, b) => qualityScore(b) - qualityScore(a));
+  // Suspicious-entry guard: a real, currently-relevant film does not have an implausibly
+  // high rating on tiny volume, or a high rating with essentially zero audience interest.
+  // These are fake/erroneous TMDB records or vote-manipulated titles (e.g. a "10.0" with
+  // 1000 votes and 0.04 popularity, or a 9.2 with <600 votes and ~0 popularity). They beat
+  // the normal quality floor precisely because their *rating* is high, so we reject them
+  // explicitly. Thresholds are deliberately conservative so genuine films are never caught.
+  const isSuspicious = (m) => {
+    const r = m._imdbRating, v = m._imdbVotes || 0, p = m.popularity || 0;
+    if (r == null) return false;                 // no IMDb rating -> not this failure mode
+    if (r >= 9.5 && v < 5000) return true;        // implausibly high rating, thin votes
+    if (r >= 8.5 && v < 3000 && p < 1.0) return true; // high rating but ~zero audience interest
+    return false;
+  };
+  const clearsBar = (m) => {
+    if (isSuspicious(m)) return false;
+    const r = bestRating(m);
+    return r == null || r >= 5.5;
+  };
+
+  // 40/35/25 quality weighting (your spec): IMDb rating 40%, IMDb vote volume 35%, current
+  // buzz/popularity 25%. Votes and buzz are log-scaled then normalized 0..1 across the pool
+  // (so the heavy tail of Hollywood vote counts doesn't dwarf everything), rating is /10.
+  // A bounded freshness multiplier from recencyBonus keeps "feel fresh" in the mix. This
+  // score orders films WITHIN the soft language quota — it decides which Hindi/English/etc.
+  // film fills each slot and their order, while the quota still guarantees Hindi its slots.
+  const poolForNorm = pool.filter((m) => !isSuspicious(m));
+  const maxLogV = Math.max(1, ...poolForNorm.map((m) => Math.log10((m._imdbVotes || m.vote_count || 0) + 1)));
+  const maxLogP = Math.max(0.01, ...poolForNorm.map((m) => Math.log10((m.popularity || 0) + 1)));
+  const weighted402535 = (m) => {
+    const rN = (bestRating(m) ?? PRIOR_C) / 10;
+    const vN = Math.log10((bestVotes(m)) + 1) / maxLogV;
+    const pN = Math.log10((m.popularity || 0) + 1) / maxLogP;
+    const base = 0.40 * rN + 0.35 * vN + 0.25 * pN;
+    // freshness nudge: scale recencyBonus (0..2) to a small 0..0.10 multiplier-add so the
+    // newest films get a slight edge without overriding the quality+popularity signal.
+    return base + 0.05 * recencyBonus(m);
+  };
+
+  const ranked = pool.filter(clearsBar).sort((a, b) => weighted402535(b) - weighted402535(a));
   const MIN_PICKS = 4, MAX_PICKS = 7;
 
   // Soft-priority composition: target mix is 3 Hindi, 2 English, 1 Tamil, 1 Telugu (= 7).
-  // Each target slot is filled by the best qualifying film of that language (quality +
-  // freshness ranked, clearing the 6.5 representation bar). It's SOFT: any target that
-  // can't be filled by its language is left for the fallback pass, where the best remaining
-  // film of ANY language (clearing the 5.5 floor) takes the slot — so a standout outside
-  // the target set (e.g. a strong Malayalam or Punjabi release) can still make the list,
-  // and we never pad a slot with a weak film or leave the list short.
+  // Slots are filled by the best film of that language under the 40/35/25 score (clearing
+  // the 6.5 representation bar). It's SOFT: any target that can't be filled by its language
+  // is left for the fallback pass, where the best remaining film of ANY language (clearing
+  // the 5.5 floor + suspicious guard) takes the slot — so a standout outside the target set
+  // can still make the list, and we never pad a slot with a weak film or leave it short.
   const TARGETS = [["hi", 3], ["en", 2], ["ta", 1], ["te", 1]];
   const REP_BAR = 6.5;
   let picks = [];
@@ -327,13 +359,14 @@ async function main() {
     if (picks.length >= MIN_PICKS) break;
     if (!picks.includes(m)) picks.push(m);
   }
-  picks = picks.slice(0, MAX_PICKS).sort((a, b) => qualityScore(b) - qualityScore(a));
+  picks = picks.slice(0, MAX_PICKS).sort((a, b) => weighted402535(b) - weighted402535(a));
 
   // Soft top-3 reserve: the first three slots prefer English/Hindi (broad-audience lead),
   // but this is a preference, not a hard quota — if the best available English/Hindi film
   // is much weaker than a regional film (gap > TOP3_TOLERANCE in quality score), the
   // regional film keeps the slot rather than fronting a weak title.
-  const TOP3_TOLERANCE = 1.0;
+  const TOP3_TOLERANCE = 0.15; // on the 0..1 weighted score: a regional film must beat the
+                                // best English/Hindi film by this margin to keep a top-3 slot
   const isLead = (m) => m.original_language === "en" || m.original_language === "hi";
   const reordered = [];
   const remaining = [...picks]; // already quality-sorted
@@ -344,7 +377,7 @@ async function main() {
     if (!topLead) choice = remaining[0];
     else if (!topRegional) choice = topLead;
     else {
-      choice = (qualityScore(topRegional) - qualityScore(topLead) > TOP3_TOLERANCE) ? topRegional : topLead;
+      choice = (weighted402535(topRegional) - weighted402535(topLead) > TOP3_TOLERANCE) ? topRegional : topLead;
     }
     reordered.push(choice);
     remaining.splice(remaining.indexOf(choice), 1);
@@ -368,7 +401,7 @@ async function main() {
   const freshCutoff = new Date(Date.now() - FRESH_DAYS * 864e5).toISOString().slice(0, 10);
 
   // Resolve IMDb rating for a candidate (detail call -> dataset lookup). Sets _imdbRating
-  // so qualityScore uses IMDb as the rating/votes signal, exactly like theatres.
+  // so weighted402535 uses IMDb as the rating/votes signal, exactly like theatres.
   const attachImdb = async (c) => {
     try {
       const d = await tmdb(`/${c.kind}/${c.id}`, { append_to_response: "external_ids" });
@@ -399,7 +432,8 @@ async function main() {
     ...trTv.results.map((t) => ({ ...t, kind: "tv" })),
   ].filter((c) => !isRegional(c) && !EXCLUDE_IDS.has(c.id));
   for (const c of intlCands) { await attachImdb(c); await sleep(150); }
-  intlCands.sort((a, b) => qualityScore(b) - qualityScore(a));
+  intlCands = intlCands.filter((c) => !isSuspicious(c)); // drop fake/manipulated entries
+  intlCands.sort((a, b) => weighted402535(b) - weighted402535(a));
 
   const intl = [], usedIds = new Set();
   for (const c of intlCands) {
@@ -444,8 +478,9 @@ async function main() {
       return null; // no usable rating
     };
     cands = cands
+      .filter((c) => !isSuspicious(c)) // drop fake/manipulated entries
       .filter((c) => { const r = ottRating(c); return r == null || r >= 5.5; })
-      .sort((a, b) => qualityScore(b) - qualityScore(a));
+      .sort((a, b) => weighted402535(b) - weighted402535(a));
     for (const c of cands) {
       if (regional.length >= OTT_REGIONAL_TARGET) break;
       if (usedIds.has(c.id)) continue;
