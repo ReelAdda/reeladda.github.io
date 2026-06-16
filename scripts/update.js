@@ -173,22 +173,26 @@ async function main() {
   }
 
   // After enrich, fold in the IMDb rating (from the dataset). Appends the IMDb chip,
-  // and — crucially — if IMDb has a rating but TMDB's votes were too thin to show one,
-  // surfaces a real rating/verdict instead of the "New release" placeholder.
+  // IMDb-primary display: IMDb is the better, more comprehensive rating, so when it exists
+  // it is the ONLY score shown — the TMDB chip is dropped. TMDB is kept solely as a labeled
+  // fallback for films IMDb hasn't rated yet (too new / below IMDb's vote threshold), so the
+  // freshest films still show a number instead of a blank. Also persists numeric imdbRating/
+  // imdbVotes for ranking, and lets IMDb fill the verdict when TMDB had only a placeholder.
   function withImdb(item) {
     if (item.imdbScore) {
-      item.scores = [...(item.scores || []), { source: "IMDb", score: item.imdbScore }];
       const num = parseFloat(item.imdbScore); // "7.4/10" -> 7.4
-      if (!isNaN(num)) item.imdbRating = num;  // persist numeric IMDb rating for ranking
-      if (!isNaN(num) && item.rating == null) {
-        // TMDB couldn't give a rating (placeholder) — let IMDb stand in for display.
-        item.rating = num;
-        item.verdict = verdict(num, 1000); // enough-votes path: real verdict band
-        item.isFresh = false; // no longer a "no rating yet" placeholder
+      // IMDb present -> show IMDb only (replace the scores array, dropping the TMDB chip).
+      item.scores = [{ source: "IMDb", score: item.imdbScore }];
+      if (!isNaN(num)) {
+        item.imdbRating = num;       // persist numeric IMDb rating for ranking
+        item.rating = num;           // IMDb is now the primary displayed rating
+        item.verdict = verdict(num, 1000); // real verdict band from IMDb
+        item.isFresh = false;        // has a real rating -> not a "no rating yet" placeholder
       }
     }
-    // Persist IMDb vote count (from the dataset, via enrich) so downstream ranking can
-    // weight by vote volume. Null when IMDb has no entry for the title.
+    // else: no IMDb rating — leave the existing TMDB-sourced scores array as-is. It already
+    // reads "TMDB x.x/10" (labeled) when TMDB had a usable rating, or "New release" when the
+    // film is too new for either source. This is the silent fallback for the freshest films.
     item.imdbVotes = item.imdbVotes ?? null;
     delete item.imdbScore;
     return item;
@@ -512,13 +516,71 @@ async function main() {
   while (ri < regional.length) ott.push(regional[ri++]);
   ott.length = Math.min(ott.length, OTT_MAX);
 
-  // ---------- COMING SOON (next releases in India) ----------
+  // ---------- COMING SOON (next releases in India, soft language quota) ----------
+  // Pure date-sorting made this skew to whatever industry had the most films dated soon
+  // (often Malayalam). Instead, apply a SOFT language quota — 3 English, 2 Hindi, 3 regional
+  // (= 8) — so Hollywood and Hindi get prominence while regional is capped at 3 (not flooded).
+  // Within each language we surface the MOST ANTICIPATED upcoming films (by TMDB popularity),
+  // since unreleased films have no ratings to rank by and buzz is the useful signal. SOFT:
+  // any quota a language can't fill yields its slots to the fallback (best remaining upcoming
+  // film of any language), so we never leave gaps or pad with nothing.
   const today = new Date().toISOString().slice(0, 10);
-  const upcoming = await tmdb("/movie/upcoming", { region: "IN", page: "1" });
-  const soonBase = upcoming.results
+  const soonHorizon = new Date(Date.now() + 90 * 864e5).toISOString().slice(0, 10); // ~3 months out
+  const [up1, up2] = await Promise.all([
+    tmdb("/movie/upcoming", { region: "IN", page: "1" }),
+    tmdb("/movie/upcoming", { region: "IN", page: "2" }),
+  ]);
+  // The /upcoming feed for India under-represents Hollywood and Hindi (it skews to whatever
+  // regional industry has the most films dated soon). So — like the theatre pool — we
+  // supplement it with discover queries for upcoming ENGLISH and HINDI films specifically,
+  // giving the quota more of those to draw from. Without this, the quota stays starved of
+  // English/Hindi candidates and falls back to regional. Future window only (next ~3 months).
+  const upSeen = new Set([...EXCLUDE_IDS]);
+  const upPoolRaw = [];
+  for (const m of [...up1.results, ...(up2.results || [])]) {
+    if (!upSeen.has(m.id)) { upSeen.add(m.id); upPoolRaw.push(m); }
+  }
+  for (const lang of ["en", "hi"]) {
+    try {
+      const d = await tmdb("/discover/movie", {
+        region: "IN",
+        with_original_language: lang,
+        "primary_release_date.gte": today,
+        "primary_release_date.lte": soonHorizon,
+        sort_by: "popularity.desc",
+        page: "1",
+      });
+      for (const m of (d.results || [])) {
+        if (!upSeen.has(m.id)) { upSeen.add(m.id); upPoolRaw.push(m); }
+      }
+    } catch (e) { console.warn(`soon-discover ${lang}: ${e.message}`); }
+    await sleep(150);
+  }
+  const upPool = upPoolRaw
     .filter((m) => m.release_date && m.release_date > today)
-    .sort((a, b) => a.release_date.localeCompare(b.release_date))
-    .slice(0, 8);
+    .sort((a, b) => (b.popularity || 0) - (a.popularity || 0)); // most anticipated first
+
+  const SOON_TARGETS = [["en", 3], ["hi", 2], ["__regional__", 3]];
+  const SOON_MAX = 8;
+  const isSoonRegional = (m) => INDIAN_LANGS.includes(m.original_language) && m.original_language !== "hi";
+  const soonSeen = new Set();
+  const soonBase = [];
+  for (const [key, n] of SOON_TARGETS) {
+    const matches = upPool.filter((m) => {
+      if (soonSeen.has(m.id)) return false;
+      return key === "__regional__" ? isSoonRegional(m) : m.original_language === key;
+    });
+    for (let i = 0; i < n && i < matches.length; i++) { soonBase.push(matches[i]); soonSeen.add(matches[i].id); }
+  }
+  // Soft fallback: fill any unfilled slots with the most-anticipated remaining films of any
+  // language, so the list reaches SOON_MAX even if a quota came up short.
+  for (const m of upPool) {
+    if (soonBase.length >= SOON_MAX) break;
+    if (!soonSeen.has(m.id)) { soonBase.push(m); soonSeen.add(m.id); }
+  }
+  // Present in release-date order (soonest first) — within the curated set, chronological
+  // reads most naturally as a "what's coming" list.
+  soonBase.sort((a, b) => a.release_date.localeCompare(b.release_date));
 
   const comingSoon = [];
   for (const m of soonBase) {
@@ -543,7 +605,7 @@ async function main() {
   // If no newcomer qualifies, a genuinely great holdover (>=7.0) can be re-featured.
   // If nothing clears either bar, there is no pick this week — honesty over decoration.
   const all = [...theatres, ...ott];
-  const pickPool = all.filter((x) => x.rating != null && x.votes >= 20);
+  const pickPool = all.filter((x) => x.rating != null && ((x.imdbRating != null ? (x.imdbVotes || 0) : (x.votes || 0)) >= 20));
   const pick = (pickPool.filter((x) => x.isRecent && x.rating >= 6.5).sort((a, b) => b.rating - a.rating)[0]) ||
                (pickPool.filter((x) => x.rating >= 7.0).sort((a, b) => b.rating - a.rating)[0]) || null;
 
@@ -624,8 +686,9 @@ function buildFilmPage(item, asOf) {
     director: item.director ? { "@type": "Person", name: item.director } : undefined,
     actor: cast.map((c) => ({ "@type": "Person", name: c })),
   };
-  if (item.rating != null && item.votes >= 10) {
-    ld.aggregateRating = { "@type": "AggregateRating", ratingValue: item.rating, ratingCount: item.votes, bestRating: 10 };
+  const schemaVotes = item.imdbRating != null ? (item.imdbVotes || 0) : (item.votes || 0);
+  if (item.rating != null && schemaVotes >= 10) {
+    ld.aggregateRating = { "@type": "AggregateRating", ratingValue: item.rating, ratingCount: schemaVotes, bestRating: 10 };
   }
 
   const breadcrumb = {
@@ -682,7 +745,7 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
     <div>
       <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
       <div class="meta">${[item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert].filter(Boolean).map(e).join(" · ")}</div>
-      ${item.rating != null ? `<div class="rating">★ ${Number(item.rating).toFixed(1)}${item.votes ? ` <span style="color:var(--mute);font-weight:400;font-size:13px">(${e(item.votes)} votes)</span>` : ""}</div>` : ""}
+      ${item.rating != null ? (() => { const dv = item.imdbRating != null ? item.imdbVotes : item.votes; return `<div class="rating">★ ${Number(item.rating).toFixed(1)}${dv ? ` <span style="color:var(--mute);font-weight:400;font-size:13px">(${e(dv)} votes)</span>` : ""}</div>`; })() : ""}
       ${item.verdict ? `<div class="verdict">▸ ${e(item.verdict)}</div>` : ""}
       ${item.released ? `<div class="meta" style="margin-top:8px">${relLabel} ${e(item.released)}</div>` : ""}
     </div>
