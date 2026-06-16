@@ -356,8 +356,33 @@ async function main() {
     if (r >= 8.5 && v < 3000 && p < 1.0) return true; // high rating but ~zero audience interest
     return false;
   };
+  // Bad-date / re-release guard: TMDB serves per-region release dates that are sometimes
+  // wrong — an old film gets a recent date for a particular country (re-release, streaming/
+  // anniversary date, or data error), so it wrongly appears as "now playing / fresh". The
+  // tell is the vote count: a genuinely new release cannot have accumulated tens of thousands
+  // of IMDb votes in days. So if a film's date looks recent (within the freshness window) but
+  // Stale / re-release guard. TMDB's now_playing for a region sometimes returns OLD films —
+  // either re-releases actually back in cinemas, or stale regional listings — with high lifetime
+  // vote counts. Some keep their true old date (Top Gun 2022, Shrek 2001); others get a wrong
+  // recent regional date (Chandu Champion). A DATE check can't catch the honestly-old ones, so
+  // the reliable signal is BUZZ: a film genuinely drawing audiences now has high current
+  // popularity; an old film coasting on lifetime votes does not. We drop a film when it is
+  // "famous but not buzzing now", via two patterns tuned against real data:
+  //   (a) very famous, cooled off:  >50k votes AND popularity <80  (Top Gun 879k/25, Shrek 812k/26)
+  //   (b) moderately known, dead:   >20k votes AND popularity <5   (Chandu Champion 36k/1.5)
+  // Genuine current films pass: a real hit keeps high popularity (Obsession 91k/718), and a
+  // genuine new release simply hasn't got the vote volume to trip either pattern (I Am Frankelda
+  // 1.4k votes, Masters of the Universe 19k votes / pop 204). Thresholds are conservative.
+  const looksReRelease = (m) => {
+    const v = m._imdbVotes || 0;
+    const p = m.popularity || 0;
+    if (v > 50000 && p < 80) return true;  // famous catalogue title, not currently buzzing
+    if (v > 20000 && p < 5) return true;   // older title with essentially no current interest
+    return false;
+  };
   const clearsBar = (m) => {
     if (isSuspicious(m)) return false;
+    if (looksReRelease(m)) return false;
     const r = bestRating(m);
     return r == null || r >= 5.5;
   };
