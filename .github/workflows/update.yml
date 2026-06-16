@@ -1,51 +1,56 @@
 name: Daily FilmyChill Update
-
 on:
   schedule:
     # Every day at 9:00 AM IST (3:30 AM UTC)
     - cron: "30 3 * * *"
   workflow_dispatch: {}   # also lets you run it manually anytime with one click
-
 permissions:
   contents: write
-
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout site
         uses: actions/checkout@v4
-
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-
       - name: Fetch latest releases
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-          OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
         run: node scripts/update.js
-
       - name: Validate data before publishing
         run: |
           node -e "
-            const d = require('./data.json');
+            const fs = require('fs');
             const fail = (m) => { console.error('VALIDATION FAILED: ' + m); process.exit(1); };
+
+            // --- Canonical India file (data.json) + pages ---
+            const d = require('./data.json');
             if (!Array.isArray(d.theatres) || d.theatres.length < 1) fail('theatres empty');
             if (!Array.isArray(d.ott) || d.ott.length < 3) fail('ott suspiciously small');
             if (!d.generatedAt) fail('missing generatedAt');
             const bad = [...d.theatres, ...d.ott].find(x => !x.title);
             if (bad) fail('item without title');
-            const pages = require('fs').readdirSync('movie').filter(f => f.endsWith('.html'));
+            const pages = fs.readdirSync('movie').filter(f => f.endsWith('.html'));
             if (pages.length < 5) fail('film pages missing');
             console.log('data.json OK:', d.theatres.length, 'theatre,', d.ott.length, 'ott,', (d.comingSoon||[]).length, 'upcoming. Pick:', d.pick, '| pages:', pages.length);
-          "
 
+            // --- Per-country files: must exist and be non-empty ---
+            const countries = ['in','us','uk','ae','au','de'];
+            for (const c of countries) {
+              const path = 'data-' + c + '.json';
+              if (!fs.existsSync(path)) fail('missing country file ' + path);
+              const cd = JSON.parse(fs.readFileSync(path, 'utf8'));
+              if (!Array.isArray(cd.theatres)) fail(path + ' has no theatres array');
+              console.log('  ' + path + ' OK:', cd.theatres.length, 'theatre,', (cd.ott||[]).length, 'ott,', (cd.comingSoon||[]).length, 'upcoming.');
+            }
+          "
       - name: Commit updated data
         run: |
           git config user.name "filmychill-bot"
           git config user.email "actions@github.com"
-          git add data.json movie/ sitemap.xml index.html
+          git add data.json data-*.json movie/ sitemap.xml index.html
           git diff --staged --quiet || git commit -m "Daily release scan: $(date -u +%Y-%m-%d)"
           git push
