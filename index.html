@@ -900,7 +900,6 @@ const COUNTRY_LABELS = { in: '🇮🇳 India', us: '🇺🇸 United States', uk:
 const COUNTRY_PATH = { in: '/', us: '/us/', uk: '/uk/', au: '/au/', de: '/de/' };
 // Data file each country page loads (relative to ITS OWN location).
 const FC_PAGE = (typeof window.__FC_PAGE === 'string' && SUPPORTED_COUNTRIES[window.__FC_PAGE]) ? window.__FC_PAGE : 'in';
-const FC_IS_ROOT = (FC_PAGE === 'in');
 
 // Switcher: navigate to the chosen country's page (links, not a JS reload — so each country
 // is a real indexable URL). Remember the manual choice so the root won't re-redirect away.
@@ -926,11 +925,11 @@ function initCountryPage() {
 initCountryPage();
 
 function loadCountryData(code) {
-// Country pages live in a subfolder, so data files are one level up ("../data-us.json").
-// The root (India) loads from the same folder. Fall back to canonical data.json.
-const base = FC_IS_ROOT ? '' : '../';
-fetch(base + 'data-' + code + '.json?v=' + Date.now())
-  .then(r => r.ok ? r : fetch(base + 'data.json?v=' + Date.now())) // fall back to canonical (India) file
+// Data files live at the site ROOT. Use an absolute path ("/data-us.json") so it resolves
+// correctly from any country subfolder (e.g. /us/) regardless of trailing-slash quirks —
+// a relative "../" path can mis-resolve on some static hosts. Fall back to canonical data.json.
+fetch('/data-' + code + '.json?v=' + Date.now())
+  .then(r => r.ok ? r : fetch('/data.json?v=' + Date.now())) // fall back to canonical (India) file
   .then(r => r.json())
   .then(data => {
     DATA = data;
