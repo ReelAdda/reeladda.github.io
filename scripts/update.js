@@ -51,13 +51,6 @@ const COUNTRIES = [
     soonTargets: [["en", 6], ["__regional__", 2]],
   },
   {
-    code: "ae", name: "United Arab Emirates", region: "AE", watchRegion: "AE",
-    priorityLangs: ["en", "hi", "ml", "ta"],
-    regionalLangs: ["hi", "ml", "ta", "te"],
-    theatreTargets: [["en", 5], ["hi", 3]],
-    soonTargets: [["en", 3], ["hi", 2], ["__regional__", 3]],
-  },
-  {
     code: "au", name: "Australia", region: "AU", watchRegion: "AU",
     priorityLangs: ["en"],
     regionalLangs: ["hi", "zh", "ko"],
