@@ -18,7 +18,7 @@
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
-<script type="application/ld+json"><!--SSR:JSONLD-->{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://filmychill.com/#website","name":"FilmyChill","url":"https://filmychill.com/","author":{"@type":"Person","name":"Vikram Sharma"},"datePublished":"2026-01-01","dateModified":"2026-06-16T17:52:20.843Z"},{"@type":"ItemList","name":"What's worth watching this week in the US","url":"https://filmychill.com/us/","dateModified":"2026-06-16T17:52:20.843Z","numberOfItems":17,"itemListElement":[{"@type":"ListItem","position":1,"url":"https://filmychill.com/us/","name":"Obsession"},{"@type":"ListItem","position":2,"url":"https://filmychill.com/us/","name":"Disclosure Day"},{"@type":"ListItem","position":3,"url":"https://filmychill.com/us/","name":"Masters of the Universe"},{"@type":"ListItem","position":4,"url":"https://filmychill.com/us/","name":"The Furious"},{"@type":"ListItem","position":5,"url":"https://filmychill.com/us/","name":"Mortal Kombat II"},{"@type":"ListItem","position":6,"url":"https://filmychill.com/us/","name":"The Mandalorian and Grogu"},{"@type":"ListItem","position":7,"url":"https://filmychill.com/us/","name":"I Am Frankelda"},{"@type":"ListItem","position":8,"url":"https://filmychill.com/us/","name":"The Boys"},{"@type":"ListItem","position":9,"url":"https://filmychill.com/us/","name":"Rick and Morty"},{"@type":"ListItem","position":10,"url":"https://filmychill.com/us/","name":"The Marked Woman"},{"@type":"ListItem","position":11,"url":"https://filmychill.com/us/","name":"FROM"},{"@type":"ListItem","position":12,"url":"https://filmychill.com/us/","name":"House of the Dragon"},{"@type":"ListItem","position":13,"url":"https://filmychill.com/us/","name":"Mexico 86"},{"@type":"ListItem","position":14,"url":"https://filmychill.com/us/","name":"Euphoria"},{"@type":"ListItem","position":15,"url":"https://filmychill.com/us/","name":"One Piece"},{"@type":"ListItem","position":16,"url":"https://filmychill.com/us/","name":"James."},{"@type":"ListItem","position":17,"url":"https://filmychill.com/us/","name":"Teach You a Lesson"}]}]}<!--/SSR:JSONLD--></script>
+<script type="application/ld+json"><!--SSR:JSONLD-->{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://filmychill.com/#website","name":"FilmyChill","url":"https://filmychill.com/","author":{"@type":"Person","name":"Vikram Sharma"},"datePublished":"2026-01-01","dateModified":"2026-06-16T18:24:27.913Z"},{"@type":"ItemList","name":"What's worth watching this week in the US","url":"https://filmychill.com/us/","dateModified":"2026-06-16T18:24:27.913Z","numberOfItems":17,"itemListElement":[{"@type":"ListItem","position":1,"url":"https://filmychill.com/us/","name":"Obsession"},{"@type":"ListItem","position":2,"url":"https://filmychill.com/us/","name":"Disclosure Day"},{"@type":"ListItem","position":3,"url":"https://filmychill.com/us/","name":"Masters of the Universe"},{"@type":"ListItem","position":4,"url":"https://filmychill.com/us/","name":"The Furious"},{"@type":"ListItem","position":5,"url":"https://filmychill.com/us/","name":"Mortal Kombat II"},{"@type":"ListItem","position":6,"url":"https://filmychill.com/us/","name":"The Mandalorian and Grogu"},{"@type":"ListItem","position":7,"url":"https://filmychill.com/us/","name":"I Am Frankelda"},{"@type":"ListItem","position":8,"url":"https://filmychill.com/us/","name":"The Boys"},{"@type":"ListItem","position":9,"url":"https://filmychill.com/us/","name":"Rick and Morty"},{"@type":"ListItem","position":10,"url":"https://filmychill.com/us/","name":"The Marked Woman"},{"@type":"ListItem","position":11,"url":"https://filmychill.com/us/","name":"FROM"},{"@type":"ListItem","position":12,"url":"https://filmychill.com/us/","name":"House of the Dragon"},{"@type":"ListItem","position":13,"url":"https://filmychill.com/us/","name":"Mexico 86"},{"@type":"ListItem","position":14,"url":"https://filmychill.com/us/","name":"Euphoria"},{"@type":"ListItem","position":15,"url":"https://filmychill.com/us/","name":"One Piece"},{"@type":"ListItem","position":16,"url":"https://filmychill.com/us/","name":"James."},{"@type":"ListItem","position":17,"url":"https://filmychill.com/us/","name":"Teach You a Lesson"}]}]}<!--/SSR:JSONLD--></script>
 <link rel="preconnect" href="https://image.tmdb.org">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -911,13 +911,11 @@ if (WHATSAPP_CHANNEL_URL) {
 // Each country has its own page: India at "/", others at "/us/", "/uk/", "/au/", "/de/".
 // FC_PAGE is injected per-page by the build (the country this page was generated for).
 const SUPPORTED_COUNTRIES = { in: 'India', us: 'United States', uk: 'United Kingdom', au: 'Australia', de: 'Germany' };
-const ISO_TO_CODE = { IN: 'in', US: 'us', GB: 'uk', AU: 'au', DE: 'de' };
 const COUNTRY_LABELS = { in: '🇮🇳 India', us: '🇺🇸 United States', uk: '🇬🇧 United Kingdom', au: '🇦🇺 Australia', de: '🇩🇪 Germany' };
 // Path each country page lives at (relative to site root).
 const COUNTRY_PATH = { in: '/', us: '/us/', uk: '/uk/', au: '/au/', de: '/de/' };
 // Data file each country page loads (relative to ITS OWN location).
 const FC_PAGE = (typeof window.__FC_PAGE === 'string' && SUPPORTED_COUNTRIES[window.__FC_PAGE]) ? window.__FC_PAGE : 'in';
-const FC_IS_ROOT = (FC_PAGE === 'in');
 
 // Switcher: navigate to the chosen country's page (links, not a JS reload — so each country
 // is a real indexable URL). Remember the manual choice so the root won't re-redirect away.
@@ -926,31 +924,6 @@ function setCountry(code) {
   try { localStorage.setItem('fc_country', code); } catch (e) {}
   if (code === FC_PAGE) return; // already here
   location.href = COUNTRY_PATH[code];
-}
-
-// Geo-detect runs ONLY on the root page, and ONLY to redirect a first-time non-India visitor
-// to their country page. A manual choice (localStorage) suppresses the redirect. Any failure
-// just stays on India (the root). Country pages never geo-detect — they are already correct.
-async function maybeRedirectRoot() {
-  if (!FC_IS_ROOT) return false;
-  // If the visitor previously chose a country, honor it (redirect there once).
-  try {
-    const saved = localStorage.getItem('fc_country');
-    if (saved && SUPPORTED_COUNTRIES[saved] && saved !== 'in') { location.replace(COUNTRY_PATH[saved]); return true; }
-    if (saved === 'in') return false; // chose India explicitly -> stay
-  } catch (e) {}
-  // No saved choice: detect via IP. Supported non-IN country -> redirect to its page.
-  try {
-    const r = await fetch('https://ipapi.co/json/');
-    if (r.ok) {
-      const j = await r.json();
-      const iso = (j && j.country_code) ? j.country_code.toUpperCase() : null;
-      const code = iso ? (ISO_TO_CODE[iso] || 'us') : 'in';
-      try { localStorage.setItem('fc_country', code); } catch (e) {}
-      if (code !== 'in') { location.replace(COUNTRY_PATH[code]); return true; }
-    }
-  } catch (e) {}
-  return false; // stay on India
 }
 
 // Reflect this page's country in the switcher + tagline, then load its data.
@@ -962,19 +935,17 @@ function initCountryPage() {
   loadCountryData(FC_PAGE);
 }
 
-// On root: try the geo-redirect first; if it doesn't redirect, render India. On country
-// pages: render immediately.
-(async function () {
-  const redirected = await maybeRedirectRoot();
-  if (!redirected) initCountryPage();
-})();
+// Each country has its own page (India at "/", others at "/<code>/"), so there is no
+// geo-detection or redirect — the page simply renders the country it was built for. Visitors
+// reach the right country via search (each page is indexed for its market) or the switcher.
+initCountryPage();
 
 function loadCountryData(code) {
-// Country pages live in a subfolder, so data files are one level up ("../data-us.json").
-// The root (India) loads from the same folder. Fall back to canonical data.json.
-const base = FC_IS_ROOT ? '' : '../';
-fetch(base + 'data-' + code + '.json?v=' + Date.now())
-  .then(r => r.ok ? r : fetch(base + 'data.json?v=' + Date.now())) // fall back to canonical (India) file
+// Data files live at the site ROOT. Use an absolute path ("/data-us.json") so it resolves
+// correctly from any country subfolder (e.g. /us/) regardless of trailing-slash quirks —
+// a relative "../" path can mis-resolve on some static hosts. Fall back to canonical data.json.
+fetch('/data-' + code + '.json?v=' + Date.now())
+  .then(r => r.ok ? r : fetch('/data.json?v=' + Date.now())) // fall back to canonical (India) file
   .then(r => r.json())
   .then(data => {
     DATA = data;
