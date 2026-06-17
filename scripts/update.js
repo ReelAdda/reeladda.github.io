@@ -17,7 +17,7 @@ const BASE = "https://api.themoviedb.org/3";
 //            attribution only). Switch to this BEFORE you monetize.
 // The footer attribution follows this automatically, so the credit always matches
 // the data actually used. To flip: change this one line, commit, run the workflow.
-const RATINGS_SOURCE = process.env.RATINGS_SOURCE || "imdb"; // "imdb" | "tmdb"
+const RATINGS_SOURCE = process.env.RATINGS_SOURCE || "tmdb"; // "imdb" | "tmdb"
 const USE_IMDB = RATINGS_SOURCE === "imdb";
 
 if (!API_KEY && !process.env.PAGES_ONLY && require.main === module) {
