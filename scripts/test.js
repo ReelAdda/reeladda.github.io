@@ -192,10 +192,11 @@ test("produces valid JSON with ItemList", () => {
 
 // ---------------- RATINGS_SOURCE toggle ----------------
 group("RATINGS_SOURCE toggle");
-test("default mode is imdb (no env override)", () => {
-  // test.js is run without RATINGS_SOURCE set, so the module default applies.
-  assert.strictEqual(U.RATINGS_SOURCE, "imdb");
-  assert.strictEqual(U.USE_IMDB, true);
+test("default mode is tmdb (no env override)", () => {
+  // The committed default is now "tmdb" (site monetization-ready). Flipping back to "imdb"
+  // requires changing this assertion too.
+  assert.strictEqual(U.RATINGS_SOURCE, "tmdb");
+  assert.strictEqual(U.USE_IMDB, false);
 });
 test("IMDb mode: footer credits TMDB for data AND IMDb for ratings (required wording)", () => {
   const f = U.footerAttribution(true); // explicit IMDb mode — deterministic, no env needed
@@ -205,13 +206,13 @@ test("IMDb mode: footer credits TMDB for data AND IMDb for ratings (required wor
   assert.ok(/Used with permission/.test(f), "IMDb's required verbatim wording present");
 });
 test("TMDB mode: footer credits TMDB for data+ratings and drops IMDb entirely", () => {
-  const f = U.footerAttribution(false); // explicit TMDB mode — deterministic, no subprocess
+  const f = U.footerAttribution(false); // explicit TMDB mode — deterministic, in-process
   assert.ok(/Film data and ratings from/.test(f), "TMDB credited for both data and ratings");
   assert.ok(!/IMDb/i.test(f), "IMDb name must NOT appear when ratings come from TMDB");
 });
-test("default footerAttribution() matches explicit IMDb mode (global wiring correct)", () => {
-  // No-arg call uses the global USE_IMDB; confirms production call site resolves to IMDb now.
-  assert.strictEqual(U.footerAttribution(), U.footerAttribution(true));
+test("default footerAttribution() matches current mode (global wiring correct)", () => {
+  // No-arg call uses the global USE_IMDB; default is tmdb, so it must match explicit TMDB mode.
+  assert.strictEqual(U.footerAttribution(), U.footerAttribution(false));
 });
 
 // ---------------- summary ----------------
