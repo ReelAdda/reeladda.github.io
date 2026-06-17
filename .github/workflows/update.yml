@@ -16,37 +16,33 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "24"
+
+      # Unit tests run FIRST (no API calls) so a code regression fails fast,
+      # before we spend time/quota on the build. Covers pure functions + the
+      # SSR-injection guard (incl. the comment-in-script regression test).
+      - name: Run unit tests
+        run: node scripts/test.js
+
       - name: Fetch latest releases
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: node scripts/update.js
-      - name: Validate data before publishing
+
+      # Smoke test validates the SHAPE + freshness of EVERY country's data file.
+      # Fails the build (before commit) if any file is missing, empty, stale, or malformed —
+      # so a bad/partial build never ships.
+      - name: Smoke-test generated data
+        run: node scripts/smoke.js us uk au de
+
+      - name: Verify film pages exist
         run: |
           node -e "
             const fs = require('fs');
-            const fail = (m) => { console.error('VALIDATION FAILED: ' + m); process.exit(1); };
-
-            // --- Canonical India file (data.json) + pages ---
-            const d = require('./data.json');
-            if (!Array.isArray(d.theatres) || d.theatres.length < 1) fail('theatres empty');
-            if (!Array.isArray(d.ott) || d.ott.length < 3) fail('ott suspiciously small');
-            if (!d.generatedAt) fail('missing generatedAt');
-            const bad = [...d.theatres, ...d.ott].find(x => !x.title);
-            if (bad) fail('item without title');
             const pages = fs.readdirSync('movie').filter(f => f.endsWith('.html'));
-            if (pages.length < 5) fail('film pages missing');
-            console.log('data.json OK:', d.theatres.length, 'theatre,', d.ott.length, 'ott,', (d.comingSoon||[]).length, 'upcoming. Pick:', d.pick, '| pages:', pages.length);
-
-            // --- Per-country files: must exist and be non-empty ---
-            const countries = ['in','us','uk','au','de'];
-            for (const c of countries) {
-              const path = 'data-' + c + '.json';
-              if (!fs.existsSync(path)) fail('missing country file ' + path);
-              const cd = JSON.parse(fs.readFileSync(path, 'utf8'));
-              if (!Array.isArray(cd.theatres)) fail(path + ' has no theatres array');
-              console.log('  ' + path + ' OK:', cd.theatres.length, 'theatre,', (cd.ott||[]).length, 'ott,', (cd.comingSoon||[]).length, 'upcoming.');
-            }
+            if (pages.length < 5) { console.error('VALIDATION FAILED: film pages missing'); process.exit(1); }
+            console.log('film pages OK:', pages.length);
           "
+
       - name: Commit updated data
         run: |
           git config user.name "filmychill-bot"
