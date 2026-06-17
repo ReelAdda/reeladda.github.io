@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-06-17T08:42:04.310Z",
+ "generatedAt": "2026-06-17T12:09:27.341Z",
  "country": "uk",
- "pick": "Rick and Morty",
+ "pick": "Angel's Egg",
  "theatres": [
   {
    "title": "Obsession",
@@ -9,11 +9,11 @@
    "language": "English",
    "released": "2026-05-15",
    "review": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon…",
-   "rating": 8.1,
+   "rating": 7.9,
    "scores": [
     {
-     "source": "IMDb",
-     "score": "8.1/10"
+     "source": "TMDB",
+     "score": "7.9/10"
     }
    ],
    "votes": 800,
@@ -36,10 +36,9 @@
    ],
    "director": "Curry Barker",
    "runtime": 108,
-   "imdbVotes": 91448,
+   "imdbVotes": null,
    "backdrop": "https://image.tmdb.org/t/p/w780/5lTZyuBTNOfawsfPT8Q0cIg6qAF.jpg",
    "fullReview": "After breaking the mysterious \"One Wish Willow\" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.",
-   "imdbRating": 8.1,
    "slug": "obsession"
   },
   {
@@ -48,11 +47,11 @@
    "language": "English",
    "released": "2026-06-10",
    "review": "If you found out we weren’t alone, if someone showed you, proved it to you, would that frighten you?",
-   "rating": 7,
+   "rating": 6.8,
    "scores": [
     {
-     "source": "IMDb",
-     "score": "7.0/10"
+     "source": "TMDB",
+     "score": "6.8/10"
     }
    ],
    "votes": 430,
@@ -75,50 +74,10 @@
    ],
    "director": "Steven Spielberg",
    "runtime": 145,
-   "imdbVotes": 3919,
+   "imdbVotes": null,
    "backdrop": "https://image.tmdb.org/t/p/w780/s6ly8laenkHWlIBRkLSfIuEMLC6.jpg",
    "fullReview": "If you found out we weren’t alone, if someone showed you, proved it to you, would that frighten you?",
-   "imdbRating": 7,
    "slug": "disclosure-day"
-  },
-  {
-   "title": "The Mandalorian and Grogu",
-   "genre": "Action / Adventure",
-   "language": "English",
-   "released": "2026-05-22",
-   "review": "The evil Empire has fallen, and Imperial warlords remain scattered throughout the galaxy. As the fledgling New Republic works to protect everything the…",
-   "rating": 7,
-   "scores": [
-    {
-     "source": "IMDb",
-     "score": "7.0/10"
-    }
-   ],
-   "votes": 474,
-   "verdict": "Worth a watch",
-   "poster": "https://image.tmdb.org/t/p/w342/5Vi8dSauVwH1HOsiZceDMbRr1Ca.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 1228710,
-   "popularity": 256.9239,
-   "platform": "Theatres",
-   "cert": "U/A 16+",
-   "trailer": "https://www.youtube.com/watch?v=uwild1rw7Aw",
-   "providers": [],
-   "cast": [
-    "Pedro Pascal",
-    "Jeremy Allen White",
-    "Sigourney Weaver",
-    "Brendan Wayne"
-   ],
-   "director": "Jon Favreau",
-   "runtime": 132,
-   "imdbVotes": 58197,
-   "backdrop": "https://image.tmdb.org/t/p/w780/6zg7A9ICOthNR2TSXlT51KvXrsA.jpg",
-   "fullReview": "The evil Empire has fallen, and Imperial warlords remain scattered throughout the galaxy. As the fledgling New Republic works to protect everything the Rebellion fought for, they have enlisted the help of legendary Mandalorian bounty hunter Din Djarin and his young apprentice Grogu.",
-   "imdbRating": 7,
-   "slug": "the-mandalorian-and-grogu"
   },
   {
    "title": "Masters of the Universe",
@@ -126,11 +85,11 @@
    "language": "English",
    "released": "2026-06-03",
    "review": "After being separated for 15 years, the Sword of Power leads Prince Adam back to Eternia, where he discovers his home shattered under the fiendish rule of…",
-   "rating": 7.1,
+   "rating": 7.3,
    "scores": [
     {
-     "source": "IMDb",
-     "score": "7.1/10"
+     "source": "TMDB",
+     "score": "7.3/10"
     }
    ],
    "votes": 223,
@@ -153,11 +112,48 @@
    ],
    "director": "Travis Knight",
    "runtime": 141,
-   "imdbVotes": 19213,
+   "imdbVotes": null,
    "backdrop": "https://image.tmdb.org/t/p/w780/piV2OnzTZCyGBP9JCjlHIgKGlfo.jpg",
    "fullReview": "After being separated for 15 years, the Sword of Power leads Prince Adam back to Eternia, where he discovers his home shattered under the fiendish rule of Skeletor. To save his family and his world, Adam must join forces with his closest allies, Teela and Duncan/Man-At-Arms, and embrace his true destiny as He-Man — the most powerful man in the universe.",
-   "imdbRating": 7.1,
    "slug": "masters-of-the-universe"
+  },
+  {
+   "title": "The Mandalorian and Grogu",
+   "genre": "Action / Adventure",
+   "language": "English",
+   "released": "2026-05-22",
+   "review": "The evil Empire has fallen, and Imperial warlords remain scattered throughout the galaxy. As the fledgling New Republic works to protect everything the…",
+   "rating": 6.8,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "6.8/10"
+    }
+   ],
+   "votes": 474,
+   "verdict": "Worth a watch",
+   "poster": "https://image.tmdb.org/t/p/w342/5Vi8dSauVwH1HOsiZceDMbRr1Ca.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1228710,
+   "popularity": 256.9239,
+   "platform": "Theatres",
+   "cert": "U/A 16+",
+   "trailer": "https://www.youtube.com/watch?v=uwild1rw7Aw",
+   "providers": [],
+   "cast": [
+    "Pedro Pascal",
+    "Jeremy Allen White",
+    "Sigourney Weaver",
+    "Brendan Wayne"
+   ],
+   "director": "Jon Favreau",
+   "runtime": 132,
+   "imdbVotes": null,
+   "backdrop": "https://image.tmdb.org/t/p/w780/6zg7A9ICOthNR2TSXlT51KvXrsA.jpg",
+   "fullReview": "The evil Empire has fallen, and Imperial warlords remain scattered throughout the galaxy. As the fledgling New Republic works to protect everything the Rebellion fought for, they have enlisted the help of legendary Mandalorian bounty hunter Din Djarin and his young apprentice Grogu.",
+   "slug": "the-mandalorian-and-grogu"
   },
   {
    "title": "Backrooms",
@@ -165,11 +161,11 @@
    "language": "English",
    "released": "2026-05-29",
    "review": "A strange doorway appears in the basement of a furniture showroom.",
-   "rating": 7.1,
+   "rating": 6.9,
    "scores": [
     {
-     "source": "IMDb",
-     "score": "7.1/10"
+     "source": "TMDB",
+     "score": "6.9/10"
     }
    ],
    "votes": 558,
@@ -192,89 +188,85 @@
    ],
    "director": "Kane Parsons",
    "runtime": 111,
-   "imdbVotes": 67680,
+   "imdbVotes": null,
    "backdrop": "https://image.tmdb.org/t/p/w780/mCpwRayjXMFzKHbjbzc5JRKfq1O.jpg",
    "fullReview": "A strange doorway appears in the basement of a furniture showroom.",
-   "imdbRating": 7.1,
    "slug": "backrooms"
   },
   {
-   "title": "Hai Jawani Toh Ishq Hona Hai",
-   "genre": "Romance / Comedy",
-   "language": "Hindi",
-   "released": "2026-06-05",
-   "review": "When Jass leaves his marriage over conflicting priorities, a new romance abroad is upended by shocking revelations, forcing him to confront love, loyalty, and…",
-   "rating": 5.8,
+   "title": "Angel's Egg",
+   "genre": "Animation / Fantasy",
+   "language": "Japanese",
+   "released": "2026-06-17",
+   "review": "In the ruins of a strange city, a young girl takes care of a large egg she holds carefully in her arms. She bonds with a boy who is searching for a bird he saw…",
+   "rating": 7.7,
    "scores": [
     {
-     "source": "IMDb",
-     "score": "5.8/10"
+     "source": "TMDB",
+     "score": "7.7/10"
     }
    ],
-   "votes": 17,
-   "verdict": "Decent one-time watch",
-   "poster": "https://image.tmdb.org/t/p/w342/vmlJvz6qVzYgei2V74GvnmcuQfW.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 1308553,
-   "popularity": 341.0197,
-   "platform": "Theatres",
-   "cert": "U/A 16+",
-   "trailer": "https://www.youtube.com/results?search_query=Hai%20Jawani%20Toh%20Ishq%20Hona%20Hai%20official%20trailer",
-   "providers": [],
-   "cast": [
-    "Varun Dhawan",
-    "Mrunal Thakur",
-    "Pooja Hegde",
-    "Maniesh Paul"
-   ],
-   "director": "David Dhawan",
-   "runtime": 136,
-   "imdbVotes": 11520,
-   "backdrop": "https://image.tmdb.org/t/p/w780/l5QgEvlfK6eHPM4YPEk7AArXmh8.jpg",
-   "fullReview": "When Jass leaves his marriage over conflicting priorities, a new romance abroad is upended by shocking revelations, forcing him to confront love, loyalty, and the true meaning of commitment.",
-   "imdbRating": 5.8,
-   "slug": "hai-jawani-toh-ishq-hona-hai"
-  },
-  {
-   "title": "Tuner",
-   "genre": "Crime / Thriller",
-   "language": "English",
-   "released": "2026-05-29",
-   "review": "A talented piano tuner's life is turned upside down when he discovers that his meticulous skills for tuning pianos can equally be applied to cracking safes.",
-   "rating": 7.5,
-   "scores": [
-    {
-     "source": "IMDb",
-     "score": "7.5/10"
-    }
-   ],
-   "votes": 52,
+   "votes": 585,
    "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/kyM60vcgf7lfofmZB4F5Rj7OrHW.jpg",
-   "isRecent": false,
+   "poster": "https://image.tmdb.org/t/p/w342/dcEUGvckbePFzPKhGXnS9T3kZMG.jpg",
+   "isRecent": true,
    "isFresh": false,
    "kind": "movie",
-   "tmdbId": 1340206,
-   "popularity": 17.1241,
+   "tmdbId": 15916,
+   "popularity": 3.1201,
    "platform": "Theatres",
    "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=rdlOZhl-nSA",
+   "trailer": "https://www.youtube.com/watch?v=SqyVGzaQFpQ",
    "providers": [],
    "cast": [
-    "Leo Woodall",
-    "Havana Rose Liu",
-    "Lior Raz",
-    "Tovah Feldshuh"
+    "Keiichi Noda",
+    "Mako Hyodo",
+    "Jinpachi Nezu"
    ],
-   "director": "Daniel Roher",
-   "runtime": 107,
-   "imdbVotes": 4919,
-   "backdrop": "https://image.tmdb.org/t/p/w780/y04gpYp8rJoUud6vf8okqHIdP4V.jpg",
-   "fullReview": "A talented piano tuner's life is turned upside down when he discovers that his meticulous skills for tuning pianos can equally be applied to cracking safes.",
-   "imdbRating": 7.5,
-   "slug": "tuner"
+   "director": "Mamoru Oshii",
+   "runtime": 71,
+   "imdbVotes": null,
+   "backdrop": "https://image.tmdb.org/t/p/w780/nZn384qWYugXu6U1N8Ya0Iv0NXE.jpg",
+   "fullReview": "In the ruins of a strange city, a young girl takes care of a large egg she holds carefully in her arms. She bonds with a boy who is searching for a bird he saw in a dream.",
+   "slug": "angel-s-egg"
+  },
+  {
+   "title": "Boogie Nights",
+   "genre": "Drama / Comedy",
+   "language": "English",
+   "released": "1998-01-16",
+   "review": "In 1977, an idealistic porn producer and his promising protege try to catch up with the end of an era before their never-ending party collides with cold, hard…",
+   "rating": 7.6,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "7.6/10"
+    }
+   ],
+   "votes": 3579,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/wnE24UPCPQsQnbBOu4zVE2qaDNm.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 4995,
+   "popularity": 6.0293,
+   "platform": "Theatres",
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=6__jTfyCMsc",
+   "providers": [],
+   "cast": [
+    "Mark Wahlberg",
+    "Burt Reynolds",
+    "Julianne Moore",
+    "John C. Reilly"
+   ],
+   "director": "Paul Thomas Anderson",
+   "runtime": 156,
+   "imdbVotes": null,
+   "backdrop": "https://image.tmdb.org/t/p/w780/ArpTzQZHWh4UVsgUvV6S7WjTq1n.jpg",
+   "fullReview": "In 1977, an idealistic porn producer and his promising protege try to catch up with the end of an era before their never-ending party collides with cold, hard reality.",
+   "slug": "boogie-nights"
   }
  ],
  "ott": [
@@ -287,11 +279,11 @@
    "rating": 8.5,
    "scores": [
     {
-     "source": "IMDb",
+     "source": "TMDB",
      "score": "8.5/10"
     }
    ],
-   "votes": 12930,
+   "votes": 12932,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
    "isRecent": false,
@@ -313,12 +305,52 @@
    ],
    "director": "Eric Kripke",
    "runtime": null,
-   "imdbVotes": 991285,
-   "backdrop": "https://image.tmdb.org/t/p/w780/bq28ajZaoMyzEIm6REelqyqtEDZ.jpg",
+   "imdbVotes": null,
+   "backdrop": "https://image.tmdb.org/t/p/w780/n6vVs6z8obNbExdD3QHTr4Utu1Z.jpg",
    "fullReview": "A group of vigilantes known informally as “The Boys” set out to take down corrupt superheroes with no more than blue-collar grit and a willingness to fight dirty.",
    "platform": "Amazon Prime Video",
-   "imdbRating": 8.5,
    "slug": "the-boys"
+  },
+  {
+   "title": "FROM",
+   "genre": "Mystery / Drama",
+   "language": "English",
+   "released": "2022-02-20",
+   "review": "Unravel the mystery of a nightmarish town in middle America that traps all those who enter. As the unwilling residents fight to keep a sense of normalcy and…",
+   "rating": 8.5,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.5/10"
+    }
+   ],
+   "votes": 3663,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/pRtJagIxpfODzzb0T0NAvZSzErC.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 124364,
+   "popularity": 789.1945,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=pDHqAj4eJcM",
+   "providers": [
+    "Sky Go",
+    "Now TV"
+   ],
+   "cast": [
+    "Harold Perrineau",
+    "Catalina Sandino Moreno",
+    "Ricky He",
+    "David Alpay"
+   ],
+   "director": "John Griffin",
+   "runtime": null,
+   "imdbVotes": null,
+   "backdrop": "https://image.tmdb.org/t/p/w780/m7eiSGHFzr584zFmetGqkqaU6BN.jpg",
+   "fullReview": "Unravel the mystery of a nightmarish town in middle America that traps all those who enter. As the unwilling residents fight to keep a sense of normalcy and search for a way out, they must also survive the threats of the surrounding forest – including the terrifying creatures that come out when the sun goes down.",
+   "platform": "Sky Go",
+   "slug": "from"
   },
   {
    "title": "Rick and Morty",
@@ -326,14 +358,14 @@
    "language": "English",
    "released": "2013-12-02",
    "review": "Follows a sociopathic genius scientist who drags his inherently timid grandson on adventures across the universe.",
-   "rating": 9,
+   "rating": 8.7,
    "scores": [
     {
-     "source": "IMDb",
-     "score": "9.0/10"
+     "source": "TMDB",
+     "score": "8.7/10"
     }
    ],
-   "votes": 10976,
+   "votes": 10978,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/owhkU6KRqdXoUQpjV8uyZGPtX58.jpg",
    "isRecent": false,
@@ -356,97 +388,11 @@
    ],
    "director": "Dan Harmon",
    "runtime": null,
-   "imdbVotes": 697695,
+   "imdbVotes": null,
    "backdrop": "https://image.tmdb.org/t/p/w780/9In9QgVJx7PlFOAgVHCKKSbo605.jpg",
    "fullReview": "Follows a sociopathic genius scientist who drags his inherently timid grandson on adventures across the universe.",
    "platform": "Netflix",
-   "imdbRating": 9,
    "slug": "rick-and-morty"
-  },
-  {
-   "title": "FROM",
-   "genre": "Mystery / Drama",
-   "language": "English",
-   "released": "2022-02-20",
-   "review": "Unravel the mystery of a nightmarish town in middle America that traps all those who enter. As the unwilling residents fight to keep a sense of normalcy and…",
-   "rating": 7.8,
-   "scores": [
-    {
-     "source": "IMDb",
-     "score": "7.8/10"
-    }
-   ],
-   "votes": 3662,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/pRtJagIxpfODzzb0T0NAvZSzErC.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 124364,
-   "popularity": 789.1945,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=pDHqAj4eJcM",
-   "providers": [
-    "Sky Go",
-    "Now TV"
-   ],
-   "cast": [
-    "Harold Perrineau",
-    "Catalina Sandino Moreno",
-    "Ricky He",
-    "David Alpay"
-   ],
-   "director": "John Griffin",
-   "runtime": null,
-   "imdbVotes": 188058,
-   "backdrop": "https://image.tmdb.org/t/p/w780/m7eiSGHFzr584zFmetGqkqaU6BN.jpg",
-   "fullReview": "Unravel the mystery of a nightmarish town in middle America that traps all those who enter. As the unwilling residents fight to keep a sense of normalcy and search for a way out, they must also survive the threats of the surrounding forest – including the terrifying creatures that come out when the sun goes down.",
-   "platform": "Sky Go",
-   "imdbRating": 7.8,
-   "slug": "from"
-  },
-  {
-   "title": "House of the Dragon",
-   "genre": "Sci-Fi & Fantasy / Drama",
-   "language": "English",
-   "released": "2022-08-21",
-   "review": "The Targaryen dynasty is at the absolute apex of its power, with more than 15 dragons under their yoke. Most empires crumble from such heights. In the case of…",
-   "rating": 8.3,
-   "scores": [
-    {
-     "source": "IMDb",
-     "score": "8.3/10"
-    }
-   ],
-   "votes": 6028,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/7V0Ebks0GgpKvQ7QbLAIdX5dos4.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 94997,
-   "popularity": 102.5453,
-   "cert": "A",
-   "trailer": "https://www.youtube.com/watch?v=DotnJ7tTA34",
-   "providers": [
-    "HBO Max Amazon Channel",
-    "Sky Go",
-    "Now TV"
-   ],
-   "cast": [
-    "Matt Smith",
-    "Emma D'Arcy",
-    "Olivia Cooke",
-    "Steve Toussaint"
-   ],
-   "director": "George R.R. Martin",
-   "runtime": null,
-   "imdbVotes": 529611,
-   "backdrop": "https://image.tmdb.org/t/p/w780/577eXC8wFQT0eUrJcgznSiFPRmk.jpg",
-   "fullReview": "The Targaryen dynasty is at the absolute apex of its power, with more than 15 dragons under their yoke. Most empires crumble from such heights. In the case of the Targaryens, their slow fall begins when King Viserys breaks with a century of tradition by naming his daughter Rhaenyra heir to the Iron Throne. But when Viserys later fathers a son, the court is shocked when Rhaenyra retains her status as his heir, and seeds of division sow friction across the realm.",
-   "platform": "HBO Max Amazon Channel",
-   "imdbRating": 8.3,
-   "slug": "house-of-the-dragon"
   },
   {
    "title": "Euphoria",
@@ -454,11 +400,11 @@
    "language": "English",
    "released": "2019-06-16",
    "review": "A group of high school students navigate love and friendships in a world of drugs, sex, trauma, and social media.",
-   "rating": 8.1,
+   "rating": 8.3,
    "scores": [
     {
-     "source": "IMDb",
-     "score": "8.1/10"
+     "source": "TMDB",
+     "score": "8.3/10"
     }
    ],
    "votes": 10868,
@@ -483,12 +429,94 @@
    ],
    "director": "Sam Levinson",
    "runtime": null,
-   "imdbVotes": 312851,
+   "imdbVotes": null,
    "backdrop": "https://image.tmdb.org/t/p/w780/mez2Z3WqlPKNXpi7mWoiiE5guE9.jpg",
    "fullReview": "A group of high school students navigate love and friendships in a world of drugs, sex, trauma, and social media.",
    "platform": "HBO Max Amazon Channel",
-   "imdbRating": 8.1,
    "slug": "euphoria"
+  },
+  {
+   "title": "House of the Dragon",
+   "genre": "Sci-Fi & Fantasy / Drama",
+   "language": "English",
+   "released": "2022-08-21",
+   "review": "The Targaryen dynasty is at the absolute apex of its power, with more than 15 dragons under their yoke. Most empires crumble from such heights. In the case of…",
+   "rating": 8.3,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.3/10"
+    }
+   ],
+   "votes": 6029,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/7V0Ebks0GgpKvQ7QbLAIdX5dos4.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 94997,
+   "popularity": 102.5453,
+   "cert": "A",
+   "trailer": "https://www.youtube.com/watch?v=DotnJ7tTA34",
+   "providers": [
+    "HBO Max Amazon Channel",
+    "Sky Go",
+    "Now TV"
+   ],
+   "cast": [
+    "Matt Smith",
+    "Emma D'Arcy",
+    "Olivia Cooke",
+    "Steve Toussaint"
+   ],
+   "director": "George R.R. Martin",
+   "runtime": null,
+   "imdbVotes": null,
+   "backdrop": "https://image.tmdb.org/t/p/w780/577eXC8wFQT0eUrJcgznSiFPRmk.jpg",
+   "fullReview": "The Targaryen dynasty is at the absolute apex of its power, with more than 15 dragons under their yoke. Most empires crumble from such heights. In the case of the Targaryens, their slow fall begins when King Viserys breaks with a century of tradition by naming his daughter Rhaenyra heir to the Iron Throne. But when Viserys later fathers a son, the court is shocked when Rhaenyra retains her status as his heir, and seeds of division sow friction across the realm.",
+   "platform": "HBO Max Amazon Channel",
+   "slug": "house-of-the-dragon"
+  },
+  {
+   "title": "Teach You a Lesson",
+   "genre": "Action & Adventure / Drama",
+   "language": "Korean",
+   "released": "2026-06-05",
+   "review": "An inspector from the Educational Rights Protection Bureau (ERPB) who is authorized by the government to use physical intervention and unconventional methods…",
+   "rating": 9.5,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "9.5/10"
+    }
+   ],
+   "votes": 321,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/fMECSPrTmRClSViMsXFYmiYIcWP.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 276161,
+   "popularity": 267.8358,
+   "cert": "A",
+   "trailer": "https://www.youtube.com/watch?v=LdezlX84py0",
+   "providers": [
+    "Netflix",
+    "Netflix Standard with Ads"
+   ],
+   "cast": [
+    "Kim Moo-yul",
+    "Lee Sung-min",
+    "Jin Ki-joo",
+    "Pyo Ji-hoon"
+   ],
+   "director": "Chae Yong-taek",
+   "runtime": null,
+   "imdbVotes": null,
+   "backdrop": "https://image.tmdb.org/t/p/w780/vyG93jhmPL7tBIhRtCLa5mdBKob.jpg",
+   "fullReview": "An inspector from the Educational Rights Protection Bureau (ERPB) who is authorized by the government to use physical intervention and unconventional methods to discipline delinquent students and reform the educational system.",
+   "platform": "Netflix",
+   "slug": "teach-you-a-lesson"
   },
   {
    "title": "One Piece",
@@ -496,14 +524,14 @@
    "language": "Japanese",
    "released": "1999-10-20",
    "review": "Years ago, the fearsome Pirate King, Gol D. Roger was executed leaving a huge pile of treasure and the famous \"One Piece\" behind. Whoever claims the \"One…",
-   "rating": 9,
+   "rating": 8.7,
    "scores": [
     {
-     "source": "IMDb",
-     "score": "9.0/10"
+     "source": "TMDB",
+     "score": "8.7/10"
     }
    ],
-   "votes": 5354,
+   "votes": 5355,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/dB4EDhre2dsC2kxYDavyKWqLQwi.jpg",
    "isRecent": false,
@@ -527,138 +555,92 @@
    ],
    "director": null,
    "runtime": 24,
-   "imdbVotes": 355842,
+   "imdbVotes": null,
    "backdrop": "https://image.tmdb.org/t/p/w780/2rmK7mnchw9Xr3XdiTFSxTTLXqv.jpg",
    "fullReview": "Years ago, the fearsome Pirate King, Gol D. Roger was executed leaving a huge pile of treasure and the famous \"One Piece\" behind. Whoever claims the \"One Piece\" will be named the new King of the Pirates.\n\nMonkey D. Luffy, a boy who consumed a \"Devil Fruit,\" decides to follow in the footsteps of his idol, the pirate Shanks, and find the One Piece. It helps, of course, that his body has the properties of rubber and that he's surrounded by a bevy of skilled fighters and thieves to help him along the way.\n\nLuffy will do anything to get the One Piece and become King of the Pirates!",
    "platform": "Netflix",
-   "imdbRating": 9,
    "slug": "one-piece"
   },
   {
-   "title": "Teach You a Lesson",
-   "genre": "Action & Adventure / Drama",
-   "language": "Korean",
-   "released": "2026-06-05",
-   "review": "An inspector from the Educational Rights Protection Bureau (ERPB) who is authorized by the government to use physical intervention and unconventional methods…",
-   "rating": 8.6,
-   "scores": [
-    {
-     "source": "IMDb",
-     "score": "8.6/10"
-    }
-   ],
-   "votes": 317,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/fMECSPrTmRClSViMsXFYmiYIcWP.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 276161,
-   "popularity": 267.8358,
-   "cert": "A",
-   "trailer": "https://www.youtube.com/watch?v=LdezlX84py0",
-   "providers": [
-    "Netflix",
-    "Netflix Standard with Ads"
-   ],
-   "cast": [
-    "Kim Moo-yul",
-    "Lee Sung-min",
-    "Jin Ki-joo",
-    "Pyo Ji-hoon"
-   ],
-   "director": "Chae Yong-taek",
-   "runtime": null,
-   "imdbVotes": 4764,
-   "backdrop": "https://image.tmdb.org/t/p/w780/vyG93jhmPL7tBIhRtCLa5mdBKob.jpg",
-   "fullReview": "An inspector from the Educational Rights Protection Bureau (ERPB) who is authorized by the government to use physical intervention and unconventional methods to discipline delinquent students and reform the educational system.",
-   "platform": "Netflix",
-   "imdbRating": 8.6,
-   "slug": "teach-you-a-lesson"
-  },
-  {
-   "title": "Re:ZERO -Starting Life in Another World-",
-   "genre": "Animation / Action & Adventure",
-   "language": "Japanese",
-   "released": "2016-04-04",
-   "review": "Natsuki Subaru, an ordinary high school  student, is on his way home from the convenience store when he finds  himself transported to another world. As he's…",
-   "rating": 8.2,
-   "scores": [
-    {
-     "source": "IMDb",
-     "score": "8.2/10"
-    }
-   ],
-   "votes": 655,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/5MrRCj7z92YLWMXHeWKp19eJPYv.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 65942,
-   "popularity": 92.6234,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=P4l9d-rlD4o",
-   "providers": [
-    "Crunchyroll",
-    "Crunchyroll Amazon Channel"
-   ],
-   "cast": [
-    "Yusuke Kobayashi",
-    "Rie Takahashi",
-    "Yumi Uchiyama",
-    "Rie Murakawa"
-   ],
-   "director": null,
-   "runtime": 25,
-   "imdbVotes": 54667,
-   "backdrop": "https://image.tmdb.org/t/p/w780/x6y59dJBE1o0r4YRsWVQXE2nnlB.jpg",
-   "fullReview": "Natsuki Subaru, an ordinary high school  student, is on his way home from the convenience store when he finds  himself transported to another world. As he's lost and confused in a new  world where he doesn't even know left from right, the only person to  reach out to him was a beautiful girl with silver hair. Determined to  repay her somehow for saving him from his own despair, Subaru agrees to  help the girl find something she's looking for.",
-   "platform": "Crunchyroll",
-   "imdbRating": 8.2,
-   "slug": "re-zero-starting-life-in-another-world"
-  },
-  {
-   "title": "Spider-Noir",
-   "genre": "Drama / Mystery",
+   "title": "Off Campus",
+   "genre": "Drama",
    "language": "English",
-   "released": "2026-05-25",
-   "review": "Ben Reilly, an aging and down on his luck private investigator in 1930s New York, is forced to grapple with his past life as the city's one and only superhero.",
-   "rating": 8,
+   "released": "2026-05-13",
+   "review": "Hannah Wells tutors hockey captain Garrett Graham to win over her crush. Their deal becomes real connection as they face their pasts. Friends Logan, Dean,…",
+   "rating": 9,
    "scores": [
     {
-     "source": "IMDb",
-     "score": "8.0/10"
+     "source": "TMDB",
+     "score": "9.0/10"
     }
    ],
-   "votes": 536,
+   "votes": 465,
    "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/oD8WSVqz84ZRfelkr7JPeJwR9Iv.jpg",
+   "poster": "https://image.tmdb.org/t/p/w342/cbODFqkcmRgrYH8NkG4Q4Hcg8Z1.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
-   "tmdbId": 220102,
-   "popularity": 126.7387,
-   "cert": "U/A 16+",
-   "trailer": "https://www.youtube.com/watch?v=e5QW457407U",
+   "tmdbId": 273240,
+   "popularity": 348.6645,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=wAozjf2frxw",
    "providers": [
     "Amazon Prime Video",
     "Amazon Prime Video with Ads"
    ],
    "cast": [
-    "Nicolas Cage",
-    "Lamorne Morris",
-    "Li Jun Li",
-    "Karen Rodriguez"
+    "Ella Bright",
+    "Belmont Cameli",
+    "Mika Abdalla",
+    "Stephen Kalyn"
    ],
-   "director": "Oren Uziel",
+   "director": "Gina Fattore",
    "runtime": null,
-   "imdbVotes": 34461,
-   "backdrop": "https://image.tmdb.org/t/p/w780/mkwVoyP9bFSmfVqU8FJyem52hVR.jpg",
-   "fullReview": "Ben Reilly, an aging and down on his luck private investigator in 1930s New York, is forced to grapple with his past life as the city's one and only superhero.",
+   "imdbVotes": null,
+   "backdrop": "https://image.tmdb.org/t/p/w780/52sp0vPhLOWrZ1QoZIWiapronM.jpg",
+   "fullReview": "Hannah Wells tutors hockey captain Garrett Graham to win over her crush. Their deal becomes real connection as they face their pasts. Friends Logan, Dean, Tucker, and Allie navigate college life and love.",
    "platform": "Amazon Prime Video",
-   "imdbRating": 8,
-   "slug": "spider-noir"
+   "slug": "off-campus"
+  },
+  {
+   "title": "Hoppers",
+   "genre": "Adventure / Animation",
+   "language": "English",
+   "released": "2026-03-04",
+   "review": "Scientists have discovered how to 'hop' human consciousness into lifelike robotic animals, allowing people to communicate with animals as animals. Animal lover…",
+   "rating": 8.2,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.2/10"
+    }
+   ],
+   "votes": 1608,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/xjtWQ2CL1mpmMNwuU5HeS4Iuwuu.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1327819,
+   "popularity": 120.5732,
+   "cert": "U/A 7+",
+   "trailer": "https://www.youtube.com/watch?v=PypDSyIRRSs",
+   "providers": [
+    "Disney Plus"
+   ],
+   "cast": [
+    "Piper Curda",
+    "Bobby Moynihan",
+    "Jon Hamm",
+    "Kathy Najimy"
+   ],
+   "director": "Daniel Chong",
+   "runtime": 104,
+   "imdbVotes": null,
+   "backdrop": "https://image.tmdb.org/t/p/w780/u53UYu5XG2hNgWGvs3xGhAVzypl.jpg",
+   "fullReview": "Scientists have discovered how to 'hop' human consciousness into lifelike robotic animals, allowing people to communicate with animals as animals. Animal lover Mabel seizes an opportunity to use the technology, uncovering mysteries within the animal world beyond anything she could have imagined.",
+   "platform": "Disney Plus",
+   "slug": "hoppers"
   },
   {
    "title": "Dutton Ranch",
@@ -666,14 +648,14 @@
    "language": "English",
    "released": "2026-05-15",
    "review": "Rip Wheeler and Beth Dutton gamble everything on a new life in South Texas, but the promise of building a future far from the ghosts of Yellowstone quickly…",
-   "rating": 8.4,
+   "rating": 9.3,
    "scores": [
     {
-     "source": "IMDb",
-     "score": "8.4/10"
+     "source": "TMDB",
+     "score": "9.3/10"
     }
    ],
-   "votes": 271,
+   "votes": 272,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/xsiecCxd8lkcAluw0wWwbW5CwSv.jpg",
    "isRecent": false,
@@ -697,11 +679,10 @@
    ],
    "director": "Chad Feehan",
    "runtime": null,
-   "imdbVotes": 9299,
+   "imdbVotes": null,
    "backdrop": "https://image.tmdb.org/t/p/w780/wh5agdl3b7fqC7mSjsCkHx4fMAs.jpg",
    "fullReview": "Rip Wheeler and Beth Dutton gamble everything on a new life in South Texas, but the promise of building a future far from the ghosts of Yellowstone quickly collides with brutal new realities and a rival ranch that will stop at nothing to protect its empire.",
    "platform": "Paramount Plus",
-   "imdbRating": 8.4,
    "slug": "dutton-ranch"
   }
  ],
@@ -781,8 +762,8 @@
    ],
    "director": "Kenji Tanigaki",
    "runtime": 113,
-   "imdbScore": "7.9/10",
-   "imdbVotes": 2682,
+   "imdbScore": null,
+   "imdbVotes": null,
    "backdrop": "https://image.tmdb.org/t/p/w780/ew3EqF9VLTxmK64OsHT7p7lr4wT.jpg",
    "fullReview": "After Wang Wei's daughter is kidnapped by a criminal network and he receives no help from the corrupt police, Wei sets out to find her himself. His only ally is Navin, a relentless journalist whose wife has mysteriously disappeared. Fueled by a furious vengeance, the unlikely duo ruthlessly battle the kidnappers in this explosive martial arts showdown.",
    "slug": "the-furious"
@@ -808,8 +789,8 @@
    ],
    "director": "Anders Thomas Jensen",
    "runtime": 116,
-   "imdbScore": "7.2/10",
-   "imdbVotes": 13924,
+   "imdbScore": null,
+   "imdbVotes": null,
    "backdrop": "https://image.tmdb.org/t/p/w780/zo1SfeASCrbHFaXJN9y1RW7uU2m.jpg",
    "fullReview": "After serving fourteen years for robbery, Anker is released from prison and reunites with his mentally ill brother Manfred, who alone knows where the stolen money is hidden but has forgotten its location, sending them on a journey to recover the loot and confront who they are.",
    "slug": "the-last-viking"
