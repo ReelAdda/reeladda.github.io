@@ -8,21 +8,52 @@ const zlib = require("zlib");
 const API_KEY = process.env.TMDB_API_KEY;
 const BASE = "https://api.themoviedb.org/3";
 
-if (!API_KEY && !process.env.PAGES_ONLY) {
+if (!API_KEY && !process.env.PAGES_ONLY && require.main === module) {
   console.error("Missing TMDB_API_KEY. Add it in GitHub repo Settings → Secrets.");
   process.exit(1);
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// TMDB fetch with retry + exponential backoff. Transient failures (429 rate-limit, 5xx,
+// network errors) are retried up to MAX_RETRIES with growing delays, honoring the server's
+// Retry-After header when present. A 4xx other than 429 fails fast (it won't fix on retry).
+// This protects the daily build from a single network hiccup corrupting a country's output.
+const TMDB_MAX_RETRIES = 4;
 async function tmdb(path, params = {}) {
   const url = new URL(BASE + path);
   url.searchParams.set("api_key", API_KEY);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`TMDB ${path} failed: ${res.status}`);
-  return res.json();
-}
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  let lastErr;
+  for (let attempt = 0; attempt <= TMDB_MAX_RETRIES; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return res.json();
+
+      // 429 / 5xx are transient -> retry. Other 4xx are permanent -> fail fast.
+      const transient = res.status === 429 || res.status >= 500;
+      if (!transient || attempt === TMDB_MAX_RETRIES) {
+        throw new Error(`TMDB ${path} failed: ${res.status}`);
+      }
+      // Honor Retry-After (seconds) if given, else exponential backoff (0.5s,1s,2s,4s) + jitter.
+      const retryAfter = parseFloat(res.headers.get("retry-after"));
+      const backoff = Number.isFinite(retryAfter)
+        ? retryAfter * 1000
+        : 500 * Math.pow(2, attempt) + Math.floor(Math.random() * 250);
+      console.warn(`TMDB ${path} -> ${res.status}, retry ${attempt + 1}/${TMDB_MAX_RETRIES} in ${Math.round(backoff)}ms`);
+      await sleep(backoff);
+    } catch (e) {
+      // Network-level error (fetch threw): retry with backoff unless out of attempts.
+      lastErr = e;
+      if (attempt === TMDB_MAX_RETRIES || /failed: \d/.test(e.message)) throw e;
+      const backoff = 500 * Math.pow(2, attempt) + Math.floor(Math.random() * 250);
+      console.warn(`TMDB ${path} network error: ${e.message}, retry ${attempt + 1}/${TMDB_MAX_RETRIES} in ${Math.round(backoff)}ms`);
+      await sleep(backoff);
+    }
+  }
+  throw lastErr || new Error(`TMDB ${path} failed after retries`);
+}
 
 // Per-country configuration. Each country runs the SAME pipeline parameterised by region,
 // watch_region, priority languages, and soft quotas. INDIA IS FIRST and reproduces the
@@ -724,7 +755,8 @@ async function main() {
   console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.`);
 }
 
-if (!process.env.PAGES_ONLY) main().catch((e) => {
+// Run the build only when executed directly (not when required by tests/tools).
+if (!process.env.PAGES_ONLY && require.main === module) main().catch((e) => {
   // Never leak the API key into Action logs, even via network error messages
   const msg = String(e && e.stack || e).split(API_KEY).join('***');
   console.error(msg);
@@ -842,7 +874,7 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
 <div class="top"><a href="https://filmychill.com/">FILMY<span>CHILL</span></a></div>
 <div class="wrap">
   <div class="head">
-    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster">` : "<div></div>"}
+    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="72" height="106">` : "<div></div>"}
     <div>
       <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
       <div class="meta">${[item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert].filter(Boolean).map(e).join(" · ")}</div>
@@ -918,7 +950,7 @@ function ssrCard(item, i, isIndia) {
   const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null].filter(Boolean).map(e).join(" · ");
   const inner = `
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
-    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" loading="lazy">` : ""}
+    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
     <div>
       <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${item.isRecent ? '<span class="fresh-badge">New release</span>' : ""}</div>
       <div class="meta">${bits}</div>
@@ -935,7 +967,7 @@ function ssrCard(item, i, isIndia) {
 function ssrSoonCard(item) {
   const e = escHtml;
   return `<a class="soon-card" href="/movie/${e(item.slug)}.html" style="text-decoration:none;color:inherit">
-    ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" loading="lazy">` : ""}
+    ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
     <div class="soon-body">
       <div class="soon-date">${e(item.released || "")}</div>
       <div class="soon-title">${e(item.title)}</div>
@@ -947,7 +979,28 @@ function ssrSoonCard(item) {
 function replaceBetween(html, tag, inner) {
   const start = `<!--SSR:${tag}-->`, end = `<!--/SSR:${tag}-->`;
   const a = html.indexOf(start), b = html.indexOf(end);
-  if (a === -1 || b === -1 || b < a) { console.warn(`SSR markers for ${tag} not found — skipped`); return html; }
+  // Fail LOUD, not silent: a missing/malformed marker means the template is broken and the
+  // page would render wrong (this is the class of bug that caused the PAGECODE issue). A
+  // hard throw fails the build so it's caught in CI, not discovered live.
+  if (a === -1) throw new Error(`SSR marker <!--SSR:${tag}--> missing in template`);
+  if (b === -1) throw new Error(`SSR marker <!--/SSR:${tag}--> (closing) missing in template`);
+  if (b < a) throw new Error(`SSR markers for ${tag} are out of order (closing before opening)`);
+  // Guard against the comment-in-script trap: SSR markers must never sit inside an
+  // EXECUTABLE <script> (HTML comments break JS there). Non-executable script blocks like
+  // <script type="application/ld+json"> are data, not code, so comments are safe there.
+  const before = html.slice(0, a);
+  const lastOpen = before.lastIndexOf("<script");
+  const lastClose = before.lastIndexOf("</script>");
+  if (lastOpen > lastClose) {
+    const openTag = before.slice(lastOpen, before.indexOf(">", lastOpen) + 1);
+    const typeMatch = openTag.match(/type\s*=\s*["']([^"']+)["']/i);
+    const scriptType = typeMatch ? typeMatch[1].toLowerCase() : "";
+    // Executable if no type, or a JS MIME type / module. Data types (ld+json, etc.) are safe.
+    const isExecutable = scriptType === "" || /javascript|ecmascript|module/.test(scriptType);
+    if (isExecutable) {
+      throw new Error(`SSR marker ${tag} is inside an executable <script> tag — HTML comments break JS there. Move it to HTML context.`);
+    }
+  }
   return html.slice(0, a + start.length) + inner + html.slice(b);
 }
 
@@ -1050,7 +1103,7 @@ function prerenderIndex(data) {
 
 // Local regeneration from existing data.json (no API calls): PAGES_ONLY=1 node scripts/update.js
 // Placed at end of file so all const declarations (COUNTRY_PAGE_META etc.) are initialized.
-if (process.env.PAGES_ONLY) {
+if (process.env.PAGES_ONLY && require.main === module) {
   const d = JSON.parse(fs.readFileSync("data.json", "utf8"));
   assignSlugs(d);
   generatePages(d);
@@ -1058,3 +1111,9 @@ if (process.env.PAGES_ONLY) {
   fs.writeFileSync("data.json", JSON.stringify(d, null, 1));
   process.exit(0);
 }
+
+// Export pure/helper functions for unit testing (only meaningful when required, not run).
+module.exports = {
+  verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween,
+  assignSlugs, buildHeadTags, buildHomeJsonLd, ssrCard, ssrSoonCard,
+};
