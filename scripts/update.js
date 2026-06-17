@@ -66,7 +66,7 @@ const COUNTRIES = [
     regionalLangs: ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"], // order = India's regionalOrder
     ottRegionalLangs: ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"], // OTT regional pool langs
     theatreTargets: [["hi", 3], ["en", 2], ["ta", 1], ["te", 1]],
-    soonTargets: [["en", 3], ["hi", 2], ["__regional__", 3]],
+    soonTargets: [["en", 3], ["hi", 3], ["__regional__", 2]],
   },
   {
     code: "us", name: "United States", region: "US", watchRegion: "US",
@@ -664,15 +664,17 @@ async function main() {
     } catch (e) { console.warn(`soon-discover ${cfg.code}/${lang}: ${e.message}`); }
     await sleep(150);
   }
-  // BUZZ FLOOR: upcoming films have no ratings, so popularity (anticipation) is the only
-  // quality signal. Drop films below this floor entirely — they enter neither the quota nor
-  // the fallback — so Coming Soon shows genuinely anticipated titles, even if that means
-  // fewer than SOON_MAX. (Obscure regional films often sit near ~1; real releases are far
-  // higher — e.g. major titles run into the hundreds.) Tunable: raise for stricter buzz.
-  const SOON_BUZZ_FLOOR = 12;
-  const upPool = upPoolRaw
+  // Upcoming films have no ratings, so popularity (anticipation) is the only quality signal —
+  // BUT TMDB popularity skews to Hollywood, so legitimate Hindi/regional films sit low. We
+  // therefore do NOT pre-filter the quota pool by popularity (that erased Indian films and made
+  // the section Hollywood-only). Instead:
+  //   • the QUOTA (named languages, e.g. India = 3 English / 3 Hindi / 2 regional) draws from
+  //     ALL dated-future films, so the intended mix reliably fills regardless of buzz, and
+  //   • the buzz FLOOR applies only to the FALLBACK filler, so once the quota is satisfied we
+  //     don't pad the list with ghost entries (popularity ~1).
+  const SOON_BUZZ_FLOOR = 4; // fallback filler must clear this; quota languages are exempt
+  const datedFuture = upPoolRaw
     .filter((m) => m.release_date && m.release_date > today)
-    .filter((m) => (m.popularity || 0) >= SOON_BUZZ_FLOOR) // only films with real anticipation
     .sort((a, b) => (b.popularity || 0) - (a.popularity || 0)); // most anticipated first
 
   const SOON_TARGETS = cfg.soonTargets;
@@ -683,18 +685,22 @@ async function main() {
   const isSoonRegional = (m) => INDIAN_LANGS.includes(m.original_language) && !soonNamed.has(m.original_language);
   const soonSeen = new Set();
   const soonBase = [];
+  // QUOTA: fills the intended language mix from the full pool (most-anticipated first within
+  // each language). Not floor-filtered, so Hindi/regional always get their guaranteed slots.
   for (const [key, n] of SOON_TARGETS) {
-    const matches = upPool.filter((m) => {
+    const matches = datedFuture.filter((m) => {
       if (soonSeen.has(m.id)) return false;
       return key === "__regional__" ? isSoonRegional(m) : m.original_language === key;
     });
     for (let i = 0; i < n && i < matches.length; i++) { soonBase.push(matches[i]); soonSeen.add(matches[i].id); }
   }
-  // Soft fallback: fill any unfilled slots with the most-anticipated remaining films of any
-  // language, so the list reaches SOON_MAX even if a quota came up short.
-  for (const m of upPool) {
+  // FALLBACK: top up toward SOON_MAX with the most-anticipated remaining films of ANY language,
+  // but only those clearing the buzz floor — so filler is real anticipation, not dead-weight.
+  for (const m of datedFuture) {
     if (soonBase.length >= SOON_MAX) break;
-    if (!soonSeen.has(m.id)) { soonBase.push(m); soonSeen.add(m.id); }
+    if (soonSeen.has(m.id)) continue;
+    if ((m.popularity || 0) < SOON_BUZZ_FLOOR) continue; // skip ghosts in the filler
+    soonBase.push(m); soonSeen.add(m.id);
   }
   // Present in release-date order (soonest first) — within the curated set, chronological
   // reads most naturally as a "what's coming" list.
