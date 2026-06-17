@@ -190,6 +190,39 @@ test("produces valid JSON with ItemList", () => {
   assert.ok(itemList.itemListElement.length >= 2, "lists the items");
 });
 
+// ---------------- RATINGS_SOURCE toggle ----------------
+group("RATINGS_SOURCE toggle");
+test("default mode is imdb (no env override)", () => {
+  // test.js is run without RATINGS_SOURCE set, so the module default applies.
+  assert.strictEqual(U.RATINGS_SOURCE, "imdb");
+  assert.strictEqual(U.USE_IMDB, true);
+});
+test("IMDb mode: footer credits TMDB for data AND IMDb for ratings (required wording)", () => {
+  const f = U.footerAttribution();
+  assert.ok(/Film data from/.test(f), "TMDB credited for film data");
+  assert.ok(/not endorsed or certified by TMDB/.test(f), "TMDB disclaimer present");
+  assert.ok(/Information courtesy of IMDb|courtesy of <a[^>]*>IMDb/.test(f), "IMDb credited");
+  assert.ok(/Used with permission/.test(f), "IMDb's required verbatim wording present");
+});
+test("TMDB mode (subprocess): footer credits TMDB for data+ratings and drops IMDb entirely", () => {
+  const { execSync } = require("child_process");
+  // Run update.js in a fresh process with the toggle flipped, print footerAttribution().
+  const out = execSync(
+    `RATINGS_SOURCE=tmdb node -e "process.env.PAGES_ONLY='';console.log(require('./update.js').footerAttribution())"`,
+    { cwd: __dirname, encoding: "utf8", env: { ...process.env, RATINGS_SOURCE: "tmdb" } }
+  );
+  assert.ok(/Film data and ratings from/.test(out), "TMDB credited for both data and ratings");
+  assert.ok(!/IMDb/i.test(out), "IMDb name must NOT appear when ratings come from TMDB");
+});
+test("TMDB mode (subprocess): USE_IMDB is false", () => {
+  const { execSync } = require("child_process");
+  const out = execSync(
+    `RATINGS_SOURCE=tmdb node -e "console.log(require('./update.js').USE_IMDB)"`,
+    { cwd: __dirname, encoding: "utf8", env: { ...process.env, RATINGS_SOURCE: "tmdb" } }
+  ).trim();
+  assert.strictEqual(out, "false");
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
