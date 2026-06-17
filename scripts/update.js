@@ -17,7 +17,7 @@ const BASE = "https://api.themoviedb.org/3";
 //            attribution only). Switch to this BEFORE you monetize.
 // The footer attribution follows this automatically, so the credit always matches
 // the data actually used. To flip: change this one line, commit, run the workflow.
-const RATINGS_SOURCE = process.env.RATINGS_SOURCE || "tmdb"; // "imdb" | "tmdb"
+const RATINGS_SOURCE = process.env.RATINGS_SOURCE || "imdb"; // "imdb" | "tmdb"
 const USE_IMDB = RATINGS_SOURCE === "imdb";
 
 if (!API_KEY && !process.env.PAGES_ONLY && require.main === module) {
@@ -1116,13 +1116,15 @@ function buildHomeJsonLd(data, cfg) {
   return JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
 }
 
-// Footer attribution text, matched to RATINGS_SOURCE so the credit always reflects the data
-// actually used. IMDb mode: TMDB credited for film data + IMDb credited for ratings using
-// IMDb's REQUIRED verbatim wording. TMDB mode: TMDB credited for both (no IMDb name anywhere,
-// since IMDb data isn't used and its terms forbid using its name without a current license).
-function footerAttribution() {
+// Footer attribution text, matched to the active ratings source so the credit always reflects
+// the data actually used. Takes useImdb (defaults to the global USE_IMDB) so both modes can be
+// unit-tested directly, without spawning a subprocess. IMDb mode: TMDB credited for film data +
+// IMDb credited for ratings using IMDb's REQUIRED verbatim wording. TMDB mode: TMDB credited for
+// both (no IMDb name anywhere, since IMDb data isn't used and its terms forbid using its name
+// without a current license).
+function footerAttribution(useImdb = USE_IMDB) {
   const tmdb = `<a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>`;
-  if (USE_IMDB) {
+  if (useImdb) {
     return `Film data from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  ` +
            `Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>\n  `;
   }
