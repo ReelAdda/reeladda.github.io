@@ -33,6 +33,7 @@ const COUNTRIES = [
     code: "in", name: "India", region: "IN", watchRegion: "IN",
     priorityLangs: ["hi", "ta", "te"],
     regionalLangs: ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"], // order = India's regionalOrder
+    ottRegionalLangs: ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"], // OTT regional pool langs
     theatreTargets: [["hi", 3], ["en", 2], ["ta", 1], ["te", 1]],
     soonTargets: [["en", 3], ["hi", 2], ["__regional__", 3]],
   },
@@ -40,6 +41,7 @@ const COUNTRIES = [
     code: "us", name: "United States", region: "US", watchRegion: "US",
     priorityLangs: ["en", "es"],
     regionalLangs: ["es"],
+    ottRegionalLangs: ["es"],
     theatreTargets: [["en", 5], ["es", 1]],
     soonTargets: [["en", 5], ["es", 1], ["__regional__", 2]],
   },
@@ -47,6 +49,7 @@ const COUNTRIES = [
     code: "uk", name: "United Kingdom", region: "GB", watchRegion: "GB",
     priorityLangs: ["en"],
     regionalLangs: ["hi", "pa"],
+    ottRegionalLangs: [], // English-only OTT: fill all slots from international (English) trending
     theatreTargets: [["en", 6]],
     soonTargets: [["en", 6], ["__regional__", 2]],
   },
@@ -54,6 +57,7 @@ const COUNTRIES = [
     code: "au", name: "Australia", region: "AU", watchRegion: "AU",
     priorityLangs: ["en"],
     regionalLangs: ["hi", "zh", "ko"],
+    ottRegionalLangs: [], // English-only OTT: fill all slots from international (English) trending
     theatreTargets: [["en", 6]],
     soonTargets: [["en", 6], ["__regional__", 2]],
   },
@@ -61,6 +65,7 @@ const COUNTRIES = [
     code: "de", name: "Germany", region: "DE", watchRegion: "DE",
     priorityLangs: ["de", "en"],
     regionalLangs: ["de"],
+    ottRegionalLangs: ["de"],
     theatreTargets: [["de", 5], ["en", 2]],
     soonTargets: [["de", 5], ["en", 2], ["__regional__", 1]],
   },
@@ -127,7 +132,7 @@ async function loadImdbRatings() {
 }
 let imdbRatings = new Map(); // populated at the start of main()
 
-async function enrich(kind, id) {
+async function enrich(kind, id, region = "IN") {
   const extra = kind === "movie" ? "release_dates" : "content_ratings";
   const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,external_ids,${extra}` });
 
@@ -147,8 +152,8 @@ async function enrich(kind, id) {
     ? `https://www.youtube.com/watch?v=${t.key}`
     : `https://www.youtube.com/results?search_query=${encodeURIComponent(`${d.title || d.name || ""} official trailer`)}`;
 
-  // Streaming platforms in India
-  const inProv = d["watch/providers"]?.results?.IN;
+  // Streaming platforms in this country's region
+  const inProv = d["watch/providers"]?.results?.[region];
   const providers = (inProv?.flatrate || []).slice(0, 4).map((p) => p.provider_name);
 
   // Cast & director
@@ -461,7 +466,7 @@ async function main() {
   const theatres = [];
   for (const m of picks) {
     const item = { ...baseItem(m, "movie"), platform: "Theatres" };
-    try { Object.assign(item, await enrich("movie", m.id)); withImdb(item); } catch (e) { console.warn(`enrich movie ${m.id}: ${e.message}`); }
+    try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); withImdb(item); } catch (e) { console.warn(`enrich movie ${m.id}: ${e.message}`); }
     theatres.push(item);
     await sleep(150);
   }
@@ -470,7 +475,9 @@ async function main() {
   // International from global trending (inherently fresh); regional from per-language
   // discover gated to recent releases so we never resurface all-time classics. Both
   // ranked with the same IMDb-preferred quality term as theatres, for consistency.
-  const OTT_MAX = 10, OTT_REGIONAL_TARGET = 4, OTT_INTL_CAP = OTT_MAX - OTT_REGIONAL_TARGET;
+  const OTT_MAX = 10;
+  const OTT_REGIONAL_TARGET = (cfg.ottRegionalLangs && cfg.ottRegionalLangs.length) ? 4 : 0;
+  const OTT_INTL_CAP = OTT_MAX - OTT_REGIONAL_TARGET;
   const FRESH_DAYS = 30;
   const freshCutoff = new Date(Date.now() - FRESH_DAYS * 864e5).toISOString().slice(0, 10);
 
@@ -489,7 +496,7 @@ async function main() {
 
   const buildOttItem = async (c) => {
     const item = baseItem(c, c.kind);
-    const extra = await enrich(c.kind, c.id);
+    const extra = await enrich(c.kind, c.id, cfg.watchRegion);
     if (!extra.providers || extra.providers.length === 0) return null; // not streaming in India
     Object.assign(item, extra, { platform: extra.providers[0] });
     withImdb(item);
@@ -520,7 +527,7 @@ async function main() {
   // --- Regional pool: per-language discover, gated to recent releases (anti-staleness),
   //     Hindi first, IMDb-ranked. This is what surfaces fresh Hindi/regional OTT shows
   //     that never trend globally. ---
-  const regionalOrder = INDIAN_LANGS;
+  const regionalOrder = cfg.ottRegionalLangs || [];
   const regional = [];
   for (const lang of regionalOrder) {
     if (regional.length >= OTT_REGIONAL_TARGET) break;
@@ -668,7 +675,7 @@ async function main() {
       tmdbId: m.id,
     };
     // Full details so the modal can show trailer, backdrop, cast, runtime
-    try { Object.assign(item, await enrich("movie", m.id)); } catch (e) { console.warn(`soon ${m.id}: ${e.message}`); }
+    try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); } catch (e) { console.warn(`soon ${m.id}: ${e.message}`); }
     comingSoon.push(item);
     await sleep(150);
   }
