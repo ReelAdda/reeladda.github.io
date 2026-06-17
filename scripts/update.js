@@ -1018,7 +1018,7 @@ function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   let html = templateHtml;
   html = replaceBetween(html, "HEAD", buildHeadTags(cfg));
-  html = replaceBetween(html, "PAGECODE", `window.__FC_PAGE='${cfg.code}';`);
+  html = replaceBetween(html, "PAGECODE", `<meta name="fc-page" content="${cfg.code}">`);
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, isIndia)).join(""));
   html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCard(x, i, isIndia)).join(""));
   html = replaceBetween(html, "SOON", (data.comingSoon || []).map(ssrSoonCard).join(""));
