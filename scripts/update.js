@@ -8,6 +8,18 @@ const zlib = require("zlib");
 const API_KEY = process.env.TMDB_API_KEY;
 const BASE = "https://api.themoviedb.org/3";
 
+// ============================================================================
+// RATINGS SOURCE — the one switch that decides where star ratings come from.
+//   "imdb" : use IMDb's daily non-commercial dataset for ratings/votes (more
+//            authoritative, MORE votes) — but the dataset is NON-COMMERCIAL.
+//            Use only while this site earns NO revenue (no ads/affiliate/etc.).
+//   "tmdb" : use TMDB's vote_average/vote_count — commercially licensed (free,
+//            attribution only). Switch to this BEFORE you monetize.
+// The footer attribution follows this automatically, so the credit always matches
+// the data actually used. To flip: change this one line, commit, run the workflow.
+const RATINGS_SOURCE = process.env.RATINGS_SOURCE || "imdb"; // "imdb" | "tmdb"
+const USE_IMDB = RATINGS_SOURCE === "imdb";
+
 if (!API_KEY && !process.env.PAGES_ONLY && require.main === module) {
   console.error("Missing TMDB_API_KEY. Add it in GitHub repo Settings → Secrets.");
   process.exit(1);
@@ -137,6 +149,10 @@ function img(path, size = "w342") {
 const IMDB_DATASET_URL = "https://datasets.imdbws.com/title.ratings.tsv.gz";
 async function loadImdbRatings() {
   const map = new Map();
+  if (!USE_IMDB) {
+    console.log("RATINGS_SOURCE=tmdb — skipping IMDb dataset; using TMDB ratings only.");
+    return map; // empty: no IMDb data flows anywhere downstream
+  }
   try {
     const res = await fetch(IMDB_DATASET_URL);
     if (!res.ok) throw new Error(`dataset HTTP ${res.status}`);
@@ -257,6 +273,9 @@ async function main() {
   // freshest films still show a number instead of a blank. Also persists numeric imdbRating/
   // imdbVotes for ranking, and lets IMDb fill the verdict when TMDB had only a placeholder.
   function withImdb(item) {
+    // In TMDB mode, IMDb never displaces the TMDB rating/verdict/score chip. (Redundant with
+    // the empty IMDb map, but explicit so the display source is unmistakable.)
+    if (!USE_IMDB) { item.imdbVotes = item.imdbVotes ?? null; delete item.imdbScore; return item; }
     if (item.imdbScore) {
       const num = parseFloat(item.imdbScore); // "7.4/10" -> 7.4
       // IMDb present -> show IMDb only (replace the scores array, dropping the TMDB chip).
@@ -330,19 +349,26 @@ async function main() {
   // film to resolve its IMDb ID, then a cheap lookup in the loaded dataset. Runs once
   // a day, so the extra calls are immaterial. Any failure leaves _imdbRating null and
   // the film falls back to its TMDB rating — never blocks ranking.
-  for (const m of pool) {
-    try {
-      const d = await tmdb(`/movie/${m.id}`, { append_to_response: "external_ids" });
-      const imdbId = d.external_ids?.imdb_id;
-      if (imdbId && imdbRatings.has(imdbId)) {
-        const r = imdbRatings.get(imdbId);
-        if (r && r.rating) {
-          m._imdbRating = parseFloat(r.rating);
-          m._imdbVotes = r.votes || 0;
+  // Resolve each pool film's IMDb ID -> dataset rating BEFORE ranking, so IMDb (which has far
+  // more Indian raters than TMDB) drives selection, not just display. One detail call per film,
+  // then a cheap in-memory lookup. SKIPPED ENTIRELY when RATINGS_SOURCE=tmdb — no IMDb data is
+  // used, so these calls (and their pacing sleeps) would be pure waste. Any failure leaves
+  // _imdbRating null and the film falls back to its TMDB rating — never blocks ranking.
+  if (USE_IMDB) {
+    for (const m of pool) {
+      try {
+        const d = await tmdb(`/movie/${m.id}`, { append_to_response: "external_ids" });
+        const imdbId = d.external_ids?.imdb_id;
+        if (imdbId && imdbRatings.has(imdbId)) {
+          const r = imdbRatings.get(imdbId);
+          if (r && r.rating) {
+            m._imdbRating = parseFloat(r.rating);
+            m._imdbVotes = r.votes || 0;
+          }
         }
-      }
-    } catch (e) { console.warn(`imdb-id ${m.id}: ${e.message}`); }
-    await sleep(150);
+      } catch (e) { console.warn(`imdb-id ${m.id}: ${e.message}`); }
+      await sleep(150);
+    }
   }
 
   // Tunable: neutral prior C and smoothing constant M (how many votes before a
@@ -351,11 +377,11 @@ async function main() {
   // Best available rating/votes: IMDb when present (more raters for Indian titles),
   // else TMDB. These drive both the quality floor and the ranking score.
   const bestRating = (m) => {
-    if (m._imdbRating != null) return m._imdbRating;
+    if (USE_IMDB && m._imdbRating != null) return m._imdbRating;
     if ((m.vote_count || 0) >= 10) return m.vote_average || 0;
     return null; // no usable rating yet
   };
-  const bestVotes = (m) => (m._imdbRating != null ? (m._imdbVotes || 0) : (m.vote_count || 0));
+  const bestVotes = (m) => ((USE_IMDB && m._imdbRating != null) ? (m._imdbVotes || 0) : (m.vote_count || 0));
   // Freshness is enforced by the POOL, not the ranking. Within the fresh pool we rank on
   // quality with an ADDITIVE form: rating sets the baseline and vote volume gives a gentle
   // confidence nudge — score = rating + 0.5*log10(votes+10). This means an excellent film
@@ -385,6 +411,10 @@ async function main() {
   // 1000 votes and 0.04 popularity, or a 9.2 with <600 votes and ~0 popularity). They beat
   // the normal quality floor precisely because their *rating* is high, so we reject them
   // explicitly. Thresholds are deliberately conservative so genuine films are never caught.
+  // NOTE: this guard (and looksReRelease below) are calibrated to IMDb's vote SCALE. In TMDB
+  // mode they become no-ops (m._imdbRating/_imdbVotes are null), since TMDB's far thinner vote
+  // counts would make these thresholds over-filter. That's intentional — if TMDB ever becomes
+  // the primary source, these two guards should be re-tuned against real TMDB vote volumes.
   const isSuspicious = (m) => {
     const r = m._imdbRating, v = m._imdbVotes || 0, p = m.popularity || 0;
     if (r == null) return false;                 // no IMDb rating -> not this failure mode
@@ -513,8 +543,10 @@ async function main() {
   const freshCutoff = new Date(Date.now() - FRESH_DAYS * 864e5).toISOString().slice(0, 10);
 
   // Resolve IMDb rating for a candidate (detail call -> dataset lookup). Sets _imdbRating
-  // so weighted402535 uses IMDb as the rating/votes signal, exactly like theatres.
+  // so weighted402535 uses IMDb as the rating/votes signal, exactly like theatres. No-op in
+  // TMDB mode (IMDb data unused) — skipping it avoids a wasted detail call per candidate.
   const attachImdb = async (c) => {
+    if (!USE_IMDB) return;
     try {
       const d = await tmdb(`/${c.kind}/${c.id}`, { append_to_response: "external_ids" });
       const imdbId = d.external_ids?.imdb_id;
@@ -905,8 +937,7 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
   <a class="btn" href="https://filmychill.com/#${e(item.slug)}">🎬 See this week's top picks on FilmyChill →</a>
 </div>
 <footer>
-  Film data and ratings from <a href="https://www.themoviedb.org" rel="noopener">TMDB</a>. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>
-  © 2026 FilmyChill · Made with ❤️ by Vikram Sharma
+  ${footerAttribution()}© 2026 FilmyChill · Vikram Sharma
 </footer>
 </body>
 </html>`;
@@ -1085,6 +1116,19 @@ function buildHomeJsonLd(data, cfg) {
   return JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
 }
 
+// Footer attribution text, matched to RATINGS_SOURCE so the credit always reflects the data
+// actually used. IMDb mode: TMDB credited for film data + IMDb credited for ratings using
+// IMDb's REQUIRED verbatim wording. TMDB mode: TMDB credited for both (no IMDb name anywhere,
+// since IMDb data isn't used and its terms forbid using its name without a current license).
+function footerAttribution() {
+  const tmdb = `<a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>`;
+  if (USE_IMDB) {
+    return `Film data from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  ` +
+           `Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>\n  `;
+  }
+  return `Film data and ratings from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  `;
+}
+
 // Render one country's page from the pristine template string and write it to its path
 // (root index.html for India, <code>/index.html for others). The template is read ONCE by
 // the caller and passed in, so per-country injections never stack on each other.
@@ -1097,6 +1141,7 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCard(x, i, isIndia)).join(""));
   html = replaceBetween(html, "SOON", (data.comingSoon || []).map(ssrSoonCard).join(""));
   html = replaceBetween(html, "JSONLD", buildHomeJsonLd(data, cfg));
+  html = replaceBetween(html, "ATTRIBUTION", footerAttribution());
   if (isIndia) {
     fs.writeFileSync("index.html", html);
   } else {
@@ -1130,4 +1175,5 @@ if (process.env.PAGES_ONLY && require.main === module) {
 module.exports = {
   verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween,
   assignSlugs, buildHeadTags, buildHomeJsonLd, ssrCard, ssrSoonCard,
+  footerAttribution, RATINGS_SOURCE, USE_IMDB,
 };
