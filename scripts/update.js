@@ -664,8 +664,15 @@ async function main() {
     } catch (e) { console.warn(`soon-discover ${cfg.code}/${lang}: ${e.message}`); }
     await sleep(150);
   }
+  // BUZZ FLOOR: upcoming films have no ratings, so popularity (anticipation) is the only
+  // quality signal. Drop films below this floor entirely — they enter neither the quota nor
+  // the fallback — so Coming Soon shows genuinely anticipated titles, even if that means
+  // fewer than SOON_MAX. (Obscure regional films often sit near ~1; real releases are far
+  // higher — e.g. major titles run into the hundreds.) Tunable: raise for stricter buzz.
+  const SOON_BUZZ_FLOOR = 12;
   const upPool = upPoolRaw
     .filter((m) => m.release_date && m.release_date > today)
+    .filter((m) => (m.popularity || 0) >= SOON_BUZZ_FLOOR) // only films with real anticipation
     .sort((a, b) => (b.popularity || 0) - (a.popularity || 0)); // most anticipated first
 
   const SOON_TARGETS = cfg.soonTargets;
@@ -704,6 +711,7 @@ async function main() {
       poster: img(m.poster_path),
       kind: "movie",
       tmdbId: m.id,
+      popularity: m.popularity ?? null, // buzz/anticipation signal (films are ranked by this)
     };
     // Full details so the modal can show trailer, backdrop, cast, runtime
     try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); } catch (e) { console.warn(`soon ${m.id}: ${e.message}`); }
