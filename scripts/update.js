@@ -405,45 +405,47 @@ async function main() {
   };
   // (qualityScore retired — ranking now uses the 40/35/25 weighted402535 score everywhere)
 
-  // Suspicious-entry guard: a real, currently-relevant film does not have an implausibly
-  // high rating on tiny volume, or a high rating with essentially zero audience interest.
-  // These are fake/erroneous TMDB records or vote-manipulated titles (e.g. a "10.0" with
-  // 1000 votes and 0.04 popularity, or a 9.2 with <600 votes and ~0 popularity). They beat
-  // the normal quality floor precisely because their *rating* is high, so we reject them
-  // explicitly. Thresholds are deliberately conservative so genuine films are never caught.
-  // NOTE: this guard (and looksReRelease below) are calibrated to IMDb's vote SCALE. In TMDB
-  // mode they become no-ops (m._imdbRating/_imdbVotes are null), since TMDB's far thinner vote
-  // counts would make these thresholds over-filter. That's intentional — if TMDB ever becomes
-  // the primary source, these two guards should be re-tuned against real TMDB vote volumes.
+  // Suspicious-entry guard: a real, currently-relevant film does not have an implausibly high
+  // rating on tiny volume, or a high rating with essentially zero audience interest. These are
+  // fake/erroneous records or vote-manipulated titles. Thresholds are mode-aware because IMDb
+  // and TMDB have very different vote SCALES (IMDb counts are ~10-50x TMDB's). Conservative in
+  // both modes so genuine films are never caught.
   const isSuspicious = (m) => {
-    const r = m._imdbRating, v = m._imdbVotes || 0, p = m.popularity || 0;
-    if (r == null) return false;                 // no IMDb rating -> not this failure mode
-    if (r >= 9.5 && v < 5000) return true;        // implausibly high rating, thin votes
-    if (r >= 8.5 && v < 3000 && p < 1.0) return true; // high rating but ~zero audience interest
+    const p = m.popularity || 0;
+    if (USE_IMDB) {
+      const r = m._imdbRating, v = m._imdbVotes || 0;
+      if (r == null) return false;
+      if (r >= 9.5 && v < 5000) return true;            // implausibly high rating, thin votes
+      if (r >= 8.5 && v < 3000 && p < 1.0) return true; // high rating but ~zero audience interest
+    } else {
+      const r = (m.vote_count || 0) >= 10 ? m.vote_average : null;
+      const v = m.vote_count || 0;
+      if (r == null) return false;
+      if (r >= 9.5 && v < 200) return true;             // TMDB scale: implausibly high on thin votes
+      if (r >= 9.0 && v < 100 && p < 2.0) return true;  // high rating, almost no votes, no buzz
+    }
     return false;
   };
-  // Bad-date / re-release guard: TMDB serves per-region release dates that are sometimes
-  // wrong — an old film gets a recent date for a particular country (re-release, streaming/
-  // anniversary date, or data error), so it wrongly appears as "now playing / fresh". The
-  // tell is the vote count: a genuinely new release cannot have accumulated tens of thousands
-  // of IMDb votes in days. So if a film's date looks recent (within the freshness window) but
   // Stale / re-release guard. TMDB's now_playing for a region sometimes returns OLD films —
-  // either re-releases actually back in cinemas, or stale regional listings — with high lifetime
-  // vote counts. Some keep their true old date (Top Gun 2022, Shrek 2001); others get a wrong
-  // recent regional date (Chandu Champion). A DATE check can't catch the honestly-old ones, so
-  // the reliable signal is BUZZ: a film genuinely drawing audiences now has high current
-  // popularity; an old film coasting on lifetime votes does not. We drop a film when it is
-  // "famous but not buzzing now", via two patterns tuned against real data:
-  //   (a) very famous, cooled off:  >50k votes AND popularity <80  (Top Gun 879k/25, Shrek 812k/26)
-  //   (b) moderately known, dead:   >20k votes AND popularity <5   (Chandu Champion 36k/1.5)
-  // Genuine current films pass: a real hit keeps high popularity (Obsession 91k/718), and a
-  // genuine new release simply hasn't got the vote volume to trip either pattern (I Am Frankelda
-  // 1.4k votes, Masters of the Universe 19k votes / pop 204). Thresholds are conservative.
+  // re-releases back in cinemas or stale regional listings — that wrongly appear "fresh". A
+  // DATE check can't catch the honestly-old ones, so the reliable signal is BUZZ: a film truly
+  // drawing audiences now has high current popularity; an old film coasting on lifetime votes
+  // does not. We drop "famous but not buzzing now" via two patterns. Popularity is the SAME
+  // field in both modes, but vote SCALE differs hugely (IMDb ~10-50x TMDB), so vote thresholds
+  // are mode-aware. IMDb refs: Top Gun 879k/pop25, Shrek 812k/pop26, Chandu Champion 36k/pop1.5.
+  // TMDB refs (much lower counts): Shrek ~18k, Top Gun Maverick ~11k; a days-old release rarely
+  // exceeds ~1-2k TMDB votes, so a high count + low popularity reliably means "old, not fresh".
   const looksReRelease = (m) => {
-    const v = m._imdbVotes || 0;
     const p = m.popularity || 0;
-    if (v > 50000 && p < 80) return true;  // famous catalogue title, not currently buzzing
-    if (v > 20000 && p < 5) return true;   // older title with essentially no current interest
+    if (USE_IMDB) {
+      const v = m._imdbVotes || 0;
+      if (v > 50000 && p < 80) return true;  // famous catalogue title, not currently buzzing
+      if (v > 20000 && p < 5) return true;   // older title with essentially no current interest
+    } else {
+      const v = m.vote_count || 0;           // TMDB vote scale
+      if (v > 3000 && p < 80) return true;   // famous catalogue title (Shrek/Top Gun), cooled off
+      if (v > 1000 && p < 5) return true;    // older title with essentially no current interest
+    }
     return false;
   };
   const clearsBar = (m) => {
@@ -482,10 +484,16 @@ async function main() {
   // the 5.5 floor + suspicious guard) takes the slot — so a standout outside the target set
   // can still make the list, and we never pad a slot with a weak film or leave it short.
   const TARGETS = cfg.theatreTargets;
-  const REP_BAR = 6.5;
+  // Representation rating bar. IMDb mode: 6.5 (IMDb has plenty of Indian raters, so this is a
+  // meaningful quality gate). TMDB mode: TMDB under-rates AND under-counts regional cinema
+  // (Western-skewed audience), so a 6.5 bar wrongly empties the Hindi/Tamil/Telugu quotas. Use
+  // a lower bar AND treat an absent rating as acceptable (a legit Hindi film with few TMDB votes
+  // must still be eligible for Hindi representation; it already cleared the pool's quality floor).
+  const REP_BAR = USE_IMDB ? 6.5 : 5.0;
+  const repRating = (m) => bestRating(m) ?? (USE_IMDB ? 0 : REP_BAR); // null fails in IMDb, passes in TMDB
   let picks = [];
   for (const [lang, n] of TARGETS) {
-    const langFilms = ranked.filter((m) => m.original_language === lang && (bestRating(m) ?? 0) >= REP_BAR && !picks.includes(m));
+    const langFilms = ranked.filter((m) => m.original_language === lang && repRating(m) >= REP_BAR && !picks.includes(m));
     for (let i = 0; i < n && i < langFilms.length; i++) picks.push(langFilms[i]);
   }
   // Soft fallback: fill any remaining slots (up to MAX_PICKS) with the best films of any
