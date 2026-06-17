@@ -765,6 +765,23 @@ async function main() {
     await sleep(150);
   }
 
+  // ---------- CROSS-SECTION DEDUP (a film must appear in only ONE section) ----------
+  // TMDB's now_playing for a region can include a film that is actually a STREAMING release
+  // (e.g. a Netflix original given a theatrical date), so the same title can land in both the
+  // theatres pool AND the OTT pool — showing twice, once wrongly under "In Theatres". OTT
+  // membership REQUIRES a real subscription (flatrate) provider in the region (buildOttItem
+  // returns null otherwise), so if a film is streamable, the streaming listing is the accurate
+  // and actionable one. Remove any such film from theatres so it shows once, under Streaming Now.
+  // (Theatrical-only films — and films merely available for digital rent/buy — have no flatrate
+  // provider, so they are never pulled out of theatres by this.)
+  const ottIds = new Set(ott.map((x) => x.tmdbId));
+  for (let i = theatres.length - 1; i >= 0; i--) {
+    if (ottIds.has(theatres[i].tmdbId)) {
+      console.log(`[${cfg.code}] dedup: "${theatres[i].title}" is streaming -> removed from theatres, kept in OTT`);
+      theatres.splice(i, 1);
+    }
+  }
+
   // ---------- PICK OF THE WEEK ----------
   // An endorsement must be earned: new films need >=6.5 to take the crown.
   // If no newcomer qualifies, a genuinely great holdover (>=7.0) can be re-featured.
