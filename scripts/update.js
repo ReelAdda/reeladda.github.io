@@ -1020,16 +1020,24 @@ async function main() {
   catch { pageTemplate = null; console.warn("index.html template not found — page render skipped"); }
 
   const builtCountries = [];
+  const dataByCode = {};
+  const allSlugSets = {};
+  // Pass 1: build data for every country (writes data-<code>.json; India also writes data.json).
   for (const cfg of COUNTRIES) {
     const data = await buildCountry(cfg);
     assignSlugs(data);
     fs.writeFileSync(`data-${cfg.code}.json`, JSON.stringify(data, null, 1));
+    if (cfg.code === "in") fs.writeFileSync("data.json", JSON.stringify(data, null, 1));
+    dataByCode[cfg.code] = data;
+    const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || [])];
+    allSlugSets[cfg.code] = new Set(all.map((x) => x.slug).filter(Boolean));
     builtCountries.push(cfg);
-    if (cfg.code === "in") {
-      generatePages(data); // per-film pages + sitemap (India only)
-      fs.writeFileSync("data.json", JSON.stringify(data, null, 1));
-    }
-    if (pageTemplate) renderCountryPage(pageTemplate, cfg, data);
+  }
+  // Pass 2: now that ALL slug sets are known, generate per-film pages for every country (so
+  // hreflang alternates between countries are accurate) and render each country homepage.
+  for (const cfg of COUNTRIES) {
+    generatePages(dataByCode[cfg.code], cfg, allSlugSets);
+    if (pageTemplate) renderCountryPage(pageTemplate, cfg, dataByCode[cfg.code]);
   }
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
   writeMultiCountrySitemap(builtCountries);
@@ -1076,17 +1084,36 @@ function ytIdOf(url) {
   return m ? m[1] : null;
 }
 
-function buildFilmPage(item, asOf, knownSlugs) {
+// Page path for a film in a given country. India keeps the legacy flat path /movie/<slug>.html
+// (preserves already-indexed URLs + the existing archive); other countries are namespaced under
+// /<code>/movie/<slug>.html so the same title in different markets never collides and each has
+// its own region-correct "where to watch". Used everywhere a film page is linked or written.
+function filmPagePath(code, slug) {
+  return code === "in" ? `/movie/${slug}.html` : `/${code}/movie/${slug}.html`;
+}
+function filmPageUrl(code, slug) {
+  return `https://filmychill.com${filmPagePath(code, slug)}`;
+}
+
+function buildFilmPage(item, asOf, knownSlugs, cfg) {
   const e = escHtml;
+  const code = (cfg && cfg.code) || "in";
+  const country = (cfg && cfg.name) || "India";
+  const homeUrl = code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`;
   const year = (item.released || "").slice(0, 4);
   const upcoming = item.released && item.released > new Date().toISOString().slice(0, 10);
   const relLabel = upcoming ? "Releases" : "Released";
   const synopsis = item.fullReview || item.review || "";
   const desc = trim([item.verdict, synopsis].filter(Boolean).join(". "), 155);
-  const url = `https://filmychill.com/movie/${item.slug}.html`;
+  const url = filmPageUrl(code, item.slug);
   const ytid = ytIdOf(item.trailer);
   const cast = Array.isArray(item.cast) ? item.cast.slice(0, 6) : [];
   const providers = Array.isArray(item.providers) ? item.providers : [];
+
+  // hreflang alternates: the SAME film may have a page in several countries. crossCountry maps
+  // code -> true for every other country whose current run also has this slug. Passed in by
+  // generatePages (it knows all countries' slug sets); absent for ad-hoc/test renders.
+  const alts = (item._alts && Array.isArray(item._alts)) ? item._alts : [];
 
   const ld = {
     "@context": "https://schema.org",
@@ -1109,7 +1136,7 @@ function buildFilmPage(item, asOf, knownSlugs) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "FilmyChill", item: "https://filmychill.com/" },
+      { "@type": "ListItem", position: 1, name: "FilmyChill", item: homeUrl },
       { "@type": "ListItem", position: 2, name: item.title, item: url },
     ],
   };
@@ -1136,9 +1163,9 @@ function buildFilmPage(item, asOf, knownSlugs) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${e(item.title)}${year ? " (" + year + ")" : ""} — Review, Rating & Where to Watch in India | FilmyChill</title>
+<title>${e(item.title)}${year ? " (" + year + ")" : ""} — Review, Rating & Where to Watch in ${e(country)} | FilmyChill</title>
 <meta name="description" content="${e(desc)}">
-<link rel="canonical" href="${e(url)}">
+<link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl("in", item.slug))}"/>` : ""}
 <meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="video.movie">
@@ -1187,7 +1214,7 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
 </style>
 </head>
 <body>
-<div class="top"><a href="https://filmychill.com/">FILMY<span>CHILL</span></a></div>
+<div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
 <div class="wrap">
   <div class="head">
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="72" height="106">` : "<div></div>"}
@@ -1204,17 +1231,17 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
   ${goodToKnow.length ? `<h2>Good to know</h2><table class="gtk">${goodToKnow.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : ""}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
   ${cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
-  ${providers.length ? `<h2>Where to watch in India</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${e(asOf || "")} — platforms may change over time.</p>` : item.platform === "Theatres" ? `<h2>Where to watch in India</h2><div><span class="pill">In theatres</span></div>` : ""}
+  ${providers.length ? `<h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${e(asOf || "")} — platforms may change over time.</p>` : item.platform === "Theatres" ? `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>` : ""}
   ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
   ${similar.length ? `<h2>If you liked this</h2><div class="simgrid">${similar.map((s) => {
     const exists = knownSlugs && knownSlugs.has(s.slug);
     const inner = `${s.poster ? `<img src="${e(s.poster)}" alt="${e(s.title)} poster" loading="lazy">` : ""}<div class="st">${e(s.title)}</div><div class="sm">${[s.language, s.kind === "tv" ? "Series" : "Film"].filter(Boolean).map(e).join(" · ")}</div>`;
     return exists
-      ? `<a class="simcard" href="/movie/${e(s.slug)}.html">${inner}</a>`
+      ? `<a class="simcard" href="${e(filmPagePath(code, s.slug))}">${inner}</a>`
       : `<div class="simcard" style="cursor:default">${inner}</div>`;
   }).join("")}</div>` : ""}
   ${faqs.length ? `<h2>Frequently asked</h2><div class="faq">${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("")}</div>` : ""}
-  <a class="btn" href="https://filmychill.com/#${e(item.slug)}">🎬 See this week's top picks on FilmyChill →</a>
+  <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">🎬 See this week's top picks on FilmyChill →</a>
 </div>
 <footer>
   ${footerAttribution()}© 2026 FilmyChill · Vikram Sharma
@@ -1223,50 +1250,87 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
 </html>`;
 }
 
-function generatePages(data) {
+// Generate per-film pages for ONE country. India writes to movie/ (flat, legacy); other
+// countries write to <code>/movie/. allSlugSets maps code -> Set(slugs) for EVERY country in
+// this run, so each page can emit hreflang alternates pointing only at countries that actually
+// have that film. knownSlugs (this country's own set + its archive) gates "If you liked this".
+function generatePages(data, cfg, allSlugSets) {
+  const code = (cfg && cfg.code) || "in";
+  const dir = code === "in" ? "movie" : `${code}/movie`;
   const asOf = (data.generatedAt || new Date().toISOString()).slice(0, 10);
-  if (!fs.existsSync("movie")) fs.mkdirSync("movie");
+  fs.mkdirSync(dir, { recursive: true });
   const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || [])];
-  // Slugs that will resolve to a real page: every film in this run, plus every page already
-  // archived on disk from past runs. "If you liked this" only links into this set so it never
-  // points at a non-existent page (a soft-404, which would hurt SEO rather than help).
-  const archived = fs.existsSync("movie")
-    ? fs.readdirSync("movie").filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5))
+  // Slugs that resolve to a real page in THIS country: this run + this country's archive.
+  const archived = fs.existsSync(dir)
+    ? fs.readdirSync(dir).filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5))
     : [];
   const knownSlugs = new Set([...archived, ...all.map((x) => x.slug).filter(Boolean)]);
+  // Other countries (in this run) that ALSO have this slug -> hreflang alternates.
+  const otherCodes = COUNTRIES.filter((c) => c.code !== code);
   let written = 0;
   for (const item of all) {
     if (!item.slug) continue;
+    item._alts = otherCodes
+      .filter((c) => allSlugSets && allSlugSets[c.code] && allSlugSets[c.code].has(item.slug))
+      .map((c) => ({ code: c.code, region: c.region }));
     try {
-      fs.writeFileSync(`movie/${item.slug}.html`, buildFilmPage(item, asOf, knownSlugs));
+      fs.writeFileSync(`${dir}/${item.slug}.html`, buildFilmPage(item, asOf, knownSlugs, cfg));
       written++;
-    } catch (err) { console.warn(`page ${item.slug}: ${err.message}`); }
+    } catch (err) { console.warn(`page ${code}/${item.slug}: ${err.message}`); }
+    finally { delete item._alts; }
   }
-  const pages = fs.readdirSync("movie").filter((f) => f.endsWith(".html"));
-  console.log(`Pages: ${written} written, ${pages.length} total in archive (India per-film pages).`);
+  const total = fs.readdirSync(dir).filter((f) => f.endsWith(".html")).length;
+  console.log(`Pages [${code}]: ${written} written, ${total} total in ${dir}/.`);
 }
 
-// Complete sitemap: every country page (with hreflang alternates linking them as the same
-// site for different regions) + India's per-film pages. Built after all countries render.
+// Complete sitemap: every country homepage (with hreflang alternates) + every country's
+// per-film pages. A film that exists in several countries gets hreflang alternates linking
+// those copies together; a film unique to one country stands alone.
 function writeMultiCountrySitemap(countries) {
   const today = new Date().toISOString().slice(0, 10);
   const pathFor = (code) => (code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`);
-  // hreflang alternates: list every country version + x-default (India).
-  const alternates = countries.map((c) =>
+  const homeAlts = countries.map((c) =>
     `    <xhtml:link rel="alternate" hreflang="${c.code === "in" ? "en-IN" : "en-" + c.region}" href="${pathFor(c.code)}"/>`).join("\n")
     + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/"/>`;
   const countryUrls = countries.map((c) =>
-    `  <url><loc>${pathFor(c.code)}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority>\n${alternates}\n  </url>`);
-  // India per-film pages (archive). Fresh ones get higher priority.
-  let filmUrls = [];
-  try {
-    const pages = fs.readdirSync("movie").filter((f) => f.endsWith(".html")).sort();
-    filmUrls = pages.map((f) =>
-      `  <url><loc>https://filmychill.com/movie/${f}</loc><lastmod>${today}</lastmod><priority>0.5</priority></url>`);
-  } catch (e) {}
+    `  <url><loc>${pathFor(c.code)}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority>\n${homeAlts}\n  </url>`);
+
+  // Per-film pages for every country. Build a map slug -> [codes that have it] so we can emit
+  // hreflang alternates for films shared across markets.
+  const dirFor = (code) => (code === "in" ? "movie" : `${code}/movie`);
+  const filmUrlFor = (code, slug) => (code === "in"
+    ? `https://filmychill.com/movie/${slug}.html`
+    : `https://filmychill.com/${code}/movie/${slug}.html`);
+  const slugCodes = {}; // slug -> Set(codes)
+  for (const c of countries) {
+    const dir = dirFor(c.code);
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".html"))) {
+      const slug = f.slice(0, -5);
+      (slugCodes[slug] = slugCodes[slug] || new Set()).add(c.code);
+    }
+  }
+  const regionOf = (code) => (countries.find((c) => c.code === code) || {}).region || code.toUpperCase();
+  let filmCount = 0;
+  const filmUrls = [];
+  for (const c of countries) {
+    const dir = dirFor(c.code);
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".html")).sort()) {
+      const slug = f.slice(0, -5);
+      const codes = [...(slugCodes[slug] || [])];
+      const alts = codes.length > 1
+        ? "\n" + codes.map((cc) =>
+            `    <xhtml:link rel="alternate" hreflang="${cc === "in" ? "en-IN" : "en-" + regionOf(cc)}" href="${filmUrlFor(cc, slug)}"/>`).join("\n")
+          + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${filmUrlFor("in", slug)}"/>`
+        : "";
+      filmUrls.push(`  <url><loc>${filmUrlFor(c.code, slug)}</loc><lastmod>${today}</lastmod><priority>0.5</priority>${alts ? alts + "\n  " : ""}</url>`);
+      filmCount++;
+    }
+  }
   fs.writeFileSync("sitemap.xml",
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${countryUrls.join("\n")}\n${filmUrls.join("\n")}\n</urlset>\n`);
-  console.log(`Sitemap: ${countries.length} country pages + ${filmUrls.length} film pages.`);
+  console.log(`Sitemap: ${countries.length} country pages + ${filmCount} film pages.`);
 }
 
 // Manual/local regeneration from existing data.json: PAGES_ONLY=1 node scripts/update.js
@@ -1277,7 +1341,7 @@ function writeMultiCountrySitemap(countries) {
 // "Loading fresh picks". The page JS replaces it on load.
 // ============================================================
 
-function ssrCard(item, i, isIndia) {
+function ssrCard(item, i, code) {
   const e = escHtml;
   const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null].filter(Boolean).map(e).join(" · ");
   const inner = `
@@ -1289,16 +1353,16 @@ function ssrCard(item, i, isIndia) {
       ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 110))}</p>` : ""}
     </div>`;
-  // Per-film pages exist only for India -> link there. Other countries render a non-link card
-  // (the page JS makes it interactive via the detail modal on load), avoiding broken links.
-  return isIndia
-    ? `<a class="card${item.poster ? "" : " no-poster"}" href="/movie/${e(item.slug)}.html" style="text-decoration:none;color:inherit">${inner}</a>`
+  // Every country now has its own per-film pages, so always link to this country's page.
+  // (`code` defaults to India for safety if a caller omits it.)
+  return item.slug
+    ? `<a class="card${item.poster ? "" : " no-poster"}" href="${e(filmPagePath(code || "in", item.slug))}" style="text-decoration:none;color:inherit">${inner}</a>`
     : `<div class="card${item.poster ? "" : " no-poster"}" style="color:inherit">${inner}</div>`;
 }
 
-function ssrSoonCard(item) {
+function ssrSoonCard(item, code) {
   const e = escHtml;
-  return `<a class="soon-card" href="/movie/${e(item.slug)}.html" style="text-decoration:none;color:inherit">
+  return `<a class="soon-card" href="${e(filmPagePath(code || "in", item.slug))}" style="text-decoration:none;color:inherit">
     ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
     <div class="soon-body">
       <div class="soon-date">${e(item.released || "")}</div>
@@ -1370,14 +1434,15 @@ function buildHomeJsonLd(data, cfg) {
   const m = COUNTRY_PAGE_META[(cfg && cfg.code) || "in"] || { name: "", path: "/" };
   const pageUrl = `https://filmychill.com${m.path}`;
   const date = (data.generatedAt || new Date().toISOString()).slice(0, 10);
-  // Per-film pages exist only for India; other countries' list items point to the country page.
-  const isIndia = !cfg || cfg.code === "in";
+  const code = (cfg && cfg.code) || "in";
+  const isIndia = code === "in";
+  // Every country now has its own per-film pages, so each list item links to its real page.
   const listItems = [...(data.theatres || []), ...(data.ott || [])]
     .filter((x) => x.slug)
     .map((x, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: isIndia ? `https://filmychill.com/movie/${x.slug}.html` : pageUrl,
+      url: filmPageUrl(code, x.slug),
       name: x.title,
     }));
   const listName = isIndia ? "What's worth watching this week" : `What's worth watching this week in ${m.name}`;
@@ -1426,9 +1491,9 @@ function renderCountryPage(templateHtml, cfg, data) {
   let html = templateHtml;
   html = replaceBetween(html, "HEAD", buildHeadTags(cfg));
   html = replaceBetween(html, "PAGECODE", `<meta name="fc-page" content="${cfg.code}">`);
-  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, isIndia)).join(""));
-  html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCard(x, i, isIndia)).join(""));
-  html = replaceBetween(html, "SOON", (data.comingSoon || []).map(ssrSoonCard).join(""));
+  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
+  html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
+  html = replaceBetween(html, "SOON", (data.comingSoon || []).map((x) => ssrSoonCard(x, cfg.code)).join(""));
   html = replaceBetween(html, "JSONLD", buildHomeJsonLd(data, cfg));
   html = replaceBetween(html, "ATTRIBUTION", footerAttribution());
   if (isIndia) {
@@ -1454,7 +1519,10 @@ function prerenderIndex(data) {
 if (process.env.PAGES_ONLY && require.main === module) {
   const d = JSON.parse(fs.readFileSync("data.json", "utf8"));
   assignSlugs(d);
-  generatePages(d);
+  const inCfg = COUNTRIES.find((c) => c.code === "in") || { code: "in", name: "India", region: "IN" };
+  const all = [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || [])];
+  const slugSets = { in: new Set(all.map((x) => x.slug).filter(Boolean)) };
+  generatePages(d, inCfg, slugSets); // India only in local regen
   prerenderIndex(d);
   fs.writeFileSync("data.json", JSON.stringify(d, null, 1));
   process.exit(0);
@@ -1467,4 +1535,5 @@ module.exports = {
   footerAttribution, RATINGS_SOURCE, USE_IMDB,
   deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
+  filmPagePath, filmPageUrl,
 };
