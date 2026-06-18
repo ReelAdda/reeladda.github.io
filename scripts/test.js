@@ -215,6 +215,45 @@ test("default footerAttribution() matches current mode (global wiring correct)",
   assert.strictEqual(U.footerAttribution(), U.footerAttribution(false));
 });
 
+// ---------------- OTT freshness gate (anti-staleness) ----------------
+// Guards the fix that stops perennial catalogue hits (Rick and Morty, The Boys) from
+// leaking into the "latest releases" OTT list via weekly trending, while still keeping
+// the NEW season of a returning hit show.
+const FRESH_NOW = new Date("2026-06-18T00:00:00Z").getTime();
+
+test("deriveFreshDate: movie uses release_date", () => {
+  assert.strictEqual(U.deriveFreshDate("movie", { release_date: "2026-06-08" }), "2026-06-08");
+});
+test("deriveFreshDate: TV uses LATEST non-special season air_date, not original launch", () => {
+  const d = { first_air_date: "2013-12-02", seasons: [
+    { season_number: 0, air_date: "2013-11-01" }, // specials ignored
+    { season_number: 7, air_date: "2024-10-20" },
+  ] };
+  assert.strictEqual(U.deriveFreshDate("tv", d), "2024-10-20");
+});
+test("deriveFreshDate: TV falls back to last_air_date when no season data", () => {
+  assert.strictEqual(U.deriveFreshDate("tv", { first_air_date: "2019-01-01", last_air_date: "2024-07-18" }), "2024-07-18");
+});
+test("isOttFresh: old catalogue title is dropped (Rick and Morty case)", () => {
+  // latest season 2024-10-20 is >75d before 2026-06-18 -> stale
+  assert.strictEqual(U.isOttFresh("2024-10-20", FRESH_NOW), false);
+});
+test("isOttFresh: returning hit's NEW season is kept", () => {
+  // a season aired 2026-06-01, well within window -> fresh
+  assert.strictEqual(U.isOttFresh("2026-06-01", FRESH_NOW), true);
+});
+test("isOttFresh: recent movie kept, old classic dropped", () => {
+  assert.strictEqual(U.isOttFresh("2026-06-08", FRESH_NOW), true);
+  assert.strictEqual(U.isOttFresh("1994-09-23", FRESH_NOW), false);
+});
+test("isOttFresh: null freshDate (too-new/undatable) is kept, never punished", () => {
+  assert.strictEqual(U.isOttFresh(null, FRESH_NOW), true);
+});
+test("isOttFresh: boundary at exactly OTT_FRESH_DAYS passes", () => {
+  const edge = new Date(FRESH_NOW - U.OTT_FRESH_DAYS * 864e5).toISOString().slice(0, 10);
+  assert.strictEqual(U.isOttFresh(edge, FRESH_NOW), true);
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
