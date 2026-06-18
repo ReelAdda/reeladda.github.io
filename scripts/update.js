@@ -167,6 +167,147 @@ function isOttFresh(freshDate, now = Date.now()) {
   return age <= OTT_FRESH_DAYS;
 }
 
+// ---- Enriched film-page content (all DETERMINISTIC: derived from fields we already have,
+// no LLM, no extra dependency). These produce ORIGINAL prose/structure so each /movie/*.html
+// page is not just TMDB's synopsis reworded — which is what lifts it for SEO. Pure + tested.
+
+// A multi-sentence verdict paragraph assembled from the item's own data. Distinct from the
+// short `verdict` label ("Worth a watch"). Deterministic templating keyed on rating band,
+// recency, runtime, and where-to-watch — no invented plot facts, so nothing can hallucinate.
+function buildVerdictProse(item) {
+  if (!item || !item.title) return "";
+  const r = item.rating;
+  const votes = item.imdbRating != null ? item.imdbVotes : item.votes;
+  const isTv = item.kind === "tv";
+  const noun = isTv ? "series" : "film";
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = item.released && item.released > today;
+
+  // Opening clause keyed on rating band (or recency when unrated).
+  let lead;
+  if (r == null || !votes || votes < 10) {
+    lead = upcoming
+      ? `${item.title} is one of the more anticipated ${item.language || ""} releases on the calendar`.replace(/\s+/g, " ")
+      : `${item.title} is a fresh ${item.language ? item.language + " " : ""}${noun} that's only just landed, so ratings are still settling`;
+  } else if (r >= 7.5) {
+    lead = `${item.title} lands among the stronger ${item.language || ""} ${noun}s on offer right now`.replace(/\s+/g, " ");
+  } else if (r >= 6.5) {
+    lead = `${item.title} is a solid, watchable ${item.language ? item.language + " " : ""}${noun} that mostly delivers on what it promises`;
+  } else if (r >= 5.5) {
+    lead = `${item.title} is a middling ${item.language ? item.language + " " : ""}${noun} — fine for a one-time watch but unlikely to stay with you`;
+  } else {
+    lead = `${item.title} struggles to land, and the ratings reflect a ${noun} that misfires more than it works`;
+  }
+
+  // Rating sentence (only when we actually have one with enough votes).
+  let ratingBit = "";
+  if (r != null && votes >= 10) {
+    const src = item.imdbRating != null ? "IMDb" : "TMDB";
+    ratingBit = ` It carries a ${Number(r).toFixed(1)}/10 on ${src} across ${Number(votes).toLocaleString("en-IN")} ratings, which puts it ${r >= 7 ? "comfortably above average" : r >= 6 ? "around the middle of the pack" : "below the bar for most viewers"}.`;
+  }
+
+  // Runtime / format note.
+  let formatBit = "";
+  if (item.runtime) {
+    formatBit = isTv
+      ? ` Episodes run about ${item.runtime} minutes.`
+      : item.runtime >= 150
+        ? ` At ${item.runtime} minutes it's a long sit, so save it for when you've got the evening.`
+        : item.runtime <= 100
+          ? ` It's a tight ${item.runtime}-minute watch — easy to fit into a busy night.`
+          : ` It runs a manageable ${item.runtime} minutes.`;
+  }
+
+  // Where-to-watch close.
+  let whereBit = "";
+  const provs = Array.isArray(item.providers) ? item.providers : [];
+  if (upcoming && item.released) {
+    whereBit = ` It releases ${item.released}; mark your calendar if it's on your list.`;
+  } else if (provs.length) {
+    whereBit = ` In India you can stream it on ${provs.slice(0, 3).join(", ")}.`;
+  } else if (item.platform === "Theatres") {
+    whereBit = ` It's in theatres in India now — best caught on the big screen.`;
+  }
+
+  return (lead.replace(/\.$/, "") + "." + ratingBit + formatBit + whereBit).trim();
+}
+
+// "Good to know" quick-scan facts. Returns an array of {label, value} pairs, each derived
+// deterministically. Skips any fact it can't fill so the table never shows blanks.
+function buildGoodToKnow(item) {
+  if (!item) return [];
+  const rows = [];
+  const isTv = item.kind === "tv";
+
+  if (item.runtime) {
+    const v = isTv ? `~${item.runtime} min per episode`
+      : item.runtime >= 150 ? `${item.runtime} min — long`
+      : item.runtime <= 100 ? `${item.runtime} min — short`
+      : `${item.runtime} min`;
+    rows.push({ label: "Runtime", value: v });
+  }
+  if (item.cert) {
+    const c = String(item.cert).toUpperCase();
+    // Order matters: check restrictive/age-gated patterns BEFORE bare "U", because "U/A 16+"
+    // starts with "U" but is NOT a universal rating.
+    const family =
+      /^(A|R|NC-17|18)/.test(c) ? "Adults only"
+      : /(U\/A|UA|12|13|14|15|16|PG-13)/.test(c) ? "Older kids & up"
+      : /^(U|G|7|PG)/.test(c) ? "Yes — family friendly"
+      : "Check rating";
+    rows.push({ label: "Watch with family?", value: `${item.cert} · ${family}` });
+  }
+  if (item.genre) rows.push({ label: "Genre", value: item.genre });
+  if (item.language) rows.push({ label: "Language", value: item.language });
+  const provs = Array.isArray(item.providers) ? item.providers : [];
+  if (provs.length) rows.push({ label: "Best screen", value: "Stream at home" });
+  else if (item.platform === "Theatres") rows.push({ label: "Best screen", value: "Theatre / big screen" });
+
+  return rows;
+}
+
+// FAQ entries (question + answer), deterministic, for both on-page display AND FAQPage
+// schema. Only questions we can answer truthfully from data are emitted.
+function buildFaqs(item) {
+  if (!item || !item.title) return [];
+  const faqs = [];
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = item.released && item.released > today;
+  const provs = Array.isArray(item.providers) ? item.providers : [];
+  const verdictLabel = item.verdict || "";
+
+  // Q1: worth watching
+  if (verdictLabel && !/verdict soon|enough ratings/i.test(verdictLabel)) {
+    faqs.push({
+      q: `Is ${item.title} worth watching?`,
+      a: `${verdictLabel}.${item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10.` : ""} See FilmyChill's full take above.`,
+    });
+  }
+  // Q2: where to watch
+  let whereA;
+  if (upcoming) whereA = `${item.title} hasn't released yet${item.released ? ` — it's due ${item.released}` : ""}. We'll list where to watch once it's out.`;
+  else if (provs.length) whereA = `You can stream ${item.title} in India on ${provs.join(", ")}.`;
+  else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across India. An OTT release hasn't been announced yet.`;
+  else whereA = `Streaming availability for ${item.title} in India isn't confirmed yet — check back as platforms update.`;
+  faqs.push({ q: `Where can I watch ${item.title}?`, a: whereA });
+
+  // Q3: family friendly (only if we have a cert)
+  if (item.cert) {
+    const c = String(item.cert).toUpperCase();
+    const a =
+      /^(A|R|NC-17|18)/.test(c) ? `${item.title} is rated ${item.cert} — aimed at adult audiences.`
+      : /(U\/A|UA|12|13|14|15|16|PG-13)/.test(c) ? `${item.title} is rated ${item.cert}. Fine for older kids with guidance.`
+      : /^(U|G|7|PG)/.test(c) ? `${item.title} is rated ${item.cert}, suitable for family viewing.`
+      : `${item.title} is rated ${item.cert}.`;
+    faqs.push({ q: `Is ${item.title} family friendly?`, a });
+  }
+  // Q4: language (helps regional long-tail search)
+  if (item.language) {
+    faqs.push({ q: `What language is ${item.title} in?`, a: `${item.title} is a ${item.language} ${item.kind === "tv" ? "series" : "film"}${item.genre ? ` (${item.genre})` : ""}.` });
+  }
+  return faqs;
+}
+
 function img(path, size = "w342") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
 }
@@ -210,7 +351,7 @@ let imdbRatings = new Map(); // populated at the start of main()
 
 async function enrich(kind, id, region = "IN") {
   const extra = kind === "movie" ? "release_dates" : "content_ratings";
-  const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,external_ids,${extra}` });
+  const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,external_ids,recommendations,${extra}` });
 
   // Certificate (India)
   let cert = null;
@@ -254,9 +395,23 @@ async function enrich(kind, id, region = "IN") {
     if (r && r.rating) { imdbScore = `${r.rating}/10`; imdbVotes = r.votes || 0; }
   }
 
+  // "If you liked this" — top recommendations from the SAME enrich call (appended above, so
+  // no extra round trip). We keep title + slug + light meta; the page links to each film's own
+  // page when it exists. slugify mirrors the client/page slug scheme so links resolve.
+  const recs = (d.recommendations?.results || [])
+    .filter((x) => (x.title || x.name) && x.poster_path)
+    .slice(0, 6)
+    .map((x) => ({
+      title: x.title || x.name,
+      slug: slugify(x.title || x.name),
+      poster: img(x.poster_path),
+      language: LANG[x.original_language] || x.original_language || null,
+      kind: x.media_type === "tv" || x.first_air_date ? "tv" : "movie",
+    }));
+
   return {
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
-    freshDate,
+    freshDate, similar: recs,
     backdrop: img(d.backdrop_path, "w780"),
     fullReview: trim(d.overview, 600),
   };
@@ -921,7 +1076,7 @@ function ytIdOf(url) {
   return m ? m[1] : null;
 }
 
-function buildFilmPage(item, asOf) {
+function buildFilmPage(item, asOf, knownSlugs) {
   const e = escHtml;
   const year = (item.released || "").slice(0, 4);
   const upcoming = item.released && item.released > new Date().toISOString().slice(0, 10);
@@ -959,6 +1114,23 @@ function buildFilmPage(item, asOf) {
     ],
   };
 
+  // --- Enriched, deterministic sections (original content -> SEO value) ---
+  const verdictProse = buildVerdictProse(item);
+  const goodToKnow = buildGoodToKnow(item);
+  const faqs = buildFaqs(item);
+  const similar = (Array.isArray(item.similar) ? item.similar : []).slice(0, 3);
+
+  // FAQPage schema — only when we have at least 2 Q&As (Google wants a real list).
+  const faqLd = faqs.length >= 2 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  } : null;
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -975,7 +1147,8 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
 <meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
-<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>
+<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>${faqLd ? `
+<script type="application/ld+json">${JSON.stringify(faqLd)}</script>` : ""}
 <style>
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
@@ -993,6 +1166,23 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
   .frame iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
   .btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
   footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
+  .vprose { font-size:15px; line-height:1.7; margin-top:8px; }
+  .gtk { width:100%; border-collapse:collapse; margin-top:8px; }
+  .gtk td { padding:9px 0; border-top:1px solid var(--line); font-size:14px; vertical-align:top; }
+  .gtk td:first-child { color:var(--mute); width:46%; }
+  .gtk td:last-child { font-weight:600; text-align:right; }
+  .simgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:8px; }
+  .simcard { display:block; background:#fff; border:1px solid var(--line); border-radius:10px; overflow:hidden; text-decoration:none; color:var(--ink); }
+  .simcard img { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; background:var(--line); }
+  .simcard .st { font-size:12.5px; font-weight:700; padding:8px 8px 2px; line-height:1.25; }
+  .simcard .sm { font-size:11px; color:var(--mute); padding:0 8px 8px; }
+  .faq { margin-top:8px; }
+  .faq details { border-top:1px solid var(--line); padding:10px 0; }
+  .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }
+  .faq summary::-webkit-details-marker { display:none; }
+  .faq summary::after { content:"+"; float:right; color:var(--indigo); font-weight:700; }
+  .faq details[open] summary::after { content:"–"; }
+  .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
   @media (max-width:420px){ .head { grid-template-columns:110px 1fr; } .poster { width:110px; } h1 { font-size:20px; } }
 </style>
 </head>
@@ -1009,11 +1199,21 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
       ${item.released ? `<div class="meta" style="margin-top:8px">${relLabel} ${e(item.released)}</div>` : ""}
     </div>
   </div>
+  ${verdictProse ? `<h2>The verdict</h2><p class="vprose">${e(verdictProse)}</p>` : ""}
   ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
+  ${goodToKnow.length ? `<h2>Good to know</h2><table class="gtk">${goodToKnow.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : ""}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
   ${cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
   ${providers.length ? `<h2>Where to watch in India</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${e(asOf || "")} — platforms may change over time.</p>` : item.platform === "Theatres" ? `<h2>Where to watch in India</h2><div><span class="pill">In theatres</span></div>` : ""}
   ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
+  ${similar.length ? `<h2>If you liked this</h2><div class="simgrid">${similar.map((s) => {
+    const exists = knownSlugs && knownSlugs.has(s.slug);
+    const inner = `${s.poster ? `<img src="${e(s.poster)}" alt="${e(s.title)} poster" loading="lazy">` : ""}<div class="st">${e(s.title)}</div><div class="sm">${[s.language, s.kind === "tv" ? "Series" : "Film"].filter(Boolean).map(e).join(" · ")}</div>`;
+    return exists
+      ? `<a class="simcard" href="/movie/${e(s.slug)}.html">${inner}</a>`
+      : `<div class="simcard" style="cursor:default">${inner}</div>`;
+  }).join("")}</div>` : ""}
+  ${faqs.length ? `<h2>Frequently asked</h2><div class="faq">${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("")}</div>` : ""}
   <a class="btn" href="https://filmychill.com/#${e(item.slug)}">🎬 See this week's top picks on FilmyChill →</a>
 </div>
 <footer>
@@ -1027,11 +1227,18 @@ function generatePages(data) {
   const asOf = (data.generatedAt || new Date().toISOString()).slice(0, 10);
   if (!fs.existsSync("movie")) fs.mkdirSync("movie");
   const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || [])];
+  // Slugs that will resolve to a real page: every film in this run, plus every page already
+  // archived on disk from past runs. "If you liked this" only links into this set so it never
+  // points at a non-existent page (a soft-404, which would hurt SEO rather than help).
+  const archived = fs.existsSync("movie")
+    ? fs.readdirSync("movie").filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5))
+    : [];
+  const knownSlugs = new Set([...archived, ...all.map((x) => x.slug).filter(Boolean)]);
   let written = 0;
   for (const item of all) {
     if (!item.slug) continue;
     try {
-      fs.writeFileSync(`movie/${item.slug}.html`, buildFilmPage(item, asOf));
+      fs.writeFileSync(`movie/${item.slug}.html`, buildFilmPage(item, asOf, knownSlugs));
       written++;
     } catch (err) { console.warn(`page ${item.slug}: ${err.message}`); }
   }
@@ -1259,4 +1466,5 @@ module.exports = {
   assignSlugs, buildHeadTags, buildHomeJsonLd, ssrCard, ssrSoonCard,
   footerAttribution, RATINGS_SOURCE, USE_IMDB,
   deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
+  buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
 };
