@@ -304,6 +304,48 @@ test("buildFaqs: never invents a 'worth watching' answer when verdict is a place
   assert.ok(!faqs.some((f) => /Is New worth watching/.test(f.q)));
 });
 
+// ---------------- Multi-country per-film pages (B) ----------------
+test("filmPagePath: India is flat, other countries are namespaced", () => {
+  assert.strictEqual(U.filmPagePath("in", "the-furious"), "/movie/the-furious.html");
+  assert.strictEqual(U.filmPagePath("us", "the-furious"), "/us/movie/the-furious.html");
+  assert.strictEqual(U.filmPagePath("de", "x"), "/de/movie/x.html");
+});
+test("filmPageUrl: absolute URL with correct country base", () => {
+  assert.strictEqual(U.filmPageUrl("in", "x"), "https://filmychill.com/movie/x.html");
+  assert.strictEqual(U.filmPageUrl("uk", "x"), "https://filmychill.com/uk/movie/x.html");
+});
+test("buildFilmPage: US page has US canonical, title, and where-to-watch", () => {
+  const item = { title: "The Furious", slug: "the-furious", kind: "movie", language: "English", platform: "Theatres", released: "2026-06-01" };
+  const html = U.buildFilmPage(item, "2026-06-17", new Set(["the-furious"]), { code: "us", name: "United States", region: "US" });
+  assert.ok(/rel="canonical" href="https:\/\/filmychill.com\/us\/movie\/the-furious.html"/.test(html));
+  assert.ok(/Where to Watch in United States/.test(html));
+  assert.ok(/<h2>Where to watch in United States<\/h2>/.test(html));
+});
+test("buildFilmPage: defaults to India when no cfg passed (backward compatible)", () => {
+  const item = { title: "X", slug: "x", kind: "movie", platform: "Theatres" };
+  const html = U.buildFilmPage(item, "2026-06-17", new Set(["x"]));
+  assert.ok(/rel="canonical" href="https:\/\/filmychill.com\/movie\/x.html"/.test(html));
+  assert.ok(/Where to Watch in India/.test(html));
+});
+test("buildFilmPage: hreflang alternates emitted for shared film", () => {
+  const item = { title: "Shared", slug: "shared", kind: "movie", platform: "Theatres", _alts: [{ code: "in", region: "IN" }] };
+  const html = U.buildFilmPage(item, "2026-06-17", new Set(["shared"]), { code: "us", name: "United States", region: "US" });
+  assert.ok(/hreflang="en-IN" href="https:\/\/filmychill.com\/movie\/shared.html"/.test(html));
+  assert.ok(/hreflang="x-default"/.test(html));
+});
+test("buildFilmPage: 'If you liked this' links use the page's own country namespace", () => {
+  const item = { title: "Main", slug: "main", kind: "movie", platform: "Theatres",
+    similar: [{ title: "Rec", slug: "rec", poster: "https://image.tmdb.org/t/p/w342/a.jpg", language: "English", kind: "movie" }] };
+  const html = U.buildFilmPage(item, "2026-06-17", new Set(["main", "rec"]), { code: "us", name: "United States", region: "US" });
+  assert.ok(/href="\/us\/movie\/rec.html"/.test(html));
+});
+test("ssrCard: links to the country's film page path", () => {
+  const card = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Theatres" }, 0, "us");
+  assert.ok(/href="\/us\/movie\/t.html"/.test(card));
+  const inCard = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Theatres" }, 0, "in");
+  assert.ok(/href="\/movie\/t.html"/.test(inCard));
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
