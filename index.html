@@ -622,6 +622,14 @@ function render() {
 
 function slugify(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
 
+// Per-film page path for the CURRENT country. India is flat (/movie/<slug>.html); other
+// countries are namespaced (/<code>/movie/<slug>.html). FC_PAGE is set below from the DOM.
+function filmPagePath(slug) {
+  return (typeof FC_PAGE !== 'undefined' && FC_PAGE !== 'in')
+    ? '/' + FC_PAGE + '/movie/' + slug + '.html'
+    : '/movie/' + slug + '.html';
+}
+
 function findBySlug(slug) {
   for (const k of ['theatres', 'ott', 'comingSoon']) {
     const i = (DATA[k] || []).findIndex(x => slugify(x.title) === slug);
@@ -764,7 +772,7 @@ function openDetail(listKey, i) {
       })()}
       <button class="share-film-btn" onclick="shareFilm('${listKey}', ${i})">📲 Share<span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span></button>
       ${item.released && item.released > new Date().toISOString().slice(0, 10) ? `<button class="trailer-btn" style="background:var(--marigold);color:var(--ink);margin-left:8px" onclick="remindMe('${listKey}', ${i})">🗓 Remind me</button>` : ''}
-      ${item.slug ? `<a class="trailer-btn" style="background:transparent;color:var(--indigo);border:1.5px solid var(--indigo);margin-left:8px" href="/movie/${esc(item.slug)}.html">📄 Full page</a>` : ''}
+      ${item.slug ? `<a class="trailer-btn" style="background:transparent;color:var(--indigo);border:1.5px solid var(--indigo);margin-left:8px" href="${filmPagePath(item.slug)}">📄 Full page</a>` : ''}
       <a class="trailer-btn" style="background:var(--marigold);color:var(--ink);margin-left:8px" href="#" onclick="event.preventDefault(); toggleSave('${listKey}', ${i}); closeDetail();">${isSaved(item) ? '★ Remove from My List' : '☆ Add to My List'}</a>
     </div>`;
   history.replaceState(null, '', '#' + slugify(item.title));
