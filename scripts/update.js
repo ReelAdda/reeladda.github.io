@@ -138,6 +138,35 @@ function trim(text, n = 160) {
   return text.length <= n ? text : text.slice(0, n).replace(/\s+\S*$/, "") + "…";
 }
 
+// OTT freshness window: how recent a title's freshDate must be to count as a current OTT
+// release. Wider than theatres' 21d because "new this month/two months" is the relevant
+// sense of fresh for streaming. Exported + used by the OTT intl gate and the test suite.
+const OTT_FRESH_DAYS = 75;
+
+// Derive the freshness date for an OTT title from a TMDB detail object.
+// MOVIE: its release_date. TV: the air date of the most recent NON-special season (season 0
+// is specials) — NOT the series' original launch, which for a long-running show (Rick and
+// Morty = 2013) is meaningless for "is it fresh now". Falls back to last_air_date /
+// first_air_date when per-season data is absent. Pure function -> unit-testable.
+function deriveFreshDate(kind, d) {
+  if (!d) return null;
+  if (kind === "movie") return d.release_date || null;
+  const seasonDates = (d.seasons || [])
+    .filter((s) => s.season_number > 0 && s.air_date)
+    .map((s) => s.air_date);
+  return seasonDates.length ? seasonDates.sort().pop() : (d.last_air_date || d.first_air_date || null);
+}
+
+// Is an OTT item fresh enough to list? A null freshDate means TMDB has no date yet (genuinely
+// too new) -> kept, so we never punish brand-new titles. A future or within-window date passes;
+// anything older than OTT_FRESH_DAYS is a rewatch/catalogue title and is dropped. `now` is
+// injectable for deterministic tests. Pure function -> unit-testable.
+function isOttFresh(freshDate, now = Date.now()) {
+  if (!freshDate) return true;
+  const age = (now - new Date(freshDate).getTime()) / 864e5;
+  return age <= OTT_FRESH_DAYS;
+}
+
 function img(path, size = "w342") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
 }
@@ -211,6 +240,9 @@ async function enrich(kind, id, region = "IN") {
 
   const runtime = kind === "movie" ? d.runtime : (d.episode_run_time?.[0] || null);
 
+  // Freshness signal for the OTT pool — see deriveFreshDate (handles movie vs TV-season logic).
+  const freshDate = deriveFreshDate(kind, d);
+
   // IMDb rating via OMDb (optional). IMDb's base has more Indian raters than TMDB,
   // IMDb rating from the daily dataset (loaded once into imdbRatings). IMDb's base
   // has more Indian raters than TMDB, so it's a useful second opinion. Cheap in-memory
@@ -224,6 +256,7 @@ async function enrich(kind, id, region = "IN") {
 
   return {
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
+    freshDate,
     backdrop: img(d.backdrop_path, "w780"),
     fullReview: trim(d.overview, 600),
   };
@@ -550,6 +583,14 @@ async function main() {
   const FRESH_DAYS = 30;
   const freshCutoff = new Date(Date.now() - FRESH_DAYS * 864e5).toISOString().slice(0, 10);
 
+  // OTT staleness gate. Trending-this-week is a freshness PROXY, but perennial catalogue
+  // hits (Rick and Morty, The Boys) trend every week on rewatches, so the proxy leaks
+  // all-time classics into a "latest releases" list. The fix is a real recency check on
+  // the item's freshDate (movie release date, or a TV series' LATEST-season air date — not
+  // its original launch). This keeps a returning hit's NEW season (recent freshDate) while
+  // dropping an old show with no recent season. See isOttFresh/OTT_FRESH_DAYS (module scope).
+  const ottIsFresh = (item) => item && isOttFresh(item.freshDate);
+
   // Resolve IMDb rating for a candidate (detail call -> dataset lookup). Sets _imdbRating
   // so weighted402535 uses IMDb as the rating/votes signal, exactly like theatres. No-op in
   // TMDB mode (IMDb data unused) — skipping it avoids a wasted detail call per candidate.
@@ -584,13 +625,24 @@ async function main() {
     ...trTv.results.map((t) => ({ ...t, kind: "tv" })),
   ].filter((c) => !isRegional(c) && !EXCLUDE_IDS.has(c.id));
   for (const c of intlCands) { await attachImdb(c); await sleep(150); }
-  intlCands = intlCands.filter((c) => !isSuspicious(c)); // drop fake/manipulated entries
+  // Drop fake/manipulated entries AND famous-but-not-currently-buzzing catalogue titles
+  // (looksReRelease) — the same buzz guard theatres use, which the OTT intl pool previously
+  // skipped. This is the cheap first cut; the authoritative recency check (ottIsFresh) runs
+  // after build, once enrich() has resolved each title's real freshDate.
+  intlCands = intlCands.filter((c) => !isSuspicious(c) && !looksReRelease(c));
   intlCands.sort((a, b) => weighted402535(b) - weighted402535(a));
 
   const intl = [], usedIds = new Set();
   for (const c of intlCands) {
     if (intl.length >= OTT_INTL_CAP) break;
-    try { const it = await buildOttItem(c); if (it) { intl.push(it); usedIds.add(c.id); } }
+    try {
+      const it = await buildOttItem(c);
+      // Recency gate: keep only genuinely-fresh titles. A trending old movie, or an old
+      // series with no recent season, fails here and we move on to the next candidate —
+      // so the slot goes to a genuinely new release instead of an all-time classic.
+      if (it && ottIsFresh(it)) { intl.push(it); usedIds.add(c.id); }
+      else if (it) console.log(`  ott-intl skip (stale): ${it.title} freshDate=${it.freshDate}`);
+    }
     catch (e) { console.warn(`ott-intl ${c.id}: ${e.message}`); }
     await sleep(150);
   }
@@ -647,7 +699,10 @@ async function main() {
     for (const c of intlCands) {
       if (intl.length + regional.length >= OTT_MAX) break;
       if (usedIds.has(c.id)) continue;
-      try { const it = await buildOttItem(c); if (it) { intl.push(it); usedIds.add(c.id); } }
+      try {
+        const it = await buildOttItem(c);
+        if (it && ottIsFresh(it)) { intl.push(it); usedIds.add(c.id); } // same recency gate as the main pass
+      }
       catch (e) { console.warn(`ott-backfill ${c.id}: ${e.message}`); }
       await sleep(150);
     }
@@ -1203,4 +1258,5 @@ module.exports = {
   verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween,
   assignSlugs, buildHeadTags, buildHomeJsonLd, ssrCard, ssrSoonCard,
   footerAttribution, RATINGS_SOURCE, USE_IMDB,
+  deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
 };
