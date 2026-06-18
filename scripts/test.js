@@ -254,6 +254,56 @@ test("isOttFresh: boundary at exactly OTT_FRESH_DAYS passes", () => {
   assert.strictEqual(U.isOttFresh(edge, FRESH_NOW), true);
 });
 
+// ---------------- Enriched film-page sections (deterministic content) ----------------
+test("buildVerdictProse: high-rated film gets a strong lead + rating sentence", () => {
+  const p = U.buildVerdictProse({ title: "Test", kind: "movie", language: "Telugu", rating: 8.2, votes: 5000, runtime: 140, providers: ["Netflix"] });
+  assert.ok(p.includes("Test"));
+  assert.ok(/8\.2\/10/.test(p));
+  assert.ok(/Netflix/.test(p));
+});
+test("buildVerdictProse: unrated/too-new film does not fabricate a rating", () => {
+  const p = U.buildVerdictProse({ title: "Brandnew", kind: "movie", language: "Hindi", rating: null, votes: 0, released: "2099-01-01" });
+  assert.ok(!/\/10/.test(p)); // no rating invented
+});
+test("buildVerdictProse: empty item returns empty string", () => {
+  assert.strictEqual(U.buildVerdictProse(null), "");
+  assert.strictEqual(U.buildVerdictProse({}), "");
+});
+test("buildGoodToKnow: U/A 16+ is NOT labelled family friendly (cert order bug guard)", () => {
+  const rows = U.buildGoodToKnow({ cert: "U/A 16+", runtime: 120, genre: "Action", language: "Hindi" });
+  const fam = rows.find((r) => r.label === "Watch with family?");
+  assert.ok(fam && /Older kids/.test(fam.value));
+  assert.ok(fam && !/family friendly/.test(fam.value));
+});
+test("buildGoodToKnow: bare U cert IS family friendly", () => {
+  const rows = U.buildGoodToKnow({ cert: "U" });
+  const fam = rows.find((r) => r.label === "Watch with family?");
+  assert.ok(fam && /family friendly/.test(fam.value));
+});
+test("buildGoodToKnow: A cert is adults only", () => {
+  const rows = U.buildGoodToKnow({ cert: "A" });
+  const fam = rows.find((r) => r.label === "Watch with family?");
+  assert.ok(fam && /Adults only/.test(fam.value));
+});
+test("buildGoodToKnow: skips rows it can't fill (no blanks)", () => {
+  const rows = U.buildGoodToKnow({ title: "X" }); // no cert/runtime/genre/lang/providers
+  assert.strictEqual(rows.length, 0);
+});
+test("buildFaqs: produces a where-to-watch Q for a theatre film", () => {
+  const faqs = U.buildFaqs({ title: "Cine", platform: "Theatres", verdict: "Worth a watch", rating: 7 });
+  assert.ok(faqs.some((f) => /Where can I watch Cine/.test(f.q)));
+  assert.ok(faqs.some((f) => /theatres/i.test(f.a)));
+});
+test("buildFaqs: upcoming film says it hasn't released", () => {
+  const faqs = U.buildFaqs({ title: "Soon", released: "2099-01-01", language: "Hindi" });
+  const where = faqs.find((f) => /Where can I watch/.test(f.q));
+  assert.ok(where && /hasn't released/.test(where.a));
+});
+test("buildFaqs: never invents a 'worth watching' answer when verdict is a placeholder", () => {
+  const faqs = U.buildFaqs({ title: "New", verdict: "Just released — verdict soon", platform: "Theatres" });
+  assert.ok(!faqs.some((f) => /Is New worth watching/.test(f.q)));
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
