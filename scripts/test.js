@@ -300,6 +300,21 @@ test("filterTheatreFresh: future-dated film is kept (release-day timezone edge)"
   assert.ok(out.some((m) => m.title === "Tomorrow"));
 });
 
+// ---------------- Head-tag ratings wording follows the active source ----------------
+// Guards the fix for the Google snippet claiming "IMDb ratings" while RATINGS_SOURCE=tmdb.
+// IMDb's name may only appear when IMDb data is actually used (its terms require a license).
+test("buildHeadTags: TMDB mode never mentions IMDb (root + country pages)", () => {
+  assert.ok(!U.buildHeadTags({ code: "in", name: "India" }, false).includes("IMDb"));
+  assert.ok(!U.buildHeadTags({ code: "us", name: "United States" }, false).includes("IMDb"));
+});
+test("buildHeadTags: TMDB mode still promises ratings, just unbranded", () => {
+  assert.ok(U.buildHeadTags({ code: "in", name: "India" }, false).includes("ratings, verdicts"));
+});
+test("buildHeadTags: IMDb mode keeps the IMDb wording", () => {
+  assert.ok(U.buildHeadTags({ code: "in", name: "India" }, true).includes("IMDb ratings"));
+  assert.ok(U.buildHeadTags({ code: "de", name: "Germany" }, true).includes("IMDb ratings"));
+});
+
 // ---------------- OTT recency-decay ranking bonus ----------------
 // Guards the fix that stops a high-rated near-expiry season from camping in the OTT top 3
 // above week-old drops (the FROM-at-74-days case). Gate decides admission; bonus decides order.
