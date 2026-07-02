@@ -167,6 +167,87 @@ function isOttFresh(freshDate, now = Date.now()) {
   return age <= OTT_FRESH_DAYS;
 }
 
+// Theatre freshness gate. THEATRE_WINDOW_DAYS previously only date-gated the per-language
+// discover SUPPLEMENT — the now_playing pool passed through ungated, and TMDB keeps films
+// in now_playing for many weeks, so month-old titles could top "Latest big-screen releases".
+// filterTheatreFresh gates the WHOLE merged pool by release_date. SOFT: if the strict
+// 21-day window leaves too few films to fill the section well (a quiet release week), it
+// widens ONCE to the fallback window rather than shipping a thin list — freshness first,
+// but never an empty section. A film with NO release_date can't prove freshness and is
+// dropped (unlike OTT's null-keeps rule: theatrical releases always carry a date, so a
+// missing one signals a junk record, not a too-new title). Future-dated films are kept
+// (release-day timezone edge: TMDB dates are region-primary and can sit a few hours ahead).
+// `now` is injectable for deterministic tests. Pure function -> unit-testable.
+const THEATRE_WINDOW_DAYS = 21;          // strict 3-week window
+const THEATRE_WINDOW_FALLBACK_DAYS = 35; // widened once when the strict pool runs thin
+const THEATRE_MIN_POOL = 8;              // enough candidates to fill 7 slots with choice
+function filterTheatreFresh(pool, now = Date.now()) {
+  const within = (m, days) => {
+    if (!m.release_date) return false;
+    const age = (now - new Date(m.release_date).getTime()) / 864e5;
+    return age <= days;
+  };
+  const strict = pool.filter((m) => within(m, THEATRE_WINDOW_DAYS));
+  if (strict.length >= THEATRE_MIN_POOL) return strict;
+  return pool.filter((m) => within(m, THEATRE_WINDOW_FALLBACK_DAYS));
+}
+
+// OTT recency-decay ranking bonus. The 75-day gate (isOttFresh) decides WHO may be on the
+// list; this decides WHERE within it. Without it, ranking inside the window was pure
+// quality, so a high-rated near-expiry season could camp at #3 above week-old drops for
+// weeks (the FROM-at-74-days case). Linear decay from OTT_RECENCY_MAX at freshDate=today
+// to 0 at OTT_FRESH_DAYS, on the same 0..1 scale as the weighted402535 score (whose base
+// spans roughly 0.4..1.0) — enough that among comparable titles the newest leads, but a
+// clearly stronger title still holds its slot. Null or future freshDate -> 0 (recency
+// can't be proven for ranking; the gate already decided admission). Pure -> unit-testable.
+const OTT_RECENCY_MAX = 0.15;
+function ottRecencyBonus(freshDate, now = Date.now()) {
+  if (!freshDate) return 0;
+  const age = (now - new Date(freshDate).getTime()) / 864e5;
+  if (age < 0 || age > OTT_FRESH_DAYS) return 0;
+  return OTT_RECENCY_MAX * (1 - age / OTT_FRESH_DAYS);
+}
+
+// Freshness badge for a card, derived from freshDate — the REAL recency signal (a movie's
+// release date, or a TV series' LATEST-season air date). The old badge keyed off
+// release_date/first_air_date, so a returning show's new season could never earn one
+// (first_air_date is the series' original launch — 2022 for House of the Dragon). Movies:
+// "New release" within 7 days. TV: 14 days (streaming seasons roll out weekly — a season
+// is still news in week two), labelled "New show" for a first season and "New season" for
+// a returning one. Small negative-age tolerance covers release-day timezone skew; anything
+// further in the future gets no badge (it isn't out). Pure -> unit-testable.
+const BADGE_MOVIE_DAYS = 7, BADGE_TV_DAYS = 14;
+function freshBadge(kind, freshDate, now = Date.now(), seasonCount = null) {
+  if (!freshDate) return null;
+  const age = (now - new Date(freshDate).getTime()) / 864e5;
+  if (age < -1) return null; // not released yet
+  if (kind === "tv") {
+    if (age > BADGE_TV_DAYS) return null;
+    return seasonCount === 1 ? "New show" : "New season";
+  }
+  return age <= BADGE_MOVIE_DAYS ? "New release" : null;
+}
+
+// Human-readable freshness line for a card's meta row, so recency is VISIBLE, not implied:
+// "Released 12 Jun" for movies, "Latest season 21 Jun" for TV (whose `released` field is
+// the series' original launch and would mislead). Year is appended only when it differs
+// from the current year, so a Dec title shown in Jan still reads unambiguously. Must stay
+// in sync with the client-side freshLabel()/fmtDate() in index.html. Pure -> unit-testable.
+function fmtDateShort(dateStr, now = Date.now()) {
+  const dt = new Date(dateStr);
+  const opts = { day: "numeric", month: "short" };
+  if (dt.getFullYear() !== new Date(now).getFullYear()) opts.year = "numeric";
+  return dt.toLocaleDateString("en-IN", opts);
+}
+function freshLabel(item, now = Date.now()) {
+  // TV needs freshDate (latest season, not the series launch). Movies prefer `released`
+  // (the region-localized date the modal already shows) over freshDate (TMDB's global
+  // primary date), so the card and modal never show two different dates for one film.
+  const d = item.kind === "tv" ? (item.freshDate || item.released) : (item.released || item.freshDate);
+  if (!d) return "";
+  return (item.kind === "tv" ? "Latest season " : "Released ") + fmtDateShort(d, now);
+}
+
 // ---- Enriched film-page content (all DETERMINISTIC: derived from fields we already have,
 // no LLM, no extra dependency). These produce ORIGINAL prose/structure so each /movie/*.html
 // page is not just TMDB's synopsis reworded — which is what lifts it for SEO. Pure + tested.
@@ -384,6 +465,14 @@ async function enrich(kind, id, region = "IN") {
   // Freshness signal for the OTT pool — see deriveFreshDate (handles movie vs TV-season logic).
   const freshDate = deriveFreshDate(kind, d);
 
+  // Card badge from freshDate (see freshBadge, module scope). Season count distinguishes a
+  // brand-new show from a returning one. This also OVERRIDES baseItem's isRecent, which was
+  // computed from release_date/first_air_date and therefore could never flag a returning
+  // show's new season. isRecent stays semantically "badge-worthy new" for downstream users
+  // (Pick of the Week eligibility).
+  const seasonCount = kind === "tv" ? (d.seasons || []).filter((s) => s.season_number > 0).length : null;
+  const badge = freshBadge(kind, freshDate, Date.now(), seasonCount);
+
   // IMDb rating via OMDb (optional). IMDb's base has more Indian raters than TMDB,
   // IMDb rating from the daily dataset (loaded once into imdbRatings). IMDb's base
   // has more Indian raters than TMDB, so it's a useful second opinion. Cheap in-memory
@@ -411,7 +500,7 @@ async function enrich(kind, id, region = "IN") {
 
   return {
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
-    freshDate, similar: recs,
+    freshDate, badge, isRecent: badge != null, similar: recs,
     backdrop: img(d.backdrop_path, "w780"),
     fullReview: trim(d.overview, 600),
   };
@@ -497,7 +586,7 @@ async function main() {
   // Seed `seen` with the manual exclusion list so blocked films (banned/pulled/mislisted)
   // are skipped everywhere the pool is built below — both now_playing and discover.
   const seen = new Set(EXCLUDE_IDS);
-  const pool = [...np1.results, ...(np2.results || [])].filter((m) => {
+  let pool = [...np1.results, ...(np2.results || [])].filter((m) => {
     if (seen.has(m.id)) { return false; } seen.add(m.id); return true;
   });
 
@@ -507,7 +596,7 @@ async function main() {
   // limited theatrical (not direct-to-OTT), and a 3-week window keeps it current — wide
   // enough for films still running, tight enough to avoid resurfacing the back catalogue.
   // These merge into the pool on equal footing; the normal ranking decides what's picked.
-  const THEATRE_WINDOW_DAYS = 21; // 3-week freshness filter
+  // (THEATRE_WINDOW_DAYS lives at module scope now — it gates the WHOLE pool, not just this query.)
   const theatreCutoff = new Date(Date.now() - THEATRE_WINDOW_DAYS * 864e5).toISOString().slice(0, 10);
   const todayStr = new Date().toISOString().slice(0, 10);
   // Priority languages for theatre representation: Hindi, Tamil, Telugu. Discover queries
@@ -531,6 +620,14 @@ async function main() {
     } catch (e) { console.warn(`theatre-discover ${lang}: ${e.message}`); }
     await sleep(150);
   }
+
+  // Gate the WHOLE pool by the freshness window (filterTheatreFresh, module scope). This is
+  // the fix for month-old now_playing films topping "Latest big-screen releases": discover
+  // results were already date-gated by their query, but now_playing results were not. Runs
+  // BEFORE IMDb enrichment so stale films never cost detail calls.
+  const poolBeforeGate = pool.length;
+  pool = filterTheatreFresh(pool);
+  console.log(`  theatre pool: ${poolBeforeGate} -> ${pool.length} after freshness gate (${THEATRE_WINDOW_DAYS}d window)`);
 
   // Attach IMDb rating to each pool film BEFORE ranking, so IMDb (which has far more
   // Indian raters than TMDB) drives selection — not just display. One detail call per
@@ -767,6 +864,7 @@ async function main() {
     if (!extra.providers || extra.providers.length === 0) return null; // not streaming in India
     Object.assign(item, extra, { platform: extra.providers[0] });
     withImdb(item);
+    item._w = weighted402535(c); // quality score kept for the recency re-rank below (stripped before write)
     return item;
   };
 
@@ -862,6 +960,15 @@ async function main() {
       await sleep(150);
     }
   }
+
+  // --- Recency-decay re-rank (see ottRecencyBonus, module scope). Selection above is
+  //     quality-greedy; ORDER is quality + freshness, so this week's drops lead and a
+  //     near-expiry season sinks toward the bottom instead of camping in the top 3.
+  //     Pools are re-ranked separately so the regional-visibility interleave below keeps
+  //     working on two internally-ordered lists. ---
+  const ottOrder = (it) => (it._w || 0) + ottRecencyBonus(it.freshDate);
+  intl.sort((a, b) => ottOrder(b) - ottOrder(a));
+  regional.sort((a, b) => ottOrder(b) - ottOrder(a));
 
   // --- Interleave so regional stays visible instead of sinking below the international ---
   const ott = [];
@@ -1004,7 +1111,7 @@ async function main() {
   const data = { generatedAt: new Date().toISOString(), country: cfg.code, pick: pick ? pick.title : null, theatres, ott, comingSoon };
   // Strip internal-only fields (ranking helpers) so they never reach the data file.
   for (const list of [data.theatres, data.ott, data.comingSoon]) {
-    for (const it of list) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; delete it._imdbRating; delete it._imdbVotes; }
+    for (const it of list) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; delete it._imdbRating; delete it._imdbVotes; delete it._w; }
   }
   console.log(`[${cfg.code}] ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming. Pick: ${data.pick}`);
   return data;
@@ -1343,12 +1450,16 @@ function writeMultiCountrySitemap(countries) {
 
 function ssrCard(item, i, code) {
   const e = escHtml;
-  const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null].filter(Boolean).map(e).join(" · ");
+  // Badge text comes from the data (freshBadge). Fallback to the old isRecent flag so a
+  // template regen against a pre-badge data.json still renders sensibly.
+  const badge = item.badge || (item.isRecent ? "New release" : null);
+  const when = freshLabel(item);
+  const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null, when || null].filter(Boolean).map(e).join(" · ");
   const inner = `
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
     <div>
-      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${item.isRecent ? '<span class="fresh-badge">New release</span>' : ""}</div>
+      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}</div>
       <div class="meta">${bits}</div>
       ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 110))}</p>` : ""}
@@ -1534,6 +1645,8 @@ module.exports = {
   assignSlugs, buildHeadTags, buildHomeJsonLd, ssrCard, ssrSoonCard,
   footerAttribution, RATINGS_SOURCE, USE_IMDB,
   deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
+  filterTheatreFresh, THEATRE_WINDOW_DAYS, THEATRE_WINDOW_FALLBACK_DAYS, THEATRE_MIN_POOL,
+  ottRecencyBonus, OTT_RECENCY_MAX, freshBadge, freshLabel, fmtDateShort,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
   filmPagePath, filmPageUrl,
 };
