@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-02T11:24:25.978Z",
+ "generatedAt": "2026-07-02T14:26:08.126Z",
  "country": "de",
  "pick": "House of the Dragon",
  "theatres": [
@@ -404,6 +404,13 @@
      "kind": "movie"
     },
     {
+     "title": "Marmalade",
+     "slug": "marmalade",
+     "poster": "https://image.tmdb.org/t/p/w342/yt66TPbmJn8E4LepeLhBO5V1AED.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Shimmer Lake",
      "slug": "shimmer-lake",
      "poster": "https://image.tmdb.org/t/p/w342/bQHhpTHiys0CZRrdDRKvXBmM5KL.jpg",
@@ -411,16 +418,9 @@
      "kind": "movie"
     },
     {
-     "title": "Barron's Cove",
-     "slug": "barron-s-cove",
-     "poster": "https://image.tmdb.org/t/p/w342/wo8qFjc2FLJdGg8FmnZeTxVBf7D.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Suburbicon",
-     "slug": "suburbicon",
-     "poster": "https://image.tmdb.org/t/p/w342/yqYwf0kPK2SaCWM80msl4nYK6U7.jpg",
+     "title": "Panic",
+     "slug": "panic",
+     "poster": "https://image.tmdb.org/t/p/w342/gCaWBW6qQ0otWliRi0Gs4bAzgDX.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -468,13 +468,6 @@
    "badge": "New release",
    "similar": [
     {
-     "title": "Holy Lands",
-     "slug": "holy-lands",
-     "poster": "https://image.tmdb.org/t/p/w342/qcRIVBS5pGDV2ZeKJZtVDQsgCxm.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "The Girl in the Book",
      "slug": "the-girl-in-the-book",
      "poster": "https://image.tmdb.org/t/p/w342/zVvOHOz5848dZ5x7mGqxBWzsPmS.jpg",
@@ -482,30 +475,37 @@
      "kind": "movie"
     },
     {
-     "title": "The Safety of Objects",
-     "slug": "the-safety-of-objects",
-     "poster": "https://image.tmdb.org/t/p/w342/i7w5Q2HP3dI6UbN59l3ZL55weir.jpg",
+     "title": "Call Me Crazy: A Five Film",
+     "slug": "call-me-crazy-a-five-film",
+     "poster": "https://image.tmdb.org/t/p/w342/kVcDZluWy2vBxi1rTfZ3OOxmXLg.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Bastard Out of Carolina",
-     "slug": "bastard-out-of-carolina",
-     "poster": "https://image.tmdb.org/t/p/w342/jYFwFOkHwWxaStR21UIgdb96Gzh.jpg",
+     "title": "Sky",
+     "slug": "sky",
+     "poster": "https://image.tmdb.org/t/p/w342/eCMOtpzERbm065R03t8XbD5oogn.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Iron Jawed Angels",
-     "slug": "iron-jawed-angels",
-     "poster": "https://image.tmdb.org/t/p/w342/pLtbTAIBpoRrQxnfTVB0y0wVEKK.jpg",
+     "title": "TalhotBlond",
+     "slug": "talhotblond",
+     "poster": "https://image.tmdb.org/t/p/w342/3FF9YFuVvh5t393NxfME47wxqrZ.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Truth About Emanuel",
-     "slug": "the-truth-about-emanuel",
-     "poster": "https://image.tmdb.org/t/p/w342/z98jqAlVlnXyYnTlC95Na8FQXHF.jpg",
+     "title": "A Year Ago in Winter",
+     "slug": "a-year-ago-in-winter",
+     "poster": "https://image.tmdb.org/t/p/w342/yPQwdxT2kHeJKtIERIGVFFUgstD.jpg",
+     "language": "German",
+     "kind": "movie"
+    },
+    {
+     "title": "Normal",
+     "slug": "normal",
+     "poster": "https://image.tmdb.org/t/p/w342/jIVHUZYRGW7HHirQUTen4anfYZN.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -548,10 +548,24 @@
    "director": "Pauline Roenneberg",
    "runtime": 138,
    "imdbVotes": null,
-   "imdbId": null,
+   "imdbId": "tt43550573",
    "freshDate": "2026-07-02",
    "badge": "New release",
    "similar": [
+    {
+     "title": "The House of Tomorrow",
+     "slug": "the-house-of-tomorrow",
+     "poster": "https://image.tmdb.org/t/p/w342/5D9mvVo7nJ7YYZXoNKQiABYAR55.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Somewhere in Queens",
+     "slug": "somewhere-in-queens",
+     "poster": "https://image.tmdb.org/t/p/w342/zXr6AziPii0NFpbTANNpLrOPxRP.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
     {
      "title": "Family Weekend",
      "slug": "family-weekend",
@@ -574,24 +588,10 @@
      "kind": "movie"
     },
     {
-     "title": "Trafficking",
-     "slug": "trafficking",
-     "poster": "https://image.tmdb.org/t/p/w342/s2W30VLQYZKmxzlKljk7ikYC8Yc.jpg",
+     "title": "In the Soup",
+     "slug": "in-the-soup",
+     "poster": "https://image.tmdb.org/t/p/w342/kj7j6q8g3kptgqnpjpZlr5det2I.jpg",
      "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Suburbia",
-     "slug": "suburbia",
-     "poster": "https://image.tmdb.org/t/p/w342/vydIE7nizxO04ER9EcDdbdaHh8c.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Tartuffe",
-     "slug": "tartuffe",
-     "poster": "https://image.tmdb.org/t/p/w342/xRin1lHzsK8s8EMfT54wgxiD61H.jpg",
-     "language": "German",
      "kind": "movie"
     }
    ],
@@ -614,7 +614,7 @@
      "score": "8.4/10"
     }
    ],
-   "votes": 6413,
+   "votes": 6414,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/7V0Ebks0GgpKvQ7QbLAIdX5dos4.jpg",
    "isRecent": true,
@@ -743,6 +743,13 @@
      "kind": "tv"
     },
     {
+     "title": "Murder Drones",
+     "slug": "murder-drones",
+     "poster": "https://image.tmdb.org/t/p/w342/z6fAKaN2F9jogQIdcHUHNVsiFNV.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "American Dad!",
      "slug": "american-dad",
      "poster": "https://image.tmdb.org/t/p/w342/eb9sH2am9IUSQ8GhXTNAVoujk8W.jpg",
@@ -757,23 +764,16 @@
      "kind": "tv"
     },
     {
+     "title": "The Legend of Vox Machina",
+     "slug": "the-legend-of-vox-machina",
+     "poster": "https://image.tmdb.org/t/p/w342/zjQTSYZEmy0GVnK1aFLvNiAwluo.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "Long Story Short",
      "slug": "long-story-short",
      "poster": "https://image.tmdb.org/t/p/w342/22nh2kTuFpitrqTxxixhWjxEqFa.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Aqua Teen Hunger Force",
-     "slug": "aqua-teen-hunger-force",
-     "poster": "https://image.tmdb.org/t/p/w342/jCWOkfMLsT2sGHadCkmR65MWtJu.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Sausage Party: Foodtopia",
-     "slug": "sausage-party-foodtopia",
-     "poster": "https://image.tmdb.org/t/p/w342/cPLk5uvh0Am0UQlxRP4xqNcVQD3.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -852,16 +852,16 @@
      "kind": "tv"
     },
     {
-     "title": "After Life",
-     "slug": "after-life",
-     "poster": "https://image.tmdb.org/t/p/w342/6eJf4h9XcvqK64vbx27EFlLVURm.jpg",
+     "title": "Succession",
+     "slug": "succession",
+     "poster": "https://image.tmdb.org/t/p/w342/z0XiwdrCQ9yVIr4O0pxzaAYRxdW.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Succession",
-     "slug": "succession",
-     "poster": "https://image.tmdb.org/t/p/w342/z0XiwdrCQ9yVIr4O0pxzaAYRxdW.jpg",
+     "title": "Bad Sisters",
+     "slug": "bad-sisters",
+     "poster": "https://image.tmdb.org/t/p/w342/z63D1Y8udrrFOhLFCT9YElcTr0w.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -886,7 +886,7 @@
      "score": "7.8/10"
     }
    ],
-   "votes": 1178,
+   "votes": 1179,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/lzZpWEaqzP0qVA5nkCc5ASbNcSy.jpg",
    "isRecent": true,
@@ -1016,6 +1016,13 @@
      "kind": "tv"
     },
     {
+     "title": "Bling Empire",
+     "slug": "bling-empire",
+     "poster": "https://image.tmdb.org/t/p/w342/wiPeSkj8WaU1A3PL4Y0he0Ouacz.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "The Real Housewives of Potomac",
      "slug": "the-real-housewives-of-potomac",
      "poster": "https://image.tmdb.org/t/p/w342/lgSkHpr6LXxsh2YXiBrDZHn5wUR.jpg",
@@ -1026,13 +1033,6 @@
      "title": "Life of Kylie",
      "slug": "life-of-kylie",
      "poster": "https://image.tmdb.org/t/p/w342/h4NhWMBshGxp11m9uYob4KJU81y.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Bling Empire",
-     "slug": "bling-empire",
-     "poster": "https://image.tmdb.org/t/p/w342/wiPeSkj8WaU1A3PL4Y0he0Ouacz.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1104,16 +1104,16 @@
      "kind": "tv"
     },
     {
-     "title": "Y: The Last Man",
-     "slug": "y-the-last-man",
-     "poster": "https://image.tmdb.org/t/p/w342/xJvTO2fLOQWwJlQ4MAt7rP8Yno0.jpg",
+     "title": "Snowpiercer",
+     "slug": "snowpiercer",
+     "poster": "https://image.tmdb.org/t/p/w342/exKzfiKzMdQBHrdd7zNmKauJkbg.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Snowpiercer",
-     "slug": "snowpiercer",
-     "poster": "https://image.tmdb.org/t/p/w342/exKzfiKzMdQBHrdd7zNmKauJkbg.jpg",
+     "title": "Y: The Last Man",
+     "slug": "y-the-last-man",
+     "poster": "https://image.tmdb.org/t/p/w342/xJvTO2fLOQWwJlQ4MAt7rP8Yno0.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1125,9 +1125,9 @@
      "kind": "tv"
     },
     {
-     "title": "The Man in the High Castle",
-     "slug": "the-man-in-the-high-castle",
-     "poster": "https://image.tmdb.org/t/p/w342/xhoDZbMNeyCA0BGPZQsdIiO43Dp.jpg",
+     "title": "The Plot Against America",
+     "slug": "the-plot-against-america",
+     "poster": "https://image.tmdb.org/t/p/w342/rC5GUHvKxlk3WPyCh4mQ5q6HDxG.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1182,16 +1182,16 @@
    "badge": null,
    "similar": [
     {
-     "title": "Stranger Things",
-     "slug": "stranger-things",
-     "poster": "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+     "title": "The Mist",
+     "slug": "the-mist",
+     "poster": "https://image.tmdb.org/t/p/w342/iwDmsffJ5qYBxiGTPdwgIKTscKu.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Mist",
-     "slug": "the-mist",
-     "poster": "https://image.tmdb.org/t/p/w342/iwDmsffJ5qYBxiGTPdwgIKTscKu.jpg",
+     "title": "Stranger Things",
+     "slug": "stranger-things",
+     "poster": "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1210,16 +1210,16 @@
      "kind": "tv"
     },
     {
-     "title": "Tales from the Loop",
-     "slug": "tales-from-the-loop",
-     "poster": "https://image.tmdb.org/t/p/w342/56D0QFyLhrRp1ZTBz8Gw10qtZas.jpg",
+     "title": "The Society",
+     "slug": "the-society",
+     "poster": "https://image.tmdb.org/t/p/w342/mxOlnFEQMpxjIltr9Ox06iyjjvK.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Castle Rock",
-     "slug": "castle-rock",
-     "poster": "https://image.tmdb.org/t/p/w342/6dnUpv9ghx84pgxlMOb4uuJrWDs.jpg",
+     "title": "Tales from the Loop",
+     "slug": "tales-from-the-loop",
+     "poster": "https://image.tmdb.org/t/p/w342/56D0QFyLhrRp1ZTBz8Gw10qtZas.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1244,7 +1244,7 @@
      "score": "9.5/10"
     }
    ],
-   "votes": 557,
+   "votes": 558,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/fMECSPrTmRClSViMsXFYmiYIcWP.jpg",
    "isRecent": false,
@@ -1363,13 +1363,6 @@
    "badge": null,
    "similar": [
     {
-     "title": "Yellowstone",
-     "slug": "yellowstone",
-     "poster": "https://image.tmdb.org/t/p/w342/vOYfRZ0NpUK5hG2CB2dJFnYJlGe.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "Ransom Canyon",
      "slug": "ransom-canyon",
      "poster": "https://image.tmdb.org/t/p/w342/vp6A0mthGwZmnowmLxqNPF0lVRN.jpg",
@@ -1377,16 +1370,16 @@
      "kind": "tv"
     },
     {
-     "title": "Territory",
-     "slug": "territory",
-     "poster": "https://image.tmdb.org/t/p/w342/jPoNveBQWYwwWf2UnK27LEtWiqb.jpg",
+     "title": "Lonesome Dove",
+     "slug": "lonesome-dove",
+     "poster": "https://image.tmdb.org/t/p/w342/qK4iseZGf0YhYx53ecawSGhL0sl.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Lonesome Dove",
-     "slug": "lonesome-dove",
-     "poster": "https://image.tmdb.org/t/p/w342/qK4iseZGf0YhYx53ecawSGhL0sl.jpg",
+     "title": "Territory",
+     "slug": "territory",
+     "poster": "https://image.tmdb.org/t/p/w342/jPoNveBQWYwwWf2UnK27LEtWiqb.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1401,6 +1394,13 @@
      "title": "How the West Was Won",
      "slug": "how-the-west-was-won",
      "poster": "https://image.tmdb.org/t/p/w342/7SlOtDowU9k3V5nIiwUlI2ZFkEk.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Billy the Kid",
+     "slug": "billy-the-kid",
+     "poster": "https://image.tmdb.org/t/p/w342/hwPPA0sqlU9kGRHDDyl4cVp4Vum.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1613,6 +1613,13 @@
      "kind": "movie"
     },
     {
+     "title": "A Year Ago in Winter",
+     "slug": "a-year-ago-in-winter",
+     "poster": "https://image.tmdb.org/t/p/w342/yPQwdxT2kHeJKtIERIGVFFUgstD.jpg",
+     "language": "German",
+     "kind": "movie"
+    },
+    {
      "title": "Starving in Suburbia",
      "slug": "starving-in-suburbia",
      "poster": "https://image.tmdb.org/t/p/w342/kSTqlLJ0gNEIQVNwVe9YhvAcdZo.jpg",
@@ -1627,23 +1634,16 @@
      "kind": "movie"
     },
     {
+     "title": "Return",
+     "slug": "return",
+     "poster": "https://image.tmdb.org/t/p/w342/xAuR564U2njKKcXSbfbq36rZLeA.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Holy Lands",
      "slug": "holy-lands",
      "poster": "https://image.tmdb.org/t/p/w342/qcRIVBS5pGDV2ZeKJZtVDQsgCxm.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Safety of Objects",
-     "slug": "the-safety-of-objects",
-     "poster": "https://image.tmdb.org/t/p/w342/i7w5Q2HP3dI6UbN59l3ZL55weir.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "I Believe in Unicorns",
-     "slug": "i-believe-in-unicorns",
-     "poster": "https://image.tmdb.org/t/p/w342/gxquUhh9IleBnWJFoNJQmfjXqgG.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1695,16 +1695,16 @@
      "kind": "movie"
     },
     {
-     "title": "The Magic of Ordinary Days",
-     "slug": "the-magic-of-ordinary-days",
-     "poster": "https://image.tmdb.org/t/p/w342/4UAR1KJNyvBdhTXmmlxqROUCxi2.jpg",
-     "language": "English",
+     "title": "Same Same But Different",
+     "slug": "same-same-but-different",
+     "poster": "https://image.tmdb.org/t/p/w342/eSq61iJTzmWavEHhJuCp7sVpc5i.jpg",
+     "language": "German",
      "kind": "movie"
     },
     {
-     "title": "Love Everlasting",
-     "slug": "love-everlasting",
-     "poster": "https://image.tmdb.org/t/p/w342/fQeaB97z2g0vdu0tvu0T9me1aJF.jpg",
+     "title": "The Magic of Ordinary Days",
+     "slug": "the-magic-of-ordinary-days",
+     "poster": "https://image.tmdb.org/t/p/w342/4UAR1KJNyvBdhTXmmlxqROUCxi2.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -1716,10 +1716,10 @@
      "kind": "movie"
     },
     {
-     "title": "Same Same But Different",
-     "slug": "same-same-but-different",
-     "poster": "https://image.tmdb.org/t/p/w342/eSq61iJTzmWavEHhJuCp7sVpc5i.jpg",
-     "language": "German",
+     "title": "Love Everlasting",
+     "slug": "love-everlasting",
+     "poster": "https://image.tmdb.org/t/p/w342/fQeaB97z2g0vdu0tvu0T9me1aJF.jpg",
+     "language": "English",
      "kind": "movie"
     }
    ],
@@ -1756,6 +1756,13 @@
    "isRecent": false,
    "similar": [
     {
+     "title": "Toy Story 4",
+     "slug": "toy-story-4",
+     "poster": "https://image.tmdb.org/t/p/w342/w9kR8qbmQ01HwnvK4alvnQ2ca0L.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Maya the Bee: The Honey Games",
      "slug": "maya-the-bee-the-honey-games",
      "poster": "https://image.tmdb.org/t/p/w342/yx4jdeTbDvZfmHPpd0D3L78VYDB.jpg",
@@ -1787,13 +1794,6 @@
      "title": "Madagascar 3: Europe's Most Wanted",
      "slug": "madagascar-3-europe-s-most-wanted",
      "poster": "https://image.tmdb.org/t/p/w342/ekraj4ksvIKeuvQVEevEJkuybZd.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Toy Story 2",
-     "slug": "toy-story-2",
-     "poster": "https://image.tmdb.org/t/p/w342/4rbcp3ng8n1MKHjpeqW0L7Fnpzz.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1866,9 +1866,9 @@
      "kind": "movie"
     },
     {
-     "title": "Fire and Ice",
-     "slug": "fire-and-ice",
-     "poster": "https://image.tmdb.org/t/p/w342/v0fi9KgmdsUsGtopxxRzbtQ5NIX.jpg",
+     "title": "The SpongeBob Movie: Sponge on the Run",
+     "slug": "the-spongebob-movie-sponge-on-the-run",
+     "poster": "https://image.tmdb.org/t/p/w342/jlJ8nDhMhCYJuzOw3f52CP1W8MW.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2077,6 +2077,13 @@
      "kind": "movie"
     },
     {
+     "title": "Johnny Belinda",
+     "slug": "johnny-belinda",
+     "poster": "https://image.tmdb.org/t/p/w342/lIkYFx7ZaU56iG507lgLoSh1GNR.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Xiu Xiu: The Sent-Down Girl",
      "slug": "xiu-xiu-the-sent-down-girl",
      "poster": "https://image.tmdb.org/t/p/w342/f60ZzxvcNjQG1aXomXuKWEzS2pP.jpg",
@@ -2087,13 +2094,6 @@
      "title": "Girl in the Bunker",
      "slug": "girl-in-the-bunker",
      "poster": "https://image.tmdb.org/t/p/w342/OKtXyFe0BwIlZ0BKXxFbez67sy.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Johnny Belinda",
-     "slug": "johnny-belinda",
-     "poster": "https://image.tmdb.org/t/p/w342/lIkYFx7ZaU56iG507lgLoSh1GNR.jpg",
      "language": "English",
      "kind": "movie"
     }

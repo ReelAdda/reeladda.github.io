@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-02T11:23:49.925Z",
+ "generatedAt": "2026-07-02T14:25:25.071Z",
  "country": "us",
  "pick": "House of the Dragon",
  "theatres": [
@@ -42,6 +42,13 @@
    "badge": null,
    "similar": [
     {
+     "title": "Toy Story 4",
+     "slug": "toy-story-4",
+     "poster": "https://image.tmdb.org/t/p/w342/w9kR8qbmQ01HwnvK4alvnQ2ca0L.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Maya the Bee: The Honey Games",
      "slug": "maya-the-bee-the-honey-games",
      "poster": "https://image.tmdb.org/t/p/w342/yx4jdeTbDvZfmHPpd0D3L78VYDB.jpg",
@@ -73,13 +80,6 @@
      "title": "Madagascar 3: Europe's Most Wanted",
      "slug": "madagascar-3-europe-s-most-wanted",
      "poster": "https://image.tmdb.org/t/p/w342/ekraj4ksvIKeuvQVEevEJkuybZd.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Toy Story 2",
-     "slug": "toy-story-2",
-     "poster": "https://image.tmdb.org/t/p/w342/4rbcp3ng8n1MKHjpeqW0L7Fnpzz.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -240,13 +240,6 @@
      "kind": "movie"
     },
     {
-     "title": "The 5th Wave",
-     "slug": "the-5th-wave",
-     "poster": "https://image.tmdb.org/t/p/w342/ja34BV577dtjWl2S5G1tB93IjYb.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "The Invasion",
      "slug": "the-invasion",
      "poster": "https://image.tmdb.org/t/p/w342/oS5rMuJXwNZZPx0ojhvjgduglD2.jpg",
@@ -257,6 +250,13 @@
      "title": "Three Days of the Condor",
      "slug": "three-days-of-the-condor",
      "poster": "https://image.tmdb.org/t/p/w342/zinwtZqdb7gnc4zMu8dfkK1fMN3.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Fourth Kind",
+     "slug": "the-fourth-kind",
+     "poster": "https://image.tmdb.org/t/p/w342/vfnsGUwurUQqlpvArBvUVc9rYXa.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -360,14 +360,14 @@
    "language": "English",
    "released": "2026-06-30",
    "review": "Adventure follows detective Enola Holmes to Malta, where her plans to tie the knot unravel when Sherlock's disappearance plunges her into a perilous case.",
-   "rating": 7.7,
+   "rating": 7.6,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.7/10"
+     "score": "7.6/10"
     }
    ],
-   "votes": 52,
+   "votes": 68,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/7kRYHH9H9PjBFwz1FprbHB2AAjI.jpg",
    "isRecent": true,
@@ -378,7 +378,10 @@
    "platform": "Theatres",
    "cert": "U/A 13+",
    "trailer": "https://www.youtube.com/watch?v=n_pEJjq-9xQ",
-   "providers": [],
+   "providers": [
+    "Netflix",
+    "Netflix Standard with Ads"
+   ],
    "cast": [
     "Millie Bobby Brown",
     "Henry Cavill",
@@ -437,9 +440,7 @@
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/jLuGZc84MvPYCQomQg9DI72mstt.jpg",
    "fullReview": "Adventure follows detective Enola Holmes to Malta, where her plans to tie the knot unravel when Sherlock's disappearance plunges her into a perilous case.",
-   "slug": "enola-holmes-3",
-   "wikiWeeklyViews": 87062,
-   "trending": true
+   "slug": "enola-holmes-3"
   },
   {
    "title": "Citizen Vigilante",
@@ -562,7 +563,7 @@
     "Luis Leonardo Suarez",
     "Gaby Cárdenas"
    ],
-   "director": "Roy Ambriz",
+   "director": "Arturo Ambriz",
    "runtime": 104,
    "imdbVotes": null,
    "imdbId": "tt36639986",
@@ -577,17 +578,17 @@
      "kind": "movie"
     },
     {
-     "title": "The Legend of La Llorona",
-     "slug": "the-legend-of-la-llorona",
-     "poster": "https://image.tmdb.org/t/p/w342/vBiqoYfDIWKKzZTiQScqgCO09UD.jpg",
-     "language": "Spanish",
-     "kind": "movie"
-    },
-    {
      "title": "Legends of Oz: Dorothy's Return",
      "slug": "legends-of-oz-dorothy-s-return",
      "poster": "https://image.tmdb.org/t/p/w342/5XiNCjFudNX0Wj5LanPuIb8E9pU.jpg",
      "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Legend of La Llorona",
+     "slug": "the-legend-of-la-llorona",
+     "poster": "https://image.tmdb.org/t/p/w342/vBiqoYfDIWKKzZTiQScqgCO09UD.jpg",
+     "language": "Spanish",
      "kind": "movie"
     },
     {
@@ -632,7 +633,7 @@
      "score": "8.4/10"
     }
    ],
-   "votes": 6413,
+   "votes": 6414,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/7V0Ebks0GgpKvQ7QbLAIdX5dos4.jpg",
    "isRecent": true,
@@ -849,6 +850,13 @@
      "kind": "tv"
     },
     {
+     "title": "Murder Drones",
+     "slug": "murder-drones",
+     "poster": "https://image.tmdb.org/t/p/w342/z6fAKaN2F9jogQIdcHUHNVsiFNV.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "American Dad!",
      "slug": "american-dad",
      "poster": "https://image.tmdb.org/t/p/w342/eb9sH2am9IUSQ8GhXTNAVoujk8W.jpg",
@@ -863,23 +871,16 @@
      "kind": "tv"
     },
     {
+     "title": "The Legend of Vox Machina",
+     "slug": "the-legend-of-vox-machina",
+     "poster": "https://image.tmdb.org/t/p/w342/zjQTSYZEmy0GVnK1aFLvNiAwluo.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "Long Story Short",
      "slug": "long-story-short",
      "poster": "https://image.tmdb.org/t/p/w342/22nh2kTuFpitrqTxxixhWjxEqFa.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Aqua Teen Hunger Force",
-     "slug": "aqua-teen-hunger-force",
-     "poster": "https://image.tmdb.org/t/p/w342/jCWOkfMLsT2sGHadCkmR65MWtJu.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Sausage Party: Foodtopia",
-     "slug": "sausage-party-foodtopia",
-     "poster": "https://image.tmdb.org/t/p/w342/cPLk5uvh0Am0UQlxRP4xqNcVQD3.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -928,6 +929,13 @@
    "badge": null,
    "similar": [
     {
+     "title": "La jauría",
+     "slug": "la-jaur-a",
+     "poster": "https://image.tmdb.org/t/p/w342/iRZX9p0miSsBVV7eBgH0HSjnmE2.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
      "title": "The Gold",
      "slug": "the-gold",
      "poster": "https://image.tmdb.org/t/p/w342/9JY9Gza4HQhXjIPXg9uSy8FeiSM.jpg",
@@ -939,13 +947,6 @@
      "slug": "power-book-iv-force",
      "poster": "https://image.tmdb.org/t/p/w342/yzL4Tqbw2JA9MCsHJWFC4xV1IYU.jpg",
      "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "La jauría",
-     "slug": "la-jaur-a",
-     "poster": "https://image.tmdb.org/t/p/w342/iRZX9p0miSsBVV7eBgH0HSjnmE2.jpg",
-     "language": "Spanish",
      "kind": "tv"
     },
     {
@@ -963,10 +964,10 @@
      "kind": "tv"
     },
     {
-     "title": "Escape at Dannemora",
-     "slug": "escape-at-dannemora",
-     "poster": "https://image.tmdb.org/t/p/w342/odk6ccUtUJlGTzPApKS6s4CTTrK.jpg",
-     "language": "English",
+     "title": "El marginal",
+     "slug": "el-marginal",
+     "poster": "https://image.tmdb.org/t/p/w342/p1GFsUK5nCVHYNtjRxoGyfGdD9C.jpg",
+     "language": "Spanish",
      "kind": "tv"
     }
    ],
@@ -1045,16 +1046,16 @@
      "kind": "tv"
     },
     {
-     "title": "After Life",
-     "slug": "after-life",
-     "poster": "https://image.tmdb.org/t/p/w342/6eJf4h9XcvqK64vbx27EFlLVURm.jpg",
+     "title": "Succession",
+     "slug": "succession",
+     "poster": "https://image.tmdb.org/t/p/w342/z0XiwdrCQ9yVIr4O0pxzaAYRxdW.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Succession",
-     "slug": "succession",
-     "poster": "https://image.tmdb.org/t/p/w342/z0XiwdrCQ9yVIr4O0pxzaAYRxdW.jpg",
+     "title": "Bad Sisters",
+     "slug": "bad-sisters",
+     "poster": "https://image.tmdb.org/t/p/w342/z63D1Y8udrrFOhLFCT9YElcTr0w.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1067,11 +1068,11 @@
    "trending": true
   },
   {
-   "title": "Deprisa, deprisa",
-   "genre": "Documentary / Comedy",
+   "title": "Ultras: Passion and Death",
+   "genre": "Documentary",
    "language": "Spanish",
-   "released": "2026-06-26",
-   "review": "",
+   "released": "2026-06-19",
+   "review": "Ultras: Passion and Death is an HBO docuseries that explores the violent and deeply rooted Spanish \"ultras\" football fan movement by examining three specific…",
    "rating": null,
    "scores": [
     {
@@ -1079,77 +1080,79 @@
      "score": "New release"
     }
    ],
-   "votes": 0,
-   "verdict": "Just released — verdict soon",
-   "poster": "https://image.tmdb.org/t/p/w342/nHC1QhsCUykNFevLAQpK5IHwqOG.jpg",
+   "votes": 1,
+   "verdict": "Not enough ratings yet",
+   "poster": "https://image.tmdb.org/t/p/w342/4RekSXVNXuUEu4qtiaTFdmvVgjD.jpg",
    "isRecent": true,
-   "isFresh": true,
-   "kind": "movie",
-   "tmdbId": 1703928,
-   "popularity": 0.0239,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 325858,
+   "popularity": 1.8003,
    "cert": null,
-   "trailer": "https://www.youtube.com/results?search_query=Deprisa%2C%20deprisa%20official%20trailer",
+   "trailer": "https://www.youtube.com/results?search_query=Ultras%3A%20Passion%20and%20Death%20official%20trailer",
    "providers": [
-    "Criterion Channel"
+    "HBO Max"
    ],
    "cast": [
-    "Claudia García de Mateos",
-    "Javier Sánchez Martínez"
+    "Manolo Lama",
+    "Paco González",
+    "Joan Gaspart",
+    "Tomás Roncero"
    ],
-   "director": "Claudia García de Mateos",
-   "runtime": 0,
+   "director": "Pedro García Campos",
+   "runtime": null,
    "imdbVotes": null,
-   "imdbId": "tt43437675",
-   "freshDate": "2026-06-26",
-   "badge": "New release",
+   "imdbId": null,
+   "freshDate": "2026-06-19",
+   "badge": "New show",
    "similar": [
     {
-     "title": "Kevin Hart: Irresponsible",
-     "slug": "kevin-hart-irresponsible",
-     "poster": "https://image.tmdb.org/t/p/w342/fpFsj2IQekSi9cjOlRyBiIoLBY4.jpg",
+     "title": "Rafa",
+     "slug": "rafa",
+     "poster": "https://image.tmdb.org/t/p/w342/utyZY9NKMC0Ci9Rh0ohW9giFKee.jpg",
      "language": "English",
-     "kind": "movie"
+     "kind": "tv"
     },
     {
-     "title": "Good Hair",
-     "slug": "good-hair",
-     "poster": "https://image.tmdb.org/t/p/w342/ru6vIG2Omq8HKgDBe4o02BtySWz.jpg",
+     "title": "Deadly Women",
+     "slug": "deadly-women",
+     "poster": "https://image.tmdb.org/t/p/w342/ne1Juoh8EBRELP5TnhasNRFxovJ.jpg",
      "language": "English",
-     "kind": "movie"
+     "kind": "tv"
     },
     {
-     "title": "Trevor Noah: Where Was I",
-     "slug": "trevor-noah-where-was-i",
-     "poster": "https://image.tmdb.org/t/p/w342/nt2uIRpYZ68g0J7dCSnJZqA5unS.jpg",
+     "title": "Eli Roth's History of Horror",
+     "slug": "eli-roth-s-history-of-horror",
+     "poster": "https://image.tmdb.org/t/p/w342/15ZXGHIk3nFBqCRCEKVHMO7oINI.jpg",
      "language": "English",
-     "kind": "movie"
+     "kind": "tv"
     },
     {
-     "title": "Sidney",
-     "slug": "sidney",
-     "poster": "https://image.tmdb.org/t/p/w342/cVdkjqmIipF2DCvDwt16BRv7e9o.jpg",
+     "title": "History 101",
+     "slug": "history-101",
+     "poster": "https://image.tmdb.org/t/p/w342/3wY1EwinwrtpNZCwFmpDHZ5ISaK.jpg",
      "language": "English",
-     "kind": "movie"
+     "kind": "tv"
     },
     {
-     "title": "John Candy: I Like Me",
-     "slug": "john-candy-i-like-me",
-     "poster": "https://image.tmdb.org/t/p/w342/mNEJdx9WSXeyMmkuQfTeY4zouNx.jpg",
+     "title": "Break Point",
+     "slug": "break-point",
+     "poster": "https://image.tmdb.org/t/p/w342/62QQG1qdCds8c0tslzaGib1wiuK.jpg",
      "language": "English",
-     "kind": "movie"
+     "kind": "tv"
     },
     {
-     "title": "The Class of ‘92",
-     "slug": "the-class-of-92",
-     "poster": "https://image.tmdb.org/t/p/w342/v2dnvfpYBG81cegENM7Sd6tgshB.jpg",
+     "title": "Hulk Hogan: Real American",
+     "slug": "hulk-hogan-real-american",
+     "poster": "https://image.tmdb.org/t/p/w342/pdEEOQystKjHtC71RV6yRobY8bk.jpg",
      "language": "English",
-     "kind": "movie"
+     "kind": "tv"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/UP1xvxEfCyaRjEGSmaXREZQ2kV.jpg",
-   "fullReview": "",
-   "platform": "Criterion Channel",
-   "slug": "deprisa-deprisa"
+   "backdrop": "https://image.tmdb.org/t/p/w780/aVm5DI5apmc6yJHyqSA1VWOZb6Z.jpg",
+   "fullReview": "Ultras: Passion and Death is an HBO docuseries that explores the violent and deeply rooted Spanish \"ultras\" football fan movement by examining three specific tragedies that forever altered the nation's sporting and cultural landscape. The series uncovers how the passion of fandom can escalate into extreme aggression and tribalism.",
+   "platform": "HBO Max",
+   "slug": "ultras-passion-and-death"
   },
   {
    "title": "Avatar: The Last Airbender",
@@ -1164,7 +1167,7 @@
      "score": "7.8/10"
     }
    ],
-   "votes": 1178,
+   "votes": 1179,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/lzZpWEaqzP0qVA5nkCc5ASbNcSy.jpg",
    "isRecent": true,
@@ -1242,11 +1245,11 @@
    "trending": true
   },
   {
-   "title": "The Topurias",
-   "genre": "Documentary",
+   "title": "Deprisa, deprisa",
+   "genre": "Documentary / Comedy",
    "language": "Spanish",
-   "released": "2026-06-05",
-   "review": "Ilia Topuria is one of the biggest stars in MMA. This documentary explores his personal side and reveals a side of the champion never seen before.",
+   "released": "2026-06-26",
+   "review": "",
    "rating": null,
    "scores": [
     {
@@ -1255,79 +1258,76 @@
     }
    ],
    "votes": 0,
-   "verdict": "Not enough ratings yet",
-   "poster": "https://image.tmdb.org/t/p/w342/kUuxTuzeHI4hbPO94ukieKJPcvC.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 323979,
-   "popularity": 2.2381,
+   "verdict": "Just released — verdict soon",
+   "poster": "https://image.tmdb.org/t/p/w342/nHC1QhsCUykNFevLAQpK5IHwqOG.jpg",
+   "isRecent": true,
+   "isFresh": true,
+   "kind": "movie",
+   "tmdbId": 1703928,
+   "popularity": 0.0239,
    "cert": null,
-   "trailer": "https://www.youtube.com/results?search_query=The%20Topurias%20official%20trailer",
+   "trailer": "https://www.youtube.com/results?search_query=Deprisa%2C%20deprisa%20official%20trailer",
    "providers": [
-    "HBO Max Amazon Channel",
-    "HBO Max"
+    "Criterion Channel"
    ],
    "cast": [
-    "Ilia Topuria",
-    "Aleksandre Topuria",
-    "Omar Montes",
-    "Sergio Ramos"
+    "Claudia García de Mateos",
+    "Javier Sánchez Martínez"
    ],
-   "director": null,
-   "runtime": null,
+   "director": "Claudia García de Mateos",
+   "runtime": 0,
    "imdbVotes": null,
-   "imdbId": "tt43294748",
-   "freshDate": "2026-06-05",
-   "badge": null,
+   "imdbId": "tt43437675",
+   "freshDate": "2026-06-26",
+   "badge": "New release",
    "similar": [
     {
-     "title": "Hulk Hogan: Real American",
-     "slug": "hulk-hogan-real-american",
-     "poster": "https://image.tmdb.org/t/p/w342/pdEEOQystKjHtC71RV6yRobY8bk.jpg",
+     "title": "Kevin Hart: Irresponsible",
+     "slug": "kevin-hart-irresponsible",
+     "poster": "https://image.tmdb.org/t/p/w342/fpFsj2IQekSi9cjOlRyBiIoLBY4.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "McGREGOR FOREVER",
-     "slug": "mcgregor-forever",
-     "poster": "https://image.tmdb.org/t/p/w342/8vjMXey1TDjtXMTzxxG8c0GHvgr.jpg",
+     "title": "Good Hair",
+     "slug": "good-hair",
+     "poster": "https://image.tmdb.org/t/p/w342/ru6vIG2Omq8HKgDBe4o02BtySWz.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "History 101",
-     "slug": "history-101",
-     "poster": "https://image.tmdb.org/t/p/w342/3wY1EwinwrtpNZCwFmpDHZ5ISaK.jpg",
+     "title": "Trevor Noah: Where Was I",
+     "slug": "trevor-noah-where-was-i",
+     "poster": "https://image.tmdb.org/t/p/w342/nt2uIRpYZ68g0J7dCSnJZqA5unS.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "Trust Me: The False Prophet",
-     "slug": "trust-me-the-false-prophet",
-     "poster": "https://image.tmdb.org/t/p/w342/mDugtY17uzG4r6yU0pRgjawcfSA.jpg",
+     "title": "An Evening with Kevin Smith",
+     "slug": "an-evening-with-kevin-smith",
+     "poster": "https://image.tmdb.org/t/p/w342/w37BFY3m4iGqg1dXCk1gbw2AJ5q.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "Eli Roth's History of Horror",
-     "slug": "eli-roth-s-history-of-horror",
-     "poster": "https://image.tmdb.org/t/p/w342/15ZXGHIk3nFBqCRCEKVHMO7oINI.jpg",
+     "title": "John Candy: I Like Me",
+     "slug": "john-candy-i-like-me",
+     "poster": "https://image.tmdb.org/t/p/w342/mNEJdx9WSXeyMmkuQfTeY4zouNx.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "I AM A KILLER",
-     "slug": "i-am-a-killer",
-     "poster": "https://image.tmdb.org/t/p/w342/1dJcf9KiZ1lNgjiTv5H8irIo2Ky.jpg",
+     "title": "Sidney",
+     "slug": "sidney",
+     "poster": "https://image.tmdb.org/t/p/w342/cVdkjqmIipF2DCvDwt16BRv7e9o.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/52WwzI84nNL1ZTuUx0yVPEyMvkT.jpg",
-   "fullReview": "Ilia Topuria is one of the biggest stars in MMA. This documentary explores his personal side and reveals a side of the champion never seen before.",
-   "platform": "HBO Max Amazon Channel",
-   "slug": "the-topurias"
+   "backdrop": "https://image.tmdb.org/t/p/w780/UP1xvxEfCyaRjEGSmaXREZQ2kV.jpg",
+   "fullReview": "",
+   "platform": "Criterion Channel",
+   "slug": "deprisa-deprisa"
   },
   {
    "title": "FROM",
@@ -1372,16 +1372,16 @@
    "badge": null,
    "similar": [
     {
-     "title": "Stranger Things",
-     "slug": "stranger-things",
-     "poster": "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+     "title": "The Mist",
+     "slug": "the-mist",
+     "poster": "https://image.tmdb.org/t/p/w342/iwDmsffJ5qYBxiGTPdwgIKTscKu.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Mist",
-     "slug": "the-mist",
-     "poster": "https://image.tmdb.org/t/p/w342/iwDmsffJ5qYBxiGTPdwgIKTscKu.jpg",
+     "title": "Stranger Things",
+     "slug": "stranger-things",
+     "poster": "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1400,16 +1400,16 @@
      "kind": "tv"
     },
     {
-     "title": "Tales from the Loop",
-     "slug": "tales-from-the-loop",
-     "poster": "https://image.tmdb.org/t/p/w342/56D0QFyLhrRp1ZTBz8Gw10qtZas.jpg",
+     "title": "The Society",
+     "slug": "the-society",
+     "poster": "https://image.tmdb.org/t/p/w342/mxOlnFEQMpxjIltr9Ox06iyjjvK.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Castle Rock",
-     "slug": "castle-rock",
-     "poster": "https://image.tmdb.org/t/p/w342/6dnUpv9ghx84pgxlMOb4uuJrWDs.jpg",
+     "title": "Tales from the Loop",
+     "slug": "tales-from-the-loop",
+     "poster": "https://image.tmdb.org/t/p/w342/56D0QFyLhrRp1ZTBz8Gw10qtZas.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1434,7 +1434,7 @@
      "score": "9.5/10"
     }
    ],
-   "votes": 557,
+   "votes": 558,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/fMECSPrTmRClSViMsXFYmiYIcWP.jpg",
    "isRecent": false,
@@ -1802,9 +1802,9 @@
      "kind": "movie"
     },
     {
-     "title": "Fire and Ice",
-     "slug": "fire-and-ice",
-     "poster": "https://image.tmdb.org/t/p/w342/v0fi9KgmdsUsGtopxxRzbtQ5NIX.jpg",
+     "title": "The SpongeBob Movie: Sponge on the Run",
+     "slug": "the-spongebob-movie-sponge-on-the-run",
+     "poster": "https://image.tmdb.org/t/p/w342/jlJ8nDhMhCYJuzOw3f52CP1W8MW.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1992,6 +1992,13 @@
    "isRecent": false,
    "similar": [
     {
+     "title": "Somewhere in Queens",
+     "slug": "somewhere-in-queens",
+     "poster": "https://image.tmdb.org/t/p/w342/zXr6AziPii0NFpbTANNpLrOPxRP.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Family Weekend",
      "slug": "family-weekend",
      "poster": "https://image.tmdb.org/t/p/w342/RiUNV96HPP14OfB7ILEOe2Vj26.jpg",
@@ -2013,23 +2020,16 @@
      "kind": "movie"
     },
     {
+     "title": "Ricky Gervais: Mortality",
+     "slug": "ricky-gervais-mortality",
+     "poster": "https://image.tmdb.org/t/p/w342/u54OhdSaaLBh02Y4Nf5cETkh8Ku.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "...All the Marbles",
      "slug": "all-the-marbles",
      "poster": "https://image.tmdb.org/t/p/w342/qv0WuNiP93ahEEYDFwC5DcjJmOS.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Hooking Up",
-     "slug": "hooking-up",
-     "poster": "https://image.tmdb.org/t/p/w342/y5QXP7qdwtPRiZy6cQTjRoaTXuW.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Dave Chappelle: The Unstoppable...",
-     "slug": "dave-chappelle-the-unstoppable",
-     "poster": "https://image.tmdb.org/t/p/w342/534y0Pt72VEAUTV3THKpMxzCoB3.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2074,16 +2074,16 @@
      "kind": "movie"
     },
     {
-     "title": "Girl in the Box",
-     "slug": "girl-in-the-box",
-     "poster": "https://image.tmdb.org/t/p/w342/uLH92vwvTlOjnSCG5JqJtH1fT9p.jpg",
+     "title": "Eleanor the Great",
+     "slug": "eleanor-the-great",
+     "poster": "https://image.tmdb.org/t/p/w342/9XTM42IJST6lwPxtK2iUwNaFvCT.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Eleanor the Great",
-     "slug": "eleanor-the-great",
-     "poster": "https://image.tmdb.org/t/p/w342/9XTM42IJST6lwPxtK2iUwNaFvCT.jpg",
+     "title": "Girl in the Box",
+     "slug": "girl-in-the-box",
+     "poster": "https://image.tmdb.org/t/p/w342/uLH92vwvTlOjnSCG5JqJtH1fT9p.jpg",
      "language": "English",
      "kind": "movie"
     },
