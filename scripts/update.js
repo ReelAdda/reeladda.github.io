@@ -1521,22 +1521,27 @@ const COUNTRY_PAGE_META = {
   au: { name: "Australia", path: "/au/" },
   de: { name: "Germany", path: "/de/" },
 };
-function buildHeadTags(cfg) {
+function buildHeadTags(cfg, useImdb = USE_IMDB) {
   const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name, path: `/${cfg.code}/` };
   const url = `https://filmychill.com${m.path}`;
+  // Ratings wording follows the active source (same principle as footerAttribution): IMDb's
+  // name may only appear when IMDb data is actually used — its terms forbid using the name
+  // without a current license, and in TMDB mode the claim would simply be false. TMDB mode
+  // says just "ratings": accurate, and the TMDB brand adds nothing to a search snippet.
+  const ratingsWord = useImdb ? "IMDb ratings" : "ratings";
   if (cfg.code === "in") {
     // Root keeps the multi-country, India-first wording already chosen.
     return `<title>FilmyChill — Latest Movie & OTT Releases, with Reviews, Updated Daily</title>\n`
-      + `<meta name="description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, IMDb ratings, verdicts, auto-updated daily.">\n`
+      + `<meta name="description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts, auto-updated daily.">\n`
       + `<link rel="canonical" href="${url}">\n`
       + `<meta property="og:title" content="FilmyChill — What's worth watching this week">\n`
-      + `<meta property="og:description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, IMDb ratings, verdicts. Auto-updated daily.">`;
+      + `<meta property="og:description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts. Auto-updated daily.">`;
   }
   return `<title>FilmyChill — Latest Movie &amp; OTT Releases in ${m.name}, with Reviews, Updated Daily</title>\n`
-    + `<meta name="description" content="Latest theatre and OTT releases in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, IMDb ratings, verdicts, auto-updated daily.">\n`
+    + `<meta name="description" content="Latest theatre and OTT releases in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, ${ratingsWord}, verdicts, auto-updated daily.">\n`
     + `<link rel="canonical" href="${url}">\n`
     + `<meta property="og:title" content="FilmyChill — What's worth watching this week in ${m.name}">\n`
-    + `<meta property="og:description" content="Top theatre releases + OTT picks in ${m.name} with trailers, IMDb ratings and verdicts. Auto-updated daily.">`;
+    + `<meta property="og:description" content="Top theatre releases + OTT picks in ${m.name} with trailers, ${ratingsWord} and verdicts. Auto-updated daily.">`;
 }
 
 // Homepage structured data: WebSite + dateModified + an ItemList of this
