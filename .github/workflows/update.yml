@@ -31,6 +31,10 @@ jobs:
       - name: Fetch latest releases
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          # Optional: enables "trailer views" social proof on cards. Create a free key in
+          # Google Cloud Console (YouTube Data API v3) and add it as a repo secret named
+          # YT_API_KEY. If absent, the build simply skips trailer stats — nothing breaks.
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
         run: node scripts/update.js
 
       # Smoke test validates the SHAPE + freshness of EVERY country's data file.
@@ -49,9 +53,42 @@ jobs:
           "
 
       - name: Commit updated data
+        id: commit
         run: |
           git config user.name "filmychill-bot"
           git config user.email "actions@github.com"
           git add data.json data-*.json index.html us/ uk/ au/ de/ movie/ new-on-ott/ sitemap.xml
-          git diff --staged --quiet || git commit -m "Daily release scan: $(date -u +%Y-%m-%d)"
-          git push
+          if git diff --staged --quiet; then
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to commit."
+          else
+            git commit -m "Daily release scan: $(date -u +%Y-%m-%d)"
+            git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # IndexNow: tell Bing/DuckDuckGo/Yandex INSTANTLY that today's pages changed, instead
+      # of waiting for a crawl — exactly the freshness race a daily site wants to win.
+      # (Google doesn't use IndexNow; it relies on the sitemap lastmod + normal crawling.)
+      # Free and keyless as a service; the key below just proves domain ownership via the
+      # matching KEY.txt file in the repo root, served by GitHub Pages. Only pings when a
+      # commit actually happened. Ping failures never fail the build (|| true).
+      - name: Ping IndexNow
+        if: steps.commit.outputs.pushed == 'true'
+        run: |
+          sleep 90  # give GitHub Pages a moment to deploy the new commit first
+          curl -s -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d '{
+              "host": "filmychill.com",
+              "key": "a95eba27e6b3f0e85e89e609241d6699",
+              "keyLocation": "https://filmychill.com/a95eba27e6b3f0e85e89e609241d6699.txt",
+              "urlList": [
+                "https://filmychill.com/",
+                "https://filmychill.com/new-on-ott/",
+                "https://filmychill.com/us/", "https://filmychill.com/us/new-on-ott/",
+                "https://filmychill.com/uk/", "https://filmychill.com/uk/new-on-ott/",
+                "https://filmychill.com/au/", "https://filmychill.com/au/new-on-ott/",
+                "https://filmychill.com/de/", "https://filmychill.com/de/new-on-ott/"
+              ]
+            }' || true
