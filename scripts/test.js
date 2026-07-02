@@ -378,13 +378,63 @@ test("freshLabel: movie prefers region-localized released over global freshDate 
   assert.strictEqual(U.freshLabel({ kind: "movie", released: "2026-05-29", freshDate: "2026-05-13" }, TH_NOW), "Released 29 May");
 });
 
+// ---------------- Buzz signals (Wikipedia pageviews + trailer stats) ----------------
+// Guards the free-data features: computeBuzz decides the 🔥 Trending badge from raw daily
+// pageview counts; fmtViews/trailerViewsLabel format trailer social proof.
+test("computeBuzz: high absolute daily views -> trending", () => {
+  const b = U.computeBuzz([9000,9500,8000,9000,9500,9000,8500, 15000,16000,14000,15500,15000,16000,14500]);
+  assert.ok(b.trending);
+  assert.strictEqual(b.weeklyViews, 106000);
+});
+test("computeBuzz: clear week-over-week spike above floor -> trending", () => {
+  const b = U.computeBuzz([2000,2000,2000,2000,2000,2000,2000, 4000,4000,4000,4000,4000,4000,4000]);
+  assert.ok(b.trending, "2x spike at 4k/day must trend");
+});
+test("computeBuzz: flat/low interest -> not trending; tiny spikes never trend (floor)", () => {
+  assert.ok(!U.computeBuzz([3000,3000,3000,3000,3000,3000,3000, 3100,3000,3050,3000,3100,3000,3050]).trending);
+  assert.ok(!U.computeBuzz([20,20,20,20,20,20,20, 40,40,40,40,40,40,40]).trending, "20->40 views is noise, not buzz");
+});
+test("computeBuzz: fewer than 7 days of data -> null (too new to judge)", () => {
+  assert.strictEqual(U.computeBuzz([5000, 6000, 7000]), null);
+  assert.strictEqual(U.computeBuzz(null), null);
+});
+test("fmtViews: social-proof formatting across magnitudes", () => {
+  assert.strictEqual(U.fmtViews(52123456), "52M");
+  assert.strictEqual(U.fmtViews(3400000), "3.4M");
+  assert.strictEqual(U.fmtViews(850000), "850K");
+  assert.strictEqual(U.fmtViews(1234567890), "1.2B");
+});
+test("trailerViewsLabel: null below 1M (anti-proof guard), label at 52M", () => {
+  assert.strictEqual(U.trailerViewsLabel(999999), null);
+  assert.strictEqual(U.trailerViewsLabel(undefined), null);
+  assert.strictEqual(U.trailerViewsLabel(52123456), "▶ 52M trailer views");
+});
+test("ssrCard: trending badge + trailer views render from data fields", () => {
+  const html = U.ssrCard({ title: "HotD", platform: "JioHotstar", language: "English", genre: "Fantasy / Drama",
+    rating: 8.2, verdict: "Must watch", kind: "tv", slug: "hotd", trending: true, trailerViews: 52123456,
+    badge: "New season", freshDate: "2026-06-21" }, 0, "in");
+  assert.ok(html.includes("🔥 Trending"));
+  assert.ok(html.includes("▶ 52M trailer views"));
+  assert.ok(html.includes("New season"));
+});
+test("ssrCard: no buzz fields -> no trending badge, no views label (graceful absence)", () => {
+  const html = U.ssrCard({ title: "Plain", platform: "Netflix", language: "Hindi", rating: 7.0,
+    verdict: "Worth a watch", kind: "movie", slug: "plain" }, 0, "in");
+  assert.ok(!html.includes("Trending"));
+  assert.ok(!html.includes("trailer views"));
+});
+test("buildHeadTags: max-image-preview:large on every homepage (Google Discover eligibility)", () => {
+  assert.ok(U.buildHeadTags({ code: "in", name: "India" }, false).includes('content="max-image-preview:large"'));
+  assert.ok(U.buildHeadTags({ code: "us", name: "United States" }, false).includes('content="max-image-preview:large"'));
+});
+
 // ---------------- "New on OTT this week" page (organic-discovery page) ----------------
 const OTT_WEEK_DATA = {
   generatedAt: "2026-07-01T07:54:26.326Z",
   ott: [
     { title: "Alliance", slug: "alliance", platform: "Amazon Prime Video", language: "English", genre: "Reality", rating: 7.2, verdict: "Worth a watch", kind: "tv", freshDate: "2026-06-26", badge: "New show", poster: "https://image.tmdb.org/t/p/w342/x.jpg" },
     { title: "Maa <Behen>", slug: "maa-behen", platform: "Netflix", language: "Hindi", genre: "Drama", rating: 6.9, verdict: "Worth a watch", kind: "movie", freshDate: "2026-06-04" },
-    { title: "The Bear", slug: "the-bear", platform: "JioHotstar", language: "English", genre: "Comedy", rating: 8.2, verdict: "Must watch", kind: "tv", freshDate: "2026-06-25", badge: "New season" },
+    { title: "The Bear", slug: "the-bear", platform: "JioHotstar", language: "English", genre: "Comedy", rating: 8.2, verdict: "Must watch", kind: "tv", freshDate: "2026-06-25", badge: "New season", trending: true, trailerViews: 12300000 },
     { title: "Raakh", slug: "raakh", platform: "Amazon Prime Video", language: "Hindi", genre: "Thriller", rating: 7.5, verdict: "Worth a watch", kind: "movie", freshDate: "2026-06-12" },
   ],
 };
@@ -420,6 +470,12 @@ test("buildOttWeekPage: hreflang alternates for every country + x-default to Ind
   const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
   assert.ok(html.includes('hreflang="en-US" href="https://filmychill.com/us/new-on-ott/"'));
   assert.ok(html.includes('hreflang="x-default" href="https://filmychill.com/new-on-ott/"'));
+});
+test("buildOttWeekPage: trending badge, trailer views, and Discover meta all present", () => {
+  const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
+  assert.ok(html.includes("🔥 Trending"));
+  assert.ok(html.includes("▶ 12M trailer views"));
+  assert.ok(html.includes('content="max-image-preview:large"'));
 });
 test("buildOttWeekPage: CollectionPage schema carries dateModified (freshness signal)", () => {
   const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
