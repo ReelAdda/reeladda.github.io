@@ -1145,6 +1145,7 @@ async function main() {
   for (const cfg of COUNTRIES) {
     generatePages(dataByCode[cfg.code], cfg, allSlugSets);
     if (pageTemplate) renderCountryPage(pageTemplate, cfg, dataByCode[cfg.code]);
+    writeOttWeekPage(dataByCode[cfg.code], cfg, builtCountries); // /new-on-ott/ per country
   }
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
   writeMultiCountrySitemap(builtCountries);
@@ -1402,6 +1403,14 @@ function writeMultiCountrySitemap(countries) {
   const countryUrls = countries.map((c) =>
     `  <url><loc>${pathFor(c.code)}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority>\n${homeAlts}\n  </url>`);
 
+  // "New on OTT this week" pages — the organic-discovery pages. Daily changefreq + fresh
+  // lastmod signal Google to recrawl them for the freshness-sensitive weekly queries.
+  const ottAlts = countries.map((c) =>
+    `    <xhtml:link rel="alternate" hreflang="${c.code === "in" ? "en-IN" : "en-" + c.region}" href="${ottWeekUrl(c.code)}"/>`).join("\n")
+    + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${ottWeekUrl("in")}"/>`;
+  const ottUrls = countries.map((c) =>
+    `  <url><loc>${ottWeekUrl(c.code)}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.9</priority>\n${ottAlts}\n  </url>`);
+
   // Per-film pages for every country. Build a map slug -> [codes that have it] so we can emit
   // hreflang alternates for films shared across markets.
   const dirFor = (code) => (code === "in" ? "movie" : `${code}/movie`);
@@ -1436,7 +1445,7 @@ function writeMultiCountrySitemap(countries) {
     }
   }
   fs.writeFileSync("sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${countryUrls.join("\n")}\n${filmUrls.join("\n")}\n</urlset>\n`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${countryUrls.join("\n")}\n${ottUrls.join("\n")}\n${filmUrls.join("\n")}\n</urlset>\n`);
   console.log(`Sitemap: ${countries.length} country pages + ${filmCount} film pages.`);
 }
 
@@ -1514,6 +1523,193 @@ function replaceBetween(html, tag, inner) {
 // Per-country page metadata: title, description, canonical, OG — country-specific so each
 // page ranks for its own market in search. India keeps the established global-but-India-first
 // wording at the root; the others name their country explicitly.
+
+// ============================================================================
+// "NEW ON OTT THIS WEEK" PAGE — the organic-discovery page.
+// The homepage + film pages target queries FilmyChill can't win (film names vs
+// IMDb/Wikipedia) or that nobody types (the brand). The query space the site CAN
+// win is the weekly aggregation query — "new OTT releases this week", "new on
+// Netflix <country>", "what to watch this weekend" — which is high-volume,
+// freshness-sensitive (Google favours recently-updated pages for it), and is
+// EXACTLY what the pipeline already computes daily. One page per country at
+// /new-on-ott/ (India) and /<code>/new-on-ott/, rebuilt every run, grouped by
+// platform, with CollectionPage + ItemList + FAQPage schema and hreflang links.
+// ============================================================================
+function ottWeekPath(code) { return code === "in" ? "new-on-ott/index.html" : `${code}/new-on-ott/index.html`; }
+function ottWeekUrl(code) { return code === "in" ? "https://filmychill.com/new-on-ott/" : `https://filmychill.com/${code}/new-on-ott/`; }
+
+function buildOttWeekPage(data, cfg, allCountries) {
+  const e = escHtml;
+  // JSON-LD-safe serializer: escapes "<" as \u003c inside the JSON so a title containing
+  // "</script>" can never break out of the <script type="application/ld+json"> block.
+  const ldJson = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
+  const code = (cfg && cfg.code) || "in";
+  const m = COUNTRY_PAGE_META[code] || { name: cfg && cfg.name || "India", path: `/${code}/` };
+  const countryName = m.name; // "India", "the US", ...
+  const homeUrl = `https://filmychill.com${m.path}`;
+  const url = ottWeekUrl(code);
+  const gen = data.generatedAt || new Date().toISOString();
+  const monthYear = new Date(gen).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+  const updatedHuman = new Date(gen).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+
+  const items = (data.ott || []).filter((x) => x && x.title);
+  // Group by platform, preserving the ranked order inside each group; biggest platforms first.
+  const groups = new Map();
+  for (const it of items) {
+    const p = it.platform || "More platforms";
+    if (!groups.has(p)) groups.set(p, []);
+    groups.get(p).push(it);
+  }
+  const platforms = [...groups.keys()].sort((a, b) => groups.get(b).length - groups.get(a).length || a.localeCompare(b));
+  const platformNames = platforms.slice(0, 4).join(", ");
+
+  const title = `New OTT Releases This Week in ${countryName} (${monthYear}) — ${platformNames || "Streaming"} | FilmyChill`;
+  const desc = `Every new movie and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated daily.`;
+
+  // FAQ per major platform + one "best of" — real answers from real data, mirrored in
+  // FAQPage schema. Only platforms with titles get a question; schema only if >= 2 Q&As.
+  const faqs = [];
+  for (const p of platforms.slice(0, 3)) {
+    const titles = groups.get(p).map((t) => `${t.title}${t.language ? ` (${t.language})` : ""}`).join(", ");
+    faqs.push({ q: `What's new on ${p} in ${countryName} this week?`, a: `New on ${p} this week: ${titles}.` });
+  }
+  const best = items.filter((x) => x.rating != null).sort((a, b) => b.rating - a.rating).slice(0, 3);
+  if (best.length >= 2) {
+    faqs.push({
+      q: `What are the best new OTT releases in ${countryName} this week?`,
+      a: `Top-rated this week: ${best.map((x) => `${x.title} (${Number(x.rating).toFixed(1)}/10 on ${x.platform})`).join(", ")}.`,
+    });
+  }
+  const faqLd = faqs.length >= 2 ? {
+    "@context": "https://schema.org", "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+  } : null;
+
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `New OTT Releases This Week in ${countryName}`,
+    url,
+    dateModified: gen,
+    isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: items.filter((x) => x.slug).length,
+      itemListElement: items.filter((x) => x.slug).map((x, i) => ({
+        "@type": "ListItem", position: i + 1, name: x.title, url: filmPageUrl(code, x.slug),
+      })),
+    },
+  };
+  const breadcrumb = {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "FilmyChill", item: homeUrl },
+      { "@type": "ListItem", position: 2, name: "New on OTT this week", item: url },
+    ],
+  };
+
+  // hreflang alternates: this page exists for every built country every run.
+  const alts = (allCountries && allCountries.length ? allCountries : [{ code: "in", region: "IN" }])
+    .map((c) => `<link rel="alternate" hreflang="${c.code === "in" ? "en-IN" : "en-" + (c.region || c.code.toUpperCase())}" href="${ottWeekUrl(c.code)}"/>`)
+    .join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${ottWeekUrl("in")}"/>`;
+
+  const rowFor = (it) => {
+    const badge = it.badge || (it.isRecent ? "New release" : null);
+    const meta = [it.language, it.genre ? it.genre.split(" / ")[0] : null, freshLabel(it) || null].filter(Boolean).map(e).join(" · ");
+    const inner = `
+      ${it.poster ? `<img src="${e(it.poster)}" alt="${e(it.title)} poster" width="92" height="138" loading="lazy">` : "<div class=\"nop\"></div>"}
+      <div>
+        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}</div>
+        <div class="rm">${meta}</div>
+        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
+      </div>`;
+    return it.slug
+      ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>`
+      : `<div class="row">${inner}</div>`;
+  };
+  const sections = platforms.map((p) => `
+  <section>
+    <h2>New on ${e(p)} <span class="cnt">${groups.get(p).length}</span></h2>
+    ${groups.get(p).map(rowFor).join("\n")}
+  </section>`).join("\n");
+
+  const faqHtml = faqs.length ? `
+  <section>
+    <h2>Quick answers</h2>
+    <div class="faq">
+      ${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("\n      ")}
+    </div>
+  </section>` : "";
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${e(title)}</title>
+<meta name="description" content="${e(desc)}">
+<link rel="canonical" href="${e(url)}">
+${alts}
+<meta property="og:title" content="New OTT Releases This Week in ${e(countryName)} (${e(monthYear)})">
+<meta property="og:description" content="${e(desc)}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${e(url)}">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'">
+<script type="application/ld+json">${ldJson(ld)}</script>
+<script type="application/ld+json">${ldJson(breadcrumb)}</script>${faqLd ? `
+<script type="application/ld+json">${ldJson(faqLd)}</script>` : ""}
+<style>
+  :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
+  * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
+  .top { background:var(--indigo); padding:14px 16px; } .top a { color:var(--cream); text-decoration:none; font-weight:800; letter-spacing:1px; font-size:18px; }
+  .top a span { color:var(--marigold); }
+  .wrap { max-width:680px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { font-size:24px; margin:0 0 4px; line-height:1.3; }
+  .upd { color:var(--mute); font-size:13px; margin-bottom:6px; }
+  .lead { font-size:14.5px; line-height:1.6; color:var(--mute); margin:0 0 8px; }
+  h2 { font-size:17px; margin:26px 0 10px; } .cnt { color:var(--marigold); }
+  .row { display:grid; grid-template-columns:92px 1fr; gap:12px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; text-decoration:none; color:inherit; }
+  .row img { border-radius:8px; display:block; width:92px; height:138px; object-fit:cover; background:var(--line); }
+  .nop { width:92px; height:138px; border-radius:8px; background:var(--line); }
+  .rt { display:flex; gap:8px; align-items:center; flex-wrap:wrap; } .rt h3 { font-size:16px; margin:2px 0; }
+  .badge { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); background:var(--marigold); border-radius:5px; padding:3px 7px; font-weight:800; }
+  .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
+  .faq details { border-top:1px solid var(--line); padding:10px 0; }
+  .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }
+  .faq summary::-webkit-details-marker { display:none; }
+  .faq summary::after { content:"+"; float:right; color:var(--indigo); font-weight:700; }
+  .faq details[open] summary::after { content:"–"; }
+  .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
+  .btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
+  footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
+<div class="wrap">
+  <h1>New OTT Releases This Week in ${e(countryName)}</h1>
+  <div class="upd">Updated ${e(updatedHuman)} · refreshed daily</div>
+  <p class="lead">Every new movie and web series that started streaming in ${e(countryName)} this week, grouped by platform and ranked by rating — so you know what's actually worth your time.</p>
+${sections}
+${faqHtml}
+  <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + OTT)</a>
+</div>
+<footer>
+  ${footerAttribution()}© 2026 FilmyChill
+</footer>
+</body>
+</html>`;
+}
+
+function writeOttWeekPage(data, cfg, allCountries) {
+  const p = ottWeekPath(cfg.code);
+  const dir = p.slice(0, p.lastIndexOf("/"));
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(p, buildOttWeekPage(data, cfg, allCountries));
+  console.log(`  OTT-week page: /${p.replace(/index\.html$/, "")}`);
+}
+
 const COUNTRY_PAGE_META = {
   in: { name: "India", path: "/" },
   us: { name: "the US", path: "/us/" },
@@ -1640,6 +1836,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
   const slugSets = { in: new Set(all.map((x) => x.slug).filter(Boolean)) };
   generatePages(d, inCfg, slugSets); // India only in local regen
   prerenderIndex(d);
+  writeOttWeekPage(d, inCfg, [inCfg]);
   fs.writeFileSync("data.json", JSON.stringify(d, null, 1));
   process.exit(0);
 }
@@ -1652,6 +1849,7 @@ module.exports = {
   deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
   filterTheatreFresh, THEATRE_WINDOW_DAYS, THEATRE_WINDOW_FALLBACK_DAYS, THEATRE_MIN_POOL,
   ottRecencyBonus, OTT_RECENCY_MAX, freshBadge, freshLabel, fmtDateShort,
+  buildOttWeekPage, ottWeekUrl, ottWeekPath,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
   filmPagePath, filmPageUrl,
 };
