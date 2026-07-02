@@ -552,8 +552,45 @@ test("buildFilmPage: US page has US canonical, title, and where-to-watch", () =>
   const item = { title: "The Furious", slug: "the-furious", kind: "movie", language: "English", platform: "Theatres", released: "2026-06-01" };
   const html = U.buildFilmPage(item, "2026-06-17", new Set(["the-furious"]), { code: "us", name: "United States", region: "US" });
   assert.ok(/rel="canonical" href="https:\/\/filmychill.com\/us\/movie\/the-furious.html"/.test(html));
-  assert.ok(/Where to Watch in United States/.test(html));
-  assert.ok(/<h2>Where to watch in United States<\/h2>/.test(html));
+  // Display name comes from COUNTRY_PAGE_META ("the US"), not the config's "United States" —
+  // "in the US" is how people actually search and speak.
+  assert.ok(/Where to Watch in the US/.test(html));
+  assert.ok(/<h2>Where to watch in the US<\/h2>/.test(html));
+});
+// Guards the fix for India references leaking onto other countries' film pages ("It's in
+// theatres in India now" on a US page). Every country's page must speak about ITSELF.
+test("buildVerdictProse: theatre close names the page's own country, not India", () => {
+  const item = { title: "Toy Story 5", kind: "movie", language: "English", rating: 7.4, votes: 406, runtime: 102, platform: "Theatres" };
+  const us = U.buildVerdictProse(item, "the US", "en-US");
+  assert.ok(us.includes("It's in theatres in the US now"), us);
+  assert.ok(!us.includes("India"));
+  const de = U.buildVerdictProse(item, "Germany", "en-GB");
+  assert.ok(de.includes("It's in theatres in Germany now"));
+});
+test("buildVerdictProse: streaming close + vote grouping follow the country's locale", () => {
+  const item = { title: "X", kind: "movie", language: "English", rating: 8.0, votes: 1234567, providers: ["Netflix"] };
+  const us = U.buildVerdictProse(item, "the US", "en-US");
+  assert.ok(us.includes("In the US you can stream it on Netflix"));
+  assert.ok(us.includes("1,234,567"), "US grouping");
+  const ind = U.buildVerdictProse(item); // defaults preserve India behavior
+  assert.ok(ind.includes("In India you can stream it"));
+  assert.ok(ind.includes("12,34,567"), "Indian lakh grouping");
+});
+test("buildFaqs: where-to-watch answers name the page's own country", () => {
+  const theatre = { title: "T", kind: "movie", platform: "Theatres", verdict: "Worth a watch", rating: 7.0 };
+  const faqsUk = U.buildFaqs(theatre, "the UK");
+  const whereUk = faqsUk.find((f) => f.q.startsWith("Where"));
+  assert.ok(whereUk.a.includes("theatres across the UK"));
+  assert.ok(!JSON.stringify(faqsUk).includes("India"));
+  const faqsIn = U.buildFaqs(theatre); // default -> India
+  assert.ok(faqsIn.find((f) => f.q.startsWith("Where")).a.includes("theatres across India"));
+});
+test("countryNameFor/localeFor: prose names and locales per country", () => {
+  assert.strictEqual(U.countryNameFor({ code: "us", name: "United States" }), "the US");
+  assert.strictEqual(U.countryNameFor(null), "India");
+  assert.strictEqual(U.localeFor("us"), "en-US");
+  assert.strictEqual(U.localeFor("in"), "en-IN");
+  assert.strictEqual(U.localeFor("de"), "en-GB");
 });
 test("buildFilmPage: defaults to India when no cfg passed (backward compatible)", () => {
   const item = { title: "X", slug: "x", kind: "movie", platform: "Theatres" };
