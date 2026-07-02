@@ -408,7 +408,7 @@ async function attachTrailerStats(dataByCode) {
 // A multi-sentence verdict paragraph assembled from the item's own data. Distinct from the
 // short `verdict` label ("Worth a watch"). Deterministic templating keyed on rating band,
 // recency, runtime, and where-to-watch — no invented plot facts, so nothing can hallucinate.
-function buildVerdictProse(item) {
+function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
   if (!item || !item.title) return "";
   const r = item.rating;
   const votes = item.imdbRating != null ? item.imdbVotes : item.votes;
@@ -437,7 +437,7 @@ function buildVerdictProse(item) {
   let ratingBit = "";
   if (r != null && votes >= 10) {
     const src = item.imdbRating != null ? "IMDb" : "TMDB";
-    ratingBit = ` It carries a ${Number(r).toFixed(1)}/10 on ${src} across ${Number(votes).toLocaleString("en-IN")} ratings, which puts it ${r >= 7 ? "comfortably above average" : r >= 6 ? "around the middle of the pack" : "below the bar for most viewers"}.`;
+    ratingBit = ` It carries a ${Number(r).toFixed(1)}/10 on ${src} across ${Number(votes).toLocaleString(locale)} ratings, which puts it ${r >= 7 ? "comfortably above average" : r >= 6 ? "around the middle of the pack" : "below the bar for most viewers"}.`;
   }
 
   // Runtime / format note.
@@ -458,9 +458,9 @@ function buildVerdictProse(item) {
   if (upcoming && item.released) {
     whereBit = ` It releases ${item.released}; mark your calendar if it's on your list.`;
   } else if (provs.length) {
-    whereBit = ` In India you can stream it on ${provs.slice(0, 3).join(", ")}.`;
+    whereBit = ` In ${countryName} you can stream it on ${provs.slice(0, 3).join(", ")}.`;
   } else if (item.platform === "Theatres") {
-    whereBit = ` It's in theatres in India now — best caught on the big screen.`;
+    whereBit = ` It's in theatres in ${countryName} now — best caught on the big screen.`;
   }
 
   return (lead.replace(/\.$/, "") + "." + ratingBit + formatBit + whereBit).trim();
@@ -502,7 +502,7 @@ function buildGoodToKnow(item) {
 
 // FAQ entries (question + answer), deterministic, for both on-page display AND FAQPage
 // schema. Only questions we can answer truthfully from data are emitted.
-function buildFaqs(item) {
+function buildFaqs(item, countryName = "India") {
   if (!item || !item.title) return [];
   const faqs = [];
   const today = new Date().toISOString().slice(0, 10);
@@ -520,9 +520,9 @@ function buildFaqs(item) {
   // Q2: where to watch
   let whereA;
   if (upcoming) whereA = `${item.title} hasn't released yet${item.released ? ` — it's due ${item.released}` : ""}. We'll list where to watch once it's out.`;
-  else if (provs.length) whereA = `You can stream ${item.title} in India on ${provs.join(", ")}.`;
-  else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across India. An OTT release hasn't been announced yet.`;
-  else whereA = `Streaming availability for ${item.title} in India isn't confirmed yet — check back as platforms update.`;
+  else if (provs.length) whereA = `You can stream ${item.title} in ${countryName} on ${provs.join(", ")}.`;
+  else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across ${countryName}. An OTT release hasn't been announced yet.`;
+  else whereA = `Streaming availability for ${item.title} in ${countryName} isn't confirmed yet — check back as platforms update.`;
   faqs.push({ q: `Where can I watch ${item.title}?`, a: whereA });
 
   // Q3: family friendly (only if we have a cert)
@@ -1369,7 +1369,7 @@ function filmPageUrl(code, slug) {
 function buildFilmPage(item, asOf, knownSlugs, cfg) {
   const e = escHtml;
   const code = (cfg && cfg.code) || "in";
-  const country = (cfg && cfg.name) || "India";
+  const country = countryNameFor(cfg); // "the US", not the config's "United States" — reads right in titles and prose
   const homeUrl = code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`;
   const year = (item.released || "").slice(0, 4);
   const upcoming = item.released && item.released > new Date().toISOString().slice(0, 10);
@@ -1413,9 +1413,9 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   };
 
   // --- Enriched, deterministic sections (original content -> SEO value) ---
-  const verdictProse = buildVerdictProse(item);
+  const verdictProse = buildVerdictProse(item, country, localeFor(code));
   const goodToKnow = buildGoodToKnow(item);
-  const faqs = buildFaqs(item);
+  const faqs = buildFaqs(item, country);
   const similar = (Array.isArray(item.similar) ? item.similar : []).slice(0, 3);
 
   // FAQPage schema — only when we have at least 2 Q&As (Google wants a real list).
@@ -1713,8 +1713,8 @@ function buildOttWeekPage(data, cfg, allCountries) {
   const homeUrl = `https://filmychill.com${m.path}`;
   const url = ottWeekUrl(code);
   const gen = data.generatedAt || new Date().toISOString();
-  const monthYear = new Date(gen).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
-  const updatedHuman = new Date(gen).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  const monthYear = new Date(gen).toLocaleDateString(localeFor(code), { month: "long", year: "numeric" });
+  const updatedHuman = new Date(gen).toLocaleDateString(localeFor(code), { day: "numeric", month: "long", year: "numeric" });
 
   const items = (data.ott || []).filter((x) => x && x.title);
   // Group by platform, preserving the ranked order inside each group; biggest platforms first.
@@ -1883,6 +1883,15 @@ const COUNTRY_PAGE_META = {
   au: { name: "Australia", path: "/au/" },
   de: { name: "Germany", path: "/de/" },
 };
+
+// English locale conventions per country — grouping ("12,34,567" lakh-style is correct ONLY
+// for India; the US expects "1,234,567") and long-date order ("July 1, 2026" in the US vs
+// "1 July 2026" elsewhere). Germany gets en-GB: the site's language is English, and en-GB's
+// day-first order matches German convention for an English-language page.
+const COUNTRY_LOCALE = { in: "en-IN", us: "en-US", uk: "en-GB", au: "en-AU", de: "en-GB" };
+const localeFor = (code) => COUNTRY_LOCALE[code] || "en-IN";
+// Prose-ready country name ("the US", not the config's "United States") for any cfg.
+const countryNameFor = (cfg) => (COUNTRY_PAGE_META[(cfg && cfg.code) || "in"] || {}).name || (cfg && cfg.name) || "India";
 function buildHeadTags(cfg, useImdb = USE_IMDB) {
   const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name, path: `/${cfg.code}/` };
   const url = `https://filmychill.com${m.path}`;
@@ -2022,7 +2031,7 @@ module.exports = {
   filterTheatreFresh, THEATRE_WINDOW_DAYS, THEATRE_WINDOW_FALLBACK_DAYS, THEATRE_MIN_POOL,
   ottRecencyBonus, OTT_RECENCY_MAX, freshBadge, freshLabel, fmtDateShort,
   buildOttWeekPage, ottWeekUrl, ottWeekPath,
-  computeBuzz, fmtViews, trailerViewsLabel,
+  computeBuzz, fmtViews, trailerViewsLabel, localeFor, countryNameFor,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
   filmPagePath, filmPageUrl,
 };
