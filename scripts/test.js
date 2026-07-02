@@ -254,6 +254,115 @@ test("isOttFresh: boundary at exactly OTT_FRESH_DAYS passes", () => {
   assert.strictEqual(U.isOttFresh(edge, FRESH_NOW), true);
 });
 
+// ---------------- Theatre freshness gate (whole-pool) ----------------
+// Guards the fix that gates the ENTIRE theatre pool (now_playing included) by the freshness
+// window — previously only the discover supplement was date-gated, so month-old now_playing
+// films could top "Latest big-screen releases" (the Obsession case: released 34 days prior).
+const TH_NOW = new Date("2026-07-02T00:00:00Z").getTime();
+const thFilm = (title, release_date) => ({ title, release_date });
+const daysAgo = (n) => new Date(TH_NOW - n * 864e5).toISOString().slice(0, 10);
+
+test("filterTheatreFresh: month-old now_playing film is dropped (Obsession case)", () => {
+  // 9 fresh films so the strict window has enough to stand on its own
+  const pool = [thFilm("Obsession", "2026-05-29"), // 34 days old
+    ...Array.from({ length: 9 }, (_, i) => thFilm(`Fresh${i}`, daysAgo(i + 1)))];
+  const out = U.filterTheatreFresh(pool, TH_NOW);
+  assert.ok(!out.some((m) => m.title === "Obsession"), "34-day-old film must be gated out");
+  assert.strictEqual(out.length, 9);
+});
+test("filterTheatreFresh: films within the strict window are kept, boundary inclusive", () => {
+  const pool = [thFilm("Edge", daysAgo(U.THEATRE_WINDOW_DAYS)),
+    ...Array.from({ length: 8 }, (_, i) => thFilm(`Fresh${i}`, daysAgo(i + 1)))];
+  const out = U.filterTheatreFresh(pool, TH_NOW);
+  assert.ok(out.some((m) => m.title === "Edge"), "exactly-21-days-old film must pass");
+});
+test("filterTheatreFresh: thin week widens ONCE to the fallback window", () => {
+  // Only 3 strictly-fresh films (< THEATRE_MIN_POOL) + 4 in the 21-35d band + 1 beyond 35d.
+  const pool = [
+    ...Array.from({ length: 3 }, (_, i) => thFilm(`Fresh${i}`, daysAgo(i + 2))),
+    ...Array.from({ length: 4 }, (_, i) => thFilm(`Mid${i}`, daysAgo(25 + i))),
+    thFilm("Ancient", daysAgo(40)),
+  ];
+  const out = U.filterTheatreFresh(pool, TH_NOW);
+  assert.strictEqual(out.length, 7, "widened window keeps fresh + mid-band films");
+  assert.ok(!out.some((m) => m.title === "Ancient"), "fallback must not resurrect >35d films");
+});
+test("filterTheatreFresh: film with no release_date is dropped (junk record, not too-new)", () => {
+  const pool = [{ title: "Undated" },
+    ...Array.from({ length: 9 }, (_, i) => thFilm(`Fresh${i}`, daysAgo(i + 1)))];
+  const out = U.filterTheatreFresh(pool, TH_NOW);
+  assert.ok(!out.some((m) => m.title === "Undated"));
+});
+test("filterTheatreFresh: future-dated film is kept (release-day timezone edge)", () => {
+  const pool = [thFilm("Tomorrow", daysAgo(-1)),
+    ...Array.from({ length: 8 }, (_, i) => thFilm(`Fresh${i}`, daysAgo(i + 1)))];
+  const out = U.filterTheatreFresh(pool, TH_NOW);
+  assert.ok(out.some((m) => m.title === "Tomorrow"));
+});
+
+// ---------------- OTT recency-decay ranking bonus ----------------
+// Guards the fix that stops a high-rated near-expiry season from camping in the OTT top 3
+// above week-old drops (the FROM-at-74-days case). Gate decides admission; bonus decides order.
+test("ottRecencyBonus: released today gets the full bonus", () => {
+  assert.strictEqual(U.ottRecencyBonus(daysAgo(0), TH_NOW), U.OTT_RECENCY_MAX);
+});
+test("ottRecencyBonus: near-expiry title gets ~nothing, week-old drop outranks it", () => {
+  const nearExpiry = U.ottRecencyBonus(daysAgo(74), TH_NOW); // the FROM case
+  const weekOld = U.ottRecencyBonus(daysAgo(7), TH_NOW);
+  assert.ok(nearExpiry < 0.01, `74d bonus should be ~0, got ${nearExpiry}`);
+  assert.ok(weekOld > 0.12, `7d bonus should be near max, got ${weekOld}`);
+});
+test("ottRecencyBonus: decays linearly (half window ≈ half bonus)", () => {
+  const half = U.ottRecencyBonus(daysAgo(Math.round(U.OTT_FRESH_DAYS / 2)), TH_NOW);
+  assert.ok(Math.abs(half - U.OTT_RECENCY_MAX / 2) < 0.01);
+});
+test("ottRecencyBonus: null and beyond-window dates get zero", () => {
+  assert.strictEqual(U.ottRecencyBonus(null, TH_NOW), 0);
+  assert.strictEqual(U.ottRecencyBonus(daysAgo(100), TH_NOW), 0);
+});
+
+// ---------------- Freshness badge (freshDate-driven) ----------------
+// Guards the fix that lets returning TV seasons earn a badge. The old logic keyed off
+// release_date/first_air_date, so House of the Dragon (first_air_date 2022) showed NO badge
+// even when its new season aired 11 days ago.
+test("freshBadge: movie within 7 days -> New release", () => {
+  assert.strictEqual(U.freshBadge("movie", daysAgo(3), TH_NOW), "New release");
+});
+test("freshBadge: movie at 8 days -> no badge", () => {
+  assert.strictEqual(U.freshBadge("movie", daysAgo(8), TH_NOW), null);
+});
+test("freshBadge: returning show's season within 14 days -> New season (HotD case)", () => {
+  assert.strictEqual(U.freshBadge("tv", daysAgo(11), TH_NOW, 3), "New season");
+});
+test("freshBadge: first season of a brand-new show -> New show", () => {
+  assert.strictEqual(U.freshBadge("tv", daysAgo(5), TH_NOW, 1), "New show");
+});
+test("freshBadge: TV season older than 14 days -> no badge", () => {
+  assert.strictEqual(U.freshBadge("tv", daysAgo(15), TH_NOW, 3), null);
+});
+test("freshBadge: unreleased (future beyond tolerance) and null dates -> no badge", () => {
+  assert.strictEqual(U.freshBadge("movie", daysAgo(-5), TH_NOW), null);
+  assert.strictEqual(U.freshBadge("movie", null, TH_NOW), null);
+});
+
+// ---------------- freshLabel (visible card freshness line) ----------------
+test("freshLabel: movie shows 'Released <date>'", () => {
+  assert.strictEqual(U.freshLabel({ kind: "movie", freshDate: "2026-06-12" }, TH_NOW), "Released 12 Jun");
+});
+test("freshLabel: TV shows 'Latest season <date>', not the series launch", () => {
+  assert.strictEqual(U.freshLabel({ kind: "tv", freshDate: "2026-06-21", released: "2022-08-21" }, TH_NOW), "Latest season 21 Jun");
+});
+test("freshLabel: cross-year date includes the year (no ambiguity)", () => {
+  assert.ok(U.freshLabel({ kind: "movie", freshDate: "2025-12-20" }, TH_NOW).includes("2025"));
+});
+test("freshLabel: falls back to released when freshDate absent, empty when neither", () => {
+  assert.strictEqual(U.freshLabel({ kind: "movie", released: "2026-06-12" }, TH_NOW), "Released 12 Jun");
+  assert.strictEqual(U.freshLabel({ kind: "movie" }, TH_NOW), "");
+});
+test("freshLabel: movie prefers region-localized released over global freshDate (card = modal)", () => {
+  assert.strictEqual(U.freshLabel({ kind: "movie", released: "2026-05-29", freshDate: "2026-05-13" }, TH_NOW), "Released 29 May");
+});
+
 // ---------------- Enriched film-page sections (deterministic content) ----------------
 test("buildVerdictProse: high-rated film gets a strong lead + rating sentence", () => {
   const p = U.buildVerdictProse({ title: "Test", kind: "movie", language: "Telugu", rating: 8.2, votes: 5000, runtime: 140, providers: ["Netflix"] });
