@@ -248,6 +248,159 @@ function freshLabel(item, now = Date.now()) {
   return (item.kind === "tv" ? "Latest season " : "Released ") + fmtDateShort(d, now);
 }
 
+// ============================================================================
+// BUZZ SIGNALS — two free, licence-clean sources that TMDB can't provide:
+//   1. Wikipedia pageviews (keyless): how many people are READING about a title
+//      this week -> "🔥 Trending" badge. Article resolved precisely via Wikidata's
+//      IMDb-ID property (P345) — never by title search, so no wrong-article risk.
+//   2. YouTube Data API (optional YT_API_KEY secret): trailer view counts ->
+//      "▶ 52M trailer views" social proof. Skipped silently when the key is absent.
+// Both attach BEFORE data files are written (client cards read data.json) and both
+// degrade gracefully: any failure means a missing badge, never a failed build.
+// ============================================================================
+const YT_API_KEY = process.env.YT_API_KEY || "";
+const WIKI_HEADERS = { "User-Agent": "FilmyChillBot/1.0 (https://filmychill.com; vikramksharma87@gmail.com)" };
+const BUZZ_TREND_MIN_DAILY = 10000; // avg daily en-wiki views that always count as trending
+const BUZZ_TREND_SPIKE = 1.5;       // ...or recent week >= 1.5x the prior week
+const BUZZ_SPIKE_FLOOR = 3000;      //    (with a floor, so 20 -> 40 views never "trends")
+
+// Pure: daily view counts (oldest -> newest, ideally 14 entries) -> buzz verdict.
+// Trending = big in absolute terms OR clearly accelerating. < 7 days of data -> null
+// (brand-new articles can't prove a trend yet).
+function computeBuzz(daily) {
+  if (!Array.isArray(daily) || daily.length < 7) return null;
+  const recent = daily.slice(-7);
+  const prior = daily.slice(0, -7);
+  const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+  const recentAvg = avg(recent);
+  const priorAvg = prior.length ? avg(prior) : 0;
+  const trending = recentAvg >= BUZZ_TREND_MIN_DAILY
+    || (priorAvg > 0 && recentAvg >= BUZZ_SPIKE_FLOOR && recentAvg >= BUZZ_TREND_SPIKE * priorAvg);
+  return { weeklyViews: Math.round(recent.reduce((x, y) => x + y, 0)), trending };
+}
+
+// Pure: social-proof number formatting ("52M", "3.4M", "850K"). Label only from 1M up —
+// below that, a view count reads as ANTI-proof, so we show nothing.
+function fmtViews(n) {
+  if (!Number.isFinite(n) || n < 0) return "";
+  if (n >= 1e9) return (n / 1e9 >= 10 ? Math.round(n / 1e9) : +(n / 1e9).toFixed(1)) + "B";
+  if (n >= 1e6) return (n / 1e6 >= 10 ? Math.round(n / 1e6) : +(n / 1e6).toFixed(1)) + "M";
+  if (n >= 1e3) return Math.round(n / 1e3) + "K";
+  return String(n);
+}
+function trailerViewsLabel(n) {
+  return Number.isFinite(n) && n >= 1e6 ? `▶ ${fmtViews(n)} trailer views` : null;
+}
+
+// Keyless JSON fetch with one retry — for Wikimedia + YouTube endpoints.
+async function fetchJsonKeyless(url, headers = {}) {
+  let lastErr;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, { headers });
+      if (res.ok) return res.json();
+      lastErr = new Error(`HTTP ${res.status}`);
+      if (res.status < 500 && res.status !== 429) break; // permanent -> don't retry
+    } catch (e) { lastErr = e; }
+    await sleep(600);
+  }
+  throw lastErr;
+}
+
+// IMDb ID -> English Wikipedia article title, via Wikidata's P345 (IMDb ID) property.
+// Two keyless calls; returns null when the title has no Wikidata item or no enwiki article.
+async function wikiArticleForImdb(imdbId) {
+  const search = await fetchJsonKeyless(
+    `https://www.wikidata.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(`haswbstatement:"P345=${imdbId}"`)}&srlimit=1&format=json`,
+    WIKI_HEADERS);
+  const qid = search?.query?.search?.[0]?.title;
+  if (!qid) return null;
+  const ent = await fetchJsonKeyless(
+    `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${qid}&props=sitelinks&sitefilter=enwiki&format=json`,
+    WIKI_HEADERS);
+  return ent?.entities?.[qid]?.sitelinks?.enwiki?.title || null;
+}
+
+// Last 14 full days of pageviews for an article (ends yesterday — today is incomplete).
+async function wikiDailyViews(article) {
+  const day = (offset) => {
+    const d = new Date(Date.now() - offset * 864e5);
+    return d.toISOString().slice(0, 10).replace(/-/g, "") + "00";
+  };
+  const slug = encodeURIComponent(article.replace(/ /g, "_"));
+  const j = await fetchJsonKeyless(
+    `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/${slug}/daily/${day(14)}/${day(1)}`,
+    WIKI_HEADERS);
+  return (j?.items || []).map((x) => x.views);
+}
+
+// Attach Wikipedia buzz to every theatre + OTT item across all countries. Same film
+// appears in several countries' lists and pageviews are en-wiki-global, so each unique
+// IMDb ID is fetched ONCE and fanned out. No imdbId -> no badge (never guess articles).
+async function attachBuzz(dataByCode) {
+  const byImdb = new Map();
+  for (const data of Object.values(dataByCode)) {
+    for (const it of [...(data.theatres || []), ...(data.ott || [])]) {
+      if (!it.imdbId) continue;
+      if (!byImdb.has(it.imdbId)) byImdb.set(it.imdbId, []);
+      byImdb.get(it.imdbId).push(it);
+    }
+  }
+  let resolved = 0, trendingCount = 0;
+  for (const [imdbId, items] of byImdb) {
+    try {
+      const article = await wikiArticleForImdb(imdbId);
+      if (article) {
+        const buzz = computeBuzz(await wikiDailyViews(article));
+        if (buzz) {
+          resolved++;
+          if (buzz.trending) trendingCount++;
+          for (const it of items) {
+            it.wikiWeeklyViews = buzz.weeklyViews;
+            if (buzz.trending) it.trending = true;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn(`  buzz: ${items[0].title} skipped (${e.message})`);
+    }
+    await sleep(120); // polite pace against Wikimedia (well under their guidance)
+  }
+  console.log(`Buzz: ${resolved}/${byImdb.size} titles resolved via Wikipedia, ${trendingCount} trending`);
+}
+
+// Attach YouTube trailer view counts (theatres + OTT + coming soon — pre-release trailer
+// hype is buzz too). One videos.list call per 50 unique trailers; ~2 calls/run total,
+// costing ~2 of the 10,000 free daily quota units.
+async function attachTrailerStats(dataByCode) {
+  if (!YT_API_KEY) { console.log("Trailer stats: YT_API_KEY not set — skipping (optional feature)."); return; }
+  const byYt = new Map();
+  for (const data of Object.values(dataByCode)) {
+    for (const it of [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || [])]) {
+      const id = ytIdOf(it.trailer);
+      if (!id) continue; // search-URL fallback trailers have no video id
+      if (!byYt.has(id)) byYt.set(id, []);
+      byYt.get(id).push(it);
+    }
+  }
+  const ids = [...byYt.keys()];
+  let attached = 0;
+  for (let i = 0; i < ids.length; i += 50) {
+    const chunk = ids.slice(i, i + 50);
+    try {
+      const j = await fetchJsonKeyless(
+        `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${chunk.join(",")}&key=${YT_API_KEY}`);
+      for (const v of j?.items || []) {
+        const n = Number(v?.statistics?.viewCount);
+        if (!Number.isFinite(n)) continue;
+        attached++;
+        for (const it of byYt.get(v.id) || []) it.trailerViews = n;
+      }
+    } catch (e) { console.warn(`  trailer stats: chunk skipped (${e.message})`); }
+  }
+  console.log(`Trailer stats: views attached for ${attached}/${ids.length} trailers`);
+}
+
 // ---- Enriched film-page content (all DETERMINISTIC: derived from fields we already have,
 // no LLM, no extra dependency). These produce ORIGINAL prose/structure so each /movie/*.html
 // page is not just TMDB's synopsis reworded — which is what lifts it for SEO. Pure + tested.
@@ -500,6 +653,7 @@ async function enrich(kind, id, region = "IN") {
 
   return {
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
+    imdbId: imdbId || null, // handle for cross-source lookups (Wikipedia buzz via Wikidata P345)
     freshDate, badge, isRecent: badge != null, similar: recs,
     backdrop: img(d.backdrop_path, "w780"),
     fullReview: trim(d.overview, 600),
@@ -1129,16 +1283,25 @@ async function main() {
   const builtCountries = [];
   const dataByCode = {};
   const allSlugSets = {};
-  // Pass 1: build data for every country (writes data-<code>.json; India also writes data.json).
+  // Pass 1: build data for every country.
   for (const cfg of COUNTRIES) {
     const data = await buildCountry(cfg);
     assignSlugs(data);
-    fs.writeFileSync(`data-${cfg.code}.json`, JSON.stringify(data, null, 1));
-    if (cfg.code === "in") fs.writeFileSync("data.json", JSON.stringify(data, null, 1));
     dataByCode[cfg.code] = data;
     const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || [])];
     allSlugSets[cfg.code] = new Set(all.map((x) => x.slug).filter(Boolean));
     builtCountries.push(cfg);
+  }
+
+  // Buzz signals attach BEFORE the data files are written, so client-rendered cards
+  // (which read data.json) see the same badges the SSR cards do. Both are non-fatal.
+  await attachBuzz(dataByCode);
+  await attachTrailerStats(dataByCode);
+
+  // Now write every country's data file (India also writes the legacy data.json).
+  for (const cfg of builtCountries) {
+    fs.writeFileSync(`data-${cfg.code}.json`, JSON.stringify(dataByCode[cfg.code], null, 1));
+    if (cfg.code === "in") fs.writeFileSync("data.json", JSON.stringify(dataByCode[cfg.code], null, 1));
   }
   // Pass 2: now that ALL slug sets are known, generate per-film pages for every country (so
   // hreflang alternates between countries are accurate) and render each country homepage.
@@ -1273,6 +1436,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(item.title)}${year ? " (" + year + ")" : ""} — Review, Rating & Where to Watch in ${e(country)} | FilmyChill</title>
 <meta name="description" content="${e(desc)}">
+<meta name="robots" content="max-image-preview:large">
 <link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl("in", item.slug))}"/>` : ""}
 <meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">
 <meta property="og:description" content="${e(desc)}">
@@ -1468,9 +1632,9 @@ function ssrCard(item, i, code) {
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
     <div>
-      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}</div>
+      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}${item.trending ? '<span class="fresh-badge trend">🔥 Trending</span>' : ""}</div>
       <div class="meta">${bits}</div>
-      ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>` : ""}
+      ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}${trailerViewsLabel(item.trailerViews) ? " · " + trailerViewsLabel(item.trailerViews) : ""}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 110))}</p>` : ""}
     </div>`;
   // Every country now has its own per-film pages, so always link to this country's page.
@@ -1619,9 +1783,9 @@ function buildOttWeekPage(data, cfg, allCountries) {
     const inner = `
       ${it.poster ? `<img src="${e(it.poster)}" alt="${e(it.title)} poster" width="92" height="138" loading="lazy">` : "<div class=\"nop\"></div>"}
       <div>
-        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}</div>
+        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">🔥 Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
-        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
+        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}${trailerViewsLabel(it.trailerViews) ? " · " + trailerViewsLabel(it.trailerViews) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
       </div>`;
     return it.slug
       ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>`
@@ -1648,6 +1812,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(title)}</title>
 <meta name="description" content="${e(desc)}">
+<meta name="robots" content="max-image-preview:large">
 <link rel="canonical" href="${e(url)}">
 ${alts}
 <meta property="og:title" content="New OTT Releases This Week in ${e(countryName)} (${e(monthYear)})">
@@ -1674,6 +1839,7 @@ ${alts}
   .nop { width:92px; height:138px; border-radius:8px; background:var(--line); }
   .rt { display:flex; gap:8px; align-items:center; flex-wrap:wrap; } .rt h3 { font-size:16px; margin:2px 0; }
   .badge { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); background:var(--marigold); border-radius:5px; padding:3px 7px; font-weight:800; }
+  .badge.trend { background:#FF4E3A; color:#fff; }
   .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
   .faq details { border-top:1px solid var(--line); padding:10px 0; }
   .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }
@@ -1725,16 +1891,22 @@ function buildHeadTags(cfg, useImdb = USE_IMDB) {
   // without a current license, and in TMDB mode the claim would simply be false. TMDB mode
   // says just "ratings": accurate, and the TMDB brand adds nothing to a search snippet.
   const ratingsWord = useImdb ? "IMDb ratings" : "ratings";
+  // max-image-preview:large is REQUIRED for Google Discover eligibility — Discover is the
+  // channel where daily entertainment content actually goes viral in India. One tag,
+  // emitted on every page type (homepages here; film + ott-week pages set it themselves).
+  const discover = `<meta name="robots" content="max-image-preview:large">`;
   if (cfg.code === "in") {
     // Root keeps the multi-country, India-first wording already chosen.
     return `<title>FilmyChill — Latest Movie & OTT Releases, with Reviews, Updated Daily</title>\n`
       + `<meta name="description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts, auto-updated daily.">\n`
+      + discover + "\n"
       + `<link rel="canonical" href="${url}">\n`
       + `<meta property="og:title" content="FilmyChill — What's worth watching this week">\n`
       + `<meta property="og:description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts. Auto-updated daily.">`;
   }
   return `<title>FilmyChill — Latest Movie &amp; OTT Releases in ${m.name}, with Reviews, Updated Daily</title>\n`
     + `<meta name="description" content="Latest theatre and OTT releases in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, ${ratingsWord}, verdicts, auto-updated daily.">\n`
+    + discover + "\n"
     + `<link rel="canonical" href="${url}">\n`
     + `<meta property="og:title" content="FilmyChill — What's worth watching this week in ${m.name}">\n`
     + `<meta property="og:description" content="Top theatre releases + OTT picks in ${m.name} with trailers, ${ratingsWord} and verdicts. Auto-updated daily.">`;
@@ -1850,6 +2022,7 @@ module.exports = {
   filterTheatreFresh, THEATRE_WINDOW_DAYS, THEATRE_WINDOW_FALLBACK_DAYS, THEATRE_MIN_POOL,
   ottRecencyBonus, OTT_RECENCY_MAX, freshBadge, freshLabel, fmtDateShort,
   buildOttWeekPage, ottWeekUrl, ottWeekPath,
+  computeBuzz, fmtViews, trailerViewsLabel,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
   filmPagePath, filmPageUrl,
 };
