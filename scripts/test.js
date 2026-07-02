@@ -378,6 +378,60 @@ test("freshLabel: movie prefers region-localized released over global freshDate 
   assert.strictEqual(U.freshLabel({ kind: "movie", released: "2026-05-29", freshDate: "2026-05-13" }, TH_NOW), "Released 29 May");
 });
 
+// ---------------- "New on OTT this week" page (organic-discovery page) ----------------
+const OTT_WEEK_DATA = {
+  generatedAt: "2026-07-01T07:54:26.326Z",
+  ott: [
+    { title: "Alliance", slug: "alliance", platform: "Amazon Prime Video", language: "English", genre: "Reality", rating: 7.2, verdict: "Worth a watch", kind: "tv", freshDate: "2026-06-26", badge: "New show", poster: "https://image.tmdb.org/t/p/w342/x.jpg" },
+    { title: "Maa <Behen>", slug: "maa-behen", platform: "Netflix", language: "Hindi", genre: "Drama", rating: 6.9, verdict: "Worth a watch", kind: "movie", freshDate: "2026-06-04" },
+    { title: "The Bear", slug: "the-bear", platform: "JioHotstar", language: "English", genre: "Comedy", rating: 8.2, verdict: "Must watch", kind: "tv", freshDate: "2026-06-25", badge: "New season" },
+    { title: "Raakh", slug: "raakh", platform: "Amazon Prime Video", language: "Hindi", genre: "Thriller", rating: 7.5, verdict: "Worth a watch", kind: "movie", freshDate: "2026-06-12" },
+  ],
+};
+const OTT_WEEK_COUNTRIES = [{ code: "in", region: "IN" }, { code: "us", region: "US" }];
+
+test("buildOttWeekPage: keyword-first title with country + month, canonical to /new-on-ott/", () => {
+  const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
+  assert.ok(html.includes("<title>New OTT Releases This Week in India (July 2026)"));
+  assert.ok(html.includes('<link rel="canonical" href="https://filmychill.com/new-on-ott/">'));
+});
+test("buildOttWeekPage: groups by platform, biggest platform first", () => {
+  const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
+  assert.ok(html.indexOf("New on Amazon Prime Video") < html.indexOf("New on JioHotstar"), "2-title platform must lead");
+  assert.ok(html.includes("New on Netflix"));
+});
+test("buildOttWeekPage: rows link to the country's film pages", () => {
+  const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "us", name: "United States" }, OTT_WEEK_COUNTRIES);
+  assert.ok(html.includes('href="/us/movie/the-bear.html"'));
+  assert.ok(html.includes('<link rel="canonical" href="https://filmychill.com/us/new-on-ott/">'));
+});
+test("buildOttWeekPage: FAQPage schema built from real data (platforms + best-of)", () => {
+  const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
+  assert.ok(html.includes('"@type":"FAQPage"'));
+  assert.ok(html.includes("What&#39;s new on Netflix in India this week?") || html.includes("What's new on Netflix in India this week?"));
+  assert.ok(html.includes("best new OTT releases in India"));
+});
+test("buildOttWeekPage: titles are HTML-escaped (injection guard)", () => {
+  const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
+  assert.ok(!html.includes("Maa <Behen>"), "raw angle brackets must not survive");
+  assert.ok(html.includes("Maa &lt;Behen&gt;"));
+});
+test("buildOttWeekPage: hreflang alternates for every country + x-default to India", () => {
+  const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
+  assert.ok(html.includes('hreflang="en-US" href="https://filmychill.com/us/new-on-ott/"'));
+  assert.ok(html.includes('hreflang="x-default" href="https://filmychill.com/new-on-ott/"'));
+});
+test("buildOttWeekPage: CollectionPage schema carries dateModified (freshness signal)", () => {
+  const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
+  assert.ok(html.includes('"dateModified":"2026-07-01T07:54:26.326Z"'));
+});
+test("ottWeekPath/ottWeekUrl: India flat, countries namespaced", () => {
+  assert.strictEqual(U.ottWeekPath("in"), "new-on-ott/index.html");
+  assert.strictEqual(U.ottWeekPath("de"), "de/new-on-ott/index.html");
+  assert.strictEqual(U.ottWeekUrl("in"), "https://filmychill.com/new-on-ott/");
+  assert.strictEqual(U.ottWeekUrl("uk"), "https://filmychill.com/uk/new-on-ott/");
+});
+
 // ---------------- Enriched film-page sections (deterministic content) ----------------
 test("buildVerdictProse: high-rated film gets a strong lead + rating sentence", () => {
   const p = U.buildVerdictProse({ title: "Test", kind: "movie", language: "Telugu", rating: 8.2, votes: 5000, runtime: 140, providers: ["Netflix"] });
