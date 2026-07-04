@@ -378,6 +378,73 @@ test("freshLabel: movie prefers region-localized released over global freshDate 
   assert.strictEqual(U.freshLabel({ kind: "movie", released: "2026-05-29", freshDate: "2026-05-13" }, TH_NOW), "Released 29 May");
 });
 
+// ---------------- First-seen tracking (ott-seen.json) ----------------
+// Guards the upgrade from release-date freshness to true catalog-arrival freshness.
+// TH_NOW = 2026-07-02 (declared above). daysAgo(n) helpers reused.
+test("ottArrival: late OTT arrival — old release, fresh sighting -> effective=arrival, badged", () => {
+  const { effective, isArrival } = U.ottArrival(daysAgo(80), daysAgo(3), TH_NOW);
+  assert.strictEqual(effective, daysAgo(3), "gate/decay must use the arrival date");
+  assert.ok(isArrival, "80-day-old film newly on a platform is an arrival event");
+});
+test("ottArrival: direct-to-OTT release — fresh release, fresh sighting -> release event, NOT arrival-badged", () => {
+  const { effective, isArrival } = U.ottArrival(daysAgo(3), daysAgo(2), TH_NOW);
+  assert.strictEqual(effective, daysAgo(2));
+  assert.ok(!isArrival, "recent releases already carry the release badge");
+});
+test("ottArrival: catalog addition — years-old title first seen today -> fresh + arrival", () => {
+  const { effective, isArrival } = U.ottArrival("2024-03-01", daysAgo(0), TH_NOW);
+  assert.strictEqual(effective, daysAgo(0));
+  assert.ok(isArrival);
+});
+test("ottArrival: long-listed title — old first-sighting -> no badge, effective stays put", () => {
+  const { isArrival } = U.ottArrival(daysAgo(60), daysAgo(40), TH_NOW);
+  assert.ok(!isArrival, "a title sighted 40 days ago is not newly arrived");
+});
+test("ottArrival: null freshDate (too-new title) -> effective = first sighting", () => {
+  const { effective } = U.ottArrival(null, daysAgo(1), TH_NOW);
+  assert.strictEqual(effective, daysAgo(1));
+});
+test("recordOttSeen: cold start seeds with the EARLIER of release date and today (no fake-new flood)", () => {
+  const seen = {};
+  const first = U.recordOttSeen(seen, "movie:1", daysAgo(30), daysAgo(0), true);
+  assert.strictEqual(first, daysAgo(30), "existing catalog must keep release-based freshness on day one");
+  assert.strictEqual(seen["movie:1"].last, daysAgo(0));
+});
+test("recordOttSeen: incremental — unseen key is a new arrival (first = today)", () => {
+  const seen = { "movie:1": { first: daysAgo(30), last: daysAgo(1) } };
+  const first = U.recordOttSeen(seen, "movie:2", daysAgo(90), daysAgo(0), false);
+  assert.strictEqual(first, daysAgo(0));
+});
+test("recordOttSeen: repeat sighting returns original first and bumps last", () => {
+  const seen = { "tv:9": { first: daysAgo(10), last: daysAgo(1) } };
+  const first = U.recordOttSeen(seen, "tv:9", daysAgo(12), daysAgo(0), false);
+  assert.strictEqual(first, daysAgo(10));
+  assert.strictEqual(seen["tv:9"].last, daysAgo(0));
+});
+test("pruneOttSeen: entries unseen past retention are dropped, recent ones kept", () => {
+  const all = { in: {
+    stale: { first: daysAgo(300), last: daysAgo(200) },
+    fresh: { first: daysAgo(300), last: daysAgo(5) },
+  } };
+  U.pruneOttSeen(all, TH_NOW);
+  assert.ok(!all.in.stale, "200-days-unseen entry must be pruned");
+  assert.ok(all.in.fresh, "recently-seen entry survives regardless of age");
+});
+test("laterDate/earlierDate: null-safe date-string comparison", () => {
+  assert.strictEqual(U.laterDate("2026-06-01", "2026-07-01"), "2026-07-01");
+  assert.strictEqual(U.earlierDate("2026-06-01", "2026-07-01"), "2026-06-01");
+  assert.strictEqual(U.laterDate(null, "2026-07-01"), "2026-07-01");
+  assert.strictEqual(U.earlierDate("2026-06-01", null), "2026-06-01");
+});
+test("first-seen end-to-end: gate keeps a late arrival that release-date freshness would drop", () => {
+  // An April theatrical film first sighted on a platform 3 days ago: release-age 80d fails
+  // the 45d window, but the EFFECTIVE date (arrival) passes — the whole point of the feature.
+  const releaseDate = daysAgo(80), firstSeen = daysAgo(3);
+  assert.ok(!U.isOttFresh(releaseDate, TH_NOW), "release date alone would be gated out");
+  const { effective } = U.ottArrival(releaseDate, firstSeen, TH_NOW);
+  assert.ok(U.isOttFresh(effective, TH_NOW), "effective date keeps it in the list");
+});
+
 // ---------------- Buzz signals (Wikipedia pageviews + trailer stats) ----------------
 // Guards the free-data features: computeBuzz decides the 🔥 Trending badge from raw daily
 // pageview counts; fmtViews/trailerViewsLabel format trailer social proof.
