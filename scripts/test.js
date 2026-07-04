@@ -378,6 +378,74 @@ test("freshLabel: movie prefers region-localized released over global freshDate 
   assert.strictEqual(U.freshLabel({ kind: "movie", released: "2026-05-29", freshDate: "2026-05-13" }, TH_NOW), "Released 29 May");
 });
 
+// ---------------- RSS feed (distribution automation) ----------------
+test("buildRssFeed: valid channel with country name, self link, and capped newest-first items", () => {
+  const data = { generatedAt: "2026-07-04T07:22:00Z",
+    theatres: [{ title: "Toy Story 5", slug: "toy-story-5", platform: "Theatres", released: "2026-06-19", rating: 7.4, verdict: "Worth a watch", language: "English" }],
+    ott: [{ title: "Silo", slug: "silo", platform: "Apple TV", freshDate: "2026-07-02", ottSince: "2026-07-02", rating: 8.2, verdict: "Must watch", language: "English" }] };
+  const xml = U.buildRssFeed(data, { code: "in", name: "India" });
+  assert.ok(xml.includes("<title>FilmyChill — New Movies &amp; OTT This Week in India</title>"));
+  assert.ok(xml.includes('atom:link href="https://filmychill.com/feed.xml" rel="self"'));
+  assert.ok(xml.indexOf("Silo") < xml.indexOf("Toy Story 5"), "newest (Jul 2) before older (Jun 19)");
+  assert.ok(xml.includes("<pubDate>"));
+});
+test("buildRssFeed: guid is stable per freshness-event (arrival date), not per rebuild", () => {
+  const item = { title: "X", slug: "x", platform: "Netflix", freshDate: "2026-04-10", ottSince: "2026-07-01", rating: 7, verdict: "Worth a watch" };
+  const xml1 = U.buildRssFeed({ generatedAt: "2026-07-04T01:00:00Z", ott: [item] }, { code: "in", name: "India" });
+  const xml2 = U.buildRssFeed({ generatedAt: "2026-07-04T13:00:00Z", ott: [item] }, { code: "in", name: "India" });
+  const guid = (x) => /<guid[^>]*>([^<]*)<\/guid>/.exec(x)[1];
+  assert.strictEqual(guid(xml1), guid(xml2), "same event -> same guid across rebuilds");
+  assert.ok(guid(xml1).includes("2026-07-01"), "guid keys on the ARRIVAL date");
+});
+test("buildRssFeed: country feeds use their own namespace and XML-escapes titles", () => {
+  const data = { generatedAt: "2026-07-04T07:22:00Z", ott: [{ title: "Tom & Jerry <3", slug: "tj", platform: "Netflix", freshDate: "2026-07-01" }] };
+  const xml = U.buildRssFeed(data, { code: "us", name: "United States" });
+  assert.ok(xml.includes("https://filmychill.com/us/movie/tj.html"));
+  assert.ok(xml.includes("Tom &amp; Jerry &lt;3"));
+  assert.ok(!xml.includes("Tom & Jerry <3"));
+});
+
+// ---------------- Film-page archive (honest long tail) ----------------
+test("archivePatchHtml + generator SYNC GUARD: a real theatrical page gets honestly archived", () => {
+  // Build an actual page with buildFilmPage, then archive-patch it. If someone rewords the
+  // theatrical claims in buildVerdictProse/buildFaqs without updating archivePatchHtml,
+  // THIS test fails — the patcher and generator must stay in step.
+  const item = { title: "T", slug: "t", kind: "movie", language: "Hindi", platform: "Theatres",
+    released: "2026-06-01", rating: 7.0, votes: 500, verdict: "Worth a watch", runtime: 120 };
+  const page = U.buildFilmPage(item, "2026-06-17", new Set(["t"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(page.includes("in theatres in India now"), "precondition: page carries the live claim");
+  const { html, changed } = U.archivePatchHtml(page, "India");
+  assert.ok(changed, "patch must fire on a theatrical page");
+  assert.ok(!html.includes("in theatres in India now"), "live claim removed");
+  assert.ok(html.includes("had its theatrical run in India"));
+  assert.ok(html.includes("finished its theatrical run in India"));
+  assert.ok(!html.includes('<span class="pill">In theatres</span>'));
+});
+test("archivePatchHtml: no-op for OTT pages (their availability stays valid)", () => {
+  const item = { title: "S", slug: "s", kind: "tv", language: "English", platform: "Netflix",
+    providers: ["Netflix"], released: "2026-06-01", freshDate: "2026-06-20", rating: 8.0, votes: 900, verdict: "Must watch" };
+  const page = U.buildFilmPage(item, "2026-06-25", new Set(["s"]), { code: "in", name: "India", region: "IN" });
+  const { changed } = U.archivePatchHtml(page, "India");
+  assert.ok(!changed, "nothing to patch on a streaming page");
+});
+test("reconcilePagesManifest: current bumps last + clears archive; departed marked ONCE", () => {
+  const today = "2026-07-04";
+  const manifest = { in: {
+    "current-film": { last: "2026-07-03" },
+    "returned-film": { last: "2026-06-01", archivedOn: "2026-06-10" },
+    "already-archived": { last: "2026-06-01", archivedOn: "2026-06-10" },
+  } };
+  const current = new Set(["current-film", "returned-film", "brand-new"]);
+  const disk = ["current-film", "returned-film", "brand-new", "already-archived", "just-departed"];
+  const toArchive = U.reconcilePagesManifest(manifest, "in", current, disk, today);
+  assert.deepStrictEqual(toArchive, ["just-departed"], "only NEWLY departed pages get patched");
+  assert.strictEqual(manifest.in["current-film"].last, today);
+  assert.ok(!manifest.in["returned-film"].archivedOn, "a returning film is live again");
+  assert.strictEqual(manifest.in["already-archived"].archivedOn, "2026-06-10", "frozen date untouched");
+  assert.strictEqual(manifest.in["just-departed"].archivedOn, today);
+  assert.strictEqual(manifest.in["brand-new"].last, today);
+});
+
 // ---------------- First-seen tracking (ott-seen.json) ----------------
 // Guards the upgrade from release-date freshness to true catalog-arrival freshness.
 // TH_NOW = 2026-07-02 (declared above). daysAgo(n) helpers reused.
@@ -489,6 +557,21 @@ test("ssrCard: no buzz fields -> no trending badge, no views label (graceful abs
     verdict: "Worth a watch", kind: "movie", slug: "plain" }, 0, "in");
   assert.ok(!html.includes("Trending"));
   assert.ok(!html.includes("trailer views"));
+});
+test("buildHeadTags: with data — live month in title, real film names in description (CTR)", () => {
+  const data = { generatedAt: "2026-07-04T07:22:38Z",
+    theatres: [{ title: "Toy Story 5" }, { title: "Supergirl" }],
+    ott: [{ title: "House of the Dragon" }, { title: "Silo" }] };
+  const html = U.buildHeadTags({ code: "in", name: "India" }, false, data);
+  assert.ok(html.includes("<title>New Movies &amp; OTT This Week in India (July 2026) | FilmyChill</title>"));
+  assert.ok(html.includes("This week: Toy Story 5, House of the Dragon + 2 more"));
+  assert.ok(html.includes("Updated twice daily"));
+  const us = U.buildHeadTags({ code: "us", name: "United States" }, false, data);
+  assert.ok(us.includes("This Week in the US (July 2026)"));
+});
+test("buildHeadTags: without data — legacy static wording unchanged (backward compatible)", () => {
+  const html = U.buildHeadTags({ code: "in", name: "India" }, false);
+  assert.ok(html.includes("FilmyChill — Latest Movie &amp; OTT Releases, with Reviews, Updated Daily"));
 });
 test("buildHeadTags: max-image-preview:large on every homepage (Google Discover eligibility)", () => {
   assert.ok(U.buildHeadTags({ code: "in", name: "India" }, false).includes('content="max-image-preview:large"'));
