@@ -138,10 +138,12 @@ function trim(text, n = 160) {
   return text.length <= n ? text : text.slice(0, n).replace(/\s+\S*$/, "") + "…";
 }
 
-// OTT freshness window: how recent a title's freshDate must be to count as a current OTT
-// release. Wider than theatres' 21d because "new this month/two months" is the relevant
-// sense of fresh for streaming. Exported + used by the OTT intl gate and the test suite.
-const OTT_FRESH_DAYS = 75;
+// OTT freshness window: how recent a title's EFFECTIVE freshness date (release/season date
+// OR first sighting on a platform — see first-seen tracking below) must be to count as a
+// current OTT release. Tightened from 75 to 45 days: with first-seen tracking, a late OTT
+// arrival stays fresh via its arrival date, so the wide release-date window is no longer
+// needed to protect those — 45d keeps the list genuinely current. Revert knob: set 75.
+const OTT_FRESH_DAYS = 45;
 
 // Derive the freshness date for an OTT title from a TMDB detail object.
 // MOVIE: its release_date. TV: the air date of the most recent NON-special season (season 0
@@ -165,6 +167,80 @@ function isOttFresh(freshDate, now = Date.now()) {
   if (!freshDate) return true;
   const age = (now - new Date(freshDate).getTime()) / 864e5;
   return age <= OTT_FRESH_DAYS;
+}
+
+// ============================================================================
+// FIRST-SEEN TRACKING (ott-seen.json) — upgrades OTT freshness from a proxy to
+// the real thing. TMDB only exposes RELEASE dates, not when a title arrived on a
+// platform, so release-date freshness has two blind spots: a theatrical film that
+// lands on Netflix months later (genuinely new on OTT, but "old" by release date),
+// and catalog additions. The fix every serious streaming tracker uses: remember
+// when THIS pipeline first observed each title WITH a streaming provider, per
+// country (catalogs differ). ott-seen.json maps
+//   { "<country>": { "<kind>:<tmdbId>": { first, last } } }
+// and is committed by the bot alongside the data files.
+//   - COLD START (country absent from the file): every current title is seeded
+//     with the EARLIER of its release-freshness date and today, so nothing
+//     falsely floods in as "just added" on day one.
+//   - INCREMENTAL: an unseen key is a new arrival -> first = today.
+//   - `last` is bumped every observation; entries unseen for SEEN_RETENTION_DAYS
+//     are pruned, which both bounds the file AND prevents a title that briefly
+//     left the candidate pool from re-entering as fake-new (retention >> window).
+// Honest-epistemics note: "first seen" approximates "added to platform" — the
+// pipeline can only observe titles that enter its candidate pool. That is the
+// user-relevant definition (new to THIS list), and the arrival badge below is
+// additionally guarded so a merely re-trending old title needs a genuinely
+// recent first-sighting to earn it.
+// ============================================================================
+const OTT_SEEN_FILE = "ott-seen.json";
+const SEEN_RETENTION_DAYS = 180;   // prune entries not observed for this long
+const ARRIVAL_BADGE_DAYS = 14;     // first-seen within this window can badge as an arrival
+const ARRIVAL_MIN_RELEASE_AGE = 21; // ...but only if the RELEASE is older than this
+                                    // (otherwise it's a release event, badged already)
+
+function laterDate(a, b) { return !a ? b : !b ? a : (a >= b ? a : b); }
+function earlierDate(a, b) { return !a ? b : !b ? a : (a <= b ? a : b); }
+
+// Pure: effective OTT freshness + whether this is an "arrival event" worth a
+// "New on <platform>" badge. Effective = the LATER of release-freshness and first
+// sighting: a June release seen in June stays June; an April film first seen in
+// July is fresh as of July; a 2024 title newly on the platform is fresh today.
+function ottArrival(freshDate, firstSeen, now = Date.now()) {
+  const effective = laterDate(freshDate, firstSeen) || null;
+  const days = (d) => (now - new Date(d).getTime()) / 864e5;
+  const isArrival = !!firstSeen && days(firstSeen) <= ARRIVAL_BADGE_DAYS
+    && (!freshDate || days(freshDate) > ARRIVAL_MIN_RELEASE_AGE);
+  return { effective, isArrival };
+}
+
+// Pure: record one observation in a country's seen-map. Returns the firstSeen date.
+// Mutates seenCountry (the caller owns persistence).
+function recordOttSeen(seenCountry, key, freshDate, todayStr, coldStart) {
+  const prior = seenCountry[key];
+  if (prior) { prior.last = todayStr; return prior.first; }
+  const first = coldStart ? (earlierDate(freshDate, todayStr) || todayStr) : todayStr;
+  seenCountry[key] = { first, last: todayStr };
+  return first;
+}
+
+// Pure: drop entries not observed within the retention window (bounds file size).
+function pruneOttSeen(seenAll, now = Date.now()) {
+  for (const code of Object.keys(seenAll || {})) {
+    const m = seenAll[code];
+    for (const k of Object.keys(m)) {
+      const last = new Date(m[k].last || m[k].first || 0).getTime();
+      if ((now - last) / 864e5 > SEEN_RETENTION_DAYS) delete m[k];
+    }
+  }
+  return seenAll || {};
+}
+
+let OTT_SEEN = null; // loaded once per process, written once after all countries build
+function loadOttSeen() {
+  if (OTT_SEEN) return OTT_SEEN;
+  try { OTT_SEEN = pruneOttSeen(JSON.parse(fs.readFileSync(OTT_SEEN_FILE, "utf8"))); }
+  catch { OTT_SEEN = {}; } // first ever run -> cold start for every country
+  return OTT_SEEN;
 }
 
 // Theatre freshness gate. THEATRE_WINDOW_DAYS previously only date-gated the per-language
@@ -995,7 +1071,16 @@ async function main() {
   // the item's freshDate (movie release date, or a TV series' LATEST-season air date — not
   // its original launch). This keeps a returning hit's NEW season (recent freshDate) while
   // dropping an old show with no recent season. See isOttFresh/OTT_FRESH_DAYS (module scope).
-  const ottIsFresh = (item) => item && isOttFresh(item.freshDate);
+  // Gate runs on the EFFECTIVE date (release/season OR first platform sighting), so a
+  // theatrical film that just landed on OTT months after release is correctly kept.
+  const ottIsFresh = (item) => item && isOttFresh(item.ottFreshDate || item.freshDate);
+
+  // First-seen tracking state for THIS country (see module-scope docs at ott-seen.json).
+  // coldStart is captured BEFORE any recording so seeding stays consistent for the run.
+  const seenAll = loadOttSeen();
+  const seenCountry = (seenAll[cfg.code] = seenAll[cfg.code] || {});
+  const seenColdStart = Object.keys(seenCountry).length === 0;
+  // (todayStr already declared earlier in buildCountry — reused for recording sightings.)
 
   // Resolve IMDb rating for a candidate (detail call -> dataset lookup). Sets _imdbRating
   // so weighted402535 uses IMDb as the rating/votes signal, exactly like theatres. No-op in
@@ -1015,10 +1100,23 @@ async function main() {
   const buildOttItem = async (c) => {
     const item = baseItem(c, c.kind);
     const extra = await enrich(c.kind, c.id, cfg.watchRegion);
-    if (!extra.providers || extra.providers.length === 0) return null; // not streaming in India
+    if (!extra.providers || extra.providers.length === 0) return null; // not streaming in this region
     Object.assign(item, extra, { platform: extra.providers[0] });
     withImdb(item);
     item._w = weighted402535(c); // quality score kept for the recency re-rank below (stripped before write)
+
+    // First-seen tracking: this title was observed WITH a provider today. ottSince is the
+    // (approximate) platform-arrival date; ottFreshDate is what the gate + recency decay use.
+    const firstSeen = recordOttSeen(seenCountry, `${item.kind}:${item.tmdbId}`, item.freshDate, todayStr, seenColdStart);
+    const { effective, isArrival } = ottArrival(item.freshDate, firstSeen);
+    item.ottSince = firstSeen;
+    item.ottFreshDate = effective;
+    // Arrival badge — only when no release-event badge already applies (one badge, clear
+    // meaning): an older release newly sighted on the platform is news AS an arrival.
+    if (!item.badge && isArrival && item.platform && item.platform !== "Theatres") {
+      item.badge = `New on ${item.platform}`;
+      item.isRecent = true;
+    }
     return item;
   };
 
@@ -1120,7 +1218,7 @@ async function main() {
   //     near-expiry season sinks toward the bottom instead of camping in the top 3.
   //     Pools are re-ranked separately so the regional-visibility interleave below keeps
   //     working on two internally-ordered lists. ---
-  const ottOrder = (it) => (it._w || 0) + ottRecencyBonus(it.freshDate);
+  const ottOrder = (it) => (it._w || 0) + ottRecencyBonus(it.ottFreshDate || it.freshDate);
   intl.sort((a, b) => ottOrder(b) - ottOrder(a));
   regional.sort((a, b) => ottOrder(b) - ottOrder(a));
 
@@ -1292,6 +1390,10 @@ async function main() {
     allSlugSets[cfg.code] = new Set(all.map((x) => x.slug).filter(Boolean));
     builtCountries.push(cfg);
   }
+
+  // Persist first-seen tracking (see ott-seen.json docs) — every country has now recorded
+  // today's sightings; the workflow commits this file so tomorrow's run remembers them.
+  fs.writeFileSync(OTT_SEEN_FILE, JSON.stringify(loadOttSeen(), null, 1));
 
   // Buzz signals attach BEFORE the data files are written, so client-rendered cards
   // (which read data.json) see the same badges the SSR cards do. Both are non-fatal.
@@ -2032,6 +2134,8 @@ module.exports = {
   ottRecencyBonus, OTT_RECENCY_MAX, freshBadge, freshLabel, fmtDateShort,
   buildOttWeekPage, ottWeekUrl, ottWeekPath,
   computeBuzz, fmtViews, trailerViewsLabel, localeFor, countryNameFor,
+  ottArrival, recordOttSeen, pruneOttSeen, laterDate, earlierDate,
+  ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, SEEN_RETENTION_DAYS,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
   filmPagePath, filmPageUrl,
 };
