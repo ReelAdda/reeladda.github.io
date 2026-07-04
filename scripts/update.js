@@ -1411,9 +1411,17 @@ async function main() {
     generatePages(dataByCode[cfg.code], cfg, allSlugSets);
     if (pageTemplate) renderCountryPage(pageTemplate, cfg, dataByCode[cfg.code]);
     writeOttWeekPage(dataByCode[cfg.code], cfg, builtCountries); // /new-on-ott/ per country
+    writeRssFeed(dataByCode[cfg.code], cfg);                      // /feed.xml per country
   }
+
+  // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
+  // and the manifest records real lastmod dates for the sitemap (see module-scope docs).
+  const pagesManifest = loadPagesManifest();
+  for (const cfg of builtCountries) archiveDepartedPages(pagesManifest, cfg, allSlugSets[cfg.code] || new Set());
+  fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
+
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
-  writeMultiCountrySitemap(builtCountries);
+  writeMultiCountrySitemap(builtCountries, pagesManifest);
   console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.`);
 }
 
@@ -1660,8 +1668,15 @@ function generatePages(data, cfg, allSlugSets) {
 // Complete sitemap: every country homepage (with hreflang alternates) + every country's
 // per-film pages. A film that exists in several countries gets hreflang alternates linking
 // those copies together; a film unique to one country stands alone.
-function writeMultiCountrySitemap(countries) {
+function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const today = new Date().toISOString().slice(0, 10);
+  // Honest per-film lastmod: a page's date is when it was last actually written (current
+  // films: today; archived films: their freeze date) — claiming lastmod=today for frozen
+  // pages teaches crawlers to distrust the whole sitemap's lastmod signal.
+  const filmLastmod = (code, slug) => {
+    const e = pagesManifest && pagesManifest[code] && pagesManifest[code][slug];
+    return e ? (e.archivedOn || e.last || today) : today;
+  };
   const pathFor = (code) => (code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`);
   const homeAlts = countries.map((c) =>
     `    <xhtml:link rel="alternate" hreflang="${c.code === "in" ? "en-IN" : "en-" + c.region}" href="${pathFor(c.code)}"/>`).join("\n")
@@ -1706,7 +1721,7 @@ function writeMultiCountrySitemap(countries) {
             `    <xhtml:link rel="alternate" hreflang="${cc === "in" ? "en-IN" : "en-" + regionOf(cc)}" href="${filmUrlFor(cc, slug)}"/>`).join("\n")
           + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${filmUrlFor("in", slug)}"/>`
         : "";
-      filmUrls.push(`  <url><loc>${filmUrlFor(c.code, slug)}</loc><lastmod>${today}</lastmod><priority>0.5</priority>${alts ? alts + "\n  " : ""}</url>`);
+      filmUrls.push(`  <url><loc>${filmUrlFor(c.code, slug)}</loc><lastmod>${filmLastmod(c.code, slug)}</lastmod><priority>0.5</priority>${alts ? alts + "\n  " : ""}</url>`);
       filmCount++;
     }
   }
@@ -1970,6 +1985,138 @@ ${faqHtml}
 </html>`;
 }
 
+// ============================================================================
+// RSS FEED — the distribution automation hook. One feed per country (root
+// feed.xml for India, /<code>/feed.xml elsewhere) listing this run's theatre +
+// OTT titles, newest first. GUIDs are stable per freshness-event (page URL +
+// arrival/release date), so aggregators and automations (IFTTT/Zapier -> WhatsApp
+// Channel, X) see a NEW entry exactly when a title newly arrives — not on every
+// daily rebuild. Pure builder -> unit-testable; writer is a thin wrapper.
+// ============================================================================
+function buildRssFeed(data, cfg) {
+  const e = escHtml; // & < > " ' — valid XML escaping too
+  const code = (cfg && cfg.code) || "in";
+  const m = COUNTRY_PAGE_META[code] || { name: (cfg && cfg.name) || "India", path: `/${code}/` };
+  const home = `https://filmychill.com${m.path}`;
+  const self = `${home}feed.xml`;
+  const items = [...(data.theatres || []), ...(data.ott || [])]
+    .filter((x) => x && x.title && x.slug)
+    .map((x) => ({ x, when: x.ottSince || x.freshDate || x.released || "" }))
+    .sort((a, b) => (b.when || "").localeCompare(a.when || ""))
+    .slice(0, 30);
+  const rfc822 = (d) => (d ? new Date(d) : new Date());
+  const itemXml = items.map(({ x, when }) => {
+    const url = filmPageUrl(code, x.slug);
+    const bits = [x.platform, x.language, x.rating != null ? `★ ${Number(x.rating).toFixed(1)}` : null, x.verdict]
+      .filter(Boolean).join(" · ");
+    return `  <item>
+    <title>${e(x.title)}${x.platform ? ` — ${e(x.platform)}` : ""}</title>
+    <link>${e(url)}</link>
+    <guid isPermaLink="false">${e(url)}::${e(when)}</guid>
+    <pubDate>${rfc822(when).toUTCString()}</pubDate>
+    <description>${e([bits, x.review].filter(Boolean).join(" — "))}</description>
+  </item>`;
+  }).join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>FilmyChill — New Movies &amp; OTT This Week in ${e(m.name)}</title>
+  <link>${e(home)}</link>
+  <atom:link href="${e(self)}" rel="self" type="application/rss+xml"/>
+  <description>What's worth watching this week in ${e(m.name)} — new theatre and OTT releases with ratings and verdicts. Updated twice daily.</description>
+  <language>en</language>
+  <lastBuildDate>${new Date(data.generatedAt || Date.now()).toUTCString()}</lastBuildDate>
+${itemXml}
+</channel>
+</rss>
+`;
+}
+
+function writeRssFeed(data, cfg) {
+  const p = cfg.code === "in" ? "feed.xml" : `${cfg.code}/feed.xml`;
+  fs.writeFileSync(p, buildRssFeed(data, cfg));
+  console.log(`  RSS feed: /${p}`);
+}
+
+// ============================================================================
+// FILM-PAGE ARCHIVE — makes the long tail honest instead of stale. Film pages
+// stay on disk (and in the sitemap) forever after a title leaves the weekly
+// list, which is exactly right for late queries like "X ott release date" —
+// but until now an archived theatrical page claimed "It's in theatres now"
+// indefinitely, and every old page reported lastmod=today (which teaches
+// Google to distrust the sitemap's lastmod entirely).
+// pages-manifest.json (committed) tracks per country: slug -> { last: date
+// last listed, archivedOn?: date }. On the run where a title leaves the list,
+// its page gets a ONE-TIME honesty patch (theatrical-run claims -> past tense
+// + an OTT-arrival pointer) and then freezes; lastmod reports the truth. If a
+// title RETURNS to the list (e.g. its OTT arrival — first-seen tracking's
+// specialty), generatePages rewrites the page fresh and the archive mark is
+// cleared. The patch phrases are generated by buildVerdictProse/buildFaqs, and
+// a sync-guard test asserts patcher and generator stay in step.
+// ============================================================================
+const PAGES_MANIFEST_FILE = "pages-manifest.json";
+
+// Pure: one-time honesty rewrite for a page whose film has left the list.
+// Returns { html, changed }. No-op for OTT pages (their availability claims stay valid).
+function archivePatchHtml(html, countryName) {
+  const swaps = [
+    [`It&#39;s in theatres in ${countryName} now — best caught on the big screen.`,
+     `It had its theatrical run in ${countryName} — check back here for its OTT arrival.`],
+    [`is currently playing in theatres across ${countryName}. An OTT release hasn&#39;t been announced yet.`,
+     `has finished its theatrical run in ${countryName}. Its OTT release hasn&#39;t been announced yet — check back soon.`],
+    [`<span class="pill">In theatres</span>`,
+     `<span class="pill">Theatrical run ended — OTT arrival pending</span>`],
+  ];
+  let out = html, changed = false;
+  for (const [from, to] of swaps) {
+    if (out.includes(from)) { out = out.split(from).join(to); changed = true; }
+  }
+  return { html: out, changed };
+}
+
+// Pure-ish: reconcile one country's manifest with today's reality. Bumps `last` for
+// current slugs (clearing any archive mark — the page was just regenerated fresh),
+// and returns the slugs that need the one-time archive patch (on disk, not current,
+// not yet archived). Mutates manifest[code]; caller persists.
+function reconcilePagesManifest(manifest, code, currentSlugs, diskSlugs, todayStr) {
+  const m = (manifest[code] = manifest[code] || {});
+  for (const slug of currentSlugs) {
+    const entry = (m[slug] = m[slug] || {});
+    entry.last = todayStr;
+    delete entry.archivedOn;
+  }
+  const toArchive = [];
+  for (const slug of diskSlugs) {
+    if (currentSlugs.has(slug)) continue;
+    const entry = (m[slug] = m[slug] || { last: todayStr });
+    if (!entry.archivedOn) { entry.archivedOn = todayStr; toArchive.push(slug); }
+  }
+  return toArchive;
+}
+
+function loadPagesManifest() {
+  try { return JSON.parse(fs.readFileSync(PAGES_MANIFEST_FILE, "utf8")); } catch { return {}; }
+}
+
+// Run the archive pass for one country: patch newly-departed pages in place.
+function archiveDepartedPages(manifest, cfg, currentSlugs) {
+  const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
+  if (!fs.existsSync(dir)) return;
+  const diskSlugs = fs.readdirSync(dir).filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5));
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const toArchive = reconcilePagesManifest(manifest, cfg.code, currentSlugs, diskSlugs, todayStr);
+  const countryName = countryNameFor(cfg);
+  let patched = 0;
+  for (const slug of toArchive) {
+    const p = `${dir}/${slug}.html`;
+    try {
+      const { html, changed } = archivePatchHtml(fs.readFileSync(p, "utf8"), countryName);
+      if (changed) { fs.writeFileSync(p, html); patched++; }
+    } catch (e) { console.warn(`  archive: ${p} skipped (${e.message})`); }
+  }
+  if (toArchive.length) console.log(`  archive [${cfg.code}]: ${toArchive.length} pages left the list, ${patched} honesty-patched`);
+}
+
 function writeOttWeekPage(data, cfg, allCountries) {
   const p = ottWeekPath(cfg.code);
   const dir = p.slice(0, p.lastIndexOf("/"));
@@ -1994,9 +2141,28 @@ const COUNTRY_LOCALE = { in: "en-IN", us: "en-US", uk: "en-GB", au: "en-AU", de:
 const localeFor = (code) => COUNTRY_LOCALE[code] || "en-IN";
 // Prose-ready country name ("the US", not the config's "United States") for any cfg.
 const countryNameFor = (cfg) => (COUNTRY_PAGE_META[(cfg && cfg.code) || "in"] || {}).name || (cfg && cfg.name) || "India";
-function buildHeadTags(cfg, useImdb = USE_IMDB) {
+function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name, path: `/${cfg.code}/` };
   const url = `https://filmychill.com${m.path}`;
+
+  // SERP click-through: when this run's data is passed, the title carries the live month
+  // (freshness a searcher can SEE in the results page) and the description leads with real
+  // film names — a searcher choosing between ten generic "latest OTT releases" links clicks
+  // the one showing titles they recognise. Without data (tests/legacy calls), the static
+  // wording below is used unchanged.
+  let dynTitle = null, dynDesc = null;
+  if (data) {
+    const monthYear = new Date(data.generatedAt || Date.now())
+      .toLocaleDateString(localeFor(cfg.code), { month: "long", year: "numeric" });
+    dynTitle = `New Movies & OTT This Week in ${m.name} (${monthYear}) | FilmyChill`;
+    const all = [...(data.theatres || []), ...(data.ott || [])];
+    // Two marquee names: the top theatre title and the top OTT title (fall back down the list).
+    const names = [(data.theatres || [])[0], (data.ott || [])[0]].filter(Boolean).map((x) => x.title);
+    if (names.length && all.length > names.length) {
+      dynDesc = `This week: ${names.join(", ")} + ${all.length - names.length} more — ratings, verdicts & where to watch in ${m.name}. Updated twice daily.`;
+      if (dynDesc.length > 158) dynDesc = `This week: ${names[0]} + ${all.length - 1} more — ratings, verdicts & where to watch in ${m.name}. Updated twice daily.`;
+    }
+  }
   // Ratings wording follows the active source (same principle as footerAttribution): IMDb's
   // name may only appear when IMDb data is actually used — its terms forbid using the name
   // without a current license, and in TMDB mode the claim would simply be false. TMDB mode
@@ -2005,18 +2171,19 @@ function buildHeadTags(cfg, useImdb = USE_IMDB) {
   // max-image-preview:large is REQUIRED for Google Discover eligibility — Discover is the
   // channel where daily entertainment content actually goes viral in India. One tag,
   // emitted on every page type (homepages here; film + ott-week pages set it themselves).
-  const discover = `<meta name="robots" content="max-image-preview:large">`;
+  const discover = `<meta name="robots" content="max-image-preview:large">`
+    + `\n<link rel="alternate" type="application/rss+xml" title="FilmyChill — New Movies & OTT" href="https://filmychill.com${m.path}feed.xml">`;
   if (cfg.code === "in") {
-    // Root keeps the multi-country, India-first wording already chosen.
-    return `<title>FilmyChill — Latest Movie & OTT Releases, with Reviews, Updated Daily</title>\n`
-      + `<meta name="description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts, auto-updated daily.">\n`
+    // Root keeps the multi-country, India-first wording as the no-data fallback.
+    return `<title>${escHtml(dynTitle || "FilmyChill — Latest Movie & OTT Releases, with Reviews, Updated Daily")}</title>\n`
+      + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
       + discover + "\n"
       + `<link rel="canonical" href="${url}">\n`
       + `<meta property="og:title" content="FilmyChill — What's worth watching this week">\n`
       + `<meta property="og:description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts. Auto-updated daily.">`;
   }
-  return `<title>FilmyChill — Latest Movie &amp; OTT Releases in ${m.name}, with Reviews, Updated Daily</title>\n`
-    + `<meta name="description" content="Latest theatre and OTT releases in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, ${ratingsWord}, verdicts, auto-updated daily.">\n`
+  return `<title>${escHtml(dynTitle) || `FilmyChill — Latest Movie &amp; OTT Releases in ${m.name}, with Reviews, Updated Daily`}</title>\n`
+    + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
     + discover + "\n"
     + `<link rel="canonical" href="${url}">\n`
     + `<meta property="og:title" content="FilmyChill — What's worth watching this week in ${m.name}">\n`
@@ -2084,7 +2251,7 @@ function footerAttribution(useImdb = USE_IMDB) {
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   let html = templateHtml;
-  html = replaceBetween(html, "HEAD", buildHeadTags(cfg));
+  html = replaceBetween(html, "HEAD", buildHeadTags(cfg, USE_IMDB, data));
   html = replaceBetween(html, "PAGECODE", `<meta name="fc-page" content="${cfg.code}">`);
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
   html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
@@ -2120,6 +2287,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
   generatePages(d, inCfg, slugSets); // India only in local regen
   prerenderIndex(d);
   writeOttWeekPage(d, inCfg, [inCfg]);
+  writeRssFeed(d, inCfg);
   fs.writeFileSync("data.json", JSON.stringify(d, null, 1));
   process.exit(0);
 }
@@ -2135,6 +2303,7 @@ module.exports = {
   buildOttWeekPage, ottWeekUrl, ottWeekPath,
   computeBuzz, fmtViews, trailerViewsLabel, localeFor, countryNameFor,
   ottArrival, recordOttSeen, pruneOttSeen, laterDate, earlierDate,
+  buildRssFeed, archivePatchHtml, reconcilePagesManifest,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, SEEN_RETENTION_DAYS,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
   filmPagePath, filmPageUrl,
