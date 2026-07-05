@@ -792,6 +792,80 @@ test("ssrCard: links to the country's film page path", () => {
   assert.ok(/href="\/movie\/t.html"/.test(inCard));
 });
 
+// ---------------- critics' take: analyzeReception() ----------------
+group("analyzeReception()");
+test("classic positive reception -> tone + praised/panned aspects split correctly", () => {
+  const text = "The film received generally positive reviews from critics. " +
+    "Reviewers praised the performances of the lead cast and the film's music, " +
+    "but criticised the pacing of the second half. ".padEnd(200, " ");
+  const a = U.analyzeReception(text);
+  assert.strictEqual(a.tone, "positive");
+  assert.ok(a.praised.includes("performances"));
+  assert.ok(a.panned.includes("pacing") || a.panned.includes("second half"));
+});
+test("'praised X but criticised Y' in ONE sentence splits by clause", () => {
+  const text = "Critics praised the visuals but criticised the writing throughout the film. ".padEnd(200, "x");
+  const a = U.analyzeReception(text);
+  assert.ok(a.praised.includes("visuals"));
+  assert.ok(a.panned.includes("writing"));
+});
+test("earliest verdict phrase wins the tone (acclaim opening beats later 'mixed')", () => {
+  const text = "The film received universal acclaim from critics upon release. A small minority of publications offered mixed reviews, mostly regional outlets covering the wide release in later weeks.";
+  assert.strictEqual(U.analyzeReception(text).tone, "acclaim");
+});
+test("aspect both praised and panned is dropped as contested", () => {
+  const text = "Some critics praised the story for its ambition and sweep across generations. Other critics criticised the story heavily, calling it overstuffed and difficult to follow at feature length.";
+  const a = U.analyzeReception(text);
+  assert.ok(!a.praised.includes("story") && !a.panned.includes("story"));
+});
+test("too-short section -> null (never invent a take from a stub)", () => {
+  assert.strictEqual(U.analyzeReception("Reviews were positive."), null);
+  assert.strictEqual(U.analyzeReception(""), null);
+  assert.strictEqual(U.analyzeReception(null), null);
+});
+test("'mixed martial arts' does not trigger mixed tone", () => {
+  const text = "The film follows a mixed martial arts fighter through a title run and was noted for authentic fight choreography by observers of the sport. ".padEnd(220, " ");
+  const a = U.analyzeReception(text);
+  assert.ok(!a || a.tone !== "mixed");
+});
+
+// ---------------- critics' take: composeTake() ----------------
+group("composeTake()");
+test("positive + praise + criticism -> balanced original sentence", () => {
+  const s = U.composeTake({ tone: "positive", praised: ["performances", "music"], panned: ["pacing"] });
+  assert.ok(/performances and music/.test(s) && /pacing/.test(s));
+});
+test("acclaim without aspects still yields a confident line", () => {
+  assert.ok(/loved/i.test(U.composeTake({ tone: "acclaim", praised: [], panned: [] })));
+});
+test("negative tone reads honest, not hedged", () => {
+  assert.ok(/rough|not impressed/i.test(U.composeTake({ tone: "negative", praised: [], panned: ["writing"] })));
+});
+test("nothing extractable -> null (line is omitted, never hollow)", () => {
+  assert.strictEqual(U.composeTake({ tone: null, praised: [], panned: [] }), null);
+  assert.strictEqual(U.composeTake(null), null);
+});
+
+// ---------------- critics' take: rendering ----------------
+group("take rendering");
+test("ssrCard renders the take line when present, omits it when absent", () => {
+  const withTake = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix", take: "Critics liked it, especially the performances." }, 0, "in");
+  assert.ok(/class="take"/.test(withTake) && /especially the performances/.test(withTake));
+  const without = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix" }, 0, "in");
+  assert.ok(!/class="take"/.test(without));
+});
+test("ssrCard escapes HTML inside the take", () => {
+  const card = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix", take: `<script>alert(1)</script>` }, 0, "in");
+  assert.ok(!card.includes("<script>alert(1)</script>"));
+});
+test("buildFilmPage shows take with the wiki attribution note only for wiki source", () => {
+  const base = { title: "Main", slug: "main", kind: "movie", platform: "Theatres", take: "Critics loved it — special praise for the visuals." };
+  const wiki = U.buildFilmPage({ ...base, takeSrc: "wiki" }, "2026-07-05", new Set(["main"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(/class="take"/.test(wiki) && /distilled from critics/.test(wiki));
+  const tmdbSrc = U.buildFilmPage({ ...base, takeSrc: "tmdb" }, "2026-07-05", new Set(["main"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(/class="take"/.test(tmdbSrc) && !/distilled from critics/.test(tmdbSrc));
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
