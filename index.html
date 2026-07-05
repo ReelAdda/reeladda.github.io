@@ -139,6 +139,8 @@
   .fresh-badge.foryou { background: transparent; border: 1.5px solid var(--indigo); color: var(--indigo); padding: 2px 7px; }
   .meta { color: var(--mute); font-size: 12.5px; margin-top: 4px; }
   .review { margin-top: 9px; font-size: 13.5px; line-height: 1.6; color: #4A4366; }
+  .take { margin-top: 8px; font-size: 12.5px; font-weight: 600; color: var(--indigo); line-height: 1.55; }
+  .modal .take { font-size: 14px; margin-top: 12px; }
   .bottom-row { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .score { font-size: 12px; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 4px 9px; color: var(--mute); }
   .score b { color: var(--ink); }
@@ -623,6 +625,7 @@ function card(item, i, listKey) {
       </div>
       <div class="meta">${esc(item.genre || '')}${item.language ? ' · ' + esc(item.language) : ''}${item.runtime ? ' · ' + esc(String(item.runtime)) + ' min' : ''}${item.cert ? ' · ' + esc(item.cert) : ''}${freshLabel(item) ? ' · ' + esc(freshLabel(item)) : ''}${trailerViewsLabel(item.trailerViews) ? ' · ' + trailerViewsLabel(item.trailerViews) : ''}</div>
       <div class="review">${esc(item.review || '')}</div>
+      ${item.take ? `<div class="take">💬 ${esc(item.take)}</div>` : ''}
       <div class="bottom-row">${scores}<span class="verdict">▸ ${esc(item.verdict || '')}</span></div>
       <div class="more-hint">Tap for trailer & full details →</div>
     </div>
@@ -841,6 +844,7 @@ function openDetail(listKey, i) {
         ${item.director ? `<b>Director:</b> ${esc(item.director)}<br>` : ''}
         ${(item.cast && item.cast.length) ? `<b>Cast:</b> ${esc(item.cast.join(', '))}` : ''}
       </div>
+      ${item.take ? `<div class="take">💬 ${esc(item.take)}</div>` : ''}
       ${item.verdict ? `<div class="verdict">▸ ${esc(item.verdict)}</div>` : ''}
       ${(() => {
         const id = ytId(item.trailer);
