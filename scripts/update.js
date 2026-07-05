@@ -2173,21 +2173,42 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   // emitted on every page type (homepages here; film + ott-week pages set it themselves).
   const discover = `<meta name="robots" content="max-image-preview:large">`
     + `\n<link rel="alternate" type="application/rss+xml" title="FilmyChill — New Movies & OTT" href="https://filmychill.com${m.path}feed.xml">`;
+
+  // On-page hreflang for the five homepages. Film + new-on-ott pages already emit these;
+  // the homepages only declared alternates in the sitemap, which is the weaker signal —
+  // without on-page tags Google can serve the Indian page to US searchers or treat five
+  // near-identical homepages as competing duplicates. x-default -> India (the canonical root).
+  const homeAlts = COUNTRIES.map((cc) => {
+    const alt = COUNTRY_PAGE_META[cc.code] || { path: `/${cc.code}/` };
+    return `<link rel="alternate" hreflang="${cc.code === "in" ? "en-IN" : "en-" + cc.region}" href="https://filmychill.com${alt.path}"/>`;
+  }).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="https://filmychill.com/"/>`;
+
+  // Share/social tags: og mirrors the DYNAMIC title/description (a WhatsApp/X share should
+  // show this week's real films, not a generic pitch), og:url anchors shares to the right
+  // country page, og:locale marks the market, twitter:card upgrades bare links to cards.
+  const ogLocale = cfg.code === "in" ? "en_IN" : "en_" + ((cfg && cfg.region) || (COUNTRIES.find((cc) => cc.code === cfg.code) || {}).region || cfg.code.toUpperCase());
+  const shareTags = `<meta property="og:url" content="${url}">\n`
+    + `<meta property="og:locale" content="${ogLocale}">\n`
+    + `<meta name="twitter:card" content="summary_large_image">`;
   if (cfg.code === "in") {
     // Root keeps the multi-country, India-first wording as the no-data fallback.
     return `<title>${escHtml(dynTitle || "FilmyChill — Latest Movie & OTT Releases, with Reviews, Updated Daily")}</title>\n`
       + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
       + discover + "\n"
       + `<link rel="canonical" href="${url}">\n`
-      + `<meta property="og:title" content="FilmyChill — What's worth watching this week">\n`
-      + `<meta property="og:description" content="Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts. Auto-updated daily.">`;
+      + homeAlts + "\n"
+      + `<meta property="og:title" content="${escHtml(dynTitle) || "FilmyChill — What's worth watching this week"}">\n`
+      + `<meta property="og:description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts. Auto-updated daily.`}">\n`
+      + shareTags;
   }
   return `<title>${escHtml(dynTitle) || `FilmyChill — Latest Movie &amp; OTT Releases in ${m.name}, with Reviews, Updated Daily`}</title>\n`
     + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
     + discover + "\n"
     + `<link rel="canonical" href="${url}">\n`
-    + `<meta property="og:title" content="FilmyChill — What's worth watching this week in ${m.name}">\n`
-    + `<meta property="og:description" content="Top theatre releases + OTT picks in ${m.name} with trailers, ${ratingsWord} and verdicts. Auto-updated daily.">`;
+    + homeAlts + "\n"
+    + `<meta property="og:title" content="${escHtml(dynTitle) || `FilmyChill — What's worth watching this week in ${m.name}`}">\n`
+    + `<meta property="og:description" content="${escHtml(dynDesc) || `Top theatre releases + OTT picks in ${m.name} with trailers, ${ratingsWord} and verdicts. Auto-updated daily.`}">\n`
+    + shareTags;
 }
 
 // Homepage structured data: WebSite + dateModified + an ItemList of this
@@ -2210,10 +2231,21 @@ function buildHomeJsonLd(data, cfg) {
   const listName = isIndia ? "What's worth watching this week" : `What's worth watching this week in ${m.name}`;
   const graph = [
     {
+      // Brand entity: feeds logo/knowledge-panel treatment for "filmychill" queries —
+      // which (per Search Console) is most of the site's current impressions.
+      "@type": "Organization",
+      "@id": "https://filmychill.com/#org",
+      name: "FilmyChill",
+      url: "https://filmychill.com/",
+      logo: { "@type": "ImageObject", url: "https://filmychill.com/icon-192.png", width: 192, height: 192 },
+      sameAs: ["https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j"],
+    },
+    {
       "@type": "WebSite",
       "@id": "https://filmychill.com/#website",
       name: "FilmyChill",
       url: "https://filmychill.com/",
+      publisher: { "@id": "https://filmychill.com/#org" },
       author: { "@type": "Person", name: "Vikram Sharma" },
       datePublished: "2026-01-01",
       dateModified: data.generatedAt || `${date}T00:00:00.000Z`,
