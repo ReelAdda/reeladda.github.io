@@ -573,6 +573,31 @@ test("buildHeadTags: without data — legacy static wording unchanged (backward 
   const html = U.buildHeadTags({ code: "in", name: "India" }, false);
   assert.ok(html.includes("FilmyChill — Latest Movie &amp; OTT Releases, with Reviews, Updated Daily"));
 });
+test("buildHeadTags: on-page hreflang alternates for all five homepages + x-default", () => {
+  const html = U.buildHeadTags({ code: "us", name: "United States" }, false);
+  assert.ok(html.includes('hreflang="en-IN" href="https://filmychill.com/"'));
+  assert.ok(html.includes('hreflang="en-US" href="https://filmychill.com/us/"'));
+  assert.ok(html.includes('hreflang="en-DE" href="https://filmychill.com/de/"'));
+  assert.ok(html.includes('hreflang="x-default" href="https://filmychill.com/"'));
+});
+test("buildHeadTags: og mirrors the dynamic snippet; og:url, og:locale, twitter:card present", () => {
+  const data = { generatedAt: "2026-07-04T07:22:38Z", theatres: [{ title: "Toy Story 5" }], ott: [{ title: "Silo" }, { title: "X" }] };
+  const html = U.buildHeadTags({ code: "in", name: "India" }, false, data);
+  assert.ok(html.includes('og:title" content="New Movies &amp; OTT This Week in India (July 2026) | FilmyChill"'), "share title = SERP title");
+  assert.ok(html.includes('og:url" content="https://filmychill.com/"'));
+  assert.ok(html.includes('og:locale" content="en_IN"'));
+  assert.ok(html.includes('twitter:card" content="summary_large_image"'));
+  const uk = U.buildHeadTags({ code: "uk", name: "United Kingdom", region: "GB" }, false, data);
+  assert.ok(uk.includes('og:locale" content="en_GB"'));
+});
+test("buildHomeJsonLd: Organization brand entity with logo, linked as WebSite publisher", () => {
+  const ld = JSON.parse(U.buildHomeJsonLd({ generatedAt: "2026-07-04T07:22:38Z", theatres: [], ott: [] }, { code: "in", name: "India" }));
+  const org = ld["@graph"].find((n) => n["@type"] === "Organization");
+  assert.ok(org, "Organization node present");
+  assert.strictEqual(org.logo.url, "https://filmychill.com/icon-192.png");
+  const site = ld["@graph"].find((n) => n["@type"] === "WebSite");
+  assert.strictEqual(site.publisher["@id"], org["@id"], "WebSite links to the brand entity");
+});
 test("buildHeadTags: max-image-preview:large on every homepage (Google Discover eligibility)", () => {
   assert.ok(U.buildHeadTags({ code: "in", name: "India" }, false).includes('content="max-image-preview:large"'));
   assert.ok(U.buildHeadTags({ code: "us", name: "United States" }, false).includes('content="max-image-preview:large"'));
