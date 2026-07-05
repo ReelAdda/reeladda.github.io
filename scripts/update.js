@@ -445,6 +445,197 @@ async function attachBuzz(dataByCode) {
   console.log(`Buzz: ${resolved}/${byImdb.size} titles resolved via Wikipedia, ${trendingCount} trending`);
 }
 
+// ============================================================================
+// CRITICS' TAKE — one opinionated line per film, sourced from people who have
+// already done the research. Primary source: the "Reception" section of the
+// film's English Wikipedia article (a human-written summary of real critic
+// consensus), located precisely via the buzz module's Wikidata P345 lookup —
+// never by title search. Fallback: TMDB user reviews (rating average only).
+// The printed sentence is SYNTHESISED in our own words from extracted signals
+// (overall tone + praised/criticised aspects) — never copied text — so it is
+// licence-clean. Results are cached in takes.json (committed by the workflow):
+//   { "<imdbId | kind:tmdbId>": { take, src, article, checked } }
+// A title WITH a take is never re-fetched; a title WITHOUT one is re-checked
+// each run (reception sections appear days after release) until it ages out of
+// this week's lists. Everything degrades gracefully: no take -> no line shown,
+// never a failed build.
+// ============================================================================
+const TAKES_FILE = "takes.json";
+const TAKES_RETENTION_DAYS = 180; // prune cache entries not touched for this long
+let TAKES = null;
+function loadTakes() {
+  if (TAKES) return TAKES;
+  try { TAKES = JSON.parse(fs.readFileSync(TAKES_FILE, "utf8")); }
+  catch { TAKES = {}; } // first ever run -> empty cache
+  const cutoff = new Date(Date.now() - TAKES_RETENTION_DAYS * 864e5).toISOString().slice(0, 10);
+  for (const k of Object.keys(TAKES)) if ((TAKES[k].checked || "") < cutoff) delete TAKES[k];
+  return TAKES;
+}
+
+// Aspect vocabulary: pattern found in reception prose -> the plain noun we print.
+// Order matters only for readability; matches are deduped by printed noun.
+const TAKE_ASPECTS = [
+  [/performances?|acting|cast|portrayals?/i, "performances"],
+  [/screenplay|script\b|writing|dialogues?/i, "writing"],
+  [/direction|filmmaking/i, "direction"],
+  [/pacing|\bpace\b/i, "pacing"],
+  [/humou?r|comedy|jokes/i, "humour"],
+  [/action (?:sequences|scenes|set.?pieces)|stunts|\baction\b/i, "action"],
+  [/soundtrack|music|score\b|songs/i, "music"],
+  [/visual effects|\bvfx\b|visuals|cinematography|camerawork/i, "visuals"],
+  [/animation/i, "animation"],
+  [/chemistry/i, "lead chemistry"],
+  [/emotional (?:depth|core|weight|resonance)/i, "emotional weight"],
+  [/second half|climax|ending|final act|third act/i, "second half"],
+  [/runtime|length\b/i, "runtime"],
+  [/editing/i, "editing"],
+  [/world.?building|production design/i, "production design"],
+  [/twists?/i, "twists"],
+  [/story|plot|narrative/i, "story"],
+];
+const TAKE_PRAISE_RE = /prais\w+|laud\w+|acclaim\w+|applaud\w+|compliment\w+|appreciat\w+|celebrated|singled out|won praise|drew praise|impressed|highlights?|stand.?out|well.?received/i;
+const TAKE_PAN_RE = /criticis\w+|criticiz\w+|panned|faulted|drew criticism|flak|bemoaned|lamented|complain\w+|weakest|disappoint\w+|letdown|drag(?:ged|s)?\b|uneven|flaws?|shortcomings?/i;
+
+// Pure: reception-section plain text -> { tone, praised[], panned[] } | null.
+// Tone is decided by whichever verdict phrase appears EARLIEST (reception sections
+// open with the overall consensus — usually the RT/Metacritic sentence). Aspects
+// are assigned polarity per clause, so "praised X but criticised Y" splits right.
+function analyzeReception(text) {
+  if (!text || text.trim().length < 120) return null; // too thin to trust
+  const t = text.slice(0, 6000);
+  const tones = [
+    ["acclaim", /universal acclaim|critical acclaim|widespread acclaim|rave reviews|overwhelmingly positive/i],
+    ["positive", /generally (?:positive|favou?rable)|positive (?:reviews|response|reception)|mostly positive|favou?rable reviews|well received by critics/i],
+    ["mixed", /mixed(?:[- ]to[- ](?:positive|negative))? (?:reviews|response|reception|critical)|mixed or average|polari[sz]ed|divided (?:critics|reviews|opinion)/i],
+    ["negative", /generally (?:negative|unfavou?rable)|negative (?:reviews|response|reception)|critically panned|\bpanned\b|overwhelming dislike|unfavou?rable reviews/i],
+  ];
+  let tone = null, toneAt = Infinity;
+  for (const [name, re] of tones) {
+    const m = t.match(re);
+    if (m && m.index < toneAt) { tone = name; toneAt = m.index; }
+  }
+  const praised = new Set(), panned = new Set();
+  for (const sentence of t.split(/(?<=[.!?])\s+/)) {
+    for (const clause of sentence.split(/\bbut\b|\bhowever\b|\bwhile\b|\balthough\b|\bthough\b|;|,\s+(?=(?:and\s+)?(?:the|several|some|critics|reviewers|others|many)\b)/i)) {
+      const isPraise = TAKE_PRAISE_RE.test(clause);
+      const isPan = TAKE_PAN_RE.test(clause);
+      if (isPraise === isPan) continue; // neither, or ambiguous clause -> skip
+      for (const [re, noun] of TAKE_ASPECTS) {
+        if (re.test(clause)) (isPraise ? praised : panned).add(noun);
+      }
+    }
+  }
+  for (const n of praised) if (panned.has(n)) { praised.delete(n); panned.delete(n); } // contested -> drop
+  if (!tone && !praised.size && !panned.size) return null;
+  return { tone, praised: [...praised].slice(0, 2), panned: [...panned].slice(0, 1) };
+}
+
+// Pure: analysis -> one original opinionated sentence (never source text). null when
+// there is genuinely nothing to say — an absent line beats a hollow one.
+function composeTake(a) {
+  if (!a) return null;
+  const list = (arr) => (arr.length === 2 ? `${arr[0]} and ${arr[1]}` : arr[0]);
+  const p = a.praised.length ? list(a.praised) : null;
+  const c = a.panned.length ? a.panned[0] : null;
+  switch (a.tone) {
+    case "acclaim":
+      return p ? `Critics loved it — special praise for the ${p}.`
+        : `Critics loved this one; reception has been close to universal acclaim.`;
+    case "positive":
+      if (p && c) return `Critics liked it: the ${p} won praise, though the ${c} drew some flak.`;
+      if (p) return `Critics liked it, especially the ${p}.`;
+      if (c) return `Critics were broadly positive, with reservations about the ${c}.`;
+      return `Critics have been largely positive on this one.`;
+    case "mixed":
+      if (p && c) return `Critics are split — praise for the ${p}, pushback on the ${c}.`;
+      if (p) return `Critics are split, though the ${p} found admirers.`;
+      if (c) return `Critics are split, with the ${c} drawing most complaints.`;
+      return `Critics are genuinely split on this one.`;
+    case "negative":
+      return c ? `Critics were rough on it, mostly over the ${c}.`
+        : `Critics were not impressed with this one.`;
+    default:
+      if (p && c) return `Reviewers praised the ${p} but flagged the ${c}.`;
+      if (p) return `Reviewers singled out the ${p} for praise.`;
+      if (c) return `Reviewers' main gripe: the ${c}.`;
+      return null;
+  }
+}
+
+// English-Wikipedia reception section as plain text, or null if the article has none.
+// Uses TextExtracts (keyless); sub-headings inside the section are stripped, their
+// prose kept, so "=== Critical response ===" under "== Reception ==" still counts.
+async function wikiReceptionText(article) {
+  const j = await fetchJsonKeyless(
+    `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&redirects=1&format=json&titles=${encodeURIComponent(article)}`,
+    WIKI_HEADERS);
+  const page = Object.values(j?.query?.pages || {})[0];
+  const text = page?.extract || "";
+  const m = text.match(/\n==+\s*(?:Critical (?:response|reception)|Reception|Reviews|Critical and audience response)\s*==+\n([\s\S]*?)(?=\n==[^=]|$)/i);
+  return m ? m[1].replace(/\n==+[^=\n]+==+\n/g, "\n") : null;
+}
+
+// Fallback: TMDB user reviews. Only the rating AVERAGE is used (a fact, not text) and
+// only when at least 2 rated reviews exist — one opinion is an anecdote, not a lean.
+async function tmdbReviewTake(item) {
+  if (!item.tmdbId) return null;
+  const j = await tmdb(`/${item.kind === "tv" ? "tv" : "movie"}/${item.tmdbId}/reviews`, {});
+  const ratings = (j?.results || []).map((r) => r?.author_details?.rating).filter((n) => Number.isFinite(n));
+  if (ratings.length < 2) return null;
+  const avg = ratings.reduce((x, y) => x + y, 0) / ratings.length;
+  const lean = avg >= 7.5 ? "strongly positive" : avg >= 6 ? "positive" : avg >= 4.5 ? "mixed" : "negative";
+  return `Early viewer reviews ${lean === "mixed" ? "are mixed" : "lean " + lean} — averaging ${avg.toFixed(1)}/10 on TMDB.`;
+}
+
+// Attach a critics' take to every theatre + OTT item across all countries. Same
+// dedupe-and-fan-out shape as attachBuzz: each unique title is researched ONCE.
+async function attachTakes(dataByCode) {
+  const takes = loadTakes();
+  const today = new Date().toISOString().slice(0, 10);
+  const byKey = new Map();
+  for (const data of Object.values(dataByCode)) {
+    for (const it of [...(data.theatres || []), ...(data.ott || [])]) {
+      const key = it.imdbId || (it.tmdbId ? `${it.kind}:${it.tmdbId}` : null);
+      if (!key) continue;
+      if (!byKey.has(key)) byKey.set(key, []);
+      byKey.get(key).push(it);
+    }
+  }
+  let found = 0;
+  for (const [key, items] of byKey) {
+    try {
+      let entry = takes[key];
+      if (!entry || (!entry.take && entry.checked !== today)) {
+        let take = null, src = null, article = entry?.article || null;
+        if (key.startsWith("tt")) { // real IMDb id -> precise Wikipedia route
+          if (!article) article = await wikiArticleForImdb(key);
+          if (article) {
+            const composed = composeTake(analyzeReception(await wikiReceptionText(article)));
+            if (composed) { take = composed; src = "wiki"; }
+          }
+        }
+        if (!take) {
+          const t = await tmdbReviewTake(items[0]);
+          if (t) { take = t; src = "tmdb"; }
+        }
+        entry = { take, src, article: article || undefined, checked: today };
+        takes[key] = entry;
+        await sleep(150); // polite pace against Wikimedia
+      } else {
+        entry.checked = today; // touch so retention pruning keeps live titles
+      }
+      if (entry.take) {
+        found++;
+        for (const it of items) { it.take = entry.take; it.takeSrc = entry.src; }
+      }
+    } catch (e) {
+      console.warn(`  take: ${items[0].title} skipped (${e.message})`);
+    }
+  }
+  fs.writeFileSync(TAKES_FILE, JSON.stringify(takes, null, 1));
+  console.log(`Takes: ${found}/${byKey.size} titles have a critics' line`);
+}
+
 // Attach YouTube trailer view counts (theatres + OTT + coming soon — pre-release trailer
 // hype is buzz too). One videos.list call per 50 unique trailers; ~2 calls/run total,
 // costing ~2 of the 10,000 free daily quota units.
@@ -1399,6 +1590,9 @@ async function main() {
   // (which read data.json) see the same badges the SSR cards do. Both are non-fatal.
   await attachBuzz(dataByCode);
   await attachTrailerStats(dataByCode);
+  // Critics' takes attach last but still BEFORE data files are written, so
+  // client-rendered cards (which read data.json) show the same line the SSR cards do.
+  await attachTakes(dataByCode);
 
   // Now write every country's data file (India also writes the legacy data.json).
   for (const cfg of builtCountries) {
@@ -1576,6 +1770,8 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
   .btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
   footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
   .vprose { font-size:15px; line-height:1.7; margin-top:8px; }
+  .take { font-size:14.5px; font-weight:600; color:var(--indigo); line-height:1.6; margin-top:10px; }
+  .tsrc { color:var(--mute); font-weight:400; font-size:12px; }
   .gtk { width:100%; border-collapse:collapse; margin-top:8px; }
   .gtk td { padding:9px 0; border-top:1px solid var(--line); font-size:14px; vertical-align:top; }
   .gtk td:first-child { color:var(--mute); width:46%; }
@@ -1609,6 +1805,7 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
     </div>
   </div>
   ${verdictProse ? `<h2>The verdict</h2><p class="vprose">${e(verdictProse)}</p>` : ""}
+  ${item.take ? `<p class="take">💬 ${e(item.take)}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
   ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${goodToKnow.length ? `<h2>Good to know</h2><table class="gtk">${goodToKnow.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : ""}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
@@ -1753,6 +1950,7 @@ function ssrCard(item, i, code) {
       <div class="meta">${bits}</div>
       ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}${trailerViewsLabel(item.trailerViews) ? " · " + trailerViewsLabel(item.trailerViews) : ""}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 110))}</p>` : ""}
+      ${item.take ? `<p class="take">💬 ${e(item.take)}</p>` : ""}
     </div>`;
   // Every country now has its own per-film pages, so always link to this country's page.
   // (`code` defaults to India for safety if a caller omits it.)
@@ -2339,4 +2537,5 @@ module.exports = {
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, SEEN_RETENTION_DAYS,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
   filmPagePath, filmPageUrl,
+  analyzeReception, composeTake, TAKES_RETENTION_DAYS,
 };
