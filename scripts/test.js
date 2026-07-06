@@ -866,6 +866,141 @@ test("buildFilmPage shows take with the wiki attribution note only for wiki sour
   assert.ok(/class="take"/.test(tmdbSrc) && !/distilled from critics/.test(tmdbSrc));
 });
 
+// ---------------- list integrity: ottRenderable() / orderOttForDisplay() ----------------
+group("ottRenderable() / orderOttForDisplay()");
+const NOW = new Date("2026-07-06T12:00:00Z").getTime();
+test("future-dated movie cannot be Streaming Now (the Drishyam 3 class of bug)", () => {
+  assert.strictEqual(U.ottRenderable({ kind: "movie", released: "2026-10-02" }, NOW), false);
+  assert.strictEqual(U.ottRenderable({ kind: "movie", released: "2026-07-01" }, NOW), true);
+  assert.strictEqual(U.ottRenderable({ kind: "movie", released: "2026-07-06" }, NOW), true); // release day is fine
+});
+test("future TV season date is not streaming either; missing dates pass the gate", () => {
+  assert.strictEqual(U.ottRenderable({ kind: "tv", freshDate: "2026-08-01" }, NOW), false);
+  assert.strictEqual(U.ottRenderable({ kind: "tv" }, NOW), true);
+});
+test("orderOttForDisplay: drops future items, partitions fresh/older, flags stillGood", () => {
+  const list = [
+    { kind: "tv", title: "OldHit", freshDate: "2026-05-24", rating: 8.7, review: "x" },
+    { kind: "movie", title: "Future", released: "2026-10-02" },
+    { kind: "movie", title: "NewFilm", released: "2026-07-01", ottFreshDate: "2026-07-01", rating: 7.0, review: "y" },
+  ];
+  const out = U.orderOttForDisplay(list, NOW);
+  assert.deepStrictEqual(out.map((x) => x.title), ["NewFilm", "OldHit"]); // future dropped, fresh first
+  assert.strictEqual(out[0].stillGood, undefined);
+  assert.strictEqual(out[1].stillGood, true);
+});
+test("orderOttForDisplay: threadbare cards sink below complete ones within their group", () => {
+  const list = [
+    { kind: "movie", title: "Thin", released: "2026-07-02", ottFreshDate: "2026-07-02" },
+    { kind: "movie", title: "Full", released: "2026-07-01", ottFreshDate: "2026-07-01", rating: 7.5, review: "solid" },
+  ];
+  assert.deepStrictEqual(U.orderOttForDisplay(list, NOW).map((x) => x.title), ["Full", "Thin"]);
+});
+test("isStillWorthIt: unknown freshness never claims to be new", () => {
+  assert.strictEqual(U.isStillWorthIt({}, NOW), true);
+  assert.strictEqual(U.isStillWorthIt({ ottFreshDate: "2026-07-04" }, NOW), false);
+});
+
+// ---------------- trim(): sentence boundaries ----------------
+group("trim() sentence boundaries");
+test("cuts at a sentence end past 60% of budget, no ellipsis", () => {
+  const text = "The film follows a detective. He uncovers a conspiracy spanning decades of corruption and lies in the city.";
+  const out = U.trim(text, 40);
+  assert.strictEqual(out, "The film follows a detective.");
+});
+test("sentence end too early -> falls back to word cut + ellipsis", () => {
+  const text = "Hi. " + "word ".repeat(50);
+  const out = U.trim(text, 60);
+  assert.ok(out.endsWith("\u2026"));
+});
+
+// ---------------- language pages ----------------
+group("buildLanguagePage()");
+const LANG_DATA = {
+  generatedAt: "2026-07-06T03:00:00Z",
+  theatres: [
+    { title: "Tamil Hit", slug: "tamil-hit", language: "Tamil", platform: "Theatres", rating: 7.8, kind: "movie", released: "2026-07-03" },
+    { title: "Hindi Film", slug: "hindi-film", language: "Hindi", platform: "Theatres", kind: "movie" },
+  ],
+  ott: [{ title: "Tamil Stream", slug: "tamil-stream", language: "Tamil", platform: "Netflix", rating: 8.0, kind: "movie", take: "Critics liked it, especially the performances." }],
+  comingSoon: [{ title: "Tamil Soon", slug: "tamil-soon", language: "Tamil", released: "2026-07-20", kind: "movie" }],
+};
+test("filters to the requested language only, across all three sections", () => {
+  const html = U.buildLanguagePage(LANG_DATA, "Tamil", "tamil");
+  assert.ok(html.includes("Tamil Hit") && html.includes("Tamil Stream") && html.includes("Tamil Soon"));
+  assert.ok(!html.includes("Hindi Film"));
+});
+test("canonical, title, FAQ schema and take line present", () => {
+  const html = U.buildLanguagePage(LANG_DATA, "Tamil", "tamil");
+  assert.ok(html.includes('rel="canonical" href="https://filmychill.com/tamil/"'));
+  assert.ok(/New Tamil Movies & OTT Releases This Week/.test(html.replace(/&amp;/g, "&")));
+  assert.ok(html.includes("FAQPage"));
+  assert.ok(html.includes("especially the performances"));
+});
+test("five language pages configured", () => {
+  assert.strictEqual(U.LANGUAGE_PAGES.length, 5);
+  assert.ok(U.LANGUAGE_PAGES.some(([n, s]) => n === "Tamil" && s === "tamil"));
+});
+
+// ---------------- weekly snapshots ----------------
+group("isoWeekOf() / buildWeekPage()");
+test("ISO week math: 2026-07-06 is Monday of week 28", () => {
+  assert.deepStrictEqual(U.isoWeekOf(new Date("2026-07-06T12:00:00Z")), { year: 2026, week: 28 });
+  assert.strictEqual(U.weekSlug({ year: 2026, week: 28 }), "2026-W28");
+});
+test("ISO week year boundary: 2027-01-01 (Friday) belongs to 2026-W53", () => {
+  assert.deepStrictEqual(U.isoWeekOf(new Date("2027-01-01T12:00:00Z")), { year: 2026, week: 53 });
+});
+test("isoWeekSunday is deterministic from the slug (frozen-page lastmod)", () => {
+  assert.strictEqual(U.isoWeekSunday("2026-W28"), "2026-07-12");
+});
+test("buildWeekPage: canonical, date range, frozen note, items", () => {
+  const html = U.buildWeekPage(LANG_DATA, "2026-W28");
+  assert.ok(html.includes('rel="canonical" href="https://filmychill.com/week/2026-W28/"'));
+  assert.ok(html.includes("Tamil Hit") && html.includes("Hindi Film"));
+  assert.ok(/stays frozen once the week ends/.test(html));
+});
+
+// ---------------- honest split rendering + footer links ----------------
+group("ssrOttSection() / buildMoreLinks()");
+test("divider renders before the first stillGood card, once", () => {
+  const items = [
+    { title: "Fresh", slug: "fresh", platform: "Netflix" },
+    { title: "Old1", slug: "old1", platform: "Netflix", stillGood: true },
+    { title: "Old2", slug: "old2", platform: "Netflix", stillGood: true },
+  ];
+  const html = U.ssrOttSection(items, "in");
+  assert.strictEqual((html.match(/ott-divider/g) || []).length, 1);
+  assert.ok(html.indexOf("ott-divider") < html.indexOf("Old1"));
+  assert.ok(html.indexOf("Fresh") < html.indexOf("ott-divider"));
+});
+test("no divider when nothing is stillGood, and none when everything is", () => {
+  assert.ok(!U.ssrOttSection([{ title: "A", slug: "a" }], "in").includes("ott-divider"));
+  assert.ok(!U.ssrOttSection([{ title: "A", slug: "a", stillGood: true }], "in").includes("ott-divider"));
+});
+test("India footer links languages + week snapshot + about; other countries about only", () => {
+  const indiaLinks = U.buildMoreLinks("in");
+  assert.ok(indiaLinks.includes('href="/tamil/"') && indiaLinks.includes('href="/week/') && indiaLinks.includes('href="/about/"'));
+  const usLinks = U.buildMoreLinks("us");
+  assert.ok(usLinks.includes('href="/about/"') && !usLinks.includes("/tamil/"));
+});
+
+// ---------------- take variants ----------------
+group("composeTake() variants");
+test("tone-only lines vary by seed but are deterministic", () => {
+  const a = { tone: "positive", praised: [], panned: [] };
+  const s0 = U.composeTake(a, 0), s1 = U.composeTake(a, 1);
+  assert.notStrictEqual(s0, s1);
+  assert.strictEqual(U.composeTake(a, 1), s1); // same seed -> same line, every run
+});
+test("seed 0 keeps original phrasing (cached takes stay stable)", () => {
+  assert.strictEqual(U.composeTake({ tone: "positive", praised: [], panned: [] }, 0), "Critics have been largely positive on this one.");
+});
+test("aspect-bearing lines are unaffected by seed", () => {
+  const a = { tone: "positive", praised: ["visuals"], panned: [] };
+  assert.strictEqual(U.composeTake(a, 3), U.composeTake(a, 7));
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
