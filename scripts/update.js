@@ -121,6 +121,7 @@ const COUNTRIES = [
 // e.g. themoviedb.org/movie/1692948) and add it below with a short note.
 const EXCLUDE_IDS = new Set([
   1692948, // Chardikala — banned in India / not in theatres
+  1155818, // Satluj — banned in India
 ]);
 
 const LANG = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", ml: "Malayalam", kn: "Kannada", ko: "Korean", ja: "Japanese", es: "Spanish", fr: "French", mr: "Marathi", bn: "Bengali", pa: "Punjabi", gu: "Gujarati", de: "German", it: "Italian", pt: "Portuguese", zh: "Chinese" };
