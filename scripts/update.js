@@ -136,7 +136,15 @@ function verdict(rating, votes) {
 
 function trim(text, n = 160) {
   if (!text) return "";
-  return text.length <= n ? text : text.slice(0, n).replace(/\s+\S*$/, "") + "…";
+  if (text.length <= n) return text;
+  // Prefer ending at a sentence boundary when one exists past 60% of the budget — a
+  // complete sentence reads finished; a mid-thought "…" reads broken. Fall back to the
+  // old word-boundary cut when the last sentence end is too early (or absent).
+  const slice = text.slice(0, n);
+  let cut = -1;
+  for (const m of slice.matchAll(/[.!?](?:\s|$)/g)) cut = m.index;
+  if (cut >= Math.floor(n * 0.6)) return slice.slice(0, cut + 1);
+  return slice.replace(/\s+\S*$/, "") + "…";
 }
 
 // OTT freshness window: how recent a title's EFFECTIVE freshness date (release/season date
@@ -283,6 +291,42 @@ function ottRecencyBonus(freshDate, now = Date.now()) {
   const age = (now - new Date(freshDate).getTime()) / 864e5;
   if (age < 0 || age > OTT_FRESH_DAYS) return 0;
   return OTT_RECENCY_MAX * (1 - age / OTT_FRESH_DAYS);
+}
+
+// ============================================================================
+// LIST INTEGRITY + HONEST SPLIT — nothing visibly wrong may ever render.
+// 1. ottRenderable: a movie whose release date is in the FUTURE cannot be
+//    "Streaming Now" — a TMDB provider entry for it is a pre-order/pre-add
+//    listing (the Drishyam 3 class of bug). Same for a future TV season date.
+//    Coming Soon is built separately, so dropped items aren't lost to users.
+// 2. hasCardSubstance: a card with neither a rating nor a synopsis is a
+//    threadbare trust leak; it sinks below complete cards (and usually off
+//    the list at the OTT_MAX cut).
+// 3. isStillWorthIt: the "Streaming Now" heading promises this week. Titles
+//    whose effective freshness is older than STILL_WORTH_DAYS are partitioned
+//    below a visible "Still worth it" divider instead of impersonating news.
+// All pure -> unit-testable. Order inside each partition is preserved.
+// ============================================================================
+const STILL_WORTH_DAYS = 10;
+function ottRenderable(item, now = Date.now()) {
+  const today = new Date(now).toISOString().slice(0, 10);
+  if (item.kind === "movie" && item.released && item.released > today) return false;
+  if (item.kind === "tv" && item.freshDate && item.freshDate > today) return false;
+  return true;
+}
+function hasCardSubstance(item) { return item.rating != null || !!item.review; }
+function isStillWorthIt(item, now = Date.now()) {
+  const d = item.ottFreshDate || item.freshDate || item.released;
+  if (!d) return true; // can't prove it's new -> never claim it is
+  return (now - new Date(d).getTime()) / 864e5 > STILL_WORTH_DAYS;
+}
+function orderOttForDisplay(list, now = Date.now()) {
+  const gated = list.filter((it) => ottRenderable(it, now));
+  const part = (arr, pred) => [arr.filter(pred), arr.filter((x) => !pred(x))];
+  const [fresh, older] = part(gated, (it) => !isStillWorthIt(it, now));
+  for (const it of older) it.stillGood = true; // serialized -> client renders the divider too
+  const sink = (arr) => { const [a, b] = part(arr, hasCardSubstance); return [...a, ...b]; };
+  return [...sink(fresh), ...sink(older)];
 }
 
 // Freshness badge for a card, derived from freshDate — the REAL recency signal (a movie's
@@ -533,28 +577,58 @@ function analyzeReception(text) {
 
 // Pure: analysis -> one original opinionated sentence (never source text). null when
 // there is genuinely nothing to say — an absent line beats a hollow one.
-function composeTake(a) {
+// Tone-only variant pools: when the extractor finds a verdict but no aspects, several
+// cards can share the same sentence and the human-voice illusion cracks. Each pool's
+// variant is picked DETERMINISTICALLY by seed (the title's tmdbId), so a film keeps the
+// same line across runs — variety across the page, stability across days. Index 0 keeps
+// the original phrasing so a missing seed degrades to prior behaviour.
+const TAKE_VARIANTS = {
+  acclaim: [
+    `Critics loved this one; reception has been close to universal acclaim.`,
+    `Reviewers were close to unanimous — this one landed.`,
+    `Almost nobody had a bad word for it.`,
+    `The critical verdict is rare-air positive.`,
+  ],
+  positive: [
+    `Critics have been largely positive on this one.`,
+    `The reviews lean clearly positive.`,
+    `Most critics came away happy.`,
+    `Word from reviewers is solidly good.`,
+  ],
+  mixed: [
+    `Critics are genuinely split on this one.`,
+    `Reviews are all over the map on this one.`,
+    `Critics couldn't agree — expect a love-it-or-hate-it watch.`,
+    `Opinions split right down the middle on this one.`,
+  ],
+  negative: [
+    `Critics were not impressed with this one.`,
+    `The reviews were not kind.`,
+    `Critics largely gave this one a pass.`,
+    `Reviewers came away cold on this one.`,
+  ],
+};
+function composeTake(a, seed = 0) {
   if (!a) return null;
   const list = (arr) => (arr.length === 2 ? `${arr[0]} and ${arr[1]}` : arr[0]);
   const p = a.praised.length ? list(a.praised) : null;
   const c = a.panned.length ? a.panned[0] : null;
+  const vary = (pool) => pool[Math.abs(Number(seed) || 0) % pool.length];
   switch (a.tone) {
     case "acclaim":
-      return p ? `Critics loved it — special praise for the ${p}.`
-        : `Critics loved this one; reception has been close to universal acclaim.`;
+      return p ? `Critics loved it — special praise for the ${p}.` : vary(TAKE_VARIANTS.acclaim);
     case "positive":
       if (p && c) return `Critics liked it: the ${p} won praise, though the ${c} drew some flak.`;
       if (p) return `Critics liked it, especially the ${p}.`;
       if (c) return `Critics were broadly positive, with reservations about the ${c}.`;
-      return `Critics have been largely positive on this one.`;
+      return vary(TAKE_VARIANTS.positive);
     case "mixed":
       if (p && c) return `Critics are split — praise for the ${p}, pushback on the ${c}.`;
       if (p) return `Critics are split, though the ${p} found admirers.`;
       if (c) return `Critics are split, with the ${c} drawing most complaints.`;
-      return `Critics are genuinely split on this one.`;
+      return vary(TAKE_VARIANTS.mixed);
     case "negative":
-      return c ? `Critics were rough on it, mostly over the ${c}.`
-        : `Critics were not impressed with this one.`;
+      return c ? `Critics were rough on it, mostly over the ${c}.` : vary(TAKE_VARIANTS.negative);
     default:
       if (p && c) return `Reviewers praised the ${p} but flagged the ${c}.`;
       if (p) return `Reviewers singled out the ${p} for praise.`;
@@ -611,7 +685,7 @@ async function attachTakes(dataByCode) {
         if (key.startsWith("tt")) { // real IMDb id -> precise Wikipedia route
           if (!article) article = await wikiArticleForImdb(key);
           if (article) {
-            const composed = composeTake(analyzeReception(await wikiReceptionText(article)));
+            const composed = composeTake(analyzeReception(await wikiReceptionText(article)), Number(items[0].tmdbId) || 0);
             if (composed) { take = composed; src = "wiki"; }
           }
         }
@@ -1423,6 +1497,11 @@ async function main() {
     if (ri < regional.length && step && (i + 1) % step === 0) ott.push(regional[ri++]);
   }
   while (ri < regional.length) ott.push(regional[ri++]);
+  // Integrity gate + honest split (module scope): drop pre-release provider listings,
+  // sink threadbare cards, partition into "new this week" / "still worth it".
+  const ottDisplay = orderOttForDisplay(ott);
+  ott.length = 0;
+  ott.push(...ottDisplay);
   ott.length = Math.min(ott.length, OTT_MAX);
 
   // ---------- COMING SOON (next releases in India, soft language quota) ----------
@@ -1607,6 +1686,13 @@ async function main() {
     if (pageTemplate) renderCountryPage(pageTemplate, cfg, dataByCode[cfg.code]);
     writeOttWeekPage(dataByCode[cfg.code], cfg, builtCountries); // /new-on-ott/ per country
     writeRssFeed(dataByCode[cfg.code], cfg);                      // /feed.xml per country
+  }
+  // India-only surfaces: language landing pages (/tamil/, /hindi/, ...) and the
+  // permanent weekly snapshot (/week/<year>-W<ww>/). Both are pure re-renders of
+  // this run's India data — zero extra API calls.
+  if (dataByCode.in) {
+    writeLanguagePages(dataByCode.in);
+    writeWeekPage(dataByCode.in);
   }
 
   // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
@@ -1923,9 +2009,23 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       filmCount++;
     }
   }
+  // Language landing pages (India) — daily-refreshed discovery surfaces.
+  const langUrls = LANGUAGE_PAGES.filter(([, slug]) => fs.existsSync(`${slug}/index.html`))
+    .map(([, slug]) => `  <url><loc>https://filmychill.com/${slug}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
+  // Weekly snapshots: the current week reports today; FROZEN weeks report their own
+  // Sunday — deterministic from the directory name, never "today" for an untouched page.
+  const weekUrls = [];
+  if (fs.existsSync("week")) {
+    const cur = weekSlug(isoWeekOf());
+    for (const d of fs.readdirSync("week").filter((x) => /^\d{4}-W\d{2}$/.test(x)).sort()) {
+      weekUrls.push(`  <url><loc>https://filmychill.com/week/${d}/</loc><lastmod>${d === cur ? today : isoWeekSunday(d)}</lastmod><priority>0.4</priority></url>`);
+    }
+  }
+  const aboutUrls = fs.existsSync("about/index.html")
+    ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${ABOUT_LASTMOD}</lastmod><priority>0.3</priority></url>`] : [];
   fs.writeFileSync("sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${countryUrls.join("\n")}\n${ottUrls.join("\n")}\n${filmUrls.join("\n")}\n</urlset>\n`);
-  console.log(`Sitemap: ${countries.length} country pages + ${filmCount} film pages.`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...weekUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
+  console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${weekUrls.length} week + ${filmCount} film pages.`);
 }
 
 // Manual/local regeneration from existing data.json: PAGES_ONLY=1 node scripts/update.js
@@ -2324,6 +2424,252 @@ function writeOttWeekPage(data, cfg, allCountries) {
   console.log(`  OTT-week page: /${p.replace(/index\.html$/, "")}`);
 }
 
+// ============================================================================
+// LANGUAGE LANDING PAGES (India) — the query surface India actually uses.
+// Nobody searches "new movies India"; they search "new tamil movies on OTT".
+// One page per major language at /<language>/, filtered from India's data,
+// refreshed every run. Same licence-clean sources, same take lines, own
+// canonical + FAQ schema. Pure builder -> unit-testable; writer is thin.
+// ============================================================================
+const LANGUAGE_PAGES = [
+  ["Hindi", "hindi"], ["Tamil", "tamil"], ["Telugu", "telugu"],
+  ["Malayalam", "malayalam"], ["Kannada", "kannada"],
+];
+
+// Shared listing shell for language + week pages (same visual family as the
+// /new-on-ott/ pages). `sections` = [{ h2, items }]; rows link to film pages.
+function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote }) {
+  const e = escHtml;
+  const ldJson = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
+  const rowFor = (it) => {
+    const badge = it.badge || (it.isRecent ? "New release" : null);
+    const meta = [it.platform && it.platform !== "Theatres" ? it.platform : (it.platform === "Theatres" ? "In theatres" : null),
+      it.genre ? it.genre.split(" / ")[0] : null, freshLabel(it) || null].filter(Boolean).map(e).join(" · ");
+    const inner = `
+      ${it.poster ? `<img src="${e(it.poster)}" alt="${e(it.title)} poster" width="92" height="138" loading="lazy">` : '<div class="nop"></div>'}
+      <div>
+        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">🔥 Trending</span>' : ""}</div>
+        <div class="rm">${meta}</div>
+        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
+        ${it.take ? `<div class="rm tk">💬 ${e(it.take)}</div>` : ""}
+      </div>`;
+    return it.slug ? `<a class="row" href="${e(filmPagePath("in", it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
+  };
+  const sectionHtml = sections.filter((sec) => sec.items.length).map((sec) => `
+  <section>
+    <h2>${e(sec.h2)} <span class="cnt">${sec.items.length}</span></h2>
+    ${sec.items.map(rowFor).join("\n")}
+  </section>`).join("\n");
+  const faqHtml = faqs && faqs.length ? `
+  <section>
+    <h2>Quick answers</h2>
+    <div class="faq">
+      ${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("\n      ")}
+    </div>
+  </section>` : "";
+  const faqLd = faqs && faqs.length >= 2 ? {
+    "@context": "https://schema.org", "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+  } : null;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${e(title)}</title>
+<meta name="description" content="${e(desc)}">
+<meta name="robots" content="max-image-preview:large">
+<link rel="canonical" href="${e(canonical)}">
+<meta property="og:title" content="${e(h1)}">
+<meta property="og:description" content="${e(desc)}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${e(canonical)}">
+<meta name="twitter:card" content="summary">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'">
+${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</script>`).join("\n")}${faqLd ? `
+<script type="application/ld+json">${ldJson(faqLd)}</script>` : ""}
+<style>
+  :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
+  * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
+  .top { background:var(--indigo); padding:14px 16px; } .top a { color:var(--cream); text-decoration:none; font-weight:800; letter-spacing:1px; font-size:18px; }
+  .top a span { color:var(--marigold); }
+  .wrap { max-width:680px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { font-size:24px; margin:0 0 4px; line-height:1.3; }
+  .upd { color:var(--mute); font-size:13px; margin-bottom:6px; }
+  .lead { font-size:14.5px; line-height:1.6; color:var(--mute); margin:0 0 8px; }
+  .frozen { background:rgba(64,56,199,.07); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:13px; color:var(--mute); margin:10px 0 0; }
+  h2 { font-size:17px; margin:26px 0 10px; } .cnt { color:var(--marigold); }
+  .row { display:grid; grid-template-columns:92px 1fr; gap:12px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; text-decoration:none; color:inherit; }
+  .row img { border-radius:8px; display:block; width:92px; height:138px; object-fit:cover; background:var(--line); }
+  .nop { width:92px; height:138px; border-radius:8px; background:var(--line); }
+  .rt { display:flex; gap:8px; align-items:center; flex-wrap:wrap; } .rt h3 { font-size:16px; margin:2px 0; }
+  .badge { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); background:var(--marigold); border-radius:5px; padding:3px 7px; font-weight:800; }
+  .badge.trend { background:#FF4E3A; color:#fff; }
+  .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
+  .rm.tk { color:var(--indigo); font-weight:600; }
+  .faq details { border-top:1px solid var(--line); padding:10px 0; }
+  .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }
+  .faq summary::-webkit-details-marker { display:none; }
+  .faq summary::after { content:"+"; float:right; color:var(--indigo); font-weight:700; }
+  .faq details[open] summary::after { content:"–"; }
+  .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
+  .btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
+  footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
+<div class="wrap">
+  <h1>${e(h1)}</h1>
+  <div class="upd">${e(updLine)}</div>
+  <p class="lead">${e(lead)}</p>${frozenNote ? `
+  <div class="frozen">${e(frozenNote)}</div>` : ""}
+${sectionHtml}
+${faqHtml}
+  <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + OTT)</a>
+</div>
+<footer>
+  ${footerAttribution()}© 2026 FilmyChill · Vikram Sharma
+</footer>
+</body>
+</html>`;
+}
+
+// Pure: India data + language name -> full language landing page HTML.
+function buildLanguagePage(data, langName, slug) {
+  const url = `https://filmychill.com/${slug}/`;
+  const gen = data.generatedAt || new Date().toISOString();
+  const monthYear = new Date(gen).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+  const updatedHuman = new Date(gen).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  const of = (k) => (data[k] || []).filter((x) => x && x.language === langName);
+  const theatres = of("theatres"), ott = of("ott"), soon = of("comingSoon");
+  const faqs = [];
+  if (ott.length) faqs.push({
+    q: `What's new in ${langName} on OTT this week?`,
+    a: `New ${langName} titles streaming this week: ${ott.map((t) => `${t.title}${t.platform ? ` (${t.platform})` : ""}`).join(", ")}.`,
+  });
+  const best = [...theatres, ...ott].filter((x) => x.rating != null).sort((a, b) => b.rating - a.rating).slice(0, 3);
+  if (best.length >= 2) faqs.push({
+    q: `What are the best new ${langName} movies and shows this week?`,
+    a: `Top-rated ${langName} picks: ${best.map((x) => `${x.title} (${Number(x.rating).toFixed(1)}/10)`).join(", ")}.`,
+  });
+  if (soon.length) faqs.push({
+    q: `Which ${langName} movies are releasing soon?`,
+    a: `Coming up: ${soon.map((x) => `${x.title}${x.released ? ` (${x.released})` : ""}`).join(", ")}.`,
+  });
+  const all = [...theatres, ...ott].filter((x) => x.slug);
+  const extraLd = [{
+    "@context": "https://schema.org", "@type": "CollectionPage",
+    name: `New ${langName} Movies & OTT Releases This Week`, url, dateModified: gen,
+    isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+    mainEntity: { "@type": "ItemList", numberOfItems: all.length,
+      itemListElement: all.map((x, i) => ({ "@type": "ListItem", position: i + 1, name: x.title, url: filmPageUrl("in", x.slug) })) },
+  }, {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "FilmyChill", item: "https://filmychill.com/" },
+      { "@type": "ListItem", position: 2, name: `${langName} this week`, item: url },
+    ],
+  }];
+  return listingPageHtml({
+    title: `New ${langName} Movies & OTT Releases This Week (${monthYear}) | FilmyChill`,
+    desc: `Every new ${langName} movie in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated daily.`,
+    canonical: url,
+    h1: `New ${langName} Movies & OTT This Week`,
+    updLine: `Updated ${updatedHuman} · refreshed daily`,
+    lead: `Every ${langName} title that hit theatres or started streaming this week, ranked and rated — plus what's coming next.`,
+    sections: [
+      { h2: "In theatres", items: theatres },
+      { h2: "Streaming now", items: ott },
+      { h2: "Coming soon", items: soon },
+    ],
+    faqs, extraLd, homeUrl: "https://filmychill.com/",
+  });
+}
+
+function writeLanguagePages(data) {
+  for (const [langName, slug] of LANGUAGE_PAGES) {
+    if (!fs.existsSync(slug)) fs.mkdirSync(slug, { recursive: true });
+    fs.writeFileSync(`${slug}/index.html`, buildLanguagePage(data, langName, slug));
+  }
+  console.log(`Language pages: ${LANGUAGE_PAGES.map(([, sl]) => "/" + sl + "/").join(" ")}`);
+}
+
+// ============================================================================
+// WEEKLY SNAPSHOTS — /week/<year>-W<ww>/ permalinks (India). Overwritten on
+// every run DURING its week, frozen forever when the ISO week rolls over. Every
+// WhatsApp share and RSS item gets a durable URL; Google gets dated, genuinely
+// fresh pages weekly. Zero marginal content cost — it's this run's data.
+// ============================================================================
+function isoWeekOf(d = new Date()) { // ISO-8601 week number + week-year (UTC)
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return { year: date.getUTCFullYear(), week: Math.ceil((((date - yearStart) / 864e5) + 1) / 7) };
+}
+function weekSlug(w) { return `${w.year}-W${String(w.week).padStart(2, "0")}`; }
+function isoWeekMonday(slug) { // "2026-W28" -> Date of that ISO week's Monday (UTC)
+  const [y, w] = slug.split("-W").map(Number);
+  const jan4 = new Date(Date.UTC(y, 0, 4));
+  const monday = new Date(jan4);
+  monday.setUTCDate(jan4.getUTCDate() - ((jan4.getUTCDay() || 7) - 1) + (w - 1) * 7);
+  return monday;
+}
+// Deterministic lastmod for FROZEN week pages: the week's own Sunday. Never
+// "today" for a page we didn't touch — the same honesty rule as the film archive.
+function isoWeekSunday(slug) {
+  const sun = isoWeekMonday(slug);
+  sun.setUTCDate(sun.getUTCDate() + 6);
+  return sun.toISOString().slice(0, 10);
+}
+
+// Pure: India data + week slug -> frozen-snapshot page HTML.
+function buildWeekPage(data, slug) {
+  const url = `https://filmychill.com/week/${slug}/`;
+  const monday = isoWeekMonday(slug);
+  const sunday = new Date(monday); sunday.setUTCDate(monday.getUTCDate() + 6);
+  const fmt = (d) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "UTC" });
+  const range = `${fmt(monday)} – ${fmt(sunday)} ${sunday.getUTCFullYear()}`;
+  const weekNo = Number(slug.split("-W")[1]);
+  const theatres = (data.theatres || []).filter((x) => x && x.title);
+  const ott = (data.ott || []).filter((x) => x && x.title);
+  const all = [...theatres, ...ott].filter((x) => x.slug);
+  const extraLd = [{
+    "@context": "https://schema.org", "@type": "CollectionPage",
+    name: `FilmyChill — Week ${weekNo}, ${slug.slice(0, 4)}`, url,
+    dateModified: data.generatedAt || undefined,
+    isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+    mainEntity: { "@type": "ItemList", numberOfItems: all.length,
+      itemListElement: all.map((x, i) => ({ "@type": "ListItem", position: i + 1, name: x.title, url: filmPageUrl("in", x.slug) })) },
+  }];
+  return listingPageHtml({
+    title: `Movies & OTT: Week ${weekNo}, ${slug.slice(0, 4)} (${range}) in India | FilmyChill`,
+    desc: `What was worth watching in India in week ${weekNo} (${range}) — theatre releases and new OTT titles with ratings and verdicts. A permanent weekly snapshot.`,
+    canonical: url,
+    h1: `Week ${weekNo}: ${range}`,
+    updLine: `India · theatres + OTT`,
+    lead: `A permanent snapshot of what was worth watching this week — every share link stays alive forever.`,
+    frozenNote: `This page captures week ${weekNo} of ${slug.slice(0, 4)} and stays frozen once the week ends. For the current list, head to the homepage.`,
+    sections: [
+      { h2: "In theatres", items: theatres },
+      { h2: "Streaming", items: ott },
+    ],
+    faqs: [], extraLd, homeUrl: "https://filmychill.com/",
+  });
+}
+
+function writeWeekPage(data) {
+  const slug = weekSlug(isoWeekOf());
+  const dir = `week/${slug}`;
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(`${dir}/index.html`, buildWeekPage(data, slug));
+  console.log(`Week snapshot: /week/${slug}/`);
+}
+
+// About page lastmod for the sitemap — bump manually when about/index.html changes.
+const ABOUT_LASTMOD = "2026-07-06";
+
 const COUNTRY_PAGE_META = {
   in: { name: "India", path: "/" },
   us: { name: "the US", path: "/us/" },
@@ -2479,13 +2825,39 @@ function footerAttribution(useImdb = USE_IMDB) {
 // Render one country's page from the pristine template string and write it to its path
 // (root index.html for India, <code>/index.html for others). The template is read ONCE by
 // the caller and passed in, so per-country injections never stack on each other.
+// SSR OTT section with the honest divider: cards in order, one "Still worth it"
+// separator before the first stillGood card (only when a fresh group precedes it,
+// so an all-older list never renders a heading with nothing above it).
+function ssrOttSection(items, code) {
+  let out = "", divided = false;
+  items.forEach((x, i) => {
+    if (!divided && x.stillGood && i > 0) {
+      out += `<div class="ott-divider">Still worth it — standouts from earlier weeks</div>`;
+      divided = true;
+    }
+    out += ssrCard(x, i, code);
+  });
+  return out;
+}
+
+// Footer cross-links, injected per country: India links its language pages and the
+// current week's snapshot; every country links About. New indexable surfaces get
+// crawl paths from every page on the site.
+function buildMoreLinks(code) {
+  const about = `<a href="/about/">About FilmyChill</a>`;
+  if (code !== "in") return about;
+  const langs = LANGUAGE_PAGES.map(([name, slug]) => `<a href="/${slug}/">${name}</a>`).join(" · ");
+  return `${langs} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${about}`;
+}
+
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   let html = templateHtml;
   html = replaceBetween(html, "HEAD", buildHeadTags(cfg, USE_IMDB, data));
   html = replaceBetween(html, "PAGECODE", `<meta name="fc-page" content="${cfg.code}">`);
+  html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code));
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
-  html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
+  html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code));
   html = replaceBetween(html, "SOON", (data.comingSoon || []).map((x) => ssrSoonCard(x, cfg.code)).join(""));
   html = replaceBetween(html, "JSONLD", buildHomeJsonLd(data, cfg));
   html = replaceBetween(html, "ATTRIBUTION", footerAttribution());
@@ -2539,4 +2911,8 @@ module.exports = {
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
   filmPagePath, filmPageUrl,
   analyzeReception, composeTake, TAKES_RETENTION_DAYS,
+  ottRenderable, hasCardSubstance, isStillWorthIt, orderOttForDisplay, STILL_WORTH_DAYS,
+  buildLanguagePage, LANGUAGE_PAGES, listingPageHtml,
+  isoWeekOf, weekSlug, isoWeekMonday, isoWeekSunday, buildWeekPage,
+  ssrOttSection, buildMoreLinks, ABOUT_LASTMOD,
 };
