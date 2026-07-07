@@ -1400,6 +1400,12 @@ async function main() {
       item.badge = `New on ${item.platform}`;
       item.isRecent = true;
     }
+    // Integrity gate at the SOURCE: a pre-release provider listing (future-dated movie /
+    // future TV season) is rejected here, before any pool counts it — so selection and
+    // backfill naturally pick the next candidate and the final list arrives at OTT_MAX
+    // already clean. (orderOttForDisplay's own filter remains as a belt-and-braces net,
+    // but gating only there let dropped items shrink the list below 10 with no refill.)
+    if (!ottRenderable(item)) return null;
     return item;
   };
 
