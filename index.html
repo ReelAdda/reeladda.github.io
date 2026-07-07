@@ -363,7 +363,7 @@
 
   <section>
     <div class="section-head">
-      <h2>Streaming Now</h2><span class="count">TOP 10</span>
+      <h2>Streaming Now</h2><span class="count" id="ottCount">TOP 10</span>
       <span class="sub"><a href="new-on-ott/" style="color:var(--indigo);font-weight:700;text-decoration:none">All new OTT releases this week →</a></span>
     </div>
     <div class="grid ott" id="ottGrid"><!--SSR:OTT--><a class="card" href="/movie/mushoku-tensei-jobless-reincarnation.html" style="text-decoration:none;color:inherit">
@@ -687,6 +687,8 @@ function render() {
     '<div class="error-box" style="flex:1">' + (cs.length ? 'No upcoming ' + esc(activeLang) + ' releases in the next scan.' : 'Upcoming releases will appear after the next scan.') + '</div>';
   const tc = document.getElementById('theatreCount');
   if (tc && DATA.theatres.length) tc.textContent = 'TOP ' + DATA.theatres.length;
+  const oc = document.getElementById('ottCount');
+  if (oc && DATA.ott.length) oc.textContent = 'TOP ' + DATA.ott.length;
   updateWLCount();
 }
 
