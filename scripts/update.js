@@ -122,7 +122,24 @@ const COUNTRIES = [
 const EXCLUDE_IDS = new Set([
   1692948, // Chardikala — banned in India / not in theatres
   1155818, // Satluj — banned in India
+  1725370, // Satluj — DUPLICATE TMDB record of the banned film (new id, same movie)
 ]);
+// TITLE-level exclusions: TMDB grows duplicate records for Indian releases (new id,
+// same film), and an id blocklist can't see the next duplicate. Titles here are
+// matched by slug, so casing/punctuation variants ("Satluj!", "SATLUJ") all die too.
+// Keep entries lowercase-slug form. Removing a title re-admits every record of it.
+const EXCLUDE_TITLES = new Set([
+  "satluj",     // banned in India
+  "chardikala", // banned in India
+]);
+// One predicate for every pool: blocked by id OR by slugified title (movies use
+// `title`, TV uses `name`; enriched items use `title` — cover all three).
+function isExcluded(c) {
+  if (!c) return false;
+  if (EXCLUDE_IDS.has(c.id) || EXCLUDE_IDS.has(c.tmdbId)) return true;
+  const t = c.title || c.name;
+  return t ? EXCLUDE_TITLES.has(slugify(t)) : false;
+}
 
 const LANG = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", ml: "Malayalam", kn: "Kannada", ko: "Korean", ja: "Japanese", es: "Spanish", fr: "French", mr: "Marathi", bn: "Bengali", pa: "Punjabi", gu: "Gujarati", de: "German", it: "Italian", pt: "Portuguese", zh: "Chinese" };
 
@@ -1083,7 +1100,7 @@ async function main() {
   // are skipped everywhere the pool is built below — both now_playing and discover.
   const seen = new Set(EXCLUDE_IDS);
   let pool = [...np1.results, ...(np2.results || [])].filter((m) => {
-    if (seen.has(m.id)) { return false; } seen.add(m.id); return true;
+    if (seen.has(m.id) || isExcluded(m)) { return false; } seen.add(m.id); return true;
   });
 
   // Multi-source supplement: now_playing is incomplete for Indian regional theatrical
@@ -1111,7 +1128,7 @@ async function main() {
         page: "1",
       });
       for (const m of (d.results || [])) {
-        if (!seen.has(m.id)) { seen.add(m.id); pool.push(m); }
+        if (!seen.has(m.id) && !isExcluded(m)) { seen.add(m.id); pool.push(m); }
       }
     } catch (e) { console.warn(`theatre-discover ${lang}: ${e.message}`); }
     await sleep(150);
@@ -1394,7 +1411,7 @@ async function main() {
   let intlCands = [
     ...trMovies.results.map((m) => ({ ...m, kind: "movie" })),
     ...trTv.results.map((t) => ({ ...t, kind: "tv" })),
-  ].filter((c) => !isRegional(c) && !EXCLUDE_IDS.has(c.id));
+  ].filter((c) => !isRegional(c) && !isExcluded(c));
   for (const c of intlCands) { await attachImdb(c); await sleep(150); }
   // Drop fake/manipulated entries AND famous-but-not-currently-buzzing catalogue titles
   // (looksReRelease) — the same buzz guard theatres use, which the OTT intl pool previously
@@ -1441,7 +1458,7 @@ async function main() {
         cands.push(...(d.results || []).map((m) => ({ ...m, kind })));
       } catch (e) { console.warn(`ott-regional ${lang}/${kind}: ${e.message}`); }
     }
-    cands = cands.filter((c) => !usedIds.has(c.id) && !EXCLUDE_IDS.has(c.id));
+    cands = cands.filter((c) => !usedIds.has(c.id) && !isExcluded(c));
     for (const c of cands) { await attachImdb(c); await sleep(150); }
     // Quality floor on the best rating we have: IMDb if present, else TMDB. A film is
     // only allowed through unfloored when it has NO usable rating at all (genuinely too
@@ -1526,7 +1543,7 @@ async function main() {
   const upSeen = new Set([...EXCLUDE_IDS]);
   const upPoolRaw = [];
   for (const m of [...up1.results, ...(up2.results || [])]) {
-    if (!upSeen.has(m.id)) { upSeen.add(m.id); upPoolRaw.push(m); }
+    if (!upSeen.has(m.id) && !isExcluded(m)) { upSeen.add(m.id); upPoolRaw.push(m); }
   }
   for (const lang of cfg.priorityLangs) {
     try {
@@ -1539,7 +1556,7 @@ async function main() {
         page: "1",
       });
       for (const m of (d.results || [])) {
-        if (!upSeen.has(m.id)) { upSeen.add(m.id); upPoolRaw.push(m); }
+        if (!upSeen.has(m.id) && !isExcluded(m)) { upSeen.add(m.id); upPoolRaw.push(m); }
       }
     } catch (e) { console.warn(`soon-discover ${cfg.code}/${lang}: ${e.message}`); }
     await sleep(150);
@@ -2915,4 +2932,5 @@ module.exports = {
   buildLanguagePage, LANGUAGE_PAGES, listingPageHtml,
   isoWeekOf, weekSlug, isoWeekMonday, isoWeekSunday, buildWeekPage,
   ssrOttSection, buildMoreLinks, ABOUT_LASTMOD,
+  isExcluded, EXCLUDE_TITLES,
 };
