@@ -1001,6 +1001,23 @@ test("aspect-bearing lines are unaffected by seed", () => {
   assert.strictEqual(U.composeTake(a, 3), U.composeTake(a, 7));
 });
 
+// ---------------- exclusion: isExcluded() ----------------
+group("isExcluded()");
+test("blocks by TMDB id (raw candidate and enriched item shapes)", () => {
+  assert.strictEqual(U.isExcluded({ id: 1155818, title: "Satluj" }), true);
+  assert.strictEqual(U.isExcluded({ tmdbId: 1725370, title: "Whatever" }), true);
+});
+test("blocks DUPLICATE records by title slug — new id, same banned film", () => {
+  assert.strictEqual(U.isExcluded({ id: 9999999, title: "Satluj" }), true);
+  assert.strictEqual(U.isExcluded({ id: 9999998, title: "SATLUJ!" }), true); // casing/punct variants
+  assert.strictEqual(U.isExcluded({ id: 9999997, name: "Chardikala" }), true); // TV shape uses `name`
+});
+test("does not block innocent titles or partial matches", () => {
+  assert.strictEqual(U.isExcluded({ id: 42, title: "Satluj Ke Kinare" }), false); // different film, different slug
+  assert.strictEqual(U.isExcluded({ id: 43, title: "The Bear" }), false);
+  assert.strictEqual(U.isExcluded(null), false);
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
