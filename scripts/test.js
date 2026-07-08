@@ -1018,6 +1018,85 @@ test("does not block innocent titles or partial matches", () => {
   assert.strictEqual(U.isExcluded(null), false);
 });
 
+// ---------------- editorial hook: extractHook() ----------------
+group("extractHook()");
+test("remake with language", () => {
+  const lead = "Baby Do Die Do is a 2026 Indian Hindi-language mystery film. It is a remake of the 2019 Korean film Midnight Runner, adapted for Mumbai. The film stars several newcomers in leading roles and released theatrically in July 2026.";
+  assert.strictEqual(U.extractHook(lead), "A remake of the Korean film \u2018Midnight Runner\u2019.");
+});
+test("sequel", () => {
+  const lead = "Gatta Kusthi 2 is a 2026 Indian Tamil-language sports comedy film. It is a sequel to the 2022 film Gatta Kusthi and continues the story of Veera and Keerthi as they balance family and wrestling.";
+  assert.strictEqual(U.extractHook(lead), "The follow-up to \u2018Gatta Kusthi\u2019.");
+});
+test("novel adaptation with author", () => {
+  const lead = "Silo is an American science fiction dystopian television series. It is based on the novel Wool by Hugh Howey and follows the residents of a giant underground silo in a ruined future world.";
+  assert.strictEqual(U.extractHook(lead), "Based on Hugh Howey's novel \u2018Wool\u2019.");
+});
+test("true events", () => {
+  const lead = "Satluj is a 2026 Indian Hindi-language crime drama based on true events surrounding the disappearances investigated by a human rights activist in 1990s Punjab, produced independently.";
+  assert.strictEqual(U.extractHook(lead), "Based on true events.");
+});
+test("festival premiere", () => {
+  const lead = "Charukesi is a 2026 Indian Tamil-language drama film about a musician and her ailing mother. The film premiered at the 2026 International Film Festival Rotterdam to a warm reception before its streaming release.";
+  assert.ok(/Premiered at the/.test(U.extractHook(lead)));
+});
+test("remake beats sequel when both appear (priority)", () => {
+  const lead = "The movie is a remake of the Malayalam film Drishyam and also serves as a sequel to the 2015 film in spirit, expanding the story of the family at its centre across a new decade of events.";
+  assert.ok(U.extractHook(lead).startsWith("A remake"));
+});
+test("no framing fact -> null, short/absent lead -> null", () => {
+  const lead = "Alpha is a 2026 Indian Hindi-language action thriller film directed by a debutant and produced under a major banner, starring two leading actresses in principal roles across several international locations.";
+  assert.strictEqual(U.extractHook(lead), null);
+  assert.strictEqual(U.extractHook(""), null);
+  assert.strictEqual(U.extractHook(null), null);
+});
+test("directorial debut uses the item's director", () => {
+  const lead = "The film marks the directorial debut of its writer and was shot across Mumbai and Pune over a period of two years, with an ensemble cast of theatre actors in most of the speaking roles.";
+  assert.strictEqual(U.extractHook(lead, { director: "Asha Rane" }), "Asha Rane's directorial debut.");
+  assert.strictEqual(U.extractHook(lead, {}), null); // no director known -> no hook
+});
+
+// ---------------- editorial: audienceCounterpoint() ----------------
+group("audienceCounterpoint()");
+test("critics negative + audiences high -> disagreement line", () => {
+  const c = U.audienceCounterpoint({ take: "Critics were rough on it, mostly over the writing.", rating: 8.2, votes: 900 });
+  assert.ok(/Audiences disagree/.test(c) && /8\.2/.test(c));
+});
+test("critics split + audiences high -> disagreement line", () => {
+  assert.ok(/Audiences disagree/.test(U.audienceCounterpoint({ take: "Critics are split on this one.", rating: 7.8, votes: 200 })));
+});
+test("critics positive + audiences low -> cooler line", () => {
+  assert.ok(/cooler/.test(U.audienceCounterpoint({ take: "Critics liked it, especially the visuals.", rating: 5.1, votes: 300 })));
+});
+test("agreement, few votes, or missing data -> null", () => {
+  assert.strictEqual(U.audienceCounterpoint({ take: "Critics liked it, especially the visuals.", rating: 8.0, votes: 500 }), null);
+  assert.strictEqual(U.audienceCounterpoint({ take: "Critics were rough on it.", rating: 8.0, votes: 10 }), null);
+  assert.strictEqual(U.audienceCounterpoint({ take: "Critics were rough on it.", rating: null }), null);
+  assert.strictEqual(U.audienceCounterpoint(null), null);
+});
+test("uses IMDb votes when IMDb ratings are the source", () => {
+  assert.ok(U.audienceCounterpoint({ take: "Critics were rough on it.", rating: 8.0, imdbRating: 8.0, imdbVotes: 5000, votes: 0 }));
+});
+
+// ---------------- editorial: rendering ----------------
+group("hook + counterpoint rendering");
+test("ssrCard renders hook and counterpoint; omits both when absent", () => {
+  const withBoth = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix",
+    hook: "The follow-up to \u2018X\u2019.", take: "Critics are split on this one.",
+    takeCounter: "Audiences disagree \u2014 \u2605 8.1 from viewers." }, 0, "in");
+  assert.ok(/class="meta hook"/.test(withBoth) && /follow-up/.test(withBoth));
+  assert.ok(/class="tcounter"/.test(withBoth) && /8\.1 from viewers/.test(withBoth));
+  const bare = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix" }, 0, "in");
+  assert.ok(!/hook/.test(bare) && !/tcounter/.test(bare));
+});
+test("buildFilmPage renders hook and counterpoint", () => {
+  const html = U.buildFilmPage({ title: "Main", slug: "main", kind: "movie", platform: "Theatres",
+    hook: "Based on true events.", take: "Critics loved it \u2014 special praise for the visuals.",
+    takeCounter: "Audiences are cooler on it (\u2605 5.2).", takeSrc: "wiki" },
+    "2026-07-07", new Set(["main"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(/class="hook"/.test(html) && /true events/.test(html) && /tcounter/.test(html));
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
