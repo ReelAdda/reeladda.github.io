@@ -657,14 +657,77 @@ function composeTake(a, seed = 0) {
 // English-Wikipedia reception section as plain text, or null if the article has none.
 // Uses TextExtracts (keyless); sub-headings inside the section are stripped, their
 // prose kept, so "=== Critical response ===" under "== Reception ==" still counts.
-async function wikiReceptionText(article) {
+// One extract fetch now serves TWO editorial features: the article LEAD (framing facts —
+// remake/sequel/adaptation/festival, extracted by extractHook) and the RECEPTION section
+// (critic consensus, analysed by analyzeReception). Same single keyless call as before.
+async function wikiExtract(article) {
   const j = await fetchJsonKeyless(
     `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&redirects=1&format=json&titles=${encodeURIComponent(article)}`,
     WIKI_HEADERS);
   const page = Object.values(j?.query?.pages || {})[0];
   const text = page?.extract || "";
+  const lead = text.split(/\n==[^=]/)[0].slice(0, 2500); // everything before the first section
   const m = text.match(/\n==+\s*(?:Critical (?:response|reception)|Reception|Reviews|Critical and audience response)\s*==+\n([\s\S]*?)(?=\n==[^=]|$)/i);
-  return m ? m[1].replace(/\n==+[^=\n]+==+\n/g, "\n") : null;
+  const reception = m ? m[1].replace(/\n==+[^=\n]+==+\n/g, "\n") : null;
+  return { lead, reception };
+}
+
+// ============================================================================
+// THE HOOK — one framing fact per film, the line every human editor leads
+// with: "A remake of the Malayalam film X" / "The follow-up to Y" / "Based on
+// Hugh Howey's novels" / "Premiered at Cannes". Extracted from the Wikipedia
+// lead paragraph (facts, composed in our own words — licence-clean), cached in
+// takes.json next to the take. Pure -> unit-testable. One hook max, by
+// priority: remake > sequel/spin-off > adaptation > festival > debut. Absent
+// beats invented: no pattern, no hook.
+// ============================================================================
+function extractHook(lead, item = {}) {
+  if (!lead || lead.length < 60) return null;
+  const t = lead.replace(/\s+/g, " ");
+  const clean = (x) => x.trim().replace(/["'\u2018\u2019\u201c\u201d]/g, "").replace(/\s+/g, " ").slice(0, 48);
+  // Titles/names in lead prose end at a clause boundary: punctuation, a parenthetical
+  // (usually the year), or " and/which/that " followed by a lowercase word — the
+  // lowercase requirement keeps titles like "Rick and Morty" intact while stopping
+  // "Gatta Kusthi and continues the story". Lazy captures + this lookahead.
+  const B = String.raw`(?=,|\.|;|:|\(| and [a-z]| which | that |$)`;
+  let m;
+  if ((m = t.match(new RegExp(String.raw`remake of (?:the )?(?:\d{4} )?(?:([A-Z]\w+)(?:-language)? )?film ["'\u2018\u201c]?([A-Z][^.;,("'\u2019\u201d]{1,45}?)${B}`))))
+    return `A remake of the ${m[1] ? m[1] + " " : ""}film \u2018${clean(m[2])}\u2019.`;
+  if ((m = t.match(new RegExp(String.raw`(?:a |the )?sequel to (?:the \d{4} film |the film )?["'\u2018\u201c]?([A-Z][^.;,("'\u2019\u201d]{1,45}?)${B}`))))
+    return `The follow-up to \u2018${clean(m[1])}\u2019.`;
+  if ((m = t.match(new RegExp(String.raw`spin-?off (?:of|from) (?:the )?([A-Z][^.;,("]{1,45}?)${B}`))))
+    return `A spin-off of ${clean(m[1])}.`;
+  if (/based on (?:a )?true (?:events|story)|based on real events/i.test(t))
+    return `Based on true events.`;
+  if ((m = t.match(new RegExp(String.raw`based on the (novel|book|manga|play|short story|webtoon|comic book series|comics)(?: series)? ["'\u2018\u201c]?([A-Z][^.;,("'\u2019\u201d]{1,45}?)["'\u2019\u201d]? by ([A-Z][\w. -]{1,32}?)${B}`))))
+    return `Based on ${clean(m[3])}'s ${m[1]} \u2018${clean(m[2])}\u2019.`;
+  if ((m = t.match(new RegExp(String.raw`based on the (novel|book|manga|play|short story|webtoon|comics)(?: series)? (?:of the same name )?by ([A-Z][\w. -]{1,32}?)${B}`))))
+    return `Based on the ${m[1]} by ${clean(m[2])}.`;
+  if ((m = t.match(new RegExp(String.raw`premiered at the (?:\d{4} )?(?:\d+(?:st|nd|rd|th) )?([A-Z][^.;,(]{1,45}?(?:Film Festival|Festival de Cannes))`))))
+    return `Premiered at the ${clean(m[1])}.`;
+  if (/directorial debut/.test(t) && item.director)
+    return `${item.director}'s directorial debut.`;
+  return null;
+}
+
+// ============================================================================
+// AUDIENCE COUNTERPOINT — the most interesting editorial fact is DISAGREEMENT.
+// When the critics' take and the audience rating point opposite ways, say so.
+// Computed fresh each run from data already on the item (ratings move; cached
+// take text doesn't), so it stays current without any network. Pure.
+// ============================================================================
+function audienceCounterpoint(item) {
+  if (!item || !item.take || item.rating == null) return null;
+  const votes = item.imdbRating != null ? (item.imdbVotes || 0) : (item.votes || 0);
+  if (votes < 50) return null; // too few voters to call it an audience
+  const negTake = /rough on it|not impressed|not kind|gave this one a pass|came away cold/i.test(item.take);
+  const splitTake = /split|all over the map|couldn't agree|down the middle/i.test(item.take);
+  const posTake = /loved|liked it|largely positive|lean clearly positive|came away happy|solidly good|rare-air/i.test(item.take);
+  if ((negTake || splitTake) && item.rating >= 7.5)
+    return `Audiences disagree \u2014 \u2605 ${Number(item.rating).toFixed(1)} from viewers.`;
+  if (posTake && item.rating <= 5.5)
+    return `Audiences are cooler on it (\u2605 ${Number(item.rating).toFixed(1)}).`;
+  return null;
 }
 
 // Fallback: TMDB user reviews. Only the rating AVERAGE is used (a fact, not text) and
@@ -697,28 +760,46 @@ async function attachTakes(dataByCode) {
   for (const [key, items] of byKey) {
     try {
       let entry = takes[key];
-      if (!entry || (!entry.take && entry.checked !== today)) {
-        let take = null, src = null, article = entry?.article || null;
+      // Refetch when: never seen; no take yet (reception sections appear late); or a
+      // LEGACY entry predating hooks (hook === undefined; found hooks are strings,
+      // searched-but-absent is null) — a one-time backfill pass, then it settles.
+      const needsFetch = !entry || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
+      if (needsFetch) {
+        let take = entry?.take || null, src = entry?.src || null, hook = null;
+        let article = entry?.article || null;
         if (key.startsWith("tt")) { // real IMDb id -> precise Wikipedia route
           if (!article) article = await wikiArticleForImdb(key);
           if (article) {
-            const composed = composeTake(analyzeReception(await wikiReceptionText(article)), Number(items[0].tmdbId) || 0);
-            if (composed) { take = composed; src = "wiki"; }
+            const { lead, reception } = await wikiExtract(article);
+            hook = extractHook(lead, items[0]);
+            if (!take) {
+              const composed = composeTake(analyzeReception(reception), Number(items[0].tmdbId) || 0);
+              if (composed) { take = composed; src = "wiki"; }
+            }
           }
         }
         if (!take) {
           const t = await tmdbReviewTake(items[0]);
           if (t) { take = t; src = "tmdb"; }
         }
-        entry = { take, src, article: article || undefined, checked: today };
+        entry = { take, src, hook, article: article || undefined, checked: today };
         takes[key] = entry;
         await sleep(150); // polite pace against Wikimedia
       } else {
         entry.checked = today; // touch so retention pruning keeps live titles
       }
-      if (entry.take) {
-        found++;
-        for (const it of items) { it.take = entry.take; it.takeSrc = entry.src; }
+      if (entry.take || entry.hook) {
+        if (entry.take) found++;
+        for (const it of items) {
+          if (entry.take) {
+            it.take = entry.take;
+            it.takeSrc = entry.src;
+            // Disagreement is computed FRESH each run — ratings move, cached text doesn't.
+            const counter = audienceCounterpoint(it);
+            if (counter) it.takeCounter = counter;
+          }
+          if (entry.hook) it.hook = entry.hook;
+        }
       }
     } catch (e) {
       console.warn(`  take: ${items[0].title} skipped (${e.message})`);
@@ -1882,6 +1963,8 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
   .vprose { font-size:15px; line-height:1.7; margin-top:8px; }
   .take { font-size:14.5px; font-weight:600; color:var(--indigo); line-height:1.6; margin-top:10px; }
   .tsrc { color:var(--mute); font-weight:400; font-size:12px; }
+  .hook { font-size:13.5px; color:var(--mute); font-style:italic; margin-top:8px; }
+  .tcounter { color:var(--marigold-dk, #A66B00); font-weight:700; }
   .gtk { width:100%; border-collapse:collapse; margin-top:8px; }
   .gtk td { padding:9px 0; border-top:1px solid var(--line); font-size:14px; vertical-align:top; }
   .gtk td:first-child { color:var(--mute); width:46%; }
@@ -1915,7 +1998,8 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
     </div>
   </div>
   ${verdictProse ? `<h2>The verdict</h2><p class="vprose">${e(verdictProse)}</p>` : ""}
-  ${item.take ? `<p class="take">💬 ${e(item.take)}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
+  ${item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
+  ${item.take ? `<p class="take">💬 ${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
   ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${goodToKnow.length ? `<h2>Good to know</h2><table class="gtk">${goodToKnow.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : ""}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
@@ -2073,8 +2157,9 @@ function ssrCard(item, i, code) {
       <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}${item.trending ? '<span class="fresh-badge trend">🔥 Trending</span>' : ""}</div>
       <div class="meta">${bits}</div>
       ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}${trailerViewsLabel(item.trailerViews) ? " · " + trailerViewsLabel(item.trailerViews) : ""}</div>` : ""}
+      ${item.hook ? `<div class="meta hook">${e(item.hook)}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 110))}</p>` : ""}
-      ${item.take ? `<p class="take">💬 ${e(item.take)}</p>` : ""}
+      ${item.take ? `<p class="take">💬 ${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}</p>` : ""}
     </div>`;
   // Every country now has its own per-film pages, so always link to this country's page.
   // (`code` defaults to India for safety if a caller omits it.)
@@ -2474,6 +2559,7 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">🔥 Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
         ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
+        ${it.hook ? `<div class="rm hk">${e(it.hook)}</div>` : ""}
         ${it.take ? `<div class="rm tk">💬 ${e(it.take)}</div>` : ""}
       </div>`;
     return it.slug ? `<a class="row" href="${e(filmPagePath("in", it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
@@ -2530,6 +2616,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   .badge.trend { background:#FF4E3A; color:#fff; }
   .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
   .rm.tk { color:var(--indigo); font-weight:600; }
+  .rm.hk { font-style:italic; }
   .faq details { border-top:1px solid var(--line); padding:10px 0; }
   .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }
   .faq summary::-webkit-details-marker { display:none; }
@@ -2939,4 +3026,5 @@ module.exports = {
   isoWeekOf, weekSlug, isoWeekMonday, isoWeekSunday, buildWeekPage,
   ssrOttSection, buildMoreLinks, ABOUT_LASTMOD,
   isExcluded, EXCLUDE_TITLES,
+  extractHook, audienceCounterpoint,
 };
