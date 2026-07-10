@@ -112,6 +112,36 @@ const COUNTRIES = [
     theatreTargets: [["de", 5], ["en", 2]],
     soonTargets: [["de", 5], ["en", 2], ["__regional__", 1]],
   },
+  // ---- Diaspora markets: countries where FilmyChill's India strength IS the edge. ----
+  // UAE: ~3.5M Indian expats; Indian films routinely top the UAE box office, with
+  // Malayalam cinema disproportionately huge (Kerala diaspora) alongside Hindi/Tamil.
+  {
+    code: "ae", name: "UAE", region: "AE", watchRegion: "AE",
+    priorityLangs: ["hi", "en", "ml"],
+    regionalLangs: ["hi", "ml", "ta", "te", "ar"],
+    ottRegionalLangs: ["hi", "ml", "ta", "te"],
+    theatreTargets: [["hi", 2], ["en", 2], ["ml", 1], ["ta", 1]],
+    soonTargets: [["en", 2], ["hi", 2], ["__regional__", 2]],
+  },
+  // Canada: the Punjabi-cinema capital outside India (Brampton/Surrey) plus a large
+  // Hindi audience; French included for Quebec theatrical coverage.
+  {
+    code: "ca", name: "Canada", region: "CA", watchRegion: "CA",
+    priorityLangs: ["en", "pa", "hi"],
+    regionalLangs: ["pa", "hi", "fr", "ta"],
+    ottRegionalLangs: ["pa", "hi"],
+    theatreTargets: [["en", 4], ["pa", 1], ["hi", 1]],
+    soonTargets: [["en", 4], ["__regional__", 3]],
+  },
+  // Singapore: Tamil is an official language; strong Mandarin-language box office too.
+  {
+    code: "sg", name: "Singapore", region: "SG", watchRegion: "SG",
+    priorityLangs: ["en", "ta", "zh"],
+    regionalLangs: ["ta", "zh", "hi", "ms"],
+    ottRegionalLangs: ["ta", "zh"],
+    theatreTargets: [["en", 4], ["ta", 1], ["zh", 1]],
+    soonTargets: [["en", 4], ["ta", 1], ["__regional__", 2]],
+  },
 ];
 
 // Manual exclusion list — films that should NEVER appear regardless of what TMDB returns
@@ -371,19 +401,19 @@ function freshBadge(kind, freshDate, now = Date.now(), seasonCount = null) {
 // the series' original launch and would mislead). Year is appended only when it differs
 // from the current year, so a Dec title shown in Jan still reads unambiguously. Must stay
 // in sync with the client-side freshLabel()/fmtDate() in index.html. Pure -> unit-testable.
-function fmtDateShort(dateStr, now = Date.now()) {
+function fmtDateShort(dateStr, now = Date.now(), locale = "en-IN") {
   const dt = new Date(dateStr);
   const opts = { day: "numeric", month: "short" };
   if (dt.getFullYear() !== new Date(now).getFullYear()) opts.year = "numeric";
-  return dt.toLocaleDateString("en-IN", opts);
+  return dt.toLocaleDateString(locale, opts);
 }
-function freshLabel(item, now = Date.now()) {
+function freshLabel(item, now = Date.now(), locale = "en-IN") {
   // TV needs freshDate (latest season, not the series launch). Movies prefer `released`
   // (the region-localized date the modal already shows) over freshDate (TMDB's global
   // primary date), so the card and modal never show two different dates for one film.
   const d = item.kind === "tv" ? (item.freshDate || item.released) : (item.released || item.freshDate);
   if (!d) return "";
-  return (item.kind === "tv" ? "Latest season " : "Released ") + fmtDateShort(d, now);
+  return (item.kind === "tv" ? "Latest season " : "Released ") + fmtDateShort(d, now, locale);
 }
 
 // ============================================================================
@@ -1023,18 +1053,35 @@ async function loadImdbRatings() {
 }
 let imdbRatings = new Map(); // populated at the start of main()
 
+// Pure: the REGION'S OWN certification, or null. Never another country's rating —
+// an absent cert beats a wrong one (India's "U/A 16+" on the Singapore page is a lie).
+// This was hardcoded to "IN" for all countries before; a real leak, now regional.
+function certFor(kind, d, region) {
+  if (kind === "movie") {
+    const rel = d.release_dates?.results?.find((r) => r.iso_3166_1 === region);
+    return rel?.release_dates?.find((x) => x.certification)?.certification || null;
+  }
+  return d.content_ratings?.results?.find((r) => r.iso_3166_1 === region)?.rating || null;
+}
+
+// Pure: the region's OWN theatrical date (TMDB types 1-3: premiere/limited/theatrical),
+// earliest when several. null when TMDB has no dated entry for this region — the caller
+// then keeps the global primary date. Indian films open in the UAE/Canada days apart
+// from India; each country page should show (and gate freshness by) ITS OWN date.
+function regionalTheatricalDate(d, region) {
+  const rel = d.release_dates?.results?.find((r) => r.iso_3166_1 === region);
+  const dates = (rel?.release_dates || [])
+    .filter((x) => x.type >= 1 && x.type <= 3 && x.release_date)
+    .map((x) => String(x.release_date).slice(0, 10))
+    .sort();
+  return dates[0] || null;
+}
+
 async function enrich(kind, id, region = "IN") {
   const extra = kind === "movie" ? "release_dates" : "content_ratings";
   const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,external_ids,recommendations,${extra}` });
 
-  // Certificate (India)
-  let cert = null;
-  if (kind === "movie") {
-    const inRel = d.release_dates?.results?.find((r) => r.iso_3166_1 === "IN");
-    cert = inRel?.release_dates?.find((x) => x.certification)?.certification || null;
-  } else {
-    cert = d.content_ratings?.results?.find((r) => r.iso_3166_1 === "IN")?.rating || null;
-  }
+  const cert = certFor(kind, d, region);
 
   // Trailer — fall back to a YouTube search link if TMDB has no video yet
   const vids = d.videos?.results || [];
@@ -1091,12 +1138,17 @@ async function enrich(kind, id, region = "IN") {
       kind: x.media_type === "tv" || x.first_air_date ? "tv" : "movie",
     }));
 
+  // Region's own theatrical date overrides the global primary date when TMDB has one —
+  // so each country page shows (and freshness-gates by) its own market's release day.
+  const regionalRelease = kind === "movie" ? regionalTheatricalDate(d, region) : null;
+
   return {
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
     imdbId: imdbId || null, // handle for cross-source lookups (Wikipedia buzz via Wikidata P345)
     freshDate, badge, isRecent: badge != null, similar: recs,
     backdrop: img(d.backdrop_path, "w780"),
     fullReview: trim(d.overview, 600),
+    ...(regionalRelease ? { released: regionalRelease } : {}),
   };
 }
 
@@ -2148,7 +2200,7 @@ function ssrCard(item, i, code) {
   // Badge text comes from the data (freshBadge). Fallback to the old isRecent flag so a
   // template regen against a pre-badge data.json still renders sensibly.
   const badge = item.badge || (item.isRecent ? "New release" : null);
-  const when = freshLabel(item);
+  const when = freshLabel(item, Date.now(), localeFor(code)); // dates in the page's own locale
   const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null, when || null].filter(Boolean).map(e).join(" · ");
   const inner = `
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
@@ -2786,16 +2838,27 @@ const COUNTRY_PAGE_META = {
   uk: { name: "the UK", path: "/uk/" },
   au: { name: "Australia", path: "/au/" },
   de: { name: "Germany", path: "/de/" },
+  ae: { name: "the UAE", path: "/ae/" },
+  ca: { name: "Canada", path: "/ca/" },
+  sg: { name: "Singapore", path: "/sg/" },
 };
 
 // English locale conventions per country — grouping ("12,34,567" lakh-style is correct ONLY
 // for India; the US expects "1,234,567") and long-date order ("July 1, 2026" in the US vs
 // "1 July 2026" elsewhere). Germany gets en-GB: the site's language is English, and en-GB's
 // day-first order matches German convention for an English-language page.
-const COUNTRY_LOCALE = { in: "en-IN", us: "en-US", uk: "en-GB", au: "en-AU", de: "en-GB" };
+const COUNTRY_LOCALE = { in: "en-IN", us: "en-US", uk: "en-GB", au: "en-AU", de: "en-GB", ae: "en-AE", ca: "en-CA", sg: "en-SG" };
 const localeFor = (code) => COUNTRY_LOCALE[code] || "en-IN";
 // Prose-ready country name ("the US", not the config's "United States") for any cfg.
 const countryNameFor = (cfg) => (COUNTRY_PAGE_META[(cfg && cfg.code) || "in"] || {}).name || (cfg && cfg.name) || "India";
+// "India, US, UK, Australia, Germany, UAE, Canada &amp; Singapore" — generated from the
+// config so a new country can never be missing from the fallback copy again.
+function countryListForProse() {
+  const short = { "United States": "US", "United Kingdom": "UK" };
+  const names = COUNTRIES.map((c) => short[c.name] || c.name);
+  return names.slice(0, -1).join(", ") + " &amp; " + names[names.length - 1];
+}
+
 function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name, path: `/${cfg.code}/` };
   const url = `https://filmychill.com${m.path}`;
@@ -2848,12 +2911,12 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   if (cfg.code === "in") {
     // Root keeps the multi-country, India-first wording as the no-data fallback.
     return `<title>${escHtml(dynTitle || "FilmyChill — Latest Movie & OTT Releases, with Reviews, Updated Daily")}</title>\n`
-      + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
+      + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases across ${countryListForProse()} — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
       + discover + "\n"
       + `<link rel="canonical" href="${url}">\n`
       + homeAlts + "\n"
       + `<meta property="og:title" content="${escHtml(dynTitle) || "FilmyChill — What's worth watching this week"}">\n`
-      + `<meta property="og:description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases across India, US, UK, Australia &amp; Germany — trailers, ${ratingsWord}, verdicts. Auto-updated daily.`}">\n`
+      + `<meta property="og:description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases across ${countryListForProse()} — trailers, ${ratingsWord}, verdicts. Auto-updated daily.`}">\n`
       + shareTags;
   }
   return `<title>${escHtml(dynTitle) || `FilmyChill — Latest Movie &amp; OTT Releases in ${m.name}, with Reviews, Updated Daily`}</title>\n`
@@ -3027,4 +3090,5 @@ module.exports = {
   ssrOttSection, buildMoreLinks, ABOUT_LASTMOD,
   isExcluded, EXCLUDE_TITLES,
   extractHook, audienceCounterpoint,
+  certFor, regionalTheatricalDate, countryListForProse,
 };
