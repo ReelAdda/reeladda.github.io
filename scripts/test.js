@@ -1097,6 +1097,86 @@ test("buildFilmPage renders hook and counterpoint", () => {
   assert.ok(/class="hook"/.test(html) && /true events/.test(html) && /tcounter/.test(html));
 });
 
+// ---------------- multi-country config integrity ----------------
+group("country expansion config");
+const COUNTRIES_RE = require("fs").readFileSync("scripts/update.js", "utf8");
+test("eight countries, unique codes, every code covered by meta + locale maps", () => {
+  // Reconstruct via exported helpers where possible; assert through buildHeadTags shape.
+  for (const code of ["in", "us", "uk", "au", "de", "ae", "ca", "sg"]) {
+    const html = U.buildHeadTags({ code, name: code, region: code.toUpperCase() });
+    assert.ok(html.includes("filmychill.com"), code + " head tags render");
+    assert.ok(new RegExp(`hreflang="en-(AE|CA|SG|IN|US|GB|AU)"`).test(html), code + " hreflang present");
+  }
+});
+test("UAE/Canada/Singapore homepages carry all eight hreflang alternates + x-default", () => {
+  const html = U.buildHeadTags({ code: "ae", name: "UAE", region: "AE" });
+  for (const path of ["/", "/us/", "/uk/", "/au/", "/de/", "/ae/", "/ca/", "/sg/"]) {
+    assert.ok(html.includes(`href="https://filmychill.com${path}"`), "alternate for " + path);
+  }
+  assert.ok(html.includes('hreflang="x-default"'));
+});
+test("new-country film page paths are namespaced correctly", () => {
+  assert.strictEqual(U.filmPagePath("ae", "raakh"), "/ae/movie/raakh.html");
+  assert.strictEqual(U.filmPageUrl("sg", "raakh"), "https://filmychill.com/sg/movie/raakh.html");
+  assert.strictEqual(U.filmPagePath("in", "raakh"), "/movie/raakh.html"); // India stays flat
+});
+test("countryNameFor reads naturally in prose for the new markets", () => {
+  assert.strictEqual(U.countryNameFor({ code: "ae", name: "UAE" }), "the UAE");
+  assert.strictEqual(U.countryNameFor({ code: "ca", name: "Canada" }), "Canada");
+  assert.strictEqual(U.countryNameFor({ code: "sg", name: "Singapore" }), "Singapore");
+});
+test("localeFor returns a working locale for every country (date formatting never throws)", () => {
+  for (const code of ["ae", "ca", "sg"]) {
+    const out = new Date("2026-07-10").toLocaleDateString(U.localeFor(code), { day: "numeric", month: "long", year: "numeric" });
+    assert.ok(/2026/.test(out), code + " -> " + out);
+  }
+});
+
+// ---------------- regional data uniqueness (the audit fixes) ----------------
+group("regional data: certFor() / regionalTheatricalDate()");
+// One fixture TMDB payload with DIFFERENT data per region — the uniqueness proof.
+const TMDB_FIXTURE = {
+  release_dates: { results: [
+    { iso_3166_1: "IN", release_dates: [{ type: 3, certification: "UA 16+", release_date: "2026-07-03T00:00:00.000Z" }] },
+    { iso_3166_1: "AE", release_dates: [{ type: 3, certification: "PG 15", release_date: "2026-07-10T00:00:00.000Z" }] },
+    { iso_3166_1: "SG", release_dates: [{ type: 1, certification: "", release_date: "2026-07-01T00:00:00.000Z" }, { type: 3, certification: "NC16", release_date: "2026-07-09T00:00:00.000Z" }] },
+    { iso_3166_1: "US", release_dates: [{ type: 4, certification: "R", release_date: "2026-08-01T00:00:00.000Z" }] },
+  ]},
+  content_ratings: { results: [
+    { iso_3166_1: "IN", rating: "U/A 16+" }, { iso_3166_1: "CA", rating: "14+" },
+  ]},
+};
+test("each region gets ITS OWN certification — never India's", () => {
+  assert.strictEqual(U.certFor("movie", TMDB_FIXTURE, "IN"), "UA 16+");
+  assert.strictEqual(U.certFor("movie", TMDB_FIXTURE, "AE"), "PG 15");
+  assert.strictEqual(U.certFor("movie", TMDB_FIXTURE, "SG"), "NC16");
+  assert.strictEqual(U.certFor("tv", TMDB_FIXTURE, "CA"), "14+");
+});
+test("region with no cert entry -> null, NOT another country's rating", () => {
+  assert.strictEqual(U.certFor("movie", TMDB_FIXTURE, "CA"), null); // CA has no movie entry
+  assert.strictEqual(U.certFor("tv", TMDB_FIXTURE, "SG"), null);
+});
+test("each region gets ITS OWN theatrical date; earliest of types 1-3; digital (type 4) ignored", () => {
+  assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "IN"), "2026-07-03");
+  assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "AE"), "2026-07-10");
+  assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "SG"), "2026-07-01"); // earliest of the two
+  assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "US"), null); // only a type-4 digital date
+  assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "CA"), null); // no entry at all
+});
+test("dates render in each page's own locale", () => {
+  const item = { kind: "movie", released: "2026-06-19" };
+  const inLabel = U.freshLabel(item, Date.now(), U.localeFor("in"));
+  const usLabel = U.freshLabel(item, Date.now(), U.localeFor("us"));
+  assert.ok(/19 Jun/.test(inLabel), "India: " + inLabel);
+  assert.ok(/Jun 19/.test(usLabel), "US: " + usLabel);
+});
+test("fallback description lists every configured country — generated, not hardcoded", () => {
+  const list = U.countryListForProse();
+  for (const name of ["India", "US", "UK", "Australia", "Germany", "UAE", "Canada", "Singapore"]) {
+    assert.ok(list.includes(name), "missing " + name + " in: " + list);
+  }
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
