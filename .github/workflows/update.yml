@@ -57,7 +57,7 @@ jobs:
         run: |
           git config user.name "filmychill-bot"
           git config user.email "actions@github.com"
-          git add data.json data-*.json ott-seen.json takes.json search-index.json pages-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ movie/ new-on-ott/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ sitemap.xml
+          git add data.json data-*.json ott-seen.json takes.json pages-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ movie/ new-on-ott/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ sitemap.xml
           if git diff --staged --quiet; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit."
