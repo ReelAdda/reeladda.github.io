@@ -1271,6 +1271,32 @@ test("buildHomeJsonLd output itself is valid JSON", () => {
   assert.ok(parsed["@graph"] || parsed["@context"]);
 });
 
+// ---------------- theatre eligibility (the Ikka class of bug) ----------------
+group("theatreEligible()");
+const REL = (types) => ({ release_dates: { results: [{ iso_3166_1: "IN", release_dates: types.map((t) => ({ type: t, release_date: "2026-07-10T00:00:00.000Z" })) }] } });
+test("proven theatrical run (type 2/3) -> eligible, even if also digital", () => {
+  assert.strictEqual(U.theatreEligible(REL([3]), "IN"), true);
+  assert.strictEqual(U.theatreEligible(REL([2]), "IN"), true);
+  assert.strictEqual(U.theatreEligible(REL([3, 4]), "IN"), true); // hybrid release keeps its theatre slot
+});
+test("digital/TV-only release -> NOT eligible (Netflix originals in now_playing)", () => {
+  assert.strictEqual(U.theatreEligible(REL([4]), "IN"), false);
+  assert.strictEqual(U.theatreEligible(REL([6]), "IN"), false);
+  assert.strictEqual(U.theatreEligible(REL([4]), "IN", [{ name: "Netflix" }]), false);
+});
+test("premiere-only (type 1) is not a theatrical RUN -> falls to the provider signal", () => {
+  assert.strictEqual(U.theatreEligible(REL([1]), "IN", []), true); // festival film, no streaming yet: benefit of doubt
+  assert.strictEqual(U.theatreEligible(REL([1]), "IN", [{ name: "Netflix" }]), false); // premiered then straight to streaming
+});
+test("no region entry at all: eligible only without streaming providers", () => {
+  assert.strictEqual(U.theatreEligible({}, "IN", []), true);
+  assert.strictEqual(U.theatreEligible({}, "IN", [{ name: "Prime Video" }]), false);
+});
+test("Ikka's TMDB id is barred from theatres but NOT globally excluded", () => {
+  assert.ok(U.THEATRE_EXCLUDE_IDS.has(1484913));
+  assert.strictEqual(U.isExcluded({ id: 1484913, title: "Ikka" }), false); // still free to appear on the OTT list
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
