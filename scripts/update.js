@@ -3094,7 +3094,12 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
   html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code));
   html = replaceBetween(html, "SOON", (data.comingSoon || []).map((x) => ssrSoonCard(x, cfg.code)).join(""));
-  html = replaceBetween(html, "JSONLD", buildHomeJsonLd(data, cfg));
+  // The SSR markers wrap the ENTIRE <script> element (never sit inside it): HTML
+  // comments are NOT stripped inside <script>, so markers inside the tag made the
+  // JSON-LD start with "<!--" — a syntax error to Google's structured-data parser.
+  // Same lesson as the fc-page meta tag, now applied to the block that predated it.
+  html = replaceBetween(html, "JSONLD",
+    `<script type="application/ld+json">${buildHomeJsonLd(data, cfg)}</script>`);
   html = replaceBetween(html, "ATTRIBUTION", footerAttribution());
   if (isIndia) {
     fs.writeFileSync("index.html", html);
