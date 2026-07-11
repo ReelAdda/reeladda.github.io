@@ -1177,6 +1177,107 @@ test("fallback description lists every configured country — generated, not har
   }
 });
 
+// ---------------- cast photos: extractCastPics() + rendering ----------------
+group("extractCastPics()");
+const CREDITS_FIXTURE = { cast: [
+  { name: "Actor One", character: "Kara Zor-El", profile_path: "/a1.jpg" },
+  { name: "No Photo", character: "Villain", profile_path: null },
+  { name: "Actor Two", character: "", profile_path: "/a2.jpg" },
+  { name: "A3", character: "C3", profile_path: "/a3.jpg" }, { name: "A4", character: "C4", profile_path: "/a4.jpg" },
+  { name: "A5", character: "C5", profile_path: "/a5.jpg" }, { name: "A6", character: "C6", profile_path: "/a6.jpg" },
+  { name: "A7", character: "C7", profile_path: "/a7.jpg" },
+]};
+test("only members with real headshots; capped at 6; w185 size; character kept", () => {
+  const pics = U.extractCastPics(CREDITS_FIXTURE);
+  assert.strictEqual(pics.length, 6);
+  assert.ok(!pics.some((p) => p.name === "No Photo")); // no placeholder silhouettes
+  assert.strictEqual(pics[0].photo, "https://image.tmdb.org/t/p/w185/a1.jpg");
+  assert.strictEqual(pics[0].character, "Kara Zor-El");
+  assert.strictEqual(pics[1].character, null); // empty string normalised to null
+});
+test("empty/missing credits -> empty array, never throws", () => {
+  assert.deepStrictEqual(U.extractCastPics(null), []);
+  assert.deepStrictEqual(U.extractCastPics({}), []);
+  assert.deepStrictEqual(U.extractCastPics({ cast: [] }), []);
+});
+test("film page renders the photo strip with names, roles, and lazy circular images", () => {
+  const html = U.buildFilmPage({ title: "Main", slug: "main", kind: "movie", platform: "Theatres",
+    cast: ["Actor One"], castPics: [{ name: "Actor One", character: "Kara Zor-El", photo: "https://image.tmdb.org/t/p/w185/a1.jpg" }] },
+    "2026-07-08", new Set(["main"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(/class="cast-strip"/.test(html) && /Kara Zor-El/.test(html));
+  assert.ok(/w185\/a1\.jpg/.test(html) && /loading="lazy"/.test(html));
+  assert.ok(html.includes('"actor":[{"@type":"Person","name":"Actor One","image"')); // LD gains images
+});
+test("film page falls back to text pills when no photos exist (old data files)", () => {
+  const html = U.buildFilmPage({ title: "Main", slug: "main", kind: "movie", platform: "Theatres",
+    cast: ["Actor One", "Actor Two"] }, "2026-07-08", new Set(["main"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(!/class="cast-strip"/.test(html)); // CSS rule is always present; the markup must not be
+  assert.ok(/<h2>Cast<\/h2>/.test(html) && /Actor Two/.test(html));
+});
+
+// ---------------- product: mergeSearchIndex() ----------------
+group("mergeSearchIndex()");
+const IDX_DATA = { in: { theatres: [{ title: "Alpha", slug: "alpha", language: "Hindi", kind: "movie", released: "2026-07-03" }],
+    ott: [{ title: "Raakh", slug: "raakh", language: "Hindi", kind: "tv" }], comingSoon: [] },
+  ae: { theatres: [{ title: "Alpha", slug: "alpha", language: "Hindi", kind: "movie", released: "2026-07-10" }], ott: [], comingSoon: [] } };
+const IDX_MANIFEST = { in: { alpha: { last: "2026-07-10" }, raakh: { last: "2026-07-10" }, "old-film": { last: "2026-05-01", archivedOn: "2026-06-01" } } };
+test("merges current run over existing, unions countries, keeps archived-with-page entries", () => {
+  const existing = [{ t: "Old Film", s: "old-film", l: "Tamil", y: "2026", k: "movie", c: ["in"] },
+    { t: "Alpha", s: "alpha", l: null, y: null, k: "movie", c: ["in"] }];
+  const out = U.mergeSearchIndex(existing, IDX_DATA, IDX_MANIFEST);
+  const alpha = out.find((e) => e.s === "alpha");
+  assert.deepStrictEqual(alpha.c.sort(), ["ae", "in"]); // country union
+  assert.strictEqual(alpha.y, "2026"); // year backfilled from current data
+  assert.ok(out.some((e) => e.s === "old-film")); // archived page still searchable
+});
+test("prunes entries whose page exists nowhere (deleted films)", () => {
+  const existing = [{ t: "Ghost", s: "ghost", l: null, y: null, k: "movie", c: ["in"] }];
+  const out = U.mergeSearchIndex(existing, IDX_DATA, IDX_MANIFEST);
+  assert.ok(!out.some((e) => e.s === "ghost"));
+});
+test("first run (no existing, empty manifest) seeds from current data alone", () => {
+  const out = U.mergeSearchIndex([], IDX_DATA, {});
+  assert.strictEqual(out.length, 2);
+  assert.ok(out.every((e) => e.t && e.s && e.c.length));
+});
+test("output is alphabetical and entries stay terse", () => {
+  const out = U.mergeSearchIndex([], IDX_DATA, {});
+  assert.deepStrictEqual(out.map((e) => e.t), ["Alpha", "Raakh"]);
+  assert.deepStrictEqual(Object.keys(out[0]).sort(), ["c", "k", "l", "s", "t", "y"]);
+});
+test("film page share image prefers the landscape backdrop over the portrait poster", () => {
+  const html = U.buildFilmPage({ title: "Main", slug: "main", kind: "movie", platform: "Theatres",
+    poster: "https://image.tmdb.org/t/p/w342/p.jpg", backdrop: "https://image.tmdb.org/t/p/w780/b.jpg" },
+    "2026-07-10", new Set(["main"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(html.includes('og:image" content="https://image.tmdb.org/t/p/w780/b.jpg"'));
+});
+
+// ---------------- SEO: week chain + IndexNow payload ----------------
+group("prevWeekSlug() / week chaining / IndexNow");
+test("previous week math, including the year boundary", () => {
+  assert.strictEqual(U.prevWeekSlug("2026-W28"), "2026-W27");
+  assert.strictEqual(U.prevWeekSlug("2026-W01"), "2025-W52"); // crosses into the prior ISO year
+});
+test("week page links to the previous snapshot only when it exists", () => {
+  const data = { theatres: [{ title: "A", slug: "a", kind: "movie" }], ott: [] };
+  const withPrev = U.buildWeekPage(data, "2026-W28", true);
+  assert.ok(withPrev.includes('href="https://filmychill.com/week/2026-W27/"') && /Previous week/.test(withPrev));
+  const without = U.buildWeekPage(data, "2026-W28", false);
+  assert.ok(!/Previous week/.test(without)); // first-ever snapshot has no phantom link
+});
+test("IndexNow payload covers every country, all language pages, and the CURRENT week", () => {
+  const fs = require("fs");
+  U.writeIndexNowPayload([{ code: "in" }, { code: "us" }, { code: "ae" }, { code: "sg" }]);
+  const p = JSON.parse(fs.readFileSync("indexnow-payload.json", "utf8"));
+  assert.strictEqual(p.host, "filmychill.com");
+  assert.ok(p.urlList.includes("https://filmychill.com/") && p.urlList.includes("https://filmychill.com/ae/new-on-ott/"));
+  assert.ok(p.urlList.includes("https://filmychill.com/tamil/"));
+  const wk = "https://filmychill.com/week/" + U.weekSlug(U.isoWeekOf()) + "/";
+  assert.ok(p.urlList.includes(wk), "current week " + wk);
+  assert.ok(!p.urlList.includes("https://filmychill.com/in/")); // India is the root, never /in/
+  fs.unlinkSync("indexnow-payload.json");
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
