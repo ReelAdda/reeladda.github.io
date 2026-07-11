@@ -1056,6 +1056,18 @@ let imdbRatings = new Map(); // populated at the start of main()
 // Pure: the REGION'S OWN certification, or null. Never another country's rating —
 // an absent cert beats a wrong one (India's "U/A 16+" on the Singapore page is a lie).
 // This was hardcoded to "IN" for all countries before; a real leak, now regional.
+// Pure: top-billed cast WITH photos from the credits already fetched by enrich() —
+// zero extra API calls. Only members with a real TMDB headshot are included (no
+// placeholder silhouettes); w185 keeps the strip light. Character names add the
+// editorial layer ("as Kara Zor-El"). `cast` (plain names) is kept alongside for
+// backwards compatibility with older data files and the FAQ/LD consumers.
+function extractCastPics(credits) {
+  return (credits?.cast || [])
+    .filter((c) => c && c.profile_path && c.name)
+    .slice(0, 6)
+    .map((c) => ({ name: c.name, character: c.character || null, photo: img(c.profile_path, "w185") }));
+}
+
 function certFor(kind, d, region) {
   if (kind === "movie") {
     const rel = d.release_dates?.results?.find((r) => r.iso_3166_1 === region);
@@ -1096,6 +1108,7 @@ async function enrich(kind, id, region = "IN") {
 
   // Cast & director
   const cast = (d.credits?.cast || []).slice(0, 4).map((c) => c.name);
+  const castPics = extractCastPics(d.credits);
   let director = null;
   if (kind === "movie") director = (d.credits?.crew || []).find((c) => c.job === "Director")?.name || null;
   else director = d.created_by?.[0]?.name || null;
@@ -1149,6 +1162,7 @@ async function enrich(kind, id, region = "IN") {
     backdrop: img(d.backdrop_path, "w780"),
     fullReview: trim(d.overview, 600),
     ...(regionalRelease ? { released: regionalRelease } : {}),
+    ...(castPics.length ? { castPics } : {}),
   };
 }
 
@@ -1830,6 +1844,14 @@ async function main() {
   // client-rendered cards (which read data.json) show the same line the SSR cards do.
   await attachTakes(dataByCode);
 
+  // Search index + product stats, BEFORE data files are written so the client can
+  // render the confidence strip ("N picks · M+ films tracked") from data alone.
+  const priorManifest = loadPagesManifest();
+  updateSearchIndex(dataByCode, priorManifest);
+  for (const cfg of builtCountries) {
+    dataByCode[cfg.code].trackedFilms = Object.keys(priorManifest[cfg.code] || {}).length;
+  }
+
   // Now write every country's data file (India also writes the legacy data.json).
   for (const cfg of builtCountries) {
     fs.writeFileSync(`data-${cfg.code}.json`, JSON.stringify(dataByCode[cfg.code], null, 1));
@@ -1850,6 +1872,7 @@ async function main() {
     writeLanguagePages(dataByCode.in);
     writeWeekPage(dataByCode.in);
   }
+  writeIndexNowPayload(builtCountries); // fresh URL list for the workflow's IndexNow ping
 
   // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
   // and the manifest records real lastmod dates for the sitemap (see module-scope docs).
@@ -1943,7 +1966,9 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
     genre: item.genre || undefined,
     inLanguage: item.language || undefined,
     director: item.director ? { "@type": "Person", name: item.director } : undefined,
-    actor: cast.map((c) => ({ "@type": "Person", name: c })),
+    actor: (item.castPics && item.castPics.length)
+      ? item.castPics.map((c) => ({ "@type": "Person", name: c.name, image: c.photo }))
+      : cast.map((c) => ({ "@type": "Person", name: c })),
   };
   const schemaVotes = item.imdbRating != null ? (item.imdbVotes || 0) : (item.votes || 0);
   if (item.rating != null && schemaVotes >= 10) {
@@ -1989,7 +2014,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="video.movie">
 <meta property="og:url" content="${e(url)}">
-${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
+${(item.backdrop || item.poster) ? `<meta property="og:image" content="${e(item.backdrop || item.poster)}">` : ""}
 <meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
@@ -2016,6 +2041,11 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
   .take { font-size:14.5px; font-weight:600; color:var(--indigo); line-height:1.6; margin-top:10px; }
   .tsrc { color:var(--mute); font-weight:400; font-size:12px; }
   .hook { font-size:13.5px; color:var(--mute); font-style:italic; margin-top:8px; }
+  .cast-strip { display:flex; gap:14px; overflow-x:auto; padding:4px 0 8px; }
+  .cast-card { flex:0 0 84px; text-align:center; }
+  .cast-card img { width:72px; height:72px; border-radius:50%; object-fit:cover; background:var(--line); display:block; margin:0 auto; }
+  .cast-name { font-size:12px; font-weight:700; margin-top:6px; line-height:1.3; }
+  .cast-role { font-size:11px; color:var(--mute); line-height:1.3; margin-top:1px; }
   .tcounter { color:var(--marigold-dk, #A66B00); font-weight:700; }
   .gtk { width:100%; border-collapse:collapse; margin-top:8px; }
   .gtk td { padding:9px 0; border-top:1px solid var(--line); font-size:14px; vertical-align:top; }
@@ -2055,7 +2085,8 @@ ${item.poster ? `<meta property="og:image" content="${e(item.poster)}">` : ""}
   ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${goodToKnow.length ? `<h2>Good to know</h2><table class="gtk">${goodToKnow.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : ""}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
-  ${cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
+  ${(item.castPics && item.castPics.length) ? `<h2>Cast</h2><div class="cast-strip">${item.castPics.map((c) => `<div class="cast-card"><img src="${e(c.photo)}" alt="${e(c.name)}" width="72" height="72" loading="lazy"><div class="cast-name">${e(c.name)}</div>${c.character ? `<div class="cast-role">${e(c.character)}</div>` : ""}</div>`).join("")}</div>`
+    : cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
   ${providers.length ? `<h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${e(asOf || "")} — platforms may change over time.</p>` : item.platform === "Theatres" ? `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>` : ""}
   ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
   ${similar.length ? `<h2>If you liked this</h2><div class="simgrid">${similar.map((s) => {
@@ -2598,7 +2629,7 @@ const LANGUAGE_PAGES = [
 
 // Shared listing shell for language + week pages (same visual family as the
 // /new-on-ott/ pages). `sections` = [{ h2, items }]; rows link to film pages.
-function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote }) {
+function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null }) {
   const e = escHtml;
   const ldJson = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
   const rowFor = (it) => {
@@ -2688,7 +2719,8 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   <div class="frozen">${e(frozenNote)}</div>` : ""}
 ${sectionHtml}
 ${faqHtml}
-  <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + OTT)</a>
+  <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + OTT)</a>${prevWeekHref ? `
+  <a class="btn" style="background:transparent;color:var(--indigo);border:1.5px solid var(--indigo)" href="${e(prevWeekHref)}">← Previous week</a>` : ""}
 </div>
 <footer>
   ${footerAttribution()}© 2026 FilmyChill · Vikram Sharma
@@ -2778,6 +2810,13 @@ function isoWeekMonday(slug) { // "2026-W28" -> Date of that ISO week's Monday (
   monday.setUTCDate(jan4.getUTCDate() - ((jan4.getUTCDay() || 7) - 1) + (w - 1) * 7);
   return monday;
 }
+// Previous ISO week's slug — same week math, so year boundaries just work.
+function prevWeekSlug(slug) {
+  const monday = isoWeekMonday(slug);
+  monday.setUTCDate(monday.getUTCDate() - 7);
+  return weekSlug(isoWeekOf(monday));
+}
+
 // Deterministic lastmod for FROZEN week pages: the week's own Sunday. Never
 // "today" for a page we didn't touch — the same honesty rule as the film archive.
 function isoWeekSunday(slug) {
@@ -2787,7 +2826,7 @@ function isoWeekSunday(slug) {
 }
 
 // Pure: India data + week slug -> frozen-snapshot page HTML.
-function buildWeekPage(data, slug) {
+function buildWeekPage(data, slug, prevExists = false) {
   const url = `https://filmychill.com/week/${slug}/`;
   const monday = isoWeekMonday(slug);
   const sunday = new Date(monday); sunday.setUTCDate(monday.getUTCDate() + 6);
@@ -2818,6 +2857,9 @@ function buildWeekPage(data, slug) {
       { h2: "Streaming", items: ott },
     ],
     faqs: [], extraLd, homeUrl: "https://filmychill.com/",
+    // Chain to the previous snapshot so frozen weeks never orphan — a crawlable
+    // (and human-browsable) path backwards through the whole archive.
+    prevWeekHref: prevExists ? `https://filmychill.com/week/${prevWeekSlug(slug)}/` : null,
   });
 }
 
@@ -2825,8 +2867,74 @@ function writeWeekPage(data) {
   const slug = weekSlug(isoWeekOf());
   const dir = `week/${slug}`;
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(`${dir}/index.html`, buildWeekPage(data, slug));
-  console.log(`Week snapshot: /week/${slug}/`);
+  const prevExists = fs.existsSync(`week/${prevWeekSlug(slug)}/index.html`);
+  fs.writeFileSync(`${dir}/index.html`, buildWeekPage(data, slug, prevExists));
+  console.log(`Week snapshot: /week/${slug}/${prevExists ? " → chained to previous week" : ""}`);
+}
+
+// ============================================================================
+// SEARCH INDEX — the compact /search-index.json behind the header search box.
+// Accumulates every film that has ever appeared on any country's lists (title,
+// slug, language, year, kind, countries-with-a-page), upserted each run and
+// pruned against the pages manifest so entries never point at deleted pages.
+// Entry shape is deliberately terse: { t, s, l, y, k, c } — ~80 bytes each.
+// ============================================================================
+function mergeSearchIndex(existing, dataByCode, manifest = {}) {
+  const byKey = new Map();
+  for (const en of existing || []) if (en && en.s && en.t) byKey.set(en.s, en);
+  for (const [code, data] of Object.entries(dataByCode || {})) {
+    for (const it of [...(data?.theatres || []), ...(data?.ott || []), ...(data?.comingSoon || [])]) {
+      if (!it || !it.slug || !it.title) continue;
+      const prev = byKey.get(it.slug) || { c: [] };
+      byKey.set(it.slug, {
+        t: it.title, s: it.slug,
+        l: it.language || prev.l || null,
+        y: (it.released || "").slice(0, 4) || prev.y || null,
+        k: it.kind || prev.k || "movie",
+        c: [...new Set([...(prev.c || []), code])],
+      });
+    }
+  }
+  // Prune: an entry survives only while its page exists in SOME country's manifest
+  // or it is part of the current run (whose pages are generated right after this).
+  const currentSlugs = new Set();
+  for (const data of Object.values(dataByCode || {})) {
+    for (const it of [...(data?.theatres || []), ...(data?.ott || []), ...(data?.comingSoon || [])]) {
+      if (it && it.slug) currentSlugs.add(it.slug);
+    }
+  }
+  const inManifest = (slug) => Object.values(manifest || {}).some((m) => m && m[slug]);
+  return [...byKey.values()]
+    .filter((en) => currentSlugs.has(en.s) || inManifest(en.s))
+    .sort((a, b) => a.t.localeCompare(b.t));
+}
+
+function updateSearchIndex(dataByCode, manifest) {
+  let existing = [];
+  try { existing = JSON.parse(fs.readFileSync("search-index.json", "utf8")); } catch {} // first run
+  const merged = mergeSearchIndex(existing, dataByCode, manifest);
+  fs.writeFileSync("search-index.json", JSON.stringify(merged));
+  console.log(`Search index: ${merged.length} titles`);
+}
+
+// IndexNow payload, regenerated each run so DYNAMIC urls (the current week snapshot)
+// and every configured country/language page get pinged without ever editing the
+// workflow again. The key is public by design — IndexNow proves ownership via the
+// matching KEY.txt served from the repo root, not by keeping the key secret.
+function writeIndexNowPayload(builtCountries) {
+  const urls = ["https://filmychill.com/", "https://filmychill.com/new-on-ott/"];
+  for (const cfg of builtCountries) {
+    if (cfg.code === "in") continue;
+    urls.push(`https://filmychill.com/${cfg.code}/`, `https://filmychill.com/${cfg.code}/new-on-ott/`);
+  }
+  for (const [, slug] of LANGUAGE_PAGES) urls.push(`https://filmychill.com/${slug}/`);
+  urls.push(`https://filmychill.com/week/${weekSlug(isoWeekOf())}/`);
+  fs.writeFileSync("indexnow-payload.json", JSON.stringify({
+    host: "filmychill.com",
+    key: "a95eba27e6b3f0e85e89e609241d6699",
+    urlList: urls,
+  }, null, 1));
+  console.log(`IndexNow payload: ${urls.length} URLs`);
 }
 
 // About page lastmod for the sitemap — bump manually when about/index.html changes.
@@ -3091,4 +3199,7 @@ module.exports = {
   isExcluded, EXCLUDE_TITLES,
   extractHook, audienceCounterpoint,
   certFor, regionalTheatricalDate, countryListForProse,
+  extractCastPics,
+  mergeSearchIndex,
+  prevWeekSlug, writeIndexNowPayload,
 };
