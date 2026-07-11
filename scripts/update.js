@@ -1076,6 +1076,29 @@ function certFor(kind, d, region) {
   return d.content_ratings?.results?.find((r) => r.iso_3166_1 === region)?.rating || null;
 }
 
+// SECTION-scoped override: streaming originals TMDB has misfiled into theatrical pools.
+// Unlike EXCLUDE_IDS this only bars the THEATRES list — the film still appears in
+// Streaming Now / Coming Soon once its provider data populates, which is where it belongs.
+const THEATRE_EXCLUDE_IDS = new Set([
+  1484913, // Ikka — Netflix original, never had an Indian theatrical run
+]);
+
+// Pure: can this movie honestly sit in an "In Theatres" list for this region?
+// TMDB release types: 1 premiere, 2 limited theatrical, 3 theatrical, 4 digital,
+// 5 physical, 6 TV. Logic, in order of evidence strength:
+//   - a type 2/3 entry for the region  -> proven theatrical run  -> eligible
+//   - a type 4/6 entry and NO 2/3      -> digital/TV release only -> NOT eligible
+//     (the Ikka class: streaming originals in now_playing/discover pools)
+//   - no region entry at all           -> unknown; eligible only if it also has no
+//     streaming providers (a brand-new film already on flatrate is an OTT original)
+function theatreEligible(d, region, providers = []) {
+  const rel = d.release_dates?.results?.find((r) => r.iso_3166_1 === region);
+  const types = new Set((rel?.release_dates || []).map((x) => x.type));
+  if (types.has(2) || types.has(3)) return true;
+  if (types.has(4) || types.has(6)) return false;
+  return !(providers && providers.length);
+}
+
 // Pure: the region's OWN theatrical date (TMDB types 1-3: premiere/limited/theatrical),
 // earliest when several. null when TMDB has no dated entry for this region — the caller
 // then keeps the global primary date. Indian films open in the UAE/Canada days apart
@@ -1154,6 +1177,7 @@ async function enrich(kind, id, region = "IN") {
   // Region's own theatrical date overrides the global primary date when TMDB has one —
   // so each country page shows (and freshness-gates by) its own market's release day.
   const regionalRelease = kind === "movie" ? regionalTheatricalDate(d, region) : null;
+  const theatrical = kind === "movie" ? theatreEligible(d, region, providers) : null;
 
   return {
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
@@ -1163,6 +1187,7 @@ async function enrich(kind, id, region = "IN") {
     fullReview: trim(d.overview, 600),
     ...(regionalRelease ? { released: regionalRelease } : {}),
     ...(castPics.length ? { castPics } : {}),
+    ...(theatrical === false ? { theatrical: false } : {}), // only serialized when it matters
   };
 }
 
@@ -1477,10 +1502,21 @@ async function main() {
   }
   picks = [...reordered, ...remaining]; // top 3 settled, rest stay in quality order
 
+  // Enrich picks with a THEATRICAL gate + bench refill: a pick that turns out to be a
+  // digital-only release (the Ikka class) is dropped, and the next ranked film that
+  // wasn't selected takes its slot — the list never silently shrinks below target.
+  const targetCount = picks.length;
+  const bench = ranked.filter((m) => !picks.includes(m));
   const theatres = [];
-  for (const m of picks) {
+  for (const m of [...picks, ...bench]) {
+    if (theatres.length >= targetCount) break;
+    if (THEATRE_EXCLUDE_IDS.has(m.id)) continue;
     const item = { ...baseItem(m, "movie"), platform: "Theatres" };
     try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); withImdb(item); } catch (e) { console.warn(`enrich movie ${m.id}: ${e.message}`); }
+    if (item.theatrical === false) {
+      console.log(`  theatres: dropped ${item.title} — digital-only release, no theatrical run in ${cfg.region}`);
+      continue;
+    }
     theatres.push(item);
     await sleep(150);
   }
@@ -3160,4 +3196,5 @@ module.exports = {
   certFor, regionalTheatricalDate, countryListForProse,
   extractCastPics,
   prevWeekSlug, writeIndexNowPayload,
+  theatreEligible, THEATRE_EXCLUDE_IDS,
 };
