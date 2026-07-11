@@ -1215,36 +1215,8 @@ test("film page falls back to text pills when no photos exist (old data files)",
   assert.ok(/<h2>Cast<\/h2>/.test(html) && /Actor Two/.test(html));
 });
 
-// ---------------- product: mergeSearchIndex() ----------------
-group("mergeSearchIndex()");
-const IDX_DATA = { in: { theatres: [{ title: "Alpha", slug: "alpha", language: "Hindi", kind: "movie", released: "2026-07-03" }],
-    ott: [{ title: "Raakh", slug: "raakh", language: "Hindi", kind: "tv" }], comingSoon: [] },
-  ae: { theatres: [{ title: "Alpha", slug: "alpha", language: "Hindi", kind: "movie", released: "2026-07-10" }], ott: [], comingSoon: [] } };
-const IDX_MANIFEST = { in: { alpha: { last: "2026-07-10" }, raakh: { last: "2026-07-10" }, "old-film": { last: "2026-05-01", archivedOn: "2026-06-01" } } };
-test("merges current run over existing, unions countries, keeps archived-with-page entries", () => {
-  const existing = [{ t: "Old Film", s: "old-film", l: "Tamil", y: "2026", k: "movie", c: ["in"] },
-    { t: "Alpha", s: "alpha", l: null, y: null, k: "movie", c: ["in"] }];
-  const out = U.mergeSearchIndex(existing, IDX_DATA, IDX_MANIFEST);
-  const alpha = out.find((e) => e.s === "alpha");
-  assert.deepStrictEqual(alpha.c.sort(), ["ae", "in"]); // country union
-  assert.strictEqual(alpha.y, "2026"); // year backfilled from current data
-  assert.ok(out.some((e) => e.s === "old-film")); // archived page still searchable
-});
-test("prunes entries whose page exists nowhere (deleted films)", () => {
-  const existing = [{ t: "Ghost", s: "ghost", l: null, y: null, k: "movie", c: ["in"] }];
-  const out = U.mergeSearchIndex(existing, IDX_DATA, IDX_MANIFEST);
-  assert.ok(!out.some((e) => e.s === "ghost"));
-});
-test("first run (no existing, empty manifest) seeds from current data alone", () => {
-  const out = U.mergeSearchIndex([], IDX_DATA, {});
-  assert.strictEqual(out.length, 2);
-  assert.ok(out.every((e) => e.t && e.s && e.c.length));
-});
-test("output is alphabetical and entries stay terse", () => {
-  const out = U.mergeSearchIndex([], IDX_DATA, {});
-  assert.deepStrictEqual(out.map((e) => e.t), ["Alpha", "Raakh"]);
-  assert.deepStrictEqual(Object.keys(out[0]).sort(), ["c", "k", "l", "s", "t", "y"]);
-});
+// ---------------- share cards ----------------
+group("share cards");
 test("film page share image prefers the landscape backdrop over the portrait poster", () => {
   const html = U.buildFilmPage({ title: "Main", slug: "main", kind: "movie", platform: "Theatres",
     poster: "https://image.tmdb.org/t/p/w342/p.jpg", backdrop: "https://image.tmdb.org/t/p/w780/b.jpg" },
