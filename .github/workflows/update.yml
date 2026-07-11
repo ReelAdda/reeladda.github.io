@@ -57,7 +57,7 @@ jobs:
         run: |
           git config user.name "filmychill-bot"
           git config user.email "actions@github.com"
-          git add data.json data-*.json ott-seen.json takes.json pages-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ movie/ new-on-ott/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ sitemap.xml
+          git add data.json data-*.json ott-seen.json takes.json search-index.json pages-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ movie/ new-on-ott/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ sitemap.xml
           if git diff --staged --quiet; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit."
@@ -79,16 +79,4 @@ jobs:
           sleep 90  # give GitHub Pages a moment to deploy the new commit first
           curl -s -X POST "https://api.indexnow.org/indexnow" \
             -H "Content-Type: application/json; charset=utf-8" \
-            -d '{
-              "host": "filmychill.com",
-              "key": "a95eba27e6b3f0e85e89e609241d6699",
-              "keyLocation": "https://filmychill.com/a95eba27e6b3f0e85e89e609241d6699.txt",
-              "urlList": [
-                "https://filmychill.com/",
-                "https://filmychill.com/new-on-ott/",
-                "https://filmychill.com/us/", "https://filmychill.com/us/new-on-ott/",
-                "https://filmychill.com/uk/", "https://filmychill.com/uk/new-on-ott/",
-                "https://filmychill.com/au/", "https://filmychill.com/au/new-on-ott/",
-                "https://filmychill.com/de/", "https://filmychill.com/de/new-on-ott/"
-              ]
-            }' || true
+            -d @indexnow-payload.json || true
