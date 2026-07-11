@@ -1844,10 +1844,9 @@ async function main() {
   // client-rendered cards (which read data.json) show the same line the SSR cards do.
   await attachTakes(dataByCode);
 
-  // Search index + product stats, BEFORE data files are written so the client can
-  // render the confidence strip ("N picks · M+ films tracked") from data alone.
+  // Product stats, BEFORE data files are written so the client can render the
+  // confidence strip ("N picks · M+ films tracked") from data alone.
   const priorManifest = loadPagesManifest();
-  updateSearchIndex(dataByCode, priorManifest);
   for (const cfg of builtCountries) {
     dataByCode[cfg.code].trackedFilms = Object.keys(priorManifest[cfg.code] || {}).length;
   }
@@ -2872,51 +2871,6 @@ function writeWeekPage(data) {
   console.log(`Week snapshot: /week/${slug}/${prevExists ? " → chained to previous week" : ""}`);
 }
 
-// ============================================================================
-// SEARCH INDEX — the compact /search-index.json behind the header search box.
-// Accumulates every film that has ever appeared on any country's lists (title,
-// slug, language, year, kind, countries-with-a-page), upserted each run and
-// pruned against the pages manifest so entries never point at deleted pages.
-// Entry shape is deliberately terse: { t, s, l, y, k, c } — ~80 bytes each.
-// ============================================================================
-function mergeSearchIndex(existing, dataByCode, manifest = {}) {
-  const byKey = new Map();
-  for (const en of existing || []) if (en && en.s && en.t) byKey.set(en.s, en);
-  for (const [code, data] of Object.entries(dataByCode || {})) {
-    for (const it of [...(data?.theatres || []), ...(data?.ott || []), ...(data?.comingSoon || [])]) {
-      if (!it || !it.slug || !it.title) continue;
-      const prev = byKey.get(it.slug) || { c: [] };
-      byKey.set(it.slug, {
-        t: it.title, s: it.slug,
-        l: it.language || prev.l || null,
-        y: (it.released || "").slice(0, 4) || prev.y || null,
-        k: it.kind || prev.k || "movie",
-        c: [...new Set([...(prev.c || []), code])],
-      });
-    }
-  }
-  // Prune: an entry survives only while its page exists in SOME country's manifest
-  // or it is part of the current run (whose pages are generated right after this).
-  const currentSlugs = new Set();
-  for (const data of Object.values(dataByCode || {})) {
-    for (const it of [...(data?.theatres || []), ...(data?.ott || []), ...(data?.comingSoon || [])]) {
-      if (it && it.slug) currentSlugs.add(it.slug);
-    }
-  }
-  const inManifest = (slug) => Object.values(manifest || {}).some((m) => m && m[slug]);
-  return [...byKey.values()]
-    .filter((en) => currentSlugs.has(en.s) || inManifest(en.s))
-    .sort((a, b) => a.t.localeCompare(b.t));
-}
-
-function updateSearchIndex(dataByCode, manifest) {
-  let existing = [];
-  try { existing = JSON.parse(fs.readFileSync("search-index.json", "utf8")); } catch {} // first run
-  const merged = mergeSearchIndex(existing, dataByCode, manifest);
-  fs.writeFileSync("search-index.json", JSON.stringify(merged));
-  console.log(`Search index: ${merged.length} titles`);
-}
-
 // IndexNow payload, regenerated each run so DYNAMIC urls (the current week snapshot)
 // and every configured country/language page get pinged without ever editing the
 // workflow again. The key is public by design — IndexNow proves ownership via the
@@ -3200,6 +3154,5 @@ module.exports = {
   extractHook, audienceCounterpoint,
   certFor, regionalTheatricalDate, countryListForProse,
   extractCastPics,
-  mergeSearchIndex,
   prevWeekSlug, writeIndexNowPayload,
 };
