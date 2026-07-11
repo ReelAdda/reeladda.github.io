@@ -1250,6 +1250,27 @@ test("IndexNow payload covers every country, all language pages, and the CURRENT
   fs.unlinkSync("indexnow-payload.json");
 });
 
+// ---------------- structured data validity (the GSC "unparsable" bug) ----------------
+group("JSON-LD parses as Google sees it");
+test("rendered homepage: every ld+json script element contains pure, parseable JSON", () => {
+  const fs = require("fs");
+  const tpl = fs.readFileSync("index.html", "utf8");
+  const html = U.replaceBetween(tpl, "JSONLD",
+    `<script type="application/ld+json">${U.buildHomeJsonLd({ theatres: [{ title: "A", slug: "a" }], ott: [], generatedAt: new Date().toISOString() }, { code: "in", name: "India", region: "IN" })}</script>`);
+  // Emulate Google's parser: raw text content of each ld+json block must JSON.parse.
+  const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+  assert.ok(blocks.length >= 1);
+  for (const b of blocks) {
+    assert.ok(!b[1].includes("<!--"), "comment marker leaked inside a script element");
+    JSON.parse(b[1]); // throws on any syntax error
+  }
+});
+test("buildHomeJsonLd output itself is valid JSON", () => {
+  const out = U.buildHomeJsonLd({ theatres: [{ title: "O'Brien's \"Film\"", slug: "x" }], ott: [], generatedAt: new Date().toISOString() }, { code: "us", name: "United States", region: "US" });
+  const parsed = JSON.parse(out);
+  assert.ok(parsed["@graph"] || parsed["@context"]);
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
