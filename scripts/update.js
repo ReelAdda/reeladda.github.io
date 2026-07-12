@@ -635,26 +635,46 @@ const TAKE_VARIANTS = {
     `Reviewers were close to unanimous — this one landed.`,
     `Almost nobody had a bad word for it.`,
     `The critical verdict is rare-air positive.`,
+    `Wall-to-wall praise from the critics on this one.`,
+    `Critics came away raving.`,
   ],
   positive: [
     `Critics have been largely positive on this one.`,
     `The reviews lean clearly positive.`,
     `Most critics came away happy.`,
     `Word from reviewers is solidly good.`,
+    `The critical consensus tilts firmly positive.`,
+    `Reviewers found plenty to like here.`,
   ],
   mixed: [
     `Critics are genuinely split on this one.`,
     `Reviews are all over the map on this one.`,
     `Critics couldn't agree — expect a love-it-or-hate-it watch.`,
     `Opinions split right down the middle on this one.`,
+    `One critic's favourite, the next one's skip — that kind of film.`,
+    `The reviews refuse to agree on this one.`,
   ],
   negative: [
     `Critics were not impressed with this one.`,
     `The reviews were not kind.`,
     `Critics largely gave this one a pass.`,
     `Reviewers came away cold on this one.`,
+    `Critics found little to love here.`,
+    `A rough outing with the reviewers.`,
   ],
 };
+// If a take is one of the tone-only pool lines, re-pick the variant for THIS film's
+// seed. Cached entries from before the variant system all sit at index 0, which put
+// the identical sentence on three cards of one page. Aspect-bearing takes (unique by
+// construction) pass through untouched. Pure, deterministic, zero network.
+function reseedTake(take, seed = 0) {
+  if (!take) return take;
+  for (const pool of Object.values(TAKE_VARIANTS)) {
+    if (pool.includes(take)) return pool[Math.abs(Number(seed) || 0) % pool.length];
+  }
+  return take;
+}
+
 function composeTake(a, seed = 0) {
   if (!a) return null;
   const list = (arr) => (arr.length === 2 ? `${arr[0]} and ${arr[1]}` : arr[0]);
@@ -820,9 +840,10 @@ async function attachTakes(dataByCode) {
       }
       if (entry.take || entry.hook) {
         if (entry.take) found++;
+        const seededTake = reseedTake(entry.take, Number(items[0].tmdbId) || 0);
         for (const it of items) {
           if (entry.take) {
-            it.take = entry.take;
+            it.take = seededTake;
             it.takeSrc = entry.src;
             // Disagreement is computed FRESH each run — ratings move, cached text doesn't.
             const counter = audienceCounterpoint(it);
@@ -994,6 +1015,21 @@ function buildFaqs(item, countryName = "India") {
   else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across ${countryName}. An OTT release hasn't been announced yet.`;
   else whereA = `Streaming availability for ${item.title} in ${countryName} isn't confirmed yet — check back as platforms update.`;
   faqs.push({ q: `Where can I watch ${item.title}?`, a: whereA });
+
+  // Q2b: OTT release date — how India actually asks about films ("<title> ott release
+  // date"). Answers are state-aware: streaming -> platform (+ arrival date when our
+  // first-seen tracking has one); theatrical/upcoming -> honestly "not announced yet",
+  // with the true promise that this page updates the day it lands.
+  if (item.kind !== "tv") {
+    let ottA;
+    const arrival = item.ottFreshDate || null;
+    if (provs.length) {
+      ottA = `${item.title} is already streaming in ${countryName} on ${provs.join(", ")}${arrival ? ` — it arrived on ${arrival}` : ""}.`;
+    } else {
+      ottA = `An OTT release date for ${item.title} hasn't been officially announced yet. This page updates automatically the day it starts streaming.`;
+    }
+    faqs.push({ q: `When is ${item.title} releasing on OTT? (OTT release date)`, a: ottA });
+  }
 
   // Q3: family friendly (only if we have a cert)
   if (item.cert) {
@@ -2276,7 +2312,7 @@ function ssrCard(item, i, code) {
       <div class="meta">${bits}</div>
       ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}${trailerViewsLabel(item.trailerViews) ? " · " + trailerViewsLabel(item.trailerViews) : ""}</div>` : ""}
       ${item.hook ? `<div class="meta hook">${e(item.hook)}</div>` : ""}
-      ${item.review ? `<p class="review">${e(trim(item.review, 110))}</p>` : ""}
+      ${item.review ? `<p class="review">${e(trim(item.review, 150))}</p>` : ""}
       ${item.take ? `<p class="take">💬 ${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}</p>` : ""}
     </div>`;
   // Every country now has its own per-film pages, so always link to this country's page.
@@ -2545,7 +2581,7 @@ function buildRssFeed(data, cfg) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-  <title>FilmyChill — New Movies &amp; OTT This Week in ${e(m.name)}</title>
+  <title>FilmyChill — New Movies &amp; OTT Releases This Week in ${e(m.name)}</title>
   <link>${e(home)}</link>
   <atom:link href="${e(self)}" rel="self" type="application/rss+xml"/>
   <description>What's worth watching this week in ${e(m.name)} — new theatre and OTT releases with ratings and verdicts. Updated twice daily.</description>
@@ -2970,7 +3006,7 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   if (data) {
     const monthYear = new Date(data.generatedAt || Date.now())
       .toLocaleDateString(localeFor(cfg.code), { month: "long", year: "numeric" });
-    dynTitle = `New Movies & OTT This Week in ${m.name} (${monthYear}) | FilmyChill`;
+    dynTitle = `New Movies & OTT Releases This Week in ${m.name} (${monthYear}) | FilmyChill`;
     const all = [...(data.theatres || []), ...(data.ott || [])];
     // Two marquee names: the top theatre title and the top OTT title (fall back down the list).
     const names = [(data.theatres || [])[0], (data.ott || [])[0]].filter(Boolean).map((x) => x.title);
@@ -3197,4 +3233,5 @@ module.exports = {
   extractCastPics,
   prevWeekSlug, writeIndexNowPayload,
   theatreEligible, THEATRE_EXCLUDE_IDS,
+  reseedTake,
 };
