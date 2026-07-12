@@ -384,7 +384,7 @@ test("buildRssFeed: valid channel with country name, self link, and capped newes
     theatres: [{ title: "Toy Story 5", slug: "toy-story-5", platform: "Theatres", released: "2026-06-19", rating: 7.4, verdict: "Worth a watch", language: "English" }],
     ott: [{ title: "Silo", slug: "silo", platform: "Apple TV", freshDate: "2026-07-02", ottSince: "2026-07-02", rating: 8.2, verdict: "Must watch", language: "English" }] };
   const xml = U.buildRssFeed(data, { code: "in", name: "India" });
-  assert.ok(xml.includes("<title>FilmyChill — New Movies &amp; OTT This Week in India</title>"));
+  assert.ok(xml.includes("<title>FilmyChill — New Movies &amp; OTT Releases This Week in India</title>"));
   assert.ok(xml.includes('atom:link href="https://filmychill.com/feed.xml" rel="self"'));
   assert.ok(xml.indexOf("Silo") < xml.indexOf("Toy Story 5"), "newest (Jul 2) before older (Jun 19)");
   assert.ok(xml.includes("<pubDate>"));
@@ -563,7 +563,7 @@ test("buildHeadTags: with data — live month in title, real film names in descr
     theatres: [{ title: "Toy Story 5" }, { title: "Supergirl" }],
     ott: [{ title: "House of the Dragon" }, { title: "Silo" }] };
   const html = U.buildHeadTags({ code: "in", name: "India" }, false, data);
-  assert.ok(html.includes("<title>New Movies &amp; OTT This Week in India (July 2026) | FilmyChill</title>"));
+  assert.ok(html.includes("<title>New Movies &amp; OTT Releases This Week in India (July 2026) | FilmyChill</title>"));
   assert.ok(html.includes("This week: Toy Story 5, House of the Dragon + 2 more"));
   assert.ok(html.includes("Updated twice daily"));
   const us = U.buildHeadTags({ code: "us", name: "United States" }, false, data);
@@ -583,7 +583,7 @@ test("buildHeadTags: on-page hreflang alternates for all five homepages + x-defa
 test("buildHeadTags: og mirrors the dynamic snippet; og:url, og:locale, twitter:card present", () => {
   const data = { generatedAt: "2026-07-04T07:22:38Z", theatres: [{ title: "Toy Story 5" }], ott: [{ title: "Silo" }, { title: "X" }] };
   const html = U.buildHeadTags({ code: "in", name: "India" }, false, data);
-  assert.ok(html.includes('og:title" content="New Movies &amp; OTT This Week in India (July 2026) | FilmyChill"'), "share title = SERP title");
+  assert.ok(html.includes('og:title" content="New Movies &amp; OTT Releases This Week in India (July 2026) | FilmyChill"'), "share title = SERP title");
   assert.ok(html.includes('og:url" content="https://filmychill.com/"'));
   assert.ok(html.includes('og:locale" content="en_IN"'));
   assert.ok(html.includes('twitter:card" content="summary_large_image"'));
@@ -1295,6 +1295,46 @@ test("no region entry at all: eligible only without streaming providers", () => 
 test("Ikka's TMDB id is barred from theatres but NOT globally excluded", () => {
   assert.ok(U.THEATRE_EXCLUDE_IDS.has(1484913));
   assert.strictEqual(U.isExcluded({ id: 1484913, title: "Ikka" }), false); // still free to appear on the OTT list
+});
+
+// ---------------- editorial: reseedTake() ----------------
+group("reseedTake()");
+test("cached seed-0 pool lines re-pick this film's own variant — no more page duplicates", () => {
+  const cached = "Critics have been largely positive on this one."; // the tripled line
+  const a = U.reseedTake(cached, 101), b = U.reseedTake(cached, 102), c = U.reseedTake(cached, 103);
+  assert.ok(new Set([a, b, c]).size >= 2, "different seeds should mostly differ");
+  assert.strictEqual(U.reseedTake(cached, 101), a); // deterministic per film across runs
+});
+test("aspect-bearing takes pass through untouched", () => {
+  const t = "Critics liked it, especially the performances and production design.";
+  assert.strictEqual(U.reseedTake(t, 7), t);
+  assert.strictEqual(U.reseedTake(null, 7), null);
+});
+test("reseeded output always stays inside the same tone pool (never flips sentiment)", () => {
+  const negative = "The reviews were not kind.";
+  for (let seed = 0; seed < 8; seed++) {
+    const out = U.reseedTake(negative, seed);
+    assert.ok(/not kind|not impressed|gave this one a pass|came away cold|little to love|rough outing/.test(out), out);
+  }
+});
+
+// ---------------- keywords: OTT release date FAQ ----------------
+group("OTT release date FAQ");
+test("streaming film: states platform and arrival date from first-seen tracking", () => {
+  const faqs = U.buildFaqs({ title: "Raakh", kind: "movie", platform: "Amazon Prime Video",
+    providers: ["Amazon Prime Video"], ottFreshDate: "2026-06-12", released: "2026-05-01" }, "India");
+  const f = faqs.find((x) => /releasing on OTT/.test(x.q));
+  assert.ok(f && /already streaming/.test(f.a) && /2026-06-12/.test(f.a));
+});
+test("theatrical film: honestly says not announced, never invents a date", () => {
+  const faqs = U.buildFaqs({ title: "Alpha", kind: "movie", platform: "Theatres", providers: [], released: "2026-07-03" }, "India");
+  const f = faqs.find((x) => /OTT release date/.test(x.q));
+  assert.ok(f && /hasn't been officially announced/.test(f.a));
+  assert.ok(!/\d{4}-\d{2}-\d{2}/.test(f.a)); // no date of any kind in the answer
+});
+test("TV series: no OTT-release-date question (wrong query pattern for shows)", () => {
+  const faqs = U.buildFaqs({ title: "Silo", kind: "tv", platform: "Apple TV", providers: ["Apple TV+"] }, "India");
+  assert.ok(!faqs.some((x) => /releasing on OTT/.test(x.q)));
 });
 
 // ---------------- summary ----------------
