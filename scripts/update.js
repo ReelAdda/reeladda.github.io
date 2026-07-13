@@ -1944,6 +1944,7 @@ async function main() {
     writeWeekPage(dataByCode.in);
   }
   writeIndexNowPayload(builtCountries); // fresh URL list for the workflow's IndexNow ping
+  writeLlmsTxt(dataByCode); // AI-answer-engine site map with this week's actual picks
 
   // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
   // and the manifest records real lastmod dates for the sitemap (see module-scope docs).
@@ -2963,6 +2964,59 @@ function writeIndexNowPayload(builtCountries) {
   console.log(`IndexNow payload: ${urls.length} URLs`);
 }
 
+// ============================================================================
+// llms.txt — a curated markdown map of the site for AI answer engines
+// (llmstxt.org convention). Regenerated every run so ChatGPT/Perplexity/Claude
+// crawlers that fetch it see THIS WEEK'S actual picks with dates, not a stale
+// brochure. Pure builder -> unit-testable; writer is thin.
+// ============================================================================
+function buildLlmsTxt(dataByCode) {
+  const ind = dataByCode.in || {};
+  const gen = ind.generatedAt || new Date().toISOString();
+  const day = gen.slice(0, 10);
+  const line = (it) => `- ${it.title}${it.language && it.language !== "English" ? ` (${it.language})` : ""}${it.platform && it.platform !== "Theatres" ? ` — on ${it.platform}` : ""}${it.rating != null ? ` — rated ${Number(it.rating).toFixed(1)}/10` : ""}${it.slug ? ` — https://filmychill.com${filmPagePath("in", it.slug)}` : ""}`;
+  const theatres = (ind.theatres || []).slice(0, 7).map(line).join("\n");
+  const ott = (ind.ott || []).filter((x) => !x.stillGood).slice(0, 6).map(line).join("\n");
+  const langs = LANGUAGE_PAGES.map(([name, slug]) => `- [New ${name} movies & OTT this week](https://filmychill.com/${slug}/)`).join("\n");
+  const countries = COUNTRIES.filter((c) => c.code !== "in").map((c) => `- [${c.name}](https://filmychill.com/${c.code}/) · [New on OTT](https://filmychill.com/${c.code}/new-on-ott/)`).join("\n");
+  return `# FilmyChill
+
+> FilmyChill is a daily-updated guide to what is worth watching this week — new theatrical releases and OTT/streaming arrivals — for India and seven other countries, with audience ratings, honest verdicts, and critics' takes synthesised from published review coverage. Lists are rebuilt twice daily from TMDB (streaming availability via JustWatch), Wikipedia critical-reception coverage, and YouTube trailer statistics. No pay-for-placement: no studio or platform can buy a position on any list. Last build: ${gen}.
+
+## This week in India (${day})
+
+In theatres:
+${theatres}
+
+New on OTT / streaming:
+${ott}
+
+## Key pages
+
+- [This week's full picks — India](https://filmychill.com/): theatres + OTT, ranked, updated twice daily
+- [New OTT releases this week](https://filmychill.com/new-on-ott/): grouped by platform (Netflix, Prime Video, JioHotstar, ...)
+- [Weekly snapshot archive](https://filmychill.com/week/${weekSlug(isoWeekOf())}/): permanent record of each week's list
+- [About & methodology](https://filmychill.com/about/): how picks are chosen, data sources, editorial rules
+
+## Language pages (India)
+
+${langs}
+
+## Other countries
+
+${countries}
+
+## Film pages
+
+Every listed film has a page at https://filmychill.com/movie/<slug>.html (or /<country>/movie/<slug>.html) with its rating, verdict, where-to-watch, OTT release date status, cast, and critics' take.
+`;
+}
+
+function writeLlmsTxt(dataByCode) {
+  fs.writeFileSync("llms.txt", buildLlmsTxt(dataByCode));
+  console.log("llms.txt written");
+}
+
 // About page lastmod for the sitemap — bump manually when about/index.html changes.
 const ABOUT_LASTMOD = "2026-07-06";
 
@@ -3231,7 +3285,7 @@ module.exports = {
   extractHook, audienceCounterpoint,
   certFor, regionalTheatricalDate, countryListForProse,
   extractCastPics,
-  prevWeekSlug, writeIndexNowPayload,
+  prevWeekSlug, writeIndexNowPayload, buildLlmsTxt,
   theatreEligible, THEATRE_EXCLUDE_IDS,
   reseedTake,
 };
