@@ -1337,6 +1337,31 @@ test("TV series: no OTT-release-date question (wrong query pattern for shows)", 
   assert.ok(!faqs.some((x) => /releasing on OTT/.test(x.q)));
 });
 
+// ---------------- AEO: buildLlmsTxt() ----------------
+group("buildLlmsTxt()");
+const LLMS_DATA = { in: { generatedAt: "2026-07-13T06:00:00.000Z",
+  theatres: [{ title: "Alpha", slug: "alpha", language: "Hindi", platform: "Theatres", rating: 7.1 }],
+  ott: [{ title: "Ikka", slug: "ikka", language: "Hindi", platform: "Netflix", rating: 6.8 },
+        { title: "Old Hit", slug: "old-hit", platform: "Prime Video", stillGood: true }] } };
+test("contains this week's actual picks with platforms, ratings, and film URLs", () => {
+  const md = U.buildLlmsTxt(LLMS_DATA);
+  assert.ok(md.includes("Alpha (Hindi)") && md.includes("rated 7.1/10"));
+  assert.ok(md.includes("Ikka (Hindi) — on Netflix"));
+  assert.ok(md.includes("https://filmychill.com/movie/alpha.html"));
+});
+test("only genuinely-new OTT titles — stillGood items excluded from the fresh list", () => {
+  assert.ok(!U.buildLlmsTxt(LLMS_DATA).includes("Old Hit"));
+});
+test("definitional summary, build timestamp, and all key surfaces present", () => {
+  const md = U.buildLlmsTxt(LLMS_DATA);
+  assert.ok(md.startsWith("# FilmyChill"));
+  assert.ok(md.includes("2026-07-13T06:00:00.000Z"));
+  for (const url of ["https://filmychill.com/", "https://filmychill.com/new-on-ott/", "https://filmychill.com/tamil/", "https://filmychill.com/about/", "https://filmychill.com/ae/"]) {
+    assert.ok(md.includes(url), "missing " + url);
+  }
+  assert.ok(md.includes("/week/" + U.weekSlug(U.isoWeekOf()) + "/"));
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
