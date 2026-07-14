@@ -1362,6 +1362,17 @@ test("definitional summary, build timestamp, and all key surfaces present", () =
   assert.ok(md.includes("/week/" + U.weekSlug(U.isoWeekOf()) + "/"));
 });
 
+// ---------------- share images on listing surfaces ----------------
+group("listing og:image");
+test("language, week, and ott-week pages all carry the brand share image", () => {
+  const lang = U.buildLanguagePage({ generatedAt: new Date().toISOString(), theatres: [], ott: [], comingSoon: [] }, "Tamil", "tamil");
+  const week = U.buildWeekPage({ theatres: [], ott: [] }, "2026-W29");
+  const ottw = U.buildOttWeekPage({ generatedAt: new Date().toISOString(), ott: [] }, { code: "in", name: "India", region: "IN" }, [{ code: "in" }]);
+  for (const html of [lang, week, ottw]) {
+    assert.ok(html.includes('og:image" content="https://filmychill.com/og-image.png"'));
+  }
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
