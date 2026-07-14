@@ -1188,8 +1188,11 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     const strip = document.getElementById('confStrip');
     if (strip) {
       const picks = DATA.theatres.length + DATA.ott.length;
-      const tracked = data.trackedFilms && data.trackedFilms > picks ? ` · ${data.trackedFilms}+ films tracked` : '';
-      strip.textContent = `${picks} picks this week${tracked} · refreshed twice daily`;
+      // "Updated today" already lives in the pill above — repeating the cadence here
+      // was two ways of saying one thing. The tracked count is the fact the pill can't
+      // tell: the scale behind this week's list. Exact number, no "+" padding.
+      const tracked = data.trackedFilms && data.trackedFilms > picks ? ` · ${data.trackedFilms} films tracked` : '';
+      strip.textContent = `${picks} picks this week${tracked}`;
     }
 
     const d = new Date(data.generatedAt);
