@@ -2498,6 +2498,7 @@ ${alts}
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${e(url)}">
+<meta property="og:image" content="https://filmychill.com/og-image.png">
 <meta name="twitter:card" content="summary">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'">
 <script type="application/ld+json">${ldJson(ld)}</script>
@@ -2748,6 +2749,7 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${e(canonical)}">
+<meta property="og:image" content="https://filmychill.com/og-image.png">
 <meta name="twitter:card" content="summary">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'">
 ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</script>`).join("\n")}${faqLd ? `
