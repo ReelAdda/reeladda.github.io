@@ -567,23 +567,32 @@ function loadTakes() {
 // Aspect vocabulary: pattern found in reception prose -> the plain noun we print.
 // Order matters only for readability; matches are deduped by printed noun.
 const TAKE_ASPECTS = [
-  [/performances?|acting|cast|portrayals?/i, "performances"],
-  [/screenplay|script\b|writing|dialogues?/i, "writing"],
-  [/direction|filmmaking/i, "direction"],
-  [/pacing|\bpace\b/i, "pacing"],
-  [/humou?r|comedy|jokes/i, "humour"],
-  [/action (?:sequences|scenes|set.?pieces)|stunts|\baction\b/i, "action"],
-  [/soundtrack|music|score\b|songs/i, "music"],
-  [/visual effects|\bvfx\b|visuals|cinematography|camerawork/i, "visuals"],
-  [/animation/i, "animation"],
+  [/performances?|acting|\bcast\b|portrayals?|lead role/i, "performances"],
+  [/screenplay|script\b|writing|dialogues?|\bwritten\b/i, "writing"],
+  [/direction|filmmaking|direct(?:ed|orial)/i, "direction"],
+  [/pacing|\bpace\b|slow(?:ly|-moving|-paced| burn)?|dragg?(?:ed|y|ing)|meander|plodding/i, "pacing"],
+  [/humou?r|comedy|comedic|jokes|laughs?|funny/i, "humour"],
+  [/action (?:sequences|scenes|set.?pieces)|stunts|\baction\b|fight (?:scenes|choreography)/i, "action"],
+  [/soundtrack|\bmusic\b|\bscore\b|songs|background score|composer/i, "music"],
+  [/visual effects|\bvfx\b|\bcgi\b|visuals|cinematography|camerawork|photography/i, "visuals"],
+  [/animation|animated/i, "animation"],
   [/chemistry/i, "lead chemistry"],
-  [/emotional (?:depth|core|weight|resonance)/i, "emotional weight"],
-  [/second half|climax|ending|final act|third act/i, "second half"],
-  [/runtime|length\b/i, "runtime"],
-  [/editing/i, "editing"],
-  [/world.?building|production design/i, "production design"],
-  [/twists?/i, "twists"],
-  [/story|plot|narrative/i, "story"],
+  [/emotional (?:depth|core|weight|resonance|impact)|poignan|moving|heart(?:felt|warming|breaking)|tear/i, "emotional weight"],
+  [/second half|climax|ending|final act|third act|\bfinale\b|last (?:act|half|hour)/i, "second half"],
+  [/first half|opening|\bsetup\b|slow start|initial/i, "first half"],
+  [/runtime|\blength\b|overlong|bloated|too long|tight(?:ly)?|lean\b/i, "runtime"],
+  [/editing|edited|cuts?\b/i, "editing"],
+  [/world.?building|production design|\bsets?\b|set (?:design|pieces)|art direction/i, "production design"],
+  [/twists?|unpredictable|predictab/i, "twists"],
+  [/original(?:ity)?|fresh(?:ness)?|inventive|derivative|formulaic|clich[eé]/i, "originality"],
+  [/tension|suspense|thrill(?:ing|er)|gripping|edge.of.(?:your|the).seat/i, "tension"],
+  [/tone\b|tonal/i, "tone"],
+  [/character (?:development|arcs?|work)|characteri[sz]ation|well.drawn/i, "characters"],
+  [/themes?|thematic|message|commentary|allegory/i, "themes"],
+  [/ambitio(?:n|us)|scope|scale|epic|grand/i, "ambition"],
+  [/costumes?|\bmakeup\b|prosthetic/i, "costumes"],
+  [/atmosphere|mood| atmospheric|immersive/i, "atmosphere"],
+  [/story|plot|narrative|storyline/i, "story"],
 ];
 const TAKE_PRAISE_RE = /prais\w+|laud\w+|acclaim\w+|applaud\w+|compliment\w+|appreciat\w+|celebrated|singled out|won praise|drew praise|impressed|highlights?|stand.?out|well.?received/i;
 const TAKE_PAN_RE = /criticis\w+|criticiz\w+|panned|faulted|drew criticism|flak|bemoaned|lamented|complain\w+|weakest|disappoint\w+|letdown|drag(?:ged|s)?\b|uneven|flaws?|shortcomings?/i;
@@ -606,6 +615,18 @@ function analyzeReception(text) {
     const m = t.match(re);
     if (m && m.index < toneAt) { tone = name; toneAt = m.index; }
   }
+  // Concrete anchor: a Rotten Tomatoes / Metacritic figure from the prose. A NUMBER
+  // is the strongest substance a tone-only line can carry — "a 58% critics' score"
+  // beats "all over the map". Captured as a fact, printed verbatim, never invented.
+  let score = null;
+  let sm = t.match(/(\d{1,3})%\s*(?:of critics|on (?:the )?review aggregator|approval)/i)
+        || t.match(/Rotten Tomatoes[^.]{0,40}?(\d{1,3})%/i)
+        || t.match(/(\d{1,3})%[^.]{0,30}?Rotten Tomatoes/i);
+  if (sm) { const n = +sm[1]; if (n >= 0 && n <= 100) score = { kind: "rt", value: n }; }
+  if (!score) {
+    const mc = t.match(/Metacritic[^.]{0,60}?(?:score of |weighted average (?:score )?of )?(\d{1,3})(?:\s*(?:out of|\/)\s*100)?/i);
+    if (mc) { const n = +mc[1]; if (n >= 0 && n <= 100) score = { kind: "mc", value: n }; }
+  }
   const praised = new Set(), panned = new Set();
   for (const sentence of t.split(/(?<=[.!?])\s+/)) {
     for (const clause of sentence.split(/\bbut\b|\bhowever\b|\bwhile\b|\balthough\b|\bthough\b|;|,\s+(?=(?:and\s+)?(?:the|several|some|critics|reviewers|others|many)\b)/i)) {
@@ -618,8 +639,8 @@ function analyzeReception(text) {
     }
   }
   for (const n of praised) if (panned.has(n)) { praised.delete(n); panned.delete(n); } // contested -> drop
-  if (!tone && !praised.size && !panned.size) return null;
-  return { tone, praised: [...praised].slice(0, 2), panned: [...panned].slice(0, 1) };
+  if (!tone && !praised.size && !panned.size && !score) return null;
+  return { tone, praised: [...praised].slice(0, 2), panned: [...panned].slice(0, 1), score };
 }
 
 // Pure: analysis -> one original opinionated sentence (never source text). null when
@@ -681,25 +702,38 @@ function composeTake(a, seed = 0) {
   const p = a.praised.length ? list(a.praised) : null;
   const c = a.panned.length ? a.panned[0] : null;
   const vary = (pool) => pool[Math.abs(Number(seed) || 0) % pool.length];
+  // A concrete aggregator figure, phrased for a human. This is the substance that
+  // rescues a tone-only verdict from vagueness — "a 58% critics' score" is a fact
+  // the reader can weigh, not a mood.
+  const sc = a.score
+    ? (a.score.kind === "rt" ? `a ${a.score.value}% critics' score` : `a Metacritic score of ${a.score.value}`)
+    : null;
   switch (a.tone) {
     case "acclaim":
-      return p ? `Critics loved it — special praise for the ${p}.` : vary(TAKE_VARIANTS.acclaim);
+      if (p) return `Critics loved it — special praise for the ${p}.`;
+      if (sc) return `Critics loved it — ${sc} says it all.`;
+      return vary(TAKE_VARIANTS.acclaim);
     case "positive":
       if (p && c) return `Critics liked it: the ${p} won praise, though the ${c} drew some flak.`;
       if (p) return `Critics liked it, especially the ${p}.`;
       if (c) return `Critics were broadly positive, with reservations about the ${c}.`;
+      if (sc) return `Critics came down positive — ${sc}.`;
       return vary(TAKE_VARIANTS.positive);
     case "mixed":
       if (p && c) return `Critics are split — praise for the ${p}, pushback on the ${c}.`;
       if (p) return `Critics are split, though the ${p} found admirers.`;
       if (c) return `Critics are split, with the ${c} drawing most complaints.`;
-      return vary(TAKE_VARIANTS.mixed);
+      if (sc) return `Genuinely divisive — ${sc} tells the story.`;
+      return null; // UPGRADE 3: no aspect, no number -> stay silent, don't say "all over the map"
     case "negative":
-      return c ? `Critics were rough on it, mostly over the ${c}.` : vary(TAKE_VARIANTS.negative);
+      if (c) return `Critics were rough on it, mostly over the ${c}.`;
+      if (sc) return `Critics were not kind — ${sc}.`;
+      return vary(TAKE_VARIANTS.negative);
     default:
       if (p && c) return `Reviewers praised the ${p} but flagged the ${c}.`;
       if (p) return `Reviewers singled out the ${p} for praise.`;
       if (c) return `Reviewers' main gripe: the ${c}.`;
+      if (sc) return `Early read from critics: ${sc}.`;
       return null;
   }
 }
