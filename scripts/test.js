@@ -1373,6 +1373,40 @@ test("language, week, and ott-week pages all carry the brand share image", () =>
   }
 });
 
+// ---------------- take depth: wider aspects, score anchor, silence ----------------
+group("take depth upgrades");
+test("UPGRADE 1: widened vocabulary catches aspects the old matcher missed", () => {
+  const t = "The film received mixed reviews. Critics praised the atmosphere and the tension, but faulted the slow pacing and a derivative plot.";
+  const a = U.analyzeReception(t);
+  assert.ok(a.praised.includes("atmosphere") || a.praised.includes("tension"), JSON.stringify(a));
+  assert.ok(a.panned.includes("pacing"));
+});
+test("UPGRADE 2: extracts a Rotten Tomatoes figure as a concrete anchor", () => {
+  const a = U.analyzeReception("The film received mixed reviews. On Rotten Tomatoes, 58% of critics gave it a positive review based on 40 reviews collected over the release window.");
+  assert.deepStrictEqual(a.score, { kind: "rt", value: 58 });
+});
+test("UPGRADE 2: extracts a Metacritic figure when RT is absent", () => {
+  const a = U.analyzeReception("The season met negative reviews. On Metacritic it holds a weighted average score of 38, indicating generally unfavourable reviews from the critics who covered it.");
+  assert.deepStrictEqual(a.score, { kind: "mc", value: 38 });
+});
+test("UPGRADE 2+3: a score rescues a would-be-hollow mixed verdict into a fact", () => {
+  const take = U.composeTake(U.analyzeReception("The film received mixed reviews from critics. On the review aggregator Rotten Tomatoes, 61% of critics were positive, calling it watchable but slight in the end."));
+  assert.ok(/61%/.test(take) && /divisive/i.test(take), take);
+});
+test("UPGRADE 3: hollow mixed — no aspect, no score — stays SILENT (no weather report)", () => {
+  const a = U.analyzeReception("The film received mixed reviews from critics upon its wide theatrical release across the region during the summer season that year.");
+  assert.strictEqual(a.tone, "mixed");
+  assert.strictEqual(U.composeTake(a), null); // the whole point: better nothing than "all over the map"
+});
+test("aspect-bearing and acclaim/negative takes are unchanged by the upgrades", () => {
+  assert.ok(/performances/.test(U.composeTake({ tone: "positive", praised: ["performances"], panned: [], score: null })));
+  assert.ok(/loved/i.test(U.composeTake({ tone: "acclaim", praised: [], panned: [], score: null })));
+});
+test("score answer never exceeds a valid range (garbage numbers ignored)", () => {
+  const a = U.analyzeReception("The film holds a 250% approval somewhere in this malformed sentence that should not parse as a score at all here.");
+  assert.ok(!a || a.score === null);
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
