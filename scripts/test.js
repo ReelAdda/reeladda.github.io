@@ -1407,6 +1407,39 @@ test("score answer never exceeds a valid range (garbage numbers ignored)", () =>
   assert.ok(!a || a.score === null);
 });
 
+// ---------------- take quality: substance-first upgrades ----------------
+group("take quality: substance-first upgrades");
+test("canonical 'praise for X and criticism of Y' sentence is no longer skipped", () => {
+  const a = U.analyzeReception("The film received mixed reviews from critics, with praise for its visual effects and performances and criticism of its screenplay and uneven pacing throughout.");
+  assert.strictEqual(a.tone, "mixed");
+  assert.ok(a.praised.includes("visuals") || a.praised.includes("performances"), JSON.stringify(a));
+  assert.ok(a.panned.includes("writing") || a.panned.includes("pacing"), JSON.stringify(a));
+  assert.ok(/praise for the/.test(U.composeTake(a))); // substance line, not a pool line
+});
+test("'approval rating of NN%' is captured even far from the aggregator's name", () => {
+  const a = U.analyzeReception("On the review aggregator website Rotten Tomatoes, which collates the notices from major publications, the film holds an approval rating of 74% based on 190 reviews.");
+  assert.deepStrictEqual(a.score, { kind: "rt", value: 74 });
+});
+test("widened vocabulary: dismissed/hailed clauses now carry polarity", () => {
+  const a = U.analyzeReception("Reviewers dismissed the screenplay as lacklustre and derivative, though most hailed the lead performances as the strongest element of the entire production overall.");
+  assert.ok(a.panned.includes("writing"), JSON.stringify(a));
+  assert.ok(a.praised.includes("performances"), JSON.stringify(a));
+});
+test("score + aspects weave into one line of maximum substance", () => {
+  const s = U.composeTake({ tone: "mixed", praised: ["performances"], panned: ["pacing"], score: { kind: "rt", value: 58 } });
+  assert.ok(/58%/.test(s) && /performances/.test(s) && /pacing/.test(s), s);
+});
+test("isPoolTake flags tone-only pool lines and nothing else", () => {
+  assert.strictEqual(U.isPoolTake("Reviews are all over the map on this one."), true);
+  assert.strictEqual(U.isPoolTake("The reviews refuse to agree on this one."), true);
+  assert.strictEqual(U.isPoolTake("Critics liked it, especially the performances."), false);
+  assert.strictEqual(U.isPoolTake(null), false);
+});
+test("no-score aspect lines are unchanged (cache-compatible with reseedTake)", () => {
+  const s = U.composeTake({ tone: "mixed", praised: ["performances"], panned: ["pacing"], score: null });
+  assert.strictEqual(s, "Critics are split — praise for the performances, pushback on the pacing.");
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
