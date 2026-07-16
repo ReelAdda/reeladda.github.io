@@ -2015,6 +2015,10 @@ async function main() {
   for (const cfg of builtCountries) archiveDepartedPages(pagesManifest, cfg, allSlugSets[cfg.code] || new Set());
   fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
 
+  // Frozen archived pages are never rewritten, so pages generated before the x-default
+  // fix carry a dead India URL in their hreflang forever unless repaired in place.
+  repairXDefaults(builtCountries);
+
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
   writeMultiCountrySitemap(builtCountries, pagesManifest);
   console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.`);
@@ -2064,6 +2068,19 @@ function ytIdOf(url) {
 // (preserves already-indexed URLs + the existing archive); other countries are namespaced under
 // /<code>/movie/<slug>.html so the same title in different markets never collides and each has
 // its own region-correct "where to watch". Used everywhere a film page is linked or written.
+// x-default for hreflang must point to a page that EXISTS. India is the canonical
+// default only when India actually has the film; otherwise a foreign-market film
+// (e.g. a US/UK/DE release never listed in India) would advertise a dead India URL
+// as its default — Google follows hreflang alternates as discovery URLs and files
+// the miss as a 404 in Search Console. Fallback: first available copy in COUNTRIES
+// order (deterministic; stable across runs).
+function xDefaultCode(codes) {
+  if (!codes || !codes.length) return "in";
+  if (codes.includes("in")) return "in";
+  for (const c of COUNTRIES) if (codes.includes(c.code)) return c.code;
+  return codes[0];
+}
+
 function filmPagePath(code, slug) {
   return code === "in" ? `/movie/${slug}.html` : `/${code}/movie/${slug}.html`;
 }
@@ -2144,7 +2161,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
 <title>${e(item.title)}${year ? " (" + year + ")" : ""} — Review, Rating & Where to Watch in ${e(country)} | FilmyChill</title>
 <meta name="description" content="${e(desc)}">
 <meta name="robots" content="max-image-preview:large">
-<link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl("in", item.slug))}"/>` : ""}
+<link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl(xDefaultCode(alts.map((a) => a.code)), item.slug))}"/>` : ""}
 <meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="video.movie">
@@ -2274,6 +2291,43 @@ function generatePages(data, cfg, allSlugSets) {
   console.log(`Pages [${code}]: ${written} written, ${total} total in ${dir}/.`);
 }
 
+// One-time in effect: fix FROZEN (archived) film pages whose on-page hreflang still
+// declares x-default = the India copy when no India copy exists on disk. Current pages
+// are regenerated fresh each run and get the correct x-default by construction; frozen
+// pages are deliberately never rewritten, so the bad tag written by the pre-fix code
+// would otherwise persist — and keep feeding Google a 404 discovery URL. Pure disk
+// scan + string swap; after one pass every page is clean and this becomes a no-op.
+function repairXDefaults(countries) {
+  const dirFor = (code) => (code === "in" ? "movie" : `${code}/movie`);
+  const have = {}; // slug -> [codes whose file exists on disk]
+  for (const c of countries) {
+    const dir = dirFor(c.code);
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir)) {
+      if (f.endsWith(".html")) (have[f.slice(0, -5)] = have[f.slice(0, -5)] || []).push(c.code);
+    }
+  }
+  let fixed = 0;
+  for (const c of countries) {
+    const dir = dirFor(c.code);
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir)) {
+      if (!f.endsWith(".html")) continue;
+      const slug = f.slice(0, -5);
+      const codes = have[slug] || [];
+      if (codes.includes("in")) continue; // India copy exists -> x-default already valid
+      const bad = `hreflang="x-default" href="https://filmychill.com/movie/${slug}.html"`;
+      const p = `${dir}/${f}`;
+      const html = fs.readFileSync(p, "utf8");
+      if (!html.includes(bad)) continue;
+      const good = `hreflang="x-default" href="${filmPageUrl(xDefaultCode(codes), slug)}"`;
+      fs.writeFileSync(p, html.split(bad).join(good));
+      fixed++;
+    }
+  }
+  if (fixed) console.log(`  hreflang repair: ${fixed} frozen pages had x-default pointing at a missing India copy`);
+}
+
 // Complete sitemap: every country homepage (with hreflang alternates) + every country's
 // per-film pages. A film that exists in several countries gets hreflang alternates linking
 // those copies together; a film unique to one country stands alone.
@@ -2328,7 +2382,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       const alts = codes.length > 1
         ? "\n" + codes.map((cc) =>
             `    <xhtml:link rel="alternate" hreflang="${cc === "in" ? "en-IN" : "en-" + regionOf(cc)}" href="${filmUrlFor(cc, slug)}"/>`).join("\n")
-          + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${filmUrlFor("in", slug)}"/>`
+          + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${filmUrlFor(xDefaultCode(codes), slug)}"/>`
         : "";
       filmUrls.push(`  <url><loc>${filmUrlFor(c.code, slug)}</loc><lastmod>${filmLastmod(c.code, slug)}</lastmod><priority>0.5</priority>${alts ? alts + "\n  " : ""}</url>`);
       filmCount++;
@@ -3353,4 +3407,5 @@ module.exports = {
   prevWeekSlug, writeIndexNowPayload, buildLlmsTxt,
   theatreEligible, THEATRE_EXCLUDE_IDS,
   reseedTake, isPoolTake, TAKE_VERSION,
+  xDefaultCode, repairXDefaults,
 };
