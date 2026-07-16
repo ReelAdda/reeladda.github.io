@@ -1440,6 +1440,35 @@ test("no-score aspect lines are unchanged (cache-compatible with reseedTake)", (
   assert.strictEqual(s, "Critics are split — praise for the performances, pushback on the pacing.");
 });
 
+// ---------------- hreflang: x-default must point at a page that exists ----------------
+group("hreflang x-default (GSC 404 fix)");
+test("xDefaultCode: India wins when India has the film", () => {
+  assert.strictEqual(U.xDefaultCode(["us", "in", "uk"]), "in");
+});
+test("xDefaultCode: no India copy -> first available in COUNTRIES order, deterministic", () => {
+  assert.strictEqual(U.xDefaultCode(["de", "uk", "us"]), "us");
+  assert.strictEqual(U.xDefaultCode(["ae", "de"]), U.xDefaultCode(["de", "ae"])); // order-insensitive
+});
+test("xDefaultCode: degenerate inputs fall back safely", () => {
+  assert.strictEqual(U.xDefaultCode([]), "in");
+  assert.strictEqual(U.xDefaultCode(null), "in");
+});
+test("film page WITHOUT an India copy never advertises the India URL as x-default", () => {
+  const item = { title: "Simpsley", slug: "simpsley", kind: "movie", language: "English", platform: "Theatres",
+    released: "2026-07-01", rating: 6.5, votes: 300,
+    _alts: [{ code: "us", region: "US" }, { code: "uk", region: "GB" }, { code: "de", region: "DE" }] };
+  const html = U.buildFilmPage(item, "2026-07-10", new Set(["simpsley"]), { code: "us", name: "United States", region: "US" });
+  assert.ok(!html.includes('hreflang="x-default" href="https://filmychill.com/movie/simpsley.html"'), "dead India URL leaked");
+  assert.ok(html.includes('hreflang="x-default" href="https://filmychill.com/us/movie/simpsley.html"'), html.match(/x-default[^>]*/));
+});
+test("film page WITH an India copy keeps India as x-default (no behaviour change)", () => {
+  const item = { title: "Shared", slug: "shared", kind: "movie", language: "Hindi", platform: "Theatres",
+    released: "2026-07-01", rating: 7.2, votes: 900,
+    _alts: [{ code: "in", region: "IN" }, { code: "us", region: "US" }] };
+  const html = U.buildFilmPage(item, "2026-07-10", new Set(["shared"]), { code: "us", name: "United States", region: "US" });
+  assert.ok(html.includes('hreflang="x-default" href="https://filmychill.com/movie/shared.html"'));
+});
+
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Tests: ${passed} passed, ${failed} failed`);
