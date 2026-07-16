@@ -594,8 +594,14 @@ const TAKE_ASPECTS = [
   [/atmosphere|mood| atmospheric|immersive/i, "atmosphere"],
   [/story|plot|narrative|storyline/i, "story"],
 ];
-const TAKE_PRAISE_RE = /prais\w+|laud\w+|acclaim\w+|applaud\w+|compliment\w+|appreciat\w+|celebrated|singled out|won praise|drew praise|impressed|highlights?|stand.?out|well.?received/i;
-const TAKE_PAN_RE = /criticis\w+|criticiz\w+|panned|faulted|drew criticism|flak|bemoaned|lamented|complain\w+|weakest|disappoint\w+|letdown|drag(?:ged|s)?\b|uneven|flaws?|shortcomings?/i;
+const TAKE_PRAISE_RE = /prais\w+|laud\w+|acclaim\w+|applaud\w+|compliment\w+|appreciat\w+|celebrated|singled out|won praise|drew praise|impressed|highlights?|stand.?out|well.?received|hail\w+|commend\w+|plaudits|admir\w+/i;
+const TAKE_PAN_RE = /criticis\w+|criticiz\w+|panned|faulted|drew criticism|flak|bemoaned|lamented|complain\w+|weakest|disappoint\w+|letdown|drag(?:ged|s)?\b|uneven|flaws?|shortcomings?|derid\w+|dismiss\w+|lambast\w+|slam(?:med|s)\b|underwhelm\w+|lackluste?r\w*|reservations/i;
+// Splits a sentence into single-polarity clauses. The extra alternation splits BEFORE
+// praise/criticism noun groups — Wikipedia's single most common reception sentence is
+// "mixed reviews, with praise for X and criticism of Y", which the old splitter kept as
+// one clause; both polarity regexes fired on it and the whole thing was thrown away as
+// ambiguous. That one skip is why so many films fell back to hollow tone-only lines.
+const TAKE_CLAUSE_SPLIT_RE = /\bbut\b|\bhowever\b|\bwhile\b|\balthough\b|\bthough\b|;|,\s+(?=(?:and\s+)?(?:the|several|some|critics|reviewers|others|many)\b)|,?\s+(?:and|but|with)\s+(?=(?:some\s+|particular\s+|widespread\s+|general\s+)?(?:praise|criticism|acclaim|complaints?|reservations|plaudits)\b)/i;
 
 // Pure: reception-section plain text -> { tone, praised[], panned[] } | null.
 // Tone is decided by whichever verdict phrase appears EARLIEST (reception sections
@@ -620,6 +626,7 @@ function analyzeReception(text) {
   // beats "all over the map". Captured as a fact, printed verbatim, never invented.
   let score = null;
   let sm = t.match(/(\d{1,3})%\s*(?:of critics|on (?:the )?review aggregator|approval)/i)
+        || t.match(/approval rating of (\d{1,3})%/i)
         || t.match(/Rotten Tomatoes[^.]{0,40}?(\d{1,3})%/i)
         || t.match(/(\d{1,3})%[^.]{0,30}?Rotten Tomatoes/i);
   if (sm) { const n = +sm[1]; if (n >= 0 && n <= 100) score = { kind: "rt", value: n }; }
@@ -629,7 +636,7 @@ function analyzeReception(text) {
   }
   const praised = new Set(), panned = new Set();
   for (const sentence of t.split(/(?<=[.!?])\s+/)) {
-    for (const clause of sentence.split(/\bbut\b|\bhowever\b|\bwhile\b|\balthough\b|\bthough\b|;|,\s+(?=(?:and\s+)?(?:the|several|some|critics|reviewers|others|many)\b)/i)) {
+    for (const clause of sentence.split(TAKE_CLAUSE_SPLIT_RE)) {
       const isPraise = TAKE_PRAISE_RE.test(clause);
       const isPan = TAKE_PAN_RE.test(clause);
       if (isPraise === isPan) continue; // neither, or ambiguous clause -> skip
@@ -696,6 +703,19 @@ function reseedTake(take, seed = 0) {
   return take;
 }
 
+// True when a take is a tone-only pool line — a verdict with zero substance. Used to
+// invalidate stale cache entries: takes.json holds lines written by OLDER extractors
+// ("Reviews are all over the map on this one" survives forever because refetch only
+// fired on missing takes). Bumping TAKE_VERSION re-analyses every pooled title ONCE
+// with the current, deeper extractor; aspect-bearing takes (unique by construction)
+// are never touched. If re-analysis still finds nothing for a mixed verdict, the line
+// is dropped entirely — absent beats hollow.
+const TAKE_VERSION = 2;
+function isPoolTake(take) {
+  if (!take) return false;
+  return Object.values(TAKE_VARIANTS).some((pool) => pool.includes(take));
+}
+
 function composeTake(a, seed = 0) {
   if (!a) return null;
   const list = (arr) => (arr.length === 2 ? `${arr[0]} and ${arr[1]}` : arr[0]);
@@ -710,22 +730,27 @@ function composeTake(a, seed = 0) {
     : null;
   switch (a.tone) {
     case "acclaim":
+      if (p && sc) return `Critics loved it — ${sc}, with special praise for the ${p}.`;
       if (p) return `Critics loved it — special praise for the ${p}.`;
       if (sc) return `Critics loved it — ${sc} says it all.`;
       return vary(TAKE_VARIANTS.acclaim);
     case "positive":
       if (p && c) return `Critics liked it: the ${p} won praise, though the ${c} drew some flak.`;
+      if (p && sc) return `Critics liked it (${sc}), especially the ${p}.`;
       if (p) return `Critics liked it, especially the ${p}.`;
       if (c) return `Critics were broadly positive, with reservations about the ${c}.`;
       if (sc) return `Critics came down positive — ${sc}.`;
       return vary(TAKE_VARIANTS.positive);
     case "mixed":
+      if (p && c && sc) return `Critics are split at ${sc} — praise for the ${p}, pushback on the ${c}.`;
       if (p && c) return `Critics are split — praise for the ${p}, pushback on the ${c}.`;
       if (p) return `Critics are split, though the ${p} found admirers.`;
+      if (c && sc) return `Critics are split at ${sc}, with the ${c} drawing most complaints.`;
       if (c) return `Critics are split, with the ${c} drawing most complaints.`;
       if (sc) return `Genuinely divisive — ${sc} tells the story.`;
       return null; // UPGRADE 3: no aspect, no number -> stay silent, don't say "all over the map"
     case "negative":
+      if (c && sc) return `Critics were rough on it (${sc}), mostly over the ${c}.`;
       if (c) return `Critics were rough on it, mostly over the ${c}.`;
       if (sc) return `Critics were not kind — ${sc}.`;
       return vary(TAKE_VARIANTS.negative);
@@ -844,12 +869,16 @@ async function attachTakes(dataByCode) {
   for (const [key, items] of byKey) {
     try {
       let entry = takes[key];
-      // Refetch when: never seen; no take yet (reception sections appear late); or a
+      // Refetch when: never seen; no take yet (reception sections appear late); a
       // LEGACY entry predating hooks (hook === undefined; found hooks are strings,
-      // searched-but-absent is null) — a one-time backfill pass, then it settles.
-      const needsFetch = !entry || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
+      // searched-but-absent is null); or a tone-only pool line cached by an OLDER
+      // extractor (v !== TAKE_VERSION) — one re-analysis pass with the deeper
+      // extractor, then it settles. All one-time backfills.
+      const stalePool = isPoolTake(entry?.take) && entry?.v !== TAKE_VERSION;
+      const needsFetch = !entry || ((!entry.take || entry.hook === undefined || stalePool) && entry.checked !== today);
       if (needsFetch) {
         let take = entry?.take || null, src = entry?.src || null, hook = null;
+        if (stalePool) { take = null; src = null; } // recompose from scratch with the current extractor
         let article = entry?.article || null;
         if (key.startsWith("tt")) { // real IMDb id -> precise Wikipedia route
           if (!article) article = await wikiArticleForImdb(key);
@@ -866,7 +895,7 @@ async function attachTakes(dataByCode) {
           const t = await tmdbReviewTake(items[0]);
           if (t) { take = t; src = "tmdb"; }
         }
-        entry = { take, src, hook, article: article || undefined, checked: today };
+        entry = { take, src, hook, article: article || undefined, checked: today, v: TAKE_VERSION };
         takes[key] = entry;
         await sleep(150); // polite pace against Wikimedia
       } else {
@@ -3323,5 +3352,5 @@ module.exports = {
   extractCastPics,
   prevWeekSlug, writeIndexNowPayload, buildLlmsTxt,
   theatreEligible, THEATRE_EXCLUDE_IDS,
-  reseedTake,
+  reseedTake, isPoolTake, TAKE_VERSION,
 };
