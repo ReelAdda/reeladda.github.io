@@ -419,7 +419,7 @@ function freshLabel(item, now = Date.now(), locale = "en-IN") {
 // ============================================================================
 // BUZZ SIGNALS — two free, licence-clean sources that TMDB can't provide:
 //   1. Wikipedia pageviews (keyless): how many people are READING about a title
-//      this week -> "🔥 Trending" badge. Article resolved precisely via Wikidata's
+//      this week -> "Trending" badge. Article resolved precisely via Wikidata's
 //      IMDb-ID property (P345) — never by title search, so no wrong-article risk.
 //   2. YouTube Data API (optional YT_API_KEY secret): trailer view counts ->
 //      "▶ 52M trailer views" social proof. Skipped silently when the key is absent.
@@ -535,6 +535,23 @@ async function attachBuzz(dataByCode) {
     await sleep(120); // polite pace against Wikimedia (well under their guidance)
   }
   console.log(`Buzz: ${resolved}/${byImdb.size} titles resolved via Wikipedia, ${trendingCount} trending`);
+  capTrending(dataByCode);
+}
+
+// A badge on 6 of 7 cards is decoration, not signal. Keep "Trending" only on the top
+// TREND_CAP items per section per country, ranked by weekly Wikipedia views (the same
+// number that earned the badge). Pure demotion — wikiWeeklyViews stays on every item
+// for the detail pages, and the threshold logic above is untouched.
+const TREND_CAP = 2;
+function capTrending(dataByCode) {
+  for (const data of Object.values(dataByCode)) {
+    for (const list of [data.theatres, data.ott]) {
+      if (!Array.isArray(list)) continue;
+      const ranked = list.filter((it) => it.trending)
+        .sort((a, b) => (b.wikiWeeklyViews || 0) - (a.wikiWeeklyViews || 0));
+      for (const it of ranked.slice(TREND_CAP)) delete it.trending;
+    }
+  }
 }
 
 // ============================================================================
@@ -2233,7 +2250,7 @@ ${(item.backdrop || item.poster) ? `<meta property="og:image" content="${e(item.
   </div>
   ${verdictProse ? `<h2>The verdict</h2><p class="vprose">${e(verdictProse)}</p>` : ""}
   ${item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
-  ${item.take ? `<p class="take">💬 ${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
+  ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
   ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${goodToKnow.length ? `<h2>Good to know</h2><table class="gtk">${goodToKnow.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : ""}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
@@ -2426,12 +2443,12 @@ function ssrCard(item, i, code) {
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
     <div>
-      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}${item.trending ? '<span class="fresh-badge trend">🔥 Trending</span>' : ""}</div>
+      <div class="title-row"><h3>${e(item.title)}</h3>${item.platform && item.platform !== "Theatres" ? `<span class="platform">${e(item.platform)}</span>` : ""}${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}${item.trending ? '<span class="fresh-badge trend"><svg class="ic" aria-hidden="true"><use href="#icTrend"/></svg> Trending</span>' : ""}</div>
       <div class="meta">${bits}</div>
-      ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}${trailerViewsLabel(item.trailerViews) ? " · " + trailerViewsLabel(item.trailerViews) : ""}</div>` : ""}
+      ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>` : ""}
       ${item.hook ? `<div class="meta hook">${e(item.hook)}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 150))}</p>` : ""}
-      ${item.take ? `<p class="take">💬 ${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}</p>` : ""}
+      ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}</p>` : ""}
     </div>`;
   // Every country now has its own per-film pages, so always link to this country's page.
   // (`code` defaults to India for safety if a caller omits it.)
@@ -2443,9 +2460,9 @@ function ssrCard(item, i, code) {
 function ssrSoonCard(item, code) {
   const e = escHtml;
   return `<a class="soon-card" href="${e(filmPagePath(code || "in", item.slug))}" style="text-decoration:none;color:inherit">
-    ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
+    ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : `<div class="soon-ph" aria-hidden="true">${e((item.title || "?").charAt(0).toUpperCase())}</div>`}
     <div class="soon-body">
-      <div class="soon-date">${e(item.released || "")}</div>
+      <div class="soon-date">${e(item.released ? fmtDateShort(item.released, Date.now(), localeFor(code)) : "")}</div>
       <div class="soon-title">${e(item.title)}</div>
       <div class="soon-meta">${e(item.language || "")}</div>
     </div>
@@ -2579,7 +2596,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
     const inner = `
       ${it.poster ? `<img src="${e(it.poster)}" alt="${e(it.title)} poster" width="92" height="138" loading="lazy">` : "<div class=\"nop\"></div>"}
       <div>
-        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">🔥 Trending</span>' : ""}</div>
+        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
         ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}${trailerViewsLabel(it.trailerViews) ? " · " + trailerViewsLabel(it.trailerViews) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
       </div>`;
@@ -2829,11 +2846,11 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
     const inner = `
       ${it.poster ? `<img src="${e(it.poster)}" alt="${e(it.title)} poster" width="92" height="138" loading="lazy">` : '<div class="nop"></div>'}
       <div>
-        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">🔥 Trending</span>' : ""}</div>
+        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
         ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
         ${it.hook ? `<div class="rm hk">${e(it.hook)}</div>` : ""}
-        ${it.take ? `<div class="rm tk">💬 ${e(it.take)}</div>` : ""}
+        ${it.take ? `<div class="rm tk">${e(it.take)}</div>` : ""}
       </div>`;
     return it.slug ? `<a class="row" href="${e(filmPagePath("in", it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
   };
@@ -3297,9 +3314,11 @@ function footerAttribution(useImdb = USE_IMDB) {
   const tmdb = `<a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>`;
   if (useImdb) {
     return `Film data from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  ` +
-           `Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>\n  `;
+           `Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>\n  ` +
+           `Where-to-watch data provided by <a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a>.<br>\n  `;
   }
-  return `Film data and ratings from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  `;
+  return `Film data and ratings from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  ` +
+         `Where-to-watch data provided by <a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a>.<br>\n  `;
 }
 
 // Render one country's page from the pristine template string and write it to its path
@@ -3407,5 +3426,5 @@ module.exports = {
   prevWeekSlug, writeIndexNowPayload, buildLlmsTxt,
   theatreEligible, THEATRE_EXCLUDE_IDS,
   reseedTake, isPoolTake, TAKE_VERSION,
-  xDefaultCode, repairXDefaults,
+  xDefaultCode, repairXDefaults, capTrending, ssrCard, ssrSoonCard,
 };
