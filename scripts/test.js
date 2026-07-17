@@ -1085,9 +1085,9 @@ test("directorial debut uses the item's director", () => {
 
 // ---------------- editorial: audienceCounterpoint() ----------------
 group("audienceCounterpoint()");
-test("critics negative + audiences high -> disagreement line", () => {
+test("critics negative + audiences high -> disagreement line (numberless)", () => {
   const c = U.audienceCounterpoint({ take: "Critics were rough on it, mostly over the writing.", rating: 8.2, votes: 900 });
-  assert.ok(/Audiences disagree/.test(c) && /8\.2/.test(c));
+  assert.ok(/Audiences disagree/.test(c) && !/\d/.test(c), c); // no digit: the rating pill is the card's only number
 });
 test("critics split + audiences high -> disagreement line", () => {
   assert.ok(/Audiences disagree/.test(U.audienceCounterpoint({ take: "Critics are split on this one.", rating: 7.8, votes: 200 })));
@@ -1416,9 +1416,9 @@ test("UPGRADE 2: extracts a Metacritic figure when RT is absent", () => {
   const a = U.analyzeReception("The season met negative reviews. On Metacritic it holds a weighted average score of 38, indicating generally unfavourable reviews from the critics who covered it.");
   assert.deepStrictEqual(a.score, { kind: "mc", value: 38 });
 });
-test("UPGRADE 2+3: a score rescues a would-be-hollow mixed verdict into a fact", () => {
+test("UPGRADE 2+3: a score rescues a would-be-hollow mixed verdict — but never prints the number", () => {
   const take = U.composeTake(U.analyzeReception("The film received mixed reviews from critics. On the review aggregator Rotten Tomatoes, 61% of critics were positive, calling it watchable but slight in the end."));
-  assert.ok(/61%/.test(take) && /divisive/i.test(take), take);
+  assert.ok(/divisive/i.test(take) && !/\d/.test(take), take); // score is evidence for the claim, not card copy
 });
 test("UPGRADE 3: hollow mixed — no aspect, no score — stays SILENT (no weather report)", () => {
   const a = U.analyzeReception("The film received mixed reviews from critics upon its wide theatrical release across the region during the summer season that year.");
@@ -1452,9 +1452,28 @@ test("widened vocabulary: dismissed/hailed clauses now carry polarity", () => {
   assert.ok(a.panned.includes("writing"), JSON.stringify(a));
   assert.ok(a.praised.includes("performances"), JSON.stringify(a));
 });
-test("score + aspects weave into one line of maximum substance", () => {
+test("aspects render, score never leaks (avoids clashing with the TMDB rating pill)", () => {
   const s = U.composeTake({ tone: "mixed", praised: ["performances"], panned: ["pacing"], score: { kind: "rt", value: 58 } });
-  assert.ok(/58%/.test(s) && /performances/.test(s) && /pacing/.test(s), s);
+  assert.ok(/performances/.test(s) && /pacing/.test(s) && !/\d/.test(s), s);
+});
+test("takes are number-free across every tone and evidence combo", () => {
+  const combos = [];
+  for (const tone of ["acclaim", "positive", "mixed", "negative", null])
+    for (const score of [null, { kind: "rt", value: 96 }, { kind: "mc", value: 41 }])
+      for (const praised of [[], ["performances"]])
+        for (const panned of [[], ["pacing"]])
+          combos.push({ tone, score, praised, panned });
+  for (const a of combos) {
+    const s = U.composeTake(a);
+    if (s != null) assert.ok(!/\d/.test(s), JSON.stringify(a) + " -> " + s);
+  }
+});
+test("numeric cached takes are recomposed number-free (v3 purge closes the loop)", () => {
+  // The Odyssey case: a v2 cache entry saying "a 96% critics' score says it all"
+  // must be treated as stale so the next run regenerates it without the number.
+  assert.ok(/\d/.test("Critics loved it — a 96% critics' score says it all."));
+  const regenerated = U.composeTake({ tone: "acclaim", praised: [], panned: [], score: { kind: "rt", value: 96 } });
+  assert.ok(regenerated && !/\d/.test(regenerated), regenerated);
 });
 test("isPoolTake flags tone-only pool lines and nothing else", () => {
   assert.strictEqual(U.isPoolTake("Reviews are all over the map on this one."), true);
