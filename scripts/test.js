@@ -1468,6 +1468,19 @@ test("takes are number-free across every tone and evidence combo", () => {
     if (s != null) assert.ok(!/\d/.test(s), JSON.stringify(a) + " -> " + s);
   }
 });
+test("version purge fires even when the entry was already checked today", () => {
+  // Mirrors the attachTakes predicate: a numeric v2 take stamped checked=today must
+  // still qualify for refetch — otherwise known-bad lines sit on the live site a day.
+  const today = "2026-07-17";
+  const entry = { take: "Critics loved it — a 96% critics' score says it all.", v: 2, hook: null, checked: today };
+  const stalePool = !!entry && entry.v !== U.TAKE_VERSION && (U.isPoolTake(entry.take) || /\d/.test(entry.take || ""));
+  const needsFetch = !entry || stalePool || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
+  assert.strictEqual(needsFetch, true);
+  const settled = { take: "Reviewers were close to unanimous — this one landed.", v: U.TAKE_VERSION, hook: null, checked: today };
+  const stale2 = !!settled && settled.v !== U.TAKE_VERSION && (U.isPoolTake(settled.take) || /\d/.test(settled.take || ""));
+  const needs2 = !settled || stale2 || ((!settled.take || settled.hook === undefined) && settled.checked !== today);
+  assert.strictEqual(needs2, false); // stamped v3 -> settles, no loop
+});
 test("numeric cached takes are recomposed number-free (v3 purge closes the loop)", () => {
   // The Odyssey case: a v2 cache entry saying "a 96% critics' score says it all"
   // must be treated as stale so the next run regenerates it without the number.
