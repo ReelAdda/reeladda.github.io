@@ -727,7 +727,7 @@ function reseedTake(take, seed = 0) {
 // with the current, deeper extractor; aspect-bearing takes (unique by construction)
 // are never touched. If re-analysis still finds nothing for a mixed verdict, the line
 // is dropped entirely — absent beats hollow.
-const TAKE_VERSION = 2;
+const TAKE_VERSION = 3; // v3: takes must be number-free (score text clashed with the rating pill)
 function isPoolTake(take) {
   if (!take) return false;
   return Object.values(TAKE_VARIANTS).some((pool) => pool.includes(take));
@@ -741,41 +741,33 @@ function composeTake(a, seed = 0) {
   const vary = (pool) => pool[Math.abs(Number(seed) || 0) % pool.length];
   // A concrete aggregator figure, phrased for a human. This is the substance that
   // rescues a tone-only verdict from vagueness — "a 58% critics' score" is a fact
-  // the reader can weigh, not a mood.
-  const sc = a.score
-    ? (a.score.kind === "rt" ? `a ${a.score.value}% critics' score` : `a Metacritic score of ${a.score.value}`)
-    : null;
+  // the reader can weigh, not a mood. NO NUMBERS in the take text — an RT% or
+  // Metacritic figure next to the card's TMDB rating pill reads as the site
+  // contradicting itself (96% vs 6.9/10 are different scales, but the reader
+  // can't know that). The extracted score still informs WHICH sentence we pick
+  // (it's hard evidence of division/acclaim); it just never gets printed.
   switch (a.tone) {
     case "acclaim":
-      if (p && sc) return `Critics loved it — ${sc}, with special praise for the ${p}.`;
       if (p) return `Critics loved it — special praise for the ${p}.`;
-      if (sc) return `Critics loved it — ${sc} says it all.`;
       return vary(TAKE_VARIANTS.acclaim);
     case "positive":
       if (p && c) return `Critics liked it: the ${p} won praise, though the ${c} drew some flak.`;
-      if (p && sc) return `Critics liked it (${sc}), especially the ${p}.`;
       if (p) return `Critics liked it, especially the ${p}.`;
       if (c) return `Critics were broadly positive, with reservations about the ${c}.`;
-      if (sc) return `Critics came down positive — ${sc}.`;
       return vary(TAKE_VARIANTS.positive);
     case "mixed":
-      if (p && c && sc) return `Critics are split at ${sc} — praise for the ${p}, pushback on the ${c}.`;
       if (p && c) return `Critics are split — praise for the ${p}, pushback on the ${c}.`;
       if (p) return `Critics are split, though the ${p} found admirers.`;
-      if (c && sc) return `Critics are split at ${sc}, with the ${c} drawing most complaints.`;
       if (c) return `Critics are split, with the ${c} drawing most complaints.`;
-      if (sc) return `Genuinely divisive — ${sc} tells the story.`;
-      return null; // UPGRADE 3: no aspect, no number -> stay silent, don't say "all over the map"
+      if (a.score) return `Genuinely divisive — critics can't settle this one.`; // aggregator-backed, so a firm claim is honest
+      return null; // UPGRADE 3: no aspect, no evidence -> stay silent, don't say "all over the map"
     case "negative":
-      if (c && sc) return `Critics were rough on it (${sc}), mostly over the ${c}.`;
       if (c) return `Critics were rough on it, mostly over the ${c}.`;
-      if (sc) return `Critics were not kind — ${sc}.`;
       return vary(TAKE_VARIANTS.negative);
     default:
       if (p && c) return `Reviewers praised the ${p} but flagged the ${c}.`;
       if (p) return `Reviewers singled out the ${p} for praise.`;
       if (c) return `Reviewers' main gripe: the ${c}.`;
-      if (sc) return `Early read from critics: ${sc}.`;
       return null;
   }
 }
@@ -847,12 +839,12 @@ function audienceCounterpoint(item) {
   const votes = item.imdbRating != null ? (item.imdbVotes || 0) : (item.votes || 0);
   if (votes < 50) return null; // too few voters to call it an audience
   const negTake = /rough on it|not impressed|not kind|gave this one a pass|came away cold/i.test(item.take);
-  const splitTake = /split|all over the map|couldn't agree|down the middle/i.test(item.take);
+  const splitTake = /split|all over the map|couldn't agree|down the middle|divisive|can't settle/i.test(item.take);
   const posTake = /loved|liked it|largely positive|lean clearly positive|came away happy|solidly good|rare-air/i.test(item.take);
   if ((negTake || splitTake) && item.rating >= 7.5)
-    return `Audiences disagree \u2014 \u2605 ${Number(item.rating).toFixed(1)} from viewers.`;
+    return `Audiences disagree \u2014 viewers rate it far higher.`;
   if (posTake && item.rating <= 5.5)
-    return `Audiences are cooler on it (\u2605 ${Number(item.rating).toFixed(1)}).`;
+    return `Audiences are cooler on it than the critics were.`;
   return null;
 }
 
@@ -865,7 +857,7 @@ async function tmdbReviewTake(item) {
   if (ratings.length < 2) return null;
   const avg = ratings.reduce((x, y) => x + y, 0) / ratings.length;
   const lean = avg >= 7.5 ? "strongly positive" : avg >= 6 ? "positive" : avg >= 4.5 ? "mixed" : "negative";
-  return `Early viewer reviews ${lean === "mixed" ? "are mixed" : "lean " + lean} — averaging ${avg.toFixed(1)}/10 on TMDB.`;
+  return `Early viewer reviews on TMDB ${lean === "mixed" ? "are mixed" : "lean " + lean}.`;
 }
 
 // Attach a critics' take to every theatre + OTT item across all countries. Same
@@ -891,7 +883,7 @@ async function attachTakes(dataByCode) {
       // searched-but-absent is null); or a tone-only pool line cached by an OLDER
       // extractor (v !== TAKE_VERSION) — one re-analysis pass with the deeper
       // extractor, then it settles. All one-time backfills.
-      const stalePool = isPoolTake(entry?.take) && entry?.v !== TAKE_VERSION;
+      const stalePool = entry?.v !== TAKE_VERSION && (isPoolTake(entry?.take) || /\d/.test(entry?.take || ""));
       const needsFetch = !entry || ((!entry.take || entry.hook === undefined || stalePool) && entry.checked !== today);
       if (needsFetch) {
         let take = entry?.take || null, src = entry?.src || null, hook = null;
