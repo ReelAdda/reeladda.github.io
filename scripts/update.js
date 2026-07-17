@@ -880,11 +880,14 @@ async function attachTakes(dataByCode) {
       let entry = takes[key];
       // Refetch when: never seen; no take yet (reception sections appear late); a
       // LEGACY entry predating hooks (hook === undefined; found hooks are strings,
-      // searched-but-absent is null); or a tone-only pool line cached by an OLDER
-      // extractor (v !== TAKE_VERSION) — one re-analysis pass with the deeper
-      // extractor, then it settles. All one-time backfills.
-      const stalePool = entry?.v !== TAKE_VERSION && (isPoolTake(entry?.take) || /\d/.test(entry?.take || ""));
-      const needsFetch = !entry || ((!entry.take || entry.hook === undefined || stalePool) && entry.checked !== today);
+      // searched-but-absent is null) — those two wait for the daily gate; OR a stale
+      // take from an older extractor version (tone-only pool line, or any take
+      // containing a digit — v3 made takes number-free so they can't clash with the
+      // rating pill). Version purges BYPASS the checked-today gate: they run exactly
+      // once per entry (v gets stamped), so there's no re-fetch loop to protect
+      // against, and waiting a day just leaves known-bad lines on the live site.
+      const stalePool = !!entry && entry.v !== TAKE_VERSION && (isPoolTake(entry.take) || /\d/.test(entry.take || ""));
+      const needsFetch = !entry || stalePool || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
       if (needsFetch) {
         let take = entry?.take || null, src = entry?.src || null, hook = null;
         if (stalePool) { take = null; src = null; } // recompose from scratch with the current extractor
