@@ -544,13 +544,40 @@ test("trailerViewsLabel: null below 1M (anti-proof guard), label at 52M", () => 
   assert.strictEqual(U.trailerViewsLabel(undefined), null);
   assert.strictEqual(U.trailerViewsLabel(52123456), "▶ 52M trailer views");
 });
-test("ssrCard: trending badge + trailer views render from data fields", () => {
+test("ssrCard: trending badge renders (icon, no emoji); trailer views stay off the card", () => {
   const html = U.ssrCard({ title: "HotD", platform: "JioHotstar", language: "English", genre: "Fantasy / Drama",
     rating: 8.2, verdict: "Must watch", kind: "tv", slug: "hotd", trending: true, trailerViews: 52123456,
     badge: "New season", freshDate: "2026-06-21" }, 0, "in");
-  assert.ok(html.includes("🔥 Trending"));
-  assert.ok(html.includes("▶ 52M trailer views"));
+  assert.ok(html.includes("icTrend") && html.includes("Trending") && !html.includes("🔥"));
+  assert.ok(!html.includes("trailer views")); // social proof lives on the detail page now
   assert.ok(html.includes("New season"));
+});
+test("ssrCard: Theatres pill is dropped inside its own section, OTT platform pill stays", () => {
+  const t1 = U.ssrCard({ title: "A", platform: "Theatres", language: "Hindi", kind: "movie", slug: "a" }, 0, "in");
+  assert.ok(!t1.includes('<span class="platform">'));
+  const t2 = U.ssrCard({ title: "B", platform: "Netflix", language: "Hindi", kind: "movie", slug: "b" }, 0, "in");
+  assert.ok(t2.includes('<span class="platform">Netflix</span>'));
+});
+test("ssrSoonCard: human date, never raw ISO; posterless gets branded placeholder", () => {
+  const s = U.ssrSoonCard({ title: "Vibe", slug: "vibe", released: "2026-09-18", language: "Hindi" }, "in");
+  assert.ok(!s.includes("2026-09-18"), s);
+  assert.ok(/soon-date">[^<]*Sep/.test(s), s);
+  assert.ok(s.includes('class="soon-ph"') && s.includes(">V<"), s);
+});
+test("capTrending: only top 2 by weekly views keep the badge, per section", () => {
+  const data = { in: { theatres: [
+    { title: "a", trending: true, wikiWeeklyViews: 900 },
+    { title: "b", trending: true, wikiWeeklyViews: 5000 },
+    { title: "c", trending: true, wikiWeeklyViews: 100 },
+    { title: "d", trending: true, wikiWeeklyViews: 3000 },
+    { title: "e" }], ott: [] } };
+  U.capTrending(data);
+  const on = data.in.theatres.filter((x) => x.trending).map((x) => x.title).sort();
+  assert.deepStrictEqual(on, ["b", "d"]);
+});
+test("footerAttribution: JustWatch credit present in both ratings modes", () => {
+  assert.ok(U.footerAttribution(false).includes("justwatch.com"));
+  assert.ok(U.footerAttribution(true).includes("justwatch.com"));
 });
 test("ssrCard: no buzz fields -> no trending badge, no views label (graceful absence)", () => {
   const html = U.ssrCard({ title: "Plain", platform: "Netflix", language: "Hindi", rating: 7.0,
@@ -648,7 +675,7 @@ test("buildOttWeekPage: hreflang alternates for every country + x-default to Ind
 });
 test("buildOttWeekPage: trending badge, trailer views, and Discover meta all present", () => {
   const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
-  assert.ok(html.includes("🔥 Trending"));
+  assert.ok(html.includes("Trending") && !html.includes("🔥"));
   assert.ok(html.includes("▶ 12M trailer views"));
   assert.ok(html.includes('content="max-image-preview:large"'));
 });
