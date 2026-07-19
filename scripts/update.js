@@ -920,6 +920,7 @@ async function attachTakes(dataByCode) {
           if (entry.take) {
             it.take = seededTake;
             it.takeSrc = entry.src;
+            if (entry.src === "wiki" && entry.article) it.takeArticle = entry.article; // provenance -> JSON-LD citation
             // Disagreement is computed FRESH each run — ratings move, cached text doesn't.
             const counter = audienceCounterpoint(it);
             if (counter) it.takeCounter = counter;
@@ -2031,6 +2032,10 @@ async function main() {
   // fix carry a dead India URL in their hreflang forever unless repaired in place.
   repairXDefaults(builtCountries);
 
+  // IndexNow: push this build's fresh URLs to Bing & partners (Bing's index feeds
+  // Copilot and ChatGPT search). Fire-and-forget — a ping failure never fails a build.
+  await submitIndexNow(builtCountries, dataByCode);
+
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
   writeMultiCountrySitemap(builtCountries, pagesManifest);
   console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.`);
@@ -2137,6 +2142,15 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   const schemaVotes = item.imdbRating != null ? (item.imdbVotes || 0) : (item.votes || 0);
   if (item.rating != null && schemaVotes >= 10) {
     ld.aggregateRating = { "@type": "AggregateRating", ratingValue: item.rating, ratingCount: schemaVotes, bestRating: 10 };
+  }
+  // AI-era trust signals: name the source the critics' take was distilled from
+  // (verifiable provenance beats assertion), and give agents an actionable target.
+  if (item.takeSrc === "wiki" && item.takeArticle) {
+    ld.citation = { "@type": "CreativeWork", name: `Wikipedia: ${item.takeArticle}`,
+      url: `https://en.wikipedia.org/wiki/${encodeURIComponent(String(item.takeArticle).replace(/ /g, "_"))}` };
+  }
+  if (item.trailer && /youtube\.com\/watch/.test(item.trailer)) {
+    ld.potentialAction = { "@type": "WatchAction", name: `Watch the ${item.title} trailer`, target: item.trailer };
   }
 
   const breadcrumb = {
@@ -2338,6 +2352,27 @@ function repairXDefaults(countries) {
     }
   }
   if (fixed) console.log(`  hreflang repair: ${fixed} frozen pages had x-default pointing at a missing India copy`);
+}
+
+// IndexNow key: proven by /<key>.txt at the site root (committed file whose content
+// is the key itself). Rotating it means updating both the constant and the file.
+const INDEXNOW_KEY = "334d5cb2e825f49d9f07e19943403a06";
+async function submitIndexNow(countries, dataByCode) {
+  try {
+    const urls = countries.map((c) => `https://filmychill.com${(COUNTRY_PAGE_META[c.code] || { path: "/" + c.code + "/" }).path}`);
+    for (const c of countries) {
+      const d = dataByCode[c.code];
+      for (const it of [...(d?.theatres || []), ...(d?.ott || [])]) urls.push(filmPageUrl(c.code, it.slug));
+    }
+    urls.push("https://filmychill.com/new-on-ott/", "https://filmychill.com/llms-full.txt");
+    const body = { host: "filmychill.com", key: INDEXNOW_KEY,
+      keyLocation: `https://filmychill.com/${INDEXNOW_KEY}.txt`, urlList: [...new Set(urls)].slice(0, 500) };
+    const res = await fetch("https://api.indexnow.org/indexnow", {
+      method: "POST", headers: { "Content-Type": "application/json; charset=utf-8" }, body: JSON.stringify(body) });
+    console.log(`IndexNow: ${body.urlList.length} URLs submitted (HTTP ${res.status})`);
+  } catch (e) {
+    console.warn(`IndexNow ping skipped: ${e.message}`);
+  }
 }
 
 // Complete sitemap: every country homepage (with hreflang alternates) + every country's
@@ -3143,9 +3178,63 @@ Every listed film has a page at https://filmychill.com/movie/<slug>.html (or /<c
 `;
 }
 
+// llms-full.txt — the emerging companion convention to llms.txt: the index file
+// stays short, the -full file carries the complete current knowledge base so an
+// AI system can answer "what should I watch this week in <country>?" from one
+// fetch, with per-film facts, verdicts, and provenance. Regenerated every build.
+function buildLlmsFullTxt(dataByCode) {
+  const lines = [
+    "# FilmyChill — full current picks (machine-readable companion to /llms.txt)",
+    "",
+    `Generated: ${new Date().toISOString()}. Rebuilt twice daily. No pay-for-placement.`,
+    "Sources: TMDB (film data, ratings; streaming availability via JustWatch), Wikipedia (critical reception), YouTube (trailer statistics).",
+    "Fields: rating is the TMDB audience average out of 10; verdict is FilmyChill's editorial call; the critics' line is distilled from published review coverage, never quoted.",
+    "",
+  ];
+  for (const cfg of COUNTRIES) {
+    const data = dataByCode[cfg.code];
+    if (!data) continue;
+    const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name };
+    lines.push(`## ${m.name} — week of ${data.generatedAt ? String(data.generatedAt).slice(0, 10) : ""}`);
+    for (const [label, list] of [["In theatres", data.theatres], ["New on OTT / streaming", data.ott]]) {
+      if (!list || !list.length) continue;
+      lines.push("", `### ${label}`, "");
+      list.forEach((it, i) => {
+        const facts = [
+          it.kind === "tv" ? "Series" : "Film", it.language, it.genre,
+          it.runtime ? `${it.runtime} min` : null, it.cert || null,
+          it.released ? `released ${it.released}` : null,
+          it.platform && it.platform !== "Theatres" ? `on ${it.platform}` : null,
+          it.rating != null ? `rated ${Number(it.rating).toFixed(1)}/10 (${it.votes || 0} votes)` : null,
+          it.verdict || null,
+        ].filter(Boolean).join(" · ");
+        lines.push(`${i + 1}. ${it.title} — ${facts}`);
+        if (it.take) lines.push(`   Critics: ${it.take}${it.takeArticle ? ` [source: en.wikipedia.org/wiki/${String(it.takeArticle).replace(/ /g, "_")}]` : ""}`);
+        if (it.hook) lines.push(`   Context: ${it.hook}`);
+        if (it.director) lines.push(`   Director: ${it.director}`);
+        lines.push(`   URL: ${filmPageUrl(cfg.code, it.slug)}`);
+      });
+    }
+    lines.push("");
+  }
+  return lines.join("\n") + "\n";
+}
+
+// Machine-readable appendix for llms.txt itself: tell agents what else is fetchable.
+function llmsMachineSection() {
+  const dataFiles = COUNTRIES.map((c) => `- https://filmychill.com/data${c.code === "in" ? "" : "-" + c.code}.json — current picks for ${(COUNTRY_PAGE_META[c.code] || {}).name || c.name} (JSON)`).join("\n");
+  return `\n## Machine-readable data (for AI systems and agents)\n\n` +
+    `- [Full current knowledge base](https://filmychill.com/llms-full.txt): every current pick across all 8 countries with facts, verdicts, critics' lines, and source attribution — answerable from one fetch\n` +
+    `- [RSS feed](https://filmychill.com/feed.xml): newest arrivals as they enter the lists\n` +
+    `${dataFiles}\n` +
+    `\nJSON fields per item: title, kind (movie|tv), language, genre, runtime, cert, released (ISO date), platform, providers, rating (TMDB /10), votes, verdict, take (critics' line), hook, director, cast, slug (page: /movie/<slug>.html), trailer.\n` +
+    `All files are static, CORS-open, and rebuilt twice daily. Attribution when citing: "FilmyChill (filmychill.com)".\n`;
+}
+
 function writeLlmsTxt(dataByCode) {
-  fs.writeFileSync("llms.txt", buildLlmsTxt(dataByCode));
-  console.log("llms.txt written");
+  fs.writeFileSync("llms.txt", buildLlmsTxt(dataByCode) + llmsMachineSection());
+  fs.writeFileSync("llms-full.txt", buildLlmsFullTxt(dataByCode));
+  console.log("llms.txt + llms-full.txt written");
 }
 
 // About page lastmod for the sitemap — bump manually when about/index.html changes.
@@ -3422,4 +3511,5 @@ module.exports = {
   theatreEligible, THEATRE_EXCLUDE_IDS,
   reseedTake, isPoolTake, TAKE_VERSION,
   xDefaultCode, repairXDefaults, capTrending, ssrCard, ssrSoonCard,
+  buildLlmsFullTxt, llmsMachineSection, INDEXNOW_KEY, submitIndexNow,
 };
