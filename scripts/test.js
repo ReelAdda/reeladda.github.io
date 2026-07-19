@@ -1531,8 +1531,60 @@ test("editor's note: phrasing is stable within a week (seeded), facts stay live"
   const data = { theatres: [{ title: "A", rating: 8.0, votes: 100, genre: "Drama" }], ott: [] };
   assert.strictEqual(U.buildEditorNote(data, { code: "in" }, 7), U.buildEditorNote(data, { code: "in" }, 7));
 });
-test("IndexNow key file contract: constant is 32 hex chars (must match /<key>.txt in repo root)", () => {
-  assert.ok(/^[0-9a-f]{32}$/.test(U.INDEXNOW_KEY));
+test("indexNowUrls: hubs, this week's film pages, and llms-full ride the existing ping", () => {
+  const urls = U.indexNowUrls([{ code: "in" }, { code: "us" }], {
+    in: { theatres: [{ slug: "the-odyssey" }], ott: [{ slug: "pritam-and-pedro", title: "P&P", platform: "JioHotstar", providers: ["JioHotstar"] },
+      { slug: "b", title: "B", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "c", title: "C", platform: "JioHotstar", providers: ["JioHotstar"] }] },
+    us: { theatres: [], ott: [] } });
+  assert.ok(urls.includes("https://filmychill.com/movie/the-odyssey.html"));
+  assert.ok(urls.includes("https://filmychill.com/new-on-jiohotstar/"));
+  assert.ok(urls.includes("https://filmychill.com/llms-full.txt"));
+  assert.strictEqual(new Set(urls).size, urls.length); // deduped
+});
+
+// ---------------- platform hub pages ----------------
+group("platform hub pages");
+test("platformSlug: clean, collision-safe slugs incl. overrides", () => {
+  assert.strictEqual(U.platformSlug("Netflix"), "netflix");
+  assert.strictEqual(U.platformSlug("Amazon Prime Video"), "prime-video");
+  assert.strictEqual(U.platformSlug("JioHotstar"), "jiohotstar");
+  assert.strictEqual(U.platformSlug("Disney+"), "disney-plus");
+  assert.strictEqual(U.platformSlug("Apple TV"), "apple-tv");
+});
+test("hubsFor: groups by EVERY provider, enforces min-3 density, caps at 5, keeps rank order", () => {
+  const mk = (slug, provs) => ({ title: slug, slug, platform: provs[0], providers: provs });
+  const ott = [mk("a", ["Netflix", "JioHotstar"]), mk("b", ["Netflix"]), mk("c", ["Netflix"]),
+               mk("d", ["JioHotstar"]), mk("e", ["JioHotstar"]), mk("f", ["Zee5"]), mk("g", ["Zee5"])];
+  const hubs = U.hubsFor({ ott });
+  const names = hubs.map((h) => h.name).sort();
+  assert.deepStrictEqual(names, ["JioHotstar", "Netflix"]); // Zee5 has 2 -> thin, no hub
+  const nf = hubs.find((h) => h.name === "Netflix");
+  assert.deepStrictEqual(nf.items.map((x) => x.slug), ["a", "b", "c"]); // ranked order preserved
+});
+test("buildPlatformHubPage: right title, country-scoped film links, ItemList + FAQ schema", () => {
+  const mk = (slug, r) => ({ title: slug.toUpperCase(), slug, kind: "movie", platform: "Netflix", providers: ["Netflix"], rating: r, votes: 100, language: "English", genre: "Drama" });
+  const data = { generatedAt: "2026-07-19T04:00:00Z", ott: [mk("aaa", 8.2), mk("bbb", 7.1), mk("ccc", 6.4)] };
+  const hub = U.hubsFor(data)[0];
+  const html = U.buildPlatformHubPage(data, { code: "us", name: "United States" }, hub);
+  assert.ok(/New on Netflix/.test(html) && /This Week/.test(html));
+  assert.ok(html.includes('href="/us/movie/aaa.html"'), "film links must carry the country prefix");
+  assert.ok(html.includes('"ItemList"') && html.includes('"numberOfItems":3'));
+  assert.ok(html.includes("What's the best new title on Netflix") && html.includes("AAA"));
+  assert.ok(!/[\u{1F300}-\u{1FAFF}]/u.test(html), "no emoji on listing pages");
+});
+test("buildMoreLinks: hub links appear beside languages for India, alone for other countries", () => {
+  const data = { ott: [{ title: "a", slug: "a", platform: "Netflix", providers: ["Netflix"] },
+    { title: "b", slug: "b", platform: "Netflix", providers: ["Netflix"] }, { title: "c", slug: "c", platform: "Netflix", providers: ["Netflix"] }] };
+  const inLinks = U.buildMoreLinks("in", data);
+  assert.ok(inLinks.includes('href="/new-on-netflix/"') && inLinks.includes('href="/hindi/"'));
+  const usLinks = U.buildMoreLinks("us", data);
+  assert.ok(usLinks.includes('href="/us/new-on-netflix/"') && usLinks.includes("About FilmyChill"));
+});
+test("film page shows up to six similar titles now", () => {
+  const sim = Array.from({ length: 8 }, (_, i) => ({ title: "S" + i, slug: "s" + i, poster: "https://image.tmdb.org/x.jpg", language: "English", kind: "movie" }));
+  const html = U.buildFilmPage({ title: "X", slug: "x", kind: "movie", language: "English", platform: "Theatres",
+    released: "2026-07-10", rating: 7, votes: 100, similar: sim }, "2026-07-19", new Set(["x"]), { code: "in", name: "India", region: "IN" });
+  assert.strictEqual((html.match(/class="simcard"/g) || []).length, 6);
 });
 test("version purge fires even when the entry was already checked today", () => {
   // Mirrors the attachTakes predicate: a numeric v2 take stamped checked=today must
