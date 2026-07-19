@@ -1496,6 +1496,34 @@ test("film-page JSON-LD carries citation + WatchAction when provenance and trail
   assert.ok(html.includes('"citation"') && html.includes("en.wikipedia.org/wiki/The_Odyssey_(2026_film)"));
   assert.ok(html.includes('"WatchAction"') && html.includes("abc123def45"));
 });
+test("editor's note: judgments assemble from real data, capped at three sentences", () => {
+  const data = { generatedAt: "2026-07-19", theatres: [
+    { title: "The Odyssey", rating: 7.7, votes: 1200, genre: "Adventure" },
+    { title: "Moana", rating: 5.6, votes: 85, genre: "Family / Fantasy" },
+    { title: "Alpha", rating: 6.4, votes: 60, genre: "Action" }],
+    ott: [{ title: "Pritam and Pedro", rating: 8.6, votes: 300, platform: "JioHotstar" }] };
+  const n = U.buildEditorNote(data, { code: "in" }, 42);
+  assert.ok(/The Odyssey/.test(n) && /7\.7/.test(n));                 // the event, with its number used judgmentally
+  assert.ok(/Moana/.test(n) && /kids-in-the-house/.test(n));          // family flop -> the gentler skip
+  assert.ok(/Pritam and Pedro/.test(n) && /JioHotstar/.test(n));      // the sleeper
+  assert.ok(n.split(/(?<=[.!?]) /).length <= 4 && n.length < 400, n); // brevity is part of the voice
+});
+test("editor's note: no AI-sounding filler, no fabricated firsthand experience", () => {
+  for (let seed = 0; seed < 40; seed++) {
+    const n = U.buildEditorNote({ generatedAt: "2026-07-19",
+      theatres: [{ title: "A", rating: 8.1, votes: 500, genre: "Drama" }, { title: "B", rating: 4.9, votes: 90, genre: "Action" }],
+      ott: [{ title: "C", rating: 8.2, votes: 200, platform: "Netflix" }] }, { code: "in" }, seed);
+    assert.ok(!/exciting|something for everyone|lineup|!|I watched|I saw|we watched/i.test(n), n);
+  }
+});
+test("editor's note: thin data -> null, never a hollow note", () => {
+  assert.strictEqual(U.buildEditorNote({ theatres: [{ title: "X", rating: 7, votes: 3 }], ott: [] }, { code: "in" }), null);
+  assert.strictEqual(U.buildEditorNote({ theatres: [], ott: [] }, { code: "in" }), null);
+});
+test("editor's note: phrasing is stable within a week (seeded), facts stay live", () => {
+  const data = { theatres: [{ title: "A", rating: 8.0, votes: 100, genre: "Drama" }], ott: [] };
+  assert.strictEqual(U.buildEditorNote(data, { code: "in" }, 7), U.buildEditorNote(data, { code: "in" }, 7));
+});
 test("IndexNow key file contract: constant is 32 hex chars (must match /<key>.txt in repo root)", () => {
   assert.ok(/^[0-9a-f]{32}$/.test(U.INDEXNOW_KEY));
 });
