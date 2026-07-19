@@ -2354,6 +2354,90 @@ function repairXDefaults(countries) {
   if (fixed) console.log(`  hreflang repair: ${fixed} frozen pages had x-default pointing at a missing India copy`);
 }
 
+
+// ============================================================================
+// EDITOR'S NOTE — a short weekly note in a human editorial register, assembled
+// from judgments the pipeline can actually defend: which release is the event,
+// what the ratings say to skip, what's quietly excellent on streaming. RULES:
+// every claim traces to data on the items; NO fabricated firsthand experience
+// ("I watched...") ever; better absent than hollow (returns null on thin data).
+// Wording is seeded by ISO week + country so the phrasing holds steady across a
+// week's builds instead of twitching twice a day, while facts stay live.
+// If /editor-note.txt exists at the repo root, its text REPLACES the generated
+// note for India — the owner's real opinion always outranks the pipeline's.
+// ============================================================================
+const EDNOTE_MIN_VOTES = 25;
+function isoWeekNum(d = new Date()) {
+  const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+  return Math.ceil((((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 864e5) + 1) / 7);
+}
+function buildEditorNote(data, cfg, seed = null) {
+  const th = (data && data.theatres) || [], ott = (data && data.ott) || [];
+  const s = seed != null ? seed : isoWeekNum() * 31 + ((cfg && cfg.code) || "in").charCodeAt(0);
+  const pick = (pool, i) => pool[Math.abs(s + i * 7) % pool.length];
+  const rated = (list) => list.filter((x) => x.rating != null && (x.votes || 0) >= EDNOTE_MIN_VOTES);
+  const r1 = (x) => Number(x.rating).toFixed(1);
+
+  const rt = rated(th).sort((a, b) => b.rating - a.rating);
+  const event = rt[0] && rt[0].rating >= 6.5 ? rt[0] : null;
+  const skip = rt.length > 1 && rt[rt.length - 1].rating <= 5.9 && rt[rt.length - 1] !== event ? rt[rt.length - 1] : null;
+  const ro = rated(ott).sort((a, b) => b.rating - a.rating);
+  const sleeper = ro[0] && ro[0].rating >= 7.8 && ro[0].platform && ro[0].platform !== "Theatres" ? ro[0] : null;
+  if (!event && !skip && !sleeper) return null; // thin data -> say nothing
+
+  const parts = [];
+  if (event && event.rating >= 7.5) {
+    parts.push(pick([
+      `${event.title} is the obvious ticket this week, and for once the obvious call is the right one — a ${r1(event)} from early audiences is rare air.`,
+      `The week belongs to ${event.title}. A ${r1(event)} with real votes behind it means people aren't just showing up, they're coming out happy.`,
+      `Start with ${event.title} — ${r1(event)} and holding, which is about as safe as ticket money gets.`,
+    ], 1));
+  } else if (event) {
+    parts.push(pick([
+      `${event.title} leads a middling week — ${r1(event)} says solid, not special.`,
+      `${event.title} is the safest ticket around, though ${r1(event)} suggests keeping expectations in check.`,
+      `Nothing unmissable in theatres; ${event.title} at ${r1(event)} is the best of it.`,
+    ], 2));
+  } else if (rt.length) {
+    parts.push(pick([
+      `No must-see in theatres this week — save the ticket money.`,
+      `Thin week in theatres, honestly.`,
+    ], 3));
+  }
+  if (skip) {
+    const fam = /family|animation/i.test(skip.genre || "");
+    parts.push(fam
+      ? `${skip.title} at ${r1(skip)} is strictly a kids-in-the-house situation.`
+      : pick([
+          `${skip.title} at ${r1(skip)} is a skip — the number says what the trailer won't.`,
+          `Give ${skip.title} a miss; ${r1(skip)} from the people who paid is warning enough.`,
+          `${skip.title} (${r1(skip)}) can wait for streaming, if that.`,
+        ], 4));
+  }
+  if (sleeper) {
+    parts.push(pick([
+      `The sleeper is on ${sleeper.platform}: ${sleeper.title}, sitting at ${r1(sleeper)} and deserving more noise than it's getting.`,
+      `Quietly, the best-rated thing in the country is ${sleeper.title} on ${sleeper.platform} — ${r1(sleeper)} from viewers.`,
+      `Odd week when the strongest number around (${sleeper.title}, ${r1(sleeper)}) is included with a ${sleeper.platform} plan.`,
+    ], 5));
+  }
+  if (event && event.takeCounter) parts.push(`Critics and audiences are pulling in opposite directions on ${event.title}; side with whichever camp you usually trust.`);
+  return parts.slice(0, 3).join(" ");
+}
+
+function ssrEditorNote(data, cfg) {
+  let note = null;
+  if (cfg && cfg.code === "in" && fs.existsSync("editor-note.txt")) {
+    const own = fs.readFileSync("editor-note.txt", "utf8").trim();
+    if (own) note = own; // the human's line always wins
+  }
+  if (!note) note = buildEditorNote(data, cfg);
+  if (!note) return "";
+  const d = data && data.generatedAt ? fmtDateShort(String(data.generatedAt).slice(0, 10), Date.now(), localeFor(cfg.code)) : "";
+  return `<div class="ednote"><div class="ednote-label">Editor's note${d ? ` · ${e(d)}` : ""}</div><p>${e(note)}</p></div>`;
+}
+
 // IndexNow key: proven by /<key>.txt at the site root (committed file whose content
 // is the key itself). Rotating it means updating both the constant and the file.
 const INDEXNOW_KEY = "334d5cb2e825f49d9f07e19943403a06";
@@ -3439,6 +3523,7 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "HEAD", buildHeadTags(cfg, USE_IMDB, data));
   html = replaceBetween(html, "PAGECODE", `<meta name="fc-page" content="${cfg.code}">`);
   html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code));
+  html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
   html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code));
   html = replaceBetween(html, "SOON", (data.comingSoon || []).map((x) => ssrSoonCard(x, cfg.code)).join(""));
@@ -3512,4 +3597,5 @@ module.exports = {
   reseedTake, isPoolTake, TAKE_VERSION,
   xDefaultCode, repairXDefaults, capTrending, ssrCard, ssrSoonCard,
   buildLlmsFullTxt, llmsMachineSection, INDEXNOW_KEY, submitIndexNow,
+  buildEditorNote, ssrEditorNote,
 };
