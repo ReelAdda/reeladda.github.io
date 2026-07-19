@@ -2435,7 +2435,7 @@ function ssrEditorNote(data, cfg) {
   if (!note) note = buildEditorNote(data, cfg);
   if (!note) return "";
   const d = data && data.generatedAt ? fmtDateShort(String(data.generatedAt).slice(0, 10), Date.now(), localeFor(cfg.code)) : "";
-  return `<div class="ednote"><div class="ednote-label">Editor's note${d ? ` · ${e(d)}` : ""}</div><p>${e(note)}</p></div>`;
+  return `<div class="ednote"><div class="ednote-label">Editor's note${d ? ` · ${escHtml(d)}` : ""}</div><p>${escHtml(note)}</p></div>`;
 }
 
 // IndexNow key: proven by /<key>.txt at the site root (committed file whose content
