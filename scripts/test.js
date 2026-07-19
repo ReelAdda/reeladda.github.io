@@ -1468,6 +1468,37 @@ test("takes are number-free across every tone and evidence combo", () => {
     if (s != null) assert.ok(!/\d/.test(s), JSON.stringify(a) + " -> " + s);
   }
 });
+// ---------------- AI-era readiness ----------------
+group("AI-era readiness");
+test("llms-full.txt: one fetch answers the week — facts, verdicts, critics' lines, provenance", () => {
+  const data = { in: { generatedAt: "2026-07-19T04:00:00Z", theatres: [{ title: "The Odyssey", kind: "movie",
+    language: "English", genre: "Adventure", runtime: 173, cert: "A", released: "2026-07-10", platform: "Theatres",
+    rating: 7.7, votes: 1200, verdict: "Must watch", take: "Critics loved it — special praise for the visuals.",
+    takeArticle: "The Odyssey (2026 film)", hook: "Christopher Nolan's mythological epic.", director: "Christopher Nolan",
+    slug: "the-odyssey" }], ott: [] } };
+  const s = U.buildLlmsFullTxt(data);
+  assert.ok(s.includes("The Odyssey") && s.includes("rated 7.7/10") && s.includes("Must watch"));
+  assert.ok(s.includes("Critics: Critics loved it"));
+  assert.ok(s.includes("en.wikipedia.org/wiki/The_Odyssey_(2026_film)")); // provenance travels with the claim
+  assert.ok(s.includes("https://filmychill.com/movie/the-odyssey.html"));
+  assert.ok(!/<[a-z]/.test(s), "plain text only, no HTML");
+});
+test("llms.txt machine appendix lists llms-full, the feed, and every country's JSON", () => {
+  const s = U.llmsMachineSection();
+  assert.ok(s.includes("llms-full.txt") && s.includes("feed.xml"));
+  assert.ok(s.includes("https://filmychill.com/data.json") && s.includes("https://filmychill.com/data-us.json"));
+});
+test("film-page JSON-LD carries citation + WatchAction when provenance and trailer exist", () => {
+  const html = U.buildFilmPage({ title: "Odyssey", slug: "odyssey", kind: "movie", language: "English",
+    platform: "Theatres", released: "2026-07-10", rating: 7.7, votes: 900,
+    take: "Critics loved it.", takeSrc: "wiki", takeArticle: "The Odyssey (2026 film)",
+    trailer: "https://www.youtube.com/watch?v=abc123def45" }, "2026-07-19", new Set(["odyssey"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(html.includes('"citation"') && html.includes("en.wikipedia.org/wiki/The_Odyssey_(2026_film)"));
+  assert.ok(html.includes('"WatchAction"') && html.includes("abc123def45"));
+});
+test("IndexNow key file contract: constant is 32 hex chars (must match /<key>.txt in repo root)", () => {
+  assert.ok(/^[0-9a-f]{32}$/.test(U.INDEXNOW_KEY));
+});
 test("version purge fires even when the entry was already checked today", () => {
   // Mirrors the attachTakes predicate: a numeric v2 take stamped checked=today must
   // still qualify for refetch — otherwise known-bad lines sit on the live site a day.
