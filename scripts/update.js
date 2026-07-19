@@ -2010,6 +2010,7 @@ async function main() {
     generatePages(dataByCode[cfg.code], cfg, allSlugSets);
     if (pageTemplate) renderCountryPage(pageTemplate, cfg, dataByCode[cfg.code]);
     writeOttWeekPage(dataByCode[cfg.code], cfg, builtCountries); // /new-on-ott/ per country
+    writePlatformHubPages(dataByCode[cfg.code], cfg);             // /new-on-<platform>/ per country
     writeRssFeed(dataByCode[cfg.code], cfg);                      // /feed.xml per country
   }
   // India-only surfaces: language landing pages (/tamil/, /hindi/, ...) and the
@@ -2019,7 +2020,7 @@ async function main() {
     writeLanguagePages(dataByCode.in);
     writeWeekPage(dataByCode.in);
   }
-  writeIndexNowPayload(builtCountries); // fresh URL list for the workflow's IndexNow ping
+  writeIndexNowPayload(builtCountries, dataByCode); // fresh URL list for the workflow's IndexNow ping
   writeLlmsTxt(dataByCode); // AI-answer-engine site map with this week's actual picks
 
   // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
@@ -2031,10 +2032,6 @@ async function main() {
   // Frozen archived pages are never rewritten, so pages generated before the x-default
   // fix carry a dead India URL in their hreflang forever unless repaired in place.
   repairXDefaults(builtCountries);
-
-  // IndexNow: push this build's fresh URLs to Bing & partners (Bing's index feeds
-  // Copilot and ChatGPT search). Fire-and-forget — a ping failure never fails a build.
-  await submitIndexNow(builtCountries, dataByCode);
 
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
   writeMultiCountrySitemap(builtCountries, pagesManifest);
@@ -2166,7 +2163,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   const verdictProse = buildVerdictProse(item, country, localeFor(code));
   const goodToKnow = buildGoodToKnow(item);
   const faqs = buildFaqs(item, country);
-  const similar = (Array.isArray(item.similar) ? item.similar : []).slice(0, 3);
+  const similar = (Array.isArray(item.similar) ? item.similar : []).slice(0, 6);
 
   // FAQPage schema — only when we have at least 2 Q&As (Google wants a real list).
   const faqLd = faqs.length >= 2 ? {
@@ -2275,7 +2272,7 @@ ${(item.backdrop || item.poster) ? `<meta property="og:image" content="${e(item.
       : `<div class="simcard" style="cursor:default">${inner}</div>`;
   }).join("")}</div>` : ""}
   ${faqs.length ? `<h2>Frequently asked</h2><div class="faq">${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("")}</div>` : ""}
-  <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">🎬 See this week's top picks on FilmyChill →</a>
+  <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">See this week's top picks on FilmyChill →</a>
 </div>
 <footer>
   ${footerAttribution()}© 2026 FilmyChill · Vikram Sharma
@@ -2438,27 +2435,6 @@ function ssrEditorNote(data, cfg) {
   return `<div class="ednote"><div class="ednote-label">Editor's note${d ? ` · ${escHtml(d)}` : ""}</div><p>${escHtml(note)}</p></div>`;
 }
 
-// IndexNow key: proven by /<key>.txt at the site root (committed file whose content
-// is the key itself). Rotating it means updating both the constant and the file.
-const INDEXNOW_KEY = "334d5cb2e825f49d9f07e19943403a06";
-async function submitIndexNow(countries, dataByCode) {
-  try {
-    const urls = countries.map((c) => `https://filmychill.com${(COUNTRY_PAGE_META[c.code] || { path: "/" + c.code + "/" }).path}`);
-    for (const c of countries) {
-      const d = dataByCode[c.code];
-      for (const it of [...(d?.theatres || []), ...(d?.ott || [])]) urls.push(filmPageUrl(c.code, it.slug));
-    }
-    urls.push("https://filmychill.com/new-on-ott/", "https://filmychill.com/llms-full.txt");
-    const body = { host: "filmychill.com", key: INDEXNOW_KEY,
-      keyLocation: `https://filmychill.com/${INDEXNOW_KEY}.txt`, urlList: [...new Set(urls)].slice(0, 500) };
-    const res = await fetch("https://api.indexnow.org/indexnow", {
-      method: "POST", headers: { "Content-Type": "application/json; charset=utf-8" }, body: JSON.stringify(body) });
-    console.log(`IndexNow: ${body.urlList.length} URLs submitted (HTTP ${res.status})`);
-  } catch (e) {
-    console.warn(`IndexNow ping skipped: ${e.message}`);
-  }
-}
-
 // Complete sitemap: every country homepage (with hreflang alternates) + every country's
 // per-film pages. A film that exists in several countries gets hreflang alternates linking
 // those copies together; a film unique to one country stands alone.
@@ -2520,6 +2496,16 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     }
   }
   // Language landing pages (India) — daily-refreshed discovery surfaces.
+  // Platform hubs: include every hub directory that this run actually wrote.
+  const hubUrls = [];
+  for (const c of countries) {
+    const base = c.code === "in" ? "." : c.code;
+    if (!fs.existsSync(base)) continue;
+    for (const d of fs.readdirSync(base)) {
+      if (d.startsWith("new-on-") && d !== "new-on-ott" && fs.existsSync(`${base}/${d}/index.html`))
+        hubUrls.push(`  <url><loc>https://filmychill.com${c.code === "in" ? "" : "/" + c.code}/${d}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
+    }
+  }
   const langUrls = LANGUAGE_PAGES.filter(([, slug]) => fs.existsSync(`${slug}/index.html`))
     .map(([, slug]) => `  <url><loc>https://filmychill.com/${slug}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
   // Weekly snapshots: the current week reports today; FROZEN weeks report their own
@@ -2534,8 +2520,8 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const aboutUrls = fs.existsSync("about/index.html")
     ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${ABOUT_LASTMOD}</lastmod><priority>0.3</priority></url>`] : [];
   fs.writeFileSync("sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...weekUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
-  console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${weekUrls.length} week + ${filmCount} film pages.`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...weekUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
+  console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${hubUrls.length} hub + ${weekUrls.length} week + ${filmCount} film pages.`);
 }
 
 // Manual/local regeneration from existing data.json: PAGES_ONLY=1 node scripts/update.js
@@ -2628,6 +2614,105 @@ function replaceBetween(html, tag, inner) {
 // ============================================================================
 function ottWeekPath(code) { return code === "in" ? "new-on-ott/index.html" : `${code}/new-on-ott/index.html`; }
 function ottWeekUrl(code) { return code === "in" ? "https://filmychill.com/new-on-ott/" : `https://filmychill.com/${code}/new-on-ott/`; }
+
+
+// ============================================================================
+// PLATFORM HUB PAGES — /new-on-netflix/, /new-on-jiohotstar/, ... per country.
+// The highest-intent streaming queries are platform-shaped ("new on netflix
+// india this week"); nobody types "new OTT releases". Each hub is a filtered
+// re-render of data the run already has — zero extra API calls — grouped from
+// every provider an item is on (item.providers), not just its primary badge.
+// Eligibility keeps hubs dense and honest: a provider needs >= HUB_MIN_TITLES
+// current titles, and only the top HUB_MAX_PER_COUNTRY providers get pages —
+// a hub with one film is thin content under any name. Same licence-clean
+// sources, same take lines, CollectionPage + ItemList + FAQ schema.
+// ============================================================================
+const HUB_MIN_TITLES = 3;
+const HUB_MAX_PER_COUNTRY = 5;
+const PLATFORM_SLUG_OVERRIDES = { "Amazon Prime Video": "prime-video", "Apple TV": "apple-tv", "Apple TV+": "apple-tv", "Disney+": "disney-plus", "Disney Plus": "disney-plus" };
+function platformSlug(name) {
+  if (PLATFORM_SLUG_OVERRIDES[name]) return PLATFORM_SLUG_OVERRIDES[name];
+  return String(name).toLowerCase().replace(/\+/g, " plus").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+function hubsFor(data) {
+  const groups = new Map(); // provider name -> items in ranked order
+  for (const it of (data && data.ott) || []) {
+    if (!it || !it.title) continue;
+    const provs = new Set([...(Array.isArray(it.providers) ? it.providers : []), ...(it.platform && it.platform !== "Theatres" ? [it.platform] : [])]);
+    for (const p of provs) {
+      if (!groups.has(p)) groups.set(p, []);
+      groups.get(p).push(it);
+    }
+  }
+  return [...groups.entries()]
+    .filter(([, items]) => items.length >= HUB_MIN_TITLES)
+    .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
+    .slice(0, HUB_MAX_PER_COUNTRY)
+    .map(([name, items]) => ({ name, slug: platformSlug(name), items }));
+}
+function hubPath(code, slug) { return code === "in" ? `new-on-${slug}/index.html` : `${code}/new-on-${slug}/index.html`; }
+function hubUrl(code, slug) { return code === "in" ? `https://filmychill.com/new-on-${slug}/` : `https://filmychill.com/${code}/new-on-${slug}/`; }
+
+function buildPlatformHubPage(data, cfg, hub) {
+  const code = (cfg && cfg.code) || "in";
+  const m = COUNTRY_PAGE_META[code] || { name: (cfg && cfg.name) || "India", path: `/${code}/` };
+  const countryName = m.name;
+  const url = hubUrl(code, hub.slug);
+  const gen = data.generatedAt || new Date().toISOString();
+  const monthYear = new Date(gen).toLocaleDateString(localeFor(code), { month: "long", year: "numeric" });
+  const updatedHuman = new Date(gen).toLocaleDateString(localeFor(code), { day: "numeric", month: "long", year: "numeric" });
+  const films = hub.items.filter((x) => x.kind !== "tv"), series = hub.items.filter((x) => x.kind === "tv");
+
+  const faqs = [{
+    q: `What's new on ${hub.name} in ${countryName} this week?`,
+    a: `New on ${hub.name} this week: ${hub.items.map((t) => t.title).join(", ")}.`,
+  }];
+  const best = hub.items.filter((x) => x.rating != null).sort((a, b) => b.rating - a.rating)[0];
+  if (best) faqs.push({
+    q: `What's the best new title on ${hub.name} right now?`,
+    a: `${best.title} is the top-rated new arrival on ${hub.name} at ${Number(best.rating).toFixed(1)}/10${best.verdict ? ` — ${best.verdict}` : ""}.`,
+  });
+
+  const linked = hub.items.filter((x) => x.slug);
+  const extraLd = [{
+    "@context": "https://schema.org", "@type": "CollectionPage",
+    name: `New on ${hub.name} in ${countryName} This Week`, url, dateModified: gen,
+    isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+    mainEntity: { "@type": "ItemList", numberOfItems: linked.length,
+      itemListElement: linked.map((x, i) => ({ "@type": "ListItem", position: i + 1, name: x.title, url: filmPageUrl(code, x.slug) })) },
+  }, {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "FilmyChill", item: `https://filmychill.com${m.path}` },
+      { "@type": "ListItem", position: 2, name: `New on ${hub.name}`, item: url },
+    ],
+  }];
+  return listingPageHtml({
+    title: `New on ${hub.name} ${countryName} This Week (${monthYear}) | FilmyChill`,
+    desc: `Every movie and series newly streaming on ${hub.name} in ${countryName} this week — ratings, critics' verdicts, what to skip. Updated daily.`,
+    canonical: url,
+    h1: `New on ${hub.name} in ${countryName} this week`,
+    updLine: `Updated ${updatedHuman} · refreshed daily`,
+    lead: `${hub.items.length} new ${hub.items.length === 1 ? "title" : "titles"} on ${hub.name} this week, ranked and rated — with an honest word on which are worth your evening.`,
+    sections: (films.length && series.length)
+      ? [{ h2: "Movies", items: films }, { h2: "Series", items: series }]
+      : [{ h2: `Added this week`, items: hub.items }],
+    faqs, extraLd, homeUrl: `https://filmychill.com${m.path}`, code,
+  });
+}
+
+function writePlatformHubPages(data, cfg) {
+  const code = (cfg && cfg.code) || "in";
+  const hubs = hubsFor(data);
+  for (const hub of hubs) {
+    const p = hubPath(code, hub.slug);
+    const dir = p.slice(0, p.lastIndexOf("/"));
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(p, buildPlatformHubPage(data, cfg, hub));
+  }
+  if (hubs.length) console.log(`  platform hubs (${code}): ${hubs.map((h) => "new-on-" + h.slug).join(", ")}`);
+  return hubs;
+}
 
 function buildOttWeekPage(data, cfg, allCountries) {
   const e = escHtml;
@@ -2950,7 +3035,7 @@ const LANGUAGE_PAGES = [
 
 // Shared listing shell for language + week pages (same visual family as the
 // /new-on-ott/ pages). `sections` = [{ h2, items }]; rows link to film pages.
-function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null }) {
+function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in" }) {
   const e = escHtml;
   const ldJson = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
   const rowFor = (it) => {
@@ -2966,7 +3051,7 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
         ${it.hook ? `<div class="rm hk">${e(it.hook)}</div>` : ""}
         ${it.take ? `<div class="rm tk">${e(it.take)}</div>` : ""}
       </div>`;
-    return it.slug ? `<a class="row" href="${e(filmPagePath("in", it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
+    return it.slug ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
   };
   const sectionHtml = sections.filter((sec) => sec.items.length).map((sec) => `
   <section>
@@ -3198,14 +3283,21 @@ function writeWeekPage(data) {
 // and every configured country/language page get pinged without ever editing the
 // workflow again. The key is public by design — IndexNow proves ownership via the
 // matching KEY.txt served from the repo root, not by keeping the key secret.
-function writeIndexNowPayload(builtCountries) {
-  const urls = ["https://filmychill.com/", "https://filmychill.com/new-on-ott/"];
+function indexNowUrls(builtCountries, dataByCode = {}) {
+  const urls = ["https://filmychill.com/", "https://filmychill.com/new-on-ott/", "https://filmychill.com/llms-full.txt"];
   for (const cfg of builtCountries) {
-    if (cfg.code === "in") continue;
-    urls.push(`https://filmychill.com/${cfg.code}/`, `https://filmychill.com/${cfg.code}/new-on-ott/`);
+    if (cfg.code !== "in") urls.push(`https://filmychill.com/${cfg.code}/`, `https://filmychill.com/${cfg.code}/new-on-ott/`);
+    const d = dataByCode[cfg.code];
+    if (!d) continue;
+    for (const h of hubsFor(d)) urls.push(hubUrl(cfg.code, h.slug));
+    for (const it of [...(d.theatres || []), ...(d.ott || [])]) if (it.slug) urls.push(filmPageUrl(cfg.code, it.slug));
   }
   for (const [, slug] of LANGUAGE_PAGES) urls.push(`https://filmychill.com/${slug}/`);
   urls.push(`https://filmychill.com/week/${weekSlug(isoWeekOf())}/`);
+  return [...new Set(urls)].slice(0, 900); // stay modest; IndexNow caps far higher
+}
+function writeIndexNowPayload(builtCountries, dataByCode = {}) {
+  const urls = indexNowUrls(builtCountries, dataByCode);
   fs.writeFileSync("indexnow-payload.json", JSON.stringify({
     host: "filmychill.com",
     key: "a95eba27e6b3f0e85e89e609241d6699",
@@ -3510,11 +3602,12 @@ function ssrOttSection(items, code) {
 // Footer cross-links, injected per country: India links its language pages and the
 // current week's snapshot; every country links About. New indexable surfaces get
 // crawl paths from every page on the site.
-function buildMoreLinks(code) {
+function buildMoreLinks(code, data = null) {
   const about = `<a href="/about/">About FilmyChill</a>`;
-  if (code !== "in") return about;
+  const hubs = data ? hubsFor(data).map((h) => `<a href="${code === "in" ? "" : "/" + code}/new-on-${h.slug}/">New on ${escHtml(h.name)}</a>`).join(" · ") : "";
+  if (code !== "in") return hubs ? `${hubs} · ${about}` : about;
   const langs = LANGUAGE_PAGES.map(([name, slug]) => `<a href="/${slug}/">${name}</a>`).join(" · ");
-  return `${langs} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${about}`;
+  return `${langs}${hubs ? " · " + hubs : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${about}`;
 }
 
 function renderCountryPage(templateHtml, cfg, data) {
@@ -3522,7 +3615,7 @@ function renderCountryPage(templateHtml, cfg, data) {
   let html = templateHtml;
   html = replaceBetween(html, "HEAD", buildHeadTags(cfg, USE_IMDB, data));
   html = replaceBetween(html, "PAGECODE", `<meta name="fc-page" content="${cfg.code}">`);
-  html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code));
+  html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code, data));
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
   html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code));
@@ -3596,6 +3689,7 @@ module.exports = {
   theatreEligible, THEATRE_EXCLUDE_IDS,
   reseedTake, isPoolTake, TAKE_VERSION,
   xDefaultCode, repairXDefaults, capTrending, ssrCard, ssrSoonCard,
-  buildLlmsFullTxt, llmsMachineSection, INDEXNOW_KEY, submitIndexNow,
+  buildLlmsFullTxt, llmsMachineSection,
   buildEditorNote, ssrEditorNote,
+  platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, buildMoreLinks, indexNowUrls,
 };
