@@ -1516,6 +1516,13 @@ test("editor's note: no AI-sounding filler, no fabricated firsthand experience",
     assert.ok(!/exciting|something for everyone|lineup|!|I watched|I saw|we watched/i.test(n), n);
   }
 });
+test("ssrEditorNote renders the styled block (would have caught the escHtml scope bug)", () => {
+  const html = U.ssrEditorNote({ generatedAt: "2026-07-19", theatres: [
+    { title: "A & B", rating: 8.0, votes: 200, genre: "Drama" }], ott: [] }, { code: "us" });
+  assert.ok(html.includes('class="ednote"') && html.includes("Editor's note"));
+  assert.ok(html.includes("A &amp; B"), html); // escaping actually ran
+  assert.strictEqual(U.ssrEditorNote({ theatres: [], ott: [] }, { code: "us" }), ""); // thin data -> no block
+});
 test("editor's note: thin data -> null, never a hollow note", () => {
   assert.strictEqual(U.buildEditorNote({ theatres: [{ title: "X", rating: 7, votes: 3 }], ott: [] }, { code: "in" }), null);
   assert.strictEqual(U.buildEditorNote({ theatres: [], ott: [] }, { code: "in" }), null);
