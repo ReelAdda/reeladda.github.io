@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-07-19T14:44:01.226Z",
+ "generatedAt": "2026-07-20T05:23:46.118Z",
  "country": "uk",
- "pick": "Mortal Kombat II",
+ "pick": "The Odyssey",
  "theatres": [
   {
    "title": "The Odyssey",
@@ -9,21 +9,21 @@
    "language": "English",
    "released": "2026-07-06",
    "review": "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War.",
-   "rating": 7.7,
+   "rating": 7.8,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.7/10"
+     "score": "7.8/10"
     }
    ],
-   "votes": 553,
+   "votes": 654,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1368337,
-   "popularity": 660.4968,
+   "popularity": 746.6132,
    "platform": "Theatres",
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=AyIZ9tiiN8I",
@@ -41,13 +41,6 @@
    "freshDate": "2026-07-15",
    "badge": "New release",
    "similar": [
-    {
-     "title": "Conan the Barbarian",
-     "slug": "conan-the-barbarian",
-     "poster": "https://image.tmdb.org/t/p/w342/qw2A587Ee61IwcSOLNFRhuOACZZ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
     {
      "title": "Immortals",
      "slug": "immortals",
@@ -82,9 +75,16 @@
      "poster": "https://image.tmdb.org/t/p/w342/jrwQu72sGwGqwE8Ijne89PSIvhp.jpg",
      "language": "English",
      "kind": "movie"
+    },
+    {
+     "title": "Deathstalker",
+     "slug": "deathstalker",
+     "poster": "https://image.tmdb.org/t/p/w342/nEI3DnzQC1afAjJOAizx6UX27pL.jpg",
+     "language": "English",
+     "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/tYuC9kUwqhpDQ3pv1kLMqyMF1Jw.jpg",
+   "backdrop": "https://image.tmdb.org/t/p/w780/r57L2UBLPKcHdZQYg8tagv9XqK2.jpg",
    "fullReview": "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War. Throughout his voyage, he is forced to confront the whims of gods, mythological monsters, and trials that stretch both his cunning and his humanity to the breaking point.",
    "castPics": [
     {
@@ -119,12 +119,134 @@
     }
    ],
    "slug": "the-odyssey",
-   "wikiWeeklyViews": 3887683,
+   "wikiWeeklyViews": 4817992,
    "trending": true,
-   "trailerViews": 10411803,
+   "trailerViews": 10718055,
    "take": "Reviewers were close to unanimous — this one landed.",
    "takeSrc": "wiki",
    "takeArticle": "The Odyssey (2026 film)"
+  },
+  {
+   "title": "Moana",
+   "genre": "Family / Fantasy",
+   "language": "English",
+   "released": "2026-07-10",
+   "review": "Teenage Moana answers the Ocean's call and, for the first time, voyages beyond the reef of her island of Motunui with infamous demigod Maui on an unforgettable…",
+   "rating": 5.9,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "5.9/10"
+    }
+   ],
+   "votes": 113,
+   "verdict": "Decent one-time watch",
+   "poster": "https://image.tmdb.org/t/p/w342/zKVgiv5qHCvCLT4A2ymJi5QeXDH.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1108427,
+   "popularity": 601.7817,
+   "platform": "Theatres",
+   "cert": "PG",
+   "trailer": "https://www.youtube.com/watch?v=EEz5xbzYPKI",
+   "providers": [],
+   "cast": [
+    "Catherine Lagaʻaia",
+    "Dwayne Johnson",
+    "Rena Owen",
+    "John Tui"
+   ],
+   "director": "Thomas Kail",
+   "runtime": 115,
+   "imdbVotes": null,
+   "imdbId": "tt27419466",
+   "freshDate": "2026-07-08",
+   "badge": null,
+   "similar": [
+    {
+     "title": "Moana",
+     "slug": "moana",
+     "poster": "https://image.tmdb.org/t/p/w342/m5MDZOIFEFlxGiLuAzWzFSsWcye.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Moana 2",
+     "slug": "moana-2",
+     "poster": "https://image.tmdb.org/t/p/w342/aLVkiINlIeCkcZIzb7XHzPYgO6L.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Sea Beast",
+     "slug": "the-sea-beast",
+     "poster": "https://image.tmdb.org/t/p/w342/9Zfv4Ap1e8eKOYnZPtYaWhLkk0d.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Ruby Gillman, Teenage Kraken",
+     "slug": "ruby-gillman-teenage-kraken",
+     "poster": "https://image.tmdb.org/t/p/w342/8ChIb3WzYAcza1vrXR56v510MWk.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Lilo & Stitch",
+     "slug": "lilo-stitch",
+     "poster": "https://image.tmdb.org/t/p/w342/ckQzKpQJO4ZQDCN5evdpKcfm7Ys.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Legend of Ochi",
+     "slug": "the-legend-of-ochi",
+     "poster": "https://image.tmdb.org/t/p/w342/qYyEelO4JfOwE0Ui5KsrCE0O8UA.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/mMkJq4dkQwfDieB9wRC9yPxDWv9.jpg",
+   "fullReview": "Teenage Moana answers the Ocean's call and, for the first time, voyages beyond the reef of her island of Motunui with infamous demigod Maui on an unforgettable journey to restore prosperity to her people.",
+   "castPics": [
+    {
+     "name": "Catherine Lagaʻaia",
+     "character": "Moana",
+     "photo": "https://image.tmdb.org/t/p/w185/2KRIRDwy1CtY7Bge3aqVZrORelc.jpg"
+    },
+    {
+     "name": "Dwayne Johnson",
+     "character": "Maui",
+     "photo": "https://image.tmdb.org/t/p/w185/5QApZVV8FUFlVxQpIK3Ew6cqotq.jpg"
+    },
+    {
+     "name": "Rena Owen",
+     "character": "Gramma Tala",
+     "photo": "https://image.tmdb.org/t/p/w185/648ZdDBmlx6OFDFRmgAbh6q5LBo.jpg"
+    },
+    {
+     "name": "John Tui",
+     "character": "Chief Tui",
+     "photo": "https://image.tmdb.org/t/p/w185/2jIc9M5kl2GmK8fZtbtUr2s1jkS.jpg"
+    },
+    {
+     "name": "Frankie Adams",
+     "character": "Sina",
+     "photo": "https://image.tmdb.org/t/p/w185/aAUHUSf0lh3OBRoaiCRL9ep8lfL.jpg"
+    },
+    {
+     "name": "Jemaine Clement",
+     "character": "Tamatoa (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/6eiNbeurpHb2fxIeT0RrJ0wRI25.jpg"
+    }
+   ],
+   "slug": "moana",
+   "wikiWeeklyViews": 370114,
+   "trailerViews": 2292495,
+   "take": "Critics are split — praise for the originality and themes, pushback on the music.",
+   "takeSrc": "wiki",
+   "takeArticle": "Moana (2026 film)"
   },
   {
    "title": "Minions & Monsters",
@@ -139,14 +261,14 @@
      "score": "6.4/10"
     }
    ],
-   "votes": 194,
+   "votes": 200,
    "verdict": "Decent one-time watch",
    "poster": "https://image.tmdb.org/t/p/w342/nz7i42yhLIJ4ve9JKgM6NthoLHO.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1315772,
-   "popularity": 286.1125,
+   "popularity": 332.1634,
    "platform": "Theatres",
    "cert": "U",
    "trailer": "https://www.youtube.com/watch?v=V-O-uBaHk3c",
@@ -242,134 +364,12 @@
     }
    ],
    "slug": "minions-monsters",
-   "wikiWeeklyViews": 146781,
-   "trailerViews": 20190884,
+   "wikiWeeklyViews": 138215,
+   "trailerViews": 20239516,
    "take": "Most critics came away happy.",
    "takeSrc": "wiki",
    "takeArticle": "Minions & Monsters",
    "hook": "Premiered at the Annecy International Animation Film Festival."
-  },
-  {
-   "title": "Moana",
-   "genre": "Family / Fantasy",
-   "language": "English",
-   "released": "2026-07-10",
-   "review": "Teenage Moana answers the Ocean's call and, for the first time, voyages beyond the reef of her island of Motunui with infamous demigod Maui on an unforgettable…",
-   "rating": 5.8,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "5.8/10"
-    }
-   ],
-   "votes": 110,
-   "verdict": "Decent one-time watch",
-   "poster": "https://image.tmdb.org/t/p/w342/zKVgiv5qHCvCLT4A2ymJi5QeXDH.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 1108427,
-   "popularity": 364.172,
-   "platform": "Theatres",
-   "cert": "PG",
-   "trailer": "https://www.youtube.com/watch?v=EEz5xbzYPKI",
-   "providers": [],
-   "cast": [
-    "Dwayne Johnson",
-    "Catherine Lagaʻaia",
-    "Rena Owen",
-    "John Tui"
-   ],
-   "director": "Thomas Kail",
-   "runtime": 115,
-   "imdbVotes": null,
-   "imdbId": "tt27419466",
-   "freshDate": "2026-07-08",
-   "badge": null,
-   "similar": [
-    {
-     "title": "Moana",
-     "slug": "moana",
-     "poster": "https://image.tmdb.org/t/p/w342/m5MDZOIFEFlxGiLuAzWzFSsWcye.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Moana 2",
-     "slug": "moana-2",
-     "poster": "https://image.tmdb.org/t/p/w342/aLVkiINlIeCkcZIzb7XHzPYgO6L.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Sea Beast",
-     "slug": "the-sea-beast",
-     "poster": "https://image.tmdb.org/t/p/w342/9Zfv4Ap1e8eKOYnZPtYaWhLkk0d.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Ruby Gillman, Teenage Kraken",
-     "slug": "ruby-gillman-teenage-kraken",
-     "poster": "https://image.tmdb.org/t/p/w342/8ChIb3WzYAcza1vrXR56v510MWk.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Lilo & Stitch",
-     "slug": "lilo-stitch",
-     "poster": "https://image.tmdb.org/t/p/w342/ckQzKpQJO4ZQDCN5evdpKcfm7Ys.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Legend of Ochi",
-     "slug": "the-legend-of-ochi",
-     "poster": "https://image.tmdb.org/t/p/w342/qYyEelO4JfOwE0Ui5KsrCE0O8UA.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/mMkJq4dkQwfDieB9wRC9yPxDWv9.jpg",
-   "fullReview": "Teenage Moana answers the Ocean's call and, for the first time, voyages beyond the reef of her island of Motunui with infamous demigod Maui on an unforgettable journey to restore prosperity to her people.",
-   "castPics": [
-    {
-     "name": "Dwayne Johnson",
-     "character": "Maui",
-     "photo": "https://image.tmdb.org/t/p/w185/5QApZVV8FUFlVxQpIK3Ew6cqotq.jpg"
-    },
-    {
-     "name": "Catherine Lagaʻaia",
-     "character": "Moana",
-     "photo": "https://image.tmdb.org/t/p/w185/2KRIRDwy1CtY7Bge3aqVZrORelc.jpg"
-    },
-    {
-     "name": "Rena Owen",
-     "character": "Gramma Tala",
-     "photo": "https://image.tmdb.org/t/p/w185/648ZdDBmlx6OFDFRmgAbh6q5LBo.jpg"
-    },
-    {
-     "name": "John Tui",
-     "character": "Chief Tui",
-     "photo": "https://image.tmdb.org/t/p/w185/2jIc9M5kl2GmK8fZtbtUr2s1jkS.jpg"
-    },
-    {
-     "name": "Frankie Adams",
-     "character": "Sina",
-     "photo": "https://image.tmdb.org/t/p/w185/aAUHUSf0lh3OBRoaiCRL9ep8lfL.jpg"
-    },
-    {
-     "name": "Jemaine Clement",
-     "character": "Tamatoa (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/6eiNbeurpHb2fxIeT0RrJ0wRI25.jpg"
-    }
-   ],
-   "slug": "moana",
-   "wikiWeeklyViews": 433643,
-   "trailerViews": 2263424,
-   "take": "Critics are split — praise for the originality and themes, pushback on the music.",
-   "takeSrc": "wiki",
-   "takeArticle": "Moana (2026 film)"
   },
   {
    "title": "Evil Dead Burn",
@@ -384,14 +384,14 @@
      "score": "6.8/10"
     }
    ],
-   "votes": 162,
+   "votes": 167,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/ztadKzIIR0ERYqpHteaPFtk7inP.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1212763,
-   "popularity": 82.8123,
+   "popularity": 72.3815,
    "platform": "Theatres",
    "cert": "18",
    "trailer": "https://www.youtube.com/watch?v=RddZObTlmA8",
@@ -487,9 +487,9 @@
     }
    ],
    "slug": "evil-dead-burn",
-   "wikiWeeklyViews": 459558,
+   "wikiWeeklyViews": 386107,
    "trending": true,
-   "trailerViews": 362963,
+   "trailerViews": 365641,
    "take": "Critics are split, though the writing found admirers.",
    "takeSrc": "wiki",
    "takeArticle": "Evil Dead Burn",
@@ -515,7 +515,7 @@
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 950028,
-   "popularity": 22.0876,
+   "popularity": 27.0219,
    "platform": "Theatres",
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=nelkiuezJxg",
@@ -611,8 +611,8 @@
     }
    ],
    "slug": "the-invite",
-   "wikiWeeklyViews": 247600,
-   "trailerViews": 8400869,
+   "wikiWeeklyViews": 226578,
+   "trailerViews": 8414064,
    "take": "Critics loved this one; reception has been close to universal acclaim.",
    "takeSrc": "wiki",
    "takeArticle": "The Invite",
@@ -638,7 +638,7 @@
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1308767,
-   "popularity": 12.6601,
+   "popularity": 12.6025,
    "platform": "Theatres",
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=LJek-kc384w",
@@ -734,8 +734,8 @@
     }
    ],
    "slug": "young-washington",
-   "wikiWeeklyViews": 84710,
-   "trailerViews": 33804321,
+   "wikiWeeklyViews": 77612,
+   "trailerViews": 34037969,
    "take": "Genuinely divisive — critics can't settle this one.",
    "takeSrc": "wiki",
    "takeArticle": "Young Washington"
@@ -753,7 +753,7 @@
      "score": "7.6/10"
     }
    ],
-   "votes": 83,
+   "votes": 84,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/sm5TGX8WbnCd9Uo26cLyTxVwA1n.jpg",
    "isRecent": false,
@@ -856,142 +856,14 @@
     }
    ],
    "slug": "nirvanna-the-band-the-show-the-movie",
-   "wikiWeeklyViews": 21575,
-   "trailerViews": 2785554,
+   "wikiWeeklyViews": 21236,
+   "trailerViews": 2785998,
    "take": "Critics were broadly positive, with reservations about the humour.",
    "takeSrc": "wiki",
    "takeArticle": "Nirvanna the Band the Show the Movie"
   }
  ],
  "ott": [
-  {
-   "title": "Mortal Kombat II",
-   "genre": "Action / Fantasy",
-   "language": "English",
-   "released": "2026-05-07",
-   "review": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark…",
-   "rating": 8,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "8.0/10"
-    }
-   ],
-   "votes": 2029,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/hwRdDFIhaEmpRgoki805YvyyjZf.jpg",
-   "isRecent": true,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 931285,
-   "popularity": 79.6475,
-   "cert": "15",
-   "trailer": "https://www.youtube.com/watch?v=zva2PQ-ud5Y",
-   "providers": [
-    "HBO Max"
-   ],
-   "cast": [
-    "Karl Urban",
-    "Adeline Rudolph",
-    "Ludi Lin",
-    "Jessica McNamee"
-   ],
-   "director": "Simon McQuoid",
-   "runtime": 116,
-   "imdbVotes": null,
-   "imdbId": "tt17490712",
-   "freshDate": "2026-05-06",
-   "badge": "New on HBO Max",
-   "similar": [
-    {
-     "title": "Mortal Kombat",
-     "slug": "mortal-kombat",
-     "poster": "https://image.tmdb.org/t/p/w342/nkayOAUBUu4mMvyNf9iHSUiPjF1.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Mortal Kombat Legends: Scorpion's Revenge",
-     "slug": "mortal-kombat-legends-scorpion-s-revenge",
-     "poster": "https://image.tmdb.org/t/p/w342/iBvo3qOPcmhlqAaJcXcQHtx2qLk.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Mortal Kombat",
-     "slug": "mortal-kombat",
-     "poster": "https://image.tmdb.org/t/p/w342/9YhpvhhvLrtL1wlwEfpVL16GI9d.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Mortal Kombat Legends: Battle of the Realms",
-     "slug": "mortal-kombat-legends-battle-of-the-realms",
-     "poster": "https://image.tmdb.org/t/p/w342/ablrE8IbWcIrAxMmm4gnPn75AMS.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Mortal Kombat Legends: Cage Match",
-     "slug": "mortal-kombat-legends-cage-match",
-     "poster": "https://image.tmdb.org/t/p/w342/1eKWqTHp4OgKdx1QX1O9LxKHr1M.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Mortal Kombat Legends: Snow Blind",
-     "slug": "mortal-kombat-legends-snow-blind",
-     "poster": "https://image.tmdb.org/t/p/w342/8wyOdQRVrpoUb2wMdGHykaD17GM.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/4EAAwpylq313qrDqpCxulUrXBNF.jpg",
-   "fullReview": "The fan favorite champions—now joined by Johnny Cage himself—are pitted against one another in the ultimate, no-holds barred, gory battle to defeat the dark rule of Shao Kahn that threatens the very existence of the Earthrealm and its defenders.",
-   "castPics": [
-    {
-     "name": "Karl Urban",
-     "character": "Johnny Cage",
-     "photo": "https://image.tmdb.org/t/p/w185/7Y96dAfg0HcFrcLjlD5eD9N0uj4.jpg"
-    },
-    {
-     "name": "Adeline Rudolph",
-     "character": "Kitana",
-     "photo": "https://image.tmdb.org/t/p/w185/sWjjm53MeVrpQH2dxtFD3gfEt3v.jpg"
-    },
-    {
-     "name": "Ludi Lin",
-     "character": "Liu Kang",
-     "photo": "https://image.tmdb.org/t/p/w185/9Ila4K8POeuVWRO9hzyekFjvCDk.jpg"
-    },
-    {
-     "name": "Jessica McNamee",
-     "character": "Sonya Blade",
-     "photo": "https://image.tmdb.org/t/p/w185/xX1WxRZyJqVAx24Q3ziziGq2T8A.jpg"
-    },
-    {
-     "name": "Lewis Tan",
-     "character": "Cole Young",
-     "photo": "https://image.tmdb.org/t/p/w185/yMr3mwHHBpfbXwDDkahOzFtTCak.jpg"
-    },
-    {
-     "name": "Josh Lawson",
-     "character": "Kano",
-     "photo": "https://image.tmdb.org/t/p/w185/Am9vM77uZd9bGODugwmWtOfzx6E.jpg"
-    }
-   ],
-   "platform": "HBO Max",
-   "ottSince": "2026-07-19",
-   "ottFreshDate": "2026-07-19",
-   "slug": "mortal-kombat-ii",
-   "wikiWeeklyViews": 44971,
-   "trailerViews": 893631,
-   "take": "Genuinely divisive — critics can't settle this one.",
-   "takeSrc": "wiki",
-   "takeArticle": "Mortal Kombat II (film)",
-   "takeCounter": "Audiences disagree — viewers rate it far higher.",
-   "hook": "The follow-up to ‘Mortal Kombat’."
-  },
   {
    "title": "Descendants: Wicked Wonderland",
    "genre": "Fantasy / Family",
@@ -1005,14 +877,14 @@
      "score": "7.7/10"
     }
    ],
-   "votes": 41,
+   "votes": 55,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/xdhLAADGSse8KCrsDLBuM5b68Cg.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1318621,
-   "popularity": 150.1921,
+   "popularity": 169.3593,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=0Gg7x3xBqBU",
    "providers": [
@@ -1113,9 +985,126 @@
    "ottSince": "2026-07-18",
    "ottFreshDate": "2026-07-18",
    "slug": "descendants-wicked-wonderland",
-   "wikiWeeklyViews": 172598,
-   "trailerViews": 4896477,
+   "wikiWeeklyViews": 200843,
+   "trailerViews": 4910941,
+   "take": "Reviewers singled out the performances for praise.",
+   "takeSrc": "wiki",
+   "takeArticle": "Descendants: Wicked Wonderland",
    "hook": "The follow-up to ‘Descendants’."
+  },
+  {
+   "title": "The East Palace",
+   "genre": "Mystery / Action & Adventure",
+   "language": "Korean",
+   "released": "2026-07-17",
+   "review": "A man who walks the spirit world and a court lady who hears the dead enter the East Palace by the king's orders — can they unravel its dark secrets?",
+   "rating": null,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "New release"
+    }
+   ],
+   "votes": 19,
+   "verdict": "Just released — verdict soon",
+   "poster": "https://image.tmdb.org/t/p/w342/yfYohBszGqoAW8oM0qydOtJ4kPh.jpg",
+   "isRecent": true,
+   "isFresh": true,
+   "kind": "tv",
+   "tmdbId": 279323,
+   "popularity": 99.7668,
+   "cert": "15",
+   "trailer": "https://www.youtube.com/watch?v=wBUkNE1l9DU",
+   "providers": [
+    "Netflix",
+    "Netflix Standard with Ads"
+   ],
+   "cast": [
+    "Nam Joo-hyuk",
+    "Roh Yoon-seo",
+    "Cho Seung-woo",
+    "Jang Young-nam"
+   ],
+   "director": "Kwon So-ra",
+   "runtime": null,
+   "imdbVotes": null,
+   "imdbId": "tt35051401",
+   "freshDate": "2026-07-17",
+   "badge": "New show",
+   "similar": [
+    {
+     "title": "Grimm",
+     "slug": "grimm",
+     "poster": "https://image.tmdb.org/t/p/w342/iOptnt1QHi6bIHmOq6adnZTV0bU.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Constantine",
+     "slug": "constantine",
+     "poster": "https://image.tmdb.org/t/p/w342/gQ3bA1DBKyZwkDCHJFEAT0MkKpu.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Masters of Horror",
+     "slug": "masters-of-horror",
+     "poster": "https://image.tmdb.org/t/p/w342/vgTy1Lfi5P1yD7ZvsuoPKYvxwzv.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The King: Eternal Monarch",
+     "slug": "the-king-eternal-monarch",
+     "poster": "https://image.tmdb.org/t/p/w342/7SLlbkzOJb8v9wXVYIcqozx2hxe.jpg",
+     "language": "Korean",
+     "kind": "tv"
+    },
+    {
+     "title": "Alchemy of Souls",
+     "slug": "alchemy-of-souls",
+     "poster": "https://image.tmdb.org/t/p/w342/gvOZN1NlAoL8iz9ghpES1zWA3w3.jpg",
+     "language": "Korean",
+     "kind": "tv"
+    },
+    {
+     "title": "Wynonna Earp",
+     "slug": "wynonna-earp",
+     "poster": "https://image.tmdb.org/t/p/w342/qnIaDelA81dmFaXrhpz6M6dpGSD.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/8PHBAdPyfIwS5W6cfKLhItEb875.jpg",
+   "fullReview": "A man who walks the spirit world and a court lady who hears the dead enter the East Palace by the king's orders — can they unravel its dark secrets?",
+   "castPics": [
+    {
+     "name": "Nam Joo-hyuk",
+     "character": "Gu-cheon",
+     "photo": "https://image.tmdb.org/t/p/w185/kuLC8pR24kbEIAjfg3WpKW41Kcl.jpg"
+    },
+    {
+     "name": "Roh Yoon-seo",
+     "character": "Saeng-gang",
+     "photo": "https://image.tmdb.org/t/p/w185/A67wGhTozfav5saZ1Umi5f98Ezb.jpg"
+    },
+    {
+     "name": "Cho Seung-woo",
+     "character": "King (Lee Yeon)",
+     "photo": "https://image.tmdb.org/t/p/w185/agXysHUmaUdHrEQAZ2ZMvMR5oCU.jpg"
+    },
+    {
+     "name": "Jang Young-nam",
+     "character": "Queen Dowager",
+     "photo": "https://image.tmdb.org/t/p/w185/u0hl8WSswFhKVaKwaMAERU0xUJk.jpg"
+    }
+   ],
+   "platform": "Netflix",
+   "ottSince": "2026-07-19",
+   "ottFreshDate": "2026-07-19",
+   "slug": "the-east-palace",
+   "wikiWeeklyViews": 89425,
+   "trailerViews": 298172
   },
   {
    "title": "Heartstopper Forever",
@@ -1123,21 +1112,21 @@
    "language": "English",
    "released": "2026-07-14",
    "review": "It's a new school year for the Truham-Higgs gang. As Nick and Charlie's relationship deepens, their thoughts turn to life after the last bell rings.",
-   "rating": 6.7,
+   "rating": 6.8,
    "scores": [
     {
      "source": "TMDB",
-     "score": "6.7/10"
+     "score": "6.8/10"
     }
    ],
-   "votes": 81,
+   "votes": 96,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/r4lVJVO1BeBb11cBcXBdbHc9e9k.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1468683,
-   "popularity": 24.8592,
+   "popularity": 53.1957,
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=locuQ-skySE",
    "providers": [
@@ -1186,16 +1175,16 @@
      "kind": "movie"
     },
     {
-     "title": "Your Fault: London",
-     "slug": "your-fault-london",
-     "poster": "https://image.tmdb.org/t/p/w342/nLxu237EJAisFCYKK48hN9Plobx.jpg",
+     "title": "Looking: The Movie",
+     "slug": "looking-the-movie",
+     "poster": "https://image.tmdb.org/t/p/w342/tQdda275rJqNi6Ifrf3ntWBsXDj.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Looking: The Movie",
-     "slug": "looking-the-movie",
-     "poster": "https://image.tmdb.org/t/p/w342/tQdda275rJqNi6Ifrf3ntWBsXDj.jpg",
+     "title": "Fifty Shades Freed",
+     "slug": "fifty-shades-freed",
+     "poster": "https://image.tmdb.org/t/p/w342/jjPJ4s3DWZZvI4vw8Xfi4Vqa1Q8.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1239,8 +1228,8 @@
    "ottSince": "2026-07-19",
    "ottFreshDate": "2026-07-19",
    "slug": "heartstopper-forever",
-   "wikiWeeklyViews": 91270,
-   "trailerViews": 914091,
+   "wikiWeeklyViews": 110760,
+   "trailerViews": 921393,
    "take": "Word from reviewers is solidly good.",
    "takeSrc": "wiki",
    "takeArticle": "Heartstopper Forever"
@@ -1251,21 +1240,21 @@
    "language": "English",
    "released": "2026-07-14",
    "review": "When a multi-million-dollar heist goes sideways, con artist Lucky is forced to go on the run. Pursued by both the FBI and a ruthless crime boss, Lucky must…",
-   "rating": 6.4,
+   "rating": 6.6,
    "scores": [
     {
      "source": "TMDB",
-     "score": "6.4/10"
+     "score": "6.6/10"
     }
    ],
-   "votes": 52,
-   "verdict": "Decent one-time watch",
+   "votes": 59,
+   "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/xsrkiXg8EuNNtbPtbmvCxg95gK7.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 278624,
-   "popularity": 67.3537,
+   "popularity": 110.1649,
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=GAbT5qCTXR8",
    "providers": [
@@ -1361,135 +1350,11 @@
    "ottSince": "2026-07-17",
    "ottFreshDate": "2026-07-17",
    "slug": "lucky",
-   "wikiWeeklyViews": 146204,
-   "trailerViews": 6083546,
+   "wikiWeeklyViews": 166008,
+   "trailerViews": 6095797,
    "take": "Most critics came away happy.",
    "takeSrc": "wiki",
    "takeArticle": "Lucky (miniseries)"
-  },
-  {
-   "title": "The East Palace",
-   "genre": "Mystery / Action & Adventure",
-   "language": "Korean",
-   "released": "2026-07-17",
-   "review": "A man who walks the spirit world and a court lady who hears the dead enter the East Palace by the king's orders — can they unravel its dark secrets?",
-   "rating": null,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "New release"
-    }
-   ],
-   "votes": 16,
-   "verdict": "Just released — verdict soon",
-   "poster": "https://image.tmdb.org/t/p/w342/yfYohBszGqoAW8oM0qydOtJ4kPh.jpg",
-   "isRecent": true,
-   "isFresh": true,
-   "kind": "tv",
-   "tmdbId": 279323,
-   "popularity": 41.575,
-   "cert": "15",
-   "trailer": "https://www.youtube.com/watch?v=wBUkNE1l9DU",
-   "providers": [
-    "Netflix",
-    "Netflix Standard with Ads"
-   ],
-   "cast": [
-    "Nam Joo-hyuk",
-    "Roh Yoon-seo",
-    "Cho Seung-woo",
-    "Jang Young-nam"
-   ],
-   "director": "Kwon So-ra",
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt35051401",
-   "freshDate": "2026-07-17",
-   "badge": "New show",
-   "similar": [
-    {
-     "title": "Grimm",
-     "slug": "grimm",
-     "poster": "https://image.tmdb.org/t/p/w342/iOptnt1QHi6bIHmOq6adnZTV0bU.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Constantine",
-     "slug": "constantine",
-     "poster": "https://image.tmdb.org/t/p/w342/gQ3bA1DBKyZwkDCHJFEAT0MkKpu.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Masters of Horror",
-     "slug": "masters-of-horror",
-     "poster": "https://image.tmdb.org/t/p/w342/vgTy1Lfi5P1yD7ZvsuoPKYvxwzv.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The King: Eternal Monarch",
-     "slug": "the-king-eternal-monarch",
-     "poster": "https://image.tmdb.org/t/p/w342/7SLlbkzOJb8v9wXVYIcqozx2hxe.jpg",
-     "language": "Korean",
-     "kind": "tv"
-    },
-    {
-     "title": "Alchemy of Souls",
-     "slug": "alchemy-of-souls",
-     "poster": "https://image.tmdb.org/t/p/w342/gvOZN1NlAoL8iz9ghpES1zWA3w3.jpg",
-     "language": "Korean",
-     "kind": "tv"
-    },
-    {
-     "title": "Wynonna Earp",
-     "slug": "wynonna-earp",
-     "poster": "https://image.tmdb.org/t/p/w342/qnIaDelA81dmFaXrhpz6M6dpGSD.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/9LJiiVPSS2DsV9drnA3k3zqMgPW.jpg",
-   "fullReview": "A man who walks the spirit world and a court lady who hears the dead enter the East Palace by the king's orders — can they unravel its dark secrets?",
-   "castPics": [
-    {
-     "name": "Nam Joo-hyuk",
-     "character": "Gu-cheon",
-     "photo": "https://image.tmdb.org/t/p/w185/kuLC8pR24kbEIAjfg3WpKW41Kcl.jpg"
-    },
-    {
-     "name": "Roh Yoon-seo",
-     "character": "Saeng-gang",
-     "photo": "https://image.tmdb.org/t/p/w185/A67wGhTozfav5saZ1Umi5f98Ezb.jpg"
-    },
-    {
-     "name": "Cho Seung-woo",
-     "character": "King (Lee Yeon)",
-     "photo": "https://image.tmdb.org/t/p/w185/agXysHUmaUdHrEQAZ2ZMvMR5oCU.jpg"
-    },
-    {
-     "name": "Jang Young-nam",
-     "character": "Queen Dowager",
-     "photo": "https://image.tmdb.org/t/p/w185/u0hl8WSswFhKVaKwaMAERU0xUJk.jpg"
-    },
-    {
-     "name": "Tae In-ho",
-     "character": "Prince Ik-sang",
-     "photo": "https://image.tmdb.org/t/p/w185/tQJuRcrWe9QUsHikSO6Ga2XIKcS.jpg"
-    },
-    {
-     "name": "Jo Dan",
-     "character": "Prince Yeongan",
-     "photo": "https://image.tmdb.org/t/p/w185/taHwrB8GhiE1CpHz5O440kUhNkk.jpg"
-    }
-   ],
-   "platform": "Netflix",
-   "ottSince": "2026-07-19",
-   "ottFreshDate": "2026-07-19",
-   "slug": "the-east-palace",
-   "wikiWeeklyViews": 59529,
-   "trailerViews": 275150
   },
   {
    "title": "Desire",
@@ -1504,14 +1369,14 @@
      "score": "6.8/10"
     }
    ],
-   "votes": 48,
+   "votes": 57,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/3bEqHqeaQlFykaLQ7N4gDkIvL5w.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1668364,
-   "popularity": 123.6997,
+   "popularity": 161.2545,
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=siUPiUaSWvc",
    "providers": [
@@ -1613,7 +1478,7 @@
    "ottSince": "2026-07-19",
    "ottFreshDate": "2026-07-19",
    "slug": "desire",
-   "trailerViews": 78314
+   "trailerViews": 92790
   },
   {
    "title": "House of the Dragon",
@@ -1628,14 +1493,14 @@
      "score": "8.4/10"
     }
    ],
-   "votes": 6642,
+   "votes": 6654,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/7V0Ebks0GgpKvQ7QbLAIdX5dos4.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 94997,
-   "popularity": 205.2971,
+   "popularity": 266.7996,
    "cert": "18",
    "trailer": "https://www.youtube.com/watch?v=DotnJ7tTA34",
    "providers": [
@@ -1739,9 +1604,9 @@
    "ottFreshDate": "2026-06-21",
    "stillGood": true,
    "slug": "house-of-the-dragon",
-   "wikiWeeklyViews": 286480,
+   "wikiWeeklyViews": 283277,
    "trending": true,
-   "trailerViews": 29083403,
+   "trailerViews": 29088647,
    "take": "Reviewers found plenty to like here.",
    "takeSrc": "wiki",
    "takeArticle": "House of the Dragon"
@@ -1759,14 +1624,14 @@
      "score": "8.2/10"
     }
    ],
-   "votes": 2281,
+   "votes": 2285,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 125988,
-   "popularity": 179.9342,
+   "popularity": 206.7894,
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=8ZYhuvIv1pA",
    "providers": [
@@ -1870,9 +1735,9 @@
    "ottFreshDate": "2026-07-02",
    "stillGood": true,
    "slug": "silo",
-   "wikiWeeklyViews": 218261,
+   "wikiWeeklyViews": 213136,
    "trending": true,
-   "trailerViews": 9462999,
+   "trailerViews": 9468396,
    "take": "Critics liked it, especially the performances and production design.",
    "takeSrc": "wiki",
    "takeArticle": "Silo (TV series)"
@@ -1890,14 +1755,14 @@
      "score": "8.5/10"
     }
    ],
-   "votes": 1593,
+   "votes": 1594,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/gLKOYIMyKlUHW0SVdskhgf9C0yy.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 94664,
-   "popularity": 120.5223,
+   "popularity": 162.1788,
    "cert": "18",
    "trailer": "https://www.youtube.com/watch?v=k5VxfJpzy1Q",
    "providers": [
@@ -1996,8 +1861,8 @@
    "ottFreshDate": "2026-07-04",
    "stillGood": true,
    "slug": "mushoku-tensei-jobless-reincarnation",
-   "wikiWeeklyViews": 7818,
-   "trailerViews": 1761831,
+   "wikiWeeklyViews": 7392,
+   "trailerViews": 1762814,
    "take": "Most critics came away happy.",
    "takeSrc": "wiki",
    "takeArticle": "Mushoku Tensei (TV series)"
@@ -2015,14 +1880,14 @@
      "score": "8.6/10"
     }
    ],
-   "votes": 777,
+   "votes": 778,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/2HKBc5UiFw8JrruHq8S1Y7TnlW0.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 138502,
-   "popularity": 35.7896,
+   "popularity": 50.6114,
    "cert": "12",
    "trailer": "https://www.youtube.com/watch?v=pv3Ss8o9gGQ",
    "providers": [
@@ -2086,11 +1951,134 @@
    "ottFreshDate": "2026-07-01",
    "stillGood": true,
    "slug": "x-men-97",
-   "wikiWeeklyViews": 95537,
-   "trailerViews": 10355346,
+   "wikiWeeklyViews": 92472,
+   "trailerViews": 10356039,
    "take": "Critics loved it — special praise for the writing and action.",
    "takeSrc": "wiki",
    "takeArticle": "X-Men '97"
+  },
+  {
+   "title": "Agent Kim Reactivated",
+   "genre": "Action & Adventure / Crime",
+   "language": "Korean",
+   "released": "2026-06-26",
+   "review": "When an unassuming dad's daughter goes missing, he dusts off his old black-ops skills to track her down — only to attract the wrong kind of attention.",
+   "rating": 7.6,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "7.6/10"
+    }
+   ],
+   "votes": 33,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/jruaZAm1KjkFRhgRcdF8tqakhpH.jpg",
+   "isRecent": true,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 296206,
+   "popularity": 127.1224,
+   "cert": "15",
+   "trailer": "https://www.youtube.com/watch?v=k5IDEniQNEk",
+   "providers": [
+    "Netflix",
+    "Netflix Standard with Ads"
+   ],
+   "cast": [
+    "So Ji-sub",
+    "Choi Dae-hoon",
+    "Yoon Kyung-ho",
+    "Ju Sang-uk"
+   ],
+   "director": "Nam Dae-joong",
+   "runtime": null,
+   "imdbVotes": null,
+   "imdbId": "tt42127457",
+   "freshDate": "2026-06-26",
+   "badge": "New on Netflix",
+   "similar": [
+    {
+     "title": "Butterfly",
+     "slug": "butterfly",
+     "poster": "https://image.tmdb.org/t/p/w342/8x1W0TR2VIe7ORaRI9zwDqeJn9q.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Taxi Driver",
+     "slug": "taxi-driver",
+     "poster": "https://image.tmdb.org/t/p/w342/lghfb8beej1aH9ML8QyeSixniom.jpg",
+     "language": "Korean",
+     "kind": "tv"
+    },
+    {
+     "title": "Bad Guys",
+     "slug": "bad-guys",
+     "poster": "https://image.tmdb.org/t/p/w342/m2NvNFJWRGH49sjEwDLdDeuHslp.jpg",
+     "language": "Korean",
+     "kind": "tv"
+    },
+    {
+     "title": "Legends",
+     "slug": "legends",
+     "poster": "https://image.tmdb.org/t/p/w342/dGienbU1xNZJcbY8i8ubJusjDwD.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Equalizer",
+     "slug": "the-equalizer",
+     "poster": "https://image.tmdb.org/t/p/w342/7nrKPxGJWYe5cacNN9AV9bVplNZ.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Alex Rider",
+     "slug": "alex-rider",
+     "poster": "https://image.tmdb.org/t/p/w342/7VkzkvA0XckUClWrlkt4fnmTrkL.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/g1LJLlmWP74zv9yXKEXm7g9p10O.jpg",
+   "fullReview": "When an unassuming dad's daughter goes missing, he dusts off his old black-ops skills to track her down — only to attract the wrong kind of attention.",
+   "castPics": [
+    {
+     "name": "So Ji-sub",
+     "character": "Manager Kim",
+     "photo": "https://image.tmdb.org/t/p/w185/oEdXNo3ohtldtIW6DMFPpvMYW4g.jpg"
+    },
+    {
+     "name": "Choi Dae-hoon",
+     "character": "Seong Han-su",
+     "photo": "https://image.tmdb.org/t/p/w185/lxNU9yOR8C9ovqilVMQrXStoc96.jpg"
+    },
+    {
+     "name": "Yoon Kyung-ho",
+     "character": "Park Jin-cheol",
+     "photo": "https://image.tmdb.org/t/p/w185/217cVZqyvJypi4OR1uvxoaJxvLm.jpg"
+    },
+    {
+     "name": "Ju Sang-uk",
+     "character": "Ju Gang-chan",
+     "photo": "https://image.tmdb.org/t/p/w185/75yEUkCh7TG21JIzatSpPv2v98T.jpg"
+    },
+    {
+     "name": "Son Na-eun",
+     "character": "Jung Sang-a",
+     "photo": "https://image.tmdb.org/t/p/w185/sc27bY7VuG90lH0IqMn0BmHPgjO.jpg"
+    }
+   ],
+   "platform": "Netflix",
+   "ottSince": "2026-07-10",
+   "ottFreshDate": "2026-07-10",
+   "stillGood": true,
+   "slug": "agent-kim-reactivated",
+   "wikiWeeklyViews": 201722,
+   "trailerViews": 737770,
+   "take": "Critics liked it, especially the action and emotional weight.",
+   "takeSrc": "wiki",
+   "takeArticle": "Agent Kim Reactivated"
   }
  ],
  "comingSoon": [
@@ -2118,7 +2106,7 @@
    "imdbScore": null,
    "imdbVotes": null,
    "imdbId": "tt33379543",
-   "freshDate": "2026-07-22",
+   "freshDate": "2026-07-23",
    "badge": null,
    "isRecent": false,
    "similar": [
@@ -2210,7 +2198,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/3sgnSfNT27Bx5O5ukr7B26mhEQq.jpg",
    "kind": "movie",
    "tmdbId": 980431,
-   "popularity": 61.6131,
+   "popularity": 78.1108,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=7b20GRFZBFE",
    "providers": [
@@ -2276,7 +2264,7 @@
      "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/sS3zGYFPcfM5pArVNWl6qLyaSmU.jpg",
+   "backdrop": "https://image.tmdb.org/t/p/w780/ezbrL1dMymKQZw7mDEWa2ZTzN7d.jpg",
    "fullReview": "Avatar Aang, the world's last Airbender, learns of an ancient power that could save his culture from extinction. With the help of his friends, he embarks on a global quest to find it before it falls into the wrong hands and threatens to upend the peace they sacrificed everything to achieve.",
    "castPics": [
     {
@@ -2312,7 +2300,7 @@
    ],
    "theatrical": false,
    "slug": "avatar-aang-the-last-airbender",
-   "trailerViews": 12303311
+   "trailerViews": 12338098
   },
   {
    "title": "Pinocchio: Unstrung",
@@ -2420,7 +2408,7 @@
     }
    ],
    "slug": "pinocchio-unstrung",
-   "trailerViews": 204700
+   "trailerViews": 204998
   },
   {
    "title": "Spider-Man: Brand New Day",
@@ -2428,7 +2416,7 @@
    "genre": "Science Fiction / Action",
    "language": "English",
    "review": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends…",
-   "poster": "https://image.tmdb.org/t/p/w342/yyB2VJEW3an2xCdcYCPQhn9QERR.jpg",
+   "poster": "https://image.tmdb.org/t/p/w342/zp1nJcLxWDhDEQu5iZi4TAnRaSc.jpg",
    "kind": "movie",
    "tmdbId": 969681,
    "popularity": 67.0073,
@@ -2446,7 +2434,7 @@
    "imdbScore": null,
    "imdbVotes": null,
    "imdbId": "tt22084616",
-   "freshDate": "2026-07-29",
+   "freshDate": "2026-07-28",
    "badge": null,
    "isRecent": false,
    "similar": [
@@ -2461,13 +2449,6 @@
      "title": "Ant-Man and the Wasp: Quantumania",
      "slug": "ant-man-and-the-wasp-quantumania",
      "poster": "https://image.tmdb.org/t/p/w342/qnqGbB22YJ7dSs4o6M7exTpNxPz.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Amazing Spider-Man 2",
-     "slug": "the-amazing-spider-man-2",
-     "poster": "https://image.tmdb.org/t/p/w342/dGjoPttcbKR5VWg1jQuNFB247KL.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -2491,9 +2472,16 @@
      "poster": "https://image.tmdb.org/t/p/w342/6WBeq4fCfn7AN0o21W9qNcRF2l9.jpg",
      "language": "English",
      "kind": "movie"
+    },
+    {
+     "title": "Superman Returns",
+     "slug": "superman-returns",
+     "poster": "https://image.tmdb.org/t/p/w342/385XwTQZDpRX2d3kxtnpiLrjBXw.jpg",
+     "language": "English",
+     "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/vjMvFSmGUxEtqVdaZgvFee9XkZl.jpg",
+   "backdrop": "https://image.tmdb.org/t/p/w780/h0M2JTPUlR64jkfXAhZeD9e7ZWF.jpg",
    "fullReview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
    "castPics": [
     {
@@ -2504,7 +2492,7 @@
     {
      "name": "Zendaya",
      "character": "MJ",
-     "photo": "https://image.tmdb.org/t/p/w185/pdzU95iZZbJnaXTkpjrSusJJy0x.jpg"
+     "photo": "https://image.tmdb.org/t/p/w185/1qup8tSt95HLbcy2c2xrx4iJNxv.jpg"
     },
     {
      "name": "Sadie Sink",
@@ -2528,7 +2516,7 @@
     }
    ],
    "slug": "spider-man-brand-new-day",
-   "trailerViews": 34433561
+   "trailerViews": 34559336
   },
   {
    "title": "The End of Oak Street",
@@ -2539,7 +2527,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/3SifFCwwFzXdU1Ew0nA4Z92Bs15.jpg",
    "kind": "movie",
    "tmdbId": 1101383,
-   "popularity": 8.8072,
+   "popularity": 13.3636,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=3oB9AxspVow",
    "providers": [],
@@ -2562,13 +2550,6 @@
      "title": "War of the Worlds",
      "slug": "war-of-the-worlds",
      "poster": "https://image.tmdb.org/t/p/w342/6Biy7R9LfumYshur3YKhpj56MpB.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Space/Time",
-     "slug": "space-time",
-     "poster": "https://image.tmdb.org/t/p/w342/uje1ecKMnNpZp0at5TxlvVgVXqI.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -2597,6 +2578,13 @@
      "title": "The Time Machine",
      "slug": "the-time-machine",
      "poster": "https://image.tmdb.org/t/p/w342/sotBnRlFJ67cPisjAUXzbPxi9kC.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Super 8",
+     "slug": "super-8",
+     "poster": "https://image.tmdb.org/t/p/w342/pUWIjaMMYJjeBm5bJyE3mIXdQ62.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2636,7 +2624,95 @@
     }
    ],
    "slug": "the-end-of-oak-street",
-   "trailerViews": 28907115
+   "trailerViews": 28952308
+  },
+  {
+   "title": "Ice Skater",
+   "released": "2026-08-20",
+   "genre": "Drama / Thriller",
+   "language": "English",
+   "review": "A survival drama about an ice skater stranded on an ice floe at the Arctic Sea.",
+   "poster": "https://image.tmdb.org/t/p/w342/m93BKabB7Je8WQACed58BXeHNNR.jpg",
+   "kind": "movie",
+   "tmdbId": 1424965,
+   "popularity": 6.8296,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=ShXeLbwaZLw",
+   "providers": [],
+   "cast": [
+    "Thea Sofie Loch Næss",
+    "Nikos Koukas",
+    "Mimi Roivainen",
+    "Jasmin Simonen"
+   ],
+   "director": "Taavi Vartia",
+   "runtime": 83,
+   "imdbScore": null,
+   "imdbVotes": null,
+   "imdbId": "tt34959976",
+   "freshDate": "2026-08-20",
+   "badge": null,
+   "isRecent": false,
+   "similar": [
+    {
+     "title": "6 Below: Miracle on the Mountain",
+     "slug": "6-below-miracle-on-the-mountain",
+     "poster": "https://image.tmdb.org/t/p/w342/wgHFllRwPp5CUVbWNmQGX6lRBWt.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Gravity",
+     "slug": "gravity",
+     "poster": "https://image.tmdb.org/t/p/w342/kZ2nZw8D681aphje8NJi8EfbL1U.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Remember",
+     "slug": "remember",
+     "poster": "https://image.tmdb.org/t/p/w342/x496Ip0weJYfsEX23eNyzG4MjXV.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Stowaway",
+     "slug": "stowaway",
+     "poster": "https://image.tmdb.org/t/p/w342/eFyRjhJfhNgM565U2mwEp5YUUOv.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Deepwater Horizon",
+     "slug": "deepwater-horizon",
+     "poster": "https://image.tmdb.org/t/p/w342/jgBIYCZACe3iaS9TL2XzVGkO5p5.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Doctor Who: Last Christmas",
+     "slug": "doctor-who-last-christmas",
+     "poster": "https://image.tmdb.org/t/p/w342/a5XHo7MQgX3V7nNlEnl5gwZURDL.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/24hXgpn6rLTracW3baRgF0Gxo6W.jpg",
+   "fullReview": "A survival drama about an ice skater stranded on an ice floe at the Arctic Sea. When the ice floe starts to float towards south and melt, the ice skater must use all means necessary to survive.",
+   "castPics": [
+    {
+     "name": "Thea Sofie Loch Næss",
+     "character": "Emily",
+     "photo": "https://image.tmdb.org/t/p/w185/k0aq1OjmVp9psvNx4JAXQovbHqc.jpg"
+    },
+    {
+     "name": "Nikos Koukas",
+     "character": "Harry",
+     "photo": "https://image.tmdb.org/t/p/w185/6ra2G1N276Fo3MxqQWZjSAFePDH.jpg"
+    }
+   ],
+   "slug": "ice-skater",
+   "trailerViews": 55773
   },
   {
    "title": "The Dog Stars",
@@ -2647,7 +2723,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/5O616X9vmRzQdB68PHzBewPittd.jpg",
    "kind": "movie",
    "tmdbId": 1384216,
-   "popularity": 10.6769,
+   "popularity": 9.3803,
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=-xSxaE1ClEE",
    "providers": [],
@@ -2744,99 +2820,7 @@
     }
    ],
    "slug": "the-dog-stars",
-   "trailerViews": 2036680
-  },
-  {
-   "title": "Heart of the Beast",
-   "released": "2026-09-23",
-   "genre": "Action / Adventure",
-   "language": "English",
-   "review": "After a harrowing plane crash, Special Forces officer James Belmont and his combat dog, Odin, find themselves stranded…",
-   "poster": "https://image.tmdb.org/t/p/w342/1ApfSA8JTqeha3GTFEY8syV4auq.jpg",
-   "kind": "movie",
-   "tmdbId": 1263337,
-   "popularity": 6.8646,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=JFQcDFhNh4o",
-   "providers": [],
-   "cast": [
-    "Brad Pitt",
-    "J.K. Simmons",
-    "Anna Lambe"
-   ],
-   "director": "David Ayer",
-   "runtime": 0,
-   "imdbScore": null,
-   "imdbVotes": null,
-   "imdbId": "tt7526136",
-   "freshDate": "2026-09-23",
-   "badge": null,
-   "isRecent": false,
-   "similar": [
-    {
-     "title": "The Mountain Between Us",
-     "slug": "the-mountain-between-us",
-     "poster": "https://image.tmdb.org/t/p/w342/3XNfYTW4XGscI81nXMSWGsQ8cpu.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Edge",
-     "slug": "the-edge",
-     "poster": "https://image.tmdb.org/t/p/w342/zplJqfuUyqzW0D4jX3W1afl0d7b.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Max",
-     "slug": "max",
-     "poster": "https://image.tmdb.org/t/p/w342/d3ACos3t4YwXML8keTA0wKN8e36.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Alive",
-     "slug": "alive",
-     "poster": "https://image.tmdb.org/t/p/w342/uQACcCZqd7WCTRin9xRIW5gr1bd.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Call of the Wild",
-     "slug": "the-call-of-the-wild",
-     "poster": "https://image.tmdb.org/t/p/w342/bK6Vr1zce4HK3WvdAAQVSBL3dU2.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Alabama Moon",
-     "slug": "alabama-moon",
-     "poster": "https://image.tmdb.org/t/p/w342/zTExJLGaHxGnEtbo2n0vCgvxx7k.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/bicMU6xVD5deVyKP2azpyx7xkmH.jpg",
-   "fullReview": "After a harrowing plane crash, Special Forces officer James Belmont and his combat dog, Odin, find themselves stranded deep in the Alaskan wilderness. Together, they are forced into a brutal fight for survival against the elements.",
-   "castPics": [
-    {
-     "name": "Brad Pitt",
-     "character": "James Belmont",
-     "photo": "https://image.tmdb.org/t/p/w185/m09Y1YfPPeNYYUSHnnVqahkrC1o.jpg"
-    },
-    {
-     "name": "J.K. Simmons",
-     "character": null,
-     "photo": "https://image.tmdb.org/t/p/w185/ScmKoJ9eiSUOthAt1PDNLi8Fkw.jpg"
-    },
-    {
-     "name": "Anna Lambe",
-     "character": null,
-     "photo": "https://image.tmdb.org/t/p/w185/cKm5ZnAOVc6nD8KAgSDMJdZclYH.jpg"
-    }
-   ],
-   "slug": "heart-of-the-beast",
-   "trailerViews": 26690191
+   "trailerViews": 2068918
   },
   {
    "title": "Digger",
@@ -2847,7 +2831,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/1ATXKrIPJyKNwnJ6lcG088Sa6zi.jpg",
    "kind": "movie",
    "tmdbId": 1248832,
-   "popularity": 19.9476,
+   "popularity": 18.5297,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=qORTe1wW3Wg",
    "providers": [],
@@ -2944,8 +2928,8 @@
     }
    ],
    "slug": "digger",
-   "trailerViews": 4098875
+   "trailerViews": 4170136
   }
  ],
- "trackedFilms": 95
+ "trackedFilms": 96
 }
