@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-07-21T15:27:09.398Z",
+ "generatedAt": "2026-07-22T01:51:36.853Z",
  "country": "uk",
- "pick": "Stranger Things",
+ "pick": "Lee Cronin's The Mummy",
  "theatres": [
   {
    "title": "The Odyssey",
@@ -16,10 +16,10 @@
      "score": "7.9/10"
     }
    ],
-   "votes": 820,
+   "votes": 885,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
-   "isRecent": true,
+   "isRecent": false,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1368337,
@@ -39,7 +39,7 @@
    "imdbVotes": null,
    "imdbId": "tt33764258",
    "freshDate": "2026-07-15",
-   "badge": "New release",
+   "badge": null,
    "similar": [
     {
      "title": "Conan the Barbarian",
@@ -84,7 +84,7 @@
      "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/tYuC9kUwqhpDQ3pv1kLMqyMF1Jw.jpg",
+   "backdrop": "https://image.tmdb.org/t/p/w780/r57L2UBLPKcHdZQYg8tagv9XqK2.jpg",
    "fullReview": "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War. Throughout his voyage, he is forced to confront the whims of gods, mythological monsters, and trials that stretch both his cunning and his humanity to the breaking point.",
    "castPics": [
     {
@@ -119,10 +119,11 @@
     }
    ],
    "slug": "the-odyssey",
-   "trailerViews": 11244335,
+   "wikiWeeklyViews": 5492945,
+   "trending": true,
+   "trailerViews": 11413392,
    "take": "Reviewers were close to unanimous — this one landed.",
-   "takeSrc": "wiki",
-   "takeArticle": "The Odyssey (2026 film)"
+   "takeSrc": "wiki"
   },
   {
    "title": "Moana",
@@ -130,14 +131,14 @@
    "language": "English",
    "released": "2026-07-10",
    "review": "Teenage Moana answers the Ocean's call and, for the first time, voyages beyond the reef of her island of Motunui with infamous demigod Maui on an unforgettable…",
-   "rating": 5.8,
+   "rating": 5.7,
    "scores": [
     {
      "source": "TMDB",
-     "score": "5.8/10"
+     "score": "5.7/10"
     }
    ],
-   "votes": 125,
+   "votes": 132,
    "verdict": "Decent one-time watch",
    "poster": "https://image.tmdb.org/t/p/w342/zKVgiv5qHCvCLT4A2ymJi5QeXDH.jpg",
    "isRecent": false,
@@ -240,135 +241,9 @@
     }
    ],
    "slug": "moana",
-   "wikiWeeklyViews": 311903,
-   "trending": true,
-   "trailerViews": 2344079,
+   "trailerViews": 2363739,
    "take": "Critics are split — praise for the originality and themes, pushback on the music.",
-   "takeSrc": "wiki",
-   "takeArticle": "Moana (2026 film)"
-  },
-  {
-   "title": "Minions & Monsters",
-   "genre": "Adventure / Animation",
-   "language": "English",
-   "released": "2026-07-01",
-   "review": "This is the rambunctious, ridiculous and totally true story of how the Minions conquered Hollywood, became movie stars, lost everything, unleashed monsters…",
-   "rating": 6.4,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "6.4/10"
-    }
-   ],
-   "votes": 208,
-   "verdict": "Decent one-time watch",
-   "poster": "https://image.tmdb.org/t/p/w342/nz7i42yhLIJ4ve9JKgM6NthoLHO.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 1315772,
-   "popularity": 373.1675,
-   "platform": "Theatres",
-   "cert": "U",
-   "trailer": "https://www.youtube.com/watch?v=V-O-uBaHk3c",
-   "providers": [],
-   "cast": [
-    "Pierre Coffin",
-    "Trey Parker",
-    "Allison Janney",
-    "Christoph Waltz"
-   ],
-   "director": "Pierre Coffin",
-   "runtime": 90,
-   "imdbVotes": null,
-   "imdbId": "tt32890033",
-   "freshDate": "2026-06-24",
-   "badge": null,
-   "similar": [
-    {
-     "title": "The SpongeBob Movie: Sponge on the Run",
-     "slug": "the-spongebob-movie-sponge-on-the-run",
-     "poster": "https://image.tmdb.org/t/p/w342/jlJ8nDhMhCYJuzOw3f52CP1W8MW.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Croods: A New Age",
-     "slug": "the-croods-a-new-age",
-     "poster": "https://image.tmdb.org/t/p/w342/tbVZ3Sq88dZaCANlUcewQuHQOaE.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The SpongeBob Movie: Search for SquarePants",
-     "slug": "the-spongebob-movie-search-for-squarepants",
-     "poster": "https://image.tmdb.org/t/p/w342/xJnOMMsFASxNiFnG7v3TNIQ3ife.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Kung Fu Panda 4",
-     "slug": "kung-fu-panda-4",
-     "poster": "https://image.tmdb.org/t/p/w342/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Willoughbys",
-     "slug": "the-willoughbys",
-     "poster": "https://image.tmdb.org/t/p/w342/9WrMmjdZvpxLQh1tCQ9tOd1asOb.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Puss in Boots: The Last Wish",
-     "slug": "puss-in-boots-the-last-wish",
-     "poster": "https://image.tmdb.org/t/p/w342/kuf6dutpsT0vSVehic3EZIqkOBt.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/kkcwhgSFd81QDlXo8ytrpHPQjhy.jpg",
-   "fullReview": "This is the rambunctious, ridiculous and totally true story of how the Minions conquered Hollywood, became movie stars, lost everything, unleashed monsters onto the world and then banded together to try and save the planet from the mayhem they had just created.",
-   "castPics": [
-    {
-     "name": "Pierre Coffin",
-     "character": "James / Henry / Ed / Dick / The Minions (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/eAA9uWRqHlm1LT3nZfXb7UuPfVb.jpg"
-    },
-    {
-     "name": "Trey Parker",
-     "character": "Goomi (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/3tJe8t90lrcQzXj9cRcpW9wmj2c.jpg"
-    },
-    {
-     "name": "Allison Janney",
-     "character": "Olivia (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/kSaSnQ9xU8eVNL0mTppab95dZA8.jpg"
-    },
-    {
-     "name": "Christoph Waltz",
-     "character": "Max (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/jMvLGCVXLaBqjRLf5olyvEucZob.jpg"
-    },
-    {
-     "name": "Jeff Bridges",
-     "character": "Frank / Elwood (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/xms1RAY6q7Lzp7wNeRCB0kzhucn.jpg"
-    },
-    {
-     "name": "Jesse Eisenberg",
-     "character": "Dort (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/yYhwWRcxDHTn63gSEF1vnDAD7cD.jpg"
-    }
-   ],
-   "slug": "minions-monsters",
-   "wikiWeeklyViews": 132982,
-   "trailerViews": 20333594,
-   "take": "Most critics came away happy.",
-   "takeSrc": "wiki",
-   "takeArticle": "Minions & Monsters",
-   "hook": "Premiered at the Annecy International Animation Film Festival."
+   "takeSrc": "wiki"
   },
   {
    "title": "Evil Dead Burn",
@@ -376,14 +251,14 @@
    "language": "English",
    "released": "2026-07-09",
    "review": "After her husband's abrupt death, Alice seeks solace with his remaining family — descendants of a leading researcher on demonic possession.",
-   "rating": 6.7,
+   "rating": 6.8,
    "scores": [
     {
      "source": "TMDB",
-     "score": "6.7/10"
+     "score": "6.8/10"
     }
    ],
-   "votes": 176,
+   "votes": 179,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/ztadKzIIR0ERYqpHteaPFtk7inP.jpg",
    "isRecent": false,
@@ -488,10 +363,9 @@
    "slug": "evil-dead-burn",
    "wikiWeeklyViews": 327849,
    "trending": true,
-   "trailerViews": 370087,
+   "trailerViews": 371454,
    "take": "Critics are split, though the writing found admirers.",
    "takeSrc": "wiki",
-   "takeArticle": "Evil Dead Burn",
    "hook": "The follow-up to ‘Evil Dead Rise’."
   },
   {
@@ -611,10 +485,10 @@
    ],
    "slug": "the-invite",
    "wikiWeeklyViews": 204154,
-   "trailerViews": 8431789,
+   "trending": true,
+   "trailerViews": 8443256,
    "take": "Critics loved this one; reception has been close to universal acclaim.",
    "takeSrc": "wiki",
-   "takeArticle": "The Invite",
    "hook": "A remake of the Spanish film ‘The People Upstairs by Cesc Gay’."
   },
   {
@@ -630,14 +504,14 @@
      "score": "8.1/10"
     }
    ],
-   "votes": 29,
+   "votes": 31,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/ntW9zzhDmbt3sXDyPXb7SHVuDdB.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1308767,
-   "popularity": 11.6745,
+   "popularity": 12.3005,
    "platform": "Theatres",
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=LJek-kc384w",
@@ -734,391 +608,234 @@
    ],
    "slug": "young-washington",
    "wikiWeeklyViews": 71665,
-   "trailerViews": 34314210,
+   "trending": true,
+   "trailerViews": 34397736,
    "take": "Genuinely divisive — critics can't settle this one.",
-   "takeSrc": "wiki",
-   "takeArticle": "Young Washington"
+   "takeSrc": "wiki"
   },
   {
-   "title": "Nirvanna the Band the Show the Movie",
-   "genre": "Comedy / Science Fiction",
+   "title": "Borderline",
+   "genre": "Thriller",
    "language": "English",
-   "released": "2026-02-28",
-   "review": "When their plan to book a show at the Rivoli goes horribly wrong, Matt and Jay accidentally travel back to the year 2008.",
-   "rating": 7.6,
+   "released": "2026-07-17",
+   "review": "Convinced they are our secret saviors, rogue U.S. operatives abduct Mexican gang members and seed them across major American cities, unleashing criminal chaos,…",
+   "rating": null,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.6/10"
+     "score": "New release"
     }
    ],
-   "votes": 84,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/sm5TGX8WbnCd9Uo26cLyTxVwA1n.jpg",
-   "isRecent": false,
-   "isFresh": false,
+   "votes": 0,
+   "verdict": "Just released — verdict soon",
+   "poster": "https://image.tmdb.org/t/p/w342/sAA2mjpYJFAKydtzG4P4aHC4mZk.jpg",
+   "isRecent": true,
+   "isFresh": true,
    "kind": "movie",
-   "tmdbId": 1154538,
-   "popularity": 3.9503,
+   "tmdbId": 1727780,
+   "popularity": 183.0384,
    "platform": "Theatres",
-   "cert": "15",
-   "trailer": "https://www.youtube.com/watch?v=y2K9ccMREOI",
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=ORHBgSvX_24",
    "providers": [],
    "cast": [
-    "Matt Johnson",
-    "Jay McCarrol",
-    "Ben Petrie",
-    "Ethan Eng"
+    "Marissa Arguijo",
+    "Michael-Eoin Stanney",
+    "Marcus Jean Pirae",
+    "Dominic Hernandez"
    ],
-   "director": "Matt Johnson",
-   "runtime": 101,
+   "director": "Ryan Jordan",
+   "runtime": 94,
    "imdbVotes": null,
-   "imdbId": "tt35522483",
-   "freshDate": "2026-02-02",
-   "badge": null,
-   "similar": [
-    {
-     "title": "Amazon Women on the Moon",
-     "slug": "amazon-women-on-the-moon",
-     "poster": "https://image.tmdb.org/t/p/w342/p77UlHHzyBUCKgdbLosrAnltDgw.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Afterburn",
-     "slug": "afterburn",
-     "poster": "https://image.tmdb.org/t/p/w342/fSXZFZVfJmC2v0TkW711QD5o76N.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Good Luck, Have Fun, Don't Die",
-     "slug": "good-luck-have-fun-don-t-die",
-     "poster": "https://image.tmdb.org/t/p/w342/rWcfOdY7TU6lTdazWj0ebDZnAfO.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "A Mighty Wind",
-     "slug": "a-mighty-wind",
-     "poster": "https://image.tmdb.org/t/p/w342/5wUYwAD75BxtJ0Mp4da6XzHIFex.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Fanboys",
-     "slug": "fanboys",
-     "poster": "https://image.tmdb.org/t/p/w342/fitksX4J3xfBjT38YgDUXOlBkHk.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Heavy Metal",
-     "slug": "heavy-metal",
-     "poster": "https://image.tmdb.org/t/p/w342/atUtWrDlLzT1yeVK2EoYtvbS963.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/gYxOlYtLvGNrzYm6kQBcY5mqKja.jpg",
-   "fullReview": "When their plan to book a show at the Rivoli goes horribly wrong, Matt and Jay accidentally travel back to the year 2008.",
-   "castPics": [
-    {
-     "name": "Matt Johnson",
-     "character": "Matt",
-     "photo": "https://image.tmdb.org/t/p/w185/3COKJ3lpoXhxgRELso9kmwDH29b.jpg"
-    },
-    {
-     "name": "Jay McCarrol",
-     "character": "Jay",
-     "photo": "https://image.tmdb.org/t/p/w185/g7bVGNlRXyiDCNeAnP9fF6K4gb3.jpg"
-    },
-    {
-     "name": "Ben Petrie",
-     "character": "Ben",
-     "photo": "https://image.tmdb.org/t/p/w185/r2mrAH6U7lh9hQspa9AkREQcwdH.jpg"
-    },
-    {
-     "name": "Ethan Eng",
-     "character": "Ethan",
-     "photo": "https://image.tmdb.org/t/p/w185/v74YKqKy78nDa4zTxgA7HfK617h.jpg"
-    },
-    {
-     "name": "Michael Scott",
-     "character": "Michael",
-     "photo": "https://image.tmdb.org/t/p/w185/4X1IzCgHn3lak6BBAQM1d23ck2h.jpg"
-    },
-    {
-     "name": "Jared Raab",
-     "character": "Jared",
-     "photo": "https://image.tmdb.org/t/p/w185/69wfjnsVyAsu9jdPzZekz2trU81.jpg"
-    }
-   ],
-   "slug": "nirvanna-the-band-the-show-the-movie",
-   "trailerViews": 2786930,
-   "take": "Critics were broadly positive, with reservations about the humour.",
-   "takeSrc": "wiki",
-   "takeArticle": "Nirvanna the Band the Show the Movie"
-  }
- ],
- "ott": [
-  {
-   "title": "Stranger Things",
-   "genre": "Action & Adventure / Mystery",
-   "language": "English",
-   "released": "2016-07-15",
-   "review": "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.",
-   "rating": 8.6,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "8.6/10"
-    }
-   ],
-   "votes": 21487,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
-   "isRecent": true,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 66732,
-   "popularity": 105.7044,
-   "cert": "15",
-   "trailer": "https://www.youtube.com/watch?v=mnd7sFt5c3A",
-   "providers": [
-    "Netflix",
-    "Sky Go",
-    "Netflix Standard with Ads"
-   ],
-   "cast": [
-    "Winona Ryder",
-    "David Harbour",
-    "Millie Bobby Brown",
-    "Finn Wolfhard"
-   ],
-   "director": "Ross Duffer",
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt4574334",
-   "freshDate": "2025-11-26",
-   "badge": "New on Netflix",
-   "similar": [
-    {
-     "title": "FROM",
-     "slug": "from",
-     "poster": "https://image.tmdb.org/t/p/w342/pRtJagIxpfODzzb0T0NAvZSzErC.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "True Blood",
-     "slug": "true-blood",
-     "poster": "https://image.tmdb.org/t/p/w342/ktEp6fzL4xzCWsSVtrcH8JaQNQy.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "It",
-     "slug": "it",
-     "poster": "https://image.tmdb.org/t/p/w342/4ybQ6gopB3H3cu0seVZLznDnIKo.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Locke & Key",
-     "slug": "locke-key",
-     "poster": "https://image.tmdb.org/t/p/w342/zuxGfRKziGHPogipnEXXykdDmyT.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Mist",
-     "slug": "the-mist",
-     "poster": "https://image.tmdb.org/t/p/w342/iwDmsffJ5qYBxiGTPdwgIKTscKu.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Ash vs Evil Dead",
-     "slug": "ash-vs-evil-dead",
-     "poster": "https://image.tmdb.org/t/p/w342/9tNtSk46s3f1ePr59p0JG6uacc8.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
-   "fullReview": "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.",
-   "castPics": [
-    {
-     "name": "Winona Ryder",
-     "character": "Joyce Byers",
-     "photo": "https://image.tmdb.org/t/p/w185/8RVrlgtua8b53wmK7oZAAkm0N5O.jpg"
-    },
-    {
-     "name": "David Harbour",
-     "character": "Jim Hopper",
-     "photo": "https://image.tmdb.org/t/p/w185/qMFtMWlYVtFVyBoBhX5IoA5sN5a.jpg"
-    },
-    {
-     "name": "Millie Bobby Brown",
-     "character": "Eleven / Jane Hopper",
-     "photo": "https://image.tmdb.org/t/p/w185/k9KGzGDVhXKfOGpoN62MNuXL28q.jpg"
-    },
-    {
-     "name": "Finn Wolfhard",
-     "character": "Mike Wheeler",
-     "photo": "https://image.tmdb.org/t/p/w185/vgjd34eWfVL6GsLHwiwcAsjWLmo.jpg"
-    },
-    {
-     "name": "Gaten Matarazzo",
-     "character": "Dustin Henderson",
-     "photo": "https://image.tmdb.org/t/p/w185/qOwnmR5gbOT6ygp17YyLlEKXD38.jpg"
-    },
-    {
-     "name": "Caleb McLaughlin",
-     "character": "Lucas Sinclair",
-     "photo": "https://image.tmdb.org/t/p/w185/4jVS3EziBn7bf97ErxkW7jsdiLM.jpg"
-    }
-   ],
-   "platform": "Netflix",
-   "ottSince": "2026-07-21",
-   "ottFreshDate": "2026-07-21",
-   "slug": "stranger-things",
-   "wikiWeeklyViews": 45829,
-   "trailerViews": 8982208,
-   "take": "Critics have been largely positive on this one.",
-   "takeSrc": "wiki",
-   "takeArticle": "Stranger Things"
-  },
-  {
-   "title": "Descendants: Wicked Wonderland",
-   "genre": "Fantasy / Family",
-   "language": "English",
-   "released": "2026-07-16",
-   "review": "Now that the Queen of Hearts is nice and Cinderella is safe, things seem perfect for Red and Chloe… But little do they know that changing the past created a…",
-   "rating": 7.7,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "7.7/10"
-    }
-   ],
-   "votes": 71,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/xdhLAADGSse8KCrsDLBuM5b68Cg.jpg",
-   "isRecent": true,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 1318621,
-   "popularity": 184.9253,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=0Gg7x3xBqBU",
-   "providers": [
-    "Disney Plus"
-   ],
-   "cast": [
-    "Kylie Cantrall",
-    "Malia Baker",
-    "Liamani Segura",
-    "Rita Ora"
-   ],
-   "director": "Kimmy Gatewood",
-   "runtime": 98,
-   "imdbVotes": null,
-   "imdbId": "tt34477910",
-   "freshDate": "2026-07-16",
+   "imdbId": "tt28638842",
+   "freshDate": "2026-07-17",
    "badge": "New release",
    "similar": [
     {
-     "title": "Descendants 3",
-     "slug": "descendants-3",
-     "poster": "https://image.tmdb.org/t/p/w342/7IRy0iHdaS0JI3ng4ZYlk5gLSFn.jpg",
+     "title": "The Get Out",
+     "slug": "the-get-out",
+     "poster": "https://image.tmdb.org/t/p/w342/zlkeH0s7dDxcnuPcHBqAyXFUxqN.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Descendants 2",
-     "slug": "descendants-2",
-     "poster": "https://image.tmdb.org/t/p/w342/qoNlGfQmFZ37Gf5fRBaCTLlOZtx.jpg",
+     "title": "Touch of Evil",
+     "slug": "touch-of-evil",
+     "poster": "https://image.tmdb.org/t/p/w342/1pvRgmfBaoMczIJBOi9gCOZ4FMC.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Descendants: The Rise of Red",
-     "slug": "descendants-the-rise-of-red",
-     "poster": "https://image.tmdb.org/t/p/w342/8fYluTtB3b3HKO7KQa5tzrvGaps.jpg",
+     "title": "Bound by Honor",
+     "slug": "bound-by-honor",
+     "poster": "https://image.tmdb.org/t/p/w342/gvP6R6juhe2IpCG7QGDgjyUvm0g.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Cinderella III: A Twist in Time",
-     "slug": "cinderella-iii-a-twist-in-time",
-     "poster": "https://image.tmdb.org/t/p/w342/9QzKXbQfPp59iZ3rwnkKEAkPaXx.jpg",
+     "title": "Coffy",
+     "slug": "coffy",
+     "poster": "https://image.tmdb.org/t/p/w342/sN00Cvlahl6JLC2TAUBL0jZOqD3.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Disenchanted",
-     "slug": "disenchanted",
-     "poster": "https://image.tmdb.org/t/p/w342/uyNLq2Dc3s4IOdcYTU8ZtM2lTjb.jpg",
+     "title": "Sicario: Day of the Soldado",
+     "slug": "sicario-day-of-the-soldado",
+     "poster": "https://image.tmdb.org/t/p/w342/qcLYofEhNh51Sk1jUWjmKHLzkqw.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Legends of Oz: Dorothy's Return",
-     "slug": "legends-of-oz-dorothy-s-return",
-     "poster": "https://image.tmdb.org/t/p/w342/5XiNCjFudNX0Wj5LanPuIb8E9pU.jpg",
+     "title": "The Substitute",
+     "slug": "the-substitute",
+     "poster": "https://image.tmdb.org/t/p/w342/7vfzvhPMNauUXrVxVOPEfpOsful.jpg",
      "language": "English",
      "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/idRLKyu43mRhMWNjzd6FiEromNI.jpg",
-   "fullReview": "Now that the Queen of Hearts is nice and Cinderella is safe, things seem perfect for Red and Chloe… But little do they know that changing the past created a new villain — Maddox Hatter. When Maddox captures the Queen of Hearts, Red and Chloe must work alongside Red’s new sister Pink, Luisa Madrigal’s son Luis, and Maddox’s son Max to save her and Wonderland.",
+   "backdrop": "https://image.tmdb.org/t/p/w780/t5iMyppJhIdjPQDAWIWoilO5iYf.jpg",
+   "fullReview": "Convinced they are our secret saviors, rogue U.S. operatives abduct Mexican gang members and seed them across major American cities, unleashing criminal chaos, swaying voters by playing on nativist prejudices, and forcing law enforcement into a race to expose the plot as the escalating carnage threatens democracy itself.",
    "castPics": [
     {
-     "name": "Kylie Cantrall",
-     "character": "Red",
-     "photo": "https://image.tmdb.org/t/p/w185/A2onyG1HcYgcmKrxZKSX80g9eY0.jpg"
+     "name": "Michael-Eoin Stanney",
+     "character": "Shawn",
+     "photo": "https://image.tmdb.org/t/p/w185/ybgdmLiPWu0P9RH1lgGBR49d0Rt.jpg"
     },
     {
-     "name": "Malia Baker",
-     "character": "Chloe",
-     "photo": "https://image.tmdb.org/t/p/w185/sHaoKRA4VGmmd8b4fTEwrBr9x3m.jpg"
+     "name": "Marcus Jean Pirae",
+     "character": "Brett",
+     "photo": "https://image.tmdb.org/t/p/w185/4XD78iRQJpx0uTQRg98Dfzgyb69.jpg"
     },
     {
-     "name": "Liamani Segura",
-     "character": "Pink",
-     "photo": "https://image.tmdb.org/t/p/w185/jqjmZQwrYQNj9QModC9HoEfF3N2.jpg"
-    },
-    {
-     "name": "Rita Ora",
-     "character": "Queen of Hearts",
-     "photo": "https://image.tmdb.org/t/p/w185/tti3t4tDPt0LgSfY2vBsR5rofn0.jpg"
-    },
-    {
-     "name": "Brandy Norwood",
-     "character": "Cinderella",
-     "photo": "https://image.tmdb.org/t/p/w185/ie1IH8LQI3aGzke4FoYRbcdHv88.jpg"
-    },
-    {
-     "name": "Leonardo Nam",
-     "character": "Maddox Hatter",
-     "photo": "https://image.tmdb.org/t/p/w185/yKL70EoAdjJV2JI2CN1Dr5qzAlJ.jpg"
+     "name": "Nigel Vonas",
+     "character": "Detective Linquist",
+     "photo": "https://image.tmdb.org/t/p/w185/hhFFUHGXU8kSDjvJZPEVFCVsagz.jpg"
     }
    ],
-   "theatrical": false,
-   "platform": "Disney Plus",
-   "ottSince": "2026-07-18",
-   "ottFreshDate": "2026-07-18",
-   "slug": "descendants-wicked-wonderland",
-   "wikiWeeklyViews": 217162,
-   "trending": true,
-   "trailerViews": 4931707,
-   "take": "Reviewers singled out the performances for praise.",
-   "takeSrc": "wiki",
-   "takeArticle": "Descendants: Wicked Wonderland",
-   "hook": "The follow-up to ‘Descendants’."
+   "slug": "borderline",
+   "trailerViews": 1035574
   },
+  {
+   "title": "Man of War",
+   "genre": "Action / Thriller",
+   "language": "English",
+   "released": "2026-07-03",
+   "review": "When an aid worker vanishes in the first hours of war in Ukraine, a former Navy SEAL and CIA operative crosses into the shattered country to bring her…",
+   "rating": 6.3,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "6.3/10"
+    }
+   ],
+   "votes": 23,
+   "verdict": "Decent one-time watch",
+   "poster": "https://image.tmdb.org/t/p/w342/vt0RqHlqfUzeiBEVQvp43yY2076.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1705729,
+   "popularity": 7.1229,
+   "platform": "Theatres",
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=q0_t2HOsDsY",
+   "providers": [],
+   "cast": [
+    "LaMonica Garrett",
+    "Andrew Howard",
+    "Linds Edwards",
+    "Rosmary Yaneva"
+   ],
+   "director": "William Kaufman",
+   "runtime": 111,
+   "imdbVotes": null,
+   "imdbId": "tt34584846",
+   "freshDate": "2026-07-03",
+   "badge": null,
+   "similar": [
+    {
+     "title": "Kandahar",
+     "slug": "kandahar",
+     "poster": "https://image.tmdb.org/t/p/w342/lCanGgsqF4xD2WA5NF8PWeT3IXd.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Tom Clancy's Without Remorse",
+     "slug": "tom-clancy-s-without-remorse",
+     "poster": "https://image.tmdb.org/t/p/w342/6OnlqShdRinhJwV1uGiRE70lD63.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "One Shot",
+     "slug": "one-shot",
+     "poster": "https://image.tmdb.org/t/p/w342/3OXiTjU30gWtqxmx4BU9RVp2OTv.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Act of Valor",
+     "slug": "act-of-valor",
+     "poster": "https://image.tmdb.org/t/p/w342/1Xcd5ci69pVXMPP02DU11Ffq0yY.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Valiant One",
+     "slug": "valiant-one",
+     "poster": "https://image.tmdb.org/t/p/w342/sT8Z14RDCAd6szzxzWFAU4xcMwg.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Hunter Killer",
+     "slug": "hunter-killer",
+     "poster": "https://image.tmdb.org/t/p/w342/a0j18XNVhP4RcW3wXwsqT0kVoQm.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/kMrkqfjuPR4FlfaScrNNYuOEGHa.jpg",
+   "fullReview": "When an aid worker vanishes in the first hours of war in Ukraine, a former Navy SEAL and CIA operative crosses into the shattered country to bring her home-facing mercenaries, shifting battle lines, and ghosts he thought he left behind.",
+   "castPics": [
+    {
+     "name": "LaMonica Garrett",
+     "character": "Michael Connor",
+     "photo": "https://image.tmdb.org/t/p/w185/yE5TBZ2qC5LAPDduBQAERo7EF3r.jpg"
+    },
+    {
+     "name": "Andrew Howard",
+     "character": "Dany Sundakov",
+     "photo": "https://image.tmdb.org/t/p/w185/kba1JeCUYHufjB933G5xPRhO8lV.jpg"
+    },
+    {
+     "name": "Linds Edwards",
+     "character": "Bunny",
+     "photo": "https://image.tmdb.org/t/p/w185/xCUqvvOWLJ2KZzJ52SRRuuD5uyV.jpg"
+    },
+    {
+     "name": "Rosmary Yaneva",
+     "character": "Riley",
+     "photo": "https://image.tmdb.org/t/p/w185/fPBLsL2QHTpjZPLTnwEO9hau46g.jpg"
+    },
+    {
+     "name": "Jason Patric",
+     "character": "Charlie Lewis",
+     "photo": "https://image.tmdb.org/t/p/w185/iv21ZjE90f9QNiNONKF9Lp6ZD68.jpg"
+    },
+    {
+     "name": "Daniel Bernhardt",
+     "character": "Stanismir Koniev",
+     "photo": "https://image.tmdb.org/t/p/w185/3BLz32inDr1jznU6pKQmh20zfhK.jpg"
+    }
+   ],
+   "slug": "man-of-war",
+   "trailerViews": 436699
+  }
+ ],
+ "ott": [
   {
    "title": "King of the Hill",
    "genre": "Animation / Comedy",
@@ -1132,14 +849,14 @@
      "score": "7.4/10"
     }
    ],
-   "votes": 678,
+   "votes": 679,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/e2xyMapmYgv4AuSoSDv9Y4pQlD6.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 2122,
-   "popularity": 52.2567,
+   "popularity": 90.2053,
    "cert": "12",
    "trailer": "https://www.youtube.com/results?search_query=King%20of%20the%20Hill%20official%20trailer",
    "providers": [
@@ -1236,9 +953,137 @@
    "ottFreshDate": "2026-07-20",
    "slug": "king-of-the-hill",
    "wikiWeeklyViews": 35765,
+   "trending": true,
    "take": "Critics loved it — special praise for the animation and originality.",
+   "takeSrc": "wiki"
+  },
+  {
+   "title": "Descendants: Wicked Wonderland",
+   "genre": "Fantasy / Family",
+   "language": "English",
+   "released": "2026-07-16",
+   "review": "Now that the Queen of Hearts is nice and Cinderella is safe, things seem perfect for Red and Chloe… But little do they know that changing the past created a…",
+   "rating": 7.8,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "7.8/10"
+    }
+   ],
+   "votes": 75,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/xdhLAADGSse8KCrsDLBuM5b68Cg.jpg",
+   "isRecent": true,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1318621,
+   "popularity": 198.058,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=0Gg7x3xBqBU",
+   "providers": [
+    "Disney Plus"
+   ],
+   "cast": [
+    "Kylie Cantrall",
+    "Malia Baker",
+    "Liamani Segura",
+    "Rita Ora"
+   ],
+   "director": "Kimmy Gatewood",
+   "runtime": 98,
+   "imdbVotes": null,
+   "imdbId": "tt34477910",
+   "freshDate": "2026-07-16",
+   "badge": "New release",
+   "similar": [
+    {
+     "title": "Descendants 3",
+     "slug": "descendants-3",
+     "poster": "https://image.tmdb.org/t/p/w342/7IRy0iHdaS0JI3ng4ZYlk5gLSFn.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Descendants 2",
+     "slug": "descendants-2",
+     "poster": "https://image.tmdb.org/t/p/w342/qoNlGfQmFZ37Gf5fRBaCTLlOZtx.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Descendants: The Rise of Red",
+     "slug": "descendants-the-rise-of-red",
+     "poster": "https://image.tmdb.org/t/p/w342/8fYluTtB3b3HKO7KQa5tzrvGaps.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Disenchanted",
+     "slug": "disenchanted",
+     "poster": "https://image.tmdb.org/t/p/w342/uyNLq2Dc3s4IOdcYTU8ZtM2lTjb.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Legends of Oz: Dorothy's Return",
+     "slug": "legends-of-oz-dorothy-s-return",
+     "poster": "https://image.tmdb.org/t/p/w342/5XiNCjFudNX0Wj5LanPuIb8E9pU.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Maleficent: Mistress of Evil",
+     "slug": "maleficent-mistress-of-evil",
+     "poster": "https://image.tmdb.org/t/p/w342/vloNTScJ3w7jwNwtNGoG8DbTThv.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/idRLKyu43mRhMWNjzd6FiEromNI.jpg",
+   "fullReview": "Now that the Queen of Hearts is nice and Cinderella is safe, things seem perfect for Red and Chloe… But little do they know that changing the past created a new villain — Maddox Hatter. When Maddox captures the Queen of Hearts, Red and Chloe must work alongside Red’s new sister Pink, Luisa Madrigal’s son Luis, and Maddox’s son Max to save her and Wonderland.",
+   "castPics": [
+    {
+     "name": "Kylie Cantrall",
+     "character": "Red",
+     "photo": "https://image.tmdb.org/t/p/w185/A2onyG1HcYgcmKrxZKSX80g9eY0.jpg"
+    },
+    {
+     "name": "Malia Baker",
+     "character": "Chloe",
+     "photo": "https://image.tmdb.org/t/p/w185/sHaoKRA4VGmmd8b4fTEwrBr9x3m.jpg"
+    },
+    {
+     "name": "Liamani Segura",
+     "character": "Pink",
+     "photo": "https://image.tmdb.org/t/p/w185/jqjmZQwrYQNj9QModC9HoEfF3N2.jpg"
+    },
+    {
+     "name": "Rita Ora",
+     "character": "Queen of Hearts",
+     "photo": "https://image.tmdb.org/t/p/w185/tti3t4tDPt0LgSfY2vBsR5rofn0.jpg"
+    },
+    {
+     "name": "Brandy Norwood",
+     "character": "Cinderella",
+     "photo": "https://image.tmdb.org/t/p/w185/ie1IH8LQI3aGzke4FoYRbcdHv88.jpg"
+    },
+    {
+     "name": "Leonardo Nam",
+     "character": "Maddox Hatter",
+     "photo": "https://image.tmdb.org/t/p/w185/yKL70EoAdjJV2JI2CN1Dr5qzAlJ.jpg"
+    }
+   ],
+   "theatrical": false,
+   "platform": "Disney Plus",
+   "ottSince": "2026-07-18",
+   "ottFreshDate": "2026-07-16",
+   "slug": "descendants-wicked-wonderland",
+   "wikiWeeklyViews": 217162,
+   "trending": true,
+   "trailerViews": 4940291,
+   "take": "Reviewers singled out the performances for praise.",
    "takeSrc": "wiki",
-   "takeArticle": "King of the Hill"
+   "hook": "The follow-up to ‘Descendants’."
   },
   {
    "title": "The East Palace",
@@ -1246,21 +1091,21 @@
    "language": "Korean",
    "released": "2026-07-17",
    "review": "A man who walks the spirit world and a court lady who hears the dead enter the East Palace by the king's orders — can they unravel its dark secrets?",
-   "rating": 8,
+   "rating": 7.9,
    "scores": [
     {
      "source": "TMDB",
-     "score": "8.0/10"
+     "score": "7.9/10"
     }
    ],
-   "votes": 29,
+   "votes": 32,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/yfYohBszGqoAW8oM0qydOtJ4kPh.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 279323,
-   "popularity": 105.6806,
+   "popularity": 106.9706,
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=wBUkNE1l9DU",
    "providers": [
@@ -1309,16 +1154,16 @@
      "kind": "tv"
     },
     {
-     "title": "Revenge",
-     "slug": "revenge",
-     "poster": "https://image.tmdb.org/t/p/w342/qx7XytRgg1F03NN5BoK8jx3Cyft.jpg",
+     "title": "Wynonna Earp",
+     "slug": "wynonna-earp",
+     "poster": "https://image.tmdb.org/t/p/w342/qnIaDelA81dmFaXrhpz6M6dpGSD.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Wynonna Earp",
-     "slug": "wynonna-earp",
-     "poster": "https://image.tmdb.org/t/p/w342/qnIaDelA81dmFaXrhpz6M6dpGSD.jpg",
+     "title": "Revenge",
+     "slug": "revenge",
+     "poster": "https://image.tmdb.org/t/p/w342/qx7XytRgg1F03NN5BoK8jx3Cyft.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1349,10 +1194,11 @@
    ],
    "platform": "Netflix",
    "ottSince": "2026-07-19",
-   "ottFreshDate": "2026-07-19",
+   "ottFreshDate": "2026-07-17",
    "slug": "the-east-palace",
    "wikiWeeklyViews": 110855,
-   "trailerViews": 334408
+   "trending": true,
+   "trailerViews": 346329
   },
   {
    "title": "Heartstopper Forever",
@@ -1360,21 +1206,21 @@
    "language": "English",
    "released": "2026-07-14",
    "review": "It's a new school year for the Truham-Higgs gang. As Nick and Charlie's relationship deepens, their thoughts turn to life after the last bell rings.",
-   "rating": 6.9,
+   "rating": 7,
    "scores": [
     {
      "source": "TMDB",
-     "score": "6.9/10"
+     "score": "7.0/10"
     }
    ],
-   "votes": 121,
+   "votes": 129,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/r4lVJVO1BeBb11cBcXBdbHc9e9k.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1468683,
-   "popularity": 53.1547,
+   "popularity": 57.4888,
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=locuQ-skySE",
    "providers": [
@@ -1388,7 +1234,7 @@
     "Yasmin Finney"
    ],
    "director": "Wash Westmoreland",
-   "runtime": 114,
+   "runtime": 110,
    "imdbVotes": null,
    "imdbId": "tt36619926",
    "freshDate": "2026-07-14",
@@ -1430,9 +1276,9 @@
      "kind": "movie"
     },
     {
-     "title": "Your Fault: London",
-     "slug": "your-fault-london",
-     "poster": "https://image.tmdb.org/t/p/w342/nLxu237EJAisFCYKK48hN9Plobx.jpg",
+     "title": "Marked Men: Rule + Shaw",
+     "slug": "marked-men-rule-shaw",
+     "poster": "https://image.tmdb.org/t/p/w342/gZQU8BtCH2IbMZq6QETiU4HXQSR.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1474,13 +1320,13 @@
    "theatrical": false,
    "platform": "Netflix",
    "ottSince": "2026-07-19",
-   "ottFreshDate": "2026-07-19",
+   "ottFreshDate": "2026-07-14",
    "slug": "heartstopper-forever",
    "wikiWeeklyViews": 122569,
-   "trailerViews": 931492,
+   "trending": true,
+   "trailerViews": 935720,
    "take": "Word from reviewers is solidly good.",
-   "takeSrc": "wiki",
-   "takeArticle": "Heartstopper Forever"
+   "takeSrc": "wiki"
   },
   {
    "title": "Lucky",
@@ -1488,21 +1334,21 @@
    "language": "English",
    "released": "2026-07-14",
    "review": "When a multi-million-dollar heist goes sideways, con artist Lucky is forced to go on the run. Pursued by both the FBI and a ruthless crime boss, Lucky must…",
-   "rating": 6.7,
+   "rating": 6.8,
    "scores": [
     {
      "source": "TMDB",
-     "score": "6.7/10"
+     "score": "6.8/10"
     }
    ],
-   "votes": 65,
+   "votes": 67,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/xsrkiXg8EuNNtbPtbmvCxg95gK7.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 278624,
-   "popularity": 115.0949,
+   "popularity": 121.2359,
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=GAbT5qCTXR8",
    "providers": [
@@ -1596,13 +1442,13 @@
    ],
    "platform": "Apple TV",
    "ottSince": "2026-07-17",
-   "ottFreshDate": "2026-07-17",
+   "ottFreshDate": "2026-07-14",
    "slug": "lucky",
    "wikiWeeklyViews": 180739,
-   "trailerViews": 6117000,
+   "trending": true,
+   "trailerViews": 6126042,
    "take": "Most critics came away happy.",
-   "takeSrc": "wiki",
-   "takeArticle": "Lucky (miniseries)"
+   "takeSrc": "wiki"
   },
   {
    "title": "House of the Dragon",
@@ -1617,14 +1463,14 @@
      "score": "8.4/10"
     }
    ],
-   "votes": 6669,
+   "votes": 6674,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/7V0Ebks0GgpKvQ7QbLAIdX5dos4.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 94997,
-   "popularity": 352.3085,
+   "popularity": 361.3376,
    "cert": "18",
    "trailer": "https://www.youtube.com/watch?v=DotnJ7tTA34",
    "providers": [
@@ -1730,10 +1576,139 @@
    "slug": "house-of-the-dragon",
    "wikiWeeklyViews": 279745,
    "trending": true,
-   "trailerViews": 29100100,
+   "trailerViews": 29103573,
    "take": "Reviewers found plenty to like here.",
+   "takeSrc": "wiki"
+  },
+  {
+   "title": "Lee Cronin's The Mummy",
+   "genre": "Horror / Mystery",
+   "language": "English",
+   "released": "2026-04-17",
+   "review": "The young daughter of a journalist disappears into the desert without a trace—eight years later, the broken family is shocked when she is returned to them, as…",
+   "rating": 8,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.0/10"
+    }
+   ],
+   "votes": 2307,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/1q308iixueCU4pFtSYugNOevtNx.jpg",
+   "isRecent": true,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1304313,
+   "popularity": 102.3633,
+   "cert": "18",
+   "trailer": "https://www.youtube.com/watch?v=6wbMsDmJLCs",
+   "providers": [
+    "HBO Max Amazon Channel",
+    "Sky Go",
+    "HBO Max"
+   ],
+   "cast": [
+    "Jack Reynor",
+    "Laia Costa",
+    "May Calamawy",
+    "Natalie Grace"
+   ],
+   "director": "Lee Cronin",
+   "runtime": 133,
+   "imdbVotes": null,
+   "imdbId": "tt32612507",
+   "freshDate": "2026-04-15",
+   "badge": "New on HBO Max Amazon Channel",
+   "similar": [
+    {
+     "title": "The Ring",
+     "slug": "the-ring",
+     "poster": "https://image.tmdb.org/t/p/w342/AeRpUynJKDpJveklBJipOYrVxCS.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Until Dawn",
+     "slug": "until-dawn",
+     "poster": "https://image.tmdb.org/t/p/w342/bLY5yN4MKVynZ2HMZWElTOGBgBe.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Deliver Us from Evil",
+     "slug": "deliver-us-from-evil",
+     "poster": "https://image.tmdb.org/t/p/w342/Uz32ERsyCmGwV8Eg2wmT2ooWpo.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Paranormal Activity",
+     "slug": "paranormal-activity",
+     "poster": "https://image.tmdb.org/t/p/w342/tmclkEpjeo4Zu564gf3KrwIOuKw.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "undertone",
+     "slug": "undertone",
+     "poster": "https://image.tmdb.org/t/p/w342/2PFgFMnrdCPXWiZl1PUvky7Mo9D.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Empty Man",
+     "slug": "the-empty-man",
+     "poster": "https://image.tmdb.org/t/p/w342/8apzu9JFTUMtOpYkHk6LNPOs3pY.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/uUKPbSEKjnCd72chRtBhUgs0z8A.jpg",
+   "fullReview": "The young daughter of a journalist disappears into the desert without a trace—eight years later, the broken family is shocked when she is returned to them, as what should be a joyful reunion turns into a living nightmare.",
+   "castPics": [
+    {
+     "name": "Jack Reynor",
+     "character": "Charlie Cannon",
+     "photo": "https://image.tmdb.org/t/p/w185/ti7IuuwBP66kntCCp6t38xzOcT4.jpg"
+    },
+    {
+     "name": "Laia Costa",
+     "character": "Larissa Cannon",
+     "photo": "https://image.tmdb.org/t/p/w185/kSbdpHWLlfzvOfZKJ0dgP0ieVL6.jpg"
+    },
+    {
+     "name": "May Calamawy",
+     "character": "Detective Dalia Zaki",
+     "photo": "https://image.tmdb.org/t/p/w185/5S3nNkH5p85xK7k7AaXBZ0ouyOR.jpg"
+    },
+    {
+     "name": "Natalie Grace",
+     "character": "Katie Cannon",
+     "photo": "https://image.tmdb.org/t/p/w185/uoJRUulO6A9By4IhNrDdiKevAOj.jpg"
+    },
+    {
+     "name": "Shylo Molina",
+     "character": "Sebastián Cannon",
+     "photo": "https://image.tmdb.org/t/p/w185/rIhBsRY6c7B4ClLOJbc4qEWter1.jpg"
+    },
+    {
+     "name": "Billie Roy",
+     "character": "Maud Cannon",
+     "photo": "https://image.tmdb.org/t/p/w185/criWuHntMq5c6Duv505NApONwUu.jpg"
+    }
+   ],
+   "platform": "HBO Max Amazon Channel",
+   "ottSince": "2026-07-11",
+   "ottFreshDate": "2026-07-11",
+   "stillGood": true,
+   "slug": "lee-cronin-s-the-mummy",
+   "wikiWeeklyViews": 125806,
+   "trending": true,
+   "trailerViews": 623636,
+   "take": "Opinions split right down the middle on this one.",
    "takeSrc": "wiki",
-   "takeArticle": "House of the Dragon"
+   "takeCounter": "Audiences disagree — ★ 8.0 from viewers."
   },
   {
    "title": "Silo",
@@ -1748,14 +1723,14 @@
      "score": "8.2/10"
     }
    ],
-   "votes": 2293,
+   "votes": 2296,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 125988,
-   "popularity": 187.7668,
+   "popularity": 184.9321,
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=8ZYhuvIv1pA",
    "providers": [
@@ -1860,10 +1835,10 @@
    "stillGood": true,
    "slug": "silo",
    "wikiWeeklyViews": 206998,
-   "trailerViews": 9478469,
+   "trending": true,
+   "trailerViews": 9482436,
    "take": "Critics liked it, especially the performances and production design.",
-   "takeSrc": "wiki",
-   "takeArticle": "Silo (TV series)"
+   "takeSrc": "wiki"
   },
   {
    "title": "Mushoku Tensei: Jobless Reincarnation",
@@ -1878,14 +1853,14 @@
      "score": "8.5/10"
     }
    ],
-   "votes": 1597,
+   "votes": 1601,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/gLKOYIMyKlUHW0SVdskhgf9C0yy.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 94664,
-   "popularity": 161.4665,
+   "popularity": 153.6953,
    "cert": "18",
    "trailer": "https://www.youtube.com/watch?v=k5VxfJpzy1Q",
    "providers": [
@@ -1985,10 +1960,9 @@
    "stillGood": true,
    "slug": "mushoku-tensei-jobless-reincarnation",
    "wikiWeeklyViews": 7215,
-   "trailerViews": 1764391,
+   "trailerViews": 1765003,
    "take": "Most critics came away happy.",
-   "takeSrc": "wiki",
-   "takeArticle": "Mushoku Tensei (TV series)"
+   "takeSrc": "wiki"
   },
   {
    "title": "X-Men '97",
@@ -2003,14 +1977,14 @@
      "score": "8.6/10"
     }
    ],
-   "votes": 779,
+   "votes": 781,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/2HKBc5UiFw8JrruHq8S1Y7TnlW0.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 138502,
-   "popularity": 50.5246,
+   "popularity": 54.6819,
    "cert": "12",
    "trailer": "https://www.youtube.com/watch?v=pv3Ss8o9gGQ",
    "providers": [
@@ -2075,13 +2049,121 @@
    "stillGood": true,
    "slug": "x-men-97",
    "wikiWeeklyViews": 89437,
-   "trailerViews": 10357487,
+   "trending": true,
+   "trailerViews": 10358010,
    "take": "Critics loved it — special praise for the writing and action.",
-   "takeSrc": "wiki",
-   "takeArticle": "X-Men '97"
+   "takeSrc": "wiki"
   }
  ],
  "comingSoon": [
+  {
+   "title": "Motor City",
+   "released": "2026-07-23",
+   "genre": "Action / Thriller",
+   "language": "English",
+   "review": "In 1970s Detroit, John Miller falls for a local gangster's girl and lands in prison for a crime he didn't commit.",
+   "poster": "https://image.tmdb.org/t/p/w342/lGovcOtxugJPhfJjFKud9EbWtOA.jpg",
+   "kind": "movie",
+   "tmdbId": 87513,
+   "popularity": 10.5414,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=JHMPxTWI4sQ",
+   "providers": [],
+   "cast": [
+    "Alan Ritchson",
+    "Shailene Woodley",
+    "Ben Foster",
+    "Amar Chadha-Patel"
+   ],
+   "director": "Potsy Ponciroli",
+   "runtime": 103,
+   "imdbScore": null,
+   "imdbVotes": null,
+   "imdbId": "tt2012616",
+   "freshDate": "2026-07-23",
+   "badge": "New release",
+   "isRecent": true,
+   "similar": [
+    {
+     "title": "Run All Night",
+     "slug": "run-all-night",
+     "poster": "https://image.tmdb.org/t/p/w342/iGvSMoPbWZWDnIhh54yiq3sW7wH.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Absolution",
+     "slug": "absolution",
+     "poster": "https://image.tmdb.org/t/p/w342/gt70JOD9xsPlpJnuBJAWdOT4yRg.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "12 Rounds 3: Lockdown",
+     "slug": "12-rounds-3-lockdown",
+     "poster": "https://image.tmdb.org/t/p/w342/3wAIu7q72mINXVplVnU6pMbZmQQ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Shade",
+     "slug": "shade",
+     "poster": "https://image.tmdb.org/t/p/w342/2uK217wp1SSFgbIcwDaPrzlLd7X.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Blood Ties",
+     "slug": "blood-ties",
+     "poster": "https://image.tmdb.org/t/p/w342/7tMuywiZUoaAihEIkCu3BAL1xPC.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "War",
+     "slug": "war",
+     "poster": "https://image.tmdb.org/t/p/w342/scFc8RD4sFxB2x0eIOaymphMnYh.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/cYEu96qXUFilbHPw7yP3qi0SQle.jpg",
+   "fullReview": "In 1970s Detroit, John Miller falls for a local gangster's girl and lands in prison for a crime he didn't commit. With his life ruined, Miller plots revenge against the man who took his girl away.",
+   "castPics": [
+    {
+     "name": "Alan Ritchson",
+     "character": "John Miller",
+     "photo": "https://image.tmdb.org/t/p/w185/92YNEEpCyugkTzPprJwZpvVtvuK.jpg"
+    },
+    {
+     "name": "Shailene Woodley",
+     "character": "Sophia",
+     "photo": "https://image.tmdb.org/t/p/w185/tqNlTcDxDFQOQi0GpEtx0lqQyWt.jpg"
+    },
+    {
+     "name": "Ben Foster",
+     "character": "Reynolds",
+     "photo": "https://image.tmdb.org/t/p/w185/yG8iZqkgRukaEuRJz1lfFIlbPDt.jpg"
+    },
+    {
+     "name": "Amar Chadha-Patel",
+     "character": "Singh",
+     "photo": "https://image.tmdb.org/t/p/w185/6SZXUfn5A2IzwrWhpBDw99gC4uQ.jpg"
+    },
+    {
+     "name": "Ben McKenzie",
+     "character": "Kent",
+     "photo": "https://image.tmdb.org/t/p/w185/2jlwhOXKakL6gk365u4gPkTtHHi.jpg"
+    },
+    {
+     "name": "Lionel Boyce",
+     "character": "Youngblood",
+     "photo": "https://image.tmdb.org/t/p/w185/hpIxX5nkfA3pWCW8rYkEUCSBVyS.jpg"
+    }
+   ],
+   "slug": "motor-city",
+   "trailerViews": 1638361
+  },
   {
    "title": "Jana Nayagan",
    "released": "2026-07-23",
@@ -2107,8 +2189,8 @@
    "imdbVotes": null,
    "imdbId": "tt33379543",
    "freshDate": "2026-07-23",
-   "badge": null,
-   "isRecent": false,
+   "badge": "New release",
+   "isRecent": true,
    "similar": [
     {
      "title": "Code 8 Part II",
@@ -2198,7 +2280,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/3sgnSfNT27Bx5O5ukr7B26mhEQq.jpg",
    "kind": "movie",
    "tmdbId": 980431,
-   "popularity": 74.4744,
+   "popularity": 73.9081,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=7b20GRFZBFE",
    "providers": [
@@ -2300,115 +2382,7 @@
    ],
    "theatrical": false,
    "slug": "avatar-aang-the-last-airbender",
-   "trailerViews": 12411117
-  },
-  {
-   "title": "Pinocchio: Unstrung",
-   "released": "2026-06-17",
-   "genre": "Horror / Fantasy",
-   "language": "English",
-   "review": "Influenced by a sinister Cricket and created by Geppetto, Pinocchio launches a violent crusade to carve himself into a…",
-   "poster": "https://image.tmdb.org/t/p/w342/sqhfUrPEeAlFf684FsVa8v1GYCD.jpg",
-   "kind": "movie",
-   "tmdbId": 1232569,
-   "popularity": 8.9605,
-   "cert": "18",
-   "trailer": "https://www.youtube.com/watch?v=mmWcqwR5yX0",
-   "providers": [],
-   "cast": [
-    "Jude Evan Lloyd",
-    "Robert Englund",
-    "Cameron Bell",
-    "Jessica Balmer"
-   ],
-   "director": "Rhys Frake-Waterfield",
-   "runtime": 82,
-   "imdbScore": null,
-   "imdbVotes": null,
-   "imdbId": "tt30887701",
-   "freshDate": "2026-07-22",
-   "badge": "New release",
-   "isRecent": true,
-   "similar": [
-    {
-     "title": "Barbarian",
-     "slug": "barbarian",
-     "poster": "https://image.tmdb.org/t/p/w342/idT5mnqPcJgSkvpDX7pJffBzdVH.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Fear Street: 1994",
-     "slug": "fear-street-1994",
-     "poster": "https://image.tmdb.org/t/p/w342/9J9Wy39ZjrVmfk7yMkulpcI5sy0.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Wishmaster",
-     "slug": "wishmaster",
-     "poster": "https://image.tmdb.org/t/p/w342/t7rep7SCqiy4COUsq2cOcdQwzU0.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Dogs",
-     "slug": "the-dogs",
-     "poster": "https://image.tmdb.org/t/p/w342/kz6oqKyKCjmR8V1JdnF9brp9DSn.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Mandy",
-     "slug": "mandy",
-     "poster": "https://image.tmdb.org/t/p/w342/m0yf7J7HsKeK6E81SMRcX8vx6mH.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Fear Street: 1978",
-     "slug": "fear-street-1978",
-     "poster": "https://image.tmdb.org/t/p/w342/5dNTxhoGDTHHGqUTdxcr4H1dqlU.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/dNKFETDDujxm2PUN873Jwiw5VML.jpg",
-   "fullReview": "Influenced by a sinister Cricket and created by Geppetto, Pinocchio launches a violent crusade to carve himself into a real boy like his brother James, one piece at a time.",
-   "castPics": [
-    {
-     "name": "Jude Evan Lloyd",
-     "character": "Pinocchio (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/vBbtBNsGKOZPvmdlyG6lUUkcNwF.jpg"
-    },
-    {
-     "name": "Robert Englund",
-     "character": "Cricket (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/cjGEkiavinHa1dnetDvnEhlD2Wm.jpg"
-    },
-    {
-     "name": "Cameron Bell",
-     "character": "James",
-     "photo": "https://image.tmdb.org/t/p/w185/4pHVLu11DmVMJDgGo1X5rZH53Uh.jpg"
-    },
-    {
-     "name": "Jessica Balmer",
-     "character": "Mia",
-     "photo": "https://image.tmdb.org/t/p/w185/fhb5Oj719yH7z5f2lYU2r8Lyu46.jpg"
-    },
-    {
-     "name": "Richard Brake",
-     "character": "Geppetto",
-     "photo": "https://image.tmdb.org/t/p/w185/JwsiErANShzPSdYsNoiNYdrSg1.jpg"
-    },
-    {
-     "name": "Jack Art Gray",
-     "character": "Dudley",
-     "photo": "https://image.tmdb.org/t/p/w185/7C9o6X4g3lj9OsrD24ztL01GxVL.jpg"
-    }
-   ],
-   "slug": "pinocchio-unstrung",
-   "trailerViews": 205888
+   "trailerViews": 12431497
   },
   {
    "title": "Spider-Man: Brand New Day",
@@ -2421,7 +2395,7 @@
    "tmdbId": 969681,
    "popularity": 117.2648,
    "cert": "12A",
-   "trailer": "https://www.youtube.com/watch?v=62bIsvRcPv0",
+   "trailer": "https://www.youtube.com/watch?v=P3uI5sLosKU",
    "providers": [],
    "cast": [
     "Tom Holland",
@@ -2439,13 +2413,6 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "Spider-Man: No Way Home",
-     "slug": "spider-man-no-way-home",
-     "poster": "https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Ant-Man and the Wasp: Quantumania",
      "slug": "ant-man-and-the-wasp-quantumania",
      "poster": "https://image.tmdb.org/t/p/w342/qnqGbB22YJ7dSs4o6M7exTpNxPz.jpg",
@@ -2460,28 +2427,35 @@
      "kind": "movie"
     },
     {
-     "title": "Spider-Man: Homecoming",
-     "slug": "spider-man-homecoming",
-     "poster": "https://image.tmdb.org/t/p/w342/c24sv2weTHPsmDa7jEMN0m2P3RT.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Teenage Mutant Ninja Turtles",
-     "slug": "teenage-mutant-ninja-turtles",
-     "poster": "https://image.tmdb.org/t/p/w342/azL2ThbJMIkts3ZMt3j1YgBUeDB.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Captain America: Civil War",
      "slug": "captain-america-civil-war",
      "poster": "https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg",
      "language": "English",
      "kind": "movie"
+    },
+    {
+     "title": "Black Panther",
+     "slug": "black-panther",
+     "poster": "https://image.tmdb.org/t/p/w342/uxzzxijgPIY7slzFvMotPv8wjKA.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Iron Man 2",
+     "slug": "iron-man-2",
+     "poster": "https://image.tmdb.org/t/p/w342/6WBeq4fCfn7AN0o21W9qNcRF2l9.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Superman Returns",
+     "slug": "superman-returns",
+     "poster": "https://image.tmdb.org/t/p/w342/385XwTQZDpRX2d3kxtnpiLrjBXw.jpg",
+     "language": "English",
+     "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/h0M2JTPUlR64jkfXAhZeD9e7ZWF.jpg",
+   "backdrop": "https://image.tmdb.org/t/p/w780/vjMvFSmGUxEtqVdaZgvFee9XkZl.jpg",
    "fullReview": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
    "castPics": [
     {
@@ -2516,7 +2490,7 @@
     }
    ],
    "slug": "spider-man-brand-new-day",
-   "trailerViews": 35011217
+   "trailerViews": 1445724
   },
   {
    "title": "Ice Cream Man",
@@ -2624,7 +2598,7 @@
     }
    ],
    "slug": "ice-cream-man",
-   "trailerViews": 4644769
+   "trailerViews": 4645365
   },
   {
    "title": "The End of Oak Street",
@@ -2635,7 +2609,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/3SifFCwwFzXdU1Ew0nA4Z92Bs15.jpg",
    "kind": "movie",
    "tmdbId": 1101383,
-   "popularity": 14.5693,
+   "popularity": 15.6262,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=3oB9AxspVow",
    "providers": [],
@@ -2732,7 +2706,7 @@
     }
    ],
    "slug": "the-end-of-oak-street",
-   "trailerViews": 29032725
+   "trailerViews": 29061640
   },
   {
    "title": "The Dog Stars",
@@ -2743,7 +2717,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/5O616X9vmRzQdB68PHzBewPittd.jpg",
    "kind": "movie",
    "tmdbId": 1384216,
-   "popularity": 11.5763,
+   "popularity": 11.0867,
    "cert": "15",
    "trailer": "https://www.youtube.com/watch?v=-xSxaE1ClEE",
    "providers": [],
@@ -2840,18 +2814,18 @@
     }
    ],
    "slug": "the-dog-stars",
-   "trailerViews": 2118800
+   "trailerViews": 2132862
   },
   {
    "title": "Digger",
    "released": "2026-10-02",
-   "genre": "Adventure / Comedy",
+   "genre": "Comedy / Adventure",
    "language": "English",
    "review": "The most powerful man in the world embarks on a frantic mission to prove he is humanity's savior before the disaster…",
    "poster": "https://image.tmdb.org/t/p/w342/1ATXKrIPJyKNwnJ6lcG088Sa6zi.jpg",
    "kind": "movie",
    "tmdbId": 1248832,
-   "popularity": 15.022,
+   "popularity": 12.5865,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=qORTe1wW3Wg",
    "providers": [],
@@ -2892,13 +2866,6 @@
      "kind": "movie"
     },
     {
-     "title": "Afterburn",
-     "slug": "afterburn",
-     "poster": "https://image.tmdb.org/t/p/w342/fSXZFZVfJmC2v0TkW711QD5o76N.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Accident Man",
      "slug": "accident-man",
      "poster": "https://image.tmdb.org/t/p/w342/bHFKej3Dbr8kGRSRHpkoFHq9TJQ.jpg",
@@ -2906,9 +2873,16 @@
      "kind": "movie"
     },
     {
-     "title": "Interceptor",
-     "slug": "interceptor",
-     "poster": "https://image.tmdb.org/t/p/w342/jBKNAfANo4e3rzJtb7aHfYNd7b3.jpg",
+     "title": "Afterburn",
+     "slug": "afterburn",
+     "poster": "https://image.tmdb.org/t/p/w342/fSXZFZVfJmC2v0TkW711QD5o76N.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Ricky Gervais: Mortality",
+     "slug": "ricky-gervais-mortality",
+     "poster": "https://image.tmdb.org/t/p/w342/u54OhdSaaLBh02Y4Nf5cETkh8Ku.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2948,8 +2922,8 @@
     }
    ],
    "slug": "digger",
-   "trailerViews": 4261317
+   "trailerViews": 4289677
   }
  ],
- "trackedFilms": 98
+ "trackedFilms": 99
 }

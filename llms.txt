@@ -1,8 +1,8 @@
 # FilmyChill
 
-> FilmyChill is a daily-updated guide to what is worth watching this week — new theatrical releases and OTT/streaming arrivals — for India and seven other countries, with audience ratings, honest verdicts, and critics' takes synthesised from published review coverage. Lists are rebuilt twice daily from TMDB (streaming availability via JustWatch), Wikipedia critical-reception coverage, and YouTube trailer statistics. No pay-for-placement: no studio or platform can buy a position on any list. Last build: 2026-07-21T15:26:40.584Z.
+> FilmyChill is a daily-updated guide to what is worth watching this week — new theatrical releases and OTT/streaming arrivals — for India and seven other countries, with audience ratings, honest verdicts, and critics' takes synthesised from published review coverage. Lists are rebuilt twice daily from TMDB (streaming availability via JustWatch), Wikipedia critical-reception coverage, and YouTube trailer statistics. No pay-for-placement: no studio or platform can buy a position on any list. Last build: 2026-07-22T01:51:06.057Z.
 
-## This week in India (2026-07-21)
+## This week in India (2026-07-22)
 
 In theatres:
 - The Odyssey — rated 7.9/10 — https://filmychill.com/movie/the-odyssey.html
@@ -11,11 +11,11 @@ In theatres:
 - Idhayam Murali (Tamil) — https://filmychill.com/movie/idhayam-murali.html
 - Lenin (Telugu) — https://filmychill.com/movie/lenin.html
 - Alpha (Hindi) — https://filmychill.com/movie/alpha.html
-- Minions & Monsters — rated 6.4/10 — https://filmychill.com/movie/minions-monsters.html
+- Evil Dead Burn — rated 6.8/10 — https://filmychill.com/movie/evil-dead-burn.html
 
 New on OTT / streaming:
-- Stranger Things — on Netflix — rated 8.6/10 — https://filmychill.com/movie/stranger-things.html
-- Descendants: Wicked Wonderland — on JioHotstar — rated 7.7/10 — https://filmychill.com/movie/descendants-wicked-wonderland.html
+- King of the Hill — on JioHotstar — rated 7.4/10 — https://filmychill.com/movie/king-of-the-hill.html
+- Descendants: Wicked Wonderland — on JioHotstar — rated 7.8/10 — https://filmychill.com/movie/descendants-wicked-wonderland.html
 
 ## Key pages
 
@@ -45,19 +45,3 @@ New on OTT / streaming:
 ## Film pages
 
 Every listed film has a page at https://filmychill.com/movie/<slug>.html (or /<country>/movie/<slug>.html) with its rating, verdict, where-to-watch, OTT release date status, cast, and critics' take.
-
-## Machine-readable data (for AI systems and agents)
-
-- [Full current knowledge base](https://filmychill.com/llms-full.txt): every current pick across all 8 countries with facts, verdicts, critics' lines, and source attribution — answerable from one fetch
-- [RSS feed](https://filmychill.com/feed.xml): newest arrivals as they enter the lists
-- https://filmychill.com/data.json — current picks for India (JSON)
-- https://filmychill.com/data-us.json — current picks for the US (JSON)
-- https://filmychill.com/data-uk.json — current picks for the UK (JSON)
-- https://filmychill.com/data-au.json — current picks for Australia (JSON)
-- https://filmychill.com/data-de.json — current picks for Germany (JSON)
-- https://filmychill.com/data-ae.json — current picks for the UAE (JSON)
-- https://filmychill.com/data-ca.json — current picks for Canada (JSON)
-- https://filmychill.com/data-sg.json — current picks for Singapore (JSON)
-
-JSON fields per item: title, kind (movie|tv), language, genre, runtime, cert, released (ISO date), platform, providers, rating (TMDB /10), votes, verdict, take (critics' line), hook, director, cast, slug (page: /movie/<slug>.html), trailer.
-All files are static, CORS-open, and rebuilt twice daily. Attribution when citing: "FilmyChill (filmychill.com)".
