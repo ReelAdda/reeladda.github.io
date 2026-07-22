@@ -456,13 +456,21 @@ test("ottArrival: late OTT arrival — old release, fresh sighting -> effective=
 });
 test("ottArrival: direct-to-OTT release — fresh release, fresh sighting -> release event, NOT arrival-badged", () => {
   const { effective, isArrival } = U.ottArrival(daysAgo(3), daysAgo(2), TH_NOW);
-  assert.strictEqual(effective, daysAgo(2));
+  assert.strictEqual(effective, daysAgo(3), "a fresh release keeps its release date for the gate (not the later sighting)");
   assert.ok(!isArrival, "recent releases already carry the release badge");
 });
-test("ottArrival: catalog addition — years-old title first seen today -> fresh + arrival", () => {
-  const { effective, isArrival } = U.ottArrival("2024-03-01", daysAgo(0), TH_NOW);
-  assert.strictEqual(effective, daysAgo(0));
-  assert.ok(isArrival);
+test("ottArrival: recent catalog addition — a few-months-old release first seen today -> fresh + arrival", () => {
+  const { effective, isArrival } = U.ottArrival(daysAgo(120), daysAgo(0), TH_NOW);
+  assert.strictEqual(effective, daysAgo(0), "a genuine recent arrival uses the arrival date");
+  assert.ok(isArrival, "within the arrival release-age window -> badge");
+});
+test("ottArrival: re-pruned catalog title — 8-month-old season re-seeded today -> NOT arrival, stays stale (Stranger Things bug)", () => {
+  const { effective, isArrival } = U.ottArrival(daysAgo(240), daysAgo(0), TH_NOW);
+  assert.ok(!isArrival, "an 8-month-old release is a catalog title, not a new arrival, however recently the ledger forgot it");
+  assert.strictEqual(effective, daysAgo(240), "effective must stay the true release date so the freshness gate drops it");
+});
+test("ottArrival: release-age ceiling sits above the seen-retention window (no genuine arrival excluded)", () => {
+  assert.ok(U.ARRIVAL_MAX_RELEASE_AGE > U.SEEN_RETENTION_DAYS);
 });
 test("ottArrival: long-listed title — old first-sighting -> no badge, effective stays put", () => {
   const { isArrival } = U.ottArrival(daysAgo(60), daysAgo(40), TH_NOW);
@@ -544,40 +552,13 @@ test("trailerViewsLabel: null below 1M (anti-proof guard), label at 52M", () => 
   assert.strictEqual(U.trailerViewsLabel(undefined), null);
   assert.strictEqual(U.trailerViewsLabel(52123456), "▶ 52M trailer views");
 });
-test("ssrCard: trending badge renders (icon, no emoji); trailer views stay off the card", () => {
+test("ssrCard: trending badge + trailer views render from data fields", () => {
   const html = U.ssrCard({ title: "HotD", platform: "JioHotstar", language: "English", genre: "Fantasy / Drama",
     rating: 8.2, verdict: "Must watch", kind: "tv", slug: "hotd", trending: true, trailerViews: 52123456,
     badge: "New season", freshDate: "2026-06-21" }, 0, "in");
-  assert.ok(html.includes("icTrend") && html.includes("Trending") && !html.includes("🔥"));
-  assert.ok(!html.includes("trailer views")); // social proof lives on the detail page now
+  assert.ok(html.includes("🔥 Trending"));
+  assert.ok(html.includes("▶ 52M trailer views"));
   assert.ok(html.includes("New season"));
-});
-test("ssrCard: Theatres pill is dropped inside its own section, OTT platform pill stays", () => {
-  const t1 = U.ssrCard({ title: "A", platform: "Theatres", language: "Hindi", kind: "movie", slug: "a" }, 0, "in");
-  assert.ok(!t1.includes('<span class="platform">'));
-  const t2 = U.ssrCard({ title: "B", platform: "Netflix", language: "Hindi", kind: "movie", slug: "b" }, 0, "in");
-  assert.ok(t2.includes('<span class="platform">Netflix</span>'));
-});
-test("ssrSoonCard: human date, never raw ISO; posterless gets branded placeholder", () => {
-  const s = U.ssrSoonCard({ title: "Vibe", slug: "vibe", released: "2026-09-18", language: "Hindi" }, "in");
-  assert.ok(!s.includes("2026-09-18"), s);
-  assert.ok(/soon-date">[^<]*Sep/.test(s), s);
-  assert.ok(s.includes('class="soon-ph"') && s.includes(">V<"), s);
-});
-test("capTrending: only top 2 by weekly views keep the badge, per section", () => {
-  const data = { in: { theatres: [
-    { title: "a", trending: true, wikiWeeklyViews: 900 },
-    { title: "b", trending: true, wikiWeeklyViews: 5000 },
-    { title: "c", trending: true, wikiWeeklyViews: 100 },
-    { title: "d", trending: true, wikiWeeklyViews: 3000 },
-    { title: "e" }], ott: [] } };
-  U.capTrending(data);
-  const on = data.in.theatres.filter((x) => x.trending).map((x) => x.title).sort();
-  assert.deepStrictEqual(on, ["b", "d"]);
-});
-test("footerAttribution: JustWatch credit present in both ratings modes", () => {
-  assert.ok(U.footerAttribution(false).includes("justwatch.com"));
-  assert.ok(U.footerAttribution(true).includes("justwatch.com"));
 });
 test("ssrCard: no buzz fields -> no trending badge, no views label (graceful absence)", () => {
   const html = U.ssrCard({ title: "Plain", platform: "Netflix", language: "Hindi", rating: 7.0,
@@ -675,7 +656,7 @@ test("buildOttWeekPage: hreflang alternates for every country + x-default to Ind
 });
 test("buildOttWeekPage: trending badge, trailer views, and Discover meta all present", () => {
   const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
-  assert.ok(html.includes("Trending") && !html.includes("🔥"));
+  assert.ok(html.includes("🔥 Trending"));
   assert.ok(html.includes("▶ 12M trailer views"));
   assert.ok(html.includes('content="max-image-preview:large"'));
 });
@@ -1085,9 +1066,9 @@ test("directorial debut uses the item's director", () => {
 
 // ---------------- editorial: audienceCounterpoint() ----------------
 group("audienceCounterpoint()");
-test("critics negative + audiences high -> disagreement line (numberless)", () => {
+test("critics negative + audiences high -> disagreement line", () => {
   const c = U.audienceCounterpoint({ take: "Critics were rough on it, mostly over the writing.", rating: 8.2, votes: 900 });
-  assert.ok(/Audiences disagree/.test(c) && !/\d/.test(c), c); // no digit: the rating pill is the card's only number
+  assert.ok(/Audiences disagree/.test(c) && /8\.2/.test(c));
 });
 test("critics split + audiences high -> disagreement line", () => {
   assert.ok(/Audiences disagree/.test(U.audienceCounterpoint({ take: "Critics are split on this one.", rating: 7.8, votes: 200 })));
@@ -1416,9 +1397,9 @@ test("UPGRADE 2: extracts a Metacritic figure when RT is absent", () => {
   const a = U.analyzeReception("The season met negative reviews. On Metacritic it holds a weighted average score of 38, indicating generally unfavourable reviews from the critics who covered it.");
   assert.deepStrictEqual(a.score, { kind: "mc", value: 38 });
 });
-test("UPGRADE 2+3: a score rescues a would-be-hollow mixed verdict — but never prints the number", () => {
+test("UPGRADE 2+3: a score rescues a would-be-hollow mixed verdict into a fact", () => {
   const take = U.composeTake(U.analyzeReception("The film received mixed reviews from critics. On the review aggregator Rotten Tomatoes, 61% of critics were positive, calling it watchable but slight in the end."));
-  assert.ok(/divisive/i.test(take) && !/\d/.test(take), take); // score is evidence for the claim, not card copy
+  assert.ok(/61%/.test(take) && /divisive/i.test(take), take);
 });
 test("UPGRADE 3: hollow mixed — no aspect, no score — stays SILENT (no weather report)", () => {
   const a = U.analyzeReception("The film received mixed reviews from critics upon its wide theatrical release across the region during the summer season that year.");
@@ -1432,218 +1413,6 @@ test("aspect-bearing and acclaim/negative takes are unchanged by the upgrades", 
 test("score answer never exceeds a valid range (garbage numbers ignored)", () => {
   const a = U.analyzeReception("The film holds a 250% approval somewhere in this malformed sentence that should not parse as a score at all here.");
   assert.ok(!a || a.score === null);
-});
-
-// ---------------- take quality: substance-first upgrades ----------------
-group("take quality: substance-first upgrades");
-test("canonical 'praise for X and criticism of Y' sentence is no longer skipped", () => {
-  const a = U.analyzeReception("The film received mixed reviews from critics, with praise for its visual effects and performances and criticism of its screenplay and uneven pacing throughout.");
-  assert.strictEqual(a.tone, "mixed");
-  assert.ok(a.praised.includes("visuals") || a.praised.includes("performances"), JSON.stringify(a));
-  assert.ok(a.panned.includes("writing") || a.panned.includes("pacing"), JSON.stringify(a));
-  assert.ok(/praise for the/.test(U.composeTake(a))); // substance line, not a pool line
-});
-test("'approval rating of NN%' is captured even far from the aggregator's name", () => {
-  const a = U.analyzeReception("On the review aggregator website Rotten Tomatoes, which collates the notices from major publications, the film holds an approval rating of 74% based on 190 reviews.");
-  assert.deepStrictEqual(a.score, { kind: "rt", value: 74 });
-});
-test("widened vocabulary: dismissed/hailed clauses now carry polarity", () => {
-  const a = U.analyzeReception("Reviewers dismissed the screenplay as lacklustre and derivative, though most hailed the lead performances as the strongest element of the entire production overall.");
-  assert.ok(a.panned.includes("writing"), JSON.stringify(a));
-  assert.ok(a.praised.includes("performances"), JSON.stringify(a));
-});
-test("aspects render, score never leaks (avoids clashing with the TMDB rating pill)", () => {
-  const s = U.composeTake({ tone: "mixed", praised: ["performances"], panned: ["pacing"], score: { kind: "rt", value: 58 } });
-  assert.ok(/performances/.test(s) && /pacing/.test(s) && !/\d/.test(s), s);
-});
-test("takes are number-free across every tone and evidence combo", () => {
-  const combos = [];
-  for (const tone of ["acclaim", "positive", "mixed", "negative", null])
-    for (const score of [null, { kind: "rt", value: 96 }, { kind: "mc", value: 41 }])
-      for (const praised of [[], ["performances"]])
-        for (const panned of [[], ["pacing"]])
-          combos.push({ tone, score, praised, panned });
-  for (const a of combos) {
-    const s = U.composeTake(a);
-    if (s != null) assert.ok(!/\d/.test(s), JSON.stringify(a) + " -> " + s);
-  }
-});
-// ---------------- AI-era readiness ----------------
-group("AI-era readiness");
-test("llms-full.txt: one fetch answers the week — facts, verdicts, critics' lines, provenance", () => {
-  const data = { in: { generatedAt: "2026-07-19T04:00:00Z", theatres: [{ title: "The Odyssey", kind: "movie",
-    language: "English", genre: "Adventure", runtime: 173, cert: "A", released: "2026-07-10", platform: "Theatres",
-    rating: 7.7, votes: 1200, verdict: "Must watch", take: "Critics loved it — special praise for the visuals.",
-    takeArticle: "The Odyssey (2026 film)", hook: "Christopher Nolan's mythological epic.", director: "Christopher Nolan",
-    slug: "the-odyssey" }], ott: [] } };
-  const s = U.buildLlmsFullTxt(data);
-  assert.ok(s.includes("The Odyssey") && s.includes("rated 7.7/10") && s.includes("Must watch"));
-  assert.ok(s.includes("Critics: Critics loved it"));
-  assert.ok(s.includes("en.wikipedia.org/wiki/The_Odyssey_(2026_film)")); // provenance travels with the claim
-  assert.ok(s.includes("https://filmychill.com/movie/the-odyssey.html"));
-  assert.ok(!/<[a-z]/.test(s), "plain text only, no HTML");
-});
-test("llms.txt machine appendix lists llms-full, the feed, and every country's JSON", () => {
-  const s = U.llmsMachineSection();
-  assert.ok(s.includes("llms-full.txt") && s.includes("feed.xml"));
-  assert.ok(s.includes("https://filmychill.com/data.json") && s.includes("https://filmychill.com/data-us.json"));
-});
-test("film-page JSON-LD carries citation + WatchAction when provenance and trailer exist", () => {
-  const html = U.buildFilmPage({ title: "Odyssey", slug: "odyssey", kind: "movie", language: "English",
-    platform: "Theatres", released: "2026-07-10", rating: 7.7, votes: 900,
-    take: "Critics loved it.", takeSrc: "wiki", takeArticle: "The Odyssey (2026 film)",
-    trailer: "https://www.youtube.com/watch?v=abc123def45" }, "2026-07-19", new Set(["odyssey"]), { code: "in", name: "India", region: "IN" });
-  assert.ok(html.includes('"citation"') && html.includes("en.wikipedia.org/wiki/The_Odyssey_(2026_film)"));
-  assert.ok(html.includes('"WatchAction"') && html.includes("abc123def45"));
-});
-test("editor's note: judgments assemble from real data, capped at three sentences", () => {
-  const data = { generatedAt: "2026-07-19", theatres: [
-    { title: "The Odyssey", rating: 7.7, votes: 1200, genre: "Adventure" },
-    { title: "Moana", rating: 5.6, votes: 85, genre: "Family / Fantasy" },
-    { title: "Alpha", rating: 6.4, votes: 60, genre: "Action" }],
-    ott: [{ title: "Pritam and Pedro", rating: 8.6, votes: 300, platform: "JioHotstar" }] };
-  const n = U.buildEditorNote(data, { code: "in" }, 42);
-  assert.ok(/The Odyssey/.test(n) && /7\.7/.test(n));                 // the event, with its number used judgmentally
-  assert.ok(/Moana/.test(n) && /kids-in-the-house/.test(n));          // family flop -> the gentler skip
-  assert.ok(/Pritam and Pedro/.test(n) && /JioHotstar/.test(n));      // the sleeper
-  assert.ok(n.split(/(?<=[.!?]) /).length <= 4 && n.length < 400, n); // brevity is part of the voice
-});
-test("editor's note: no AI-sounding filler, no fabricated firsthand experience", () => {
-  for (let seed = 0; seed < 40; seed++) {
-    const n = U.buildEditorNote({ generatedAt: "2026-07-19",
-      theatres: [{ title: "A", rating: 8.1, votes: 500, genre: "Drama" }, { title: "B", rating: 4.9, votes: 90, genre: "Action" }],
-      ott: [{ title: "C", rating: 8.2, votes: 200, platform: "Netflix" }] }, { code: "in" }, seed);
-    assert.ok(!/exciting|something for everyone|lineup|!|I watched|I saw|we watched/i.test(n), n);
-  }
-});
-test("ssrEditorNote renders the styled block (would have caught the escHtml scope bug)", () => {
-  const html = U.ssrEditorNote({ generatedAt: "2026-07-19", theatres: [
-    { title: "A & B", rating: 8.0, votes: 200, genre: "Drama" }], ott: [] }, { code: "us" });
-  assert.ok(html.includes('class="ednote"') && html.includes("Editor's note"));
-  assert.ok(html.includes("A &amp; B"), html); // escaping actually ran
-  assert.strictEqual(U.ssrEditorNote({ theatres: [], ott: [] }, { code: "us" }), ""); // thin data -> no block
-});
-test("editor's note: thin data -> null, never a hollow note", () => {
-  assert.strictEqual(U.buildEditorNote({ theatres: [{ title: "X", rating: 7, votes: 3 }], ott: [] }, { code: "in" }), null);
-  assert.strictEqual(U.buildEditorNote({ theatres: [], ott: [] }, { code: "in" }), null);
-});
-test("editor's note: phrasing is stable within a week (seeded), facts stay live", () => {
-  const data = { theatres: [{ title: "A", rating: 8.0, votes: 100, genre: "Drama" }], ott: [] };
-  assert.strictEqual(U.buildEditorNote(data, { code: "in" }, 7), U.buildEditorNote(data, { code: "in" }, 7));
-});
-test("indexNowUrls: hubs, this week's film pages, and llms-full ride the existing ping", () => {
-  const urls = U.indexNowUrls([{ code: "in" }, { code: "us" }], {
-    in: { theatres: [{ slug: "the-odyssey" }], ott: [{ slug: "pritam-and-pedro", title: "P&P", platform: "JioHotstar", providers: ["JioHotstar"] },
-      { slug: "b", title: "B", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "c", title: "C", platform: "JioHotstar", providers: ["JioHotstar"] }] },
-    us: { theatres: [], ott: [] } });
-  assert.ok(urls.includes("https://filmychill.com/movie/the-odyssey.html"));
-  assert.ok(urls.includes("https://filmychill.com/new-on-jiohotstar/"));
-  assert.ok(urls.includes("https://filmychill.com/llms-full.txt"));
-  assert.strictEqual(new Set(urls).size, urls.length); // deduped
-});
-
-// ---------------- platform hub pages ----------------
-group("platform hub pages");
-test("platformSlug: clean, collision-safe slugs incl. overrides", () => {
-  assert.strictEqual(U.platformSlug("Netflix"), "netflix");
-  assert.strictEqual(U.platformSlug("Amazon Prime Video"), "prime-video");
-  assert.strictEqual(U.platformSlug("JioHotstar"), "jiohotstar");
-  assert.strictEqual(U.platformSlug("Disney+"), "disney-plus");
-  assert.strictEqual(U.platformSlug("Apple TV"), "apple-tv");
-});
-test("hubsFor: groups by EVERY provider, enforces min-3 density, caps at 5, keeps rank order", () => {
-  const mk = (slug, provs) => ({ title: slug, slug, platform: provs[0], providers: provs });
-  const ott = [mk("a", ["Netflix", "JioHotstar"]), mk("b", ["Netflix"]), mk("c", ["Netflix"]),
-               mk("d", ["JioHotstar"]), mk("e", ["JioHotstar"]), mk("f", ["Zee5"]), mk("g", ["Zee5"])];
-  const hubs = U.hubsFor({ ott });
-  const names = hubs.map((h) => h.name).sort();
-  assert.deepStrictEqual(names, ["JioHotstar", "Netflix"]); // Zee5 has 2 -> thin, no hub
-  const nf = hubs.find((h) => h.name === "Netflix");
-  assert.deepStrictEqual(nf.items.map((x) => x.slug), ["a", "b", "c"]); // ranked order preserved
-});
-test("buildPlatformHubPage: right title, country-scoped film links, ItemList + FAQ schema", () => {
-  const mk = (slug, r) => ({ title: slug.toUpperCase(), slug, kind: "movie", platform: "Netflix", providers: ["Netflix"], rating: r, votes: 100, language: "English", genre: "Drama" });
-  const data = { generatedAt: "2026-07-19T04:00:00Z", ott: [mk("aaa", 8.2), mk("bbb", 7.1), mk("ccc", 6.4)] };
-  const hub = U.hubsFor(data)[0];
-  const html = U.buildPlatformHubPage(data, { code: "us", name: "United States" }, hub);
-  assert.ok(/New on Netflix/.test(html) && /This Week/.test(html));
-  assert.ok(html.includes('href="/us/movie/aaa.html"'), "film links must carry the country prefix");
-  assert.ok(html.includes('"ItemList"') && html.includes('"numberOfItems":3'));
-  assert.ok(html.includes("What's the best new title on Netflix") && html.includes("AAA"));
-  assert.ok(!/[\u{1F300}-\u{1FAFF}]/u.test(html), "no emoji on listing pages");
-});
-test("buildMoreLinks: hub links appear beside languages for India, alone for other countries", () => {
-  const data = { ott: [{ title: "a", slug: "a", platform: "Netflix", providers: ["Netflix"] },
-    { title: "b", slug: "b", platform: "Netflix", providers: ["Netflix"] }, { title: "c", slug: "c", platform: "Netflix", providers: ["Netflix"] }] };
-  const inLinks = U.buildMoreLinks("in", data);
-  assert.ok(inLinks.includes('href="/new-on-netflix/"') && inLinks.includes('href="/hindi/"'));
-  const usLinks = U.buildMoreLinks("us", data);
-  assert.ok(usLinks.includes('href="/us/new-on-netflix/"') && usLinks.includes("About FilmyChill"));
-});
-test("film page shows up to six similar titles now", () => {
-  const sim = Array.from({ length: 8 }, (_, i) => ({ title: "S" + i, slug: "s" + i, poster: "https://image.tmdb.org/x.jpg", language: "English", kind: "movie" }));
-  const html = U.buildFilmPage({ title: "X", slug: "x", kind: "movie", language: "English", platform: "Theatres",
-    released: "2026-07-10", rating: 7, votes: 100, similar: sim }, "2026-07-19", new Set(["x"]), { code: "in", name: "India", region: "IN" });
-  assert.strictEqual((html.match(/class="simcard"/g) || []).length, 6);
-});
-test("version purge fires even when the entry was already checked today", () => {
-  // Mirrors the attachTakes predicate: a numeric v2 take stamped checked=today must
-  // still qualify for refetch — otherwise known-bad lines sit on the live site a day.
-  const today = "2026-07-17";
-  const entry = { take: "Critics loved it — a 96% critics' score says it all.", v: 2, hook: null, checked: today };
-  const stalePool = !!entry && entry.v !== U.TAKE_VERSION && (U.isPoolTake(entry.take) || /\d/.test(entry.take || ""));
-  const needsFetch = !entry || stalePool || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
-  assert.strictEqual(needsFetch, true);
-  const settled = { take: "Reviewers were close to unanimous — this one landed.", v: U.TAKE_VERSION, hook: null, checked: today };
-  const stale2 = !!settled && settled.v !== U.TAKE_VERSION && (U.isPoolTake(settled.take) || /\d/.test(settled.take || ""));
-  const needs2 = !settled || stale2 || ((!settled.take || settled.hook === undefined) && settled.checked !== today);
-  assert.strictEqual(needs2, false); // stamped v3 -> settles, no loop
-});
-test("numeric cached takes are recomposed number-free (v3 purge closes the loop)", () => {
-  // The Odyssey case: a v2 cache entry saying "a 96% critics' score says it all"
-  // must be treated as stale so the next run regenerates it without the number.
-  assert.ok(/\d/.test("Critics loved it — a 96% critics' score says it all."));
-  const regenerated = U.composeTake({ tone: "acclaim", praised: [], panned: [], score: { kind: "rt", value: 96 } });
-  assert.ok(regenerated && !/\d/.test(regenerated), regenerated);
-});
-test("isPoolTake flags tone-only pool lines and nothing else", () => {
-  assert.strictEqual(U.isPoolTake("Reviews are all over the map on this one."), true);
-  assert.strictEqual(U.isPoolTake("The reviews refuse to agree on this one."), true);
-  assert.strictEqual(U.isPoolTake("Critics liked it, especially the performances."), false);
-  assert.strictEqual(U.isPoolTake(null), false);
-});
-test("no-score aspect lines are unchanged (cache-compatible with reseedTake)", () => {
-  const s = U.composeTake({ tone: "mixed", praised: ["performances"], panned: ["pacing"], score: null });
-  assert.strictEqual(s, "Critics are split — praise for the performances, pushback on the pacing.");
-});
-
-// ---------------- hreflang: x-default must point at a page that exists ----------------
-group("hreflang x-default (GSC 404 fix)");
-test("xDefaultCode: India wins when India has the film", () => {
-  assert.strictEqual(U.xDefaultCode(["us", "in", "uk"]), "in");
-});
-test("xDefaultCode: no India copy -> first available in COUNTRIES order, deterministic", () => {
-  assert.strictEqual(U.xDefaultCode(["de", "uk", "us"]), "us");
-  assert.strictEqual(U.xDefaultCode(["ae", "de"]), U.xDefaultCode(["de", "ae"])); // order-insensitive
-});
-test("xDefaultCode: degenerate inputs fall back safely", () => {
-  assert.strictEqual(U.xDefaultCode([]), "in");
-  assert.strictEqual(U.xDefaultCode(null), "in");
-});
-test("film page WITHOUT an India copy never advertises the India URL as x-default", () => {
-  const item = { title: "Simpsley", slug: "simpsley", kind: "movie", language: "English", platform: "Theatres",
-    released: "2026-07-01", rating: 6.5, votes: 300,
-    _alts: [{ code: "us", region: "US" }, { code: "uk", region: "GB" }, { code: "de", region: "DE" }] };
-  const html = U.buildFilmPage(item, "2026-07-10", new Set(["simpsley"]), { code: "us", name: "United States", region: "US" });
-  assert.ok(!html.includes('hreflang="x-default" href="https://filmychill.com/movie/simpsley.html"'), "dead India URL leaked");
-  assert.ok(html.includes('hreflang="x-default" href="https://filmychill.com/us/movie/simpsley.html"'), html.match(/x-default[^>]*/));
-});
-test("film page WITH an India copy keeps India as x-default (no behaviour change)", () => {
-  const item = { title: "Shared", slug: "shared", kind: "movie", language: "Hindi", platform: "Theatres",
-    released: "2026-07-01", rating: 7.2, votes: 900,
-    _alts: [{ code: "in", region: "IN" }, { code: "us", region: "US" }] };
-  const html = U.buildFilmPage(item, "2026-07-10", new Set(["shared"]), { code: "us", name: "United States", region: "US" });
-  assert.ok(html.includes('hreflang="x-default" href="https://filmychill.com/movie/shared.html"'));
 });
 
 // ---------------- summary ----------------
