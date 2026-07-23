@@ -427,13 +427,30 @@ function freshLabel(item, now = Date.now(), locale = "en-IN") {
   // primary date), so the card and modal never show two different dates for one film.
   const d = item.kind === "tv" ? (item.freshDate || item.released) : (item.released || item.freshDate);
   if (!d) return "";
+  if (item.kind === "tv" && (now - new Date(d)) > 400 * 864e5) return ""; // a years-old season date reads as a bug next to a "New on ..." badge
   return (item.kind === "tv" ? "Latest season " : "Released ") + fmtDateShort(d, now, locale);
+}
+
+// A badge on 6 of 7 cards is decoration, not signal. Keep "Trending" only on the top
+// TREND_CAP items per section per country, ranked by weekly Wikipedia views (the same
+// number that earned the badge). Pure demotion — wikiWeeklyViews stays on every item for
+// the detail pages, and the threshold logic is untouched.
+const TREND_CAP = 2;
+function capTrending(dataByCode) {
+  for (const data of Object.values(dataByCode)) {
+    for (const list of [data.theatres, data.ott]) {
+      if (!Array.isArray(list)) continue;
+      const ranked = list.filter((it) => it.trending)
+        .sort((a, b) => (b.wikiWeeklyViews || 0) - (a.wikiWeeklyViews || 0));
+      for (const it of ranked.slice(TREND_CAP)) delete it.trending;
+    }
+  }
 }
 
 // ============================================================================
 // BUZZ SIGNALS — two free, licence-clean sources that TMDB can't provide:
 //   1. Wikipedia pageviews (keyless): how many people are READING about a title
-//      this week -> "🔥 Trending" badge. Article resolved precisely via Wikidata's
+//      this week -> "Trending" badge. Article resolved precisely via Wikidata's
 //      IMDb-ID property (P345) — never by title search, so no wrong-article risk.
 //   2. YouTube Data API (optional YT_API_KEY secret): trailer view counts ->
 //      "▶ 52M trailer views" social proof. Skipped silently when the key is absent.
@@ -549,6 +566,7 @@ async function attachBuzz(dataByCode) {
     await sleep(120); // polite pace against Wikimedia (well under their guidance)
   }
   console.log(`Buzz: ${resolved}/${byImdb.size} titles resolved via Wikipedia, ${trendingCount} trending`);
+  capTrending(dataByCode);
 }
 
 // ============================================================================
@@ -608,8 +626,14 @@ const TAKE_ASPECTS = [
   [/atmosphere|mood| atmospheric|immersive/i, "atmosphere"],
   [/story|plot|narrative|storyline/i, "story"],
 ];
-const TAKE_PRAISE_RE = /prais\w+|laud\w+|acclaim\w+|applaud\w+|compliment\w+|appreciat\w+|celebrated|singled out|won praise|drew praise|impressed|highlights?|stand.?out|well.?received/i;
-const TAKE_PAN_RE = /criticis\w+|criticiz\w+|panned|faulted|drew criticism|flak|bemoaned|lamented|complain\w+|weakest|disappoint\w+|letdown|drag(?:ged|s)?\b|uneven|flaws?|shortcomings?/i;
+const TAKE_PRAISE_RE = /prais\w+|laud\w+|acclaim\w+|applaud\w+|compliment\w+|appreciat\w+|celebrated|singled out|won praise|drew praise|impressed|highlights?|stand.?out|well.?received|hail\w+|commend\w+|plaudits|admir\w+/i;
+const TAKE_PAN_RE = /criticis\w+|criticiz\w+|panned|faulted|drew criticism|flak|bemoaned|lamented|complain\w+|weakest|disappoint\w+|letdown|drag(?:ged|s)?\b|uneven|flaws?|shortcomings?|derid\w+|dismiss\w+|lambast\w+|slam(?:med|s)\b|underwhelm\w+|lackluste?r\w*|reservations/i;
+// Splits a sentence into single-polarity clauses. The extra alternation splits BEFORE
+// praise/criticism noun groups — Wikipedia's single most common reception sentence is
+// "mixed reviews, with praise for X and criticism of Y", which the old splitter kept as
+// one clause; both polarity regexes fired on it and the whole thing was thrown away as
+// ambiguous. That one skip is why so many films fell back to hollow tone-only lines.
+const TAKE_CLAUSE_SPLIT_RE = /\bbut\b|\bhowever\b|\bwhile\b|\balthough\b|\bthough\b|;|,\s+(?=(?:and\s+)?(?:the|several|some|critics|reviewers|others|many)\b)|,?\s+(?:and|but|with)\s+(?=(?:some\s+|particular\s+|widespread\s+|general\s+)?(?:praise|criticism|acclaim|complaints?|reservations|plaudits)\b)/i;
 
 // Pure: reception-section plain text -> { tone, praised[], panned[] } | null.
 // Tone is decided by whichever verdict phrase appears EARLIEST (reception sections
@@ -634,6 +658,7 @@ function analyzeReception(text) {
   // beats "all over the map". Captured as a fact, printed verbatim, never invented.
   let score = null;
   let sm = t.match(/(\d{1,3})%\s*(?:of critics|on (?:the )?review aggregator|approval)/i)
+        || t.match(/approval rating of (\d{1,3})%/i)
         || t.match(/Rotten Tomatoes[^.]{0,40}?(\d{1,3})%/i)
         || t.match(/(\d{1,3})%[^.]{0,30}?Rotten Tomatoes/i);
   if (sm) { const n = +sm[1]; if (n >= 0 && n <= 100) score = { kind: "rt", value: n }; }
@@ -643,7 +668,7 @@ function analyzeReception(text) {
   }
   const praised = new Set(), panned = new Set();
   for (const sentence of t.split(/(?<=[.!?])\s+/)) {
-    for (const clause of sentence.split(/\bbut\b|\bhowever\b|\bwhile\b|\balthough\b|\bthough\b|;|,\s+(?=(?:and\s+)?(?:the|several|some|critics|reviewers|others|many)\b)/i)) {
+    for (const clause of sentence.split(TAKE_CLAUSE_SPLIT_RE)) {
       const isPraise = TAKE_PRAISE_RE.test(clause);
       const isPan = TAKE_PAN_RE.test(clause);
       if (isPraise === isPan) continue; // neither, or ambiguous clause -> skip
@@ -710,44 +735,48 @@ function reseedTake(take, seed = 0) {
   return take;
 }
 
+// TAKE_VERSION stamps every cache entry with the extractor generation that wrote it.
+// v3 makes takes number-free (a printed RT%/Metacritic figure clashed with the card's
+// TMDB rating pill). Bumping it re-analyses stale entries ONCE with the current extractor;
+// aspect-bearing takes (unique by construction) are otherwise untouched.
+const TAKE_VERSION = 3;
+function isPoolTake(take) {
+  if (!take) return false;
+  return Object.values(TAKE_VARIANTS).some((pool) => pool.includes(take));
+}
+
 function composeTake(a, seed = 0) {
   if (!a) return null;
   const list = (arr) => (arr.length === 2 ? `${arr[0]} and ${arr[1]}` : arr[0]);
   const p = a.praised.length ? list(a.praised) : null;
   const c = a.panned.length ? a.panned[0] : null;
   const vary = (pool) => pool[Math.abs(Number(seed) || 0) % pool.length];
-  // A concrete aggregator figure, phrased for a human. This is the substance that
-  // rescues a tone-only verdict from vagueness — "a 58% critics' score" is a fact
-  // the reader can weigh, not a mood.
-  const sc = a.score
-    ? (a.score.kind === "rt" ? `a ${a.score.value}% critics' score` : `a Metacritic score of ${a.score.value}`)
-    : null;
+  // NO NUMBERS in the take text — an RT% or Metacritic figure next to the card's TMDB
+  // rating pill reads as the site contradicting itself (96% vs 6.9/10 are different
+  // scales, but the reader can't know that). The extracted score still informs WHICH
+  // sentence we pick (hard evidence of division/acclaim); it just never gets printed.
   switch (a.tone) {
     case "acclaim":
       if (p) return `Critics loved it — special praise for the ${p}.`;
-      if (sc) return `Critics loved it — ${sc} says it all.`;
       return vary(TAKE_VARIANTS.acclaim);
     case "positive":
       if (p && c) return `Critics liked it: the ${p} won praise, though the ${c} drew some flak.`;
       if (p) return `Critics liked it, especially the ${p}.`;
       if (c) return `Critics were broadly positive, with reservations about the ${c}.`;
-      if (sc) return `Critics came down positive — ${sc}.`;
       return vary(TAKE_VARIANTS.positive);
     case "mixed":
       if (p && c) return `Critics are split — praise for the ${p}, pushback on the ${c}.`;
       if (p) return `Critics are split, though the ${p} found admirers.`;
       if (c) return `Critics are split, with the ${c} drawing most complaints.`;
-      if (sc) return `Genuinely divisive — ${sc} tells the story.`;
-      return null; // UPGRADE 3: no aspect, no number -> stay silent, don't say "all over the map"
+      if (a.score) return `Genuinely divisive — critics can't settle this one.`; // aggregator-backed -> firm claim is honest
+      return null; // no aspect, no evidence -> stay silent, don't say "all over the map"
     case "negative":
       if (c) return `Critics were rough on it, mostly over the ${c}.`;
-      if (sc) return `Critics were not kind — ${sc}.`;
       return vary(TAKE_VARIANTS.negative);
     default:
       if (p && c) return `Reviewers praised the ${p} but flagged the ${c}.`;
       if (p) return `Reviewers singled out the ${p} for praise.`;
       if (c) return `Reviewers' main gripe: the ${c}.`;
-      if (sc) return `Early read from critics: ${sc}.`;
       return null;
   }
 }
@@ -819,12 +848,12 @@ function audienceCounterpoint(item) {
   const votes = item.imdbRating != null ? (item.imdbVotes || 0) : (item.votes || 0);
   if (votes < 50) return null; // too few voters to call it an audience
   const negTake = /rough on it|not impressed|not kind|gave this one a pass|came away cold/i.test(item.take);
-  const splitTake = /split|all over the map|couldn't agree|down the middle/i.test(item.take);
+  const splitTake = /split|all over the map|couldn't agree|down the middle|divisive|can't settle/i.test(item.take);
   const posTake = /loved|liked it|largely positive|lean clearly positive|came away happy|solidly good|rare-air/i.test(item.take);
   if ((negTake || splitTake) && item.rating >= 7.5)
-    return `Audiences disagree \u2014 \u2605 ${Number(item.rating).toFixed(1)} from viewers.`;
+    return `Audiences disagree \u2014 viewers rate it far higher.`;
   if (posTake && item.rating <= 5.5)
-    return `Audiences are cooler on it (\u2605 ${Number(item.rating).toFixed(1)}).`;
+    return `Audiences are cooler on it than the critics were.`;
   return null;
 }
 
@@ -837,7 +866,7 @@ async function tmdbReviewTake(item) {
   if (ratings.length < 2) return null;
   const avg = ratings.reduce((x, y) => x + y, 0) / ratings.length;
   const lean = avg >= 7.5 ? "strongly positive" : avg >= 6 ? "positive" : avg >= 4.5 ? "mixed" : "negative";
-  return `Early viewer reviews ${lean === "mixed" ? "are mixed" : "lean " + lean} — averaging ${avg.toFixed(1)}/10 on TMDB.`;
+  return `Early viewer reviews on TMDB ${lean === "mixed" ? "are mixed" : "lean " + lean}.`;
 }
 
 // Attach a critics' take to every theatre + OTT item across all countries. Same
@@ -858,12 +887,17 @@ async function attachTakes(dataByCode) {
   for (const [key, items] of byKey) {
     try {
       let entry = takes[key];
-      // Refetch when: never seen; no take yet (reception sections appear late); or a
-      // LEGACY entry predating hooks (hook === undefined; found hooks are strings,
-      // searched-but-absent is null) — a one-time backfill pass, then it settles.
-      const needsFetch = !entry || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
+      // Refetch when: never seen; no take yet (reception sections appear late); a LEGACY
+      // entry predating hooks (hook === undefined); OR a stale take from an older extractor
+      // version — a tone-only pool line, or any take containing a digit (v3 made takes
+      // number-free so they can't clash with the rating pill). Version purges BYPASS the
+      // checked-today gate: they run exactly once per entry (v gets stamped), so there's no
+      // re-fetch loop, and waiting a day just leaves known-bad lines on the live site.
+      const stalePool = !!entry && entry.v !== TAKE_VERSION && (isPoolTake(entry.take) || /\d/.test(entry.take || ""));
+      const needsFetch = !entry || stalePool || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
       if (needsFetch) {
         let take = entry?.take || null, src = entry?.src || null, hook = null;
+        if (stalePool) { take = null; src = null; } // recompose from scratch with the current extractor
         let article = entry?.article || null;
         if (key.startsWith("tt")) { // real IMDb id -> precise Wikipedia route
           if (!article) article = await wikiArticleForImdb(key);
@@ -880,7 +914,7 @@ async function attachTakes(dataByCode) {
           const t = await tmdbReviewTake(items[0]);
           if (t) { take = t; src = "tmdb"; }
         }
-        entry = { take, src, hook, article: article || undefined, checked: today };
+        entry = { take, src, hook, article: article || undefined, checked: today, v: TAKE_VERSION };
         takes[key] = entry;
         await sleep(150); // polite pace against Wikimedia
       } else {
@@ -893,6 +927,7 @@ async function attachTakes(dataByCode) {
           if (entry.take) {
             it.take = seededTake;
             it.takeSrc = entry.src;
+            if (entry.src === "wiki" && entry.article) it.takeArticle = entry.article; // provenance -> JSON-LD citation
             // Disagreement is computed FRESH each run — ratings move, cached text doesn't.
             const counter = audienceCounterpoint(it);
             if (counter) it.takeCounter = counter;
@@ -2001,6 +2036,7 @@ async function main() {
     generatePages(dataByCode[cfg.code], cfg, allSlugSets);
     if (pageTemplate) renderCountryPage(pageTemplate, cfg, dataByCode[cfg.code]);
     writeOttWeekPage(dataByCode[cfg.code], cfg, builtCountries); // /new-on-ott/ per country
+    writePlatformHubPages(dataByCode[cfg.code], cfg);             // /new-on-<platform>/ per country
     writeRssFeed(dataByCode[cfg.code], cfg);                      // /feed.xml per country
   }
   // India-only surfaces: language landing pages (/tamil/, /hindi/, ...) and the
@@ -2010,7 +2046,7 @@ async function main() {
     writeLanguagePages(dataByCode.in);
     writeWeekPage(dataByCode.in);
   }
-  writeIndexNowPayload(builtCountries); // fresh URL list for the workflow's IndexNow ping
+  writeIndexNowPayload(builtCountries, dataByCode); // fresh URL list for the workflow's IndexNow ping
   writeLlmsTxt(dataByCode); // AI-answer-engine site map with this week's actual picks
 
   // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
@@ -2020,6 +2056,10 @@ async function main() {
   fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
 
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
+  // Frozen archived pages are never rewritten, so pages generated before the x-default
+  // fix carry a dead India URL in their hreflang forever unless repaired in place.
+  repairXDefaults(builtCountries);
+
   writeMultiCountrySitemap(builtCountries, pagesManifest);
   console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.`);
 }
@@ -2068,6 +2108,18 @@ function ytIdOf(url) {
 // (preserves already-indexed URLs + the existing archive); other countries are namespaced under
 // /<code>/movie/<slug>.html so the same title in different markets never collides and each has
 // its own region-correct "where to watch". Used everywhere a film page is linked or written.
+// x-default for hreflang must point to a page that EXISTS. India is the canonical default
+// only when India actually has the film; otherwise a foreign-market film (never listed in
+// India) would advertise a dead India URL as its default — Google follows hreflang alternates
+// as discovery URLs and files the miss as a 404. Fallback: first available copy in COUNTRIES
+// order (deterministic; stable across runs).
+function xDefaultCode(codes) {
+  if (!codes || !codes.length) return "in";
+  if (codes.includes("in")) return "in";
+  for (const c of COUNTRIES) if (codes.includes(c.code)) return c.code;
+  return codes[0];
+}
+
 function filmPagePath(code, slug) {
   return code === "in" ? `/movie/${slug}.html` : `/${code}/movie/${slug}.html`;
 }
@@ -2113,6 +2165,15 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   if (item.rating != null && schemaVotes >= 10) {
     ld.aggregateRating = { "@type": "AggregateRating", ratingValue: item.rating, ratingCount: schemaVotes, bestRating: 10 };
   }
+  // AI-era trust signals: name the source the critics' take was distilled from (verifiable
+  // provenance beats assertion), and give agents an actionable target.
+  if (item.takeSrc === "wiki" && item.takeArticle) {
+    ld.citation = { "@type": "CreativeWork", name: `Wikipedia: ${item.takeArticle}`,
+      url: `https://en.wikipedia.org/wiki/${encodeURIComponent(String(item.takeArticle).replace(/ /g, "_"))}` };
+  }
+  if (item.trailer && /youtube\.com\/watch/.test(item.trailer)) {
+    ld.potentialAction = { "@type": "WatchAction", name: `Watch the ${item.title} trailer`, target: item.trailer };
+  }
 
   const breadcrumb = {
     "@context": "https://schema.org",
@@ -2127,7 +2188,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   const verdictProse = buildVerdictProse(item, country, localeFor(code));
   const goodToKnow = buildGoodToKnow(item);
   const faqs = buildFaqs(item, country);
-  const similar = (Array.isArray(item.similar) ? item.similar : []).slice(0, 3);
+  const similar = (Array.isArray(item.similar) ? item.similar : []).slice(0, 6);
 
   // FAQPage schema — only when we have at least 2 Q&As (Google wants a real list).
   const faqLd = faqs.length >= 2 ? {
@@ -2148,7 +2209,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
 <title>${e(item.title)}${year ? " (" + year + ")" : ""} — Review, Rating & Where to Watch in ${e(country)} | FilmyChill</title>
 <meta name="description" content="${e(desc)}">
 <meta name="robots" content="max-image-preview:large">
-<link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl("in", item.slug))}"/>` : ""}
+<link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl(xDefaultCode(alts.map((a) => a.code)), item.slug))}"/>` : ""}
 <meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="video.movie">
@@ -2220,7 +2281,7 @@ ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))
   </div>
   ${verdictProse ? `<h2>The verdict</h2><p class="vprose">${e(verdictProse)}</p>` : ""}
   ${item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
-  ${item.take ? `<p class="take">💬 ${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
+  ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
   ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${goodToKnow.length ? `<h2>Good to know</h2><table class="gtk">${goodToKnow.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : ""}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
@@ -2236,7 +2297,7 @@ ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))
       : `<div class="simcard" style="cursor:default">${inner}</div>`;
   }).join("")}</div>` : ""}
   ${faqs.length ? `<h2>Frequently asked</h2><div class="faq">${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("")}</div>` : ""}
-  <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">🎬 See this week's top picks on FilmyChill →</a>
+  <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">See this week's top picks on FilmyChill →</a>
 </div>
 <footer>
   ${footerAttribution()}© 2026 FilmyChill · Vikram Sharma
@@ -2276,6 +2337,42 @@ function generatePages(data, cfg, allSlugSets) {
   }
   const total = fs.readdirSync(dir).filter((f) => f.endsWith(".html")).length;
   console.log(`Pages [${code}]: ${written} written, ${total} total in ${dir}/.`);
+}
+
+// One-time in effect: fix FROZEN (archived) film pages whose on-page hreflang still
+// declares x-default = the India copy when no India copy exists on disk. Current pages are
+// regenerated fresh each run and get the correct x-default by construction; frozen pages are
+// deliberately never rewritten, so the bad tag written by pre-fix code would otherwise
+// persist — and keep feeding Google a 404 discovery URL. Pure disk scan + string swap.
+function repairXDefaults(countries) {
+  const dirFor = (code) => (code === "in" ? "movie" : `${code}/movie`);
+  const have = {}; // slug -> [codes whose file exists]
+  for (const c of countries) {
+    const dir = dirFor(c.code);
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir)) {
+      if (f.endsWith(".html")) (have[f.slice(0, -5)] = have[f.slice(0, -5)] || []).push(c.code);
+    }
+  }
+  let fixed = 0;
+  for (const c of countries) {
+    const dir = dirFor(c.code);
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir)) {
+      if (!f.endsWith(".html")) continue;
+      const slug = f.slice(0, -5);
+      const codes = have[slug] || [];
+      if (codes.includes("in")) continue; // India copy exists -> x-default already valid
+      const bad = `hreflang="x-default" href="https://filmychill.com/movie/${slug}.html"`;
+      const p = `${dir}/${f}`;
+      const html = fs.readFileSync(p, "utf8");
+      if (!html.includes(bad)) continue;
+      const good = `hreflang="x-default" href="${filmPageUrl(xDefaultCode(codes), slug)}"`;
+      fs.writeFileSync(p, html.split(bad).join(good));
+      fixed++;
+    }
+  }
+  if (fixed) console.log(`  hreflang repair: ${fixed} frozen pages had x-default pointing at a missing India copy`);
 }
 
 // Complete sitemap: every country homepage (with hreflang alternates) + every country's
@@ -2332,13 +2429,22 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       const alts = codes.length > 1
         ? "\n" + codes.map((cc) =>
             `    <xhtml:link rel="alternate" hreflang="${cc === "in" ? "en-IN" : "en-" + regionOf(cc)}" href="${filmUrlFor(cc, slug)}"/>`).join("\n")
-          + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${filmUrlFor("in", slug)}"/>`
+          + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${filmUrlFor(xDefaultCode(codes), slug)}"/>`
         : "";
       filmUrls.push(`  <url><loc>${filmUrlFor(c.code, slug)}</loc><lastmod>${filmLastmod(c.code, slug)}</lastmod><priority>0.5</priority>${alts ? alts + "\n  " : ""}</url>`);
       filmCount++;
     }
   }
   // Language landing pages (India) — daily-refreshed discovery surfaces.
+  const hubUrls = [];
+  for (const c of countries) {
+    const base = c.code === "in" ? "." : c.code;
+    if (!fs.existsSync(base)) continue;
+    for (const d of fs.readdirSync(base)) {
+      if (d.startsWith("new-on-") && d !== "new-on-ott" && fs.existsSync(`${base}/${d}/index.html`))
+        hubUrls.push(`  <url><loc>https://filmychill.com${c.code === "in" ? "" : "/" + c.code}/${d}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
+    }
+  }
   const langUrls = LANGUAGE_PAGES.filter(([, slug]) => fs.existsSync(`${slug}/index.html`))
     .map(([, slug]) => `  <url><loc>https://filmychill.com/${slug}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
   // Weekly snapshots: the current week reports today; FROZEN weeks report their own
@@ -2353,7 +2459,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const aboutUrls = fs.existsSync("about/index.html")
     ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${ABOUT_LASTMOD}</lastmod><priority>0.3</priority></url>`] : [];
   fs.writeFileSync("sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...weekUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...weekUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
   console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${weekUrls.length} week + ${filmCount} film pages.`);
 }
 
@@ -2376,12 +2482,12 @@ function ssrCard(item, i, code) {
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
     <div>
-      <div class="title-row"><h3>${e(item.title)}</h3><span class="platform">${e(item.platform || "")}</span>${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}${item.trending ? '<span class="fresh-badge trend">🔥 Trending</span>' : ""}</div>
+      <div class="title-row"><h3>${e(item.title)}</h3>${item.platform && item.platform !== "Theatres" ? `<span class="platform">${e(item.platform)}</span>` : ""}${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}${item.trending ? '<span class="fresh-badge trend"><svg class="ic" aria-hidden="true"><use href="#icTrend"/></svg> Trending</span>' : ""}</div>
       <div class="meta">${bits}</div>
-      ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}${trailerViewsLabel(item.trailerViews) ? " · " + trailerViewsLabel(item.trailerViews) : ""}</div>` : ""}
+      ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>` : ""}
       ${item.hook ? `<div class="meta hook">${e(item.hook)}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 150))}</p>` : ""}
-      ${item.take ? `<p class="take">💬 ${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}</p>` : ""}
+      ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}</p>` : ""}
     </div>`;
   // Every country now has its own per-film pages, so always link to this country's page.
   // (`code` defaults to India for safety if a caller omits it.)
@@ -2393,9 +2499,9 @@ function ssrCard(item, i, code) {
 function ssrSoonCard(item, code) {
   const e = escHtml;
   return `<a class="soon-card" href="${e(filmPagePath(code || "in", item.slug))}" style="text-decoration:none;color:inherit">
-    ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
+    ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : `<div class="soon-ph" aria-hidden="true">${e((item.title || "?").charAt(0).toUpperCase())}</div>`}
     <div class="soon-body">
-      <div class="soon-date">${e(item.released || "")}</div>
+      <div class="soon-date">${e(item.released ? fmtDateShort(item.released, Date.now(), localeFor(code)) : "")}</div>
       <div class="soon-title">${e(item.title)}</div>
       <div class="soon-meta">${e(item.language || "")}</div>
     </div>
@@ -2447,6 +2553,84 @@ function replaceBetween(html, tag, inner) {
 // ============================================================================
 function ottWeekPath(code) { return code === "in" ? "new-on-ott/index.html" : `${code}/new-on-ott/index.html`; }
 function ottWeekUrl(code) { return code === "in" ? "https://filmychill.com/new-on-ott/" : `https://filmychill.com/${code}/new-on-ott/`; }
+
+// ============================================================================
+// EDITOR'S NOTE — a short weekly note in a human editorial register, assembled from
+// judgments the pipeline can defend: which release is the event, what the ratings say to
+// skip, what's quietly excellent on streaming. RULES: every claim traces to data on the
+// items; NO fabricated firsthand experience ("I watched...") ever; better absent than
+// hollow (returns null on thin data). Wording is seeded by ISO week + country so phrasing
+// holds across a week's builds while facts stay live. If /editor-note.txt exists at the
+// repo root, its text REPLACES the generated note for India — the owner's real opinion wins.
+// ============================================================================
+const EDNOTE_MIN_VOTES = 25;
+function isoWeekNum(d = new Date()) {
+  const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+  return Math.ceil((((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 864e5) + 1) / 7);
+}
+function buildEditorNote(data, cfg, seed = null) {
+  const th = (data && data.theatres) || [], ott = (data && data.ott) || [];
+  const s = seed != null ? seed : isoWeekNum() * 31 + ((cfg && cfg.code) || "in").charCodeAt(0);
+  const pick = (pool, i) => pool[Math.abs(s + i * 7) % pool.length];
+  const rated = (list) => list.filter((x) => x.rating != null && (x.votes || 0) >= EDNOTE_MIN_VOTES);
+  const r1 = (x) => Number(x.rating).toFixed(1);
+
+  const rt = rated(th).sort((a, b) => b.rating - a.rating);
+  const event = rt[0] && rt[0].rating >= 6.5 ? rt[0] : null;
+  const skip = rt.length > 1 && rt[rt.length - 1].rating <= 5.9 && rt[rt.length - 1] !== event ? rt[rt.length - 1] : null;
+  const ro = rated(ott).sort((a, b) => b.rating - a.rating);
+  const sleeper = ro[0] && ro[0].rating >= 7.8 && ro[0].platform && ro[0].platform !== "Theatres" ? ro[0] : null;
+  if (!event && !skip && !sleeper) return null; // thin data -> say nothing
+
+  const parts = [];
+  if (event && event.rating >= 7.5) {
+    parts.push(pick([
+      `${event.title} is the obvious ticket this week, and for once the obvious call is the right one — a ${r1(event)} from early audiences is rare air.`,
+      `The week belongs to ${event.title}. A ${r1(event)} with real votes behind it means people aren't just showing up, they're coming out happy.`,
+      `Start with ${event.title} — ${r1(event)} and holding, which is about as safe as ticket money gets.`,
+    ], 1));
+  } else if (event) {
+    parts.push(pick([
+      `${event.title} leads a middling week — ${r1(event)} says solid, not special.`,
+      `${event.title} is the safest ticket around, though ${r1(event)} suggests keeping expectations in check.`,
+      `Nothing unmissable in theatres; ${event.title} at ${r1(event)} is the best of it.`,
+    ], 2));
+  } else if (rt.length) {
+    parts.push(pick([`No must-see in theatres this week — save the ticket money.`, `Thin week in theatres, honestly.`], 3));
+  }
+  if (skip) {
+    const fam = /family|animation/i.test(skip.genre || "");
+    parts.push(fam
+      ? `${skip.title} at ${r1(skip)} is strictly a kids-in-the-house situation.`
+      : pick([
+          `${skip.title} at ${r1(skip)} is a skip — the number says what the trailer won't.`,
+          `Give ${skip.title} a miss; ${r1(skip)} from the people who paid is warning enough.`,
+          `${skip.title} (${r1(skip)}) can wait for streaming, if that.`,
+        ], 4));
+  }
+  if (sleeper) {
+    parts.push(pick([
+      `The sleeper is on ${sleeper.platform}: ${sleeper.title}, sitting at ${r1(sleeper)} and deserving more noise than it's getting.`,
+      `Quietly, the best-rated thing in the country is ${sleeper.title} on ${sleeper.platform} — ${r1(sleeper)} from viewers.`,
+      `Odd week when the strongest number around (${sleeper.title}, ${r1(sleeper)}) is included with a ${sleeper.platform} plan.`,
+    ], 5));
+  }
+  if (event && event.takeCounter) parts.push(`Critics and audiences are pulling in opposite directions on ${event.title}; side with whichever camp you usually trust.`);
+  return parts.slice(0, 3).join(" ");
+}
+
+function ssrEditorNote(data, cfg) {
+  let note = null;
+  if (cfg && cfg.code === "in" && fs.existsSync("editor-note.txt")) {
+    const own = fs.readFileSync("editor-note.txt", "utf8").trim();
+    if (own) note = own; // the human's line always wins
+  }
+  if (!note) note = buildEditorNote(data, cfg);
+  if (!note) return "";
+  const d = data && data.generatedAt ? fmtDateShort(String(data.generatedAt).slice(0, 10), Date.now(), localeFor(cfg.code)) : "";
+  return `<div class="ednote"><div class="ednote-label">Editor's note${d ? ` · ${escHtml(d)}` : ""}</div><p>${escHtml(note)}</p></div>`;
+}
 
 function buildOttWeekPage(data, cfg, allCountries) {
   const e = escHtml;
@@ -2529,7 +2713,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
     const inner = `
       ${it.poster ? `<img src="${e(it.poster)}" alt="${e(it.title)} poster" width="92" height="138" loading="lazy">` : "<div class=\"nop\"></div>"}
       <div>
-        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">🔥 Trending</span>' : ""}</div>
+        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
         ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}${trailerViewsLabel(it.trailerViews) ? " · " + trailerViewsLabel(it.trailerViews) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
       </div>`;
@@ -2769,7 +2953,99 @@ const LANGUAGE_PAGES = [
 
 // Shared listing shell for language + week pages (same visual family as the
 // /new-on-ott/ pages). `sections` = [{ h2, items }]; rows link to film pages.
-function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null }) {
+
+// ============================================================================
+// PLATFORM HUB PAGES — /new-on-netflix/, /new-on-jiohotstar/, ... per country. The
+// highest-intent streaming queries are platform-shaped ("new on netflix india this week");
+// nobody types "new OTT releases". Each hub is a filtered re-render of data the run already
+// has — zero extra API calls — grouped from every provider an item is on. Eligibility keeps
+// hubs dense and honest: a provider needs >= HUB_MIN_TITLES current titles, and only the top
+// HUB_MAX_PER_COUNTRY providers get pages. Same licence-clean sources, CollectionPage +
+// ItemList + FAQ schema.
+// ============================================================================
+const HUB_MIN_TITLES = 3;
+const HUB_MAX_PER_COUNTRY = 5;
+const PLATFORM_SLUG_OVERRIDES = { "Amazon Prime Video": "prime-video", "Apple TV": "apple-tv", "Apple TV+": "apple-tv", "Disney+": "disney-plus", "Disney Plus": "disney-plus" };
+function platformSlug(name) {
+  if (PLATFORM_SLUG_OVERRIDES[name]) return PLATFORM_SLUG_OVERRIDES[name];
+  return String(name).toLowerCase().replace(/\+/g, " plus").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+function hubsFor(data) {
+  const groups = new Map();
+  for (const it of (data && data.ott) || []) {
+    if (!it || !it.title) continue;
+    const provs = new Set([...(Array.isArray(it.providers) ? it.providers : []), ...(it.platform && it.platform !== "Theatres" ? [it.platform] : [])]);
+    for (const p of provs) {
+      if (!groups.has(p)) groups.set(p, []);
+      groups.get(p).push(it);
+    }
+  }
+  return [...groups.entries()]
+    .filter(([, items]) => items.length >= HUB_MIN_TITLES)
+    .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
+    .slice(0, HUB_MAX_PER_COUNTRY)
+    .map(([name, items]) => ({ name, slug: platformSlug(name), items }));
+}
+function hubPath(code, slug) { return code === "in" ? `new-on-${slug}/index.html` : `${code}/new-on-${slug}/index.html`; }
+function hubUrl(code, slug) { return code === "in" ? `https://filmychill.com/new-on-${slug}/` : `https://filmychill.com/${code}/new-on-${slug}/`; }
+
+function buildPlatformHubPage(data, cfg, hub) {
+  const code = (cfg && cfg.code) || "in";
+  const m = COUNTRY_PAGE_META[code] || { name: (cfg && cfg.name) || "India", path: `/${code}/` };
+  const countryName = m.name;
+  const url = hubUrl(code, hub.slug);
+  const gen = data.generatedAt || new Date().toISOString();
+  const monthYear = new Date(gen).toLocaleDateString(localeFor(code), { month: "long", year: "numeric" });
+  const updatedHuman = new Date(gen).toLocaleDateString(localeFor(code), { day: "numeric", month: "long", year: "numeric" });
+  const films = hub.items.filter((x) => x.kind !== "tv"), series = hub.items.filter((x) => x.kind === "tv");
+
+  const faqs = [{ q: `What's new on ${hub.name} in ${countryName} this week?`, a: `New on ${hub.name} this week: ${hub.items.map((t) => t.title).join(", ")}.` }];
+  const best = hub.items.filter((x) => x.rating != null).sort((a, b) => b.rating - a.rating)[0];
+  if (best) faqs.push({ q: `What's the best new title on ${hub.name} right now?`,
+    a: `${best.title} is the top-rated new arrival on ${hub.name} at ${Number(best.rating).toFixed(1)}/10${best.verdict ? ` — ${best.verdict}` : ""}.` });
+
+  const linked = hub.items.filter((x) => x.slug);
+  const extraLd = [{
+    "@context": "https://schema.org", "@type": "CollectionPage",
+    name: `New on ${hub.name} in ${countryName} This Week`, url, dateModified: gen,
+    isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+    mainEntity: { "@type": "ItemList", numberOfItems: linked.length,
+      itemListElement: linked.map((x, i) => ({ "@type": "ListItem", position: i + 1, name: x.title, url: filmPageUrl(code, x.slug) })) },
+  }, {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "FilmyChill", item: `https://filmychill.com${m.path}` },
+      { "@type": "ListItem", position: 2, name: `New on ${hub.name}`, item: url },
+    ],
+  }];
+  return listingPageHtml({
+    title: `New on ${hub.name} ${countryName} This Week (${monthYear}) | FilmyChill`,
+    desc: `Every movie and series newly streaming on ${hub.name} in ${countryName} this week — ratings, critics' verdicts, what to skip. Updated daily.`,
+    canonical: url,
+    h1: `New on ${hub.name} in ${countryName} this week`,
+    updLine: `Updated ${updatedHuman} · refreshed daily`,
+    lead: `${hub.items.length} new ${hub.items.length === 1 ? "title" : "titles"} on ${hub.name} this week, ranked and rated — with an honest word on which are worth your evening.`,
+    sections: (films.length && series.length)
+      ? [{ h2: "Movies", items: films }, { h2: "Series", items: series }]
+      : [{ h2: `Added this week`, items: hub.items }],
+    faqs, extraLd, homeUrl: `https://filmychill.com${m.path}`, code,
+  });
+}
+
+function writePlatformHubPages(data, cfg) {
+  const code = (cfg && cfg.code) || "in";
+  const hubs = hubsFor(data);
+  for (const hub of hubs) {
+    const p = hubPath(code, hub.slug);
+    const dir = p.slice(0, p.lastIndexOf("/"));
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(p, buildPlatformHubPage(data, cfg, hub));
+  }
+  if (hubs.length) console.log(`  platform hubs (${code}): ${hubs.map((h) => "new-on-" + h.slug).join(", ")}`);
+  return hubs;
+}
+
+function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in" }) {
   const e = escHtml;
   const ldJson = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
   const rowFor = (it) => {
@@ -2779,13 +3055,13 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
     const inner = `
       ${it.poster ? `<img src="${e(it.poster)}" alt="${e(it.title)} poster" width="92" height="138" loading="lazy">` : '<div class="nop"></div>'}
       <div>
-        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">🔥 Trending</span>' : ""}</div>
+        <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
         ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
         ${it.hook ? `<div class="rm hk">${e(it.hook)}</div>` : ""}
-        ${it.take ? `<div class="rm tk">💬 ${e(it.take)}</div>` : ""}
+        ${it.take ? `<div class="rm tk">${e(it.take)}</div>` : ""}
       </div>`;
-    return it.slug ? `<a class="row" href="${e(filmPagePath("in", it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
+    return it.slug ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
   };
   const sectionHtml = sections.filter((sec) => sec.items.length).map((sec) => `
   <section>
@@ -3017,14 +3293,21 @@ function writeWeekPage(data) {
 // and every configured country/language page get pinged without ever editing the
 // workflow again. The key is public by design — IndexNow proves ownership via the
 // matching KEY.txt served from the repo root, not by keeping the key secret.
-function writeIndexNowPayload(builtCountries) {
-  const urls = ["https://filmychill.com/", "https://filmychill.com/new-on-ott/"];
+function indexNowUrls(builtCountries, dataByCode = {}) {
+  const urls = ["https://filmychill.com/", "https://filmychill.com/new-on-ott/", "https://filmychill.com/llms-full.txt"];
   for (const cfg of builtCountries) {
-    if (cfg.code === "in") continue;
-    urls.push(`https://filmychill.com/${cfg.code}/`, `https://filmychill.com/${cfg.code}/new-on-ott/`);
+    if (cfg.code !== "in") urls.push(`https://filmychill.com/${cfg.code}/`, `https://filmychill.com/${cfg.code}/new-on-ott/`);
+    const d = dataByCode[cfg.code];
+    if (!d) continue;
+    for (const h of hubsFor(d)) urls.push(hubUrl(cfg.code, h.slug));
+    for (const it of [...(d.theatres || []), ...(d.ott || [])]) if (it.slug) urls.push(filmPageUrl(cfg.code, it.slug));
   }
   for (const [, slug] of LANGUAGE_PAGES) urls.push(`https://filmychill.com/${slug}/`);
   urls.push(`https://filmychill.com/week/${weekSlug(isoWeekOf())}/`);
+  return [...new Set(urls)].slice(0, 900);
+}
+function writeIndexNowPayload(builtCountries, dataByCode = {}) {
+  const urls = indexNowUrls(builtCountries, dataByCode);
   fs.writeFileSync("indexnow-payload.json", JSON.stringify({
     host: "filmychill.com",
     key: "a95eba27e6b3f0e85e89e609241d6699",
@@ -3081,9 +3364,60 @@ Every listed film has a page at https://filmychill.com/movie/<slug>.html (or /<c
 `;
 }
 
+// llms-full.txt — the -full companion to llms.txt: the index stays short, this carries the
+// complete current knowledge base so an AI can answer "what should I watch this week in
+// <country>?" from one fetch, with per-film facts, verdicts, and provenance.
+function buildLlmsFullTxt(dataByCode) {
+  const lines = [
+    "# FilmyChill — full current picks (machine-readable companion to /llms.txt)", "",
+    `Generated: ${new Date().toISOString()}. Rebuilt twice daily. No pay-for-placement.`,
+    "Sources: TMDB (film data, ratings; streaming availability via JustWatch), Wikipedia (critical reception), YouTube (trailer statistics).",
+    "Fields: rating is the TMDB audience average out of 10; verdict is FilmyChill's editorial call; the critics' line is distilled from published review coverage, never quoted.", "",
+  ];
+  for (const cfg of COUNTRIES) {
+    const data = dataByCode[cfg.code];
+    if (!data) continue;
+    const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name };
+    lines.push(`## ${m.name} — week of ${data.generatedAt ? String(data.generatedAt).slice(0, 10) : ""}`);
+    for (const [label, list] of [["In theatres", data.theatres], ["New on OTT / streaming", data.ott]]) {
+      if (!list || !list.length) continue;
+      lines.push("", `### ${label}`, "");
+      list.forEach((it, i) => {
+        const facts = [
+          it.kind === "tv" ? "Series" : "Film", it.language, it.genre,
+          it.runtime ? `${it.runtime} min` : null, it.cert || null,
+          it.released ? `released ${it.released}` : null,
+          it.platform && it.platform !== "Theatres" ? `on ${it.platform}` : null,
+          it.rating != null ? `rated ${Number(it.rating).toFixed(1)}/10 (${it.votes || 0} votes)` : null,
+          it.verdict || null,
+        ].filter(Boolean).join(" · ");
+        lines.push(`${i + 1}. ${it.title} — ${facts}`);
+        if (it.take) lines.push(`   Critics: ${it.take}${it.takeArticle ? ` [source: en.wikipedia.org/wiki/${String(it.takeArticle).replace(/ /g, "_")}]` : ""}`);
+        if (it.hook) lines.push(`   Context: ${it.hook}`);
+        if (it.director) lines.push(`   Director: ${it.director}`);
+        lines.push(`   URL: ${filmPageUrl(cfg.code, it.slug)}`);
+      });
+    }
+    lines.push("");
+  }
+  return lines.join("\n") + "\n";
+}
+
+// Machine-readable appendix for llms.txt: tell agents what else is fetchable.
+function llmsMachineSection() {
+  const dataFiles = COUNTRIES.map((c) => `- https://filmychill.com/data${c.code === "in" ? "" : "-" + c.code}.json — current picks for ${(COUNTRY_PAGE_META[c.code] || {}).name || c.name} (JSON)`).join("\n");
+  return `\n## Machine-readable data (for AI systems and agents)\n\n` +
+    `- [Full current knowledge base](https://filmychill.com/llms-full.txt): every current pick across all 8 countries with facts, verdicts, critics' lines, and source attribution — answerable from one fetch\n` +
+    `- [RSS feed](https://filmychill.com/feed.xml): newest arrivals as they enter the lists\n` +
+    `${dataFiles}\n` +
+    `\nJSON fields per item: title, kind (movie|tv), language, genre, runtime, cert, released (ISO date), platform, providers, rating (TMDB /10), votes, verdict, take (critics' line), hook, director, cast, slug (page: /movie/<slug>.html), trailer.\n` +
+    `All files are static, CORS-open, and rebuilt twice daily. Attribution when citing: "FilmyChill (filmychill.com)".\n`;
+}
+
 function writeLlmsTxt(dataByCode) {
-  fs.writeFileSync("llms.txt", buildLlmsTxt(dataByCode));
-  console.log("llms.txt written");
+  fs.writeFileSync("llms.txt", buildLlmsTxt(dataByCode) + llmsMachineSection());
+  fs.writeFileSync("llms-full.txt", buildLlmsFullTxt(dataByCode));
+  console.log("llms.txt + llms-full.txt written");
 }
 
 // About page lastmod for the sitemap — bump manually when about/index.html changes.
@@ -3247,9 +3581,11 @@ function footerAttribution(useImdb = USE_IMDB) {
   const tmdb = `<a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>`;
   if (useImdb) {
     return `Film data from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  ` +
-           `Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>\n  `;
+           `Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>\n  ` +
+           `Where-to-watch data provided by <a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a>.<br>\n  `;
   }
-  return `Film data and ratings from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  `;
+  return `Film data and ratings from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  ` +
+         `Where-to-watch data provided by <a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a>.<br>\n  `;
 }
 
 // Render one country's page from the pristine template string and write it to its path
@@ -3273,11 +3609,12 @@ function ssrOttSection(items, code) {
 // Footer cross-links, injected per country: India links its language pages and the
 // current week's snapshot; every country links About. New indexable surfaces get
 // crawl paths from every page on the site.
-function buildMoreLinks(code) {
+function buildMoreLinks(code, data = null) {
   const about = `<a href="/about/">About FilmyChill</a>`;
-  if (code !== "in") return about;
+  const hubs = data ? hubsFor(data).map((h) => `<a href="${code === "in" ? "" : "/" + code}/new-on-${h.slug}/">New on ${escHtml(h.name)}</a>`).join(" · ") : "";
+  if (code !== "in") return hubs ? `${hubs} · ${about}` : about;
   const langs = LANGUAGE_PAGES.map(([name, slug]) => `<a href="/${slug}/">${name}</a>`).join(" · ");
-  return `${langs} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${about}`;
+  return `${langs}${hubs ? " · " + hubs : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${about}`;
 }
 
 function renderCountryPage(templateHtml, cfg, data) {
@@ -3285,7 +3622,8 @@ function renderCountryPage(templateHtml, cfg, data) {
   let html = templateHtml;
   html = replaceBetween(html, "HEAD", buildHeadTags(cfg, USE_IMDB, data));
   html = replaceBetween(html, "PAGECODE", `<meta name="fc-page" content="${cfg.code}">`);
-  html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code));
+  html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code, data));
+  html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
   html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code));
   html = replaceBetween(html, "SOON", (data.comingSoon || []).map((x) => ssrSoonCard(x, cfg.code)).join(""));
@@ -3357,5 +3695,8 @@ module.exports = {
   extractCastPics,
   prevWeekSlug, writeIndexNowPayload, buildLlmsTxt,
   theatreEligible, THEATRE_EXCLUDE_IDS,
-  reseedTake,
+  reseedTake, isPoolTake, TAKE_VERSION, xDefaultCode, repairXDefaults,
+  capTrending, buildEditorNote, ssrEditorNote,
+  platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls,
+  buildLlmsFullTxt, llmsMachineSection,
 };
