@@ -476,6 +476,36 @@ test("ottArrival: long-listed title — old first-sighting -> no badge, effectiv
   const { isArrival } = U.ottArrival(daysAgo(60), daysAgo(40), TH_NOW);
   assert.ok(!isArrival, "a title sighted 40 days ago is not newly arrived");
 });
+// ---------------- Discover / social image sizing ----------------
+group("social image (Google Discover >=1200px)");
+test("socialImage: backdrop rendered at w1280, not the inline w780", () => {
+  const s = U.socialImage({ backdropPath: "/abc.jpg", posterPath: "/def.jpg", backdrop: "https://image.tmdb.org/t/p/w780/abc.jpg" });
+  assert.strictEqual(s, "https://image.tmdb.org/t/p/w1280/abc.jpg");
+});
+test("socialImage: no backdrop -> poster at w780 (clears the size bar, not a 342px thumb)", () => {
+  const s = U.socialImage({ posterPath: "/def.jpg" });
+  assert.strictEqual(s, "https://image.tmdb.org/t/p/w780/def.jpg");
+});
+test("socialImage: legacy item without raw paths falls back to pre-sized strings (no crash)", () => {
+  assert.strictEqual(U.socialImage({ backdrop: "https://image.tmdb.org/t/p/w780/x.jpg" }), "https://image.tmdb.org/t/p/w780/x.jpg");
+  assert.strictEqual(U.socialImage({}), null);
+  assert.strictEqual(U.socialImage(null), null);
+});
+test("film page og:image uses w1280 backdrop + 16:9 dimensions", () => {
+  const html = U.buildFilmPage({ title: "X", slug: "x", kind: "movie", language: "English", platform: "Theatres",
+    released: "2026-07-10", rating: 7, votes: 100, backdropPath: "/bd.jpg", posterPath: "/ps.jpg" },
+    "2026-07-19", new Set(["x"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(html.includes('property="og:image" content="https://image.tmdb.org/t/p/w1280/bd.jpg"'), "og:image must be w1280");
+  assert.ok(!html.includes("/w780/bd.jpg"), "must not ship the small inline size as og:image");
+  assert.ok(html.includes('property="og:image:width" content="1280"'));
+});
+test("film page og:image: poster-only film omits (wrong) 16:9 dimensions", () => {
+  const html = U.buildFilmPage({ title: "Y", slug: "y", kind: "movie", language: "English", platform: "Theatres",
+    released: "2026-07-10", rating: 7, votes: 100, posterPath: "/ps.jpg" },
+    "2026-07-19", new Set(["y"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(html.includes('property="og:image" content="https://image.tmdb.org/t/p/w780/ps.jpg"'));
+  assert.ok(!html.includes('og:image:width'), "portrait poster must not claim 1280x720");
+});
 test("ottArrival: null freshDate (too-new title) -> effective = first sighting", () => {
   const { effective } = U.ottArrival(null, daysAgo(1), TH_NOW);
   assert.strictEqual(effective, daysAgo(1));
