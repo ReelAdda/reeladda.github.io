@@ -1100,6 +1100,19 @@ function img(path, size = "w342") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
 }
 
+// og:image / Twitter-card image URL, sized for Google Discover (favours >=1200px wide).
+// Prefers the backdrop at w1280 (16:9, the shape Discover and social cards want); falls
+// back to the poster at w780 so a backdrop-less title still clears the size bar instead of
+// shipping a 342px thumbnail Discover would ignore. Uses raw *Path fields when present
+// (real high-res); degrades to the pre-sized w780 backdrop / w342 poster strings only for
+// items that predate those fields, so nothing crashes on a stale cache.
+function socialImage(item) {
+  if (!item) return null;
+  if (item.backdropPath) return img(item.backdropPath, "w1280");
+  if (item.posterPath) return img(item.posterPath, "w780");
+  return item.backdrop || item.poster || null; // legacy fallback (already-sized strings)
+}
+
 // IMDb's official daily ratings dataset: tconst \t averageRating \t numVotes.
 // Downloaded once per run and parsed into a Map for cheap per-film lookup.
 // Any failure (network, parse) returns an empty Map so ratings simply fall back
@@ -1268,6 +1281,12 @@ async function enrich(kind, id, region = "IN") {
     imdbId: imdbId || null, // handle for cross-source lookups (Wikipedia buzz via Wikidata P345)
     freshDate, badge, isRecent: badge != null, similar: recs,
     backdrop: img(d.backdrop_path, "w780"),
+    // Raw TMDB paths kept so the social/Discover og:image can request a LARGE size
+    // (>=1200px) independently of the w780 inline backdrop above, which stays small for
+    // page weight. Google Discover ignores images under ~1200px wide; w780 would forfeit
+    // eligibility. Not serialized when absent.
+    ...(d.backdrop_path ? { backdropPath: d.backdrop_path } : {}),
+    ...(d.poster_path ? { posterPath: d.poster_path } : {}),
     fullReview: trim(d.overview, 600),
     ...(regionalRelease ? { released: regionalRelease } : {}),
     ...(castPics.length ? { castPics } : {}),
@@ -2134,7 +2153,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="video.movie">
 <meta property="og:url" content="${e(url)}">
-${(item.backdrop || item.poster) ? `<meta property="og:image" content="${e(item.backdrop || item.poster)}">` : ""}
+${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))}">${item.backdropPath ? '\n<meta property="og:image:width" content="1280">\n<meta property="og:image:height" content="720">' : ""}` : ""}
 <meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
@@ -3324,6 +3343,7 @@ module.exports = {
   ottArrival, recordOttSeen, pruneOttSeen, laterDate, earlierDate,
   buildRssFeed, archivePatchHtml, reconcilePagesManifest,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, ARRIVAL_MAX_RELEASE_AGE, SEEN_RETENTION_DAYS,
+  socialImage,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
   filmPagePath, filmPageUrl,
   analyzeReception, composeTake, TAKES_RETENTION_DAYS,
