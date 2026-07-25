@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-07-24T15:18:28.034Z",
+ "generatedAt": "2026-07-25T04:53:01.388Z",
  "country": "us",
  "pick": "Obsession",
  "theatres": [
@@ -9,14 +9,14 @@
    "language": "English",
    "released": "2026-07-14",
    "review": "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War.",
-   "rating": 7.9,
+   "rating": 8,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.9/10"
+     "score": "8.0/10"
     }
    ],
-   "votes": 1191,
+   "votes": 1268,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
    "isRecent": false,
@@ -92,7 +92,7 @@
     {
      "name": "Matt Damon",
      "character": "Odysseus",
-     "photo": "https://image.tmdb.org/t/p/w185/aCvBXTAR9B1qRjIRzMBYhhbm1fR.jpg"
+     "photo": "https://image.tmdb.org/t/p/w185/4KAxONjmVq7qcItdXo38SYtnpul.jpg"
     },
     {
      "name": "Tom Holland",
@@ -107,7 +107,7 @@
     {
      "name": "Robert Pattinson",
      "character": "Antinous",
-     "photo": "https://image.tmdb.org/t/p/w185/3qZ09UE7lN6AtorfXFRYpEtSY93.jpg"
+     "photo": "https://image.tmdb.org/t/p/w185/sRUM2u8qLcsOaTm0jGJGlOEQhlQ.jpg"
     },
     {
      "name": "Himesh Patel",
@@ -121,7 +121,9 @@
     }
    ],
    "slug": "the-odyssey",
-   "trailerViews": 12075347,
+   "wikiWeeklyViews": 5703126,
+   "trending": true,
+   "trailerViews": 12228720,
    "take": "Reviewers were close to unanimous — this one landed.",
    "takeSrc": "wiki",
    "takeArticle": "The Odyssey (2026 film)"
@@ -139,7 +141,7 @@
      "score": "5.9/10"
     }
    ],
-   "votes": 138,
+   "votes": 139,
    "verdict": "Decent one-time watch",
    "poster": "https://image.tmdb.org/t/p/w342/zKVgiv5qHCvCLT4A2ymJi5QeXDH.jpg",
    "isRecent": false,
@@ -179,16 +181,16 @@
      "kind": "movie"
     },
     {
-     "title": "The Sea Beast",
-     "slug": "the-sea-beast",
-     "poster": "https://image.tmdb.org/t/p/w342/9Zfv4Ap1e8eKOYnZPtYaWhLkk0d.jpg",
+     "title": "Ruby Gillman, Teenage Kraken",
+     "slug": "ruby-gillman-teenage-kraken",
+     "poster": "https://image.tmdb.org/t/p/w342/8ChIb3WzYAcza1vrXR56v510MWk.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Ruby Gillman, Teenage Kraken",
-     "slug": "ruby-gillman-teenage-kraken",
-     "poster": "https://image.tmdb.org/t/p/w342/8ChIb3WzYAcza1vrXR56v510MWk.jpg",
+     "title": "The Sea Beast",
+     "slug": "the-sea-beast",
+     "poster": "https://image.tmdb.org/t/p/w342/9Zfv4Ap1e8eKOYnZPtYaWhLkk0d.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -244,9 +246,7 @@
     }
    ],
    "slug": "moana",
-   "wikiWeeklyViews": 221813,
-   "trending": true,
-   "trailerViews": 2443565,
+   "trailerViews": 2465287,
    "take": "Critics are split — praise for the originality and themes, pushback on the music.",
    "takeSrc": "wiki",
    "takeArticle": "Moana (2026 film)"
@@ -264,14 +264,14 @@
      "score": "7.4/10"
     }
    ],
-   "votes": 505,
+   "votes": 506,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/lXBjqzo6c4NyLuJtqOiH39kswji.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 21832,
-   "popularity": 4.0371,
+   "popularity": 4.0047,
    "platform": "Theatres",
    "cert": "NR",
    "trailer": "https://www.youtube.com/watch?v=sZwPBcnOk5c",
@@ -371,8 +371,8 @@
     }
    ],
    "slug": "neon-genesis-evangelion-death-and-rebirth",
-   "wikiWeeklyViews": 7319,
-   "trailerViews": 222889
+   "wikiWeeklyViews": 7468,
+   "trailerViews": 222987
   },
   {
    "title": "Evil Dead Burn",
@@ -387,14 +387,14 @@
      "score": "6.8/10"
     }
    ],
-   "votes": 190,
+   "votes": 194,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/ztadKzIIR0ERYqpHteaPFtk7inP.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1212763,
-   "popularity": 59.7397,
+   "popularity": 56.8987,
    "platform": "Theatres",
    "cert": "R",
    "trailer": "https://www.youtube.com/watch?v=RddZObTlmA8",
@@ -492,13 +492,118 @@
     }
    ],
    "slug": "evil-dead-burn",
-   "wikiWeeklyViews": 229310,
+   "wikiWeeklyViews": 206801,
    "trending": true,
-   "trailerViews": 378476,
+   "trailerViews": 380060,
    "take": "Critics are split, though the writing found admirers.",
    "takeSrc": "wiki",
    "takeArticle": "Evil Dead Burn",
    "hook": "The follow-up to ‘Evil Dead Rise’."
+  },
+  {
+   "title": "Borderline",
+   "genre": "Thriller",
+   "language": "English",
+   "released": "2026-07-17",
+   "review": "Convinced they are our secret saviors, rogue U.S. operatives abduct Mexican gang members and seed them across major American cities, unleashing criminal chaos,…",
+   "rating": null,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "New release"
+    }
+   ],
+   "votes": 1,
+   "verdict": "Not enough ratings yet",
+   "poster": "https://image.tmdb.org/t/p/w342/sAA2mjpYJFAKydtzG4P4aHC4mZk.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1727780,
+   "popularity": 209.1934,
+   "platform": "Theatres",
+   "cert": "R",
+   "trailer": "https://www.youtube.com/watch?v=ORHBgSvX_24",
+   "providers": [],
+   "cast": [
+    "Marissa Arguijo",
+    "Michael-Eoin Stanney",
+    "Marcus Jean Pirae",
+    "Dominic Hernandez"
+   ],
+   "director": "Ryan Jordan",
+   "runtime": 94,
+   "imdbVotes": null,
+   "imdbId": "tt28638842",
+   "freshDate": "2026-07-17",
+   "badge": null,
+   "similar": [
+    {
+     "title": "The Get Out",
+     "slug": "the-get-out",
+     "poster": "https://image.tmdb.org/t/p/w342/zlkeH0s7dDxcnuPcHBqAyXFUxqN.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Touch of Evil",
+     "slug": "touch-of-evil",
+     "poster": "https://image.tmdb.org/t/p/w342/1pvRgmfBaoMczIJBOi9gCOZ4FMC.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Coffy",
+     "slug": "coffy",
+     "poster": "https://image.tmdb.org/t/p/w342/sN00Cvlahl6JLC2TAUBL0jZOqD3.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Bound by Honor",
+     "slug": "bound-by-honor",
+     "poster": "https://image.tmdb.org/t/p/w342/gvP6R6juhe2IpCG7QGDgjyUvm0g.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Sicario: Day of the Soldado",
+     "slug": "sicario-day-of-the-soldado",
+     "poster": "https://image.tmdb.org/t/p/w342/qcLYofEhNh51Sk1jUWjmKHLzkqw.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Substitute",
+     "slug": "the-substitute",
+     "poster": "https://image.tmdb.org/t/p/w342/7vfzvhPMNauUXrVxVOPEfpOsful.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/t5iMyppJhIdjPQDAWIWoilO5iYf.jpg",
+   "backdropPath": "/t5iMyppJhIdjPQDAWIWoilO5iYf.jpg",
+   "posterPath": "/sAA2mjpYJFAKydtzG4P4aHC4mZk.jpg",
+   "fullReview": "Convinced they are our secret saviors, rogue U.S. operatives abduct Mexican gang members and seed them across major American cities, unleashing criminal chaos, swaying voters by playing on nativist prejudices, and forcing law enforcement into a race to expose the plot as the escalating carnage threatens democracy itself.",
+   "castPics": [
+    {
+     "name": "Michael-Eoin Stanney",
+     "character": "Shawn",
+     "photo": "https://image.tmdb.org/t/p/w185/ybgdmLiPWu0P9RH1lgGBR49d0Rt.jpg"
+    },
+    {
+     "name": "Marcus Jean Pirae",
+     "character": "Brett",
+     "photo": "https://image.tmdb.org/t/p/w185/4XD78iRQJpx0uTQRg98Dfzgyb69.jpg"
+    },
+    {
+     "name": "Nigel Vonas",
+     "character": "Detective Linquist",
+     "photo": "https://image.tmdb.org/t/p/w185/hhFFUHGXU8kSDjvJZPEVFCVsagz.jpg"
+    }
+   ],
+   "slug": "borderline",
+   "trailerViews": 1048245
   },
   {
    "title": "Motor City",
@@ -618,15 +723,15 @@
     }
    ],
    "slug": "motor-city",
-   "wikiWeeklyViews": 40751,
-   "trailerViews": 1647046
+   "wikiWeeklyViews": 51702,
+   "trailerViews": 1653444
   },
   {
-   "title": "Borderline",
-   "genre": "Thriller",
+   "title": "Pinocchio: Unstrung",
+   "genre": "Horror / Fantasy",
    "language": "English",
-   "released": "2026-07-17",
-   "review": "Convinced they are our secret saviors, rogue U.S. operatives abduct Mexican gang members and seed them across major American cities, unleashing criminal chaos,…",
+   "released": "2026-05-29",
+   "review": "Influenced by a sinister Cricket and created by Geppetto, Pinocchio launches a violent crusade to carve himself into a real boy like his brother James, one…",
    "rating": null,
    "scores": [
     {
@@ -634,220 +739,117 @@
      "score": "New release"
     }
    ],
-   "votes": 0,
-   "verdict": "Not enough ratings yet",
-   "poster": "https://image.tmdb.org/t/p/w342/sAA2mjpYJFAKydtzG4P4aHC4mZk.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 1727780,
-   "popularity": 209.1934,
-   "platform": "Theatres",
-   "cert": "R",
-   "trailer": "https://www.youtube.com/watch?v=ORHBgSvX_24",
-   "providers": [],
-   "cast": [
-    "Marissa Arguijo",
-    "Michael-Eoin Stanney",
-    "Marcus Jean Pirae",
-    "Dominic Hernandez"
-   ],
-   "director": "Ryan Jordan",
-   "runtime": 94,
-   "imdbVotes": null,
-   "imdbId": "tt28638842",
-   "freshDate": "2026-07-17",
-   "badge": null,
-   "similar": [
-    {
-     "title": "The Get Out",
-     "slug": "the-get-out",
-     "poster": "https://image.tmdb.org/t/p/w342/zlkeH0s7dDxcnuPcHBqAyXFUxqN.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Touch of Evil",
-     "slug": "touch-of-evil",
-     "poster": "https://image.tmdb.org/t/p/w342/1pvRgmfBaoMczIJBOi9gCOZ4FMC.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Coffy",
-     "slug": "coffy",
-     "poster": "https://image.tmdb.org/t/p/w342/sN00Cvlahl6JLC2TAUBL0jZOqD3.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Bound by Honor",
-     "slug": "bound-by-honor",
-     "poster": "https://image.tmdb.org/t/p/w342/gvP6R6juhe2IpCG7QGDgjyUvm0g.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Sicario: Day of the Soldado",
-     "slug": "sicario-day-of-the-soldado",
-     "poster": "https://image.tmdb.org/t/p/w342/qcLYofEhNh51Sk1jUWjmKHLzkqw.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Substitute",
-     "slug": "the-substitute",
-     "poster": "https://image.tmdb.org/t/p/w342/7vfzvhPMNauUXrVxVOPEfpOsful.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/t5iMyppJhIdjPQDAWIWoilO5iYf.jpg",
-   "backdropPath": "/t5iMyppJhIdjPQDAWIWoilO5iYf.jpg",
-   "posterPath": "/sAA2mjpYJFAKydtzG4P4aHC4mZk.jpg",
-   "fullReview": "Convinced they are our secret saviors, rogue U.S. operatives abduct Mexican gang members and seed them across major American cities, unleashing criminal chaos, swaying voters by playing on nativist prejudices, and forcing law enforcement into a race to expose the plot as the escalating carnage threatens democracy itself.",
-   "castPics": [
-    {
-     "name": "Michael-Eoin Stanney",
-     "character": "Shawn",
-     "photo": "https://image.tmdb.org/t/p/w185/ybgdmLiPWu0P9RH1lgGBR49d0Rt.jpg"
-    },
-    {
-     "name": "Marcus Jean Pirae",
-     "character": "Brett",
-     "photo": "https://image.tmdb.org/t/p/w185/4XD78iRQJpx0uTQRg98Dfzgyb69.jpg"
-    },
-    {
-     "name": "Nigel Vonas",
-     "character": "Detective Linquist",
-     "photo": "https://image.tmdb.org/t/p/w185/hhFFUHGXU8kSDjvJZPEVFCVsagz.jpg"
-    }
-   ],
-   "slug": "borderline",
-   "trailerViews": 1045686
-  },
-  {
-   "title": "Sheep in the Box",
-   "genre": "Drama / Science Fiction",
-   "language": "Japanese",
-   "released": "2026-07-24",
-   "review": "Set in the near future, Otone Komoto works as an architect. She is married to Kensuke Komoto, who runs a construction company.",
-   "rating": null,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "New release"
-    }
-   ],
-   "votes": 6,
+   "votes": 2,
    "verdict": "Just released — verdict soon",
-   "poster": "https://image.tmdb.org/t/p/w342/9rOCIYYT8Q76FHgl3Nm5ofuc6TQ.jpg",
-   "isRecent": false,
+   "poster": "https://image.tmdb.org/t/p/w342/sqhfUrPEeAlFf684FsVa8v1GYCD.jpg",
+   "isRecent": true,
    "isFresh": true,
    "kind": "movie",
-   "tmdbId": 1553969,
-   "popularity": 4.6409,
+   "tmdbId": 1232569,
+   "popularity": 17.6574,
    "platform": "Theatres",
-   "cert": "PG",
-   "trailer": "https://www.youtube.com/watch?v=j5mlc8TAPNw",
+   "cert": "R",
+   "trailer": "https://www.youtube.com/watch?v=_VHIU9dIAWQ",
    "providers": [],
    "cast": [
-    "Haruka Ayase",
-    "Daigo Yamamoto",
-    "Kuwaki Rimu",
-    "Nana Seino"
+    "Jude Evan Lloyd",
+    "Robert Englund",
+    "Cameron Bell",
+    "Jessica Balmer"
    ],
-   "director": "Hirokazu Kore-eda",
-   "runtime": 126,
+   "director": "Rhys Frake-Waterfield",
+   "runtime": 82,
    "imdbVotes": null,
-   "imdbId": "tt38551209",
-   "freshDate": "2026-05-29",
-   "badge": null,
+   "imdbId": "tt30887701",
+   "freshDate": "2026-07-22",
+   "badge": "New release",
    "similar": [
     {
-     "title": "A.I. Artificial Intelligence",
-     "slug": "a-i-artificial-intelligence",
-     "poster": "https://image.tmdb.org/t/p/w342/8MZSGX5JORoO72EfuAEcejH5yHn.jpg",
+     "title": "Barbarian",
+     "slug": "barbarian",
+     "poster": "https://image.tmdb.org/t/p/w342/idT5mnqPcJgSkvpDX7pJffBzdVH.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Life Like",
-     "slug": "life-like",
-     "poster": "https://image.tmdb.org/t/p/w342/uOVGbT6TR8qiZiruX66yBRXq9Nv.jpg",
+     "title": "Fear Street: 1994",
+     "slug": "fear-street-1994",
+     "poster": "https://image.tmdb.org/t/p/w342/9J9Wy39ZjrVmfk7yMkulpcI5sy0.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Creator",
-     "slug": "the-creator",
-     "poster": "https://image.tmdb.org/t/p/w342/3dSivDtOuyxLDxPH4v2tcNG1fP7.jpg",
+     "title": "Wishmaster",
+     "slug": "wishmaster",
+     "poster": "https://image.tmdb.org/t/p/w342/t7rep7SCqiy4COUsq2cOcdQwzU0.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "I, Robot",
-     "slug": "i-robot",
-     "poster": "https://image.tmdb.org/t/p/w342/efwv6F2lGaghjPpBRSINHtoEiZB.jpg",
+     "title": "Mandy",
+     "slug": "mandy",
+     "poster": "https://image.tmdb.org/t/p/w342/m0yf7J7HsKeK6E81SMRcX8vx6mH.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "I Am Mother",
-     "slug": "i-am-mother",
-     "poster": "https://image.tmdb.org/t/p/w342/ayPSqlpYIbeq1RiDekx6W9WUqrL.jpg",
+     "title": "The Spine of Night",
+     "slug": "the-spine-of-night",
+     "poster": "https://image.tmdb.org/t/p/w342/9uERhKRCtgDztLsx5Pg36j61rqC.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Real Steel",
-     "slug": "real-steel",
-     "poster": "https://image.tmdb.org/t/p/w342/4GIeI5K5YdDUkR3mNQBoScpSFEf.jpg",
+     "title": "The Dogs",
+     "slug": "the-dogs",
+     "poster": "https://image.tmdb.org/t/p/w342/kz6oqKyKCjmR8V1JdnF9brp9DSn.jpg",
      "language": "English",
      "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/iZCdWpGqKQaAdhysW8gYPTdCP6A.jpg",
-   "backdropPath": "/iZCdWpGqKQaAdhysW8gYPTdCP6A.jpg",
-   "posterPath": "/9rOCIYYT8Q76FHgl3Nm5ofuc6TQ.jpg",
-   "fullReview": "Set in the near future, Otone Komoto works as an architect. She is married to Kensuke Komoto, who runs a construction company. The married couple decide to welcome a humanoid robot into their home as their son.",
+   "backdrop": "https://image.tmdb.org/t/p/w780/dNKFETDDujxm2PUN873Jwiw5VML.jpg",
+   "backdropPath": "/dNKFETDDujxm2PUN873Jwiw5VML.jpg",
+   "posterPath": "/sqhfUrPEeAlFf684FsVa8v1GYCD.jpg",
+   "fullReview": "Influenced by a sinister Cricket and created by Geppetto, Pinocchio launches a violent crusade to carve himself into a real boy like his brother James, one piece at a time.",
    "castPics": [
     {
-     "name": "Haruka Ayase",
-     "character": "Otone Komoto",
-     "photo": "https://image.tmdb.org/t/p/w185/oUfDmm4jJ03Vs58Ys64f1E219Ix.jpg"
+     "name": "Jude Evan Lloyd",
+     "character": "Pinocchio (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/vBbtBNsGKOZPvmdlyG6lUUkcNwF.jpg"
     },
     {
-     "name": "Daigo Yamamoto",
-     "character": "Kensuke Komoto",
-     "photo": "https://image.tmdb.org/t/p/w185/2gsbUEU9uua9O4Xk4ISN0LGVCBW.jpg"
+     "name": "Robert Englund",
+     "character": "Cricket (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/cjGEkiavinHa1dnetDvnEhlD2Wm.jpg"
     },
     {
-     "name": "Kuwaki Rimu",
-     "character": "Kakeru",
-     "photo": "https://image.tmdb.org/t/p/w185/bMI7Prl9uGtoVC13CtxksVXTA1E.jpg"
+     "name": "Cameron Bell",
+     "character": "James",
+     "photo": "https://image.tmdb.org/t/p/w185/4pHVLu11DmVMJDgGo1X5rZH53Uh.jpg"
     },
     {
-     "name": "Nana Seino",
-     "character": "Alice Kotaki",
-     "photo": "https://image.tmdb.org/t/p/w185/wJyVF7gAs4Mfcxv70F2ND4O1q59.jpg"
+     "name": "Jessica Balmer",
+     "character": "Mia",
+     "photo": "https://image.tmdb.org/t/p/w185/fhb5Oj719yH7z5f2lYU2r8Lyu46.jpg"
     },
     {
-     "name": "Kanichiro",
-     "character": "Gen Hidaka",
-     "photo": "https://image.tmdb.org/t/p/w185/eRBdyYdLuCj1fvU4KaNR1wU1h9r.jpg"
+     "name": "Richard Brake",
+     "character": "Geppetto",
+     "photo": "https://image.tmdb.org/t/p/w185/JwsiErANShzPSdYsNoiNYdrSg1.jpg"
     },
     {
-     "name": "Hinata Hiiragi",
-     "character": "Takuto Konno",
-     "photo": "https://image.tmdb.org/t/p/w185/sKhMVQUIoNpqVVuFM3gKp5jvKgg.jpg"
+     "name": "Jack Art Gray",
+     "character": "Dudley",
+     "photo": "https://image.tmdb.org/t/p/w185/7C9o6X4g3lj9OsrD24ztL01GxVL.jpg"
     }
    ],
-   "slug": "sheep-in-the-box",
-   "trailerViews": 52890,
-   "take": "Critics are split, with the music drawing most complaints.",
+   "slug": "pinocchio-unstrung",
+   "wikiWeeklyViews": 38362,
+   "trailerViews": 39115,
+   "take": "The reviews lean clearly positive.",
    "takeSrc": "wiki",
-   "takeArticle": "Sheep in the Box"
+   "takeArticle": "Pinocchio Unstrung",
+   "hook": "Premiered at the Brussels International Fantastic Film Festival."
   }
  ],
  "ott": [
@@ -864,14 +866,14 @@
      "score": "8.2/10"
     }
    ],
-   "votes": 3566,
+   "votes": 3595,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/bRwnj8WEKBCvmfeUNOukJPwB43K.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1339713,
-   "popularity": 415.1164,
+   "popularity": 407.6643,
    "cert": "R",
    "trailer": "https://www.youtube.com/watch?v=gMC8kkwbIQQ",
    "providers": [
@@ -974,9 +976,9 @@
    "ottSince": "2026-07-18",
    "ottFreshDate": "2026-07-18",
    "slug": "obsession",
-   "wikiWeeklyViews": 974464,
+   "wikiWeeklyViews": 954801,
    "trending": true,
-   "trailerViews": 20282425,
+   "trailerViews": 20359255,
    "take": "Critics liked it, especially the performances.",
    "takeSrc": "wiki",
    "takeArticle": "Obsession (2025 film)"
@@ -1001,7 +1003,7 @@
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 288671,
-   "popularity": 33.4652,
+   "popularity": 31.3749,
    "cert": "TV-MA",
    "trailer": "https://www.youtube.com/watch?v=qpXDZA7f3N4",
    "providers": [
@@ -1104,7 +1106,7 @@
    "ottSince": "2026-07-19",
    "ottFreshDate": "2026-07-17",
    "slug": "the-map-of-longing",
-   "trailerViews": 176204
+   "trailerViews": 177249
   },
   {
    "title": "Masters of the Universe",
@@ -1119,14 +1121,14 @@
      "score": "7.4/10"
     }
    ],
-   "votes": 756,
+   "votes": 835,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/oRuyGUHdoaQxWP3SDfafGkStxTC.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 454639,
-   "popularity": 317.5868,
+   "popularity": 359.8509,
    "cert": "PG-13",
    "trailer": "https://www.youtube.com/watch?v=rJSmz-zhDxE",
    "providers": [
@@ -1150,13 +1152,6 @@
      "title": "Guardians of the Galaxy Vol. 2",
      "slug": "guardians-of-the-galaxy-vol-2",
      "poster": "https://image.tmdb.org/t/p/w342/y4MBh0EjBlMuOzv9axM4qJlmhzz.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Avengers: Endgame",
-     "slug": "avengers-endgame",
-     "poster": "https://image.tmdb.org/t/p/w342/ulzhLuWrPK07P1YkdWQLZnQh1JL.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -1185,6 +1180,13 @@
      "title": "John Carter",
      "slug": "john-carter",
      "poster": "https://image.tmdb.org/t/p/w342/lCxz1Yus07QCQQCb6I0Dr3Lmqpx.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Star Wars: Episode III - Revenge of the Sith",
+     "slug": "star-wars-episode-iii-revenge-of-the-sith",
+     "poster": "https://image.tmdb.org/t/p/w342/xfSAoBEm9MNBjmlNcDYLvLSMlnq.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1229,136 +1231,12 @@
    "ottSince": "2026-07-23",
    "ottFreshDate": "2026-07-23",
    "slug": "masters-of-the-universe",
-   "wikiWeeklyViews": 282550,
+   "wikiWeeklyViews": 394297,
    "trending": true,
-   "trailerViews": 12092240,
+   "trailerViews": 12113450,
    "take": "Critics are split, though the performances and first half found admirers.",
    "takeSrc": "wiki",
    "takeArticle": "Masters of the Universe (2026 film)"
-  },
-  {
-   "title": "King of the Hill",
-   "genre": "Animation / Comedy",
-   "language": "English",
-   "released": "1997-01-12",
-   "review": "Set in Texas, this animated series follows the life of propane salesman Hank Hill, who lives with his overly confident substitute Spanish teacher wife Peggy,…",
-   "rating": 7.4,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "7.4/10"
-    }
-   ],
-   "votes": 681,
-   "verdict": "Worth a watch",
-   "poster": "https://image.tmdb.org/t/p/w342/e2xyMapmYgv4AuSoSDv9Y4pQlD6.jpg",
-   "isRecent": true,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 2122,
-   "popularity": 110.0292,
-   "cert": "TV-PG",
-   "trailer": "https://www.youtube.com/results?search_query=King%20of%20the%20Hill%20official%20trailer",
-   "providers": [
-    "Hulu",
-    "fuboTV",
-    "YouTube TV"
-   ],
-   "cast": [
-    "Mike Judge",
-    "Kathy Najimy",
-    "Pamela Adlon",
-    "Stephen Root"
-   ],
-   "director": "Greg Daniels",
-   "runtime": 22,
-   "imdbVotes": null,
-   "imdbId": "tt0118375",
-   "freshDate": "2026-07-20",
-   "badge": "New season",
-   "similar": [
-    {
-     "title": "Duckman",
-     "slug": "duckman",
-     "poster": "https://image.tmdb.org/t/p/w342/zg8WvrRHlyir2VhSlGGld6GNgSm.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Close Enough",
-     "slug": "close-enough",
-     "poster": "https://image.tmdb.org/t/p/w342/8aNYMcMyhv1m0MKibgCVmJrAeLs.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Great North",
-     "slug": "the-great-north",
-     "poster": "https://image.tmdb.org/t/p/w342/7Ww56dPIuXn4NZGrJJPdoafLHGu.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "My Three Sons",
-     "slug": "my-three-sons",
-     "poster": "https://image.tmdb.org/t/p/w342/2BGjuEKFtq43P3HeYSPWcX9E5et.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Father Knows Best",
-     "slug": "father-knows-best",
-     "poster": "https://image.tmdb.org/t/p/w342/5uvDdhz7Fq2OceIbmmOVpk2cSwx.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Goldbergs",
-     "slug": "the-goldbergs",
-     "poster": "https://image.tmdb.org/t/p/w342/3aQipkhSCHUmaHjImqEqT80k6GP.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/4CSdS9p0AhLhxCo1hGuQINiE2Sa.jpg",
-   "backdropPath": "/4CSdS9p0AhLhxCo1hGuQINiE2Sa.jpg",
-   "posterPath": "/e2xyMapmYgv4AuSoSDv9Y4pQlD6.jpg",
-   "fullReview": "Set in Texas, this animated series follows the life of propane salesman Hank Hill, who lives with his overly confident substitute Spanish teacher wife Peggy, wannabe comedian son Bobby, and naive niece Luanne. Hank has conservative views about God, family, and country, but his values and ethics are often challenged by the situations he, his family, and his beer-drinking neighbors/buddies find themselves in.",
-   "castPics": [
-    {
-     "name": "Mike Judge",
-     "character": "Hank Hill / Boomhauer (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/ol4kd4mSOK7Hx3r86ydez84bwEI.jpg"
-    },
-    {
-     "name": "Kathy Najimy",
-     "character": "Peggy Hill (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/nqbZF7Igr0SC8Xq8y0jwmx0mLDN.jpg"
-    },
-    {
-     "name": "Pamela Adlon",
-     "character": "Bobby Hill (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/5eIRHUbNOH7ibXa0IfUfFvj5I5L.jpg"
-    },
-    {
-     "name": "Stephen Root",
-     "character": "Bill Dauterive (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/2Zwi6AydqQQ9InVdhjYcfJXNzkp.jpg"
-    },
-    {
-     "name": "Lauren Tom",
-     "character": "Minh Souphanousinphone / Connie Souphanousinphone (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/fTKFspRRQ275AkzvtPERLZnXe0n.jpg"
-    }
-   ],
-   "platform": "Hulu",
-   "ottSince": "2026-07-23",
-   "ottFreshDate": "2026-07-20",
-   "slug": "king-of-the-hill",
-   "wikiWeeklyViews": 66363,
-   "take": "Critics loved it — special praise for the animation and originality.",
-   "takeSrc": "wiki",
-   "takeArticle": "King of the Hill"
   },
   {
    "title": "I'm Not Afraid",
@@ -1373,14 +1251,14 @@
      "score": "8.8/10"
     }
    ],
-   "votes": 31,
+   "votes": 32,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/ydUCCsKWNkGFecRPKHViWi0lppz.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 290232,
-   "popularity": 20.8043,
+   "popularity": 20.373,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=Xf0deGugNkE",
    "providers": [
@@ -1484,7 +1362,7 @@
    "ottFreshDate": "2026-07-08",
    "stillGood": true,
    "slug": "i-m-not-afraid",
-   "trailerViews": 60546
+   "trailerViews": 61034
   },
   {
    "title": "House of the Dragon",
@@ -1499,14 +1377,14 @@
      "score": "8.4/10"
     }
    ],
-   "votes": 6698,
+   "votes": 6702,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/7V0Ebks0GgpKvQ7QbLAIdX5dos4.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 94997,
-   "popularity": 334.1077,
+   "popularity": 320.3215,
    "cert": "TV-MA",
    "trailer": "https://www.youtube.com/watch?v=DotnJ7tTA34",
    "providers": [
@@ -1612,11 +1490,100 @@
    "ottFreshDate": "2026-06-21",
    "stillGood": true,
    "slug": "house-of-the-dragon",
-   "wikiWeeklyViews": 278401,
-   "trailerViews": 29118081,
+   "wikiWeeklyViews": 276626,
+   "trailerViews": 29121673,
    "take": "Reviewers found plenty to like here.",
    "takeSrc": "wiki",
    "takeArticle": "House of the Dragon"
+  },
+  {
+   "title": "Miguel Ángel Blanco: The 48 Hours That Changed Spain",
+   "genre": "Documentary",
+   "language": "Spanish",
+   "released": "2026-07-10",
+   "review": "This documentary explores how Miguel Ángel Blanco's 1997 abduction turned fear into collective resistance and shaped Spain's fright Against ETA terrorism.",
+   "rating": null,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "New release"
+    }
+   ],
+   "votes": 9,
+   "verdict": "Not enough ratings yet",
+   "poster": "https://image.tmdb.org/t/p/w342/y8PN5CRJZf6PSbY5teEMR4eBHcw.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1722713,
+   "popularity": 6.1002,
+   "cert": null,
+   "trailer": "https://www.youtube.com/results?search_query=Miguel%20%C3%81ngel%20Blanco%3A%20The%2048%20Hours%20That%20Changed%20Spain%20official%20trailer",
+   "providers": [
+    "Netflix",
+    "Netflix Standard with Ads"
+   ],
+   "cast": [],
+   "director": "Jon Sistiaga",
+   "runtime": 93,
+   "imdbVotes": null,
+   "imdbId": "tt39398878",
+   "freshDate": "2026-07-10",
+   "badge": null,
+   "similar": [
+    {
+     "title": "The Class of ‘92",
+     "slug": "the-class-of-92",
+     "poster": "https://image.tmdb.org/t/p/w342/v2dnvfpYBG81cegENM7Sd6tgshB.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Sidney",
+     "slug": "sidney",
+     "poster": "https://image.tmdb.org/t/p/w342/cVdkjqmIipF2DCvDwt16BRv7e9o.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "11M: Terror in Madrid",
+     "slug": "11m-terror-in-madrid",
+     "poster": "https://image.tmdb.org/t/p/w342/vuhSpdStKgnB0biWBctOYFgLeF3.jpg",
+     "language": "Spanish",
+     "kind": "movie"
+    },
+    {
+     "title": "180° South",
+     "slug": "180-south",
+     "poster": "https://image.tmdb.org/t/p/w342/jLvxcvpEbQ1bRETJZ3NlKpjQuLC.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Messi",
+     "slug": "messi",
+     "poster": "https://image.tmdb.org/t/p/w342/g1kwBLDkQ9M60T9aOpjLQBQAGVB.jpg",
+     "language": "Spanish",
+     "kind": "movie"
+    },
+    {
+     "title": "My Mom Jayne",
+     "slug": "my-mom-jayne",
+     "poster": "https://image.tmdb.org/t/p/w342/6KpfMouMavYr1UwTz6612YhYjbs.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/6QdbhPXNVFJ3cVCCFscOulC3Bpa.jpg",
+   "backdropPath": "/6QdbhPXNVFJ3cVCCFscOulC3Bpa.jpg",
+   "posterPath": "/y8PN5CRJZf6PSbY5teEMR4eBHcw.jpg",
+   "fullReview": "This documentary explores how Miguel Ángel Blanco's 1997 abduction turned fear into collective resistance and shaped Spain's fright Against ETA terrorism.",
+   "theatrical": false,
+   "platform": "Netflix",
+   "ottSince": "2026-07-12",
+   "ottFreshDate": "2026-07-10",
+   "stillGood": true,
+   "slug": "miguel-ngel-blanco-the-48-hours-that-changed-spain"
   },
   {
    "title": "Silo",
@@ -1631,14 +1598,14 @@
      "score": "8.2/10"
     }
    ],
-   "votes": 2307,
+   "votes": 2311,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 125988,
-   "popularity": 223.0413,
+   "popularity": 221.0217,
    "cert": "TV-MA",
    "trailer": "https://www.youtube.com/watch?v=8ZYhuvIv1pA",
    "providers": [
@@ -1744,100 +1711,11 @@
    "ottFreshDate": "2026-07-02",
    "stillGood": true,
    "slug": "silo",
-   "wikiWeeklyViews": 195208,
-   "trailerViews": 9498421,
+   "wikiWeeklyViews": 192698,
+   "trailerViews": 9504059,
    "take": "Critics liked it, especially the performances and production design.",
    "takeSrc": "wiki",
    "takeArticle": "Silo (TV series)"
-  },
-  {
-   "title": "Miguel Ángel Blanco: The 48 Hours That Changed Spain",
-   "genre": "Documentary",
-   "language": "Spanish",
-   "released": "2026-07-10",
-   "review": "This documentary explores how Miguel Ángel Blanco's 1997 abduction turned fear into collective resistance and shaped Spain's fright Against ETA terrorism.",
-   "rating": null,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "New release"
-    }
-   ],
-   "votes": 9,
-   "verdict": "Not enough ratings yet",
-   "poster": "https://image.tmdb.org/t/p/w342/y8PN5CRJZf6PSbY5teEMR4eBHcw.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 1722713,
-   "popularity": 6.8752,
-   "cert": null,
-   "trailer": "https://www.youtube.com/results?search_query=Miguel%20%C3%81ngel%20Blanco%3A%20The%2048%20Hours%20That%20Changed%20Spain%20official%20trailer",
-   "providers": [
-    "Netflix",
-    "Netflix Standard with Ads"
-   ],
-   "cast": [],
-   "director": "Jon Sistiaga",
-   "runtime": 93,
-   "imdbVotes": null,
-   "imdbId": "tt39398878",
-   "freshDate": "2026-07-10",
-   "badge": null,
-   "similar": [
-    {
-     "title": "The Class of ‘92",
-     "slug": "the-class-of-92",
-     "poster": "https://image.tmdb.org/t/p/w342/v2dnvfpYBG81cegENM7Sd6tgshB.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Sidney",
-     "slug": "sidney",
-     "poster": "https://image.tmdb.org/t/p/w342/cVdkjqmIipF2DCvDwt16BRv7e9o.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "11M: Terror in Madrid",
-     "slug": "11m-terror-in-madrid",
-     "poster": "https://image.tmdb.org/t/p/w342/vuhSpdStKgnB0biWBctOYFgLeF3.jpg",
-     "language": "Spanish",
-     "kind": "movie"
-    },
-    {
-     "title": "180° South",
-     "slug": "180-south",
-     "poster": "https://image.tmdb.org/t/p/w342/jLvxcvpEbQ1bRETJZ3NlKpjQuLC.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Messi",
-     "slug": "messi",
-     "poster": "https://image.tmdb.org/t/p/w342/g1kwBLDkQ9M60T9aOpjLQBQAGVB.jpg",
-     "language": "Spanish",
-     "kind": "movie"
-    },
-    {
-     "title": "My Mom Jayne",
-     "slug": "my-mom-jayne",
-     "poster": "https://image.tmdb.org/t/p/w342/6KpfMouMavYr1UwTz6612YhYjbs.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/6QdbhPXNVFJ3cVCCFscOulC3Bpa.jpg",
-   "backdropPath": "/6QdbhPXNVFJ3cVCCFscOulC3Bpa.jpg",
-   "posterPath": "/y8PN5CRJZf6PSbY5teEMR4eBHcw.jpg",
-   "fullReview": "This documentary explores how Miguel Ángel Blanco's 1997 abduction turned fear into collective resistance and shaped Spain's fright Against ETA terrorism.",
-   "theatrical": false,
-   "platform": "Netflix",
-   "ottSince": "2026-07-12",
-   "ottFreshDate": "2026-07-10",
-   "stillGood": true,
-   "slug": "miguel-ngel-blanco-the-48-hours-that-changed-spain"
   },
   {
    "title": "Salcedo, Leather, and Boogaloo",
@@ -1859,7 +1737,7 @@
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 327787,
-   "popularity": 4.3005,
+   "popularity": 3.739,
    "cert": null,
    "trailer": "https://www.youtube.com/results?search_query=Salcedo%2C%20Leather%2C%20and%20Boogaloo%20official%20trailer",
    "providers": [
@@ -1956,14 +1834,14 @@
      "score": "8.5/10"
     }
    ],
-   "votes": 1608,
+   "votes": 1611,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/gLKOYIMyKlUHW0SVdskhgf9C0yy.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 94664,
-   "popularity": 159.4126,
+   "popularity": 162.5704,
    "cert": "TV-MA",
    "trailer": "https://www.youtube.com/watch?v=k5VxfJpzy1Q",
    "providers": [
@@ -2063,11 +1941,103 @@
    "ottFreshDate": "2026-07-04",
    "stillGood": true,
    "slug": "mushoku-tensei-jobless-reincarnation",
-   "wikiWeeklyViews": 7360,
-   "trailerViews": 1767194,
+   "wikiWeeklyViews": 7358,
+   "trailerViews": 1767662,
    "take": "Most critics came away happy.",
    "takeSrc": "wiki",
    "takeArticle": "Mushoku Tensei (TV series)"
+  },
+  {
+   "title": "X-Men '97",
+   "genre": "Animation / Action & Adventure",
+   "language": "English",
+   "released": "2024-03-20",
+   "review": "The X-Men, a band of mutants who use their uncanny gifts to protect a world that hates and fears them, are challenged like never before, forced to face a…",
+   "rating": 8.7,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.7/10"
+    }
+   ],
+   "votes": 792,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/2HKBc5UiFw8JrruHq8S1Y7TnlW0.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 138502,
+   "popularity": 72.1319,
+   "cert": "TV-14",
+   "trailer": "https://www.youtube.com/watch?v=pv3Ss8o9gGQ",
+   "providers": [
+    "Disney Plus"
+   ],
+   "cast": [],
+   "director": null,
+   "runtime": null,
+   "imdbVotes": null,
+   "imdbId": "tt16026746",
+   "freshDate": "2026-07-01",
+   "badge": null,
+   "similar": [
+    {
+     "title": "The Gifted",
+     "slug": "the-gifted",
+     "poster": "https://image.tmdb.org/t/p/w342/nshCqszjTNuqhrB53vrSqWO18sE.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Young Justice",
+     "slug": "young-justice",
+     "poster": "https://image.tmdb.org/t/p/w342/zMJw34G4OJhcd9NjKSRjJdDqjbR.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Marvel's Runaways",
+     "slug": "marvel-s-runaways",
+     "poster": "https://image.tmdb.org/t/p/w342/hnHEhbzh0F7kN3Ah1lzRjtQuW16.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Mutant X",
+     "slug": "mutant-x",
+     "poster": "https://image.tmdb.org/t/p/w342/yiKg027jdpkSsguVBI9WqliNWez.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "gen:LOCK",
+     "slug": "gen-lock",
+     "poster": "https://image.tmdb.org/t/p/w342/wRhHlUMNMBCTOfbT8zP7CsWCB83.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "DC's Stargirl",
+     "slug": "dc-s-stargirl",
+     "poster": "https://image.tmdb.org/t/p/w342/JJxVsQPPiuLcArALotMHsCubeo.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/jIyEmnBrZtl6SEWyBoMO2hZnzMa.jpg",
+   "backdropPath": "/jIyEmnBrZtl6SEWyBoMO2hZnzMa.jpg",
+   "posterPath": "/2HKBc5UiFw8JrruHq8S1Y7TnlW0.jpg",
+   "fullReview": "The X-Men, a band of mutants who use their uncanny gifts to protect a world that hates and fears them, are challenged like never before, forced to face a dangerous and unexpected new future.",
+   "platform": "Disney Plus",
+   "ottSince": "2026-07-01",
+   "ottFreshDate": "2026-07-01",
+   "stillGood": true,
+   "slug": "x-men-97",
+   "wikiWeeklyViews": 84509,
+   "trailerViews": 10361848,
+   "take": "Critics loved it — special praise for the writing and action.",
+   "takeSrc": "wiki",
+   "takeArticle": "X-Men '97"
   }
  ],
  "comingSoon": [
@@ -2179,7 +2149,7 @@
     }
    ],
    "slug": "spider-man-brand-new-day",
-   "trailerViews": 3386795
+   "trailerViews": 3610656
   },
   {
    "title": "Mu-Ki-Ra",
@@ -2190,7 +2160,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/arJSTCDZ1Q34c6aXZxZJF9XuhhQ.jpg",
    "kind": "movie",
    "tmdbId": 1446898,
-   "popularity": 4.8821,
+   "popularity": 4.3902,
    "cert": null,
    "trailer": "https://www.youtube.com/results?search_query=Mu-Ki-Ra%20official%20trailer",
    "providers": [],
@@ -2301,6 +2271,13 @@
      "kind": "movie"
     },
     {
+     "title": "Star Trek III: The Search for Spock",
+     "slug": "star-trek-iii-the-search-for-spock",
+     "poster": "https://image.tmdb.org/t/p/w342/yqEj0oPfKBMCz7YcCARHDgH7VFm.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Zoe",
      "slug": "zoe",
      "poster": "https://image.tmdb.org/t/p/w342/hagf4LA3FRD2o1wI3LhNzl0t5vo.jpg",
@@ -2322,16 +2299,9 @@
      "kind": "movie"
     },
     {
-     "title": "Stowaway",
-     "slug": "stowaway",
-     "poster": "https://image.tmdb.org/t/p/w342/eFyRjhJfhNgM565U2mwEp5YUUOv.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Core",
-     "slug": "the-core",
-     "poster": "https://image.tmdb.org/t/p/w342/iMPR3OFhKNVvJw4eZoRhf9RzfHJ.jpg",
+     "title": "The Time Shifters",
+     "slug": "the-time-shifters",
+     "poster": "https://image.tmdb.org/t/p/w342/rDuUjfilSUOPlwQH6MYJ2mpTn3k.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2373,7 +2343,7 @@
     }
    ],
    "slug": "the-end-of-oak-street",
-   "trailerViews": 311481
+   "trailerViews": 323679
   },
   {
    "title": "PAW Patrol: The Dino Movie",
@@ -2483,7 +2453,7 @@
     }
    ],
    "slug": "paw-patrol-the-dino-movie",
-   "trailerViews": 3685653
+   "trailerViews": 3699361
   },
   {
    "title": "Resident Evil",
@@ -2494,7 +2464,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/zP83bIkBViw5b1s9bDemYJ3AAgX.jpg",
    "kind": "movie",
    "tmdbId": 1423191,
-   "popularity": 12.891,
+   "popularity": 16.0216,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=mNd1gb19A-c",
    "providers": [],
@@ -2588,7 +2558,7 @@
     }
    ],
    "slug": "resident-evil",
-   "trailerViews": 5176613
+   "trailerViews": 6008160
   },
   {
    "title": "Digger",
@@ -2599,7 +2569,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/1ATXKrIPJyKNwnJ6lcG088Sa6zi.jpg",
    "kind": "movie",
    "tmdbId": 1248832,
-   "popularity": 12.1082,
+   "popularity": 11.2294,
    "cert": "R",
    "trailer": "https://www.youtube.com/watch?v=qORTe1wW3Wg",
    "providers": [],
@@ -2698,7 +2668,7 @@
     }
    ],
    "slug": "digger",
-   "trailerViews": 4377064
+   "trailerViews": 4396842
   },
   {
    "title": "Other Mommy",
@@ -2709,7 +2679,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/8CXwxpyvQiz9COMLZov4Oae8NKb.jpg",
    "kind": "movie",
    "tmdbId": 1400837,
-   "popularity": 21.4576,
+   "popularity": 20.6341,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=bEpTgowZ1dI",
    "providers": [],
@@ -2808,7 +2778,7 @@
     }
    ],
    "slug": "other-mommy",
-   "trailerViews": 16419376
+   "trailerViews": 18524654
   },
   {
    "title": "Clayface",
@@ -2819,7 +2789,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/5jCpQnWPikggmQZoDp1eAi6BI6w.jpg",
    "kind": "movie",
    "tmdbId": 1400940,
-   "popularity": 22.5862,
+   "popularity": 22.4322,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=OGO4Mqvo3jI",
    "providers": [],
@@ -2918,7 +2888,7 @@
     }
    ],
    "slug": "clayface",
-   "trailerViews": 11048227
+   "trailerViews": 12956099
   }
  ],
  "trackedFilms": 101
