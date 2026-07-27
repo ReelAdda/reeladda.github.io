@@ -1088,7 +1088,9 @@ function buildFaqs(item, countryName = "India") {
   if (verdictLabel && !/verdict soon|enough ratings/i.test(verdictLabel)) {
     faqs.push({
       q: `Is ${item.title} worth watching?`,
-      a: `${verdictLabel}.${item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10.` : ""} See FilmyChill's full take above.`,
+      // Self-contained on purpose: featured snippets and AI answer engines quote this text
+      // out of context, so "see above" is a dead reference the moment it leaves the page.
+      a: trim(`${verdictLabel}.${item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10 on audience ratings.` : ""}${item.take ? ` ${item.take}` : ""}`, 300),
     });
   }
   // Q2: where to watch
@@ -1126,7 +1128,8 @@ function buildFaqs(item, countryName = "India") {
   }
   // Q4: language (helps regional long-tail search)
   if (item.language) {
-    faqs.push({ q: `What language is ${item.title} in?`, a: `${item.title} is a ${item.language} ${item.kind === "tv" ? "series" : "film"}${item.genre ? ` (${item.genre})` : ""}.` });
+    const art = /^[aeiou]/i.test(String(item.language)) ? "an" : "a"; // "an English film", "a Tamil film"
+    faqs.push({ q: `What language is ${item.title} in?`, a: `${item.title} is ${art} ${item.language} ${item.kind === "tv" ? "series" : "film"}${item.genre ? ` (${item.genre})` : ""}.` });
   }
   return faqs;
 }
@@ -2136,11 +2139,23 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   const upcoming = item.released && item.released > new Date().toISOString().slice(0, 10);
   const relLabel = upcoming ? "Releases" : "Released";
   const synopsis = item.fullReview || item.review || "";
-  const desc = trim([item.verdict, synopsis].filter(Boolean).join(". "), 155);
   const url = filmPageUrl(code, item.slug);
   const ytid = ytIdOf(item.trailer);
   const cast = Array.isArray(item.cast) ? item.cast.slice(0, 6) : [];
   const providers = Array.isArray(item.providers) ? item.providers : [];
+  // India film pages that aren't streaming yet target "<title> ott release date" — the
+  // highest-volume non-brand query shape for Indian releases (GSC showed impressions were
+  // almost all brand queries; this is the intended fix). Search volume for that query peaks
+  // exactly in the theatrical/pre-OTT window this branch covers, and the FAQ + auto-update
+  // mechanic already answer it. Streaming titles, TV, and other countries keep the
+  // review/where-to-watch shape ("OTT" is Indian-market phrasing).
+  const wantsOttTitle = code === "in" && item.kind !== "tv" && providers.length === 0;
+  const titleTag = wantsOttTitle
+    ? `${item.title}${year ? " (" + year + ")" : ""} OTT Release Date, Review & Where to Watch | FilmyChill`
+    : `${item.title}${year ? " (" + year + ")" : ""} — Review, Rating & Where to Watch in ${country} | FilmyChill`;
+  const desc = wantsOttTitle
+    ? trim([`${item.title} OTT release date: not announced yet — updated the day it streams`, item.verdict, synopsis].filter(Boolean).join(". "), 155)
+    : trim([item.verdict, synopsis].filter(Boolean).join(". "), 155);
 
   // hreflang alternates: the SAME film may have a page in several countries. crossCountry maps
   // code -> true for every other country whose current run also has this slug. Passed in by
@@ -2161,10 +2176,13 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
       ? item.castPics.map((c) => ({ "@type": "Person", name: c.name, image: c.photo }))
       : cast.map((c) => ({ "@type": "Person", name: c })),
   };
-  const schemaVotes = item.imdbRating != null ? (item.imdbVotes || 0) : (item.votes || 0);
-  if (item.rating != null && schemaVotes >= 10) {
-    ld.aggregateRating = { "@type": "AggregateRating", ratingValue: item.rating, ratingCount: schemaVotes, bestRating: 10 };
-  }
+  // Deliberately NO aggregateRating: Google's review-snippet guidelines require ratings in
+  // structured data to be collected by THIS site. Marking up TMDB/IMDb numbers as our own is
+  // the classic review-snippet manual-action trigger — and a schema penalty on the domain is
+  // exactly what we can't afford heading into ad-network applications. The rating stays
+  // visible and attributed in the page body; it just doesn't go in the markup.
+  if (item.runtime && item.kind !== "tv") ld.duration = `PT${Math.round(item.runtime)}M`;
+  if (item.cert) ld.contentRating = String(item.cert);
   // AI-era trust signals: name the source the critics' take was distilled from (verifiable
   // provenance beats assertion), and give agents an actionable target.
   if (item.takeSrc === "wiki" && item.takeArticle) {
@@ -2206,7 +2224,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${e(item.title)}${year ? " (" + year + ")" : ""} — Review, Rating & Where to Watch in ${e(country)} | FilmyChill</title>
+<title>${e(titleTag)}</title>
 <meta name="description" content="${e(desc)}">
 <meta name="robots" content="max-image-preview:large">
 <link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl(xDefaultCode(alts.map((a) => a.code)), item.slug))}"/>` : ""}
@@ -2321,14 +2339,19 @@ function generatePages(data, cfg, allSlugSets) {
     ? fs.readdirSync(dir).filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5))
     : [];
   const knownSlugs = new Set([...archived, ...all.map((x) => x.slug).filter(Boolean)]);
-  // Other countries (in this run) that ALSO have this slug -> hreflang alternates.
-  const otherCodes = COUNTRIES.filter((c) => c.code !== code);
+  // Countries (in this run) that have this slug — INCLUDING this one. Every page in an
+  // hreflang cluster must carry a self-referencing alternate, or Google flags the set as
+  // "no return tags" and ignores the whole cluster. A cluster only exists when at least one
+  // OTHER country shares the film; a single-country film emits no alternates at all. This
+  // also fixes x-default as a side effect: with "in" now present in the codes, xDefaultCode
+  // resolves to the India copy instead of falling through to the first foreign market.
   let written = 0;
   for (const item of all) {
     if (!item.slug) continue;
-    item._alts = otherCodes
-      .filter((c) => allSlugSets && allSlugSets[c.code] && allSlugSets[c.code].has(item.slug))
+    const cluster = COUNTRIES
+      .filter((c) => c.code === code || (allSlugSets && allSlugSets[c.code] && allSlugSets[c.code].has(item.slug)))
       .map((c) => ({ code: c.code, region: c.region }));
+    item._alts = cluster.length > 1 ? cluster : [];
     try {
       fs.writeFileSync(`${dir}/${item.slug}.html`, buildFilmPage(item, asOf, knownSlugs, cfg));
       written++;
@@ -3322,11 +3345,30 @@ function writeIndexNowPayload(builtCountries, dataByCode = {}) {
 // crawlers that fetch it see THIS WEEK'S actual picks with dates, not a stale
 // brochure. Pure builder -> unit-testable; writer is thin.
 // ============================================================================
+// Ratings backed by few votes are early-vote noise (a 3-day-old title sitting at 9.4 on a
+// fanbase's votes, then settling to 7.x a week later). AI answer engines quote these files
+// verbatim WITH our attribution, so below this vote count llms.txt omits the number entirely
+// and llms-full.txt labels it low-confidence next to its vote count. UI gates are separate
+// (EDNOTE_MIN_VOTES etc.) — this one is deliberately stricter because a quoted number in an
+// AI answer can't be softened by surrounding page context.
+const LLMS_MIN_VOTES = 100;
+// New releases attract the fanbase first: a 3-day-old title at 9.4 on a couple hundred votes
+// routinely settles a full point lower once the general audience arrives. Within the first
+// two weeks of release, demand a deeper sample before quoting a number at all.
+const LLMS_EARLY_DAYS = 14;
+const LLMS_EARLY_MIN_VOTES = 500;
+function llmsRatingConfident(it) {
+  const votes = it.votes || 0;
+  if (votes < LLMS_MIN_VOTES) return false;
+  const days = it.released ? (Date.now() - Date.parse(it.released)) / 864e5 : Infinity;
+  return days >= LLMS_EARLY_DAYS || votes >= LLMS_EARLY_MIN_VOTES;
+}
+
 function buildLlmsTxt(dataByCode) {
   const ind = dataByCode.in || {};
   const gen = ind.generatedAt || new Date().toISOString();
   const day = gen.slice(0, 10);
-  const line = (it) => `- ${it.title}${it.language && it.language !== "English" ? ` (${it.language})` : ""}${it.platform && it.platform !== "Theatres" ? ` — on ${it.platform}` : ""}${it.rating != null ? ` — rated ${Number(it.rating).toFixed(1)}/10` : ""}${it.slug ? ` — https://filmychill.com${filmPagePath("in", it.slug)}` : ""}`;
+  const line = (it) => `- ${it.title}${it.language && it.language !== "English" ? ` (${it.language})` : ""}${it.platform && it.platform !== "Theatres" ? ` — on ${it.platform}` : ""}${it.rating != null && llmsRatingConfident(it) ? ` — rated ${Number(it.rating).toFixed(1)}/10` : ""}${it.slug ? ` — https://filmychill.com${filmPagePath("in", it.slug)}` : ""}`;
   const theatres = (ind.theatres || []).slice(0, 7).map(line).join("\n");
   const ott = (ind.ott || []).filter((x) => !x.stillGood).slice(0, 6).map(line).join("\n");
   const langs = LANGUAGE_PAGES.map(([name, slug]) => `- [New ${name} movies & OTT this week](https://filmychill.com/${slug}/)`).join("\n");
@@ -3388,7 +3430,7 @@ function buildLlmsFullTxt(dataByCode) {
           it.runtime ? `${it.runtime} min` : null, it.cert || null,
           it.released ? `released ${it.released}` : null,
           it.platform && it.platform !== "Theatres" ? `on ${it.platform}` : null,
-          it.rating != null ? `rated ${Number(it.rating).toFixed(1)}/10 (${it.votes || 0} votes)` : null,
+          it.rating != null ? `rated ${Number(it.rating).toFixed(1)}/10 (${it.votes || 0} votes${llmsRatingConfident(it) ? "" : " — early, low confidence"})` : null,
           it.verdict || null,
         ].filter(Boolean).join(" · ");
         lines.push(`${i + 1}. ${it.title} — ${facts}`);
@@ -3699,4 +3741,5 @@ module.exports = {
   capTrending, buildEditorNote, ssrEditorNote,
   platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls,
   buildLlmsFullTxt, llmsMachineSection,
+  llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
