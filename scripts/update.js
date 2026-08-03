@@ -574,7 +574,8 @@ async function attachBuzz(dataByCode) {
 // already done the research. Primary source: the "Reception" section of the
 // film's English Wikipedia article (a human-written summary of real critic
 // consensus), located precisely via the buzz module's Wikidata P345 lookup —
-// never by title search. Fallback: TMDB user reviews (rating average only).
+// never by title search. Fallback: TMDB user reviews — the rating average sets the
+// lean and the review BODIES are mined for repeated aspect mentions (signals only).
 // The printed sentence is SYNTHESISED in our own words from extracted signals
 // (overall tone + praised/criticised aspects) — never copied text — so it is
 // licence-clean. Results are cached in takes.json (committed by the workflow):
@@ -677,9 +678,13 @@ function analyzeReception(text) {
       }
     }
   }
-  for (const n of praised) if (panned.has(n)) { praised.delete(n); panned.delete(n); } // contested -> drop
-  if (!tone && !praised.size && !panned.size && !score) return null;
-  return { tone, praised: [...praised].slice(0, 2), panned: [...panned].slice(0, 1), score };
+  // An aspect BOTH praised and panned used to be dropped as noise. It's the opposite —
+  // "critics can't even agree about the second half" is the most human detail a
+  // reception section offers. Keep it as a "divided" signal (max 1).
+  const divided = [];
+  for (const n of praised) if (panned.has(n)) { praised.delete(n); panned.delete(n); divided.push(n); }
+  if (!tone && !praised.size && !panned.size && !divided.length && !score) return null;
+  return { tone, praised: [...praised].slice(0, 2), panned: [...panned].slice(0, 1), divided: divided.slice(0, 1), score };
 }
 
 // Pure: analysis -> one original opinionated sentence (never source text). null when
@@ -697,6 +702,8 @@ const TAKE_VARIANTS = {
     `The critical verdict is rare-air positive.`,
     `Wall-to-wall praise from the critics on this one.`,
     `Critics came away raving.`,
+    `Reviews don't come much warmer than this.`,
+    `Critics practically lined up to praise this one.`,
   ],
   positive: [
     `Critics have been largely positive on this one.`,
@@ -705,6 +712,8 @@ const TAKE_VARIANTS = {
     `Word from reviewers is solidly good.`,
     `The critical consensus tilts firmly positive.`,
     `Reviewers found plenty to like here.`,
+    `Critics came away impressed, by and large.`,
+    `Most reviews land firmly on the positive side.`,
   ],
   mixed: [
     `Critics are genuinely split on this one.`,
@@ -713,6 +722,8 @@ const TAKE_VARIANTS = {
     `Opinions split right down the middle on this one.`,
     `One critic's favourite, the next one's skip — that kind of film.`,
     `The reviews refuse to agree on this one.`,
+    `A split decision — ask three critics, get three answers.`,
+    `Genuinely divided — this is one that starts arguments.`,
   ],
   negative: [
     `Critics were not impressed with this one.`,
@@ -721,6 +732,8 @@ const TAKE_VARIANTS = {
     `Reviewers came away cold on this one.`,
     `Critics found little to love here.`,
     `A rough outing with the reviewers.`,
+    `Reviewers mostly checked out early on this one.`,
+    `The critics' patience ran thin here.`,
   ],
 };
 // If a take is one of the tone-only pool lines, re-pick the variant for THIS film's
@@ -736,47 +749,193 @@ function reseedTake(take, seed = 0) {
 }
 
 // TAKE_VERSION stamps every cache entry with the extractor generation that wrote it.
-// v3 makes takes number-free (a printed RT%/Metacritic figure clashed with the card's
-// TMDB rating pill). Bumping it re-analyses stale entries ONCE with the current extractor;
-// aspect-bearing takes (unique by construction) are otherwise untouched.
-const TAKE_VERSION = 3;
+// v3 made takes number-free (a printed RT%/Metacritic figure clashed with the card's
+// TMDB rating pill). v4 replaces the single fixed aspect templates (and the fixed TMDB
+// fallback line) with seeded variant pools, so same-shaped takes stop repeating one
+// sentence across a page. Bumping it re-analyses stale entries ONCE with the current
+// extractor; entries already stamped with the current version are never re-flagged, so
+// a film whose seed maps to index 0 (the old wording) can't enter a refetch loop.
+const TAKE_VERSION = 5; // v5: entries store mined analysis (a/ta); pre-v5 refetch once
 function isPoolTake(take) {
   if (!take) return false;
   return Object.values(TAKE_VARIANTS).some((pool) => pool.includes(take));
 }
+// The v3 single-template shapes (aspect slots as wildcards) plus the v3 TMDB fallback
+// line. A cached take matching one of these under an older version stamp gets recomposed
+// once with the seeded pools — same one-time purge mechanism as the v3 number purge.
+const LEGACY_TAKE_RES = [
+  /^Critics loved it — special praise for the .+\.$/,
+  /^Critics liked it: the .+ won praise, though the .+ drew some flak\.$/,
+  /^Critics liked it, especially the .+\.$/,
+  /^Critics were broadly positive, with reservations about the .+\.$/,
+  /^Critics are split — praise for the .+, pushback on the .+\.$/,
+  /^Critics are split, though the .+ found admirers\.$/,
+  /^Critics are split, with the .+ drawing most complaints\.$/,
+  /^Genuinely divisive — critics can't settle this one\.$/,
+  /^Critics were rough on it, mostly over the .+\.$/,
+  /^Reviewers praised the .+ but flagged the .+\.$/,
+  /^Reviewers singled out the .+ for praise\.$/,
+  /^Reviewers' main gripe: the .+\.$/,
+  /^Early viewer reviews on TMDB (?:are mixed|lean .+)\.$/,
+];
+function isLegacyTake(take) {
+  return !!take && LEGACY_TAKE_RES.some((re) => re.test(take));
+}
+
+// Aspect-bearing template pools: one fixed sentence per tone/aspect shape meant every
+// "acclaimed, performances praised" film on a page read identically once several shared a
+// shape. Each shape is now a seeded pool with the same contract as TAKE_VARIANTS: index 0
+// preserves the previous phrasing (settled caches and default-seed calls are unchanged),
+// the variant is picked deterministically by the film's tmdbId, and every line stays
+// digit-free. Wording is chosen so audienceCounterpoint's camp regexes still classify it.
+const ASPECT_VARIANTS = {
+  acclaimP: [
+    (p) => `Critics loved it — special praise for the ${p}.`,
+    (p) => `Near-universal acclaim, with the ${p} singled out most often.`,
+    (p) => `Critics loved this one, and the ${p} drew the loudest praise.`,
+    (p) => `A critical darling — reviewers kept coming back to the ${p}.`,
+    (p) => `Rave reviews across the board, especially for the ${p}.`,
+  ],
+  positivePC: [
+    (p, c) => `Critics liked it: the ${p} won praise, though the ${c} drew some flak.`,
+    (p, c) => `Mostly good reviews — the ${p} impressed, even if the ${c} didn't.`,
+    (p, c) => `Critics came away positive, praising the ${p} while docking points for the ${c}.`,
+    (p, c) => `The ${p} won critics over; the ${c} drew the odd complaint.`,
+    (p, c) => `Reviews lean positive: strong marks for the ${p}, quibbles about the ${c}.`,
+  ],
+  positiveP: [
+    (p) => `Critics liked it, especially the ${p}.`,
+    (p) => `Good word from critics, with the ${p} earning most of the praise.`,
+    (p) => `Reviewers responded well — the ${p} came in for particular praise.`,
+    (p) => `Critics were won over, largely on the strength of the ${p}.`,
+    (p) => `A well-reviewed outing; the ${p} stood out for critics.`,
+  ],
+  positiveC: [
+    (c) => `Critics were broadly positive, with reservations about the ${c}.`,
+    (c) => `Broadly positive reviews, though the ${c} drew grumbles.`,
+    (c) => `Critics mostly approved — the ${c} was the common complaint.`,
+    (c) => `A positive reception on balance, with the ${c} taking the knocks.`,
+    (c) => `Reviewers liked it more than not, save for gripes about the ${c}.`,
+  ],
+  mixedPC: [
+    (p, c) => `Critics are split — praise for the ${p}, pushback on the ${c}.`,
+    (p, c) => `A divided reception: the ${p} won praise, the ${c} took the heat.`,
+    (p, c) => `Critics can't agree — high marks for the ${p}, complaints about the ${c}.`,
+    (p, c) => `Reviews cut both ways: the ${p} impressed, the ${c} frustrated.`,
+    (p, c) => `Half the critics point to the ${p}, the other half to the ${c}.`,
+  ],
+  mixedP: [
+    (p) => `Critics are split, though the ${p} found admirers.`,
+    (p) => `A divided verdict, with the ${p} the one thing most critics agreed on.`,
+    (p) => `Reviews swing both ways; the ${p} earns praise even from the doubters.`,
+    (p) => `Critics can't settle on this one, but the ${p} gets its due.`,
+    (p) => `Opinion is split — the ${p} is the bright spot either way.`,
+  ],
+  mixedC: [
+    (c) => `Critics are split, with the ${c} drawing most complaints.`,
+    (c) => `A divided response, and the ${c} carries most of the blame.`,
+    (c) => `Reviews swing both ways, with the ${c} the sticking point.`,
+    (c) => `Critics can't agree, though the ${c} bothered nearly everyone.`,
+    (c) => `Opinion is split, and the ${c} is where it splits hardest.`,
+  ],
+  positivePDiv: [
+    (p, d) => `Critics liked it — high marks for the ${p}, though the ${d} kept them arguing.`,
+    (p, d) => `Mostly good reviews: praise for the ${p}, real debate over the ${d}.`,
+    (p, d) => `Critics came away positive on the ${p}; on the ${d}, they part ways.`,
+    (p, d) => `A well-reviewed outing, strongest on the ${p} — only the ${d} drew real argument.`,
+  ],
+  mixedPDiv: [
+    (p, d) => `Critics are split — the ${p} won praise, the ${d} is the fault line.`,
+    (p, d) => `A divided verdict: credit for the ${p}, a genuine rift over the ${d}.`,
+    (p, d) => `Reviews swing both ways — kind to the ${p}, at war over the ${d}.`,
+    (p, d) => `Critics can't agree here; the ${p} earns praise, the ${d} starts the arguing.`,
+  ],
+  positiveDiv: [
+    (d) => `Critics are mostly positive — except when it comes to the ${d}.`,
+    (d) => `Mostly good reviews, with real disagreement only about the ${d}.`,
+    (d) => `Positive on balance, but ask two critics about the ${d} and you'll get two answers.`,
+    (d) => `Most critics approved — just don't ask them about the ${d}.`,
+  ],
+  mixedDiv: [
+    (d) => `Critics are split, nowhere more than over the ${d}.`,
+    (d) => `A divided verdict, with the ${d} right on the fault line.`,
+    (d) => `Reviews swing both ways here, most sharply over the ${d}.`,
+    (d) => `Critics can't agree on this one — least of all about the ${d}.`,
+  ],
+  mixedScore: [
+    () => `Genuinely divisive — critics can't settle this one.`,
+    () => `Truly divisive — for every critic who bought in, one checked out.`,
+    () => `A love-it-or-hate-it reception, right down the middle.`,
+    () => `Critics are split clean down the middle on this one.`,
+  ],
+  negativeC: [
+    (c) => `Critics were rough on it, mostly over the ${c}.`,
+    (c) => `The reviews were not kind, and the ${c} took the worst of it.`,
+    (c) => `Critics came away cold, pointing mainly at the ${c}.`,
+    (c) => `A drubbing from reviewers, with the ${c} the main casualty.`,
+    (c) => `Critics found little to love, least of all the ${c}.`,
+  ],
+  nonePC: [
+    (p, c) => `Reviewers praised the ${p} but flagged the ${c}.`,
+    (p, c) => `The ${p} earned praise; the ${c} caught flak.`,
+    (p, c) => `Critics highlighted the ${p}, with the ${c} the weak link.`,
+    (p, c) => `Strong marks for the ${p}, less love for the ${c}.`,
+    (p, c) => `The ${p} works, per reviewers — the ${c} less so.`,
+  ],
+  noneP: [
+    (p) => `Reviewers singled out the ${p} for praise.`,
+    (p) => `If critics agreed on one thing, it was the ${p}.`,
+    (p) => `The ${p} drew the most notice from reviewers.`,
+    (p) => `Critics kept circling back to the ${p} — in a good way.`,
+    (p) => `The ${p} is what reviewers walked away talking about.`,
+  ],
+  noneC: [
+    (c) => `Reviewers' main gripe: the ${c}.`,
+    (c) => `The ${c} came in for the most criticism.`,
+    (c) => `If reviewers dinged anything, it was the ${c}.`,
+    (c) => `The ${c} drew the bulk of the complaints.`,
+    (c) => `Critics' sore spot here is the ${c}.`,
+  ],
+};
 
 function composeTake(a, seed = 0) {
   if (!a) return null;
   const list = (arr) => (arr.length === 2 ? `${arr[0]} and ${arr[1]}` : arr[0]);
-  const p = a.praised.length ? list(a.praised) : null;
-  const c = a.panned.length ? a.panned[0] : null;
+  const p = (a.praised || []).length ? list(a.praised) : null;
+  const c = (a.panned || []).length ? a.panned[0] : null;
+  const d = (a.divided || []).length ? a.divided[0] : null;
   const vary = (pool) => pool[Math.abs(Number(seed) || 0) % pool.length];
+  const varyA = (pool, ...args) => vary(pool)(...args);
   // NO NUMBERS in the take text — an RT% or Metacritic figure next to the card's TMDB
   // rating pill reads as the site contradicting itself (96% vs 6.9/10 are different
   // scales, but the reader can't know that). The extracted score still informs WHICH
   // sentence we pick (hard evidence of division/acclaim); it just never gets printed.
   switch (a.tone) {
     case "acclaim":
-      if (p) return `Critics loved it — special praise for the ${p}.`;
+      if (p) return varyA(ASPECT_VARIANTS.acclaimP, p);
       return vary(TAKE_VARIANTS.acclaim);
     case "positive":
-      if (p && c) return `Critics liked it: the ${p} won praise, though the ${c} drew some flak.`;
-      if (p) return `Critics liked it, especially the ${p}.`;
-      if (c) return `Critics were broadly positive, with reservations about the ${c}.`;
+      if (p && c) return varyA(ASPECT_VARIANTS.positivePC, p, c);
+      if (p && d) return varyA(ASPECT_VARIANTS.positivePDiv, p, d);
+      if (d) return varyA(ASPECT_VARIANTS.positiveDiv, d);
+      if (p) return varyA(ASPECT_VARIANTS.positiveP, p);
+      if (c) return varyA(ASPECT_VARIANTS.positiveC, c);
       return vary(TAKE_VARIANTS.positive);
     case "mixed":
-      if (p && c) return `Critics are split — praise for the ${p}, pushback on the ${c}.`;
-      if (p) return `Critics are split, though the ${p} found admirers.`;
-      if (c) return `Critics are split, with the ${c} drawing most complaints.`;
-      if (a.score) return `Genuinely divisive — critics can't settle this one.`; // aggregator-backed -> firm claim is honest
+      if (p && c) return varyA(ASPECT_VARIANTS.mixedPC, p, c);
+      if (p && d) return varyA(ASPECT_VARIANTS.mixedPDiv, p, d);
+      if (d) return varyA(ASPECT_VARIANTS.mixedDiv, d);
+      if (p) return varyA(ASPECT_VARIANTS.mixedP, p);
+      if (c) return varyA(ASPECT_VARIANTS.mixedC, c);
+      if (a.score) return varyA(ASPECT_VARIANTS.mixedScore); // aggregator-backed -> firm claim is honest
       return null; // no aspect, no evidence -> stay silent, don't say "all over the map"
     case "negative":
-      if (c) return `Critics were rough on it, mostly over the ${c}.`;
+      if (c) return varyA(ASPECT_VARIANTS.negativeC, c);
       return vary(TAKE_VARIANTS.negative);
     default:
-      if (p && c) return `Reviewers praised the ${p} but flagged the ${c}.`;
-      if (p) return `Reviewers singled out the ${p} for praise.`;
-      if (c) return `Reviewers' main gripe: the ${c}.`;
+      if (p && c) return varyA(ASPECT_VARIANTS.nonePC, p, c);
+      if (p) return varyA(ASPECT_VARIANTS.noneP, p);
+      if (c) return varyA(ASPECT_VARIANTS.noneC, c);
       return null;
   }
 }
@@ -843,30 +1002,160 @@ function extractHook(lead, item = {}) {
 // Computed fresh each run from data already on the item (ratings move; cached
 // take text doesn't), so it stays current without any network. Pure.
 // ============================================================================
+const COUNTER_DISAGREE = [
+  `Audiences disagree \u2014 viewers rate it far higher.`,
+  `Viewers beg to differ \u2014 audience scores run well above the critics' line.`,
+  `The audience isn't buying the reviews \u2014 they rate it far higher.`,
+];
+const COUNTER_COOLER = [
+  `Audiences are cooler on it than the critics were.`,
+  `Viewers haven't matched the critics' enthusiasm \u2014 audience scores run lower.`,
+  `The audience is less convinced than the critics were.`,
+];
 function audienceCounterpoint(item) {
   if (!item || !item.take || item.rating == null) return null;
+  // TMDB-review fallback takes vs the TMDB rating is viewers vs viewers — there's no
+  // critic/audience disagreement to report, so those takes never get a counterpoint.
+  if (item.takeSrc === "tmdb") return null;
   const votes = item.imdbRating != null ? (item.imdbVotes || 0) : (item.votes || 0);
   if (votes < 50) return null; // too few voters to call it an audience
-  const negTake = /rough on it|not impressed|not kind|gave this one a pass|came away cold/i.test(item.take);
-  const splitTake = /split|all over the map|couldn't agree|down the middle|divisive|can't settle/i.test(item.take);
-  const posTake = /loved|liked it|largely positive|lean clearly positive|came away happy|solidly good|rare-air/i.test(item.take);
+  const t = item.take;
+  // Camp classification is PRECEDENCE-ORDERED (split > negative > positive) so a variant
+  // that carries a positive word inside a split or negative sentence ("the visuals
+  // impressed, the pacing frustrated") can never flip camps. Keyword lists cover every
+  // pool and aspect-template variant above.
+  const splitTake = /split|all over the map|(?:can't|couldn't|refuse to) agree|down the middle|divisive|can't settle|divided|cut both ways|half the critics|swing both ways|one critic's favourite|next one's skip|three answers|starts arguments/i.test(t);
+  const negTake = !splitTake && /rough|not impressed|not kind|gave this one a pass|came away cold|little to love|drubbing|checked out early|patience ran thin/i.test(t);
+  const posTake = !splitTake && !negTake && /loved|liked it|positive|came away (?:happy|impressed)|solidly good|rare-air|plenty to like|good word|well-reviewed|responded well|won (?:critics )?over|acclaim|rav(?:e|ing)|darling|unanimous|this one landed|bad word for it|much warmer|lined up to praise|approved|mostly good reviews|wall-to-wall praise|impressed/i.test(t);
+  // The counterpoint sentence itself is seeded per film so a page with two disagreements
+  // doesn't print the same disagreement line twice. Index 0 keeps the original wording.
+  const seed = Math.abs(Number(item.tmdbId) || 0);
   if ((negTake || splitTake) && item.rating >= 7.5)
-    return `Audiences disagree \u2014 viewers rate it far higher.`;
+    return COUNTER_DISAGREE[seed % COUNTER_DISAGREE.length];
   if (posTake && item.rating <= 5.5)
-    return `Audiences are cooler on it than the critics were.`;
+    return COUNTER_COOLER[seed % COUNTER_COOLER.length];
   return null;
 }
 
-// Fallback: TMDB user reviews. Only the rating AVERAGE is used (a fact, not text) and
-// only when at least 2 rated reviews exist — one opinion is an anecdote, not a lean.
-async function tmdbReviewTake(item) {
+// Fallback: TMDB user reviews, used only when at least 2 rated reviews exist — one
+// opinion is an anecdote, not a lean. Tone-only pools below (index 0 = the original
+// wording); aspect-bearing viewer pools follow the miner further down.
+const TMDB_TAKE_VARIANTS = {
+  "strongly positive": [
+    `Early viewer reviews on TMDB lean strongly positive.`,
+    `First viewer reviews on TMDB are strongly positive.`,
+    `Early word from viewers on TMDB is emphatically good.`,
+  ],
+  positive: [
+    `Early viewer reviews on TMDB lean positive.`,
+    `First viewer reviews on TMDB tilt positive.`,
+    `Early word from viewers on TMDB runs positive.`,
+  ],
+  mixed: [
+    `Early viewer reviews on TMDB are mixed.`,
+    `First viewer reviews on TMDB are split.`,
+    `Early word from viewers on TMDB is mixed.`,
+  ],
+  negative: [
+    `Early viewer reviews on TMDB lean negative.`,
+    `First viewer reviews on TMDB tilt negative.`,
+    `Early word from viewers on TMDB runs negative.`,
+  ],
+};
+// Viewer-register sentiment cues (user reviews don't say "lauded"; they say "loved it"
+// or "waste of time"). Same TAKE_ASPECTS vocabulary maps mentions to printable nouns.
+const VIEWER_POS_RE = /\blov(?:e|ed|es)\b|amazing|brilliant|fantastic|excellent|superb|stunning|gorgeous|\bgreat\b|wonderful|terrific|masterpiece|gripping|riveting|engaging|hilarious|impress\w*|outstanding|phenomenal|beautifully|top.?notch|worth (?:a )?watch|blown away|stole the show|stand.?out|shines?\b|enjoy(?:ed|able)|\bfun\b|highlight/i;
+const VIEWER_NEG_RE = /boring|waste|terrible|awful|horrible|disappoint\w*|\bmess\b|\bdull\b|\bbland\b|\bweak\b|predictable|clich[eé]|cringe|overlong|dragg?(?:ed|s|y)?\b|sloppy|\blazy\b|f(?:e|a)ll(?:s)? flat|fails?\b|worst|annoying|tedious|forgettable|underwhelm\w*|mediocre|cheesy|wooden|pointless|unwatchable|letdown|ruined/i;
+// "not great", "wasn't worth watching": a negator shortly before a positive cue means
+// the clause is NOT praise. Conservative: such clauses are skipped entirely.
+const VIEWER_NEGATION_RE = /\b(?:not|never|no|hardly|barely|isn'?t|wasn'?t|don'?t|didn'?t|doesn'?t|far from|nothing)\s+(?:\w+\s+){0,2}(?:amazing|brilliant|fantastic|excellent|great|good|worth|impressive|enjoyable|fun|engaging|gripping|special|memorable)\b/i;
+
+// Pure: TMDB review objects -> { praised[], panned[] }. An aspect counts only when at
+// least TWO separate reviews agree on its polarity — one person's opinion is an
+// anecdote, a repeated one is a pattern. Contested aspects (2+ each way) are dropped:
+// with a handful of user reviews that's noise, not a story.
+function mineViewerAspects(results) {
+  const texts = (results || []).map((r) => String(r?.content || "")).filter((s) => s.trim().length >= 40).slice(0, 8);
+  const praiseCount = {}, panCount = {};
+  if (texts.length >= 2) {
+    for (const raw of texts) {
+      const text = raw.replace(/[*_#>`~\[\]]/g, " ").replace(/\s+/g, " ").slice(0, 1800);
+      const pr = new Set(), pa = new Set(); // per-review sets: one review = one vote per aspect
+      for (const sentence of text.split(/(?<=[.!?])\s+/)) {
+        for (const clause of sentence.split(TAKE_CLAUSE_SPLIT_RE)) {
+          if (!clause) continue;
+          const pos = VIEWER_POS_RE.test(clause), neg = VIEWER_NEG_RE.test(clause);
+          if (pos === neg) continue; // neither, or ambiguous clause -> skip
+          if (pos && VIEWER_NEGATION_RE.test(clause)) continue; // negated praise
+          for (const [re, noun] of TAKE_ASPECTS) if (re.test(clause)) (pos ? pr : pa).add(noun);
+        }
+      }
+      for (const n of pr) praiseCount[n] = (praiseCount[n] || 0) + 1;
+      for (const n of pa) panCount[n] = (panCount[n] || 0) + 1;
+    }
+  }
+  const top = (mine, theirs) => Object.keys(mine)
+    .filter((n) => mine[n] >= 2 && mine[n] > (theirs[n] || 0))
+    .sort((x, y) => mine[y] - mine[x]);
+  return { praised: top(praiseCount, panCount).slice(0, 2), panned: top(panCount, praiseCount).slice(0, 1) };
+}
+
+// Aspect-bearing viewer pools. Clearly viewer-labelled ("on TMDB") so a reader never
+// mistakes them for critic consensus; digit-free; agreement-free phrasing (plural nouns
+// like "performances" fit every slot). takeSrc stays "tmdb", so these never trigger an
+// audience counterpoint (viewers vs viewers isn't a disagreement).
+const TMDB_ASPECT_VARIANTS = {
+  P: [
+    (lw, p) => `Early viewer reviews on TMDB skew ${lw}, with the ${p} getting most of the love.`,
+    (lw, p) => `Viewer word on TMDB runs ${lw} — reviews keep coming back to the ${p}.`,
+    (lw, p) => `Early TMDB reviews skew ${lw}; viewers keep mentioning the ${p}.`,
+    (lw, p) => `First viewer reviews on TMDB run ${lw}, with the warmest words for the ${p}.`,
+  ],
+  PC: [
+    (lw, p, c) => `Early viewer reviews on TMDB skew ${lw} — love for the ${p}, gripes about the ${c}.`,
+    (lw, p, c) => `Viewer word on TMDB runs ${lw}: praise for the ${p}, knocks on the ${c}.`,
+    (lw, p, c) => `Early TMDB reviews skew ${lw}, cheering the ${p} while flagging the ${c}.`,
+    (lw, p, c) => `First viewer reviews on TMDB run ${lw} — viewers rate the ${p} far above the ${c}.`,
+  ],
+  C: [
+    (lw, c) => `Early viewer reviews on TMDB skew ${lw}, with the ${c} the common complaint.`,
+    (lw, c) => `Viewer word on TMDB runs ${lw} — most gripes point at the ${c}.`,
+    (lw, c) => `Early TMDB reviews skew ${lw}; the main complaint is about the ${c}.`,
+    (lw, c) => `First viewer reviews on TMDB run ${lw}, and the loudest complaints are about the ${c}.`,
+  ],
+};
+
+// Pure: mined viewer analysis -> one sentence, seeded like composeTake. No aspects ->
+// the existing tone-only pools (index 0 unchanged since v4).
+function composeTmdbTake(ta, seed = 0) {
+  if (!ta || !ta.lean || !TMDB_TAKE_VARIANTS[ta.lean]) return null;
+  const list = (arr) => (arr.length === 2 ? `${arr[0]} and ${arr[1]}` : arr[0]);
+  const p = (ta.praised || []).length ? list(ta.praised) : null;
+  const c = (ta.panned || []).length ? ta.panned[0] : null;
+  const vary = (pool) => pool[Math.abs(Number(seed) || 0) % pool.length];
+  if (p && c) return vary(TMDB_ASPECT_VARIANTS.PC)(ta.lean, p, c);
+  if (p) return vary(TMDB_ASPECT_VARIANTS.P)(ta.lean, p);
+  if (c) return vary(TMDB_ASPECT_VARIANTS.C)(ta.lean, c);
+  return vary(TMDB_TAKE_VARIANTS[ta.lean]);
+}
+
+// Network: one reviews call (same endpoint as before — the bodies were already in the
+// response, previously discarded) -> { lean, praised, panned } | null.
+async function tmdbReviewMine(item) {
   if (!item.tmdbId) return null;
   const j = await tmdb(`/${item.kind === "tv" ? "tv" : "movie"}/${item.tmdbId}/reviews`, {});
-  const ratings = (j?.results || []).map((r) => r?.author_details?.rating).filter((n) => Number.isFinite(n));
+  const results = j?.results || [];
+  const ratings = results.map((r) => r?.author_details?.rating).filter((n) => Number.isFinite(n));
   if (ratings.length < 2) return null;
   const avg = ratings.reduce((x, y) => x + y, 0) / ratings.length;
   const lean = avg >= 7.5 ? "strongly positive" : avg >= 6 ? "positive" : avg >= 4.5 ? "mixed" : "negative";
-  return `Early viewer reviews on TMDB ${lean === "mixed" ? "are mixed" : "lean " + lean}.`;
+  const mined = mineViewerAspects(results);
+  return { lean, praised: mined.praised, panned: mined.panned };
+}
+
+async function tmdbReviewTake(item) { // kept for compatibility: mine + compose in one step
+  const ta = await tmdbReviewMine(item);
+  return ta ? composeTmdbTake(ta, Number(item.tmdbId) || 0) : null;
 }
 
 // Attach a critics' take to every theatre + OTT item across all countries. Same
@@ -889,32 +1178,38 @@ async function attachTakes(dataByCode) {
       let entry = takes[key];
       // Refetch when: never seen; no take yet (reception sections appear late); a LEGACY
       // entry predating hooks (hook === undefined); OR a stale take from an older extractor
-      // version — a tone-only pool line, or any take containing a digit (v3 made takes
-      // number-free so they can't clash with the rating pill). Version purges BYPASS the
-      // checked-today gate: they run exactly once per entry (v gets stamped), so there's no
-      // re-fetch loop, and waiting a day just leaves known-bad lines on the live site.
-      const stalePool = !!entry && entry.v !== TAKE_VERSION && (isPoolTake(entry.take) || /\d/.test(entry.take || ""));
-      const needsFetch = !entry || stalePool || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
+      // version — a tone-only pool line, a v3 single-template aspect/TMDB-fallback line
+      // (isLegacyTake), or any take containing a digit (v3 made takes number-free so they
+      // can't clash with the rating pill). Version purges BYPASS the checked-today gate:
+      // they run exactly once per entry (v gets stamped), so there's no re-fetch loop, and
+      // waiting a day just leaves known-stale lines on the live site.
+      // v5 entries carry the mined analysis; anything older lacks it, so a version
+      // mismatch alone marks the entry stale — one refetch per entry (v gets stamped,
+      // no loop), and every cached title gains aspect data in a single sweep.
+      const stale = !!entry && entry.v !== TAKE_VERSION;
+      const needsFetch = !entry || stale || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
       if (needsFetch) {
-        let take = entry?.take || null, src = entry?.src || null, hook = null;
-        if (stalePool) { take = null; src = null; } // recompose from scratch with the current extractor
-        let article = entry?.article || null;
+        let take = stale ? null : entry?.take || null, src = stale ? null : entry?.src || null, hook = null;
+        let a = stale ? null : entry?.a || null, ta = stale ? null : entry?.ta || null;
+        let article = entry?.article || null; // the article LOCATION is a stable fact — survives purges
         if (key.startsWith("tt")) { // real IMDb id -> precise Wikipedia route
           if (!article) article = await wikiArticleForImdb(key);
           if (article) {
             const { lead, reception } = await wikiExtract(article);
             hook = extractHook(lead, items[0]);
             if (!take) {
-              const composed = composeTake(analyzeReception(reception), Number(items[0].tmdbId) || 0);
-              if (composed) { take = composed; src = "wiki"; }
+              a = analyzeReception(reception);
+              const composed = composeTake(a, Number(items[0].tmdbId) || 0);
+              if (composed) { take = composed; src = "wiki"; } else a = null;
             }
           }
         }
         if (!take) {
-          const t = await tmdbReviewTake(items[0]);
-          if (t) { take = t; src = "tmdb"; }
+          ta = await tmdbReviewMine(items[0]);
+          const t = ta ? composeTmdbTake(ta, Number(items[0].tmdbId) || 0) : null;
+          if (t) { take = t; src = "tmdb"; } else ta = null;
         }
-        entry = { take, src, hook, article: article || undefined, checked: today, v: TAKE_VERSION };
+        entry = { take, src, hook, article: article || undefined, a: a || undefined, ta: ta || undefined, checked: today, v: TAKE_VERSION };
         takes[key] = entry;
         await sleep(150); // polite pace against Wikimedia
       } else {
@@ -922,11 +1217,20 @@ async function attachTakes(dataByCode) {
       }
       if (entry.take || entry.hook) {
         if (entry.take) found++;
-        const seededTake = reseedTake(entry.take, Number(items[0].tmdbId) || 0);
+        const seed = Number(items[0].tmdbId) || 0;
+        // Compose from stored analysis when we have it (exact per-film seeding, and pool
+        // growth reaches cached titles instantly); string-level reseed only for entries
+        // still mid-purge.
+        const seededTake = entry.a ? composeTake(entry.a, seed) || entry.take
+          : entry.ta ? composeTmdbTake(entry.ta, seed) || entry.take
+          : reseedTake(entry.take, seed);
+        const takeAspects = entry.a?.praised?.length ? entry.a.praised
+          : entry.ta?.praised?.length ? entry.ta.praised : null;
         for (const it of items) {
           if (entry.take) {
             it.take = seededTake;
             it.takeSrc = entry.src;
+            if (takeAspects) it.takeAspects = takeAspects; // feeds the editor's note flourish
             if (entry.src === "wiki" && entry.article) it.takeArticle = entry.article; // provenance -> JSON-LD citation
             // Disagreement is computed FRESH each run — ratings move, cached text doesn't.
             const counter = audienceCounterpoint(it);
@@ -990,40 +1294,112 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
   const noun = isTv ? "series" : "film";
   const today = new Date().toISOString().slice(0, 10);
   const upcoming = item.released && item.released > today;
+  // Seeded variety: opening, rating commentary, and runtime aside are each picked from a
+  // small pool keyed to the film (tmdbId, falling back to a title hash), so two pages in
+  // the same rating band don't open with the same sentence. Index 0 of every pool keeps
+  // the original wording. The where-to-watch close stays FIXED VERBATIM — archivePatchHtml
+  // and the archive sync-guard test match those exact strings.
+  let seed = Math.abs(Number(item.tmdbId) || 0);
+  if (!seed) {
+    const s = String(item.title);
+    for (let i = 0; i < s.length; i++) seed = (seed * 31 + s.charCodeAt(i)) | 0;
+    seed = Math.abs(seed);
+  }
+  const pick = (pool, i = 0) => pool[(seed + i * 13) % pool.length];
+  const lang = item.language ? `${item.language} ` : "";
 
   // Opening clause keyed on rating band (or recency when unrated).
   let lead;
   if (r == null || !votes || votes < 10) {
     lead = upcoming
-      ? `${item.title} is one of the more anticipated ${item.language || ""} releases on the calendar`.replace(/\s+/g, " ")
-      : `${item.title} is a fresh ${item.language ? item.language + " " : ""}${noun} that's only just landed, so ratings are still settling`;
+      ? pick([
+          `${item.title} is one of the more anticipated ${lang}releases on the calendar`,
+          `${item.title} sits high on the ${lang}watchlist for the weeks ahead`,
+          `${item.title} is the kind of ${lang}release people circle on the calendar`,
+        ])
+      : pick([
+          `${item.title} is a fresh ${lang}${noun} that's only just landed, so ratings are still settling`,
+          `${item.title} has only just arrived, so the ${lang}${noun}'s ratings are still finding their level`,
+          `${item.title} is brand new to the list — too early for the ${lang}${noun}'s numbers to mean much yet`,
+        ]);
   } else if (r >= 7.5) {
-    lead = `${item.title} lands among the stronger ${item.language || ""} ${noun}s on offer right now`.replace(/\s+/g, " ");
+    lead = pick([
+      `${item.title} lands among the stronger ${lang}${noun}s on offer right now`,
+      `${item.title} stands out as one of the better-rated ${lang}${noun}s around at the moment`,
+      `${item.title} has pulled the kind of numbers most ${lang}${noun}s never see`,
+      `${item.title} ranks near the top of the current ${lang}${noun} crop`,
+    ]);
   } else if (r >= 6.5) {
-    lead = `${item.title} is a solid, watchable ${item.language ? item.language + " " : ""}${noun} that mostly delivers on what it promises`;
+    lead = pick([
+      `${item.title} is a solid, watchable ${lang}${noun} that mostly delivers on what it promises`,
+      `${item.title} is a dependable ${lang}${noun} — it does what it sets out to do`,
+      `${item.title} holds up as a perfectly decent ${lang}${noun}, if not a remarkable one`,
+      `${item.title} earns its keep as a steady ${lang}${noun} that knows its audience`,
+    ]);
   } else if (r >= 5.5) {
-    lead = `${item.title} is a middling ${item.language ? item.language + " " : ""}${noun} — fine for a one-time watch but unlikely to stay with you`;
+    lead = pick([
+      `${item.title} is a middling ${lang}${noun} — fine for a one-time watch but unlikely to stay with you`,
+      `${item.title} sits squarely in the middle of the pack — watchable, and just as easily forgettable`,
+      `${item.title} is an average ${lang}${noun}; it passes the time without demanding more of you`,
+      `${item.title} neither embarrasses itself nor gives you much reason to recommend it`,
+    ]);
   } else {
-    lead = `${item.title} struggles to land, and the ratings reflect a ${noun} that misfires more than it works`;
+    lead = pick([
+      `${item.title} struggles to land, and the ratings reflect a ${noun} that misfires more than it works`,
+      `${item.title} has landed badly with viewers, and the numbers back that up`,
+      `${item.title} never quite comes together, going by how audiences have scored it`,
+      `${item.title} is a hard ${noun} to make a case for on current ratings`,
+    ]);
   }
+  lead = lead.replace(/\s+/g, " ");
 
-  // Rating sentence (only when we actually have one with enough votes).
+  // Rating sentence (only when we actually have one with enough votes). The figure and
+  // source are fixed facts; only the frame and the judgment tail vary.
   let ratingBit = "";
   if (r != null && votes >= 10) {
     const src = item.imdbRating != null ? "IMDb" : "TMDB";
-    ratingBit = ` It carries a ${Number(r).toFixed(1)}/10 on ${src} across ${Number(votes).toLocaleString(locale)} ratings, which puts it ${r >= 7 ? "comfortably above average" : r >= 6 ? "around the middle of the pack" : "below the bar for most viewers"}.`;
+    const x = Number(r).toFixed(1), n = Number(votes).toLocaleString(locale);
+    const an = /^8/.test(x) ? "an" : "a"; // "an 8.2", "a 7.0" — reads as spoken
+    const frame = pick([
+      ` It carries ${an} ${x}/10 on ${src} across ${n} ratings`,
+      ` It holds ${an} ${x}/10 on ${src} from ${n} ratings`,
+      ` It's sitting at ${x}/10 on ${src} across ${n} ratings`,
+    ], 1);
+    const tail = r >= 7
+      ? pick([`, which puts it comfortably above average.`, ` — comfortably clear of the pack.`, `, well above the typical run of new releases.`], 2)
+      : r >= 6
+        ? pick([`, which puts it around the middle of the pack.`, ` — squarely mid-table.`, `, right around average territory.`], 2)
+        : pick([`, which puts it below the bar for most viewers.`, ` — under the line most people draw.`, `, short of where most viewers set the bar.`], 2);
+    ratingBit = frame + tail;
   }
 
   // Runtime / format note.
   let formatBit = "";
   if (item.runtime) {
+    const rt = item.runtime;
     formatBit = isTv
-      ? ` Episodes run about ${item.runtime} minutes.`
-      : item.runtime >= 150
-        ? ` At ${item.runtime} minutes it's a long sit, so save it for when you've got the evening.`
-        : item.runtime <= 100
-          ? ` It's a tight ${item.runtime}-minute watch — easy to fit into a busy night.`
-          : ` It runs a manageable ${item.runtime} minutes.`;
+      ? pick([
+          ` Episodes run about ${rt} minutes.`,
+          ` Episode length hovers around ${rt} minutes.`,
+          ` Episodes clock in around ${rt} minutes.`,
+        ], 3)
+      : rt >= 150
+        ? pick([
+            ` At ${rt} minutes it's a long sit, so save it for when you've got the evening.`,
+            ` Budget a full evening — it runs a hefty ${rt} minutes.`,
+            ` At ${rt} minutes, it asks for a real chunk of your night.`,
+          ], 3)
+        : rt <= 100
+          ? pick([
+              ` It's a tight ${rt}-minute watch — easy to fit into a busy night.`,
+              ` At a brisk ${rt} minutes, it slots easily into a weeknight.`,
+              ` It keeps things short at ${rt} minutes — no heavy commitment required.`,
+            ], 3)
+          : pick([
+              ` It runs a manageable ${rt} minutes.`,
+              ` The ${rt}-minute runtime sits in the comfortable middle.`,
+              ` It clocks in at a standard ${rt} minutes.`,
+            ], 3);
   }
 
   // Where-to-watch close.
@@ -2583,8 +2959,10 @@ function ottWeekUrl(code) { return code === "in" ? "https://filmychill.com/new-o
 // skip, what's quietly excellent on streaming. RULES: every claim traces to data on the
 // items; NO fabricated firsthand experience ("I watched...") ever; better absent than
 // hollow (returns null on thin data). Wording is seeded by ISO week + country so phrasing
-// holds across a week's builds while facts stay live. If /editor-note.txt exists at the
-// repo root, its text REPLACES the generated note for India — the owner's real opinion wins.
+// holds across a week's builds while facts stay live; each slot draws from a six-deep pool
+// so the same sentence takes months to recur for a given country. If /editor-note.txt
+// exists at the repo root, its text REPLACES the generated note for India — the owner's
+// real opinion wins.
 // ============================================================================
 const EDNOTE_MIN_VOTES = 25;
 function isoWeekNum(d = new Date()) {
@@ -2599,6 +2977,7 @@ function buildEditorNote(data, cfg, seed = null) {
   const rated = (list) => list.filter((x) => x.rating != null && (x.votes || 0) >= EDNOTE_MIN_VOTES);
   const r1 = (x) => Number(x.rating).toFixed(1);
 
+  const an = (x) => (/^8/.test(x) ? "an" : "a"); // "an 8.1 from early audiences", "a 7.7"
   const rt = rated(th).sort((a, b) => b.rating - a.rating);
   const event = rt[0] && rt[0].rating >= 6.5 ? rt[0] : null;
   const skip = rt.length > 1 && rt[rt.length - 1].rating <= 5.9 && rt[rt.length - 1] !== event ? rt[rt.length - 1] : null;
@@ -2607,29 +2986,60 @@ function buildEditorNote(data, cfg, seed = null) {
   if (!event && !skip && !sleeper) return null; // thin data -> say nothing
 
   const parts = [];
+  // The event film's most-praised aspect (mined from critic/viewer reception) turns
+  // "book a ticket" into "book a ticket — here's why". Clause-appended, comma-led,
+  // agreement-free, digit-free; absent data changes nothing.
+  const flair = (line, it, off) => {
+    const asp = it && Array.isArray(it.takeAspects) && it.takeAspects[0];
+    if (!asp || line.length > 170) return line;
+    return line.replace(/\.$/, pick([
+      `, and most of the talk is about the ${asp}.`,
+      `, with word of mouth centring on the ${asp}.`,
+      `, and much of the buzz comes down to the ${asp}.`,
+    ], off));
+  };
   if (event && event.rating >= 7.5) {
-    parts.push(pick([
-      `${event.title} is the obvious ticket this week, and for once the obvious call is the right one — a ${r1(event)} from early audiences is rare air.`,
-      `The week belongs to ${event.title}. A ${r1(event)} with real votes behind it means people aren't just showing up, they're coming out happy.`,
+    const ev = pick([
+      `${event.title} is the obvious ticket this week, and for once the obvious call is the right one — ${an(r1(event))} ${r1(event)} from early audiences is rare air.`,
+      `The week belongs to ${event.title}. ${an(r1(event)) === "an" ? "An" : "A"} ${r1(event)} with real votes behind it means people aren't just showing up, they're coming out happy.`,
       `Start with ${event.title} — ${r1(event)} and holding, which is about as safe as ticket money gets.`,
-    ], 1));
+      `${event.title} is the one to book; ${an(r1(event))} ${r1(event)} from early audiences doesn't happen by accident.`,
+      `${event.title} has the week to itself — early viewers have it at ${r1(event)}, which is properly rare.`,
+      `If it's one trip to the cinema this week, make it ${event.title}; ${r1(event)} is as clear a signal as ratings give.`,
+    ], 1);
+    parts.push(flair(ev, event, 8));
   } else if (event) {
-    parts.push(pick([
+    const ev = pick([
       `${event.title} leads a middling week — ${r1(event)} says solid, not special.`,
       `${event.title} is the safest ticket around, though ${r1(event)} suggests keeping expectations in check.`,
       `Nothing unmissable in theatres; ${event.title} at ${r1(event)} is the best of it.`,
-    ], 2));
+      `${event.title} tops a quiet week; ${r1(event)} means decent, not destination viewing.`,
+      `${event.title} is the pick of an ordinary slate — ${r1(event)} says you'll leave satisfied, not stunned.`,
+      `${an(r1(event)) === "an" ? "An" : "A"} ${r1(event)} makes ${event.title} the best bet around, with expectations kept sensible.`,
+    ], 2);
+    parts.push(flair(ev, event, 8));
   } else if (rt.length) {
-    parts.push(pick([`No must-see in theatres this week — save the ticket money.`, `Thin week in theatres, honestly.`], 3));
+    parts.push(pick([
+      `No must-see in theatres this week — save the ticket money.`,
+      `Thin week in theatres, honestly.`,
+      `A quiet week on the big screen — nothing that demands a ticket.`,
+    ], 3));
   }
   if (skip) {
     const fam = /family|animation/i.test(skip.genre || "");
     parts.push(fam
-      ? `${skip.title} at ${r1(skip)} is strictly a kids-in-the-house situation.`
+      ? pick([
+          `${skip.title} at ${r1(skip)} is strictly a kids-in-the-house situation.`,
+          `Unless it's a kids-in-the-house weekend, ${skip.title} at ${r1(skip)} can wait.`,
+          `${skip.title} (${r1(skip)}) is a kids-in-the-house pick and not much more.`,
+        ], 4)
       : pick([
           `${skip.title} at ${r1(skip)} is a skip — the number says what the trailer won't.`,
           `Give ${skip.title} a miss; ${r1(skip)} from the people who paid is warning enough.`,
           `${skip.title} (${r1(skip)}) can wait for streaming, if that.`,
+          `${skip.title} sits at ${r1(skip)}, and there's no generous way to read that number.`,
+          `The audience has scored ${skip.title} a ${r1(skip)}, which settles it.`,
+          `${skip.title} at ${r1(skip)} is one to let pass; streaming will have it soon enough.`,
         ], 4));
   }
   if (sleeper) {
@@ -2637,9 +3047,16 @@ function buildEditorNote(data, cfg, seed = null) {
       `The sleeper is on ${sleeper.platform}: ${sleeper.title}, sitting at ${r1(sleeper)} and deserving more noise than it's getting.`,
       `Quietly, the best-rated thing in the country is ${sleeper.title} on ${sleeper.platform} — ${r1(sleeper)} from viewers.`,
       `Odd week when the strongest number around (${sleeper.title}, ${r1(sleeper)}) is included with a ${sleeper.platform} plan.`,
+      `Skip the queue and open ${sleeper.platform}: ${sleeper.title} at ${r1(sleeper)} is the week's real winner.`,
+      `The best number this week isn't in theatres — it's ${sleeper.title} on ${sleeper.platform}, holding ${r1(sleeper)}.`,
+      `${sleeper.title} is putting up numbers on ${sleeper.platform} most theatrical releases would envy — ${r1(sleeper)} from viewers.`,
     ], 5));
   }
-  if (event && event.takeCounter) parts.push(`Critics and audiences are pulling in opposite directions on ${event.title}; side with whichever camp you usually trust.`);
+  if (event && event.takeCounter) parts.push(pick([
+    `Critics and audiences are pulling in opposite directions on ${event.title}; side with whichever camp you usually trust.`,
+    `On ${event.title}, the critics say one thing and the audience score says another — pick your camp.`,
+    `${event.title} has critics and viewers at odds; trust whichever side has served you better.`,
+  ], 6));
   return parts.slice(0, 3).join(" ");
 }
 
@@ -3737,7 +4154,7 @@ module.exports = {
   extractCastPics,
   prevWeekSlug, writeIndexNowPayload, buildLlmsTxt,
   theatreEligible, THEATRE_EXCLUDE_IDS,
-  reseedTake, isPoolTake, TAKE_VERSION, xDefaultCode, repairXDefaults,
+  reseedTake, isPoolTake, isLegacyTake, mineViewerAspects, composeTmdbTake, TAKE_VERSION, xDefaultCode, repairXDefaults,
   capTrending, buildEditorNote, ssrEditorNote,
   platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls,
   buildLlmsFullTxt, llmsMachineSection,
