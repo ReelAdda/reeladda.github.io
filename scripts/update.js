@@ -2545,6 +2545,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
     url,
     image: item.poster || undefined,
     datePublished: item.released || undefined,
+    dateModified: (asOf || new Date().toISOString().slice(0, 10)),
     genre: item.genre || undefined,
     inLanguage: item.language || undefined,
     director: item.director ? { "@type": "Person", name: item.director } : undefined,
@@ -2606,8 +2607,9 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
 <link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl(xDefaultCode(alts.map((a) => a.code)), item.slug))}"/>` : ""}
 <meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">
 <meta property="og:description" content="${e(desc)}">
-<meta property="og:type" content="video.movie">
+<meta property="og:type" content="${item.kind === "tv" ? "video.tv_show" : "video.movie"}">
 <meta property="og:url" content="${e(url)}">
+<meta property="og:locale" content="${cfg && cfg.code === "in" ? "en_IN" : "en_" + (((cfg || {}).region) || String((cfg || {}).code || "IN").toUpperCase())}">
 ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))}">${item.backdropPath ? '\n<meta property="og:image:width" content="1280">\n<meta property="og:image:height" content="720">' : ""}` : ""}
 <meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'">
