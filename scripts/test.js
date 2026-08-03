@@ -711,6 +711,16 @@ test("buildVerdictProse: unrated/too-new film does not fabricate a rating", () =
   const p = U.buildVerdictProse({ title: "Brandnew", kind: "movie", language: "Hindi", rating: null, votes: 0, released: "2099-01-01" });
   assert.ok(!/\/10/.test(p)); // no rating invented
 });
+test("film page head: og:type matches kind, og:locale marks market, LD carries dateModified", () => {
+  const base = { title: "T", slug: "t", tmdbId: 3, rating: 7.0, votes: 500, language: "Hindi", platform: "Theatres" };
+  const movie = U.buildFilmPage({ ...base, kind: "movie" }, "2026-08-03", new Set(), { code: "in", name: "India", region: "IN" });
+  assert.ok(movie.includes('og:type" content="video.movie"'));
+  assert.ok(movie.includes('og:locale" content="en_IN"'));
+  assert.ok(movie.includes('"dateModified":"2026-08-03"'));
+  const tv = U.buildFilmPage({ ...base, kind: "tv" }, "2026-08-03", new Set(), { code: "uk", name: "the UK", region: "GB" });
+  assert.ok(tv.includes('og:type" content="video.tv_show"'));
+  assert.ok(tv.includes('og:locale" content="en_GB"'));
+});
 test("buildVerdictProse: empty item returns empty string", () => {
   assert.strictEqual(U.buildVerdictProse(null), "");
   assert.strictEqual(U.buildVerdictProse({}), "");
