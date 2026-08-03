@@ -715,6 +715,19 @@ test("buildVerdictProse: empty item returns empty string", () => {
   assert.strictEqual(U.buildVerdictProse(null), "");
   assert.strictEqual(U.buildVerdictProse({}), "");
 });
+test("buildVerdictProse: phrasing varies across films in a band, stays stable per film", () => {
+  const mk = (id) => ({ title: "Film", tmdbId: id, kind: "movie", language: "Hindi", rating: 8.0, votes: 900, runtime: 160, providers: ["Netflix"] });
+  const outs = new Set([1, 2, 3, 4, 5].map((i) => U.buildVerdictProse(mk(i))));
+  assert.ok(outs.size >= 3, "seeded pools should yield several distinct paragraphs: " + outs.size);
+  assert.strictEqual(U.buildVerdictProse(mk(3)), U.buildVerdictProse(mk(3)));
+});
+test("buildVerdictProse: every variant keeps the fixed theatre close (archive patch sync)", () => {
+  for (let id = 1; id <= 8; id++) {
+    const p = U.buildVerdictProse({ title: "T", tmdbId: id, kind: "movie", language: "Hindi", rating: 7.0, votes: 500, runtime: 120, platform: "Theatres" });
+    assert.ok(p.includes("It's in theatres in India now — best caught on the big screen."), p);
+    assert.ok(/7\.0\/10 on TMDB/.test(p), "rating fact survives every frame variant: " + p);
+  }
+});
 test("buildGoodToKnow: U/A 16+ is NOT labelled family friendly (cert order bug guard)", () => {
   const rows = U.buildGoodToKnow({ cert: "U/A 16+", runtime: 120, genre: "Action", language: "Hindi" });
   const fam = rows.find((r) => r.label === "Watch with family?");
@@ -854,10 +867,51 @@ test("earliest verdict phrase wins the tone (acclaim opening beats later 'mixed'
   const text = "The film received universal acclaim from critics upon release. A small minority of publications offered mixed reviews, mostly regional outlets covering the wide release in later weeks.";
   assert.strictEqual(U.analyzeReception(text).tone, "acclaim");
 });
-test("aspect both praised and panned is dropped as contested", () => {
+test("aspect both praised and panned becomes a 'divided' signal (no longer dropped)", () => {
   const text = "Some critics praised the story for its ambition and sweep across generations. Other critics criticised the story heavily, calling it overstuffed and difficult to follow at feature length.";
   const a = U.analyzeReception(text);
   assert.ok(!a.praised.includes("story") && !a.panned.includes("story"));
+  assert.deepStrictEqual(a.divided, ["story"]);
+});
+test("divided signal composes into a split-honest line, seeded, digit-free", () => {
+  const a = { tone: "mixed", praised: [], panned: [], divided: ["second half"] };
+  const s0 = U.composeTake(a, 0), s1 = U.composeTake(a, 1);
+  assert.ok(/second half/.test(s0) && /second half/.test(s1));
+  assert.notStrictEqual(s0, s1);
+  for (let i = 0; i < 4; i++) assert.ok(!/\d/.test(U.composeTake(a, i)));
+  // positive tone + divided aspect reads positive, names the sore spot
+  const p = U.composeTake({ tone: "positive", praised: [], panned: [], divided: ["writing"] }, 0);
+  assert.ok(/writing/.test(p), p);
+});
+test("praise + divided combine — neither signal is discarded", () => {
+  const a = { tone: "positive", praised: ["performances", "action"], panned: [], divided: ["second half"] };
+  for (let i = 0; i < 4; i++) {
+    const t = U.composeTake(a, i);
+    assert.ok(/performances and action/.test(t) && /second half/.test(t), t);
+    assert.ok(!/\d/.test(t));
+    const out = U.audienceCounterpoint({ take: t, rating: 5.0, votes: 300, tmdbId: i });
+    assert.ok(/cooler|less convinced|run lower/i.test(out || ""), "positivePDiv[" + i + "]: " + t + " -> " + out);
+  }
+  const m = { tone: "mixed", praised: ["visuals"], panned: [], divided: ["story"] };
+  for (let i = 0; i < 4; i++) {
+    const t = U.composeTake(m, i);
+    assert.ok(/visuals/.test(t) && /story/.test(t), t);
+    assert.ok(U.audienceCounterpoint({ take: t, rating: 8.0, votes: 300, tmdbId: i }), "mixedPDiv[" + i + "] should read split: " + t);
+  }
+});
+test("counterpoint camps: divided variants classify by tone, not by aspect wording", () => {
+  // mixed+divided line + high audience rating -> disagree
+  for (let i = 0; i < 4; i++) {
+    const t = U.composeTake({ tone: "mixed", praised: [], panned: [], divided: ["twists"] }, i);
+    const out = U.audienceCounterpoint({ take: t, rating: 8.0, votes: 300, tmdbId: i });
+    assert.ok(out, `mixedDiv[${i}] should read as split: ${t}`);
+  }
+  // positive+divided line + low audience rating -> cooler (must NOT classify as split)
+  for (let i = 0; i < 4; i++) {
+    const t = U.composeTake({ tone: "positive", praised: [], panned: [], divided: ["twists"] }, i);
+    const out = U.audienceCounterpoint({ take: t, rating: 5.0, votes: 300, tmdbId: i });
+    assert.ok(/cooler|less convinced|run lower/i.test(out || ""), `positiveDiv[${i}]: ${t} -> ${out}`);
+  }
 });
 test("too-short section -> null (never invent a take from a stub)", () => {
   assert.strictEqual(U.analyzeReception("Reviews were positive."), null);
@@ -1037,9 +1091,27 @@ test("tone-only lines vary by seed but are deterministic", () => {
 test("seed 0 keeps original phrasing (cached takes stay stable)", () => {
   assert.strictEqual(U.composeTake({ tone: "positive", praised: [], panned: [] }, 0), "Critics have been largely positive on this one.");
 });
-test("aspect-bearing lines are unaffected by seed", () => {
+test("aspect-bearing lines vary by seed, keep the aspect, and are deterministic", () => {
   const a = { tone: "positive", praised: ["visuals"], panned: [] };
-  assert.strictEqual(U.composeTake(a, 3), U.composeTake(a, 7));
+  const s0 = U.composeTake(a, 0), s2 = U.composeTake(a, 2);
+  assert.notStrictEqual(s0, s2, "different seeds -> different phrasing");
+  assert.ok(/visuals/.test(s0) && /visuals/.test(s2), "every variant carries the aspect");
+  assert.strictEqual(U.composeTake(a, 2), s2); // same seed -> same line, every run
+});
+test("aspect seed 0 keeps original phrasing (settled caches stay stable)", () => {
+  assert.strictEqual(U.composeTake({ tone: "positive", praised: ["visuals"], panned: [] }, 0),
+    "Critics liked it, especially the visuals.");
+  assert.strictEqual(U.composeTake({ tone: "negative", praised: [], panned: ["writing"] }, 0),
+    "Critics were rough on it, mostly over the writing.");
+});
+test("aspect variants are digit-free across all pools and seeds", () => {
+  for (let seed = 0; seed < 6; seed++)
+    for (const tone of ["acclaim", "positive", "mixed", "negative", null])
+      for (const praised of [[], ["performances"]])
+        for (const panned of [[], ["pacing"]]) {
+          const s = U.composeTake({ tone, score: { kind: "rt", value: 61 }, praised, panned }, seed);
+          if (s != null) assert.ok(!/\d/.test(s), s);
+        }
 });
 
 // ---------------- exclusion: isExcluded() ----------------
@@ -1114,6 +1186,23 @@ test("agreement, few votes, or missing data -> null", () => {
   assert.strictEqual(U.audienceCounterpoint({ take: "Critics were rough on it.", rating: 8.0, votes: 10 }), null);
   assert.strictEqual(U.audienceCounterpoint({ take: "Critics were rough on it.", rating: null }), null);
   assert.strictEqual(U.audienceCounterpoint(null), null);
+});
+test("counterpoint: variant phrasings still classify, precedence guards camp flips", () => {
+  const disagree = U.audienceCounterpoint({ take: "A drubbing from reviewers, with the writing the main casualty.", rating: 8.0, votes: 300 });
+  assert.ok(/far higher|beg to differ|isn't buying/.test(disagree || ""), disagree);
+  const cooler = U.audienceCounterpoint({ take: "The performances won critics over; the pacing drew the odd complaint.", rating: 5.0, votes: 300 });
+  assert.ok(/cooler|less convinced|run lower/i.test(cooler || ""), cooler);
+  // A split take contains "impressed" but must never read as positive.
+  assert.strictEqual(U.audienceCounterpoint({ take: "Reviews cut both ways: the visuals impressed, the pacing frustrated.", rating: 5.0, votes: 300 }), null);
+});
+test("counterpoint: TMDB-review takes are excluded (viewers vs viewers isn't disagreement)", () => {
+  assert.strictEqual(U.audienceCounterpoint({ take: "Early viewer reviews on TMDB lean negative.", takeSrc: "tmdb", rating: 8.0, votes: 500 }), null);
+});
+test("counterpoint: seeded wording is deterministic per film and digit-free", () => {
+  const item = { take: "Critics were rough on it.", rating: 8.0, votes: 500, tmdbId: 7 };
+  const a = U.audienceCounterpoint(item);
+  assert.strictEqual(U.audienceCounterpoint(item), a);
+  assert.ok(a && !/\d/.test(a), a);
 });
 test("uses IMDb votes when IMDb ratings are the source", () => {
   assert.ok(U.audienceCounterpoint({ take: "Critics were rough on it.", rating: 8.0, imdbRating: 8.0, imdbVotes: 5000, votes: 0 }));
@@ -1338,6 +1427,46 @@ test("Ikka's TMDB id is barred from theatres but NOT globally excluded", () => {
   assert.strictEqual(U.isExcluded({ id: 1484913, title: "Ikka" }), false); // still free to appear on the OTT list
 });
 
+// ---------------- viewer review mining ----------------
+group("mineViewerAspects() / composeTmdbTake()");
+const mkReview = (content, rating) => ({ content, author_details: { rating } });
+test("aspects need agreement across 2+ reviews; one-off opinions are ignored", () => {
+  const m = U.mineViewerAspects([
+    mkReview("Loved the action sequences, some of the best choreography this year. The runtime drags badly in the middle though.", 8),
+    mkReview("The action scenes are stunning and worth the ticket alone. But it is overlong — the runtime needed a trim.", 7),
+    mkReview("Decent watch overall. The music was terrific.", 7),
+  ]);
+  assert.deepStrictEqual(m.praised, ["action"]);
+  assert.deepStrictEqual(m.panned, ["runtime"]);
+  assert.ok(!m.praised.includes("music"), "single-review praise must not qualify");
+});
+test("negated praise never counts as praise", () => {
+  const m = U.mineViewerAspects([
+    mkReview("The acting is not great, honestly quite wooden throughout the film.", 4),
+    mkReview("Performances were not good at all, I found the acting stiff and wooden.", 3),
+  ]);
+  assert.ok(!m.praised.includes("performances"), JSON.stringify(m));
+});
+test("fewer than 2 usable review texts -> no aspects", () => {
+  const m = U.mineViewerAspects([mkReview("Amazing performances all round, truly stunning acting from the whole cast.", 9)]);
+  assert.deepStrictEqual(m, { praised: [], panned: [] });
+});
+test("composeTmdbTake: aspects produce viewer-labelled, seeded, digit-free lines", () => {
+  const ta = { lean: "positive", praised: ["action"], panned: ["runtime"] };
+  const s0 = U.composeTmdbTake(ta, 0), s1 = U.composeTmdbTake(ta, 1);
+  assert.ok(/TMDB/.test(s0) && /action/.test(s0) && /runtime/.test(s0), s0);
+  assert.notStrictEqual(s0, s1);
+  assert.strictEqual(U.composeTmdbTake(ta, 1), s1);
+  for (let i = 0; i < 4; i++) assert.ok(!/\d/.test(U.composeTmdbTake(ta, i)));
+  // no aspects -> falls back to the existing tone-only pools, index 0 unchanged
+  assert.strictEqual(U.composeTmdbTake({ lean: "mixed", praised: [], panned: [] }, 0),
+    "Early viewer reviews on TMDB are mixed.");
+});
+test("composeTmdbTake: viewer takes never trigger a counterpoint (takeSrc guard)", () => {
+  const t = U.composeTmdbTake({ lean: "negative", praised: [], panned: ["writing"] }, 2);
+  assert.strictEqual(U.audienceCounterpoint({ take: t, takeSrc: "tmdb", rating: 8.5, votes: 900, tmdbId: 2 }), null);
+});
+
 // ---------------- editorial: reseedTake() ----------------
 group("reseedTake()");
 test("cached seed-0 pool lines re-pick this film's own variant — no more page duplicates", () => {
@@ -1355,7 +1484,7 @@ test("reseeded output always stays inside the same tone pool (never flips sentim
   const negative = "The reviews were not kind.";
   for (let seed = 0; seed < 8; seed++) {
     const out = U.reseedTake(negative, seed);
-    assert.ok(/not kind|not impressed|gave this one a pass|came away cold|little to love|rough outing/.test(out), out);
+    assert.ok(/not kind|not impressed|gave this one a pass|came away cold|little to love|rough outing|checked out early|patience ran thin/.test(out), out);
   }
 });
 
@@ -1487,12 +1616,33 @@ test("isPoolTake flags tone-only pool lines and nothing else", () => {
 test("version purge fires even when the entry was already checked today", () => {
   const today = "2026-07-17";
   const entry = { take: "Critics loved it — a 96% critics' score says it all.", v: 2, hook: null, checked: today };
-  const stalePool = !!entry && entry.v !== U.TAKE_VERSION && (U.isPoolTake(entry.take) || /\d/.test(entry.take || ""));
-  const needsFetch = !entry || stalePool || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
+  const stale = !!entry && entry.v !== U.TAKE_VERSION;
+  const needsFetch = !entry || stale || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
   assert.strictEqual(needsFetch, true);
-  const settled = { take: "Reviewers were close to unanimous — this one landed.", v: U.TAKE_VERSION, hook: null, checked: today };
-  const stale2 = !!settled && settled.v !== U.TAKE_VERSION && (U.isPoolTake(settled.take) || /\d/.test(settled.take || ""));
+  const settled = { take: "Reviewers were close to unanimous — this one landed.", v: U.TAKE_VERSION, hook: null, checked: today,
+    a: { tone: "acclaim", praised: [], panned: [], divided: [] } };
+  const stale2 = !!settled && settled.v !== U.TAKE_VERSION;
   assert.strictEqual(!settled || stale2 || ((!settled.take || settled.hook === undefined) && settled.checked !== today), false);
+});
+test("v5 purge: any pre-v5 entry refetches once (gains stored analysis), v5 entries settle", () => {
+  // v4 entries stored only the composed string — no analysis to recompose from — so a
+  // bare version mismatch is the stale signal now.
+  const v4 = { take: "The performances won critics over; the pacing drew the odd complaint.", v: 4, hook: null, checked: "2026-07-17" };
+  assert.strictEqual(!!v4 && v4.v !== U.TAKE_VERSION, true);
+  const v5 = { ...v4, v: U.TAKE_VERSION, a: { tone: "positive", praised: ["performances"], panned: ["pacing"], divided: [] } };
+  assert.strictEqual(!!v5 && v5.v !== U.TAKE_VERSION, false);
+  // stamped v prevents loops: a v5 entry with a null take refetches only via the daily gate
+  const empty = { take: null, src: null, hook: null, checked: "2026-07-17", v: U.TAKE_VERSION };
+  assert.strictEqual(!!empty && empty.v !== U.TAKE_VERSION, false);
+  // isLegacyTake stays exported and correct for its v3 vocabulary
+  assert.strictEqual(U.isLegacyTake("Critics loved it — special praise for the performances."), true);
+  assert.strictEqual(U.isLegacyTake(null), false);
+});
+test("stored analysis composes per-film: same entry, different seeds, different lines", () => {
+  const a = { tone: "positive", praised: ["performances"], panned: ["pacing"], divided: [] };
+  const takes = new Set([1, 2, 3, 4, 5].map((s) => U.composeTake(a, s)));
+  assert.ok(takes.size >= 3, "one cached analysis should fan out to varied lines: " + takes.size);
+  for (const t of takes) assert.ok(/performances/.test(t) && /pacing/.test(t), t);
 });
 
 // ---------------- hreflang x-default ----------------
@@ -1557,6 +1707,20 @@ test("editor's note: thin data -> null; seeded phrasing is stable", () => {
   assert.strictEqual(U.buildEditorNote({ theatres: [{ title: "X", rating: 7, votes: 3 }], ott: [] }, { code: "in" }), null);
   const d = { theatres: [{ title: "A", rating: 8.0, votes: 100, genre: "Drama" }], ott: [] };
   assert.strictEqual(U.buildEditorNote(d, { code: "in" }, 7), U.buildEditorNote(d, { code: "in" }, 7));
+});
+test("editor note weaves the event film's praised aspect in as a clause", () => {
+  const data = { theatres: [{ title: "Odyssey", rating: 8.1, votes: 500, genre: "Drama", takeAspects: ["performances"] }], ott: [] };
+  const n = U.buildEditorNote(data, { code: "in" }, 42);
+  assert.ok(/performances/.test(n), n);
+  assert.ok(/talk is about|word of mouth|buzz comes down/.test(n), n);
+  // clause, not an extra sentence: appended before the full stop
+  assert.ok(!/\.\s+[a-z]/.test(n), "flourish must not start a lowercase sentence: " + n);
+  assert.strictEqual(U.buildEditorNote(data, { code: "in" }, 42), n); // deterministic
+});
+test("editor note without takeAspects is byte-identical to before (no flourish)", () => {
+  const bare = { theatres: [{ title: "Odyssey", rating: 8.1, votes: 500, genre: "Drama" }], ott: [] };
+  const n = U.buildEditorNote(bare, { code: "in" }, 42);
+  assert.ok(!/talk is about|word of mouth|buzz comes down/.test(n), n);
 });
 test("ssrEditorNote renders styled block and escapes (escHtml scope guard)", () => {
   const html = U.ssrEditorNote({ generatedAt: "2026-07-19", theatres: [{ title: "A & B", rating: 8.0, votes: 200, genre: "Drama" }], ott: [] }, { code: "us" });
