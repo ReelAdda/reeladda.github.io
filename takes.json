@@ -1,10 +1,26 @@
 {
  "tt29355505": {
-  "take": "Critics liked it: the performances and humour won praise, though the writing drew some flak.",
+  "take": "Reviews lean positive: strong marks for the performances and humour, quibbles about the writing.",
   "src": "wiki",
   "hook": "The follow-up to ‘Toy Story 4’.",
   "article": "Toy Story 5",
-  "checked": "2026-08-03"
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "humour"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 92
+   }
+  },
+  "checked": "2026-08-03",
+  "v": 5
  },
  "tt8814476": {
   "take": "Critics are split, with the story drawing most complaints.",
@@ -52,8 +68,18 @@
   "src": "wiki",
   "hook": null,
   "article": "House of the Dragon",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 90
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt35870921": {
   "take": "Reviewers singled out the performances for praise.",
@@ -78,11 +104,25 @@
   "v": 3
  },
  "tt14688458": {
-  "take": "Critics liked it, especially the performances and production design.",
+  "take": "Critics were won over, largely on the strength of the performances and production design.",
   "src": "wiki",
   "hook": null,
   "article": "Silo (TV series)",
-  "checked": "2026-08-03"
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "production design"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 88
+   }
+  },
+  "checked": "2026-08-03",
+  "v": 5
  },
  "tt26766517": {
   "take": null,
@@ -187,11 +227,25 @@
   "checked": "2026-07-08"
  },
  "tt16026746": {
-  "take": "Critics loved it — special praise for the writing and action.",
+  "take": "Critics loved this one, and the writing and action drew the loudest praise.",
   "src": "wiki",
   "hook": null,
   "article": "X-Men '97",
-  "checked": "2026-08-03"
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "writing",
+    "action"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 99
+   }
+  },
+  "checked": "2026-08-03",
+  "v": 5
  },
  "tt34771210": {
   "take": "Genuinely divisive — critics can't settle this one.",
@@ -447,7 +501,7 @@
   "src": null,
   "hook": null,
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt43140642": {
   "take": null,
@@ -463,12 +517,26 @@
   "checked": "2026-07-23"
  },
  "tt14173636": {
-  "take": "Critics loved this one; reception has been close to universal acclaim.",
+  "take": "Wall-to-wall praise from the critics on this one.",
   "src": "wiki",
-  "hook": "A remake of the Spanish film ‘The People Upstairs by Cesc Gay’.",
+  "hook": "A remake of the Spanish film ‘The People Upstairs’.",
   "article": "The Invite",
+  "a": {
+   "tone": "acclaim",
+   "praised": [],
+   "panned": [
+    "originality"
+   ],
+   "divided": [
+    "humour"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 97
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt34675596": {
   "take": "Reviewers found plenty to like here.",
@@ -545,12 +613,28 @@
   "v": 3
  },
  "tt39632269": {
-  "take": "Reviewers praised the twists but flagged the writing.",
+  "take": "Strong marks for the twists, less love for the writing.",
   "src": "wiki",
   "hook": null,
   "article": "Ikka (film)",
+  "a": {
+   "tone": null,
+   "praised": [
+    "twists"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [
+    "performances"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 55
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt28077038": {
   "take": null,
@@ -702,12 +786,19 @@
   "checked": "2026-07-15"
  },
  "tt33764258": {
-  "take": "Reviewers were close to unanimous — this one landed.",
-  "src": "wiki",
+  "take": "Viewer word on TMDB runs mixed — reviews keep coming back to the performances.",
+  "src": "tmdb",
   "hook": null,
   "article": "The Odyssey (2026 film)",
+  "ta": {
+   "lean": "mixed",
+   "praised": [
+    "performances"
+   ],
+   "panned": []
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt32991344": {
   "take": null,
@@ -720,7 +811,23 @@
   "src": "wiki",
   "hook": "Premiered at the Annecy International Animation Film Festival.",
   "article": "Animal Farm (2025 film)",
-  "checked": "2026-08-03"
+  "a": {
+   "tone": "negative",
+   "praised": [
+    "performances",
+    "visuals"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 28
+   }
+  },
+  "checked": "2026-08-03",
+  "v": 5
  },
  "tt35050712": {
   "take": "Critics are split, though the performances found admirers.",
@@ -741,7 +848,7 @@
   "src": null,
   "hook": null,
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt0169880": {
   "take": null,
@@ -749,7 +856,7 @@
   "hook": null,
   "article": "Neon Genesis Evangelion: Death & Rebirth",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt40427174": {
   "take": null,
@@ -838,7 +945,7 @@
   "src": null,
   "hook": null,
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt36619926": {
   "take": "Word from reviewers is solidly good.",
@@ -891,7 +998,7 @@
   "src": null,
   "hook": null,
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt7587890": {
   "take": "The critical consensus tilts firmly positive.",
@@ -930,11 +1037,27 @@
   "checked": "2026-07-22"
  },
  "tt0169858": {
-  "take": "Critics liked it: the animation and second half won praise, though the story drew some flak.",
+  "take": "Mostly good reviews — the animation and second half impressed, even if the story didn't.",
   "src": "wiki",
   "hook": null,
   "article": "The End of Evangelion",
-  "checked": "2026-08-03"
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "animation",
+    "second half"
+   ],
+   "panned": [
+    "story"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 92
+   }
+  },
+  "checked": "2026-08-03",
+  "v": 5
  },
  "tt30494226": {
   "take": "The critical consensus tilts firmly positive.",
@@ -951,12 +1074,22 @@
   "checked": "2026-07-23"
  },
  "tt32386654": {
-  "take": "Genuinely divisive — critics can't settle this one.",
+  "take": "Critics are split clean down the middle on this one.",
   "src": "wiki",
   "hook": null,
   "article": "The Wizard of the Kremlin (film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 44
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt39123115": {
   "take": null,
@@ -964,7 +1097,7 @@
   "hook": "Based on the manga by Gosho Aoyama.",
   "article": "Detective Conan: Fallen Angel of the Highway",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "movie:1679585": {
   "take": null,
@@ -979,14 +1112,27 @@
   "hook": null,
   "article": "Kraken (2026 film)",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt26450613": {
-  "take": "Reviewers singled out the first half for praise.",
+  "take": "The first half drew the most notice from reviewers.",
   "src": "wiki",
   "hook": null,
   "article": "A Shop for Killers",
-  "checked": "2026-08-03"
+  "a": {
+   "tone": null,
+   "praised": [
+    "first half"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   }
+  },
+  "checked": "2026-08-03",
+  "v": 5
  },
  "movie:1733214": {
   "take": null,
@@ -1011,18 +1157,48 @@
   "v": 3
  },
  "tt0427340": {
-  "take": "Critics are split, though the performances and first half found admirers.",
+  "take": "Opinion is split — the performances and first half is the bright spot either way.",
   "src": "wiki",
   "hook": null,
   "article": "Masters of the Universe (2026 film)",
-  "checked": "2026-08-03"
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "performances",
+    "first half"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 67
+   }
+  },
+  "checked": "2026-08-03",
+  "v": 5
  },
  "tt12327578": {
-  "take": "Critics liked it: the performances and production design won praise, though the tone drew some flak.",
+  "take": "Mostly good reviews — the performances and production design impressed, even if the tone didn't.",
   "src": "wiki",
   "hook": null,
   "article": "Star Trek: Strange New Worlds",
-  "checked": "2026-08-02"
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "production design"
+   ],
+   "panned": [
+    "tone"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 98
+   }
+  },
+  "checked": "2026-08-03",
+  "v": 5
  },
  "tt36596650": {
   "take": null,
@@ -1030,15 +1206,29 @@
   "hook": null,
   "article": "Road to Success",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt33379543": {
-  "take": "Reviewers praised the second half and story but flagged the visuals.",
+  "take": "Critics highlighted the second half and story, with the visuals the weak link.",
   "src": "wiki",
-  "hook": null,
+  "hook": "A remake of the Telugu film ‘Bhagavanth Kesari’.",
   "article": "Jana Nayagan",
+  "a": {
+   "tone": null,
+   "praised": [
+    "second half",
+    "story"
+   ],
+   "panned": [
+    "visuals"
+   ],
+   "divided": [
+    "themes"
+   ],
+   "score": null
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt40002798": {
   "take": null,
@@ -1053,7 +1243,7 @@
   "hook": null,
   "article": "The India Story",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt2012616": {
   "take": "Word from reviewers is solidly good.",
@@ -1084,8 +1274,18 @@
   "src": "wiki",
   "hook": null,
   "article": "Colours of Time (film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 96
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt28088031": {
   "take": "Genuinely divisive — critics can't settle this one.",
@@ -1096,12 +1296,29 @@
   "v": 3
  },
  "tt22084616": {
-  "take": "Critics liked it: the performances and direction won praise, though the pacing drew some flak.",
+  "take": "Mostly good reviews — the performances and direction impressed, even if the pacing didn't.",
   "src": "wiki",
   "hook": null,
   "article": "Spider-Man: Brand New Day",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "direction"
+   ],
+   "panned": [
+    "pacing"
+   ],
+   "divided": [
+    "action"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 90
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt35495063": {
   "take": null,
@@ -1111,12 +1328,22 @@
   "v": 3
  },
  "tt30887701": {
-  "take": "The reviews lean clearly positive.",
+  "take": "Truly divisive — for every critic who bought in, one checked out.",
   "src": "wiki",
   "hook": "Premiered at the Brussels International Fantastic Film Festival.",
   "article": "Pinocchio Unstrung",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 76
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt36304003": {
   "take": "Genuinely divisive — critics can't settle this one.",
@@ -1127,12 +1354,24 @@
   "v": 3
  },
  "tt18259538": {
-  "take": "Critics were broadly positive, with reservations about the originality.",
+  "take": "Broadly positive reviews, though the originality drew grumbles.",
   "src": "wiki",
   "hook": null,
   "article": "Avatar Aang: The Last Airbender",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [
+    "originality"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 91
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt32231670": {
   "take": null,
@@ -1153,7 +1392,7 @@
   "src": null,
   "hook": null,
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt41111628": {
   "take": null,
@@ -1161,7 +1400,7 @@
   "hook": null,
   "article": "The Truthers",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt39749953": {
   "take": null,
@@ -1183,7 +1422,7 @@
   "src": null,
   "hook": null,
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt39182439": {
   "take": null,
@@ -1206,30 +1445,50 @@
   "hook": null,
   "article": "Musafir Cafe",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt41515375": {
   "take": null,
   "src": null,
   "hook": null,
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt18546730": {
-  "take": "Genuinely divisive — critics can't settle this one.",
+  "take": "Critics are split clean down the middle on this one.",
   "src": "wiki",
   "hook": "The follow-up to ‘The Walking Dead television series’.",
   "article": "The Walking Dead: Dead City",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 80
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt27497393": {
   "take": "The critical consensus tilts firmly positive.",
   "src": "wiki",
   "hook": null,
   "article": "Stuart Fails to Save the Universe",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 74
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt27679443": {
   "take": null,
@@ -1254,12 +1513,22 @@
   "v": 3
  },
  "tt36958312": {
-  "take": "Genuinely divisive — critics can't settle this one.",
+  "take": "Critics are split clean down the middle on this one.",
   "src": "wiki",
   "hook": null,
   "article": "The Devil's Mouth",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 32
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt0391904": {
   "take": null,
@@ -1280,15 +1549,25 @@
   "src": null,
   "hook": null,
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt33612209": {
   "take": "The reviews lean clearly positive.",
   "src": "wiki",
   "hook": "The follow-up to ‘The Devil Wears Prada’.",
   "article": "The Devil Wears Prada 2",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 78
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt37161651": {
   "take": null,
@@ -1296,7 +1575,7 @@
   "hook": null,
   "article": "Chennai Love Story",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt36415524": {
   "take": null,
@@ -1304,7 +1583,7 @@
   "hook": "The follow-up to ‘High Rollers’.",
   "article": "The Gentleman Thief (film)",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt0431619": {
   "take": "Critics have been largely positive on this one.",
@@ -1319,7 +1598,7 @@
   "src": null,
   "hook": null,
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt43720506": {
   "take": null,
@@ -1327,7 +1606,7 @@
   "hook": null,
   "article": "The Bose Files: Sach Ya Sazish",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt32654916": {
   "take": null,
@@ -1335,30 +1614,57 @@
   "hook": "Premiered at the Gaze International LGBT Film Festival.",
   "article": "Soulm8te",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt38682795": {
   "take": null,
   "src": null,
   "hook": null,
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt13111078": {
-  "take": "Critics are split — praise for the performances and visuals, pushback on the story.",
+  "take": "Critics can't agree — high marks for the performances and visuals, complaints about the story.",
   "src": "wiki",
   "hook": null,
   "article": "Lioness (American TV series)",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "performances",
+    "visuals"
+   ],
+   "panned": [
+    "story"
+   ],
+   "divided": [
+    "writing"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 56
+   }
+  },
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt32332915": {
   "take": "Word from reviewers is solidly good.",
   "src": "wiki",
   "hook": "Premiered at the Sundance Film Festival.",
   "article": "I Want Your Sex (film)",
-  "checked": "2026-08-02",
-  "v": 3
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 89
+   }
+  },
+  "checked": "2026-08-03",
+  "v": 5
  },
  "tt42203456": {
   "take": null,
@@ -1366,7 +1672,7 @@
   "hook": "Magesh Rajendran's directorial debut.",
   "article": "Love Oh Love (film)",
   "checked": "2026-08-03",
-  "v": 3
+  "v": 5
  },
  "tt35495035": {
   "take": "Reviewers singled out the performances and writing for praise.",

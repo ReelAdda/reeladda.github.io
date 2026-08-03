@@ -97,6 +97,7 @@
   <url><loc>https://filmychill.com/new-on-jiohotstar/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/new-on-netflix/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/new-on-prime-video/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://filmychill.com/us/new-on-amazon-prime-video-with-ads/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/us/new-on-crunchyroll/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/us/new-on-crunchyroll-amazon-channel/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/us/new-on-disney-plus/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
@@ -143,6 +144,7 @@
   <url><loc>https://filmychill.com/sg/new-on-disney-plus/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/sg/new-on-hbo-max/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/sg/new-on-netflix/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://filmychill.com/sg/new-on-prime-video/</loc><lastmod>2026-08-03</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/week/2026-W28/</loc><lastmod>2026-07-12</lastmod><priority>0.4</priority></url>
   <url><loc>https://filmychill.com/week/2026-W29/</loc><lastmod>2026-07-19</lastmod><priority>0.4</priority></url>
   <url><loc>https://filmychill.com/week/2026-W30/</loc><lastmod>2026-07-26</lastmod><priority>0.4</priority></url>
@@ -587,7 +589,12 @@
     <xhtml:link rel="alternate" hreflang="en-CA" href="https://filmychill.com/ca/movie/lioness.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/lioness.html"/>
   </url>
-  <url><loc>https://filmychill.com/movie/love-oh-love.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/movie/love-oh-love.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/love-oh-love.html"/>
+    <xhtml:link rel="alternate" hreflang="en-AE" href="https://filmychill.com/ae/movie/love-oh-love.html"/>
+    <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/love-oh-love.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/love-oh-love.html"/>
+  </url>
   <url><loc>https://filmychill.com/movie/lucky.html</loc><lastmod>2026-07-19</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/lucky.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/lucky.html"/>
@@ -876,8 +883,9 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/the-death-of-robin-hood.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/the-death-of-robin-hood.html"/>
   </url>
-  <url><loc>https://filmychill.com/movie/the-devil-s-mouth.html</loc><lastmod>2026-08-02</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/movie/the-devil-s-mouth.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/the-devil-s-mouth.html"/>
@@ -1555,6 +1563,17 @@
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-boys.html"/>
     <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/the-boys.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/the-boys.html"/>
+  </url>
+  <url><loc>https://filmychill.com/us/movie/the-devil-s-mouth.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-AE" href="https://filmychill.com/ae/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-CA" href="https://filmychill.com/ca/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/the-devil-s-mouth.html"/>
   </url>
   <url><loc>https://filmychill.com/us/movie/the-devil-wears-prada-2.html</loc><lastmod>2026-08-02</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/the-devil-wears-prada-2.html"/>
@@ -2407,6 +2426,7 @@
   </url>
   <url><loc>https://filmychill.com/uk/movie/the-devil-s-mouth.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/the-devil-s-mouth.html"/>
@@ -3126,6 +3146,7 @@
   </url>
   <url><loc>https://filmychill.com/au/movie/soulm8te.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/soulm8te.html"/>
+    <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/soulm8te.html"/>
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/soulm8te.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/au/movie/soulm8te.html"/>
   </url>
@@ -3241,6 +3262,7 @@
   <url><loc>https://filmychill.com/au/movie/the-debt-collector.html</loc><lastmod>2026-07-26</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/au/movie/the-devil-s-mouth.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/the-devil-s-mouth.html"/>
@@ -3842,6 +3864,12 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/uk/movie/smoking-behind-the-supermarket-with-you.html"/>
   </url>
   <url><loc>https://filmychill.com/de/movie/sophie-passmann-pick-me-girls.html</loc><lastmod>2026-07-04</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/de/movie/soulm8te.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/soulm8te.html"/>
+    <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/soulm8te.html"/>
+    <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/soulm8te.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/au/movie/soulm8te.html"/>
+  </url>
   <url><loc>https://filmychill.com/de/movie/spider-man-brand-new-day.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/spider-man-brand-new-day.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/spider-man-brand-new-day.html"/>
@@ -3952,6 +3980,7 @@
   </url>
   <url><loc>https://filmychill.com/de/movie/the-devil-s-mouth.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/the-devil-s-mouth.html"/>
@@ -4366,6 +4395,12 @@
     <xhtml:link rel="alternate" hreflang="en-CA" href="https://filmychill.com/ca/movie/lioness.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/lioness.html"/>
   </url>
+  <url><loc>https://filmychill.com/ae/movie/love-oh-love.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/love-oh-love.html"/>
+    <xhtml:link rel="alternate" hreflang="en-AE" href="https://filmychill.com/ae/movie/love-oh-love.html"/>
+    <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/love-oh-love.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/love-oh-love.html"/>
+  </url>
   <url><loc>https://filmychill.com/ae/movie/lucky.html</loc><lastmod>2026-07-27</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/lucky.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/lucky.html"/>
@@ -4600,6 +4635,7 @@
   </url>
   <url><loc>https://filmychill.com/ae/movie/the-devil-s-mouth.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/the-devil-s-mouth.html"/>
@@ -5259,6 +5295,7 @@
   </url>
   <url><loc>https://filmychill.com/ca/movie/the-devil-s-mouth.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/the-devil-s-mouth.html"/>
@@ -5386,7 +5423,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/voicemails-for-isabelle.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/voicemails-for-isabelle.html"/>
   </url>
-  <url><loc>https://filmychill.com/ca/movie/x-men-97.html</loc><lastmod>2026-08-02</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/ca/movie/x-men-97.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/x-men-97.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/x-men-97.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/x-men-97.html"/>
@@ -5632,6 +5669,12 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/us/movie/lee-cronin-s-the-mummy.html"/>
   </url>
   <url><loc>https://filmychill.com/sg/movie/love-has-fireworks.html</loc><lastmod>2026-07-16</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/sg/movie/love-oh-love.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/love-oh-love.html"/>
+    <xhtml:link rel="alternate" hreflang="en-AE" href="https://filmychill.com/ae/movie/love-oh-love.html"/>
+    <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/love-oh-love.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/love-oh-love.html"/>
+  </url>
   <url><loc>https://filmychill.com/sg/movie/lucky.html</loc><lastmod>2026-08-01</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/lucky.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/lucky.html"/>
@@ -5767,6 +5810,7 @@
   </url>
   <url><loc>https://filmychill.com/sg/movie/soulm8te.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/soulm8te.html"/>
+    <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/soulm8te.html"/>
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/soulm8te.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/au/movie/soulm8te.html"/>
   </url>
@@ -5856,6 +5900,7 @@
   </url>
   <url><loc>https://filmychill.com/sg/movie/the-devil-s-mouth.html</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/the-devil-s-mouth.html"/>
+    <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-devil-s-mouth.html"/>
     <xhtml:link rel="alternate" hreflang="en-DE" href="https://filmychill.com/de/movie/the-devil-s-mouth.html"/>
