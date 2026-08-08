@@ -921,12 +921,22 @@
   "v": 3
  },
  "tt34866681": {
-  "take": "Most critics came away happy.",
+  "take": "Critics have been largely positive on this one.",
   "src": "wiki",
   "hook": null,
   "article": "Lucky (miniseries)",
-  "checked": "2026-07-31",
-  "v": 3
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 78
+   }
+  },
+  "checked": "2026-08-08",
+  "v": 5
  },
  "tt34477910": {
   "take": "Reviewers singled out the performances for praise.",
@@ -1644,7 +1654,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-08-06",
+  "checked": "2026-08-08",
   "v": 5
  },
  "tt43720506": {
@@ -1864,7 +1874,7 @@
     "value": 94
    }
   },
-  "checked": "2026-08-06",
+  "checked": "2026-08-08",
   "v": 5
  },
  "tt41592057": {
@@ -1995,7 +2005,7 @@
     "value": 45
    }
   },
-  "checked": "2026-08-07",
+  "checked": "2026-08-08",
   "v": 5
  },
  "tt35871759": {
@@ -2110,6 +2120,14 @@
     "value": 98
    }
   },
+  "checked": "2026-08-08",
+  "v": 5
+ },
+ "tt32268156": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "The Last House",
   "checked": "2026-08-08",
   "v": 5
  }
