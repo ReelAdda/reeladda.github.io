@@ -721,6 +721,37 @@ test("film page head: og:type matches kind, og:locale marks market, LD carries d
   assert.ok(tv.includes('og:type" content="video.tv_show"'));
   assert.ok(tv.includes('og:locale" content="en_GB"'));
 });
+group("product polish: providers, similar titles, grammar");
+test("dedupeProviders: ad tier collapses into base service, survives alone", () => {
+  assert.deepStrictEqual(
+    U.dedupeProviders(["Amazon Prime Video", "Amazon Prime Video with Ads", "Netflix"]),
+    ["Amazon Prime Video", "Netflix"]);
+  assert.deepStrictEqual(
+    U.dedupeProviders(["Netflix", "Netflix Standard with Ads"]), ["Netflix"]);
+  // ad plan is the ONLY way to stream -> keep it (dropping it would lie)
+  assert.deepStrictEqual(U.dedupeProviders(["JioCinema with Ads"]), ["JioCinema with Ads"]);
+  assert.deepStrictEqual(U.dedupeProviders([]), []);
+});
+test("rankSimilar: same-language recent titles beat collaborative-filter noise", () => {
+  const recs = [
+    { name: "The Facts of Life", first_air_date: "1979-08-24", original_language: "en", vote_count: 300, poster_path: "/a" },
+    { name: "Freaks and Geeks", first_air_date: "1999-09-25", original_language: "en", vote_count: 900, poster_path: "/b" },
+    { name: "Farzi", first_air_date: "2023-02-10", original_language: "hi", vote_count: 500, poster_path: "/c" },
+    { name: "Panchayat", first_air_date: "2020-04-03", original_language: "hi", vote_count: 400, poster_path: "/d" },
+    { name: "No Poster Show", first_air_date: "2024-01-01", original_language: "hi", vote_count: 900 },
+  ];
+  const out = U.rankSimilar(recs, "tv", "hi").map((x) => x.name);
+  assert.deepStrictEqual(out.slice(0, 2), ["Farzi", "Panchayat"], out.join(", "));
+  assert.ok(!out.includes("No Poster Show"), "posterless entries stay filtered");
+  // determinism: TMDB order breaks ties
+  assert.deepStrictEqual(U.rankSimilar(recs, "tv", "hi").map((x) => x.name), out);
+});
+test("verdict prose: no s's possessives in the just-landed variants", () => {
+  for (let id = 1; id <= 9; id++) {
+    const p = U.buildVerdictProse({ title: "T", tmdbId: id, kind: "tv", language: "Hindi", rating: null, votes: 0, released: "2026-08-01", providers: ["Netflix"] });
+    assert.ok(!/s's/.test(p), p);
+  }
+});
 test("buildVerdictProse: empty item returns empty string", () => {
   assert.strictEqual(U.buildVerdictProse(null), "");
   assert.strictEqual(U.buildVerdictProse({}), "");
