@@ -1319,8 +1319,8 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
         ])
       : pick([
           `${item.title} is a fresh ${lang}${noun} that's only just landed, so ratings are still settling`,
-          `${item.title} has only just arrived, so the ${lang}${noun}'s ratings are still finding their level`,
-          `${item.title} is brand new to the list — too early for the ${lang}${noun}'s numbers to mean much yet`,
+          `${item.title} has only just arrived, so ratings for the ${lang}${noun} are still finding their level`,
+          `${item.title} is brand new to the list — too early for the numbers on this ${lang}${noun} to mean much yet`,
         ]);
   } else if (r >= 7.5) {
     lead = pick([
@@ -1638,7 +1638,7 @@ async function enrich(kind, id, region = "IN") {
 
   // Streaming platforms in this country's region
   const inProv = d["watch/providers"]?.results?.[region];
-  const providers = (inProv?.flatrate || []).slice(0, 4).map((p) => p.provider_name);
+  const providers = dedupeProviders((inProv?.flatrate || []).map((p) => p.provider_name)).slice(0, 4);
 
   // Cast & director
   const cast = (d.credits?.cast || []).slice(0, 4).map((c) => c.name);
@@ -1674,8 +1674,7 @@ async function enrich(kind, id, region = "IN") {
   // "If you liked this" — top recommendations from the SAME enrich call (appended above, so
   // no extra round trip). We keep title + slug + light meta; the page links to each film's own
   // page when it exists. slugify mirrors the client/page slug scheme so links resolve.
-  const recs = (d.recommendations?.results || [])
-    .filter((x) => (x.title || x.name) && x.poster_path)
+  const recs = rankSimilar(d.recommendations?.results, kind, d.original_language)
     .slice(0, 6)
     .map((x) => ({
       title: x.title || x.name,
@@ -2871,6 +2870,36 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
 // pre-hydration) see real content and real links instead of
 // "Loading fresh picks". The page JS replaces it on load.
 // ============================================================
+
+// "Netflix" + "Netflix Standard with Ads" (or "... with Ads") is one service to a
+// reader — the ad tier is a plan, not a platform. Keep the ad-tier name only when the
+// base service isn't itself in the list (some titles stream ONLY on the ad plan).
+function dedupeProviders(names) {
+  const stripAds = (n) => String(n).replace(/\s+(?:standard\s+|basic\s+)?with ads$/i, "");
+  const plain = new Set(names.filter((n) => stripAds(n) === n));
+  return names.filter((n) => stripAds(n) === n || !plain.has(stripAds(n)));
+}
+
+// TMDB's raw recommendation feed is collaborative-filter noise for Indian titles — a
+// Hindi campus comedy gets 1980s American sitcoms. Re-rank by relevance to THIS film
+// before taking six: same language dominates, then recency, kind, and a popularity
+// floor. Reorder only — never drops below six, so the grid can't go empty.
+function rankSimilar(results, kind, origLang) {
+  const year = (s) => parseInt(String(s || "").slice(0, 4), 10) || 0;
+  const nowY = new Date().getFullYear();
+  return (results || [])
+    .filter((x) => (x.title || x.name) && x.poster_path)
+    .map((x, i) => {
+      const xKind = x.media_type === "tv" || x.first_air_date ? "tv" : "movie";
+      const score = (x.original_language === origLang ? 4 : 0)
+        + (nowY - year(x.release_date || x.first_air_date) <= 6 ? 2 : 0)
+        + (xKind === kind ? 1 : 0)
+        + ((x.vote_count || 0) >= 100 ? 1 : 0);
+      return { x, score, i };
+    })
+    .sort((a, b) => b.score - a.score || a.i - b.i) // stable: TMDB order breaks ties
+    .map((r) => r.x);
+}
 
 function ssrCard(item, i, code) {
   const e = escHtml;
@@ -4156,7 +4185,7 @@ module.exports = {
   extractCastPics,
   prevWeekSlug, writeIndexNowPayload, buildLlmsTxt,
   theatreEligible, THEATRE_EXCLUDE_IDS,
-  reseedTake, isPoolTake, isLegacyTake, mineViewerAspects, composeTmdbTake, TAKE_VERSION, xDefaultCode, repairXDefaults,
+  reseedTake, isPoolTake, isLegacyTake, mineViewerAspects, composeTmdbTake, dedupeProviders, rankSimilar, TAKE_VERSION, xDefaultCode, repairXDefaults,
   capTrending, buildEditorNote, ssrEditorNote,
   platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls,
   buildLlmsFullTxt, llmsMachineSection,
