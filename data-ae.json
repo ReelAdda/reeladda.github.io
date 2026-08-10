@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-10T11:11:45.009Z",
+ "generatedAt": "2026-08-10T11:28:08.770Z",
  "country": "ae",
  "pick": "Ted Lasso",
  "theatres": [
@@ -49,20 +49,6 @@
      "kind": "movie"
     },
     {
-     "title": "The Amazing Spider-Man 2",
-     "slug": "the-amazing-spider-man-2",
-     "poster": "https://image.tmdb.org/t/p/w342/dGjoPttcbKR5VWg1jQuNFB247KL.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Captain America: Civil War",
-     "slug": "captain-america-civil-war",
-     "poster": "https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Guardians of the Galaxy Vol. 3",
      "slug": "guardians-of-the-galaxy-vol-3",
      "poster": "https://image.tmdb.org/t/p/w342/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg",
@@ -77,9 +63,23 @@
      "kind": "movie"
     },
     {
-     "title": "Captain America: The Winter Soldier",
-     "slug": "captain-america-the-winter-soldier",
-     "poster": "https://image.tmdb.org/t/p/w342/tVFRpFw3xTedgPGqxW0AOI8Qhh0.jpg",
+     "title": "Thunderbolts*",
+     "slug": "thunderbolts",
+     "poster": "https://image.tmdb.org/t/p/w342/hqcexYHbiTBfDIdDWxrxPtVndBX.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Doctor Strange in the Multiverse of Madness",
+     "slug": "doctor-strange-in-the-multiverse-of-madness",
+     "poster": "https://image.tmdb.org/t/p/w342/ddJcSKbcp4rKZTmuyWaMhuwcfMz.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Marvels",
+     "slug": "the-marvels",
+     "poster": "https://image.tmdb.org/t/p/w342/9GBhzXMFjgcZ3FdR9w3bUMMTps5.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -123,7 +123,7 @@
    "slug": "spider-man-brand-new-day",
    "wikiWeeklyViews": 3629313,
    "trending": true,
-   "trailerViews": 6161439,
+   "trailerViews": 6161951,
    "take": "Mostly good reviews — the performances and direction impressed, even if the pacing didn't.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -171,13 +171,6 @@
    "badge": null,
    "similar": [
     {
-     "title": "Ramayana : The Legend of Prince Rama",
-     "slug": "ramayana-the-legend-of-prince-rama",
-     "poster": "https://image.tmdb.org/t/p/w342/jnwUw88Zq5tS0BFNvDwhISQ7p8Y.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "The SpongeBob Movie: Sponge on the Run",
      "slug": "the-spongebob-movie-sponge-on-the-run",
      "poster": "https://image.tmdb.org/t/p/w342/jlJ8nDhMhCYJuzOw3f52CP1W8MW.jpg",
@@ -192,23 +185,30 @@
      "kind": "movie"
     },
     {
-     "title": "Strings",
-     "slug": "strings",
-     "poster": "https://image.tmdb.org/t/p/w342/lJJ5ePSlmx3BZ8jFPndboIA60iH.jpg",
+     "title": "Raya and the Last Dragon",
+     "slug": "raya-and-the-last-dragon",
+     "poster": "https://image.tmdb.org/t/p/w342/5nVhgCzxKbK47OLIKxCR1syulOn.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Kung Fu Panda 2",
-     "slug": "kung-fu-panda-2",
-     "poster": "https://image.tmdb.org/t/p/w342/mtqqD00vB4PGRt20gWtGqFhrkd0.jpg",
+     "title": "The Lord of the Rings: The War of the Rohirrim",
+     "slug": "the-lord-of-the-rings-the-war-of-the-rohirrim",
+     "poster": "https://image.tmdb.org/t/p/w342/23WCoDo6wzBfzbX7BGTNwVUqZfi.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Arctic Dogs",
-     "slug": "arctic-dogs",
-     "poster": "https://image.tmdb.org/t/p/w342/5YHjyjd2N0ZXcnGuB8G1nIa6h9t.jpg",
+     "title": "Kung Fu Panda 4",
+     "slug": "kung-fu-panda-4",
+     "poster": "https://image.tmdb.org/t/p/w342/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Dragon Rider",
+     "slug": "dragon-rider",
+     "poster": "https://image.tmdb.org/t/p/w342/ucDrOXUrVnr9X3ZmXP2Q68HDIHr.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -250,7 +250,8 @@
     }
    ],
    "slug": "avatar-aang-the-last-airbender",
-   "trailerViews": 13311657,
+   "wikiWeeklyViews": 123623,
+   "trailerViews": 13311775,
    "take": "Broadly positive reviews, though the originality drew grumbles.",
    "takeSrc": "wiki",
    "takeArticle": "Avatar Aang: The Last Airbender"
@@ -294,44 +295,44 @@
    "badge": "New release",
    "similar": [
     {
-     "title": "Run",
-     "slug": "run",
-     "poster": "https://image.tmdb.org/t/p/w342/w4sxXgXpALEDFexRZE9cb3j8bb2.jpg",
+     "title": "Retro",
+     "slug": "retro",
+     "poster": "https://image.tmdb.org/t/p/w342/pJPK57REXsaLydpOPgHwWAQMdqz.jpg",
+     "language": "Tamil",
+     "kind": "movie"
+    },
+    {
+     "title": "Vada Chennai",
+     "slug": "vada-chennai",
+     "poster": "https://image.tmdb.org/t/p/w342/tl3WcNY41um1OOsjr3z6eqK31yN.jpg",
+     "language": "Tamil",
+     "kind": "movie"
+    },
+    {
+     "title": "Embattled",
+     "slug": "embattled",
+     "poster": "https://image.tmdb.org/t/p/w342/Foi2Via2fIACRJMB4934D5MP3j.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Supercross",
-     "slug": "supercross",
-     "poster": "https://image.tmdb.org/t/p/w342/82dbqeFOA2iPhwWuciZItw1ELew.jpg",
+     "title": "Fast Charlie",
+     "slug": "fast-charlie",
+     "poster": "https://image.tmdb.org/t/p/w342/3y72ffwYRUPOj4yOQbiTaN897Tm.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Substitute",
-     "slug": "the-substitute",
-     "poster": "https://image.tmdb.org/t/p/w342/7vfzvhPMNauUXrVxVOPEfpOsful.jpg",
+     "title": "The Enforcer",
+     "slug": "the-enforcer",
+     "poster": "https://image.tmdb.org/t/p/w342/72V1r1G8S87ELagVxjqAUdChMCt.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Al Capone",
-     "slug": "al-capone",
-     "poster": "https://image.tmdb.org/t/p/w342/xmtLUojTRYTswWEx7U9lWjZeZtx.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Beast",
-     "slug": "beast",
-     "poster": "https://image.tmdb.org/t/p/w342/7NrvUI3vnW8H3rD7ExKcTL7KRcQ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Blue Story",
-     "slug": "blue-story",
-     "poster": "https://image.tmdb.org/t/p/w342/qI4Rw83LxKq07xIjM3RcbKcWpAM.jpg",
+     "title": "Hunting Season",
+     "slug": "hunting-season",
+     "poster": "https://image.tmdb.org/t/p/w342/cbryTyaWdqrKpQCw6K7zm2jrB5v.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -418,20 +419,6 @@
    "badge": "New release",
    "similar": [
     {
-     "title": "Beast",
-     "slug": "beast",
-     "poster": "https://image.tmdb.org/t/p/w342/7NrvUI3vnW8H3rD7ExKcTL7KRcQ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Mexicali",
-     "slug": "mexicali",
-     "poster": "https://image.tmdb.org/t/p/w342/kQbmqipH7YvmILnB0PF8faOEcUp.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Embattled",
      "slug": "embattled",
      "poster": "https://image.tmdb.org/t/p/w342/Foi2Via2fIACRJMB4934D5MP3j.jpg",
@@ -446,16 +433,30 @@
      "kind": "movie"
     },
     {
-     "title": "Only the Strong",
-     "slug": "only-the-strong",
-     "poster": "https://image.tmdb.org/t/p/w342/pPWV5rBhCgzlzhwkpdRG7a7UZqt.jpg",
+     "title": "Interceptor",
+     "slug": "interceptor",
+     "poster": "https://image.tmdb.org/t/p/w342/jBKNAfANo4e3rzJtb7aHfYNd7b3.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "44 Minutes: The North Hollywood Shoot-Out",
-     "slug": "44-minutes-the-north-hollywood-shoot-out",
-     "poster": "https://image.tmdb.org/t/p/w342/zcL30rZ71NfoCQtTwPlJiLI40qr.jpg",
+     "title": "Hunting Season",
+     "slug": "hunting-season",
+     "poster": "https://image.tmdb.org/t/p/w342/cbryTyaWdqrKpQCw6K7zm2jrB5v.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Enforcer",
+     "slug": "the-enforcer",
+     "poster": "https://image.tmdb.org/t/p/w342/72V1r1G8S87ELagVxjqAUdChMCt.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Weekend in Taipei",
+     "slug": "weekend-in-taipei",
+     "poster": "https://image.tmdb.org/t/p/w342/qSc0AUvs8mRy00R9y8QYEHWIAQ9.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -538,23 +539,23 @@
    "badge": "New release",
    "similar": [
     {
-     "title": "Almost Friends",
-     "slug": "almost-friends",
-     "poster": "https://image.tmdb.org/t/p/w342/uJMknKxZagbhAYiiMjEaFnsZzRR.jpg",
+     "title": "Khatta Meetha",
+     "slug": "khatta-meetha",
+     "poster": "https://image.tmdb.org/t/p/w342/rIM83O7WUcZIlg9pd6SgXgB0w2v.jpg",
+     "language": "Hindi",
+     "kind": "movie"
+    },
+    {
+     "title": "Hooking Up",
+     "slug": "hooking-up",
+     "poster": "https://image.tmdb.org/t/p/w342/y5QXP7qdwtPRiZy6cQTjRoaTXuW.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "CQ",
-     "slug": "cq",
-     "poster": "https://image.tmdb.org/t/p/w342/aFAPOT77Jh7lNWYtojC6nxi4CpJ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Sometimes Always Never",
-     "slug": "sometimes-always-never",
-     "poster": "https://image.tmdb.org/t/p/w342/b7tHjke4TIaFWuzg26FwsACHUUC.jpg",
+     "title": "Wildflower",
+     "slug": "wildflower",
+     "poster": "https://image.tmdb.org/t/p/w342/jsNulf9CgHSSRSCgdhNsLynUTvm.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -566,16 +567,16 @@
      "kind": "movie"
     },
     {
-     "title": "SubUrbia",
-     "slug": "suburbia",
-     "poster": "https://image.tmdb.org/t/p/w342/7PdRbG09K9JHYyOwwCSn3OdJb0N.jpg",
+     "title": "Juniper",
+     "slug": "juniper",
+     "poster": "https://image.tmdb.org/t/p/w342/ziDXGs2Up7o51Lp55zAeyrQo6JH.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Juniper",
-     "slug": "juniper",
-     "poster": "https://image.tmdb.org/t/p/w342/ziDXGs2Up7o51Lp55zAeyrQo6JH.jpg",
+     "title": "Treasure",
+     "slug": "treasure",
+     "poster": "https://image.tmdb.org/t/p/w342/uDMrdPAQHjvbSxFiYrWWVE3dYrD.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -617,7 +618,7 @@
    ],
    "slug": "aryabhatt-ka-zero",
    "wikiWeeklyViews": 1634,
-   "trailerViews": 1943571
+   "trailerViews": 1944131
   },
   {
    "title": "Ohh My Dog",
@@ -658,6 +659,34 @@
    "badge": "New release",
    "similar": [
     {
+     "title": "Gabbar Is Back",
+     "slug": "gabbar-is-back",
+     "poster": "https://image.tmdb.org/t/p/w342/dhIVF43jCqVzxuo11hYcHQxjzS6.jpg",
+     "language": "Hindi",
+     "kind": "movie"
+    },
+    {
+     "title": "Tatami",
+     "slug": "tatami",
+     "poster": "https://image.tmdb.org/t/p/w342/A9SUL6wPDGfjX6cCBal0SmUcT47.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "On Fire",
+     "slug": "on-fire",
+     "poster": "https://image.tmdb.org/t/p/w342/1ms0zRAMtbVq5XoIfrlcSj84g6G.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Shepherd: The Story of a Jewish Dog",
+     "slug": "shepherd-the-story-of-a-jewish-dog",
+     "poster": "https://image.tmdb.org/t/p/w342/a6vgaoJzpCLJAVKw1ZFQw45Du46.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Remember",
      "slug": "remember",
      "poster": "https://image.tmdb.org/t/p/w342/x496Ip0weJYfsEX23eNyzG4MjXV.jpg",
@@ -668,34 +697,6 @@
      "title": "I Am David",
      "slug": "i-am-david",
      "poster": "https://image.tmdb.org/t/p/w342/cPoiPR15ylyBCNIr9zmUAzEb1Jm.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "An American Girl: McKenna Shoots for the Stars",
-     "slug": "an-american-girl-mckenna-shoots-for-the-stars",
-     "poster": "https://image.tmdb.org/t/p/w342/bDbtolQKNSKlW9QQo98ZmJDoaTG.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "TalhotBlond",
-     "slug": "talhotblond",
-     "poster": "https://image.tmdb.org/t/p/w342/3FF9YFuVvh5t393NxfME47wxqrZ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Parts You Lose",
-     "slug": "the-parts-you-lose",
-     "poster": "https://image.tmdb.org/t/p/w342/9kX7Yew8IHsTtBsOcktA9BEjoNo.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Call of the Wild",
-     "slug": "the-call-of-the-wild",
-     "poster": "https://image.tmdb.org/t/p/w342/bK6Vr1zce4HK3WvdAAQVSBL3dU2.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -807,9 +808,9 @@
      "kind": "movie"
     },
     {
-     "title": "Death Machine",
-     "slug": "death-machine",
-     "poster": "https://image.tmdb.org/t/p/w342/vmDaabHFO4NvrEc6kT8aRMv9Rve.jpg",
+     "title": "Outside the Wire",
+     "slug": "outside-the-wire",
+     "poster": "https://image.tmdb.org/t/p/w342/6XYLiMxHAaCsoyrVo38LBWMw2p8.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -852,7 +853,7 @@
    ],
    "slug": "soulm8te",
    "wikiWeeklyViews": 77195,
-   "trailerViews": 2160030,
+   "trailerViews": 2160089,
    "take": "Early viewer reviews on TMDB lean negative.",
    "takeSrc": "tmdb",
    "hook": "Premiered at the Gaze International LGBT Film Festival."
@@ -899,34 +900,6 @@
    "badge": "New season",
    "similar": [
     {
-     "title": "Ballers",
-     "slug": "ballers",
-     "poster": "https://image.tmdb.org/t/p/w342/WyIazPyjmcFMC42nWEpI0jr56x.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The League",
-     "slug": "the-league",
-     "poster": "https://image.tmdb.org/t/p/w342/w6IAasjDdANmalOWkjKcENhirQR.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Peep Show",
-     "slug": "peep-show",
-     "poster": "https://image.tmdb.org/t/p/w342/6rdoQ0cTjsEQLIwEjhBV8U98oUm.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Game",
-     "slug": "the-game",
-     "poster": "https://image.tmdb.org/t/p/w342/zmvRaCRcmi6lsriYxZmAR6uWHPS.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "Running Point",
      "slug": "running-point",
      "poster": "https://image.tmdb.org/t/p/w342/66EyhDRHAFqE6OQDasY7Nz2LXTw.jpg",
@@ -937,6 +910,34 @@
      "title": "The Four Seasons",
      "slug": "the-four-seasons",
      "poster": "https://image.tmdb.org/t/p/w342/w09XeYl096pwES8riRMZwEA9rnh.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Platonic",
+     "slug": "platonic",
+     "poster": "https://image.tmdb.org/t/p/w342/7G8wB9CG82nITeFwRFIRSk0sQJs.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "My Life with the Walter Boys",
+     "slug": "my-life-with-the-walter-boys",
+     "poster": "https://image.tmdb.org/t/p/w342/dQOwpTpBQEqRUcev4423LrU32G6.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Never Have I Ever",
+     "slug": "never-have-i-ever",
+     "poster": "https://image.tmdb.org/t/p/w342/hd5fnBixab6IzfUwjC5wfdbX3eM.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Rain Dogs",
+     "slug": "rain-dogs",
+     "poster": "https://image.tmdb.org/t/p/w342/cA3JlHtx24lEnflydTdX6TReAva.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -983,7 +984,7 @@
    "slug": "ted-lasso",
    "wikiWeeklyViews": 361816,
    "trending": true,
-   "trailerViews": 159328,
+   "trailerViews": 159396,
    "take": "Near-universal acclaim, with the music singled out most often.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1031,20 +1032,6 @@
    "badge": "New season",
    "similar": [
     {
-     "title": "Homeland",
-     "slug": "homeland",
-     "poster": "https://image.tmdb.org/t/p/w342/6GAvS2e6VIRsms9FpVt33PsCoEW.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Condor",
-     "slug": "condor",
-     "poster": "https://image.tmdb.org/t/p/w342/28cIK70tN2t4gPTV8CBQZED1H2G.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "The Agency",
      "slug": "the-agency",
      "poster": "https://image.tmdb.org/t/p/w342/zoLZbm5gtTQurjMxp5VOdHIpMmz.jpg",
@@ -1069,6 +1056,20 @@
      "title": "Citadel",
      "slug": "citadel",
      "poster": "https://image.tmdb.org/t/p/w342/5MHtxPEfmN4b0rHzfEZRcm6v9WI.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Old Man",
+     "slug": "the-old-man",
+     "poster": "https://image.tmdb.org/t/p/w342/8Ec9zCZl2Go8WhDN1JWjjgQRlEi.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Recruit",
+     "slug": "the-recruit",
+     "poster": "https://image.tmdb.org/t/p/w342/mLbFg0u2DPYuB5CILzwWk3kdI8b.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1113,6 +1114,7 @@
    "ottSince": "2026-08-02",
    "ottFreshDate": "2026-08-02",
    "slug": "lioness",
+   "wikiWeeklyViews": 198687,
    "trailerViews": 1866064,
    "take": "Critics can't agree — high marks for the performances and visuals, complaints about the story.",
    "takeSrc": "wiki",
@@ -1163,20 +1165,6 @@
    "badge": "New release",
    "similar": [
     {
-     "title": "Splinter",
-     "slug": "splinter",
-     "poster": "https://image.tmdb.org/t/p/w342/tFNReQlU92jmN7uuR1HHLiFkEua.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Mist",
-     "slug": "the-mist",
-     "poster": "https://image.tmdb.org/t/p/w342/1CvJ6diBACKPVGOpcWuY4XPQdqX.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Arcadian",
      "slug": "arcadian",
      "poster": "https://image.tmdb.org/t/p/w342/h4T8Xeydkw53h9uIbulYsss25UF.jpg",
@@ -1191,16 +1179,30 @@
      "kind": "movie"
     },
     {
-     "title": "The Signal",
-     "slug": "the-signal",
-     "poster": "https://image.tmdb.org/t/p/w342/qRs8osQJZLItwQER2bzuuK9A0sp.jpg",
+     "title": "Double Blind",
+     "slug": "double-blind",
+     "poster": "https://image.tmdb.org/t/p/w342/7JG4otyEyfTSECOq8VkFRdAA01M.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Containment",
-     "slug": "containment",
-     "poster": "https://image.tmdb.org/t/p/w342/lz6G41YdOK1CO2qOkoBe6cudofb.jpg",
+     "title": "Worldbreaker",
+     "slug": "worldbreaker",
+     "poster": "https://image.tmdb.org/t/p/w342/ahj1JU8r0uJv7QII5Uj7tKzbEsC.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Into the Deep",
+     "slug": "into-the-deep",
+     "poster": "https://image.tmdb.org/t/p/w342/qPvw21Y5pxojLQYDrK4ft5IYLlY.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Slash/Back",
+     "slug": "slash-back",
+     "poster": "https://image.tmdb.org/t/p/w342/fmmRFQtsRrNOpmcfoxVIyE1LxxT.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1248,7 +1250,7 @@
    "slug": "the-last-house",
    "wikiWeeklyViews": 669926,
    "trending": true,
-   "trailerViews": 3648792,
+   "trailerViews": 3649332,
    "take": "Early word from viewers on TMDB runs positive.",
    "takeSrc": "tmdb"
   },
@@ -1306,13 +1308,6 @@
      "kind": "tv"
     },
     {
-     "title": "Parish",
-     "slug": "parish",
-     "poster": "https://image.tmdb.org/t/p/w342/iV1YDLXuJHwhxF85zwaTxXyrzN6.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "Sweet Magnolias",
      "slug": "sweet-magnolias",
      "poster": "https://image.tmdb.org/t/p/w342/n1WDSFOnCCg3cdHHGBywZtYIzf9.jpg",
@@ -1327,9 +1322,16 @@
      "kind": "tv"
     },
     {
-     "title": "Julia",
-     "slug": "julia",
-     "poster": "https://image.tmdb.org/t/p/w342/ebXgoq33gsIC3ULeX53gZKN86No.jpg",
+     "title": "Tell Me Lies",
+     "slug": "tell-me-lies",
+     "poster": "https://image.tmdb.org/t/p/w342/blOAzeqf2EUrRvjK2VWDRs4nK7l.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "One Day",
+     "slug": "one-day",
+     "poster": "https://image.tmdb.org/t/p/w342/smBWt8rHCCavV88C5gQVjh0NUFa.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1375,7 +1377,7 @@
    "ottFreshDate": "2026-08-06",
    "slug": "my-life-with-the-walter-boys",
    "wikiWeeklyViews": 110260,
-   "trailerViews": 2962474,
+   "trailerViews": 2962505,
    "take": "Truly divisive — for every critic who bought in, one checked out.",
    "takeSrc": "wiki",
    "takeArticle": "My Life with the Walter Boys",
@@ -1421,20 +1423,6 @@
    "badge": "New on Amazon Prime Video",
    "similar": [
     {
-     "title": "Chéri",
-     "slug": "ch-ri",
-     "poster": "https://image.tmdb.org/t/p/w342/b35rv11ebJdqCe5chVmSUZ0RIlX.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "I Met a Girl",
-     "slug": "i-met-a-girl",
-     "poster": "https://image.tmdb.org/t/p/w342/mkE8z7x5Ab94gN3CtormERYIz8B.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Which Brings Me to You",
      "slug": "which-brings-me-to-you",
      "poster": "https://image.tmdb.org/t/p/w342/gspoAZ5p7G7D83OU9UFOmKICejw.jpg",
@@ -1449,16 +1437,30 @@
      "kind": "movie"
     },
     {
-     "title": "He Said, She Said",
-     "slug": "he-said-she-said",
-     "poster": "https://image.tmdb.org/t/p/w342/5uYv11zTTa83WMWwI3B6EOZtI0Z.jpg",
+     "title": "Happiness for Beginners",
+     "slug": "happiness-for-beginners",
+     "poster": "https://image.tmdb.org/t/p/w342/rK4jb2t3J98IXjY9O3nc8bX9yqt.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Love in Taipei",
-     "slug": "love-in-taipei",
-     "poster": "https://image.tmdb.org/t/p/w342/8iQuQcGHnxlv19rb8yz9Rk8HKnk.jpg",
+     "title": "What's Love Got to Do with It?",
+     "slug": "what-s-love-got-to-do-with-it",
+     "poster": "https://image.tmdb.org/t/p/w342/uJJYCo87r6qtsaTRENatoYuE9pI.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Father of the Bride",
+     "slug": "father-of-the-bride",
+     "poster": "https://image.tmdb.org/t/p/w342/chKMG9tzFqSkj24ejXTio156Qo0.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "I Met a Girl",
+     "slug": "i-met-a-girl",
+     "poster": "https://image.tmdb.org/t/p/w342/mkE8z7x5Ab94gN3CtormERYIz8B.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1536,30 +1538,23 @@
    "badge": null,
    "similar": [
     {
+     "title": "Aspirants",
+     "slug": "aspirants",
+     "poster": "https://image.tmdb.org/t/p/w342/lG8wK40jH4EX6dbVFI1fzw2E96N.jpg",
+     "language": "Hindi",
+     "kind": "tv"
+    },
+    {
+     "title": "Swagger",
+     "slug": "swagger",
+     "poster": "https://image.tmdb.org/t/p/w342/nASkt8izgpR4toMYgiAnxfjWcE2.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "Sullivan's Crossing",
      "slug": "sullivan-s-crossing",
      "poster": "https://image.tmdb.org/t/p/w342/nYRnuQNR13nEYaXkOZaY0qIWl2K.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Roots: The Next Generations",
-     "slug": "roots-the-next-generations",
-     "poster": "https://image.tmdb.org/t/p/w342/4yALWSK2sf02pHJvRi0QyFAljEx.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Sanditon",
-     "slug": "sanditon",
-     "poster": "https://image.tmdb.org/t/p/w342/iKMCbTAkEgvA97M8Isdqp4t12Cf.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Offspring",
-     "slug": "offspring",
-     "poster": "https://image.tmdb.org/t/p/w342/m0lZo55EY4Mxf5MdkYoVoIkOR8W.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1574,6 +1569,13 @@
      "title": "The Couple Next Door",
      "slug": "the-couple-next-door",
      "poster": "https://image.tmdb.org/t/p/w342/ifQ5ffAI6KfywBcSGoGU1YWO3yC.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "SkyMed",
+     "slug": "skymed",
+     "poster": "https://image.tmdb.org/t/p/w342/tOKUKERvfaOf7Dy2IAKT5HYYXJJ.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1670,13 +1672,6 @@
      "kind": "tv"
     },
     {
-     "title": "House of Cards",
-     "slug": "house-of-cards",
-     "poster": "https://image.tmdb.org/t/p/w342/hKWxWjFwnMvkWQawbhvC0Y7ygQ8.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "Snowpiercer",
      "slug": "snowpiercer",
      "poster": "https://image.tmdb.org/t/p/w342/exKzfiKzMdQBHrdd7zNmKauJkbg.jpg",
@@ -1684,16 +1679,23 @@
      "kind": "tv"
     },
     {
-     "title": "NOS4A2",
-     "slug": "nos4a2",
-     "poster": "https://image.tmdb.org/t/p/w342/gnosVTTRTCqooJuipwU6C0bgOGf.jpg",
+     "title": "Station Eleven",
+     "slug": "station-eleven",
+     "poster": "https://image.tmdb.org/t/p/w342/xWlhMOzRxUpu4uzkWcDQOaESCE.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Passage",
-     "slug": "the-passage",
-     "poster": "https://image.tmdb.org/t/p/w342/np1jcUOCjTGpoIzKwCnV35zxu5B.jpg",
+     "title": "The Plot Against America",
+     "slug": "the-plot-against-america",
+     "poster": "https://image.tmdb.org/t/p/w342/rC5GUHvKxlk3WPyCh4mQ5q6HDxG.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Devils",
+     "slug": "devils",
+     "poster": "https://image.tmdb.org/t/p/w342/l4Pl7APWpRANULCirWTrcMPfdIl.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1740,7 +1742,7 @@
    "stillGood": true,
    "slug": "silo",
    "wikiWeeklyViews": 222396,
-   "trailerViews": 9638658,
+   "trailerViews": 9638749,
    "take": "Critics were won over, largely on the strength of the performances and production design.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1789,23 +1791,16 @@
    "badge": null,
    "similar": [
     {
-     "title": "Hotel Babylon",
-     "slug": "hotel-babylon",
-     "poster": "https://image.tmdb.org/t/p/w342/yKMpHmpM4yHWROcl8o4pqYwjta3.jpg",
-     "language": "English",
+     "title": "Farzi",
+     "slug": "farzi",
+     "poster": "https://image.tmdb.org/t/p/w342/cTS86RwEBIDgCgUmjWQTSoPsK6p.jpg",
+     "language": "Hindi",
      "kind": "tv"
     },
     {
-     "title": "The Facts of Life",
-     "slug": "the-facts-of-life",
-     "poster": "https://image.tmdb.org/t/p/w342/45i9VujUbQITmHl3QE3eNs9ZUv3.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Men at Work",
-     "slug": "men-at-work",
-     "poster": "https://image.tmdb.org/t/p/w342/roh8cMRx6BJhiwNNJwxFmQ9M6Bf.jpg",
+     "title": "How I Met Your Father",
+     "slug": "how-i-met-your-father",
+     "poster": "https://image.tmdb.org/t/p/w342/8psLGtFzTMYCXxUNMpMOCB6doPn.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1817,16 +1812,23 @@
      "kind": "tv"
     },
     {
-     "title": "Farzi",
-     "slug": "farzi",
-     "poster": "https://image.tmdb.org/t/p/w342/cTS86RwEBIDgCgUmjWQTSoPsK6p.jpg",
-     "language": "Hindi",
+     "title": "Wild Cards",
+     "slug": "wild-cards",
+     "poster": "https://image.tmdb.org/t/p/w342/lIhkV9LNwViVD2bylPTFQvDD21e.jpg",
+     "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Freaks and Geeks",
-     "slug": "freaks-and-geeks",
-     "poster": "https://image.tmdb.org/t/p/w342/tPqV63zcW6ZV0Hd48DMGb5UzQIG.jpg",
+     "title": "Joan",
+     "slug": "joan",
+     "poster": "https://image.tmdb.org/t/p/w342/x0l9OYTcwO2BvCZcFWEnAA8YEZ1.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Couple Next Door",
+     "slug": "the-couple-next-door",
+     "poster": "https://image.tmdb.org/t/p/w342/ifQ5ffAI6KfywBcSGoGU1YWO3yC.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1872,7 +1874,7 @@
    "ottFreshDate": "2026-07-24",
    "stillGood": true,
    "slug": "adarsh-baal-vidyalaya",
-   "trailerViews": 28081080
+   "trailerViews": 28081206
   },
   {
    "title": "The Walking Dead: Dead City",
@@ -1914,20 +1916,6 @@
    "badge": null,
    "similar": [
     {
-     "title": "The Walking Dead",
-     "slug": "the-walking-dead",
-     "poster": "https://image.tmdb.org/t/p/w342/aN29llVoCFtBTwDZFtqdD9d8dHb.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Fear the Walking Dead",
-     "slug": "fear-the-walking-dead",
-     "poster": "https://image.tmdb.org/t/p/w342/l7N9aS6VyYvjelKoCB2eZge0Qky.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "The Walking Dead: World Beyond",
      "slug": "the-walking-dead-world-beyond",
      "poster": "https://image.tmdb.org/t/p/w342/6HanIV2hTLE2w7A5bI1KJb3bTL7.jpg",
@@ -1942,16 +1930,30 @@
      "kind": "tv"
     },
     {
-     "title": "The Strain",
-     "slug": "the-strain",
-     "poster": "https://image.tmdb.org/t/p/w342/2BWErT9QcADpf2G4BZ769eSnFTP.jpg",
+     "title": "Tales of the Walking Dead",
+     "slug": "tales-of-the-walking-dead",
+     "poster": "https://image.tmdb.org/t/p/w342/zRMUHvTgQ79zteQafNI46Nd9XFm.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Tales of the Walking Dead",
-     "slug": "tales-of-the-walking-dead",
-     "poster": "https://image.tmdb.org/t/p/w342/zRMUHvTgQ79zteQafNI46Nd9XFm.jpg",
+     "title": "The Walking Dead: The Ones Who Live",
+     "slug": "the-walking-dead-the-ones-who-live",
+     "poster": "https://image.tmdb.org/t/p/w342/19Ka35Vx1oKU4vbLjWEebOfUspB.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Helstrom",
+     "slug": "helstrom",
+     "poster": "https://image.tmdb.org/t/p/w342/5QmcKsepYpO9XYsWNLwsiULoaAu.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Gen V",
+     "slug": "gen-v",
+     "poster": "https://image.tmdb.org/t/p/w342/tEv842Nd5uMSavURG4aQO1pNtst.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -2045,30 +2047,9 @@
    "badge": null,
    "similar": [
     {
-     "title": "The Tick",
-     "slug": "the-tick",
-     "poster": "https://image.tmdb.org/t/p/w342/8sngJVF54bugHfCkjJOsY4wx8Hk.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "Boo, Bitch",
      "slug": "boo-bitch",
      "poster": "https://image.tmdb.org/t/p/w342/b3zagQAHUUePg29xjp9SYoxtsv7.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Future Man",
-     "slug": "future-man",
-     "poster": "https://image.tmdb.org/t/p/w342/49mOgAEa4eKpPsoBH8UvvXwEMDT.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Boys",
-     "slug": "the-boys",
-     "poster": "https://image.tmdb.org/t/p/w342/in1R2dDc421JxsoRWaIIAqVI2KE.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2080,9 +2061,30 @@
      "kind": "tv"
     },
     {
-     "title": "Stan Against Evil",
-     "slug": "stan-against-evil",
-     "poster": "https://image.tmdb.org/t/p/w342/4l6BIYxGdAhffh2KT16C6yAJzRn.jpg",
+     "title": "Creature Commandos",
+     "slug": "creature-commandos",
+     "poster": "https://image.tmdb.org/t/p/w342/bB3G6Ug1jfsOUptb0RJsqrgMVta.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Halo",
+     "slug": "halo",
+     "poster": "https://image.tmdb.org/t/p/w342/4UmNhZCEu8Vt3byMvNxNEPyf8EY.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Peacemaker",
+     "slug": "peacemaker",
+     "poster": "https://image.tmdb.org/t/p/w342/eYzbGcYnOUlvj2fa76pTgIXogd7.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Marvel Zombies",
+     "slug": "marvel-zombies",
+     "poster": "https://image.tmdb.org/t/p/w342/mwKj9ERGFXsWot0nXgQ5yMQf9I7.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -2119,7 +2121,7 @@
    "stillGood": true,
    "slug": "stuart-fails-to-save-the-universe",
    "wikiWeeklyViews": 131899,
-   "trailerViews": 70169002,
+   "trailerViews": 70169100,
    "take": "The critical consensus tilts firmly positive.",
    "takeSrc": "wiki",
    "takeArticle": "Stuart Fails to Save the Universe"
@@ -2155,23 +2157,9 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "War of the Worlds",
-     "slug": "war-of-the-worlds",
-     "poster": "https://image.tmdb.org/t/p/w342/6Biy7R9LfumYshur3YKhpj56MpB.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Greenland 2: Migration",
      "slug": "greenland-2-migration",
      "poster": "https://image.tmdb.org/t/p/w342/z2tqCJLsw6uEJ8nJV8BsQXGa3dr.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Fast Color",
-     "slug": "fast-color",
-     "poster": "https://image.tmdb.org/t/p/w342/1zZaZGMo23NsOGoGF5HRCPWwWN7.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -2183,16 +2171,30 @@
      "kind": "movie"
     },
     {
-     "title": "Memoirs of an Invisible Man",
-     "slug": "memoirs-of-an-invisible-man",
-     "poster": "https://image.tmdb.org/t/p/w342/zSy5SyhacsgqRfuJToU6jXFZ1DD.jpg",
+     "title": "The Astronaut",
+     "slug": "the-astronaut",
+     "poster": "https://image.tmdb.org/t/p/w342/souvvkJHYhztC1UqZ8lEVUiJa3J.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Astronaut",
-     "slug": "the-astronaut",
-     "poster": "https://image.tmdb.org/t/p/w342/souvvkJHYhztC1UqZ8lEVUiJa3J.jpg",
+     "title": "Stowaway",
+     "slug": "stowaway",
+     "poster": "https://image.tmdb.org/t/p/w342/eFyRjhJfhNgM565U2mwEp5YUUOv.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Disclosure Day",
+     "slug": "disclosure-day",
+     "poster": "https://image.tmdb.org/t/p/w342/AnJ8IQJI23hNpYXVNaythu061Ru.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "War of the Worlds",
+     "slug": "war-of-the-worlds",
+     "poster": "https://image.tmdb.org/t/p/w342/6Biy7R9LfumYshur3YKhpj56MpB.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2234,7 +2236,7 @@
     }
    ],
    "slug": "the-end-of-oak-street",
-   "trailerViews": 370905
+   "trailerViews": 370926
   },
   {
    "title": "PAW Patrol: The Dino Movie",
@@ -2264,6 +2266,13 @@
    "badge": null,
    "isRecent": false,
    "similar": [
+    {
+     "title": "The Ice Age Adventures of Buck Wild",
+     "slug": "the-ice-age-adventures-of-buck-wild",
+     "poster": "https://image.tmdb.org/t/p/w342/9ginbMWmt9y7PIHW1c9hnbIVWPm.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
     {
      "title": "The Land Before Time IV: Journey Through the Mists",
      "slug": "the-land-before-time-iv-journey-through-the-mists",
@@ -2296,13 +2305,6 @@
      "title": "The Land Before Time V: The Mysterious Island",
      "slug": "the-land-before-time-v-the-mysterious-island",
      "poster": "https://image.tmdb.org/t/p/w342/nlsJfYQ3dwzvr6kwG60P0nh59Sa.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Fox and the Hound 2",
-     "slug": "the-fox-and-the-hound-2",
-     "poster": "https://image.tmdb.org/t/p/w342/o3b8nenAzu5OJk7sbPJURwmeHSV.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2344,7 +2346,7 @@
     }
    ],
    "slug": "paw-patrol-the-dino-movie",
-   "trailerViews": 4150078
+   "trailerViews": 4150714
   },
   {
    "title": "Aks Seir",
@@ -2375,16 +2377,16 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "The Family Plan 2",
-     "slug": "the-family-plan-2",
-     "poster": "https://image.tmdb.org/t/p/w342/semFxuYx6HcrkZzslgAkBqfJvZk.jpg",
-     "language": "English",
+     "title": "Head to Head",
+     "slug": "head-to-head",
+     "poster": "https://image.tmdb.org/t/p/w342/cviUizb4Wil59E9tE7cu6IC2IpG.jpg",
+     "language": "ar",
      "kind": "movie"
     },
     {
-     "title": "Hostile Takeover",
-     "slug": "hostile-takeover",
-     "poster": "https://image.tmdb.org/t/p/w342/vntwlS3CAKfoLTs90GaoK6lymBC.jpg",
+     "title": "The Family Plan 2",
+     "slug": "the-family-plan-2",
+     "poster": "https://image.tmdb.org/t/p/w342/semFxuYx6HcrkZzslgAkBqfJvZk.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -2410,9 +2412,9 @@
      "kind": "movie"
     },
     {
-     "title": "Hooper",
-     "slug": "hooper",
-     "poster": "https://image.tmdb.org/t/p/w342/3qYgqCIrcKyq7eis9cOjIlGWRDE.jpg",
+     "title": "Sheroes",
+     "slug": "sheroes",
+     "poster": "https://image.tmdb.org/t/p/w342/itUAkQmihFmRxMYTa3AkvIzMCV4.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2468,30 +2470,9 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "Hot Milk",
-     "slug": "hot-milk",
-     "poster": "https://image.tmdb.org/t/p/w342/rIIPeDBAr3eSKPaqCawxFywUHAU.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Dot the I",
-     "slug": "dot-the-i",
-     "poster": "https://image.tmdb.org/t/p/w342/2Gq1e0OC7r6L4V5dJaLgANk09xl.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Time Is Up",
      "slug": "time-is-up",
      "poster": "https://image.tmdb.org/t/p/w342/dxWHyMY4HoXH8LiEhYlga2OtK5B.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "See You Soon",
-     "slug": "see-you-soon",
-     "poster": "https://image.tmdb.org/t/p/w342/nKOHCFfMsTSpLAIQKMwXotdEggs.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -2503,9 +2484,30 @@
      "kind": "movie"
     },
     {
-     "title": "Newness",
-     "slug": "newness",
-     "poster": "https://image.tmdb.org/t/p/w342/vySlYPqOrI5s8Nu6bzpGKQbotVy.jpg",
+     "title": "Pain Hustlers",
+     "slug": "pain-hustlers",
+     "poster": "https://image.tmdb.org/t/p/w342/m0gM9jE1KmCkXZRqkeNYEQZdVsZ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Marked Men: Rule + Shaw",
+     "slug": "marked-men-rule-shaw",
+     "poster": "https://image.tmdb.org/t/p/w342/gZQU8BtCH2IbMZq6QETiU4HXQSR.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Good Neighbor",
+     "slug": "the-good-neighbor",
+     "poster": "https://image.tmdb.org/t/p/w342/mXJ2xI7B0Z9WxDjyv18anPsOxeE.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Your Fault: London",
+     "slug": "your-fault-london",
+     "poster": "https://image.tmdb.org/t/p/w342/nLxu237EJAisFCYKK48hN9Plobx.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2547,7 +2549,7 @@
     }
    ],
    "slug": "the-last-sunrise",
-   "trailerViews": 859224
+   "trailerViews": 859339
   },
   {
    "title": "Fall 2: Deadpoint",
@@ -2568,7 +2570,7 @@
     "Tom Brittney",
     "Einar Haraldsson"
    ],
-   "director": "Peter Spierig",
+   "director": "Michael Spierig",
    "runtime": 0,
    "imdbScore": null,
    "imdbVotes": null,
@@ -2578,44 +2580,44 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "Death Race: Inferno",
-     "slug": "death-race-inferno",
-     "poster": "https://image.tmdb.org/t/p/w342/aRV4oC61nmBqypSaXtMXOk99dOM.jpg",
+     "title": "Fall",
+     "slug": "fall",
+     "poster": "https://image.tmdb.org/t/p/w342/spCAxD99U1A6jsiePFoqdEcY0dG.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Escape Room: Tournament of Champions",
-     "slug": "escape-room-tournament-of-champions",
-     "poster": "https://image.tmdb.org/t/p/w342/jGYJyPzVgrVV2bgClI9uvEZgVLE.jpg",
+     "title": "The 355",
+     "slug": "the-355",
+     "poster": "https://image.tmdb.org/t/p/w342/xef9Ht77B2igqZv754HNdW8qZCk.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Mechanic: Resurrection",
-     "slug": "mechanic-resurrection",
-     "poster": "https://image.tmdb.org/t/p/w342/bG3Q6EFcngpPn7uPuQTzTuq9DgV.jpg",
+     "title": "Fast X",
+     "slug": "fast-x",
+     "poster": "https://image.tmdb.org/t/p/w342/fiVW06jE7z9YnO4trhaMEdclSiC.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Ice Road: Vengeance",
-     "slug": "ice-road-vengeance",
-     "poster": "https://image.tmdb.org/t/p/w342/cQN9rZj06rXMVkk76UF1DfBAico.jpg",
+     "title": "Retribution",
+     "slug": "retribution",
+     "poster": "https://image.tmdb.org/t/p/w342/oUmmY7QWWn7OhKlcPOnirHJpP1F.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Point Blank",
-     "slug": "point-blank",
-     "poster": "https://image.tmdb.org/t/p/w342/weAvkxl0dnPevIKD8fwHjiOi6tc.jpg",
+     "title": "Eradication",
+     "slug": "eradication",
+     "poster": "https://image.tmdb.org/t/p/w342/6XZYA9VtCcidCU8Hus0J0V9wFhY.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Wrong Turn 2: Dead End",
-     "slug": "wrong-turn-2-dead-end",
-     "poster": "https://image.tmdb.org/t/p/w342/ow3IMhTVLryZuCEoQznVTTmFYuu.jpg",
+     "title": "Jurassic World Dominion",
+     "slug": "jurassic-world-dominion",
+     "poster": "https://image.tmdb.org/t/p/w342/jbAvCACjLf1ZG0unB2tdmx5HAf1.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2657,7 +2659,7 @@
     }
    ],
    "slug": "fall-2-deadpoint",
-   "trailerViews": 2223756
+   "trailerViews": 2224059
   },
   {
    "title": "Law & Order",
@@ -2695,23 +2697,16 @@
      "kind": "movie"
     },
     {
-     "title": "The Corrupted",
-     "slug": "the-corrupted",
-     "poster": "https://image.tmdb.org/t/p/w342/elf6HOIOAwMlxc4ZBsprEc5VQHc.jpg",
-     "language": "English",
+     "title": "Kurup",
+     "slug": "kurup",
+     "poster": "https://image.tmdb.org/t/p/w342/7DUKMFykp7pNpppbf8M6YDWrTYb.jpg",
+     "language": "Malayalam",
      "kind": "movie"
     },
     {
      "title": "Frank and Penelope",
      "slug": "frank-and-penelope",
      "poster": "https://image.tmdb.org/t/p/w342/5NpXoAi3nEQkEgLO09nmotPfyNa.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "In Cold Light",
-     "slug": "in-cold-light",
-     "poster": "https://image.tmdb.org/t/p/w342/rnrrZfFiUIpL00wUh15OBKStnDD.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -2723,9 +2718,16 @@
      "kind": "movie"
     },
     {
-     "title": "Barron's Cove",
-     "slug": "barron-s-cove",
-     "poster": "https://image.tmdb.org/t/p/w342/wo8qFjc2FLJdGg8FmnZeTxVBf7D.jpg",
+     "title": "God Is a Bullet",
+     "slug": "god-is-a-bullet",
+     "poster": "https://image.tmdb.org/t/p/w342/5kiLS9nsSJxDdlYUyYGiSUt8Fi8.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "LaRoy, Texas",
+     "slug": "laroy-texas",
+     "poster": "https://image.tmdb.org/t/p/w342/fEYfXyWhFJScE0I5rHsS2JxIiPP.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2796,6 +2798,13 @@
    "isRecent": false,
    "similar": [
     {
+     "title": "Tumbbad",
+     "slug": "tumbbad",
+     "poster": "https://image.tmdb.org/t/p/w342/vzjZAKozbDplHWcQXbXo0APKxst.jpg",
+     "language": "Hindi",
+     "kind": "movie"
+    },
+    {
      "title": "Books of Blood",
      "slug": "books-of-blood",
      "poster": "https://image.tmdb.org/t/p/w342/bXLVZGgLgd7OwbfP6fC5GCfrxuD.jpg",
@@ -2803,37 +2812,30 @@
      "kind": "movie"
     },
     {
-     "title": "The Dogs",
-     "slug": "the-dogs",
-     "poster": "https://image.tmdb.org/t/p/w342/kz6oqKyKCjmR8V1JdnF9brp9DSn.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Southbound",
-     "slug": "southbound",
-     "poster": "https://image.tmdb.org/t/p/w342/ehXtB1jlMx8FBlsX9JLhSQkvlZp.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Ginger Snaps",
-     "slug": "ginger-snaps",
-     "poster": "https://image.tmdb.org/t/p/w342/ozohDiJd7Oi65NEf8B0ya7lR9Fr.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Transfiguration",
-     "slug": "the-transfiguration",
-     "poster": "https://image.tmdb.org/t/p/w342/b7DWSZeP9Rxbmoase8RaIg6I369.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Fear Street: 1994",
      "slug": "fear-street-1994",
      "poster": "https://image.tmdb.org/t/p/w342/9J9Wy39ZjrVmfk7yMkulpcI5sy0.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Strange Darling",
+     "slug": "strange-darling",
+     "poster": "https://image.tmdb.org/t/p/w342/kWNCRgt3ocv19bYO0sk7TRuZuFY.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Daddy's Head",
+     "slug": "daddy-s-head",
+     "poster": "https://image.tmdb.org/t/p/w342/nEWbEBs8BalwasA4Un8rll3kauT.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "God Is a Bullet",
+     "slug": "god-is-a-bullet",
+     "poster": "https://image.tmdb.org/t/p/w342/5kiLS9nsSJxDdlYUyYGiSUt8Fi8.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2896,13 +2898,6 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "Ramayana : The Legend of Prince Rama",
-     "slug": "ramayana-the-legend-of-prince-rama",
-     "poster": "https://image.tmdb.org/t/p/w342/jnwUw88Zq5tS0BFNvDwhISQ7p8Y.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Brahmāstra Part One: Shiva",
      "slug": "brahm-stra-part-one-shiva",
      "poster": "https://image.tmdb.org/t/p/w342/x61qdvHIsr9U53FwoLVDQqAGur0.jpg",
@@ -2910,10 +2905,10 @@
      "kind": "movie"
     },
     {
-     "title": "Strings",
-     "slug": "strings",
-     "poster": "https://image.tmdb.org/t/p/w342/lJJ5ePSlmx3BZ8jFPndboIA60iH.jpg",
-     "language": "English",
+     "title": "Chhaava",
+     "slug": "chhaava",
+     "poster": "https://image.tmdb.org/t/p/w342/ubRsrzb6NRW8YhVTJ6jG1kpNvCi.jpg",
+     "language": "Hindi",
      "kind": "movie"
     },
     {
@@ -2924,16 +2919,23 @@
      "kind": "movie"
     },
     {
-     "title": "Mythica: A Quest for Heroes",
-     "slug": "mythica-a-quest-for-heroes",
-     "poster": "https://image.tmdb.org/t/p/w342/n75lUF6T2uvy1ZhVyjmdfaTfDT5.jpg",
+     "title": "The Shepherd",
+     "slug": "the-shepherd",
+     "poster": "https://image.tmdb.org/t/p/w342/f2YbkFMN27uqAWqmWZmfj3CE1tF.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Shepherd",
-     "slug": "the-shepherd",
-     "poster": "https://image.tmdb.org/t/p/w342/f2YbkFMN27uqAWqmWZmfj3CE1tF.jpg",
+     "title": "Dragonheart: Vengeance",
+     "slug": "dragonheart-vengeance",
+     "poster": "https://image.tmdb.org/t/p/w342/qs6gz6atyQcAvqC6qZaslOjliUG.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Odyssey",
+     "slug": "the-odyssey",
+     "poster": "https://image.tmdb.org/t/p/w342/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2975,7 +2977,7 @@
     }
    ],
    "slug": "ramayana",
-   "trailerViews": 339380
+   "trailerViews": 339403
   }
  ],
  "trackedFilms": 102
