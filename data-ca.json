@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-10T14:47:29.402Z",
+ "generatedAt": "2026-08-11T03:25:05.421Z",
  "country": "ca",
  "pick": "Futurama",
  "theatres": [
@@ -16,23 +16,23 @@
      "score": "7.9/10"
     }
    ],
-   "votes": 1447,
+   "votes": 1497,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/iPOn6DinuVyLY17YM9mKuPofV08.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 969681,
-   "popularity": 1401.5146,
+   "popularity": 1310.798,
    "platform": "Theatres",
    "cert": "PG",
    "trailer": "https://www.youtube.com/watch?v=P3uI5sLosKU",
    "providers": [],
    "cast": [
     "Tom Holland",
-    "Sadie Sink",
-    "Tramell Tillman",
-    "Zendaya"
+    "Zendaya",
+    "Mark Ruffalo",
+    "Jon Bernthal"
    ],
    "director": "Destin Daniel Cretton",
    "runtime": 145,
@@ -77,9 +77,9 @@
      "kind": "movie"
     },
     {
-     "title": "The Marvels",
-     "slug": "the-marvels",
-     "poster": "https://image.tmdb.org/t/p/w342/9GBhzXMFjgcZ3FdR9w3bUMMTps5.jpg",
+     "title": "Black Adam",
+     "slug": "black-adam",
+     "poster": "https://image.tmdb.org/t/p/w342/rCtreCr4xiYEWDQTebybolIh6Xe.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -95,19 +95,14 @@
      "photo": "https://image.tmdb.org/t/p/w185/xKBAaPIa1c7tzZD3Y0MhBLv4hPE.jpg"
     },
     {
-     "name": "Sadie Sink",
-     "character": "Jean Grey",
-     "photo": "https://image.tmdb.org/t/p/w185/92FddzBfK50XOUbtwjqHPraoGHy.jpg"
-    },
-    {
-     "name": "Tramell Tillman",
-     "character": "William 'Bill' Metzger",
-     "photo": "https://image.tmdb.org/t/p/w185/bEA15zMnkcXlRroYjKrFUWiiK7y.jpg"
-    },
-    {
      "name": "Zendaya",
      "character": "MJ",
      "photo": "https://image.tmdb.org/t/p/w185/3WdOloHpjtjL96uVOhFRRCcYSwq.jpg"
+    },
+    {
+     "name": "Mark Ruffalo",
+     "character": "Bruce Banner / Hulk",
+     "photo": "https://image.tmdb.org/t/p/w185/5GilHMOt5PAQh6rlUKZzGmaKEI7.jpg"
     },
     {
      "name": "Jon Bernthal",
@@ -118,12 +113,17 @@
      "name": "Jacob Batalon",
      "character": "Ned Leeds",
      "photo": "https://image.tmdb.org/t/p/w185/53YhaL4xw4Sb1ssoHkeSSBaO29c.jpg"
+    },
+    {
+     "name": "Sadie Sink",
+     "character": "Jean Grey",
+     "photo": "https://image.tmdb.org/t/p/w185/92FddzBfK50XOUbtwjqHPraoGHy.jpg"
     }
    ],
    "slug": "spider-man-brand-new-day",
-   "wikiWeeklyViews": 3629313,
+   "wikiWeeklyViews": 3143951,
    "trending": true,
-   "trailerViews": 6168474,
+   "trailerViews": 6195294,
    "take": "Mostly good reviews — the performances and direction impressed, even if the pacing didn't.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -152,7 +152,7 @@
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 18491,
-   "popularity": 14.6612,
+   "popularity": 16.7431,
    "platform": "Theatres",
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=J8t48KMGCo4",
@@ -252,8 +252,8 @@
     }
    ],
    "slug": "neon-genesis-evangelion-the-end-of-evangelion",
-   "wikiWeeklyViews": 6992,
-   "trailerViews": 770457,
+   "wikiWeeklyViews": 6961,
+   "trailerViews": 770549,
    "take": "Mostly good reviews — the animation and second half impressed, even if the story didn't.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -282,7 +282,7 @@
    "isFresh": true,
    "kind": "movie",
    "tmdbId": 1657464,
-   "popularity": 3.5037,
+   "popularity": 2.9437,
    "platform": "Theatres",
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=G58TCA0uVtY",
@@ -370,7 +370,7 @@
     }
    ],
    "slug": "the-great-punjab-robbery",
-   "trailerViews": 28733019
+   "trailerViews": 28764810
   },
   {
    "title": "Aryabhatt Ka Zero",
@@ -392,7 +392,7 @@
    "isFresh": true,
    "kind": "movie",
    "tmdbId": 1714993,
-   "popularity": 3.3691,
+   "popularity": 3.0444,
    "platform": "Theatres",
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=_pu7Y9AbMsQ",
@@ -489,8 +489,8 @@
     }
    ],
    "slug": "aryabhatt-ka-zero",
-   "wikiWeeklyViews": 1634,
-   "trailerViews": 1949161
+   "wikiWeeklyViews": 1681,
+   "trailerViews": 1963496
   },
   {
    "title": "Neon Genesis Evangelion: Death and Rebirth",
@@ -505,14 +505,14 @@
      "score": "7.4/10"
     }
    ],
-   "votes": 511,
+   "votes": 512,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/lXBjqzo6c4NyLuJtqOiH39kswji.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 21832,
-   "popularity": 4.2498,
+   "popularity": 4.3175,
    "platform": "Theatres",
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=sZwPBcnOk5c",
@@ -533,44 +533,44 @@
    "badge": null,
    "similar": [
     {
-     "title": "Evangelion: 3.0+1.0 Thrice Upon a Time",
-     "slug": "evangelion-3-0-1-0-thrice-upon-a-time",
-     "poster": "https://image.tmdb.org/t/p/w342/md5wZRRj8biHrGtyitgBZo7674t.jpg",
+     "title": "My Hero Academia: You're Next",
+     "slug": "my-hero-academia-you-re-next",
+     "poster": "https://image.tmdb.org/t/p/w342/tTrI6PwqzxkgO3dvQ7BEKXM7SYR.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Attack on Titan: THE LAST ATTACK",
-     "slug": "attack-on-titan-the-last-attack",
-     "poster": "https://image.tmdb.org/t/p/w342/wgwldDDlTDDMrluOMkpSA8lyKjv.jpg",
+     "title": "Cosmic Princess Kaguya!",
+     "slug": "cosmic-princess-kaguya",
+     "poster": "https://image.tmdb.org/t/p/w342/9I9cM38gecZcwJ0C6r0cwfvtPJP.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Kaiju No. 8: Mission Recon",
-     "slug": "kaiju-no-8-mission-recon",
-     "poster": "https://image.tmdb.org/t/p/w342/1aEfyTWUK8ZBk4aw7Ck0qEoF8PW.jpg",
+     "title": "Mobile Suit Gundam SEED FREEDOM",
+     "slug": "mobile-suit-gundam-seed-freedom",
+     "poster": "https://image.tmdb.org/t/p/w342/1EBnttleJaKnWWyyEqfiSn76ZjT.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Mobile Suit Gundam Hathaway",
-     "slug": "mobile-suit-gundam-hathaway",
-     "poster": "https://image.tmdb.org/t/p/w342/6gw8onh4FKsruBA7Oouv01EFxzn.jpg",
+     "title": "Evangelion: 2.0 You Can (Not) Advance",
+     "slug": "evangelion-2-0-you-can-not-advance",
+     "poster": "https://image.tmdb.org/t/p/w342/7VLYN2CfJpB6PrcuzDKKqdGSUi6.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Ghost in the Shell: SAC_2045 Sustainable War",
-     "slug": "ghost-in-the-shell-sac-2045-sustainable-war",
-     "poster": "https://image.tmdb.org/t/p/w342/kNTvGWDTxb2spAp9SRLNfOo7kCM.jpg",
+     "title": "Gurren Lagann the Movie: The Lights in the Sky Are Stars",
+     "slug": "gurren-lagann-the-movie-the-lights-in-the-sky-are-stars",
+     "poster": "https://image.tmdb.org/t/p/w342/fJ1NsL2A7dwY63mBkHdP1K4kD3T.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "EVANGELION: DEATH (TRUE)²",
-     "slug": "evangelion-death-true",
-     "poster": "https://image.tmdb.org/t/p/w342/AehyZFGm68ep76b81IbLJ1EJ5ot.jpg",
+     "title": "Mobile Suit Gundam I",
+     "slug": "mobile-suit-gundam-i",
+     "poster": "https://image.tmdb.org/t/p/w342/kzyMAqagPK6wuvDzA5FeJU6n71Y.jpg",
      "language": "Japanese",
      "kind": "movie"
     }
@@ -612,8 +612,8 @@
     }
    ],
    "slug": "neon-genesis-evangelion-death-and-rebirth",
-   "wikiWeeklyViews": 2193,
-   "trailerViews": 224207
+   "wikiWeeklyViews": 2183,
+   "trailerViews": 224226
   },
   {
    "title": "Pinocchio: Unstrung",
@@ -635,7 +635,7 @@
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1232569,
-   "popularity": 19.798,
+   "popularity": 18.4876,
    "platform": "Theatres",
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=_VHIU9dIAWQ",
@@ -675,13 +675,6 @@
      "kind": "movie"
     },
     {
-     "title": "Spiral: From the Book of Saw",
-     "slug": "spiral-from-the-book-of-saw",
-     "poster": "https://image.tmdb.org/t/p/w342/cTvSDfBuXTZTdRCNduGMANd7VEP.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Bone Lake",
      "slug": "bone-lake",
      "poster": "https://image.tmdb.org/t/p/w342/sGo5ti82LlydAZrvcsaj31iPuEI.jpg",
@@ -692,6 +685,13 @@
      "title": "Thanksgiving",
      "slug": "thanksgiving",
      "poster": "https://image.tmdb.org/t/p/w342/f5f3TEVst1nHHyqgn7Z3tlwnBIH.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Lodge",
+     "slug": "the-lodge",
+     "poster": "https://image.tmdb.org/t/p/w342/yake2myhbW7c6dKbmwYDy1i40bm.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -733,135 +733,141 @@
     }
    ],
    "slug": "pinocchio-unstrung",
-   "wikiWeeklyViews": 13509,
-   "trailerViews": 61759,
+   "wikiWeeklyViews": 12342,
+   "trailerViews": 62255,
    "take": "Truly divisive — for every critic who bought in, one checked out.",
    "takeSrc": "wiki",
    "takeArticle": "Pinocchio Unstrung",
    "hook": "Premiered at the Brussels International Fantastic Film Festival."
   },
   {
-   "title": "PAW Patrol: The Dino Movie",
-   "genre": "Adventure / Animation",
+   "title": "One Night Only",
+   "genre": "Comedy / Romance",
    "language": "English",
-   "released": "2026-07-23",
-   "review": "The Paw Patrol lands on a mysterious dinosaur island after a storm, where they meet Rex, a stranded pup.",
-   "rating": 7.5,
+   "released": "2026-07-27",
+   "review": "Two love-starved strangers crash into each other on the one night of the year when single people are allowed to have sex.",
+   "rating": 7.3,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.5/10"
+     "score": "7.3/10"
     }
    ],
-   "votes": 20,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/cxXSF4aY5N2cOGwaga5OnpPFHzk.jpg",
+   "votes": 18,
+   "verdict": "Worth a watch",
+   "poster": "https://image.tmdb.org/t/p/w342/9LGEqZvzI7Tsosf8srwEY48rZsD.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "movie",
-   "tmdbId": 1185806,
-   "popularity": 30.9231,
+   "tmdbId": 1433367,
+   "popularity": 26.0609,
    "platform": "Theatres",
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=xgI5iYmOf5Q",
+   "cert": "14A",
+   "trailer": "https://www.youtube.com/watch?v=lDsAVq9lo9g",
    "providers": [],
    "cast": [
-    "Carter Young",
-    "Hayden Chamberlen",
-    "Mckenna Grace",
-    "Rain Janjua"
+    "Monica Barbaro",
+    "Callum Turner",
+    "Maya Hawke",
+    "King Princess"
    ],
-   "director": "Cal Brunker",
-   "runtime": 88,
+   "director": "Will Gluck",
+   "runtime": 102,
    "imdbVotes": null,
-   "imdbId": "tt29356163",
-   "freshDate": "2026-07-23",
+   "imdbId": "tt37853455",
+   "freshDate": "2026-07-28",
    "badge": null,
    "similar": [
     {
-     "title": "The Ice Age Adventures of Buck Wild",
-     "slug": "the-ice-age-adventures-of-buck-wild",
-     "poster": "https://image.tmdb.org/t/p/w342/9ginbMWmt9y7PIHW1c9hnbIVWPm.jpg",
+     "title": "Desperados",
+     "slug": "desperados",
+     "poster": "https://image.tmdb.org/t/p/w342/hoUzSMxGu4Bm73EvH6B3iceFwW8.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Land Before Time IV: Journey Through the Mists",
-     "slug": "the-land-before-time-iv-journey-through-the-mists",
-     "poster": "https://image.tmdb.org/t/p/w342/sqBhPAvSwPCZq4Kg79CvxGrU7nj.jpg",
+     "title": "¿Quieres ser mi hijo?",
+     "slug": "quieres-ser-mi-hijo",
+     "poster": "https://image.tmdb.org/t/p/w342/6PQJsmuvSMZQMmlJfTpjIkrizUh.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Land Before Time XIV: Journey of the Brave",
-     "slug": "the-land-before-time-xiv-journey-of-the-brave",
-     "poster": "https://image.tmdb.org/t/p/w342/ahmppHBvgDrIg5EcFe16XqpWroE.jpg",
+     "title": "Players",
+     "slug": "players",
+     "poster": "https://image.tmdb.org/t/p/w342/eA94hAGntLm7Lfol5FQJNxd53Hw.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Land Before Time III: The Time of the Great Giving",
-     "slug": "the-land-before-time-iii-the-time-of-the-great-giving",
-     "poster": "https://image.tmdb.org/t/p/w342/abcJUBDHi6hxibSgm2bxYK1wAZK.jpg",
+     "title": "Puppy Love",
+     "slug": "puppy-love",
+     "poster": "https://image.tmdb.org/t/p/w342/zjpsW3sflsoxahFyFujvTnWUuqV.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Land Before Time VIII: The Big Freeze",
-     "slug": "the-land-before-time-viii-the-big-freeze",
-     "poster": "https://image.tmdb.org/t/p/w342/ztofs0LZY9Q6Ni3HEwibdZoewpd.jpg",
+     "title": "Sex Appeal",
+     "slug": "sex-appeal",
+     "poster": "https://image.tmdb.org/t/p/w342/mpwXOeSSQdBjUpyQqf6YHYbSTFO.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Land Before Time V: The Mysterious Island",
-     "slug": "the-land-before-time-v-the-mysterious-island",
-     "poster": "https://image.tmdb.org/t/p/w342/nlsJfYQ3dwzvr6kwG60P0nh59Sa.jpg",
+     "title": "Dinner in America",
+     "slug": "dinner-in-america",
+     "poster": "https://image.tmdb.org/t/p/w342/t63UhnHaWQGcuE3pViuW3LSjBJj.jpg",
      "language": "English",
      "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/upNeU9FNGAvdhnoThvv64Z0MWKn.jpg",
-   "backdropPath": "/upNeU9FNGAvdhnoThvv64Z0MWKn.jpg",
-   "posterPath": "/cxXSF4aY5N2cOGwaga5OnpPFHzk.jpg",
-   "fullReview": "The Paw Patrol lands on a mysterious dinosaur island after a storm, where they meet Rex, a stranded pup. When Humdinger's reckless mining triggers a volcano, the team faces their biggest rescue mission yet to save the island.",
+   "backdrop": "https://image.tmdb.org/t/p/w780/mfgNUnFB25BNIwe9iPJ17cUN64S.jpg",
+   "backdropPath": "/mfgNUnFB25BNIwe9iPJ17cUN64S.jpg",
+   "posterPath": "/9LGEqZvzI7Tsosf8srwEY48rZsD.jpg",
+   "fullReview": "Two love-starved strangers crash into each other on the one night of the year when single people are allowed to have sex.",
    "castPics": [
     {
-     "name": "Mckenna Grace",
-     "character": "Skye (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/sK0CVa56IIpFhCDrcXSTqPWxNbx.jpg"
+     "name": "Monica Barbaro",
+     "character": "Allie",
+     "photo": "https://image.tmdb.org/t/p/w185/nxkFcvDIC4tC3st1K1BJXJm1F2h.jpg"
     },
     {
-     "name": "Rain Janjua",
-     "character": "Chase (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/39VLLyRP55v9ImeKT50EdCIrZ84.jpg"
+     "name": "Callum Turner",
+     "character": "Owen",
+     "photo": "https://image.tmdb.org/t/p/w185/1QqpyYbX6zyyrtlKAJLbKM4B4k9.jpg"
     },
     {
-     "name": "Lucien Duncan-Reid",
-     "character": "Rubble (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/sliCDt3gkMHXcXusq72PLLFTbHG.jpg"
+     "name": "Maya Hawke",
+     "character": "Malika",
+     "photo": "https://image.tmdb.org/t/p/w185/evjbbHM1bzA6Ma5Ptjwa4WkYkkj.jpg"
     },
     {
-     "name": "Nylan Parthipan",
-     "character": "Zuma (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/cwAUs4vWfZyn2cHNrGu9tC8W0yK.jpg"
+     "name": "King Princess",
+     "character": "Jacinta",
+     "photo": "https://image.tmdb.org/t/p/w185/hQFDqQj5fmprYGOsKZMVRLCPJFd.jpg"
     },
     {
-     "name": "Ron Pardo",
-     "character": "Mayor Humdinger (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/hE4QOBmPqstfmBVXmlcJmsljUMw.jpg"
+     "name": "Molly Ringwald",
+     "character": "Linda",
+     "photo": "https://image.tmdb.org/t/p/w185/eXRphPiX18t8C3nCoOuxQFNegqP.jpg"
     },
     {
-     "name": "Jennifer Hudson",
-     "character": "Lilian Ledes (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/4wpTUqEjHYjDMj0Fv6BvfjeIS1H.jpg"
+     "name": "LeVar Burton",
+     "character": "Rick",
+     "photo": "https://image.tmdb.org/t/p/w185/tC74tISKpFGmJkrw24MMLix5nNa.jpg"
     }
    ],
-   "slug": "paw-patrol-the-dino-movie",
-   "wikiWeeklyViews": 35484,
+   "slug": "one-night-only",
+   "wikiWeeklyViews": 306311,
    "trending": true,
-   "trailerViews": 4156720,
-   "hook": "The follow-up to ‘Paw Patrol’."
+   "trailerViews": 141305,
+   "take": "Critics can't agree — high marks for the performances and writing, complaints about the humour.",
+   "takeSrc": "wiki",
+   "takeAspects": [
+    "performances",
+    "writing"
+   ],
+   "takeArticle": "One Night Only (2026 film)"
   }
  ],
  "ott": [
@@ -878,14 +884,14 @@
      "score": "8.4/10"
     }
    ],
-   "votes": 3835,
+   "votes": 3837,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/eM8bbTn8C8vUwwS6upzzm7gX31u.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 615,
-   "popularity": 109.591,
+   "popularity": 107.0873,
    "cert": "14+",
    "trailer": "https://www.youtube.com/watch?v=dUHzt5md1x0",
    "providers": [
@@ -988,8 +994,8 @@
    "ottSince": "2026-08-04",
    "ottFreshDate": "2026-08-03",
    "slug": "futurama",
-   "wikiWeeklyViews": 36577,
-   "trailerViews": 43537,
+   "wikiWeeklyViews": 33456,
+   "trailerViews": 43729,
    "take": "Critics loved it — special praise for the animation.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1010,14 +1016,14 @@
      "score": "8.3/10"
     }
    ],
-   "votes": 2510,
+   "votes": 2514,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 97546,
-   "popularity": 145.2921,
+   "popularity": 141.1664,
    "cert": "18+",
    "trailer": "https://www.youtube.com/watch?v=BwPcMIDFVKw",
    "providers": [
@@ -1121,9 +1127,9 @@
    "ottSince": "2026-07-30",
    "ottFreshDate": "2026-08-04",
    "slug": "ted-lasso",
-   "wikiWeeklyViews": 361816,
+   "wikiWeeklyViews": 374346,
    "trending": true,
-   "trailerViews": 159437,
+   "trailerViews": 159790,
    "take": "Near-universal acclaim, with the music singled out most often.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1151,7 +1157,7 @@
    "isFresh": true,
    "kind": "tv",
    "tmdbId": 284753,
-   "popularity": 69.9786,
+   "popularity": 71.5518,
    "cert": null,
    "trailer": "https://www.youtube.com/results?search_query=Operation%20Safed%20Sagar%3A%20The%20Highest%20Air%20Force%20Mission%20official%20trailer",
    "providers": [
@@ -1267,14 +1273,14 @@
      "score": "8.0/10"
     }
    ],
-   "votes": 1314,
+   "votes": 1320,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/rzpHPSEgPTpRs8EHbygwsOw7jC0.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 113962,
-   "popularity": 332.5688,
+   "popularity": 342.4827,
    "cert": "18+",
    "trailer": "https://www.youtube.com/watch?v=uEjcXhW7CXo",
    "providers": [
@@ -1379,8 +1385,8 @@
    "ottSince": "2026-08-02",
    "ottFreshDate": "2026-08-02",
    "slug": "lioness",
-   "wikiWeeklyViews": 198687,
-   "trailerViews": 1866146,
+   "wikiWeeklyViews": 199465,
+   "trailerViews": 1866893,
    "take": "Critics can't agree — high marks for the performances and visuals, complaints about the story.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1396,21 +1402,21 @@
    "language": "English",
    "released": "2026-08-06",
    "review": "A family suddenly sealed inside their home must work together to survive against dwindling resources and the ominous threat keeping them trapped.",
-   "rating": 6.7,
+   "rating": 6.8,
    "scores": [
     {
      "source": "TMDB",
-     "score": "6.7/10"
+     "score": "6.8/10"
     }
    ],
-   "votes": 344,
+   "votes": 386,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/6JU7E8Vv2M11egkctWVOScxWR75.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "movie",
    "tmdbId": 1284041,
-   "popularity": 353.8834,
+   "popularity": 369.9083,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=MLxgaz2Zp1k",
    "providers": [
@@ -1465,9 +1471,9 @@
      "kind": "movie"
     },
     {
-     "title": "Slash/Back",
-     "slug": "slash-back",
-     "poster": "https://image.tmdb.org/t/p/w342/fmmRFQtsRrNOpmcfoxVIyE1LxxT.jpg",
+     "title": "Dead Sea",
+     "slug": "dead-sea",
+     "poster": "https://image.tmdb.org/t/p/w342/ohisXa9ArEoV05ajLfX2T5D6NNF.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1513,140 +1519,11 @@
    "ottSince": "2026-08-10",
    "ottFreshDate": "2026-08-06",
    "slug": "the-last-house",
-   "wikiWeeklyViews": 669926,
+   "wikiWeeklyViews": 846609,
    "trending": true,
-   "trailerViews": 3659229,
+   "trailerViews": 3710069,
    "take": "Early word from viewers on TMDB runs positive.",
    "takeSrc": "tmdb"
-  },
-  {
-   "title": "My Life with the Walter Boys",
-   "genre": "Drama",
-   "language": "English",
-   "released": "2023-12-07",
-   "review": "When a tragedy disrupts her life, a teen moves in with her guardian's big family in a small town and learns new lessons about love, hope and friendship.",
-   "rating": 7.8,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "7.8/10"
-    }
-   ],
-   "votes": 400,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/dQOwpTpBQEqRUcev4423LrU32G6.jpg",
-   "isRecent": true,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 199001,
-   "popularity": 97.1705,
-   "cert": "14+",
-   "trailer": "https://www.youtube.com/watch?v=pHIXtOrHF80",
-   "providers": [
-    "Netflix"
-   ],
-   "cast": [
-    "Nikki Rodriguez",
-    "Noah LaLonde",
-    "Ashby Gentry",
-    "Johnny Link"
-   ],
-   "director": "Melanie Halsall",
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt8323628",
-   "freshDate": "2026-08-06",
-   "badge": "New season",
-   "similar": [
-    {
-     "title": "Bel-Air",
-     "slug": "bel-air",
-     "poster": "https://image.tmdb.org/t/p/w342/j8tbXWXrL15RucA6H4khq87dEXa.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Summer I Turned Pretty",
-     "slug": "the-summer-i-turned-pretty",
-     "poster": "https://image.tmdb.org/t/p/w342/xBIz53wYWsKfFpN0TaizVAjKJ0z.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Sweet Magnolias",
-     "slug": "sweet-magnolias",
-     "poster": "https://image.tmdb.org/t/p/w342/n1WDSFOnCCg3cdHHGBywZtYIzf9.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Off Campus",
-     "slug": "off-campus",
-     "poster": "https://image.tmdb.org/t/p/w342/tcPc5ZMBO4y2BtCJMe3o2nwZb2B.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Tell Me Lies",
-     "slug": "tell-me-lies",
-     "poster": "https://image.tmdb.org/t/p/w342/blOAzeqf2EUrRvjK2VWDRs4nK7l.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "One Day",
-     "slug": "one-day",
-     "poster": "https://image.tmdb.org/t/p/w342/smBWt8rHCCavV88C5gQVjh0NUFa.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/5WUsnqUm7xbY3oSwumSLfjyyax.jpg",
-   "backdropPath": "/5WUsnqUm7xbY3oSwumSLfjyyax.jpg",
-   "posterPath": "/dQOwpTpBQEqRUcev4423LrU32G6.jpg",
-   "fullReview": "When a tragedy disrupts her life, a teen moves in with her guardian's big family in a small town and learns new lessons about love, hope and friendship.",
-   "castPics": [
-    {
-     "name": "Nikki Rodriguez",
-     "character": "Jackie Howard",
-     "photo": "https://image.tmdb.org/t/p/w185/z80mBQQzpPtVxJuCY3YR89Mx6Wj.jpg"
-    },
-    {
-     "name": "Noah LaLonde",
-     "character": "Cole Walter",
-     "photo": "https://image.tmdb.org/t/p/w185/kFN2p5zW8kbsLaEOA4usN88lq86.jpg"
-    },
-    {
-     "name": "Ashby Gentry",
-     "character": "Alex Walter",
-     "photo": "https://image.tmdb.org/t/p/w185/mOKG73RcztGrBLC10J5ZYjwAcNv.jpg"
-    },
-    {
-     "name": "Johnny Link",
-     "character": "Will Walter",
-     "photo": "https://image.tmdb.org/t/p/w185/ciVb4V87Nf2DLxfWhRwpuPLXPUg.jpg"
-    },
-    {
-     "name": "Corey Fogelmanis",
-     "character": "Nathan Walter",
-     "photo": "https://image.tmdb.org/t/p/w185/nqAps1IQ9uBZlTNu7jZa2nmAXXa.jpg"
-    },
-    {
-     "name": "Connor Stanhope",
-     "character": "Danny Walter",
-     "photo": "https://image.tmdb.org/t/p/w185/qHU43eqMZOgODVIxOBR1Br9vFIr.jpg"
-    }
-   ],
-   "platform": "Netflix",
-   "ottSince": "2026-08-08",
-   "ottFreshDate": "2026-08-06",
-   "slug": "my-life-with-the-walter-boys",
-   "wikiWeeklyViews": 110260,
-   "trailerViews": 2962974,
-   "take": "Truly divisive — for every critic who bought in, one checked out.",
-   "takeSrc": "wiki",
-   "takeArticle": "My Life with the Walter Boys",
-   "takeCounter": "The audience isn't buying the reviews — they rate it far higher."
   },
   {
    "title": "Musafir Cafe",
@@ -1668,7 +1545,7 @@
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 313101,
-   "popularity": 39.9681,
+   "popularity": 35.1907,
    "cert": null,
    "trailer": "https://www.youtube.com/results?search_query=Musafir%20Cafe%20official%20trailer",
    "providers": [
@@ -1709,6 +1586,13 @@
      "kind": "tv"
     },
     {
+     "title": "SkyMed",
+     "slug": "skymed",
+     "poster": "https://image.tmdb.org/t/p/w342/tOKUKERvfaOf7Dy2IAKT5HYYXJJ.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "White Lies",
      "slug": "white-lies",
      "poster": "https://image.tmdb.org/t/p/w342/b81DEJk0t1OIgb7mquihSYxr8zy.jpg",
@@ -1716,16 +1600,9 @@
      "kind": "tv"
     },
     {
-     "title": "The Couple Next Door",
-     "slug": "the-couple-next-door",
-     "poster": "https://image.tmdb.org/t/p/w342/ifQ5ffAI6KfywBcSGoGU1YWO3yC.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "SkyMed",
-     "slug": "skymed",
-     "poster": "https://image.tmdb.org/t/p/w342/tOKUKERvfaOf7Dy2IAKT5HYYXJJ.jpg",
+     "title": "Joan",
+     "slug": "joan",
+     "poster": "https://image.tmdb.org/t/p/w342/x0l9OYTcwO2BvCZcFWEnAA8YEZ1.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1766,7 +1643,139 @@
    "ottFreshDate": "2026-07-24",
    "stillGood": true,
    "slug": "musafir-cafe",
-   "wikiWeeklyViews": 13482
+   "wikiWeeklyViews": 12188
+  },
+  {
+   "title": "Avatar Aang: The Last Airbender",
+   "genre": "Animation / Action",
+   "language": "English",
+   "released": "2026-07-24",
+   "review": "Avatar Aang, the world's last Airbender, learns of an ancient power that could save his culture from extinction.",
+   "rating": 9.3,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "9.3/10"
+    }
+   ],
+   "votes": 788,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/3sgnSfNT27Bx5O5ukr7B26mhEQq.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 980431,
+   "popularity": 164.8829,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=7b20GRFZBFE",
+   "providers": [
+    "Paramount Plus",
+    "Paramount+ Amazon Channel",
+    "Paramount Plus Premium"
+   ],
+   "cast": [
+    "Eric Nam",
+    "Dave Bautista",
+    "Jessica Matten",
+    "Román Zaragoza"
+   ],
+   "director": "Lauren Montgomery",
+   "runtime": 99,
+   "imdbVotes": null,
+   "imdbId": "tt18259538",
+   "freshDate": "2026-07-24",
+   "badge": null,
+   "similar": [
+    {
+     "title": "The SpongeBob Movie: Sponge on the Run",
+     "slug": "the-spongebob-movie-sponge-on-the-run",
+     "poster": "https://image.tmdb.org/t/p/w342/jlJ8nDhMhCYJuzOw3f52CP1W8MW.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Chickenhare and the Hamster of Darkness",
+     "slug": "chickenhare-and-the-hamster-of-darkness",
+     "poster": "https://image.tmdb.org/t/p/w342/2v6f1EqTo4FUxVT9MDXpF6158AX.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Lord of the Rings: The War of the Rohirrim",
+     "slug": "the-lord-of-the-rings-the-war-of-the-rohirrim",
+     "poster": "https://image.tmdb.org/t/p/w342/23WCoDo6wzBfzbX7BGTNwVUqZfi.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Kung Fu Panda 4",
+     "slug": "kung-fu-panda-4",
+     "poster": "https://image.tmdb.org/t/p/w342/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Dragon Rider",
+     "slug": "dragon-rider",
+     "poster": "https://image.tmdb.org/t/p/w342/ucDrOXUrVnr9X3ZmXP2Q68HDIHr.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Wish Dragon",
+     "slug": "wish-dragon",
+     "poster": "https://image.tmdb.org/t/p/w342/lnPf6hzANL6pVQTxUlsNYSuhT5l.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/ezbrL1dMymKQZw7mDEWa2ZTzN7d.jpg",
+   "backdropPath": "/ezbrL1dMymKQZw7mDEWa2ZTzN7d.jpg",
+   "posterPath": "/3sgnSfNT27Bx5O5ukr7B26mhEQq.jpg",
+   "fullReview": "Avatar Aang, the world's last Airbender, learns of an ancient power that could save his culture from extinction. With the help of his friends, he embarks on a global quest to find it before it falls into the wrong hands and threatens to upend the peace they sacrificed everything to achieve.",
+   "castPics": [
+    {
+     "name": "Eric Nam",
+     "character": "Aang (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/gEH0b5q9tupL49dmUFkjm9dnxP2.jpg"
+    },
+    {
+     "name": "Dave Bautista",
+     "character": "Tagah (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/snk6JiXOOoRjPtHU5VMoy6qbd32.jpg"
+    },
+    {
+     "name": "Jessica Matten",
+     "character": "Katara (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/EQsPxsav8AZmaeT3mpU3Evilee.jpg"
+    },
+    {
+     "name": "Román Zaragoza",
+     "character": "Sokka (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/uWkOkSLqj2POMqkeLk5E5UJzebv.jpg"
+    },
+    {
+     "name": "Steven Yeun",
+     "character": "Zuko (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/fOMFO2Xx4duzpNgS9Q5ytO44yGb.jpg"
+    },
+    {
+     "name": "Dionne Quan",
+     "character": "Toph (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/vGe0bMTfYDX1Wcw9ZCfY3YCSgai.jpg"
+    }
+   ],
+   "theatrical": false,
+   "platform": "Paramount Plus",
+   "ottSince": "2026-07-26",
+   "ottFreshDate": "2026-07-24",
+   "stillGood": true,
+   "slug": "avatar-aang-the-last-airbender",
+   "wikiWeeklyViews": 112798,
+   "trailerViews": 13322209,
+   "take": "Broadly positive reviews, though the originality drew grumbles.",
+   "takeSrc": "wiki",
+   "takeArticle": "Avatar Aang: The Last Airbender"
   },
   {
    "title": "Silo",
@@ -1781,14 +1790,14 @@
      "score": "8.2/10"
     }
    ],
-   "votes": 2398,
+   "votes": 2399,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 125988,
-   "popularity": 231.4564,
+   "popularity": 222.9294,
    "cert": "18+",
    "trailer": "https://www.youtube.com/watch?v=8ZYhuvIv1pA",
    "providers": [
@@ -1893,8 +1902,8 @@
    "ottFreshDate": "2026-07-02",
    "stillGood": true,
    "slug": "silo",
-   "wikiWeeklyViews": 222396,
-   "trailerViews": 9639585,
+   "wikiWeeklyViews": 223467,
+   "trailerViews": 9644267,
    "take": "Critics were won over, largely on the strength of the performances and production design.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1916,14 +1925,14 @@
      "score": "New release"
     }
    ],
-   "votes": 4,
+   "votes": 5,
    "verdict": "Not enough ratings yet",
    "poster": "https://image.tmdb.org/t/p/w342/1XbcSqURUvhgu2nnoQRZ7cXmTsJ.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 328402,
-   "popularity": 8.6733,
+   "popularity": 9.1018,
    "cert": "14+",
    "trailer": "https://www.youtube.com/watch?v=9QDfABKdqe0",
    "providers": [
@@ -1957,13 +1966,6 @@
      "kind": "tv"
     },
     {
-     "title": "Harry Wild",
-     "slug": "harry-wild",
-     "poster": "https://image.tmdb.org/t/p/w342/aLnxpbhwsJ3XCATDEfFaAmJV80d.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "Wild Cards",
      "slug": "wild-cards",
      "poster": "https://image.tmdb.org/t/p/w342/lIhkV9LNwViVD2bylPTFQvDD21e.jpg",
@@ -1981,6 +1983,13 @@
      "title": "The Couple Next Door",
      "slug": "the-couple-next-door",
      "poster": "https://image.tmdb.org/t/p/w342/ifQ5ffAI6KfywBcSGoGU1YWO3yC.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Lopez vs Lopez",
+     "slug": "lopez-vs-lopez",
+     "poster": "https://image.tmdb.org/t/p/w342/b9Wi3P36R1p4QV0vyBSIvoQ8qNH.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -2026,7 +2035,7 @@
    "ottFreshDate": "2026-07-24",
    "stillGood": true,
    "slug": "adarsh-baal-vidyalaya",
-   "trailerViews": 28083046
+   "trailerViews": 28087748
   },
   {
    "title": "X-Men '97",
@@ -2041,14 +2050,14 @@
      "score": "8.7/10"
     }
    ],
-   "votes": 826,
+   "votes": 832,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/2HKBc5UiFw8JrruHq8S1Y7TnlW0.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
    "tmdbId": 138502,
-   "popularity": 92.4869,
+   "popularity": 91.3826,
    "cert": "14+",
    "trailer": "https://www.youtube.com/watch?v=pv3Ss8o9gGQ",
    "providers": [
@@ -2114,8 +2123,8 @@
    "ottFreshDate": "2026-07-01",
    "stillGood": true,
    "slug": "x-men-97",
-   "wikiWeeklyViews": 104435,
-   "trailerViews": 10381316,
+   "wikiWeeklyViews": 105205,
+   "trailerViews": 10382006,
    "take": "Critics loved this one, and the writing and action drew the loudest praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2135,7 +2144,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/u4qctwtUwTEnA1gqQhM84MUygXp.jpg",
    "kind": "movie",
    "tmdbId": 1169537,
-   "popularity": 5.8246,
+   "popularity": 5.8467,
    "cert": null,
    "trailer": "https://www.youtube.com/results?search_query=Batwara%201947%20official%20trailer",
    "providers": [],
@@ -2155,44 +2164,44 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "Article 370",
-     "slug": "article-370",
-     "poster": "https://image.tmdb.org/t/p/w342/9VTemjHMpyxzfC3JsG2aFy8Bf9Y.jpg",
+     "title": "Sarfarosh",
+     "slug": "sarfarosh",
+     "poster": "https://image.tmdb.org/t/p/w342/i6XJCzajVcnfh5ljAn7AGub5vih.jpg",
      "language": "Hindi",
      "kind": "movie"
     },
     {
-     "title": "Kesari",
-     "slug": "kesari",
-     "poster": "https://image.tmdb.org/t/p/w342/ctjT1pMNAGD9ou0kuhz806tf7kX.jpg",
+     "title": "Border",
+     "slug": "border",
+     "poster": "https://image.tmdb.org/t/p/w342/vYih9kPSCh6CrJsZFWugXOY0ySj.jpg",
      "language": "Hindi",
      "kind": "movie"
     },
     {
-     "title": "Bharat",
-     "slug": "bharat",
-     "poster": "https://image.tmdb.org/t/p/w342/aawdjzVsfKvRRIFu9Ni74wZyjc8.jpg",
-     "language": "Hindi",
-     "kind": "movie"
-    },
-    {
-     "title": "Devotion",
-     "slug": "devotion",
-     "poster": "https://image.tmdb.org/t/p/w342/26yQPXymbWeCLKwcmyL8dRjAzth.jpg",
+     "title": "Hunting Season",
+     "slug": "hunting-season",
+     "poster": "https://image.tmdb.org/t/p/w342/cbryTyaWdqrKpQCw6K7zm2jrB5v.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Last Rifleman",
-     "slug": "the-last-rifleman",
-     "poster": "https://image.tmdb.org/t/p/w342/co1GhkWdgt2J0LRTEJjHntkMrj3.jpg",
+     "title": "Mexicali",
+     "slug": "mexicali",
+     "poster": "https://image.tmdb.org/t/p/w342/kQbmqipH7YvmILnB0PF8faOEcUp.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Waiting for Anya",
-     "slug": "waiting-for-anya",
-     "poster": "https://image.tmdb.org/t/p/w342/5BfXAZ6BoS6zdWa2X4nXEuIXPZe.jpg",
+     "title": "Stop-Loss",
+     "slug": "stop-loss",
+     "poster": "https://image.tmdb.org/t/p/w342/5lR2o3EQ6keYI7R2NtO40fHpvGZ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Deer Hunter",
+     "slug": "the-deer-hunter",
+     "poster": "https://image.tmdb.org/t/p/w342/bbGtogDZOg09bm42KIpCXUXICkh.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2244,7 +2253,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/3SifFCwwFzXdU1Ew0nA4Z92Bs15.jpg",
    "kind": "movie",
    "tmdbId": 1101383,
-   "popularity": 52.9491,
+   "popularity": 67.0169,
    "cert": "14A",
    "trailer": "https://www.youtube.com/watch?v=u4tgctWuHc0",
    "providers": [],
@@ -2255,13 +2264,13 @@
     "Maisy Stella"
    ],
    "director": "David Robert Mitchell",
-   "runtime": 100,
+   "runtime": 99,
    "imdbScore": null,
    "imdbVotes": null,
    "imdbId": "tt27165187",
    "freshDate": "2026-08-12",
-   "badge": null,
-   "isRecent": false,
+   "badge": "New release",
+   "isRecent": true,
    "similar": [
     {
      "title": "Greenland 2: Migration",
@@ -2292,9 +2301,9 @@
      "kind": "movie"
     },
     {
-     "title": "Disclosure Day",
-     "slug": "disclosure-day",
-     "poster": "https://image.tmdb.org/t/p/w342/AnJ8IQJI23hNpYXVNaythu061Ru.jpg",
+     "title": "Space/Time",
+     "slug": "space-time",
+     "poster": "https://image.tmdb.org/t/p/w342/uje1ecKMnNpZp0at5TxlvVgVXqI.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -2343,7 +2352,7 @@
     }
    ],
    "slug": "the-end-of-oak-street",
-   "trailerViews": 371499
+   "trailerViews": 375162
   },
   {
    "title": "Teenage Sex and Death at Camp Miasma",
@@ -2354,7 +2363,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/5Cz1EJOKpZ8hqvBNZYF9C2zTB2T.jpg",
    "kind": "movie",
    "tmdbId": 1240889,
-   "popularity": 26.6189,
+   "popularity": 26.3548,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=j9TsiTgYZGw",
    "providers": [],
@@ -2453,7 +2462,7 @@
     }
    ],
    "slug": "teenage-sex-and-death-at-camp-miasma",
-   "trailerViews": 75627
+   "trailerViews": 77648
   },
   {
    "title": "Train to Busan",
@@ -2464,7 +2473,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/vNVFt6dtcqnI7hqa6LFBUibuFiw.jpg",
    "kind": "movie",
    "tmdbId": 396535,
-   "popularity": 22.6738,
+   "popularity": 21.9035,
    "cert": "18A",
    "trailer": "https://www.youtube.com/watch?v=4qm59Rcq1Fw",
    "providers": [],
@@ -2500,7 +2509,21 @@
     {
      "title": "Colony",
      "slug": "colony",
-     "poster": "https://image.tmdb.org/t/p/w342/tN799oUR0f1gUKDYdMNrDaY7I51.jpg",
+     "poster": "https://image.tmdb.org/t/p/w342/wC69brhk65GvrgNQdqLRUqtneUH.jpg",
+     "language": "Korean",
+     "kind": "movie"
+    },
+    {
+     "title": "Badland Hunters",
+     "slug": "badland-hunters",
+     "poster": "https://image.tmdb.org/t/p/w342/zVMyvNowgbsBAL6O6esWfRpAcOb.jpg",
+     "language": "Korean",
+     "kind": "movie"
+    },
+    {
+     "title": "The Cursed: Dead Man's Prey",
+     "slug": "the-cursed-dead-man-s-prey",
+     "poster": "https://image.tmdb.org/t/p/w342/7Bvbaztl8M2kn3vjfveaMQhcWk0.jpg",
      "language": "Korean",
      "kind": "movie"
     },
@@ -2509,20 +2532,6 @@
      "slug": "concrete-utopia",
      "poster": "https://image.tmdb.org/t/p/w342/4l68KHxnPSow8MvnGUpjqLzJtLJ.jpg",
      "language": "Korean",
-     "kind": "movie"
-    },
-    {
-     "title": "Seoul Station",
-     "slug": "seoul-station",
-     "poster": "https://image.tmdb.org/t/p/w342/4O9pQggt8V7a9g6brsyZx2zEHRj.jpg",
-     "language": "Korean",
-     "kind": "movie"
-    },
-    {
-     "title": "Passenger",
-     "slug": "passenger",
-     "poster": "https://image.tmdb.org/t/p/w342/2sOEJzhPzjTkZSlPbGxOJ7xgIyS.jpg",
-     "language": "English",
      "kind": "movie"
     }
    ],
@@ -2563,7 +2572,7 @@
     }
    ],
    "slug": "train-to-busan",
-   "trailerViews": 3908
+   "trailerViews": 3961
   },
   {
    "title": "The Last Sunrise",
@@ -2574,7 +2583,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/pego3yEZ5SuGvRjESKAguL4Wu7M.jpg",
    "kind": "movie",
    "tmdbId": 1516698,
-   "popularity": 47.619,
+   "popularity": 44.4377,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=NhI2UpkFAFw",
    "providers": [],
@@ -2594,44 +2603,44 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "Time Is Up",
-     "slug": "time-is-up",
-     "poster": "https://image.tmdb.org/t/p/w342/dxWHyMY4HoXH8LiEhYlga2OtK5B.jpg",
+     "title": "Along for the Ride",
+     "slug": "along-for-the-ride",
+     "poster": "https://image.tmdb.org/t/p/w342/d5spmLeGR9kxBRQ6qxCFad1ljvT.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Love Me Love Me",
-     "slug": "love-me-love-me",
-     "poster": "https://image.tmdb.org/t/p/w342/jfwHKRHRE2X4NTexdzblaioHH51.jpg",
+     "title": "Turtles All the Way Down",
+     "slug": "turtles-all-the-way-down",
+     "poster": "https://image.tmdb.org/t/p/w342/tDKlFXWCvIkP2Xl2nMdI49kzwZx.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Pain Hustlers",
-     "slug": "pain-hustlers",
-     "poster": "https://image.tmdb.org/t/p/w342/m0gM9jE1KmCkXZRqkeNYEQZdVsZ.jpg",
+     "title": "Life in a Year",
+     "slug": "life-in-a-year",
+     "poster": "https://image.tmdb.org/t/p/w342/bP7u19opmHXYeTCUwGjlLldmUMc.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Marked Men: Rule + Shaw",
-     "slug": "marked-men-rule-shaw",
-     "poster": "https://image.tmdb.org/t/p/w342/gZQU8BtCH2IbMZq6QETiU4HXQSR.jpg",
+     "title": "Hello, Goodbye, and Everything in Between",
+     "slug": "hello-goodbye-and-everything-in-between",
+     "poster": "https://image.tmdb.org/t/p/w342/xyGsnp4Ld5PmJYYWnfuYYoENhHt.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Good Neighbor",
-     "slug": "the-good-neighbor",
-     "poster": "https://image.tmdb.org/t/p/w342/mXJ2xI7B0Z9WxDjyv18anPsOxeE.jpg",
+     "title": "Purple Hearts",
+     "slug": "purple-hearts",
+     "poster": "https://image.tmdb.org/t/p/w342/4JyNWkryifWbWXJyxcWh3pVya6N.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Your Fault: London",
-     "slug": "your-fault-london",
-     "poster": "https://image.tmdb.org/t/p/w342/nLxu237EJAisFCYKK48hN9Plobx.jpg",
+     "title": "2 Hearts",
+     "slug": "2-hearts",
+     "poster": "https://image.tmdb.org/t/p/w342/a7bW3uKOMPBnmHs8gnlpfhTD8YQ.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2673,7 +2682,7 @@
     }
    ],
    "slug": "the-last-sunrise",
-   "trailerViews": 861159
+   "trailerViews": 869424
   },
   {
    "title": "Fall 2: Deadpoint",
@@ -2684,7 +2693,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/p73G56bJGPa5y52cyqWscHR6NnN.jpg",
    "kind": "movie",
    "tmdbId": 1101412,
-   "popularity": 34.7375,
+   "popularity": 33.8566,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=Krs0VDIjhmE",
    "providers": [],
@@ -2739,9 +2748,9 @@
      "kind": "movie"
     },
     {
-     "title": "Jurassic World Dominion",
-     "slug": "jurassic-world-dominion",
-     "poster": "https://image.tmdb.org/t/p/w342/jbAvCACjLf1ZG0unB2tdmx5HAf1.jpg",
+     "title": "Mission: Impossible - Dead Reckoning Part One",
+     "slug": "mission-impossible-dead-reckoning-part-one",
+     "poster": "https://image.tmdb.org/t/p/w342/NNxYkU70HPurnNCSiCjYAmacwm.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2783,7 +2792,7 @@
     }
    ],
    "slug": "fall-2-deadpoint",
-   "trailerViews": 2228001
+   "trailerViews": 2242650
   },
   {
    "title": "Bokshi",
@@ -2794,7 +2803,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/9Loc2q3gO1HWolw0o6kLaMXrocS.jpg",
    "kind": "movie",
    "tmdbId": 718833,
-   "popularity": 7.6617,
+   "popularity": 6.7992,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=2nKLfpXRuEM",
    "providers": [],
@@ -2883,7 +2892,7 @@
     }
    ],
    "slug": "bokshi",
-   "trailerViews": 240996
+   "trailerViews": 241083
   },
   {
    "title": "Ramayana",
@@ -2894,7 +2903,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/f3yZZw7zIsWo6m9xJStfjDauIZX.jpg",
    "kind": "movie",
    "tmdbId": 656908,
-   "popularity": 21.399,
+   "popularity": 17.1432,
    "cert": null,
    "trailer": "https://www.youtube.com/watch?v=le2W_fB_4KY",
    "providers": [],
@@ -2993,7 +3002,7 @@
     }
    ],
    "slug": "ramayana",
-   "trailerViews": 339580
+   "trailerViews": 340921
   }
  ],
  "trackedFilms": 100
