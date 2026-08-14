@@ -1318,11 +1318,22 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
           `${item.title} sits high on the ${lang}watchlist for the weeks ahead`,
           `${item.title} is the kind of ${lang}release people circle on the calendar`,
         ])
-      : pick([
-          `${item.title} is a fresh ${lang}${noun} that's only just landed, so ratings are still settling`,
-          `${item.title} has only just arrived, so ratings for the ${lang}${noun} are still finding their level`,
-          `${item.title} is brand new to the list — too early for the numbers on this ${lang}${noun} to mean much yet`,
-        ]);
+      : (() => {
+          const days = item.released ? Math.floor((Date.parse(today) - Date.parse(item.released)) / 86400000) : null;
+          // "just landed" is only true for ~3 weeks; past that (or with no release date
+          // to judge by), say what's actually true: the ratings never showed up.
+          return days != null && days <= 21
+            ? pick([
+                `${item.title} is a fresh ${lang}${noun} that's only just landed, so ratings are still settling`,
+                `${item.title} has only just arrived, so ratings for the ${lang}${noun} are still finding their level`,
+                `${item.title} is brand new to the list — too early for the numbers on this ${lang}${noun} to mean much yet`,
+              ])
+            : pick([
+                `${item.title} hasn't gathered enough ratings yet for a firm read on this ${lang}${noun}`,
+                `${item.title} is still short of the ratings needed to call this ${lang}${noun} either way`,
+                `Ratings on ${item.title} are still too thin to say where this ${lang}${noun} lands`,
+              ]);
+        })();
   } else if (r >= 7.5) {
     lead = pick([
       `${item.title} lands among the stronger ${lang}${nounPl} on offer right now`,
@@ -3362,6 +3373,13 @@ const ARCHIVE_LEAD_SWAPS = [
    "left our list before ratings for the $1 found their level \u2014 too few votes for a firm verdict."],
   [/is brand new to the list \u2014 too early for the numbers on this ([^<]{0,60}?) to mean much yet\./g,
    "left our list before the numbers on this $1 settled \u2014 too few votes for a firm verdict."],
+  // unrated and no longer recent (tracked titles that never drew votes)
+  [/hasn&#39;t gathered enough ratings yet for a firm read on this ([^<]{0,60}?)\./g,
+   "never gathered enough ratings for a firm read on this $1 while it was on our list."],
+  [/is still short of the ratings needed to call this ([^<]{0,60}?) either way\./g,
+   "stayed short of the ratings needed to call this $1 either way."],
+  [/are still too thin to say where this ([^<]{0,60}?) lands\./g,
+   "stayed too thin to say where this $1 lands."],
   // upcoming that never arrived (or left before release)
   [/is one of the more anticipated ((?:[^<]{0,30}? )?)releases on the calendar\./g,
    "was one of the more anticipated $1releases while it was on our radar."],
