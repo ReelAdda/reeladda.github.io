@@ -1292,6 +1292,7 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
   const votes = item.imdbRating != null ? item.imdbVotes : item.votes;
   const isTv = item.kind === "tv";
   const noun = isTv ? "series" : "film";
+  const nounPl = isTv ? "series" : "films"; // "series" is its own plural — never "seriess"
   const today = new Date().toISOString().slice(0, 10);
   const upcoming = item.released && item.released > today;
   // Seeded variety: opening, rating commentary, and runtime aside are each picked from a
@@ -1324,9 +1325,9 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
         ]);
   } else if (r >= 7.5) {
     lead = pick([
-      `${item.title} lands among the stronger ${lang}${noun}s on offer right now`,
-      `${item.title} stands out as one of the better-rated ${lang}${noun}s around at the moment`,
-      `${item.title} has pulled the kind of numbers most ${lang}${noun}s never see`,
+      `${item.title} lands among the stronger ${lang}${nounPl} on offer right now`,
+      `${item.title} stands out as one of the better-rated ${lang}${nounPl} around at the moment`,
+      `${item.title} has pulled the kind of numbers most ${lang}${nounPl} never see`,
       `${item.title} ranks near the top of the current ${lang}${noun} crop`,
     ]);
   } else if (r >= 6.5) {
@@ -3343,6 +3344,40 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 
 // Pure: one-time honesty rewrite for a page whose film has left the list.
 // Returns { html, changed }. No-op for OTT pages (their availability claims stay valid).
+// Bump when new patch patterns are added: already-archived pages get one re-sweep so
+// the fix reaches pages frozen before the pattern existed.
+const ARCHIVE_PATCH_VERSION = 2;
+
+// Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
+// or the future ("on the calendar") read as broken on a page someone opens years after
+// the film left the list. At freeze, each becomes its past-tense, timeless equivalent.
+// SYNC: one pattern per time-relative variant in buildVerdictProse — the sync test
+// builds every variant, patches it, and asserts nothing time-relative survives.
+// Patterns run on escaped HTML, so apostrophes appear as &#39;.
+const ARCHIVE_LEAD_SWAPS = [
+  // unrated, just landed
+  [/is a fresh ([^<]{0,40}?)(film|series) that&#39;s only just landed, so ratings are still settling\./g,
+   "is a $1$2 that left our list before ratings settled \u2014 too few votes for a firm verdict."],
+  [/has only just arrived, so ratings for the ([^<]{0,60}?) are still finding their level\./g,
+   "left our list before ratings for the $1 found their level \u2014 too few votes for a firm verdict."],
+  [/is brand new to the list \u2014 too early for the numbers on this ([^<]{0,60}?) to mean much yet\./g,
+   "left our list before the numbers on this $1 settled \u2014 too few votes for a firm verdict."],
+  // upcoming that never arrived (or left before release)
+  [/is one of the more anticipated ((?:[^<]{0,30}? )?)releases on the calendar\./g,
+   "was one of the more anticipated $1releases while it was on our radar."],
+  [/sits high on the ((?:[^<]{0,30}? )?)watchlist for the weeks ahead\./g,
+   "sat high on the $1watchlist while it was on our radar."],
+  [/is the kind of ((?:[^<]{0,30}? )?)release people circle on the calendar\./g,
+   "was the kind of $1release people circle on the calendar."],
+  // top band "now"-phrasing
+  [/lands among the stronger ([^<]{0,50}?) on offer right now/g,
+   "landed among the stronger $1 of its release window"],
+  [/stands out as one of the better-rated ([^<]{0,50}?) around at the moment/g,
+   "stood out as one of the better-rated $1 of its release window"],
+  [/ranks near the top of the current ([^<]{0,50}?) crop/g,
+   "ranked near the top of that week&#39;s $1 crop"],
+];
+
 function archivePatchHtml(html, countryName) {
   const swaps = [
     [`It&#39;s in theatres in ${countryName} now — best caught on the big screen.`,
@@ -3355,6 +3390,10 @@ function archivePatchHtml(html, countryName) {
   let out = html, changed = false;
   for (const [from, to] of swaps) {
     if (out.includes(from)) { out = out.split(from).join(to); changed = true; }
+  }
+  for (const [re, to] of ARCHIVE_LEAD_SWAPS) {
+    if (re.test(out)) { out = out.replace(re, to); changed = true; }
+    re.lastIndex = 0; // global regexes are stateful across .test/.replace calls
   }
   return { html: out, changed };
 }
@@ -3391,15 +3430,24 @@ function archiveDepartedPages(manifest, cfg, currentSlugs) {
   const todayStr = new Date().toISOString().slice(0, 10);
   const toArchive = reconcilePagesManifest(manifest, cfg.code, currentSlugs, diskSlugs, todayStr);
   const countryName = countryNameFor(cfg);
+  // Newly-departed pages, plus a one-time re-sweep of pages archived under an older
+  // patch version (their frozen text predates newer patterns). pv stamps make it once.
+  const m = manifest[cfg.code] || {};
+  const sweep = new Set(toArchive);
+  for (const slug of diskSlugs) {
+    if (currentSlugs.has(slug)) continue;
+    if (m[slug] && m[slug].archivedOn && m[slug].pv !== ARCHIVE_PATCH_VERSION) sweep.add(slug);
+  }
   let patched = 0;
-  for (const slug of toArchive) {
+  for (const slug of sweep) {
     const p = `${dir}/${slug}.html`;
     try {
       const { html, changed } = archivePatchHtml(fs.readFileSync(p, "utf8"), countryName);
       if (changed) { fs.writeFileSync(p, html); patched++; }
+      if (m[slug]) m[slug].pv = ARCHIVE_PATCH_VERSION;
     } catch (e) { console.warn(`  archive: ${p} skipped (${e.message})`); }
   }
-  if (toArchive.length) console.log(`  archive [${cfg.code}]: ${toArchive.length} pages left the list, ${patched} honesty-patched`);
+  if (sweep.size) console.log(`  archive [${cfg.code}]: ${sweep.size} pages archived or re-swept, ${patched} honesty-patched`);
 }
 
 function writeOttWeekPage(data, cfg, allCountries) {
@@ -4160,7 +4208,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
 
 // Export pure/helper functions for unit testing (only meaningful when required, not run).
 module.exports = {
-  verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween,
+  verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween, ARCHIVE_PATCH_VERSION,
   assignSlugs, buildHeadTags, buildHomeJsonLd, ssrCard, ssrSoonCard,
   footerAttribution, RATINGS_SOURCE, USE_IMDB,
   deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
