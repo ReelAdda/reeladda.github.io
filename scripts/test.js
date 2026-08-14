@@ -421,12 +421,21 @@ test("archivePatchHtml + generator SYNC GUARD: a real theatrical page gets hones
   assert.ok(html.includes("finished its theatrical run in India"));
   assert.ok(!html.includes('<span class="pill">In theatres</span>'));
 });
-test("archivePatchHtml: no-op for OTT pages (their availability stays valid)", () => {
-  const item = { title: "S", slug: "s", kind: "tv", language: "English", platform: "Netflix",
-    providers: ["Netflix"], released: "2026-06-01", freshDate: "2026-06-20", rating: 8.0, votes: 900, verdict: "Must watch" };
-  const page = U.buildFilmPage(item, "2026-06-25", new Set(["s"]), { code: "in", name: "India", region: "IN" });
-  const { changed } = U.archivePatchHtml(page, "India");
-  assert.ok(!changed, "nothing to patch on a streaming page");
+test("archivePatchHtml: OTT availability lines stay untouched; only time-relative leads patch", () => {
+  // Mid-band lead is timeless -> a streaming page with it is a true no-op.
+  const mid = { title: "S", slug: "s", kind: "tv", language: "English", platform: "Netflix",
+    providers: ["Netflix"], released: "2026-06-01", freshDate: "2026-06-20", rating: 6.8, votes: 900, verdict: "Worth a watch" };
+  const midPage = U.buildFilmPage(mid, "2026-06-25", new Set(["s"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(!U.archivePatchHtml(midPage, "India").changed, "nothing to patch on a mid-band streaming page");
+  // Top-band lead says "right now" -> patched even on an OTT page, but the streaming
+  // availability sentence must survive verbatim (it stays true after archiving).
+  const top = { ...mid, rating: 8.0, verdict: "Must watch" };
+  const topPage = U.buildFilmPage(top, "2026-06-25", new Set(["s"]), { code: "in", name: "India", region: "IN" });
+  const before = /In India you can stream it on [^<]+/.exec(topPage);
+  const out = U.archivePatchHtml(topPage, "India");
+  assert.ok(out.changed, "time-relative lead on an OTT page gets the timeless treatment");
+  assert.ok(!/right now|at the moment|the current /.test(out.html));
+  assert.ok(before && out.html.includes(before[0]), "streaming availability line untouched");
 });
 test("reconcilePagesManifest: current bumps last + clears archive; departed marked ONCE", () => {
   const today = "2026-07-04";
@@ -750,6 +759,42 @@ test("verdict prose: no s's possessives in the just-landed variants", () => {
   for (let id = 1; id <= 9; id++) {
     const p = U.buildVerdictProse({ title: "T", tmdbId: id, kind: "tv", language: "Hindi", rating: null, votes: 0, released: "2026-08-01", providers: ["Netflix"] });
     assert.ok(!/s's/.test(p), p);
+  }
+});
+group("archive honesty: time-relative verdicts become timeless at freeze");
+const TIME_RELATIVE_RE = /brand new to the list|only just (?:landed|arrived)|on offer right now|around at the moment|the current [^<]{0,40} crop|for the weeks ahead|is one of the more anticipated|releases on the calendar|is the kind of [^<]{0,40}release people circle/;
+test("every unrated/upcoming/top-band lead variant is patched — nothing time-relative survives", () => {
+  const cases = [];
+  for (let id = 1; id <= 9; id++) {
+    for (const [kind, language] of [["movie", "Hindi"], ["tv", "English"], ["movie", null]]) {
+      cases.push({ title: "T&One", tmdbId: id, kind, language, rating: null, votes: 0, released: "2026-01-01", platform: "Theatres" }); // landed, unrated
+      cases.push({ title: "T&Two", tmdbId: id, kind, language, rating: null, votes: 0, released: "2099-01-01" });                     // upcoming
+      cases.push({ title: "T&Top", tmdbId: id, kind, language, rating: 8.1, votes: 900, runtime: 120, providers: ["Netflix"] });      // top band
+    }
+  }
+  for (const item of cases) {
+    const page = U.escHtml(U.buildVerdictProse(item));
+    const { html } = U.archivePatchHtml(page, "India");
+    assert.ok(!TIME_RELATIVE_RE.test(html), "survived patch: " + html);
+  }
+});
+test("archive lead patch keeps facts, grammar, and is idempotent", () => {
+  const prose = U.escHtml(U.buildVerdictProse({ title: "X", tmdbId: 2, kind: "tv", language: "Hindi", rating: null, votes: 0, released: "2026-01-01", platform: "Theatres" }));
+  const once = U.archivePatchHtml(prose, "India");
+  assert.strictEqual(once.changed, true);
+  assert.ok(/left our list before/.test(once.html) && /too few votes/.test(once.html), once.html);
+  const twice = U.archivePatchHtml(once.html, "India");
+  assert.strictEqual(twice.html, once.html, "patch must be idempotent");
+  // top band: rating fact survives, tense flips
+  const top = U.escHtml(U.buildVerdictProse({ title: "Y", tmdbId: 1, kind: "tv", language: "Hindi", rating: 8.1, votes: 900, providers: ["Netflix"] }));
+  const p = U.archivePatchHtml(top, "India").html;
+  assert.ok(/8\.1\/10 on TMDB/.test(p), p);
+  assert.ok(/landed among|stood out|ranked near|numbers most/.test(p), p);
+});
+test("no seriess: series pluralizes as series in every band", () => {
+  for (let id = 1; id <= 6; id++) {
+    const p = U.buildVerdictProse({ title: "S", tmdbId: id, kind: "tv", language: "Hindi", rating: 8.0, votes: 900, providers: ["Netflix"] });
+    assert.ok(!/seriess/.test(p), p);
   }
 });
 test("buildVerdictProse: empty item returns empty string", () => {
