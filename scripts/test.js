@@ -767,7 +767,8 @@ test("every unrated/upcoming/top-band lead variant is patched — nothing time-r
   const cases = [];
   for (let id = 1; id <= 9; id++) {
     for (const [kind, language] of [["movie", "Hindi"], ["tv", "English"], ["movie", null]]) {
-      cases.push({ title: "T&One", tmdbId: id, kind, language, rating: null, votes: 0, released: "2026-01-01", platform: "Theatres" }); // landed, unrated
+      cases.push({ title: "T&One", tmdbId: id, kind, language, rating: null, votes: 0, released: "2026-01-01", platform: "Theatres" }); // landed long ago, unrated
+      cases.push({ title: "T&New", tmdbId: id, kind, language, rating: null, votes: 0, released: new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10), platform: "Theatres" }); // landed days ago, unrated
       cases.push({ title: "T&Two", tmdbId: id, kind, language, rating: null, votes: 0, released: "2099-01-01" });                     // upcoming
       cases.push({ title: "T&Top", tmdbId: id, kind, language, rating: 8.1, votes: 900, runtime: 120, providers: ["Netflix"] });      // top band
     }
@@ -779,7 +780,8 @@ test("every unrated/upcoming/top-band lead variant is patched — nothing time-r
   }
 });
 test("archive lead patch keeps facts, grammar, and is idempotent", () => {
-  const prose = U.escHtml(U.buildVerdictProse({ title: "X", tmdbId: 2, kind: "tv", language: "Hindi", rating: null, votes: 0, released: "2026-01-01", platform: "Theatres" }));
+  const freshIso = new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10); // within the 21-day recency window
+  const prose = U.escHtml(U.buildVerdictProse({ title: "X", tmdbId: 2, kind: "tv", language: "Hindi", rating: null, votes: 0, released: freshIso, platform: "Theatres" }));
   const once = U.archivePatchHtml(prose, "India");
   assert.strictEqual(once.changed, true);
   assert.ok(/left our list before/.test(once.html) && /too few votes/.test(once.html), once.html);
@@ -790,6 +792,29 @@ test("archive lead patch keeps facts, grammar, and is idempotent", () => {
   const p = U.archivePatchHtml(top, "India").html;
   assert.ok(/8\.1\/10 on TMDB/.test(p), p);
   assert.ok(/landed among|stood out|ranked near|numbers most/.test(p), p);
+});
+test("unrated leads are age-aware: recency claims only within ~3 weeks of release", () => {
+  const iso = (daysAgo) => new Date(Date.now() - daysAgo * 86400000).toISOString().slice(0, 10);
+  for (let id = 1; id <= 6; id++) {
+    const oldFilm = { title: "T", tmdbId: id, kind: "movie", language: "English", rating: null, votes: 0, released: iso(60), platform: "Theatres" };
+    const p = U.buildVerdictProse(oldFilm);
+    assert.ok(!/brand new|only just|is a fresh/.test(p), "recency claim on a 60-day-old film: " + p);
+    assert.ok(/enough ratings|too thin|short of the ratings/.test(p), p);
+    const fresh = { ...oldFilm, released: iso(5) };
+    assert.ok(/brand new|only just/.test(U.buildVerdictProse(fresh)), "a 5-day-old film may say it's new");
+    // no release date to judge by -> never claim recency
+    const undated = { ...oldFilm, released: null };
+    assert.ok(!/brand new|only just|is a fresh/.test(U.buildVerdictProse(undated)));
+  }
+});
+test("aged-unrated leads freeze to past tense like every other time-relative lead", () => {
+  const iso = (d) => new Date(Date.now() - d * 86400000).toISOString().slice(0, 10);
+  for (let id = 1; id <= 6; id++) {
+    const page = U.escHtml(U.buildVerdictProse({ title: "T&x", tmdbId: id, kind: "tv", language: "Hindi", rating: null, votes: 0, released: iso(90), platform: "Theatres" }));
+    const { html } = U.archivePatchHtml(page, "India");
+    assert.ok(!/yet for a firm read|still short of|still too thin/.test(html), html);
+    assert.ok(/never gathered|stayed short|stayed too thin/.test(html), html);
+  }
 });
 test("no seriess: series pluralizes as series in every band", () => {
   for (let id = 1; id <= 6; id++) {
