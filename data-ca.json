@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-08-14T12:44:32.474Z",
+ "generatedAt": "2026-08-14T14:43:44.725Z",
  "country": "ca",
- "pick": "Ted Lasso",
+ "pick": "Futurama",
  "theatres": [
   {
    "title": "Spider-Man: Brand New Day",
@@ -56,13 +56,6 @@
      "kind": "movie"
     },
     {
-     "title": "Guardians of the Galaxy Vol. 3",
-     "slug": "guardians-of-the-galaxy-vol-3",
-     "poster": "https://image.tmdb.org/t/p/w342/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Venom: Let There Be Carnage",
      "slug": "venom-let-there-be-carnage",
      "poster": "https://image.tmdb.org/t/p/w342/pzKsRuKLFmYrW5Q0q8E8G78Tcgo.jpg",
@@ -80,6 +73,13 @@
      "title": "Thunderbolts*",
      "slug": "thunderbolts",
      "poster": "https://image.tmdb.org/t/p/w342/hqcexYHbiTBfDIdDWxrxPtVndBX.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Doctor Strange in the Multiverse of Madness",
+     "slug": "doctor-strange-in-the-multiverse-of-madness",
+     "poster": "https://image.tmdb.org/t/p/w342/ddJcSKbcp4rKZTmuyWaMhuwcfMz.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -123,7 +123,7 @@
    "slug": "spider-man-brand-new-day",
    "wikiWeeklyViews": 2350696,
    "trending": true,
-   "trailerViews": 6305304,
+   "trailerViews": 6307501,
    "take": "Mostly good reviews — the performances and direction impressed, even if the pacing didn't.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -250,7 +250,9 @@
     }
    ],
    "slug": "the-end-of-oak-street",
-   "trailerViews": 396667,
+   "wikiWeeklyViews": 391807,
+   "trending": true,
+   "trailerViews": 396875,
    "take": "Most reviews land firmly on the positive side.",
    "takeSrc": "wiki",
    "takeArticle": "The End of Oak Street"
@@ -482,7 +484,7 @@
     }
    ],
    "slug": "the-great-punjab-robbery",
-   "trailerViews": 28872478
+   "trailerViews": 28872872
   },
   {
    "title": "Teenage Sex and Death at Camp Miasma",
@@ -603,8 +605,7 @@
    ],
    "slug": "teenage-sex-and-death-at-camp-miasma",
    "wikiWeeklyViews": 159573,
-   "trending": true,
-   "trailerViews": 94734,
+   "trailerViews": 95187,
    "take": "Rave reviews across the board, especially for the humour.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -852,7 +853,7 @@
    ],
    "slug": "tony",
    "wikiWeeklyViews": 114479,
-   "trailerViews": 10689814,
+   "trailerViews": 10690826,
    "take": "Good word from critics, with the performances and music earning most of the praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -986,7 +987,7 @@
    "ottFreshDate": "2026-08-12",
    "slug": "reacher",
    "wikiWeeklyViews": 170611,
-   "trailerViews": 11883065,
+   "trailerViews": 11883227,
    "take": "Most critics came away happy.",
    "takeSrc": "wiki",
    "takeArticle": "Reacher (TV series)"
@@ -1127,7 +1128,7 @@
      "score": "6.9/10"
     }
    ],
-   "votes": 577,
+   "votes": 583,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/6JU7E8Vv2M11egkctWVOScxWR75.jpg",
    "isRecent": false,
@@ -1239,9 +1240,142 @@
    "slug": "the-last-house",
    "wikiWeeklyViews": 1167661,
    "trending": true,
-   "trailerViews": 3886092,
+   "trailerViews": 3887889,
    "take": "Early word from viewers on TMDB runs positive.",
    "takeSrc": "tmdb"
+  },
+  {
+   "title": "Futurama",
+   "genre": "Animation / Comedy",
+   "language": "English",
+   "released": "1999-03-28",
+   "review": "The adventures of a late-20th-century New York City pizza delivery boy, Philip J. Fry, who, after being unwittingly cryogenically frozen for one thousand…",
+   "rating": 8.4,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.4/10"
+    }
+   ],
+   "votes": 3846,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/eM8bbTn8C8vUwwS6upzzm7gX31u.jpg",
+   "isRecent": true,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 615,
+   "popularity": 105.4781,
+   "cert": "14+",
+   "trailer": "https://www.youtube.com/watch?v=dUHzt5md1x0",
+   "providers": [
+    "Disney Plus",
+    "Crave"
+   ],
+   "cast": [
+    "Billy West",
+    "Katey Sagal",
+    "John DiMaggio",
+    "Tress MacNeille"
+   ],
+   "director": "Matt Groening",
+   "runtime": null,
+   "imdbVotes": null,
+   "imdbId": "tt0149460",
+   "freshDate": "2026-08-03",
+   "badge": "New season",
+   "similar": [
+    {
+     "title": "Among Us",
+     "slug": "among-us",
+     "poster": "https://image.tmdb.org/t/p/w342/4gPHraAEFpTIHWFTXArOsf05wNM.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Adventure Time: Fionna and Cake",
+     "slug": "adventure-time-fionna-and-cake",
+     "poster": "https://image.tmdb.org/t/p/w342/fi1b6U1kp73xheECzqwzMn8u3mX.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Close Enough",
+     "slug": "close-enough",
+     "poster": "https://image.tmdb.org/t/p/w342/8aNYMcMyhv1m0MKibgCVmJrAeLs.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Star Wars: Visions",
+     "slug": "star-wars-visions",
+     "poster": "https://image.tmdb.org/t/p/w342/lG9ltUP4FwvsQBcwOJYceDbP48E.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Pacific Rim: The Black",
+     "slug": "pacific-rim-the-black",
+     "poster": "https://image.tmdb.org/t/p/w342/wz2tUYzlUnfQWpBpoerFDbEZdzz.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Eyes of Wakanda",
+     "slug": "eyes-of-wakanda",
+     "poster": "https://image.tmdb.org/t/p/w342/yuOfb1MgnaGPa4guzV0n1IFYVGN.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/4xKG4S1IyLIglHbCYGJDsptgQNh.jpg",
+   "backdropPath": "/4xKG4S1IyLIglHbCYGJDsptgQNh.jpg",
+   "posterPath": "/eM8bbTn8C8vUwwS6upzzm7gX31u.jpg",
+   "fullReview": "The adventures of a late-20th-century New York City pizza delivery boy, Philip J. Fry, who, after being unwittingly cryogenically frozen for one thousand years, finds employment at Planet Express, an interplanetary delivery company in the retro-futuristic 31st century.",
+   "castPics": [
+    {
+     "name": "Billy West",
+     "character": "Fry / Professor Farnsworth / Zoidberg / Zapp Brannigan (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/iNQtBsgV4wr3z5CEEFhR5U4Yedk.jpg"
+    },
+    {
+     "name": "Katey Sagal",
+     "character": "Leela (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/jdnBWdXlQG2Q2F6v9MPJkaWQ9Vd.jpg"
+    },
+    {
+     "name": "John DiMaggio",
+     "character": "Bender (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/qcbQe71nSlULDsP1OxTqltEKFbl.jpg"
+    },
+    {
+     "name": "Tress MacNeille",
+     "character": "Mom (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/gI2LsgByvSffQY34vabVnPmrHzw.jpg"
+    },
+    {
+     "name": "Maurice LaMarche",
+     "character": "Morbo / Kif Kroker (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/qCiL3EYAhLcNo0rNj5pczWo9MwG.jpg"
+    },
+    {
+     "name": "Lauren Tom",
+     "character": "Amy Wong (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/fTKFspRRQ275AkzvtPERLZnXe0n.jpg"
+    }
+   ],
+   "platform": "Disney Plus",
+   "ottSince": "2026-08-04",
+   "ottFreshDate": "2026-08-03",
+   "stillGood": true,
+   "slug": "futurama",
+   "wikiWeeklyViews": 26217,
+   "trailerViews": 44191,
+   "take": "Critics loved it — special praise for the animation.",
+   "takeSrc": "wiki",
+   "takeAspects": [
+    "animation"
+   ],
+   "takeArticle": "Futurama"
   },
   {
    "title": "Ted Lasso",
@@ -1368,15 +1502,133 @@
    "ottFreshDate": "2026-08-04",
    "stillGood": true,
    "slug": "ted-lasso",
-   "wikiWeeklyViews": 326817,
-   "trending": true,
-   "trailerViews": 161839,
+   "trailerViews": 161878,
    "take": "Near-universal acclaim, with the music singled out most often.",
    "takeSrc": "wiki",
    "takeAspects": [
     "music"
    ],
    "takeArticle": "Ted Lasso"
+  },
+  {
+   "title": "Musafir Cafe",
+   "genre": "Drama",
+   "language": "Hindi",
+   "released": "2026-07-24",
+   "review": "Chander feels an undeniable connection with Sudha. Years later, he builds a new life in the hills with Preeti, but memories of the past linger.",
+   "rating": 7.2,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "7.2/10"
+    }
+   ],
+   "votes": 10,
+   "verdict": "Worth a watch",
+   "poster": "https://image.tmdb.org/t/p/w342/1SbKjtoRKIpVQG5iYnumnfQIqhd.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 313101,
+   "popularity": 24.5015,
+   "cert": null,
+   "trailer": "https://www.youtube.com/results?search_query=Musafir%20Cafe%20official%20trailer",
+   "providers": [
+    "Netflix"
+   ],
+   "cast": [
+    "Vikrant Massey",
+    "Vedika Pinto",
+    "Mahima Makwana",
+    "Rajeev Siddhartha"
+   ],
+   "director": "Sharanya Rajgopal",
+   "runtime": null,
+   "imdbVotes": null,
+   "imdbId": "tt39665097",
+   "freshDate": "2026-07-24",
+   "badge": null,
+   "similar": [
+    {
+     "title": "Aspirants",
+     "slug": "aspirants",
+     "poster": "https://image.tmdb.org/t/p/w342/lG8wK40jH4EX6dbVFI1fzw2E96N.jpg",
+     "language": "Hindi",
+     "kind": "tv"
+    },
+    {
+     "title": "Khakee: The Bihar Chapter",
+     "slug": "khakee-the-bihar-chapter",
+     "poster": "https://image.tmdb.org/t/p/w342/xvr3WrwAQMlcb00OZEos9nLekTE.jpg",
+     "language": "Hindi",
+     "kind": "tv"
+    },
+    {
+     "title": "Swagger",
+     "slug": "swagger",
+     "poster": "https://image.tmdb.org/t/p/w342/nASkt8izgpR4toMYgiAnxfjWcE2.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Sullivan's Crossing",
+     "slug": "sullivan-s-crossing",
+     "poster": "https://image.tmdb.org/t/p/w342/nYRnuQNR13nEYaXkOZaY0qIWl2K.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "SkyMed",
+     "slug": "skymed",
+     "poster": "https://image.tmdb.org/t/p/w342/tOKUKERvfaOf7Dy2IAKT5HYYXJJ.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Couple Next Door",
+     "slug": "the-couple-next-door",
+     "poster": "https://image.tmdb.org/t/p/w342/ifQ5ffAI6KfywBcSGoGU1YWO3yC.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/mQFlpu6IH7dRIjLYZbflzn4H6uV.jpg",
+   "backdropPath": "/mQFlpu6IH7dRIjLYZbflzn4H6uV.jpg",
+   "posterPath": "/1SbKjtoRKIpVQG5iYnumnfQIqhd.jpg",
+   "fullReview": "Chander feels an undeniable connection with Sudha. Years later, he builds a new life in the hills with Preeti, but memories of the past linger.",
+   "castPics": [
+    {
+     "name": "Vikrant Massey",
+     "character": "Chander",
+     "photo": "https://image.tmdb.org/t/p/w185/zvpP52P7CtVXYONmvWrH1aOcRTx.jpg"
+    },
+    {
+     "name": "Vedika Pinto",
+     "character": "Sudha",
+     "photo": "https://image.tmdb.org/t/p/w185/xSny2CLcB8C3kzcQ5jmoUnJ5yAX.jpg"
+    },
+    {
+     "name": "Mahima Makwana",
+     "character": "Preeti",
+     "photo": "https://image.tmdb.org/t/p/w185/waEk8kZ5LVpIKAJbG9uUxQldaAT.jpg"
+    },
+    {
+     "name": "Rajeev Siddhartha",
+     "character": "Rahil",
+     "photo": "https://image.tmdb.org/t/p/w185/3F2DlzQ9fQfL8ov8uFUASUjxWTE.jpg"
+    },
+    {
+     "name": "Anubha Fatehpuria",
+     "character": "Chander's Mother",
+     "photo": "https://image.tmdb.org/t/p/w185/7KeBm0PHfsWIG8wjyrboUTem2TM.jpg"
+    }
+   ],
+   "platform": "Netflix",
+   "ottSince": "2026-07-27",
+   "ottFreshDate": "2026-07-24",
+   "stillGood": true,
+   "slug": "musafir-cafe",
+   "wikiWeeklyViews": 9543
   },
   {
    "title": "Lioness",
@@ -1504,7 +1756,8 @@
    "ottFreshDate": "2026-08-02",
    "stillGood": true,
    "slug": "lioness",
-   "trailerViews": 1869635,
+   "wikiWeeklyViews": 205996,
+   "trailerViews": 1869678,
    "take": "Critics can't agree — high marks for the performances and visuals, complaints about the story.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1513,258 +1766,6 @@
    ],
    "takeArticle": "Lioness (American TV series)",
    "takeCounter": "Viewers beg to differ — audience scores run well above the critics' line."
-  },
-  {
-   "title": "Musafir Cafe",
-   "genre": "Drama",
-   "language": "Hindi",
-   "released": "2026-07-24",
-   "review": "Chander feels an undeniable connection with Sudha. Years later, he builds a new life in the hills with Preeti, but memories of the past linger.",
-   "rating": 7.2,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "7.2/10"
-    }
-   ],
-   "votes": 10,
-   "verdict": "Worth a watch",
-   "poster": "https://image.tmdb.org/t/p/w342/1SbKjtoRKIpVQG5iYnumnfQIqhd.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 313101,
-   "popularity": 24.5015,
-   "cert": null,
-   "trailer": "https://www.youtube.com/results?search_query=Musafir%20Cafe%20official%20trailer",
-   "providers": [
-    "Netflix"
-   ],
-   "cast": [
-    "Vikrant Massey",
-    "Vedika Pinto",
-    "Mahima Makwana",
-    "Rajeev Siddhartha"
-   ],
-   "director": "Sharanya Rajgopal",
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt39665097",
-   "freshDate": "2026-07-24",
-   "badge": null,
-   "similar": [
-    {
-     "title": "Aspirants",
-     "slug": "aspirants",
-     "poster": "https://image.tmdb.org/t/p/w342/lG8wK40jH4EX6dbVFI1fzw2E96N.jpg",
-     "language": "Hindi",
-     "kind": "tv"
-    },
-    {
-     "title": "Khakee: The Bihar Chapter",
-     "slug": "khakee-the-bihar-chapter",
-     "poster": "https://image.tmdb.org/t/p/w342/xvr3WrwAQMlcb00OZEos9nLekTE.jpg",
-     "language": "Hindi",
-     "kind": "tv"
-    },
-    {
-     "title": "Swagger",
-     "slug": "swagger",
-     "poster": "https://image.tmdb.org/t/p/w342/nASkt8izgpR4toMYgiAnxfjWcE2.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Sullivan's Crossing",
-     "slug": "sullivan-s-crossing",
-     "poster": "https://image.tmdb.org/t/p/w342/nYRnuQNR13nEYaXkOZaY0qIWl2K.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "SkyMed",
-     "slug": "skymed",
-     "poster": "https://image.tmdb.org/t/p/w342/tOKUKERvfaOf7Dy2IAKT5HYYXJJ.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Couple Next Door",
-     "slug": "the-couple-next-door",
-     "poster": "https://image.tmdb.org/t/p/w342/ifQ5ffAI6KfywBcSGoGU1YWO3yC.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/mQFlpu6IH7dRIjLYZbflzn4H6uV.jpg",
-   "backdropPath": "/mQFlpu6IH7dRIjLYZbflzn4H6uV.jpg",
-   "posterPath": "/1SbKjtoRKIpVQG5iYnumnfQIqhd.jpg",
-   "fullReview": "Chander feels an undeniable connection with Sudha. Years later, he builds a new life in the hills with Preeti, but memories of the past linger.",
-   "castPics": [
-    {
-     "name": "Vikrant Massey",
-     "character": "Chander",
-     "photo": "https://image.tmdb.org/t/p/w185/zvpP52P7CtVXYONmvWrH1aOcRTx.jpg"
-    },
-    {
-     "name": "Vedika Pinto",
-     "character": "Sudha",
-     "photo": "https://image.tmdb.org/t/p/w185/xSny2CLcB8C3kzcQ5jmoUnJ5yAX.jpg"
-    },
-    {
-     "name": "Mahima Makwana",
-     "character": "Preeti",
-     "photo": "https://image.tmdb.org/t/p/w185/waEk8kZ5LVpIKAJbG9uUxQldaAT.jpg"
-    },
-    {
-     "name": "Rajeev Siddhartha",
-     "character": "Rahil",
-     "photo": "https://image.tmdb.org/t/p/w185/3F2DlzQ9fQfL8ov8uFUASUjxWTE.jpg"
-    },
-    {
-     "name": "Anubha Fatehpuria",
-     "character": "Chander's Mother",
-     "photo": "https://image.tmdb.org/t/p/w185/7KeBm0PHfsWIG8wjyrboUTem2TM.jpg"
-    }
-   ],
-   "platform": "Netflix",
-   "ottSince": "2026-07-27",
-   "ottFreshDate": "2026-07-24",
-   "stillGood": true,
-   "slug": "musafir-cafe",
-   "wikiWeeklyViews": 9543
-  },
-  {
-   "title": "Avatar Aang: The Last Airbender",
-   "genre": "Animation / Action",
-   "language": "English",
-   "released": "2026-07-24",
-   "review": "Avatar Aang, the world's last Airbender, learns of an ancient power that could save his culture from extinction.",
-   "rating": 9.3,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "9.3/10"
-    }
-   ],
-   "votes": 837,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/3sgnSfNT27Bx5O5ukr7B26mhEQq.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 980431,
-   "popularity": 131.3887,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=7b20GRFZBFE",
-   "providers": [
-    "Paramount Plus",
-    "Paramount+ Amazon Channel",
-    "Paramount Plus Premium"
-   ],
-   "cast": [
-    "Eric Nam",
-    "Dave Bautista",
-    "Jessica Matten",
-    "Román Zaragoza"
-   ],
-   "director": "Lauren Montgomery",
-   "runtime": 99,
-   "imdbVotes": null,
-   "imdbId": "tt18259538",
-   "freshDate": "2026-07-24",
-   "badge": null,
-   "similar": [
-    {
-     "title": "The SpongeBob Movie: Sponge on the Run",
-     "slug": "the-spongebob-movie-sponge-on-the-run",
-     "poster": "https://image.tmdb.org/t/p/w342/jlJ8nDhMhCYJuzOw3f52CP1W8MW.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Chickenhare and the Hamster of Darkness",
-     "slug": "chickenhare-and-the-hamster-of-darkness",
-     "poster": "https://image.tmdb.org/t/p/w342/2v6f1EqTo4FUxVT9MDXpF6158AX.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Raya and the Last Dragon",
-     "slug": "raya-and-the-last-dragon",
-     "poster": "https://image.tmdb.org/t/p/w342/5nVhgCzxKbK47OLIKxCR1syulOn.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Lord of the Rings: The War of the Rohirrim",
-     "slug": "the-lord-of-the-rings-the-war-of-the-rohirrim",
-     "poster": "https://image.tmdb.org/t/p/w342/23WCoDo6wzBfzbX7BGTNwVUqZfi.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Kung Fu Panda 4",
-     "slug": "kung-fu-panda-4",
-     "poster": "https://image.tmdb.org/t/p/w342/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Dragon Rider",
-     "slug": "dragon-rider",
-     "poster": "https://image.tmdb.org/t/p/w342/ucDrOXUrVnr9X3ZmXP2Q68HDIHr.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/ezbrL1dMymKQZw7mDEWa2ZTzN7d.jpg",
-   "backdropPath": "/ezbrL1dMymKQZw7mDEWa2ZTzN7d.jpg",
-   "posterPath": "/3sgnSfNT27Bx5O5ukr7B26mhEQq.jpg",
-   "fullReview": "Avatar Aang, the world's last Airbender, learns of an ancient power that could save his culture from extinction. With the help of his friends, he embarks on a global quest to find it before it falls into the wrong hands and threatens to upend the peace they sacrificed everything to achieve.",
-   "castPics": [
-    {
-     "name": "Eric Nam",
-     "character": "Aang (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/gEH0b5q9tupL49dmUFkjm9dnxP2.jpg"
-    },
-    {
-     "name": "Dave Bautista",
-     "character": "Tagah (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/snk6JiXOOoRjPtHU5VMoy6qbd32.jpg"
-    },
-    {
-     "name": "Jessica Matten",
-     "character": "Katara (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/EQsPxsav8AZmaeT3mpU3Evilee.jpg"
-    },
-    {
-     "name": "Román Zaragoza",
-     "character": "Sokka (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/uWkOkSLqj2POMqkeLk5E5UJzebv.jpg"
-    },
-    {
-     "name": "Steven Yeun",
-     "character": "Zuko (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/fOMFO2Xx4duzpNgS9Q5ytO44yGb.jpg"
-    },
-    {
-     "name": "Dionne Quan",
-     "character": "Toph (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/vGe0bMTfYDX1Wcw9ZCfY3YCSgai.jpg"
-    }
-   ],
-   "theatrical": false,
-   "platform": "Paramount Plus",
-   "ottSince": "2026-07-26",
-   "ottFreshDate": "2026-07-24",
-   "stillGood": true,
-   "slug": "avatar-aang-the-last-airbender",
-   "wikiWeeklyViews": 92549,
-   "trailerViews": 13360001,
-   "take": "Broadly positive reviews, though the originality drew grumbles.",
-   "takeSrc": "wiki",
-   "takeArticle": "Avatar Aang: The Last Airbender"
   },
   {
    "title": "Silo",
@@ -1779,7 +1780,7 @@
      "score": "8.2/10"
     }
    ],
-   "votes": 2414,
+   "votes": 2415,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/gMYZZvnkVNTqSVnVCphWbPXwWwb.jpg",
    "isRecent": false,
@@ -1892,7 +1893,8 @@
    "stillGood": true,
    "slug": "silo",
    "wikiWeeklyViews": 219865,
-   "trailerViews": 9662982,
+   "trending": true,
+   "trailerViews": 9663522,
    "take": "Critics were won over, largely on the strength of the performances and production design.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2024,7 +2026,7 @@
    "ottFreshDate": "2026-07-24",
    "stillGood": true,
    "slug": "adarsh-baal-vidyalaya",
-   "trailerViews": 28114691
+   "trailerViews": 28115344
   },
   {
    "title": "X-Men '97",
@@ -2075,6 +2077,13 @@
      "kind": "tv"
     },
     {
+     "title": "The Falcon and the Winter Soldier",
+     "slug": "the-falcon-and-the-winter-soldier",
+     "poster": "https://image.tmdb.org/t/p/w342/6kbAMLteGO8yyewYau6bJ683sw7.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "Marvel Studios Legends",
      "slug": "marvel-studios-legends",
      "poster": "https://image.tmdb.org/t/p/w342/EpDuYIK81YtCUT3gH2JDpyj8Qk.jpg",
@@ -2094,13 +2103,6 @@
      "poster": "https://image.tmdb.org/t/p/w342/gNbdjDi1HamTCrfvM9JeA94bNi2.jpg",
      "language": "English",
      "kind": "tv"
-    },
-    {
-     "title": "The Winchesters",
-     "slug": "the-winchesters",
-     "poster": "https://image.tmdb.org/t/p/w342/oyleYabGfn6c50bIo4M3c7ogrfL.jpg",
-     "language": "English",
-     "kind": "tv"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/jIyEmnBrZtl6SEWyBoMO2hZnzMa.jpg",
@@ -2112,8 +2114,7 @@
    "ottFreshDate": "2026-07-01",
    "stillGood": true,
    "slug": "x-men-97",
-   "wikiWeeklyViews": 118812,
-   "trailerViews": 10386717,
+   "trailerViews": 10386810,
    "take": "Critics loved this one, and the writing and action drew the loudest praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2232,7 +2233,7 @@
     }
    ],
    "slug": "mutiny",
-   "trailerViews": 7971
+   "trailerViews": 7999
   },
   {
    "title": "The Last Sunrise",
@@ -2342,7 +2343,7 @@
     }
    ],
    "slug": "the-last-sunrise",
-   "trailerViews": 913557
+   "trailerViews": 914483
   },
   {
    "title": "Coyote vs. Acme",
@@ -2452,7 +2453,7 @@
     }
    ],
    "slug": "coyote-vs-acme",
-   "trailerViews": 4942478
+   "trailerViews": 4943431
   },
   {
    "title": "Fall 2: Deadpoint",
@@ -2562,7 +2563,7 @@
     }
    ],
    "slug": "fall-2-deadpoint",
-   "trailerViews": 2318816
+   "trailerViews": 2320384
   },
   {
    "title": "Hope",
@@ -2672,7 +2673,7 @@
     }
    ],
    "slug": "hope",
-   "trailerViews": 856314
+   "trailerViews": 879898
   },
   {
    "title": "Drishyam 3",
@@ -2884,7 +2885,7 @@
     }
    ],
    "slug": "bokshi",
-   "trailerViews": 241403
+   "trailerViews": 241407
   },
   {
    "title": "Ramayana",
@@ -2994,7 +2995,7 @@
     }
    ],
    "slug": "ramayana",
-   "trailerViews": 364111
+   "trailerViews": 364196
   }
  ],
  "trackedFilms": 104
