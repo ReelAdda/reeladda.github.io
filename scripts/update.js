@@ -1687,7 +1687,7 @@ async function enrich(kind, id, region = "IN") {
   // no extra round trip). We keep title + slug + light meta; the page links to each film's own
   // page when it exists. slugify mirrors the client/page slug scheme so links resolve.
   const recs = rankSimilar(d.recommendations?.results, kind, d.original_language)
-    .slice(0, 6)
+    .slice(0, 12) // page builder promotes on-site titles from this pool, then shows 6
     .map((x) => ({
       title: x.title || x.name,
       slug: slugify(x.title || x.name),
@@ -1704,6 +1704,7 @@ async function enrich(kind, id, region = "IN") {
   return {
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
     imdbId: imdbId || null, // handle for cross-source lookups (Wikipedia buzz via Wikidata P345)
+    seasons: kind === "tv" ? d.number_of_seasons || null : null,
     freshDate, badge, isRecent: badge != null, similar: recs,
     backdrop: img(d.backdrop_path, "w780"),
     // Raw TMDB paths kept so the social/Discover og:image can request a LARGE size
@@ -2537,12 +2538,38 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   // mechanic already answer it. Streaming titles, TV, and other countries keep the
   // review/where-to-watch shape ("OTT" is Indian-market phrasing).
   const wantsOttTitle = code === "in" && item.kind !== "tv" && providers.length === 0;
+  // Google shows ~60 chars of a title; every India film title was over it, so the query
+  // words were the part being cut. Drop decoration first (brand, country), keep the
+  // query-bearing words ("OTT Release Date" / "Review") to the last tier.
+  const yr = year ? ` (${year})` : "";
+  const fitTitle = (opts) => opts.find((t) => t.length <= 60) || opts[opts.length - 1];
   const titleTag = wantsOttTitle
-    ? `${item.title}${year ? " (" + year + ")" : ""} OTT Release Date, Review & Where to Watch | FilmyChill`
-    : `${item.title}${year ? " (" + year + ")" : ""} — Review, Rating & Where to Watch in ${country} | FilmyChill`;
-  const desc = wantsOttTitle
-    ? trim([`${item.title} OTT release date: not announced yet — updated the day it streams`, item.verdict, synopsis].filter(Boolean).join(". "), 155)
-    : trim([item.verdict, synopsis].filter(Boolean).join(". "), 155);
+    ? fitTitle([
+        `${item.title}${yr} OTT Release Date, Review & Where to Watch | FilmyChill`,
+        `${item.title}${yr} OTT Release Date, Review & Where to Watch`,
+        `${item.title}${yr} OTT Release Date & Review`,
+        `${item.title}${yr} OTT Release Date`,
+      ])
+    : fitTitle([
+        `${item.title}${yr} — Review, Rating & Where to Watch in ${country} | FilmyChill`,
+        `${item.title}${yr} — Review, Rating & Where to Watch in ${country}`,
+        `${item.title}${yr} — Review & Where to Watch in ${country}`,
+        `${item.title}${yr} — Review & Where to Watch`,
+        `${item.title}${yr} — Review`,
+      ]);
+  // Description order: what IS true (platform / theatres / rating) leads, the synopsis
+  // fills, and the one unknown (OTT date) goes LAST — an unknown is a terrible opener.
+  // Guaranteed non-empty: five live pages had blank descriptions (no verdict, no synopsis).
+  const dvotes = item.imdbRating != null ? item.imdbVotes : item.votes;
+  const factBits = [];
+  if (providers.length) factBits.push(`Streaming on ${providers.slice(0, 2).join(" & ")} in ${country}`);
+  else if (item.platform === "Theatres") factBits.push(`In theatres in ${country}`);
+  if (item.rating != null && dvotes >= 10) factBits.push(`rated ${Number(item.rating).toFixed(1)}/10`);
+  const clean = (s) => String(s).trim().replace(/\.+$/, "");
+  const descParts = [factBits.join(", "), item.verdict, synopsis].filter(Boolean).map(clean);
+  if (wantsOttTitle) descParts.push("OTT date not announced yet — this page updates the day it streams");
+  const desc = trim(descParts.filter(Boolean).join(". "), 155)
+    || trim(`${item.title}${yr}: ${[item.language, item.genre, item.kind === "tv" ? "series" : "film"].filter(Boolean).join(" ")} — review, rating and where to watch in ${country}`, 155);
 
   // hreflang alternates: the SAME film may have a page in several countries. crossCountry maps
   // code -> true for every other country whose current run also has this slug. Passed in by
@@ -2557,6 +2584,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
     image: item.poster || undefined,
     datePublished: item.released || undefined,
     dateModified: (asOf || new Date().toISOString().slice(0, 10)),
+    numberOfSeasons: item.kind === "tv" && item.seasons ? item.seasons : undefined,
     genre: item.genre || undefined,
     inLanguage: item.language || undefined,
     director: item.director ? { "@type": "Person", name: item.director } : undefined,
@@ -2578,7 +2606,15 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
       url: `https://en.wikipedia.org/wiki/${encodeURIComponent(String(item.takeArticle).replace(/ /g, "_"))}` };
   }
   if (item.trailer && /youtube\.com\/watch/.test(item.trailer)) {
-    ld.potentialAction = { "@type": "WatchAction", name: `Watch the ${item.title} trailer`, target: item.trailer };
+    // A WatchAction target must be where the WORK can be watched; a trailer is not the
+    // work. schema.org gives trailers their own home: Movie/TVSeries.trailer.
+    ld.trailer = {
+      "@type": "VideoObject",
+      name: `${item.title} — Official Trailer`,
+      url: item.trailer,
+      description: `Trailer for ${item.title}`,
+      thumbnailUrl: ytIdOf(item.trailer) ? `https://img.youtube.com/vi/${ytIdOf(item.trailer)}/hqdefault.jpg` : undefined,
+    };
   }
 
   const breadcrumb = {
@@ -2594,7 +2630,12 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   const verdictProse = buildVerdictProse(item, country, localeFor(code));
   const goodToKnow = buildGoodToKnow(item);
   const faqs = buildFaqs(item, country);
-  const similar = (Array.isArray(item.similar) ? item.similar : []).slice(0, 6);
+  // On-site titles outrank off-site ones in the strip: a recommendation the reader can
+  // actually open beats a dead card, and each one is a contextual internal link on a
+  // page that otherwise has almost none (742 of 1,044 film pages had zero inlinks).
+  const simAll = Array.isArray(item.similar) ? item.similar : [];
+  const onSite = (s) => knownSlugs && knownSlugs.has(s.slug);
+  const similar = [...simAll.filter(onSite), ...simAll.filter((s) => !onSite(s))].slice(0, 6);
 
   // FAQPage schema — only when we have at least 2 Q&As (Google wants a real list).
   const faqLd = faqs.length >= 2 ? {
@@ -2684,6 +2725,7 @@ ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))
       ${item.rating != null ? (() => { const dv = item.imdbRating != null ? item.imdbVotes : item.votes; return `<div class="rating">★ ${Number(item.rating).toFixed(1)}${dv ? ` <span style="color:var(--mute);font-weight:400;font-size:13px">(${e(dv)} votes)</span>` : ""}</div>`; })() : ""}
       ${item.verdict ? `<div class="verdict">▸ ${e(item.verdict)}</div>` : ""}
       ${item.released ? `<div class="meta" style="margin-top:8px">${relLabel} ${e(item.released)}</div>` : ""}
+      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(asOf)}</div>` : ""}
     </div>
   </div>
   ${verdictProse ? `<h2>The verdict</h2><p class="vprose">${e(verdictProse)}</p>` : ""}
@@ -2707,6 +2749,8 @@ ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))
   <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">See this week's top picks on FilmyChill →</a>
 </div>
 <footer>
+  <nav><a href="${e(homeUrl)}">This week in ${e(country)}</a> · <a href="${code === "in" ? "/new-on-ott/" : `/${e(code)}/new-on-ott/`}">New on OTT</a>${code === "in" ? ` · ${LANGUAGE_PAGES.map(([n, s]) => `<a href="/${s}/">${n}</a>`).join(" · ")}` : ""} · <a href="/about/">About</a></nav>
+  Verdicts are compiled by FilmyChill's editorial system from audience ratings and published critic reception — <a href="/about/">how we rate</a>.<br>
   ${footerAttribution()}© 2026 FilmyChill · Vikram Sharma
 </footer>
 </body>
