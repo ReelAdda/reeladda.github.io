@@ -822,6 +822,54 @@ test("no seriess: series pluralizes as series in every band", () => {
     assert.ok(!/seriess/.test(p), p);
   }
 });
+group("audit fixes: titles, descriptions, inlinks, freshness, schema");
+const AUDIT_CFG = { code: "in", name: "India", region: "IN" };
+test("film title tags fit 60 chars, keeping the query words", () => {
+  const long = { title: "Teenage Sex and Death at Camp Miasma", slug: "x", kind: "movie", tmdbId: 9, released: "2026-06-06", platform: "Theatres" };
+  const page = U.buildFilmPage(long, "2026-08-14", new Set(), AUDIT_CFG);
+  const t = /<title>([^<]*)<\/title>/.exec(page)[1].replace(/&#39;|&amp;/g, "x");
+  assert.ok(t.length <= 62, t + " (" + t.length + ")");
+  assert.ok(/OTT Release Date/.test(t), "query words survive trimming: " + t);
+  const short = { ...long, title: "Raftaar" };
+  const t2 = /<title>([^<]*)<\/title>/.exec(U.buildFilmPage(short, "2026-08-14", new Set(), AUDIT_CFG))[1].replace(/&amp;/g, "&");
+  assert.ok(t2.length <= 60 && /OTT Release Date/.test(t2), t2 + " (" + t2.length + ")");
+});
+test("descriptions: never empty, never open with the unknown, name the platform", () => {
+  const bare = { title: "Law Order", slug: "law-order", kind: "movie", tmdbId: 3, language: "Hindi", genre: "Drama" };
+  const d1 = /name="description" content="([^"]*)"/.exec(U.buildFilmPage(bare, "2026-08-14", new Set(), AUDIT_CFG))[1];
+  assert.ok(d1.trim().length > 20, "blank description: " + d1);
+  const th = { title: "T", slug: "t", kind: "movie", tmdbId: 4, platform: "Theatres", rating: 7.9, votes: 500, verdict: "Must watch" };
+  const d2 = /name="description" content="([^"]*)"/.exec(U.buildFilmPage(th, "2026-08-14", new Set(), AUDIT_CFG))[1];
+  assert.ok(/^In theatres in India/.test(d2), d2);
+  assert.ok(/OTT date not announced/.test(d2) && d2.indexOf("OTT date") > d2.indexOf("theatres"), "unknown goes last: " + d2);
+  const st = { title: "Reacher", slug: "reacher", kind: "tv", tmdbId: 5, providers: ["Amazon Prime Video"], rating: 8.2, votes: 900, verdict: "Must watch" };
+  const d3 = /name="description" content="([^"]*)"/.exec(U.buildFilmPage(st, "2026-08-14", new Set(), AUDIT_CFG))[1];
+  assert.ok(/^Streaming on Amazon Prime Video in India/.test(d3), d3);
+});
+test("similar strip: on-site titles jump the queue and render as anchors", () => {
+  const item = { title: "T", slug: "t", kind: "movie", tmdbId: 6, rating: 7, votes: 100,
+    similar: [
+      { title: "OffSite One", slug: "off-site-one", poster: "/p1.jpg" },
+      { title: "OffSite Two", slug: "off-site-two", poster: "/p2.jpg" },
+      { title: "OnSite Hit", slug: "on-site-hit", poster: "/p3.jpg" },
+    ] };
+  const page = U.buildFilmPage(item, "2026-08-14", new Set(["on-site-hit"]), AUDIT_CFG);
+  assert.ok(page.indexOf("OnSite Hit") < page.indexOf("OffSite One"), "on-site first");
+  assert.ok(/<a class="simcard" href="[^"]*on-site-hit/.test(page), "on-site card is an anchor");
+});
+test("film page shows a visible updated stamp and the footer nav + how-we-rate line", () => {
+  const item = { title: "T", slug: "t", kind: "movie", tmdbId: 7, rating: 7, votes: 100, released: "2026-08-01" };
+  const page = U.buildFilmPage(item, "2026-08-14", new Set(), AUDIT_CFG);
+  assert.ok(page.includes("Page updated 2026-08-14"));
+  assert.ok(page.includes('href="/hindi/"') && page.includes('href="/new-on-ott/"') && page.includes("how we rate"));
+  const us = U.buildFilmPage(item, "2026-08-14", new Set(), { code: "us", name: "the US", region: "US" });
+  assert.ok(us.includes('href="/us/new-on-ott/"') && !us.includes('href="/hindi/"'));
+});
+test("TVSeries LD carries numberOfSeasons when known", () => {
+  const tv = { title: "S", slug: "s", kind: "tv", tmdbId: 8, rating: 8, votes: 900, seasons: 4 };
+  const page = U.buildFilmPage(tv, "2026-08-14", new Set(), AUDIT_CFG);
+  assert.ok(page.includes('"numberOfSeasons":4'), "seasons in LD");
+});
 test("buildVerdictProse: empty item returns empty string", () => {
   assert.strictEqual(U.buildVerdictProse(null), "");
   assert.strictEqual(U.buildVerdictProse({}), "");
@@ -1894,7 +1942,8 @@ test("film-page JSON-LD carries citation + WatchAction when provenance and trail
     released: "2026-07-10", rating: 7.7, votes: 900, take: "Critics loved it.", takeSrc: "wiki", takeArticle: "The Odyssey (2026 film)",
     trailer: "https://www.youtube.com/watch?v=abc123def45" }, "2026-07-19", new Set(["odyssey"]), { code: "in", name: "India", region: "IN" });
   assert.ok(html.includes('"citation"') && html.includes("en.wikipedia.org/wiki/The_Odyssey_(2026_film)"));
-  assert.ok(html.includes('"WatchAction"') && html.includes("abc123def45"));
+  assert.ok(html.includes('"VideoObject"') && html.includes("abc123def45"), "trailer rides as Movie.trailer VideoObject");
+  assert.ok(!html.includes('"WatchAction"'), "no WatchAction pointing at a trailer");
 });
 test("footerAttribution: JustWatch credit present in both ratings modes", () => {
   assert.ok(U.footerAttribution(false).includes("justwatch.com") && U.footerAttribution(true).includes("justwatch.com"));
