@@ -138,6 +138,8 @@
   <url><loc>https://filmychill.com/ca/new-on-disney-plus/</loc><lastmod>2026-08-16</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/ca/new-on-netflix/</loc><lastmod>2026-08-16</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/ca/new-on-netflix-standard-with-ads/</loc><lastmod>2026-08-16</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://filmychill.com/ca/new-on-paramount-plus/</loc><lastmod>2026-08-16</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://filmychill.com/ca/new-on-paramount-plus-premium/</loc><lastmod>2026-08-16</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/ca/new-on-prime-video/</loc><lastmod>2026-08-16</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/sg/new-on-apple-tv/</loc><lastmod>2026-08-16</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/sg/new-on-catchplay/</loc><lastmod>2026-08-16</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
@@ -270,7 +272,11 @@
     <xhtml:link rel="alternate" hreflang="en-CA" href="https://filmychill.com/ca/movie/alpha.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/alpha.html"/>
   </url>
-  <url><loc>https://filmychill.com/movie/aman.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/movie/aman.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/aman.html"/>
+    <xhtml:link rel="alternate" hreflang="en-CA" href="https://filmychill.com/ca/movie/aman.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/aman.html"/>
+  </url>
   <url><loc>https://filmychill.com/movie/ananthan-kaadu.html</loc><lastmod>2026-07-04</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/movie/aryabhatt-ka-zero.html</loc><lastmod>2026-08-14</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/aryabhatt-ka-zero.html"/>
@@ -278,7 +284,7 @@
     <xhtml:link rel="alternate" hreflang="en-CA" href="https://filmychill.com/ca/movie/aryabhatt-ka-zero.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/aryabhatt-ka-zero.html"/>
   </url>
-  <url><loc>https://filmychill.com/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-14</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/avatar-aang-the-last-airbender.html"/>
@@ -1107,6 +1113,7 @@
   </url>
   <url><loc>https://filmychill.com/movie/vishwanath-sons.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/vishwanath-sons.html"/>
+    <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/vishwanath-sons.html"/>
     <xhtml:link rel="alternate" hreflang="en-AE" href="https://filmychill.com/ae/movie/vishwanath-sons.html"/>
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/vishwanath-sons.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/vishwanath-sons.html"/>
@@ -1158,7 +1165,7 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/us/movie/all-wishes-come-true.html"/>
   </url>
   <url><loc>https://filmychill.com/us/movie/asf1xia.html</loc><lastmod>2026-07-05</lastmod><priority>0.5</priority></url>
-  <url><loc>https://filmychill.com/us/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-14</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/us/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/avatar-aang-the-last-airbender.html"/>
@@ -2051,7 +2058,7 @@
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/animal-farm.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/uk/movie/animal-farm.html"/>
   </url>
-  <url><loc>https://filmychill.com/uk/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-14</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/uk/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/avatar-aang-the-last-airbender.html"/>
@@ -2707,7 +2714,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/star-city.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/uk/movie/star-city.html"/>
   </url>
-  <url><loc>https://filmychill.com/uk/movie/star-trek-strange-new-worlds.html</loc><lastmod>2026-08-15</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/uk/movie/star-trek-strange-new-worlds.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/star-trek-strange-new-worlds.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/star-trek-strange-new-worlds.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/star-trek-strange-new-worlds.html"/>
@@ -3019,6 +3026,13 @@
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/victorian-psycho.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/uk/movie/victorian-psycho.html"/>
   </url>
+  <url><loc>https://filmychill.com/uk/movie/vishwanath-sons.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/vishwanath-sons.html"/>
+    <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/vishwanath-sons.html"/>
+    <xhtml:link rel="alternate" hreflang="en-AE" href="https://filmychill.com/ae/movie/vishwanath-sons.html"/>
+    <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/vishwanath-sons.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/vishwanath-sons.html"/>
+  </url>
   <url><loc>https://filmychill.com/uk/movie/voicemails-for-isabelle.html</loc><lastmod>2026-07-11</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/voicemails-for-isabelle.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/voicemails-for-isabelle.html"/>
@@ -3082,7 +3096,7 @@
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/animal-farm.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/uk/movie/animal-farm.html"/>
   </url>
-  <url><loc>https://filmychill.com/au/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-14</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/au/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/avatar-aang-the-last-airbender.html"/>
@@ -3236,7 +3250,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/don-t-say-good-luck.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/au/movie/don-t-say-good-luck.html"/>
   </url>
-  <url><loc>https://filmychill.com/au/movie/dookudu.html</loc><lastmod>2026-08-13</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/au/movie/dookudu.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/dookudu.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/dookudu.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/uk/movie/dookudu.html"/>
@@ -3710,7 +3724,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/star-city.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/uk/movie/star-city.html"/>
   </url>
-  <url><loc>https://filmychill.com/au/movie/star-trek-strange-new-worlds.html</loc><lastmod>2026-08-15</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/au/movie/star-trek-strange-new-worlds.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/star-trek-strange-new-worlds.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/star-trek-strange-new-worlds.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/star-trek-strange-new-worlds.html"/>
@@ -3778,7 +3792,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/ted-lasso.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/ted-lasso.html"/>
   </url>
-  <url><loc>https://filmychill.com/au/movie/teenage-sex-and-death-at-camp-miasma.html</loc><lastmod>2026-08-15</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/au/movie/teenage-sex-and-death-at-camp-miasma.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/teenage-sex-and-death-at-camp-miasma.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/teenage-sex-and-death-at-camp-miasma.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/teenage-sex-and-death-at-camp-miasma.html"/>
@@ -3842,7 +3856,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/the-devil-wears-prada-2.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/us/movie/the-devil-wears-prada-2.html"/>
   </url>
-  <url><loc>https://filmychill.com/au/movie/the-dog-stars.html</loc><lastmod>2026-07-23</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/au/movie/the-dog-stars.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/the-dog-stars.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/the-dog-stars.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-dog-stars.html"/>
@@ -4072,7 +4086,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/agent-kim-reactivated.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/uk/movie/agent-kim-reactivated.html"/>
   </url>
-  <url><loc>https://filmychill.com/de/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-14</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/de/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/avatar-aang-the-last-airbender.html"/>
@@ -4546,7 +4560,7 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/spider-noir.html"/>
   </url>
   <url><loc>https://filmychill.com/de/movie/splish-splash-forever.html</loc><lastmod>2026-07-08</lastmod><priority>0.5</priority></url>
-  <url><loc>https://filmychill.com/de/movie/star-trek-strange-new-worlds.html</loc><lastmod>2026-08-15</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/de/movie/star-trek-strange-new-worlds.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/star-trek-strange-new-worlds.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/star-trek-strange-new-worlds.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/star-trek-strange-new-worlds.html"/>
@@ -4622,7 +4636,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/ted-lasso.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/ted-lasso.html"/>
   </url>
-  <url><loc>https://filmychill.com/de/movie/teenage-sex-and-death-at-camp-miasma.html</loc><lastmod>2026-08-15</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/de/movie/teenage-sex-and-death-at-camp-miasma.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/teenage-sex-and-death-at-camp-miasma.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/teenage-sex-and-death-at-camp-miasma.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/teenage-sex-and-death-at-camp-miasma.html"/>
@@ -5398,7 +5412,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/spider-man-brand-new-day.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/spider-man-brand-new-day.html"/>
   </url>
-  <url><loc>https://filmychill.com/ae/movie/star-trek-strange-new-worlds.html</loc><lastmod>2026-08-15</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/ae/movie/star-trek-strange-new-worlds.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/star-trek-strange-new-worlds.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/star-trek-strange-new-worlds.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/star-trek-strange-new-worlds.html"/>
@@ -5607,6 +5621,7 @@
   </url>
   <url><loc>https://filmychill.com/ae/movie/vishwanath-sons.html</loc><lastmod>2026-08-12</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/vishwanath-sons.html"/>
+    <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/vishwanath-sons.html"/>
     <xhtml:link rel="alternate" hreflang="en-AE" href="https://filmychill.com/ae/movie/vishwanath-sons.html"/>
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/vishwanath-sons.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/vishwanath-sons.html"/>
@@ -5673,13 +5688,18 @@
     <xhtml:link rel="alternate" hreflang="en-CA" href="https://filmychill.com/ca/movie/alpha.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/alpha.html"/>
   </url>
+  <url><loc>https://filmychill.com/ca/movie/aman.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/aman.html"/>
+    <xhtml:link rel="alternate" hreflang="en-CA" href="https://filmychill.com/ca/movie/aman.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/aman.html"/>
+  </url>
   <url><loc>https://filmychill.com/ca/movie/aryabhatt-ka-zero.html</loc><lastmod>2026-08-13</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/aryabhatt-ka-zero.html"/>
     <xhtml:link rel="alternate" hreflang="en-AE" href="https://filmychill.com/ae/movie/aryabhatt-ka-zero.html"/>
     <xhtml:link rel="alternate" hreflang="en-CA" href="https://filmychill.com/ca/movie/aryabhatt-ka-zero.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/aryabhatt-ka-zero.html"/>
   </url>
-  <url><loc>https://filmychill.com/ca/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-14</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/ca/movie/avatar-aang-the-last-airbender.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/avatar-aang-the-last-airbender.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/avatar-aang-the-last-airbender.html"/>
@@ -6046,7 +6066,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/mushoku-tensei-jobless-reincarnation.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/mushoku-tensei-jobless-reincarnation.html"/>
   </url>
-  <url><loc>https://filmychill.com/ca/movie/mutiny.html</loc><lastmod>2026-08-15</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/ca/movie/mutiny.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-US" href="https://filmychill.com/us/movie/mutiny.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/mutiny.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/mutiny.html"/>
@@ -6214,7 +6234,7 @@
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/spider-man-brand-new-day.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/spider-man-brand-new-day.html"/>
   </url>
-  <url><loc>https://filmychill.com/ca/movie/star-trek-strange-new-worlds.html</loc><lastmod>2026-08-15</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/ca/movie/star-trek-strange-new-worlds.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/star-trek-strange-new-worlds.html"/>
     <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/star-trek-strange-new-worlds.html"/>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/star-trek-strange-new-worlds.html"/>
@@ -7200,7 +7220,7 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/the-rookie.html"/>
   </url>
   <url><loc>https://filmychill.com/sg/movie/the-rope-curse-4-kuntilanak.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority></url>
-  <url><loc>https://filmychill.com/sg/movie/the-shards.html</loc><lastmod>2026-08-10</lastmod><priority>0.5</priority>
+  <url><loc>https://filmychill.com/sg/movie/the-shards.html</loc><lastmod>2026-08-16</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-AU" href="https://filmychill.com/au/movie/the-shards.html"/>
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/the-shards.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/au/movie/the-shards.html"/>
@@ -7215,6 +7235,7 @@
   </url>
   <url><loc>https://filmychill.com/sg/movie/vishwanath-sons.html</loc><lastmod>2026-08-14</lastmod><priority>0.5</priority>
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/vishwanath-sons.html"/>
+    <xhtml:link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/vishwanath-sons.html"/>
     <xhtml:link rel="alternate" hreflang="en-AE" href="https://filmychill.com/ae/movie/vishwanath-sons.html"/>
     <xhtml:link rel="alternate" hreflang="en-SG" href="https://filmychill.com/sg/movie/vishwanath-sons.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/vishwanath-sons.html"/>
