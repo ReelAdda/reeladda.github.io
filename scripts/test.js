@@ -2045,6 +2045,22 @@ test("no providers at all -> section omitted entirely (no empty shell)", () => {
   assert.ok(!html.includes("Rent or buy"), "rent row rendered with no data");
 });
 
+group("langName() — no raw ISO codes on chips");
+test("curated map wins with our spellings", () => {
+  assert.strictEqual(U.langName("hi"), "Hindi");
+  assert.strictEqual(U.langName("ta"), "Tamil");
+});
+test("codes outside the map resolve via Intl ('ar 1' chip bug)", () => {
+  assert.strictEqual(U.langName("ar"), "Arabic");
+  assert.strictEqual(U.langName("th"), "Thai");
+  assert.strictEqual(U.langName("ru"), "Russian");
+  assert.strictEqual(U.langName("tr"), "Turkish");
+});
+test("garbage falls back to the input, never throws", () => {
+  assert.strictEqual(U.langName("zzz-not-a-lang!!"), "zzz-not-a-lang!!");
+  assert.strictEqual(U.langName(null), null);
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");
