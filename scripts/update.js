@@ -195,6 +195,23 @@ function langCode(m) {
   return fix || m.original_language;
 }
 
+// Language DISPLAY name. The curated LANG map wins (our preferred spellings), then
+// Intl.DisplayNames resolves any other ISO 639 code ("ar" -> "Arabic", "th" -> "Thai")
+// so a raw code can never leak onto a language chip again — that is exactly the bug
+// this replaces: LANG[code] || code rendered an "ar 1" chip the day an Arabic title
+// entered the list. Falls back to the code only if the runtime lacks DisplayNames.
+let _langDN = null;
+function langName(code) {
+  if (!code) return code;
+  if (LANG[code]) return LANG[code];
+  try {
+    _langDN = _langDN || new Intl.DisplayNames(["en"], { type: "language" });
+    const n = _langDN.of(code);
+    if (n && n !== code) return n;
+  } catch { /* unknown/invalid code -> fall through */ }
+  return code;
+}
+
 // "145 min" reads like metadata; "2h 25m" reads like an answer to "do I have time
 // tonight?". Used on cards, modal, and film pages so runtime formats identically
 // everywhere. Under an hour stays "52m".
@@ -1740,7 +1757,7 @@ async function enrich(kind, id, region = "IN") {
       title: x.title || x.name,
       slug: slugify(x.title || x.name),
       poster: img(x.poster_path),
-      language: LANG[langCode(x)] || langCode(x) || null,
+      language: langName(langCode(x)) || null,
       kind: x.media_type === "tv" || x.first_air_date ? "tv" : "movie",
     }));
 
@@ -1790,7 +1807,7 @@ async function main() {
     return {
       title: m.title || m.name,
       genre: genres(m.genre_ids),
-      language: LANG[langCode(m)] || langCode(m),
+      language: langName(langCode(m)),
       released: relDate,
       review: trim(m.overview),
       rating: showRating ? Number(m.vote_average.toFixed(1)) : null,
@@ -2376,7 +2393,7 @@ async function main() {
       title: m.title,
       released: m.release_date,
       genre: genres(m.genre_ids),
-      language: LANG[langCode(m)] || langCode(m),
+      language: langName(langCode(m)),
       review: trim(m.overview, 120),
       poster: img(m.poster_path),
       kind: "movie",
@@ -4342,7 +4359,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
 // Export pure/helper functions for unit testing (only meaningful when required, not run).
 module.exports = {
   verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween, ARCHIVE_PATCH_VERSION,
-  fmtRuntime, langCode, LANG_CODE_OVERRIDES,
+  fmtRuntime, langCode, langName, LANG_CODE_OVERRIDES,
   assignSlugs, buildHeadTags, buildHomeJsonLd, ssrCard, ssrSoonCard,
   footerAttribution, RATINGS_SOURCE, USE_IMDB,
   deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
