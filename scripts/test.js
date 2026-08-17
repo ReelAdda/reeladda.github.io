@@ -1956,6 +1956,95 @@ test("score answer never exceeds a valid range (garbage numbers ignored)", () =>
 
 // ---------------- summary ----------------
 console.log(`\n${"=".repeat(40)}`);
+
+// ---------------- world-class polish pass (Aug 2026) ----------------
+group("trim() — no dangling function words");
+test("fragment never ends on an article ('sparks a…' bug)", () => {
+  const t = "Fighting crime full-time in a world that forgot him sparks a change in everything he believed about heroes";
+  const out = U.trim(t, 60);
+  assert.ok(out.endsWith("\u2026"));
+  assert.ok(!/\s(?:a|an|the|and|of|to|in|that|his|her)\u2026$/i.test(out), `ends badly: "${out}"`);
+});
+test("peels chained stopwords and dangling punctuation", () => {
+  const out = U.trim("The story of the woman who refuses to leave, and of the", 56);
+  assert.ok(!/(?:,|—|-|\s(?:a|an|the|and|of|who|to))\u2026$/i.test(out), `ends badly: "${out}"`);
+});
+test("sentence-boundary preference untouched", () => {
+  const out = U.trim("A full sentence ends here. Then more trailing text follows after it", 40);
+  assert.ok(out.endsWith("here."), `expected sentence cut, got "${out}"`);
+});
+
+group("fmtRuntime()");
+test("hours + minutes", () => { assert.strictEqual(U.fmtRuntime(145), "2h 25m"); });
+test("exact hours drop minutes", () => { assert.strictEqual(U.fmtRuntime(120), "2h"); });
+test("under an hour", () => { assert.strictEqual(U.fmtRuntime(52), "52m"); });
+test("garbage -> empty", () => {
+  assert.strictEqual(U.fmtRuntime(0), "");
+  assert.strictEqual(U.fmtRuntime(null), "");
+  assert.strictEqual(U.fmtRuntime("abc"), "");
+});
+
+group("langCode() — TMDB language overrides");
+test("known-bad ids corrected (Kadhal Aura -> ta, Judaa -> pa)", () => {
+  assert.strictEqual(U.langCode({ id: 1639137, original_language: "en", title: "Kadhal Aura" }), "ta");
+  assert.strictEqual(U.langCode({ id: 1649723, original_language: "en", title: "Judaa" }), "pa");
+});
+test("everything else passes through untouched", () => {
+  assert.strictEqual(U.langCode({ id: 969681, original_language: "en" }), "en");
+  assert.strictEqual(U.langCode({ id: 12345, original_language: "ta" }), "ta");
+});
+test("override map values are valid LANG keys", () => {
+  for (const code of Object.values(U.LANG_CODE_OVERRIDES)) {
+    assert.ok(["en","hi","ta","te","ml","kn","mr","bn","pa","gu"].includes(code), code);
+  }
+});
+
+group("ssrCard — runtime + honest unrated line");
+test("movie runtime rendered as h/m in the meta row", () => {
+  const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action / Drama", kind: "movie", runtime: 150, rating: 7.1, verdict: "Worth a watch", slug: "t" }, 0, "in");
+  assert.ok(html.includes("2h 30m"), "runtime missing from SSR card");
+});
+test("TV runtime (per-episode) stays off the card meta", () => {
+  const html = U.ssrCard({ title: "T", language: "English", genre: "Drama", kind: "tv", runtime: 45, rating: 8.0, verdict: "Must watch", slug: "t" }, 0, "in");
+  assert.ok(!html.includes("45m"), "per-episode runtime leaked onto card");
+});
+test("unrated card states the verdict instead of a silent gap", () => {
+  const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: null, isFresh: true, verdict: "Just released — verdict soon", slug: "t" }, 0, "in");
+  assert.ok(html.includes("Just released — verdict soon"), "fresh verdict not rendered in SSR");
+  assert.ok(html.includes("\u2606"), "hollow star marker missing");
+});
+test("rated card unchanged (star + verdict)", () => {
+  const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: 7.9, verdict: "Must watch", slug: "t" }, 0, "in");
+  assert.ok(html.includes("\u2605 7.9 \u00b7 Must watch") || html.includes("\u2605 7.9"), "rated line broken");
+});
+
+group("ssrSoonCard — poster placeholder");
+test("missing poster renders letter + note, not a bare initial", () => {
+  const html = U.ssrSoonCard({ title: "Kadhal Aura", released: "2026-08-21", language: "Tamil", slug: "kadhal-aura" }, "in");
+  assert.ok(html.includes("soon-ph-letter"), "letter span missing");
+  assert.ok(html.includes("Poster on the way"), "note missing");
+});
+test("with poster, placeholder absent", () => {
+  const html = U.ssrSoonCard({ title: "T", released: "2026-08-21", language: "Hindi", slug: "t", poster: "https://x/p.jpg" }, "in");
+  assert.ok(!html.includes("soon-ph"), "placeholder rendered despite poster");
+});
+
+group("film page — subscription vs rent/buy");
+test("streaming providers labelled as included with subscription", () => {
+  const html = U.buildFilmPage({ title: "T", slug: "t", kind: "movie", language: "Hindi", providers: ["Netflix"], platform: "Netflix", released: "2026-08-01", review: "x", verdict: "Worth a watch", rating: 7.0, votes: 500 }, { code: "in", country: "India", watchRegion: "IN" }, {});
+  assert.ok(html.includes("Included with a subscription"), "included copy missing");
+});
+test("theatrical film with rentBuy answers 'can I watch at home?'", () => {
+  const html = U.buildFilmPage({ title: "T", slug: "t", kind: "movie", language: "Hindi", providers: [], rentBuy: ["Apple TV", "YouTube"], platform: "Theatres", released: "2026-08-01", review: "x", verdict: "Worth a watch", rating: 7.0, votes: 500 }, { code: "in", country: "India", watchRegion: "IN" }, {});
+  assert.ok(html.includes("Rent or buy"), "rent row missing");
+  assert.ok(html.includes("Apple TV"), "rent platforms missing");
+  assert.ok(html.includes("renting is the only way"), "theatres+rent copy missing");
+});
+test("no providers at all -> section omitted entirely (no empty shell)", () => {
+  const html = U.buildFilmPage({ title: "T", slug: "t", kind: "tv", language: "Hindi", providers: [], platform: "JioHotstar", released: "2026-08-01", review: "x", verdict: "Worth a watch", rating: 7.0, votes: 500 }, { code: "in", country: "India", watchRegion: "IN" }, {});
+  assert.ok(!html.includes("Rent or buy"), "rent row rendered with no data");
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");
