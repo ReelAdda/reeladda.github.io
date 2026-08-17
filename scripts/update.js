@@ -173,6 +173,39 @@ function isExcluded(c) {
 
 const LANG = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", ml: "Malayalam", kn: "Kannada", ko: "Korean", ja: "Japanese", es: "Spanish", fr: "French", mr: "Marathi", bn: "Bengali", pa: "Punjabi", gu: "Gujarati", de: "German", it: "Italian", pt: "Portuguese", zh: "Chinese" };
 
+// TMDB's original_language is community-entered and occasionally WRONG for Indian
+// releases (a Tamil film tagged "en"). Aggregators that trust it blindly then show
+// "English" for a Tamil film — exactly the error a language-first Indian site cannot
+// afford. Overrides are keyed by TMDB id and map to the CORRECT ISO code; langCode()
+// wins over original_language everywhere (display labels AND language quotas), and
+// logs when it fires so stale entries stay visible in the Action run.
+// Verified against Moviebuff / official teasers, not other TMDB-fed aggregators.
+const LANG_CODE_OVERRIDES = {
+  1639137: "ta", // Kadhal Aura — Madness of Love (2026): Tamil; TMDB says "en"
+  1649723: "pa", // Judaa (2026, Simerjit Singh / Gulab Sidhu): Punjabi; TMDB says "en"
+};
+const langOverridesFired = new Set(); // log each override once per run, not per country
+function langCode(m) {
+  if (!m || m.id == null) return m ? m.original_language : undefined;
+  const fix = LANG_CODE_OVERRIDES[m.id];
+  if (fix && fix !== m.original_language && !langOverridesFired.has(m.id)) {
+    langOverridesFired.add(m.id);
+    console.log(`lang override: ${m.title || m.name || m.id} — TMDB says "${m.original_language}", using "${fix}"`);
+  }
+  return fix || m.original_language;
+}
+
+// "145 min" reads like metadata; "2h 25m" reads like an answer to "do I have time
+// tonight?". Used on cards, modal, and film pages so runtime formats identically
+// everywhere. Under an hour stays "52m".
+function fmtRuntime(mins) {
+  const n = Number(mins);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  const h = Math.floor(n / 60), m = Math.round(n % 60);
+  if (!h) return `${m}m`;
+  return m ? `${h}h ${m}m` : `${h}h`;
+}
+
 function verdict(rating, votes) {
   if (!votes || votes < 10) return "Not enough ratings yet";
   if (rating >= 7.5) return "Must watch";
@@ -191,7 +224,14 @@ function trim(text, n = 160) {
   let cut = -1;
   for (const m of slice.matchAll(/[.!?](?:\s|$)/g)) cut = m.index;
   if (cut >= Math.floor(n * 0.6)) return slice.slice(0, cut + 1);
-  return slice.replace(/\s+\S*$/, "") + "…";
+  // Word-boundary cut alone still ends on articles and connectives ("sparks a…",
+  // "the story of the…") which reads broken. Peel trailing function words and any
+  // dangling punctuation so the fragment ends on a content word before the ellipsis.
+  let w = slice.replace(/\s+\S*$/, "");
+  const TAIL = /\s+(?:a|an|the|and|or|but|nor|of|to|in|on|at|by|for|with|from|as|into|onto|over|under|after|before|between|during|through|that|which|who|whom|whose|his|her|their|its|is|are|was|were|be|been|has|have|had|will|would|can|could|should|must|may|might|when|while|where|whom|so|than|then)$/i;
+  while (TAIL.test(w)) w = w.replace(TAIL, "");
+  w = w.replace(/[\s,;:—–\-]+$/, "");
+  return w + "…";
 }
 
 // OTT freshness window: how recent a title's EFFECTIVE freshness date (release/season date
@@ -1437,9 +1477,9 @@ function buildGoodToKnow(item) {
 
   if (item.runtime) {
     const v = isTv ? `~${item.runtime} min per episode`
-      : item.runtime >= 150 ? `${item.runtime} min — long`
-      : item.runtime <= 100 ? `${item.runtime} min — short`
-      : `${item.runtime} min`;
+      : item.runtime >= 150 ? `${fmtRuntime(item.runtime)} — long`
+      : item.runtime <= 100 ? `${fmtRuntime(item.runtime)} — short`
+      : fmtRuntime(item.runtime);
     rows.push({ label: "Runtime", value: v });
   }
   if (item.cert) {
@@ -1652,6 +1692,14 @@ async function enrich(kind, id, region = "IN") {
   const inProv = d["watch/providers"]?.results?.[region];
   const providers = dedupeProviders((inProv?.flatrate || []).map((p) => p.provider_name)).slice(0, 4);
 
+  // Rent/buy platforms from the SAME response — zero extra API calls. "Streaming on X"
+  // never said whether it costs extra; and for theatrical releases, "can I rent it at
+  // home yet?" is the single most-asked follow-up. Rent and buy are one shelf to a
+  // viewer, so they're merged; platforms already offering it on subscription are
+  // dropped (the included copy is the better answer).
+  const rentBuy = dedupeProviders([...(inProv?.rent || []), ...(inProv?.buy || [])].map((p) => p.provider_name))
+    .filter((p) => !providers.includes(p)).slice(0, 4);
+
   // Cast & director
   const cast = (d.credits?.cast || []).slice(0, 4).map((c) => c.name);
   const castPics = extractCastPics(d.credits);
@@ -1692,7 +1740,7 @@ async function enrich(kind, id, region = "IN") {
       title: x.title || x.name,
       slug: slugify(x.title || x.name),
       poster: img(x.poster_path),
-      language: LANG[x.original_language] || x.original_language || null,
+      language: LANG[langCode(x)] || langCode(x) || null,
       kind: x.media_type === "tv" || x.first_air_date ? "tv" : "movie",
     }));
 
@@ -1703,6 +1751,7 @@ async function enrich(kind, id, region = "IN") {
 
   return {
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
+    ...(rentBuy.length ? { rentBuy } : {}),
     imdbId: imdbId || null, // handle for cross-source lookups (Wikipedia buzz via Wikidata P345)
     seasons: kind === "tv" ? d.number_of_seasons || null : null,
     freshDate, badge, isRecent: badge != null, similar: recs,
@@ -1741,7 +1790,7 @@ async function main() {
     return {
       title: m.title || m.name,
       genre: genres(m.genre_ids),
-      language: LANG[m.original_language] || m.original_language,
+      language: LANG[langCode(m)] || langCode(m),
       released: relDate,
       review: trim(m.overview),
       rating: showRating ? Number(m.vote_average.toFixed(1)) : null,
@@ -1791,7 +1840,7 @@ async function main() {
   async function buildCountry(cfg) {
   // ---------- IN THEATRES (quality-ranked within fresh pool + language representation, 4-7) ----------
   const INDIAN_LANGS = cfg.regionalLangs;
-  const isRegional = (m) => INDIAN_LANGS.includes(m.original_language);
+  const isRegional = (m) => INDIAN_LANGS.includes(langCode(m));
 
   // Base pool: TMDB's "now playing" for this country.
   const np1 = await tmdb("/movie/now_playing", { region: cfg.region, page: "1" });
@@ -1992,7 +2041,7 @@ async function main() {
   const repRating = (m) => bestRating(m) ?? (USE_IMDB ? 0 : REP_BAR); // null fails in IMDb, passes in TMDB
   let picks = [];
   for (const [lang, n] of TARGETS) {
-    const langFilms = ranked.filter((m) => m.original_language === lang && repRating(m) >= REP_BAR && !picks.includes(m));
+    const langFilms = ranked.filter((m) => langCode(m) === lang && repRating(m) >= REP_BAR && !picks.includes(m));
     for (let i = 0; i < n && i < langFilms.length; i++) picks.push(langFilms[i]);
   }
   // Soft fallback: fill any remaining slots (up to MAX_PICKS) with the best films of any
@@ -2014,7 +2063,7 @@ async function main() {
   // regional film keeps the slot rather than fronting a weak title.
   const TOP3_TOLERANCE = 0.15; // on the 0..1 weighted score: a regional film must beat the
                                 // best English/Hindi film by this margin to keep a top-3 slot
-  const isLead = (m) => m.original_language === "en" || m.original_language === "hi";
+  const isLead = (m) => langCode(m) === "en" || langCode(m) === "hi";
   const reordered = [];
   const remaining = [...picks]; // already quality-sorted
   for (let pos = 0; pos < 3 && remaining.length; pos++) {
@@ -2297,7 +2346,7 @@ async function main() {
   // "regional" for coming-soon = a regionalLangs language not already a named soon target.
   // For India (soon targets name en+hi) this excludes hi — identical to the prior behaviour.
   const soonNamed = new Set(SOON_TARGETS.map(([k]) => k));
-  const isSoonRegional = (m) => INDIAN_LANGS.includes(m.original_language) && !soonNamed.has(m.original_language);
+  const isSoonRegional = (m) => INDIAN_LANGS.includes(langCode(m)) && !soonNamed.has(langCode(m));
   const soonSeen = new Set();
   const soonBase = [];
   // QUOTA: fills the intended language mix from the full pool (most-anticipated first within
@@ -2305,7 +2354,7 @@ async function main() {
   for (const [key, n] of SOON_TARGETS) {
     const matches = datedFuture.filter((m) => {
       if (soonSeen.has(m.id)) return false;
-      return key === "__regional__" ? isSoonRegional(m) : m.original_language === key;
+      return key === "__regional__" ? isSoonRegional(m) : langCode(m) === key;
     });
     for (let i = 0; i < n && i < matches.length; i++) { soonBase.push(matches[i]); soonSeen.add(matches[i].id); }
   }
@@ -2327,7 +2376,7 @@ async function main() {
       title: m.title,
       released: m.release_date,
       genre: genres(m.genre_ids),
-      language: LANG[m.original_language] || m.original_language,
+      language: LANG[langCode(m)] || langCode(m),
       review: trim(m.overview, 120),
       poster: img(m.poster_path),
       kind: "movie",
@@ -2736,7 +2785,19 @@ ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
   ${(item.castPics && item.castPics.length) ? `<h2>Cast</h2><div class="cast-strip">${item.castPics.map((c) => `<div class="cast-card"><img src="${e(c.photo)}" alt="${e(c.name)}" width="72" height="72" loading="lazy"><div class="cast-name">${e(c.name)}</div>${c.character ? `<div class="cast-role">${e(c.character)}</div>` : ""}</div>`).join("")}</div>`
     : cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
-  ${providers.length ? `<h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${e(asOf || "")} — platforms may change over time.</p>` : item.platform === "Theatres" ? `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>` : ""}
+  ${(() => {
+    // Three honest states: streaming (included with a subscription — no extra charge),
+    // rent/buy (pay per title), and theatres-only. The subscription-vs-rent distinction
+    // is the most common unanswered question on OTT listings; TMDB's monetization split
+    // (flatrate vs rent/buy) answers it for free from data we already fetch.
+    const rb = Array.isArray(item.rentBuy) ? item.rentBuy : [];
+    const rbRow = rb.length ? `<div style="margin-top:10px"><div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:5px">Rent or buy</div><div>${rb.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div></div>` : "";
+    const note = `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${e(asOf || "")} — platforms may change over time.</p>`;
+    if (providers.length) return `<h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}`;
+    if (item.platform === "Theatres") return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>${rb.length ? rbRow + `<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>` : ""}${note}`;
+    if (rb.length) return `<h2>Where to watch in ${e(country)}</h2>${rbRow}<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>${note}`;
+    return "";
+  })()}
   ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
   ${similar.length ? `<h2>If you liked this</h2><div class="simgrid">${similar.map((s) => {
     const exists = knownSlugs && knownSlugs.has(s.slug);
@@ -2963,14 +3024,24 @@ function ssrCard(item, i, code) {
   // template regen against a pre-badge data.json still renders sensibly.
   const badge = item.badge || (item.isRecent ? "New release" : null);
   const when = freshLabel(item, Date.now(), localeFor(code)); // dates in the page's own locale
-  const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null, when || null].filter(Boolean).map(e).join(" · ");
+  // Runtime sits between genre and date: it answers "do I have time tonight?" and
+  // grounds the mood picker's length filter (a filter on data the cards never showed
+  // read as arbitrary). TV runtimes are per-episode and would mislead here — movies only.
+  const rt = item.kind !== "tv" && item.runtime ? fmtRuntime(item.runtime) : null;
+  const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null, rt, when || null].filter(Boolean).map(e).join(" · ");
   const inner = `
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
     <div>
       <div class="title-row"><h3>${e(item.title)}</h3>${item.platform && item.platform !== "Theatres" ? `<span class="platform">${e(item.platform)}</span>` : ""}${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}${item.trending ? '<span class="fresh-badge trend"><svg class="ic" aria-hidden="true"><use href="#icTrend"/></svg> Trending</span>' : ""}</div>
       <div class="meta">${bits}</div>
-      ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>` : ""}
+      ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>`
+        // No rating = the confidence gate held it back (too new / too few votes). Saying
+        // so ("verdict soon" / "not enough ratings yet") turns a silent gap into a
+        // visible editorial decision — we don't print numbers we don't trust. Mirrors
+        // what the client's bottom-row already shows post-hydration, so SSR and
+        // hydrated cards finally match.
+        : item.verdict ? `<div class="meta">☆ ${e(item.verdict)}</div>` : ""}
       ${item.hook ? `<div class="meta hook">${e(item.hook)}</div>` : ""}
       ${item.review ? `<p class="review">${e(trim(item.review, 150))}</p>` : ""}
       ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}</p>` : ""}
@@ -2985,7 +3056,7 @@ function ssrCard(item, i, code) {
 function ssrSoonCard(item, code) {
   const e = escHtml;
   return `<a class="soon-card" href="${e(filmPagePath(code || "in", item.slug))}" style="text-decoration:none;color:inherit">
-    ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : `<div class="soon-ph" aria-hidden="true">${e((item.title || "?").charAt(0).toUpperCase())}</div>`}
+    ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : `<div class="soon-ph" aria-hidden="true"><span class="soon-ph-letter">${e((item.title || "?").charAt(0).toUpperCase())}</span><span class="soon-ph-note">Poster on the way</span></div>`}
     <div class="soon-body">
       <div class="soon-date">${e(item.released ? fmtDateShort(item.released, Date.now(), localeFor(code)) : "")}</div>
       <div class="soon-title">${e(item.title)}</div>
@@ -4271,6 +4342,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
 // Export pure/helper functions for unit testing (only meaningful when required, not run).
 module.exports = {
   verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween, ARCHIVE_PATCH_VERSION,
+  fmtRuntime, langCode, LANG_CODE_OVERRIDES,
   assignSlugs, buildHeadTags, buildHomeJsonLd, ssrCard, ssrSoonCard,
   footerAttribution, RATINGS_SOURCE, USE_IMDB,
   deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
