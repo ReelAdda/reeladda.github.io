@@ -1544,7 +1544,7 @@
     "value": 74
    }
   },
-  "checked": "2026-08-17",
+  "checked": "2026-08-18",
   "v": 5
  },
  "tt27679443": {
@@ -1906,7 +1906,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-08-12",
+  "checked": "2026-08-18",
   "v": 5
  },
  "movie:1336841": {
@@ -2577,6 +2577,57 @@
   "take": null,
   "src": null,
   "hook": null,
+  "checked": "2026-08-18",
+  "v": 5
+ },
+ "tt0472954": {
+  "take": "Critics loved it — special praise for the twists and story.",
+  "src": "wiki",
+  "hook": null,
+  "article": "It's Always Sunny in Philadelphia",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "twists",
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "mc",
+    "value": 72
+   }
+  },
+  "checked": "2026-08-18",
+  "v": 5
+ },
+ "tt29512655": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-08-18",
+  "v": 5
+ },
+ "tt26545992": {
+  "take": "Critics liked it: the performances and lead chemistry won praise, though the themes drew some flak.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Lanterns (TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "lead chemistry"
+   ],
+   "panned": [
+    "themes"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 94
+   }
+  },
   "checked": "2026-08-18",
   "v": 5
  }
