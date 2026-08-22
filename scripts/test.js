@@ -2061,6 +2061,121 @@ test("garbage falls back to the input, never throws", () => {
   assert.strictEqual(U.langName(null), null);
 });
 
+group("streamVocab() — per-country wording");
+test("India and UAE say OTT; everyone else says streaming", () => {
+  assert.strictEqual(U.streamVocab({ code: "in" }).word, "OTT");
+  assert.strictEqual(U.streamVocab({ code: "ae" }).word, "OTT");
+  for (const c of ["us", "uk", "au", "de", "ca", "sg"]) {
+    assert.strictEqual(U.streamVocab({ code: c }).word, "streaming", c);
+  }
+});
+test("partial cfg still resolves by code (the silent-downgrade bug)", () => {
+  assert.strictEqual(U.streamVocab({ code: "in", name: "India" }).word, "OTT");
+});
+test("no cfg defaults to India, matching buildFilmPage's own default", () => {
+  assert.strictEqual(U.streamVocab(null).word, "OTT");
+});
+test("headings and FAQ questions use the market's word", () => {
+  assert.ok(/coming to OTT\?$/.test(U.streamVocab({ code: "in" }).heading("X")));
+  assert.ok(/coming to streaming\?$/.test(U.streamVocab({ code: "us" }).heading("X")));
+  assert.ok(/OTT release date/.test(U.streamVocab({ code: "in" }).faqQuestion("X")));
+  assert.ok(!/OTT/.test(U.streamVocab({ code: "de" }).faqQuestion("X")));
+});
+
+group("streamWindowEstimate()");
+test("Hindi film gets a 6-8 week window from its release", () => {
+  const est = U.streamWindowEstimate("2026-08-13", "Hindi", new Date("2026-08-22T00:00:00Z"));
+  assert.strictEqual(est.lo, 6); assert.strictEqual(est.hi, 8);
+  assert.strictEqual(est.passed, false);
+  assert.ok(/September|October/.test(est.span), est.span);
+});
+test("Malayalam window is shorter than Hindi (industry differences are real)", () => {
+  const ml = U.streamWindowEstimate("2026-08-01", "Malayalam", new Date("2026-08-05T00:00:00Z"));
+  const hi = U.streamWindowEstimate("2026-08-01", "Hindi", new Date("2026-08-05T00:00:00Z"));
+  assert.ok(ml.hi < hi.hi);
+});
+test("window that has already closed is flagged, not asserted", () => {
+  const est = U.streamWindowEstimate("2025-01-01", "Hindi", new Date("2026-08-22T00:00:00Z"));
+  assert.strictEqual(est.passed, true);
+});
+test("no release date -> no estimate (never guess)", () => {
+  assert.strictEqual(U.streamWindowEstimate(null, "Hindi"), null);
+  assert.strictEqual(U.streamWindowEstimate("not-a-date", "Hindi"), null);
+});
+
+group("film page — 'when is it coming to streaming' section");
+const THEATRE = { title: "Batwara 1947", slug: "b", kind: "movie", language: "Hindi", platform: "Theatres", released: "2026-08-13", rating: 7.2, votes: 400, verdict: "Worth a watch" };
+test("India theatrical page asks the question in OTT wording", () => {
+  const html = U.buildFilmPage(THEATRE, "2026-08-22", new Set(), { code: "in", name: "India", region: "IN" });
+  assert.ok(/coming to OTT/.test(html), "heading missing");
+  assert.ok(/that's the usual pattern, not a confirmed date/i.test(html), "estimate not labelled as a pattern");
+  assert.ok(html.includes("<!--SW:pending-->"), "sweep marker missing");
+});
+test("US theatrical page asks it in streaming wording, no 'OTT' anywhere", () => {
+  const html = U.buildFilmPage({ ...THEATRE, language: "English" }, "2026-08-22", new Set(), { code: "us", name: "United States", region: "US" });
+  assert.ok(/coming to streaming/.test(html), "streaming heading missing");
+  assert.ok(!/\bOTT\b/.test(html), "OTT leaked onto a US page");
+});
+test("streaming film gets no pending section at all", () => {
+  const html = U.buildFilmPage({ ...THEATRE, platform: "Netflix", providers: ["Netflix"] }, "2026-08-22", new Set(), { code: "in", name: "India", region: "IN" });
+  assert.ok(!html.includes("<!--SW:pending-->"), "pending block rendered for a streaming film");
+});
+test("TV series never gets the section (per-season, not a film release)", () => {
+  const html = U.buildFilmPage({ ...THEATRE, kind: "tv", platform: "Theatres" }, "2026-08-22", new Set(), { code: "in", name: "India", region: "IN" });
+  assert.ok(!html.includes("<!--SW:pending-->"));
+});
+
+group("streaming-arrival sweep");
+const SWEEP_NOW = new Date("2026-08-22T00:00:00Z");
+test("picks archived films inside the plausible window, newest first", () => {
+  const picks = U.sweepCandidates([
+    { slug: "fresh", archivedOn: "2026-08-01", tmdbId: 1, released: "2026-08-01", kind: "movie" },
+    { slug: "older", archivedOn: "2026-06-01", tmdbId: 2, released: "2026-05-01", kind: "movie" },
+    { slug: "ancient", archivedOn: "2024-01-01", tmdbId: 3, released: "2023-01-01", kind: "movie" },
+    { slug: "current", tmdbId: 4, released: "2026-08-01", kind: "movie" },
+  ], SWEEP_NOW);
+  const slugs = picks.map((p) => p.slug);
+  assert.deepStrictEqual(slugs, ["fresh", "older"], slugs.join(","));
+});
+test("skips TV and entries with no tmdbId (nothing to re-query)", () => {
+  const picks = U.sweepCandidates([
+    { slug: "tv", archivedOn: "2026-08-01", tmdbId: 9, released: "2026-07-01", kind: "tv" },
+    { slug: "noid", archivedOn: "2026-08-01", released: "2026-07-01", kind: "movie" },
+  ], SWEEP_NOW);
+  assert.strictEqual(picks.length, 0);
+});
+test("respects the per-run API budget", () => {
+  const many = Array.from({ length: 50 }, (_, i) => ({ slug: "s" + i, archivedOn: "2026-08-01", tmdbId: i, released: "2026-07-01", kind: "movie" }));
+  assert.ok(U.sweepCandidates(many, SWEEP_NOW).length <= 18);
+});
+test("arrival patch flips the pending block and the stale pill", () => {
+  const before = U.buildFilmPage(THEATRE, "2026-08-22", new Set(), { code: "in", name: "India", region: "IN" });
+  const { html, changed } = U.applyArrivalPatch(before, {
+    title: "Batwara 1947", providers: ["Netflix"], countryName: "India",
+    cfg: { code: "in", name: "India" }, asOf: "2026-10-02",
+  });
+  assert.strictEqual(changed, true);
+  assert.ok(/It&#39;s streaming now|It's streaming now/.test(html), "arrival copy missing");
+  assert.ok(/Netflix/.test(html));
+  assert.ok(!/that&#39;s the usual pattern|that's the usual pattern/i.test(html), "stale estimate survived");
+  assert.ok(html.includes("<!--SW:pending-->"), "markers must survive for idempotency");
+});
+test("no providers -> page left completely alone", () => {
+  const before = U.buildFilmPage(THEATRE, "2026-08-22", new Set(), { code: "in", name: "India", region: "IN" });
+  const { html, changed } = U.applyArrivalPatch(before, { title: "B", providers: [], countryName: "India", cfg: { code: "in" } });
+  assert.strictEqual(changed, false);
+  assert.strictEqual(html, before);
+});
+
+group("archive patcher — vocabulary aware");
+test("legacy OTT-worded pages in streaming markets still get patched", () => {
+  const legacy = `<p>Film is currently playing in theatres across the US. An OTT release hasn&#39;t been announced yet.</p>`;
+  const { html, changed } = U.archivePatchHtml(legacy, "the US", { code: "us" });
+  assert.strictEqual(changed, true);
+  assert.ok(/has finished its theatrical run/.test(html));
+  assert.ok(/streaming release/.test(html), "replacement should use the market's own word");
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");
