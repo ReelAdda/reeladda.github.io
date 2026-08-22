@@ -73,7 +73,7 @@ async function tmdb(path, params = {}) {
 // quota match the previous hardcoded values, so its output stays byte-for-byte identical.
 const COUNTRIES = [
   {
-    code: "in", name: "India", region: "IN", watchRegion: "IN",
+    code: "in", name: "India", region: "IN", watchRegion: "IN", streamWord: "OTT",
     priorityLangs: ["hi", "ta", "te"],
     regionalLangs: ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"], // order = India's regionalOrder
     ottRegionalLangs: ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"], // OTT regional pool langs
@@ -116,7 +116,7 @@ const COUNTRIES = [
   // UAE: ~3.5M Indian expats; Indian films routinely top the UAE box office, with
   // Malayalam cinema disproportionately huge (Kerala diaspora) alongside Hindi/Tamil.
   {
-    code: "ae", name: "UAE", region: "AE", watchRegion: "AE",
+    code: "ae", name: "UAE", region: "AE", watchRegion: "AE", streamWord: "OTT",
     priorityLangs: ["hi", "en", "ml"],
     regionalLangs: ["hi", "ml", "ta", "te", "ar"],
     ottRegionalLangs: ["hi", "ml", "ta", "te"],
@@ -143,6 +143,87 @@ const COUNTRIES = [
     soonTargets: [["en", 4], ["ta", 1], ["__regional__", 2]],
   },
 ];
+
+// ============================================================================
+// STREAMING VOCABULARY — the word each market actually searches with.
+// "OTT" went mainstream in India: viewers say it, papers print it, and "<film>
+// OTT release date" is a normal query. Everywhere else it is industry jargon —
+// a US or German viewer searches "streaming", never "OTT". UAE keeps OTT
+// because its ~3.5M Indian expats search Indian-style for exactly the Hindi and
+// Malayalam titles that market is here for. Set per country via streamWord;
+// anything unset falls back to "streaming", which is the safe global default.
+// One source of truth: page copy, title tags, FAQ questions, and the archive
+// patcher all read from here, so a country's wording can never drift apart.
+// ============================================================================
+function streamVocab(cfg) {
+  // A partial cfg ({ code: "in" }) must still get India's vocabulary, so the code is
+  // resolved against COUNTRIES rather than trusting streamWord to be present.
+  const code = (cfg && cfg.code) || "in"; // no cfg == India, matching buildFilmPage's own default
+  const full = COUNTRIES.find((c) => c.code === code);
+  const w = (cfg && cfg.streamWord) || (full && full.streamWord) || "streaming";
+  const isOtt = w === "OTT";
+  return {
+    word: w,                                        // "OTT" | "streaming"
+    // Title-tag fragment. Capitalised for the OTT markets ("OTT Release Date"),
+    // sentence-shaped elsewhere ("Streaming Release Date").
+    titleFragment: isOtt ? "OTT Release Date" : "Streaming Release Date",
+    // The FAQ question. India gets the doubled phrasing that matches how the
+    // query is actually typed; streaming markets get the plain question.
+    faqQuestion: (t) => isOtt
+      ? `When is ${t} releasing on OTT? (OTT release date)`
+      : `When is ${t} coming to streaming?`,
+    // Noun phrase inside sentences: "An OTT release date for X…" /
+    // "A streaming release date for X…"
+    article: isOtt ? "An" : "A",
+    releaseDate: isOtt ? "OTT release date" : "streaming release date",
+    release: isOtt ? "OTT release" : "streaming release",
+    arrival: isOtt ? "OTT arrival" : "streaming arrival",
+    // Heading over the new date block on film pages.
+    heading: (t) => isOtt ? `When is ${t} coming to OTT?` : `When is ${t} coming to streaming?`,
+  };
+}
+
+// ============================================================================
+// THEATRICAL -> STREAMING WINDOW. "<film> OTT release date" is searched hardest in
+// the weeks AFTER a theatrical run, by people who missed it and are waiting. We
+// cannot know the real date — no public feed carries unannounced windows — so we
+// publish the honest thing: the typical gap for that industry, expressed as a
+// RANGE and always labelled as a pattern, never a promise. Windows differ by
+// industry (Hindi runs longer than Hollywood; Malayalam is famously quick), so
+// they're keyed by language with a conservative default.
+// If the film is already streaming, none of this is used — real data wins.
+// ============================================================================
+const STREAM_WINDOW_WEEKS = {
+  hi: [6, 8], ta: [4, 7], te: [4, 7], ml: [3, 6], kn: [4, 7], pa: [5, 8],
+  mr: [5, 8], bn: [5, 8], en: [5, 9], de: [5, 9],
+};
+const STREAM_WINDOW_DEFAULT = [5, 9];
+// LANG maps code->name; we store windows by code, so invert for the name we carry on items.
+function windowForLanguage(languageName) {
+  if (!languageName) return STREAM_WINDOW_DEFAULT;
+  for (const [code, name] of Object.entries(LANG)) {
+    if (name === languageName && STREAM_WINDOW_WEEKS[code]) return STREAM_WINDOW_WEEKS[code];
+  }
+  return STREAM_WINDOW_DEFAULT;
+}
+
+// Pure: given a theatrical release date and language, describe the expected window.
+// Returns null when we have no release date to anchor to (say nothing rather than guess),
+// and a `passed` flag once the window has closed — at which point claiming "expected around
+// October" for a date already gone would be worse than saying nothing useful.
+// `now` is injectable for tests.
+function streamWindowEstimate(releasedISO, languageName, now = new Date()) {
+  if (!releasedISO) return null;
+  const rel = new Date(releasedISO + "T00:00:00Z");
+  if (Number.isNaN(rel.getTime())) return null;
+  const [lo, hi] = windowForLanguage(languageName);
+  const from = new Date(rel.getTime() + lo * 7 * 86400000);
+  const to = new Date(rel.getTime() + hi * 7 * 86400000);
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const label = (d) => `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  const span = label(from) === label(to) ? label(from) : `${label(from)} and ${label(to)}`;
+  return { lo, hi, span, passed: now.getTime() > to.getTime() };
+}
 
 // Manual exclusion list — films that should NEVER appear regardless of what TMDB returns
 // (banned in India, pulled from release, festival-only, or otherwise mislisted as current
@@ -1521,7 +1602,8 @@ function buildGoodToKnow(item) {
 
 // FAQ entries (question + answer), deterministic, for both on-page display AND FAQPage
 // schema. Only questions we can answer truthfully from data are emitted.
-function buildFaqs(item, countryName = "India") {
+function buildFaqs(item, countryName = "India", cfg = null) {
+  const V = streamVocab(cfg || COUNTRIES.find((c) => c.name === countryName) || null);
   if (!item || !item.title) return [];
   const faqs = [];
   const today = new Date().toISOString().slice(0, 10);
@@ -1542,23 +1624,29 @@ function buildFaqs(item, countryName = "India") {
   let whereA;
   if (upcoming) whereA = `${item.title} hasn't released yet${item.released ? ` — it's due ${item.released}` : ""}. We'll list where to watch once it's out.`;
   else if (provs.length) whereA = `You can stream ${item.title} in ${countryName} on ${provs.join(", ")}.`;
-  else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across ${countryName}. An OTT release hasn't been announced yet.`;
+  else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across ${countryName}. ${V.article} ${V.release} hasn't been announced yet.`;
   else whereA = `Streaming availability for ${item.title} in ${countryName} isn't confirmed yet — check back as platforms update.`;
   faqs.push({ q: `Where can I watch ${item.title}?`, a: whereA });
 
-  // Q2b: OTT release date — how India actually asks about films ("<title> ott release
-  // date"). Answers are state-aware: streaming -> platform (+ arrival date when our
-  // first-seen tracking has one); theatrical/upcoming -> honestly "not announced yet",
-  // with the true promise that this page updates the day it lands.
+  // Q2b: streaming release date — the highest-volume non-brand query shape in every
+  // market, asked in that market's own words (India/UAE say "OTT", everyone else says
+  // "streaming"; see streamVocab). Answers are state-aware: streaming -> platform (+
+  // arrival date when first-seen tracking has one); theatrical -> honestly "not
+  // announced", plus the typical window as a labelled pattern, plus the true promise
+  // that this page updates the day it lands.
   if (item.kind !== "tv") {
     let ottA;
     const arrival = item.ottFreshDate || null;
     if (provs.length) {
       ottA = `${item.title} is already streaming in ${countryName} on ${provs.join(", ")}${arrival ? ` — it arrived on ${arrival}` : ""}.`;
     } else {
-      ottA = `An OTT release date for ${item.title} hasn't been officially announced yet. This page updates automatically the day it starts streaming.`;
+      const est = item.platform === "Theatres" ? streamWindowEstimate(item.released, item.language) : null;
+      const hint = est && !est.passed
+        ? ` ${item.language || "These"} releases typically reach streaming about ${est.lo}–${est.hi} weeks after their theatrical run, which would put it around ${est.span} — that's a pattern, not a confirmed date.`
+        : "";
+      ottA = `${V.article} ${V.releaseDate} for ${item.title} hasn't been officially announced yet.${hint} This page updates automatically the day it starts streaming.`;
     }
-    faqs.push({ q: `When is ${item.title} releasing on OTT? (OTT release date)`, a: ottA });
+    faqs.push({ q: V.faqQuestion(item.title), a: ottA });
   }
 
   // Q3: family friendly (only if we have a cert)
@@ -2509,7 +2597,22 @@ async function main() {
   // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
   // and the manifest records real lastmod dates for the sitemap (see module-scope docs).
   const pagesManifest = loadPagesManifest();
-  for (const cfg of builtCountries) archiveDepartedPages(pagesManifest, cfg, allSlugSets[cfg.code] || new Set());
+  for (const cfg of builtCountries) {
+    const d = dataByCode[cfg.code] || {};
+    // slug -> the few fields the streaming sweep needs after this page freezes.
+    const meta = {};
+    for (const it of [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || [])]) {
+      if (it && it.slug) meta[it.slug] = { tmdbId: it.tmdbId, released: it.released, language: it.language, kind: it.kind, title: it.title };
+    }
+    archiveDepartedPages(pagesManifest, cfg, allSlugSets[cfg.code] || new Set(), meta);
+  }
+  // Re-check frozen theatrical pages for a streaming arrival they'd otherwise never
+  // reflect (see sweepStreamingArrivals). Runs after archiving so newly-frozen pages
+  // are eligible immediately; budgeted per country.
+  for (const cfg of builtCountries) {
+    try { await sweepStreamingArrivals(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
+    catch (e) { console.warn(`  sweep [${cfg.code}] skipped: ${e.message}`); }
+  }
   fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
 
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
@@ -2603,7 +2706,8 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   // exactly in the theatrical/pre-OTT window this branch covers, and the FAQ + auto-update
   // mechanic already answer it. Streaming titles, TV, and other countries keep the
   // review/where-to-watch shape ("OTT" is Indian-market phrasing).
-  const wantsOttTitle = code === "in" && item.kind !== "tv" && providers.length === 0;
+  const V_TITLE = streamVocab(cfg);
+  const wantsOttTitle = V_TITLE.word === "OTT" && item.kind !== "tv" && providers.length === 0;
   // Google shows ~60 chars of a title; every India film title was over it, so the query
   // words were the part being cut. Drop decoration first (brand, country), keep the
   // query-bearing words ("OTT Release Date" / "Review") to the last tier.
@@ -2611,10 +2715,10 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   const fitTitle = (opts) => opts.find((t) => t.length <= 60) || opts[opts.length - 1];
   const titleTag = wantsOttTitle
     ? fitTitle([
-        `${item.title}${yr} OTT Release Date, Review & Where to Watch | FilmyChill`,
-        `${item.title}${yr} OTT Release Date, Review & Where to Watch`,
-        `${item.title}${yr} OTT Release Date & Review`,
-        `${item.title}${yr} OTT Release Date`,
+        `${item.title}${yr} ${V_TITLE.titleFragment}, Review & Where to Watch | FilmyChill`,
+        `${item.title}${yr} ${V_TITLE.titleFragment}, Review & Where to Watch`,
+        `${item.title}${yr} ${V_TITLE.titleFragment} & Review`,
+        `${item.title}${yr} ${V_TITLE.titleFragment}`,
       ])
     : fitTitle([
         `${item.title}${yr} — Review, Rating & Where to Watch in ${country} | FilmyChill`,
@@ -2633,7 +2737,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   if (item.rating != null && dvotes >= 10) factBits.push(`rated ${Number(item.rating).toFixed(1)}/10`);
   const clean = (s) => String(s).trim().replace(/\.+$/, "");
   const descParts = [factBits.join(", "), item.verdict, synopsis].filter(Boolean).map(clean);
-  if (wantsOttTitle) descParts.push("OTT date not announced yet — this page updates the day it streams");
+  if (wantsOttTitle) descParts.push(`${V_TITLE.word === "OTT" ? "OTT" : "Streaming"} date not announced yet — this page updates the day it streams`);
   const desc = trim(descParts.filter(Boolean).join(". "), 155)
     || trim(`${item.title}${yr}: ${[item.language, item.genre, item.kind === "tv" ? "series" : "film"].filter(Boolean).join(" ")} — review, rating and where to watch in ${country}`, 155);
 
@@ -2695,7 +2799,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   // --- Enriched, deterministic sections (original content -> SEO value) ---
   const verdictProse = buildVerdictProse(item, country, localeFor(code));
   const goodToKnow = buildGoodToKnow(item);
-  const faqs = buildFaqs(item, country);
+  const faqs = buildFaqs(item, country, cfg);
   // On-site titles outrank off-site ones in the strip: a recommendation the reader can
   // actually open beats a dead card, and each one is a contextual internal link on a
   // page that otherwise has almost none (742 of 1,044 film pages had zero inlinks).
@@ -2803,6 +2907,26 @@ ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))
   ${(item.castPics && item.castPics.length) ? `<h2>Cast</h2><div class="cast-strip">${item.castPics.map((c) => `<div class="cast-card"><img src="${e(c.photo)}" alt="${e(c.name)}" width="72" height="72" loading="lazy"><div class="cast-name">${e(c.name)}</div>${c.character ? `<div class="cast-role">${e(c.character)}</div>` : ""}</div>`).join("")}</div>`
     : cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
   ${(() => {
+    // ---- "When is X coming to streaming/OTT?" ----------------------------------
+    // The single highest-intent question on a theatrical film page, and the one the
+    // page previously answered only inside a collapsed FAQ. Rendered as a real
+    // section, above Where-to-watch, because it is why these visitors arrived.
+    // Shown only for films with NO streaming provider — once real data exists the
+    // Where-to-watch block below is the better answer and this disappears on the
+    // next build. Never invents a date: an estimate is always a labelled range.
+    if (item.kind === "tv" || providers.length) return "";
+    if (item.platform !== "Theatres" && !upcoming) return "";
+    const V = streamVocab(cfg);
+    if (upcoming) {
+      return `<!--SW:pending--><h2>${e(V.heading(item.title))}</h2><p>${e(item.title)} hasn't had its theatrical release yet${item.released ? `, and is due ${e(item.released)}` : ""}. ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens — this page updates automatically the day it starts streaming.</p><!--/SW:pending-->`;
+    }
+    const est = streamWindowEstimate(item.released, item.language);
+    const body = est && !est.passed
+      ? `<p>Not streaming yet — ${e(item.title)} is in its theatrical run in ${e(country)}${item.released ? `, released ${e(item.released)}` : ""}. ${e(item.language || "Films like this")} releases typically reach streaming about ${est.lo}–${est.hi} weeks after opening, which would put it somewhere around <strong>${e(est.span)}</strong>.</p><p style="color:var(--mute);font-size:13px">That's the usual pattern, not a confirmed date — no platform has announced one. We re-check every day and this page updates the moment it lands.</p>`
+      : `<p>Not streaming yet in ${e(country)}${item.released ? ` — ${e(item.title)} released in theatres ${e(item.released)}` : ""}. No platform has announced ${e(V.article.toLowerCase())} ${e(V.releaseDate)}. We re-check every day and this page updates the moment it lands.</p>`;
+    return `<!--SW:pending--><h2>${e(V.heading(item.title))}</h2>${body}<!--/SW:pending-->`;
+  })()}
+  ${(() => {
     // Three honest states: streaming (included with a subscription — no extra charge),
     // rent/buy (pay per title), and theatres-only. The subscription-vs-rent distinction
     // is the most common unanswered question on OTT listings; TMDB's monetization split
@@ -2827,7 +2951,7 @@ ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))
   <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">See this week's top picks on FilmyChill →</a>
 </div>
 <footer>
-  <nav><a href="${e(homeUrl)}">This week in ${e(country)}</a> · <a href="${code === "in" ? "/new-on-ott/" : `/${e(code)}/new-on-ott/`}">New on OTT</a>${code === "in" ? ` · ${LANGUAGE_PAGES.map(([n, s]) => `<a href="/${s}/">${n}</a>`).join(" · ")}` : ""} · <a href="/about/">About</a></nav>
+  <nav><a href="${e(homeUrl)}">This week in ${e(country)}</a> · <a href="${code === "in" ? "/new-on-ott/" : `/${e(code)}/new-on-ott/`}">New on ${e(streamVocab(cfg).word === "OTT" ? "OTT" : "streaming")}</a>${code === "in" ? ` · ${LANGUAGE_PAGES.map(([n, s]) => `<a href="/${s}/">${n}</a>`).join(" · ")}` : ""} · <a href="/about/">About</a></nav>
   Verdicts are compiled by FilmyChill's editorial system from audience ratings and published critic reception — <a href="/about/">how we rate</a>.<br>
   ${footerAttribution()}© 2026 FilmyChill · Vikram Sharma
 </footer>
@@ -3489,7 +3613,7 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 // Returns { html, changed }. No-op for OTT pages (their availability claims stay valid).
 // Bump when new patch patterns are added: already-archived pages get one re-sweep so
 // the fix reaches pages frozen before the pattern existed.
-const ARCHIVE_PATCH_VERSION = 2;
+const ARCHIVE_PATCH_VERSION = 3;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
@@ -3528,15 +3652,27 @@ const ARCHIVE_LEAD_SWAPS = [
    "ranked near the top of that week&#39;s $1 crop"],
 ];
 
-function archivePatchHtml(html, countryName) {
+function archivePatchHtml(html, countryName, cfg = null) {
+  const V = streamVocab(cfg);
+  // Pages frozen BEFORE the per-country vocabulary split carry India's "OTT" wording
+  // in every market, so we match both the country's current word and the legacy one.
+  // Replacements always use the country's current vocabulary.
+  const variants = [
+    { article: "An", release: "OTT release", arrival: "OTT arrival" },
+    { article: "A", release: "streaming release", arrival: "streaming arrival" },
+  ];
   const swaps = [
     [`It&#39;s in theatres in ${countryName} now — best caught on the big screen.`,
-     `It had its theatrical run in ${countryName} — check back here for its OTT arrival.`],
-    [`is currently playing in theatres across ${countryName}. An OTT release hasn&#39;t been announced yet.`,
-     `has finished its theatrical run in ${countryName}. Its OTT release hasn&#39;t been announced yet — check back soon.`],
+     `It had its theatrical run in ${countryName} — check back here for its ${V.arrival}.`],
     [`<span class="pill">In theatres</span>`,
-     `<span class="pill">Theatrical run ended — OTT arrival pending</span>`],
+     `<span class="pill">Theatrical run ended — ${V.arrival} pending</span>`],
   ];
+  for (const v of variants) {
+    swaps.push([
+      `is currently playing in theatres across ${countryName}. ${v.article} ${v.release} hasn&#39;t been announced yet.`,
+      `has finished its theatrical run in ${countryName}. Its ${V.release} hasn&#39;t been announced yet — check back soon.`,
+    ]);
+  }
   let out = html, changed = false;
   for (const [from, to] of swaps) {
     if (out.includes(from)) { out = out.split(from).join(to); changed = true; }
@@ -3552,11 +3688,22 @@ function archivePatchHtml(html, countryName) {
 // current slugs (clearing any archive mark — the page was just regenerated fresh),
 // and returns the slugs that need the one-time archive patch (on disk, not current,
 // not yet archived). Mutates manifest[code]; caller persists.
-function reconcilePagesManifest(manifest, code, currentSlugs, diskSlugs, todayStr) {
+function reconcilePagesManifest(manifest, code, currentSlugs, diskSlugs, todayStr, meta = null) {
   const m = (manifest[code] = manifest[code] || {});
   for (const slug of currentSlugs) {
     const entry = (m[slug] = m[slug] || {});
     entry.last = todayStr;
+    // Stamp what the refresh sweep will need once this page freezes: TMDB id to
+    // re-query providers, release date + language to decide whether it's still
+    // inside a plausible streaming window. Recorded while current, kept after.
+    const info = meta && meta[slug];
+    if (info) {
+      if (info.tmdbId) entry.tmdbId = info.tmdbId;
+      if (info.released) entry.released = info.released;
+      if (info.language) entry.lang = info.language;
+      if (info.kind) entry.kind = info.kind;
+      if (info.title) entry.title = info.title;
+    }
     delete entry.archivedOn;
   }
   const toArchive = [];
@@ -3568,17 +3715,103 @@ function reconcilePagesManifest(manifest, code, currentSlugs, diskSlugs, todaySt
   return toArchive;
 }
 
+// ============================================================================
+// STREAMING-ARRIVAL SWEEP — what turns the "coming to streaming" block into an
+// evergreen asset instead of a page that goes stale.
+//
+// Frozen archived pages get no new provider data, so a film that left the weekly
+// lists during its theatrical run and then landed quietly on a platform (never
+// making the "new this week" cut) would sit forever saying "not streaming yet"
+// — on precisely the query it spent weeks earning rank for. This sweep re-checks
+// those pages against TMDB's watch-providers and, when one has arrived, replaces
+// the pending block in place. In place, not a re-render: the page's verdict,
+// critics' take, cast and prose came from a full pipeline run and re-deriving
+// them here would make the page worse.
+//
+// Budget: only pages whose block is still "pending", whose release sits inside a
+// plausible window (SWEEP_MIN_WEEKS..SWEEP_MAX_WEEKS after release), capped at
+// SWEEP_MAX_CHECKS API calls per country per run. Newest-first, so the films
+// most likely to be about to land are checked before older stragglers.
+// ============================================================================
+const SWEEP_MIN_WEEKS = 2;
+const SWEEP_MAX_WEEKS = 30;
+const SWEEP_MAX_CHECKS = 18;
+
+// Pure: which archived slugs are worth an API call this run, newest release first.
+function sweepCandidates(entries, now = new Date(), max = SWEEP_MAX_CHECKS) {
+  const MS_WEEK = 7 * 86400000;
+  return entries
+    .filter((x) => x.archivedOn && x.tmdbId && x.released && x.kind !== "tv")
+    .map((x) => ({ ...x, ageWeeks: (now.getTime() - new Date(x.released + "T00:00:00Z").getTime()) / MS_WEEK }))
+    .filter((x) => Number.isFinite(x.ageWeeks) && x.ageWeeks >= SWEEP_MIN_WEEKS && x.ageWeeks <= SWEEP_MAX_WEEKS)
+    .sort((a, b) => a.ageWeeks - b.ageWeeks)
+    .slice(0, max);
+}
+
+// Pure: swap a page's pending block for a "now streaming" answer, and upgrade the
+// theatrical pill to real provider pills. Returns {html, changed} like archivePatchHtml.
+function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf }) {
+  if (!providers || !providers.length) return { html, changed: false };
+  const V = streamVocab(cfg);
+  const e = escHtml;
+  const start = "<!--SW:pending-->", end = "<!--/SW:pending-->";
+  const a = html.indexOf(start), b = html.indexOf(end);
+  if (a === -1 || b === -1 || b < a) return { html, changed: false };
+  const list = providers.join(", ");
+  const block = `${start}<h2>${e(V.heading(title))}</h2><p><strong>It's streaming now.</strong> ${e(title)} is available in ${e(countryName)} on ${e(list)}.</p><p style="color:var(--mute);font-size:13px">Spotted by our daily availability check${asOf ? ` on ${e(asOf)}` : ""}. Platforms can change over time.</p>${end}`;
+  let out = html.slice(0, a) + block + html.slice(b + end.length);
+  // The archived page still advertises a finished theatrical run in its pills.
+  const pills = providers.map((pv) => `<span class="pill">${e(pv)}</span>`).join("");
+  for (const stale of [
+    `<span class="pill">Theatrical run ended — ${V.arrival} pending</span>`,
+    `<span class="pill">Theatrical run ended — OTT arrival pending</span>`,
+    `<span class="pill">Theatrical run ended — streaming arrival pending</span>`,
+    `<span class="pill">In theatres</span>`,
+  ]) {
+    if (out.includes(stale)) { out = out.split(stale).join(pills); break; }
+  }
+  return { html: out, changed: true };
+}
+
+// Live pass: run the sweep for one country. Network-bound, so failures are logged
+// and skipped — a page that stays pending one more day is a non-event.
+async function sweepStreamingArrivals(manifest, cfg, asOf) {
+  const m = manifest[cfg.code] || {};
+  const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
+  if (!fs.existsSync(dir)) return;
+  const entries = Object.entries(m).map(([slug, v]) => ({ slug, ...v }));
+  const candidates = sweepCandidates(entries).filter((x) => {
+    try { return fs.readFileSync(`${dir}/${x.slug}.html`, "utf8").includes("<!--SW:pending-->"); }
+    catch { return false; }
+  });
+  if (!candidates.length) return;
+  let found = 0;
+  for (const c of candidates) {
+    try {
+      const d = await tmdb(`/movie/${c.tmdbId}/watch/providers`);
+      const provs = dedupeProviders((d?.results?.[cfg.watchRegion]?.flatrate || []).map((x) => x.provider_name)).slice(0, 4);
+      if (!provs.length) continue;
+      const p = `${dir}/${c.slug}.html`;
+      const { html, changed } = applyArrivalPatch(fs.readFileSync(p, "utf8"), {
+        title: c.title || c.slug, providers: provs, countryName: countryNameFor(cfg), cfg, asOf,
+      });
+      if (changed) { fs.writeFileSync(p, html); m[c.slug].last = asOf; found++; }
+    } catch (e) { console.warn(`  sweep ${c.slug}: ${e.message}`); }
+  }
+  console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming`);
+}
+
 function loadPagesManifest() {
   try { return JSON.parse(fs.readFileSync(PAGES_MANIFEST_FILE, "utf8")); } catch { return {}; }
 }
 
 // Run the archive pass for one country: patch newly-departed pages in place.
-function archiveDepartedPages(manifest, cfg, currentSlugs) {
+function archiveDepartedPages(manifest, cfg, currentSlugs, meta = null) {
   const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
   if (!fs.existsSync(dir)) return;
   const diskSlugs = fs.readdirSync(dir).filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5));
   const todayStr = new Date().toISOString().slice(0, 10);
-  const toArchive = reconcilePagesManifest(manifest, cfg.code, currentSlugs, diskSlugs, todayStr);
+  const toArchive = reconcilePagesManifest(manifest, cfg.code, currentSlugs, diskSlugs, todayStr, meta);
   const countryName = countryNameFor(cfg);
   // Newly-departed pages, plus a one-time re-sweep of pages archived under an older
   // patch version (their frozen text predates newer patterns). pv stamps make it once.
@@ -3592,7 +3825,7 @@ function archiveDepartedPages(manifest, cfg, currentSlugs) {
   for (const slug of sweep) {
     const p = `${dir}/${slug}.html`;
     try {
-      const { html, changed } = archivePatchHtml(fs.readFileSync(p, "utf8"), countryName);
+      const { html, changed } = archivePatchHtml(fs.readFileSync(p, "utf8"), countryName, cfg);
       if (changed) { fs.writeFileSync(p, html); patched++; }
       if (m[slug]) m[slug].pv = ARCHIVE_PATCH_VERSION;
     } catch (e) { console.warn(`  archive: ${p} skipped (${e.message})`); }
@@ -4360,6 +4593,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
 module.exports = {
   verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween, ARCHIVE_PATCH_VERSION,
   fmtRuntime, langCode, langName, LANG_CODE_OVERRIDES,
+  streamVocab, streamWindowEstimate, sweepCandidates, applyArrivalPatch,
   assignSlugs, buildHeadTags, buildHomeJsonLd, ssrCard, ssrSoonCard,
   footerAttribution, RATINGS_SOURCE, USE_IMDB,
   deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
