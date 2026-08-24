@@ -180,6 +180,17 @@ function streamVocab(cfg) {
     arrival: isOtt ? "OTT arrival" : "streaming arrival",
     // Heading over the new date block on film pages.
     heading: (t) => isOtt ? `When is ${t} coming to OTT?` : `When is ${t} coming to streaming?`,
+    // ---- PAGE COPY (homepages, weekly page, hubs, RSS, headings) ----
+    // Everything below exists so the SAME market word reaches title tags, H1s,
+    // nav labels and body copy. A US visitor should never read "OTT" anywhere.
+    // Title-case, for title tags and H1s: "New Movies & Streaming Releases…".
+    Releases: isOtt ? "OTT Releases" : "Streaming Releases",
+    // Sentence-case, for descriptions and body prose: "…theatre and streaming releases".
+    releases: isOtt ? "OTT releases" : "streaming releases",
+    // Nav/breadcrumb/footer label for the weekly aggregation page.
+    newOn: isOtt ? "New on OTT" : "New on streaming",
+    // Capitalised bare noun for UI labels that start with it ("Awaiting streaming").
+    Word: isOtt ? "OTT" : "Streaming",
   };
 }
 
@@ -3381,6 +3392,10 @@ function buildOttWeekPage(data, cfg, allCountries) {
   const countryName = m.name; // "India", "the US", ...
   const homeUrl = `https://filmychill.com${m.path}`;
   const url = ottWeekUrl(code);
+  // Market vocabulary. The URL stays /new-on-ott/ everywhere — it is already indexed and a
+  // slug is not user-facing copy — but every word a visitor or a SERP snippet SEES comes
+  // from V, so the US page reads "New Streaming Releases", never "New OTT Releases".
+  const V = streamVocab(cfg && cfg.code ? cfg : { code });
   const gen = data.generatedAt || new Date().toISOString();
   const monthYear = new Date(gen).toLocaleDateString(localeFor(code), { month: "long", year: "numeric" });
   const updatedHuman = new Date(gen).toLocaleDateString(localeFor(code), { day: "numeric", month: "long", year: "numeric" });
@@ -3396,7 +3411,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
   const platforms = [...groups.keys()].sort((a, b) => groups.get(b).length - groups.get(a).length || a.localeCompare(b));
   const platformNames = platforms.slice(0, 4).join(", ");
 
-  const title = `New OTT Releases This Week in ${countryName} (${monthYear}) — ${platformNames || "Streaming"} | FilmyChill`;
+  const title = `New ${V.Releases} This Week in ${countryName} (${monthYear}) — ${platformNames || "Streaming"} | FilmyChill`;
   const desc = `Every new movie and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated daily.`;
 
   // FAQ per major platform + one "best of" — real answers from real data, mirrored in
@@ -3409,7 +3424,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
   const best = items.filter((x) => x.rating != null).sort((a, b) => b.rating - a.rating).slice(0, 3);
   if (best.length >= 2) {
     faqs.push({
-      q: `What are the best new OTT releases in ${countryName} this week?`,
+      q: `What are the best new ${V.releases} in ${countryName} this week?`,
       a: `Top-rated this week: ${best.map((x) => `${x.title} (${Number(x.rating).toFixed(1)}/10 on ${x.platform})`).join(", ")}.`,
     });
   }
@@ -3421,7 +3436,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
   const ld = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: `New OTT Releases This Week in ${countryName}`,
+    name: `New ${V.Releases} This Week in ${countryName}`,
     url,
     dateModified: gen,
     isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
@@ -3437,7 +3452,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
     "@context": "https://schema.org", "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "FilmyChill", item: homeUrl },
-      { "@type": "ListItem", position: 2, name: "New on OTT this week", item: url },
+      { "@type": "ListItem", position: 2, name: `${V.newOn} this week`, item: url },
     ],
   };
 
@@ -3484,7 +3499,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
 <meta name="robots" content="max-image-preview:large">
 <link rel="canonical" href="${e(url)}">
 ${alts}
-<meta property="og:title" content="New OTT Releases This Week in ${e(countryName)} (${e(monthYear)})">
+<meta property="og:title" content="New ${e(V.Releases)} This Week in ${e(countryName)} (${e(monthYear)})">
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${e(url)}">
@@ -3524,12 +3539,12 @@ ${alts}
 <body>
 <div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
 <div class="wrap">
-  <h1>New OTT Releases This Week in ${e(countryName)}</h1>
+  <h1>New ${e(V.Releases)} This Week in ${e(countryName)}</h1>
   <div class="upd">Updated ${e(updatedHuman)} · refreshed daily</div>
   <p class="lead">Every new movie and web series that started streaming in ${e(countryName)} this week, grouped by platform and ranked by rating — so you know what's actually worth your time.</p>
 ${sections}
 ${faqHtml}
-  <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + OTT)</a>
+  <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + ${e(V.word)})</a>
 </div>
 <footer>
   ${footerAttribution()}© 2026 FilmyChill
@@ -3552,6 +3567,7 @@ function buildRssFeed(data, cfg) {
   const m = COUNTRY_PAGE_META[code] || { name: (cfg && cfg.name) || "India", path: `/${code}/` };
   const home = `https://filmychill.com${m.path}`;
   const self = `${home}feed.xml`;
+  const V = streamVocab(cfg && cfg.code ? cfg : { code }); // feed titles use the market's word
   const items = [...(data.theatres || []), ...(data.ott || [])]
     .filter((x) => x && x.title && x.slug)
     .map((x) => ({ x, when: x.ottSince || x.freshDate || x.released || "" }))
@@ -3573,10 +3589,10 @@ function buildRssFeed(data, cfg) {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-  <title>FilmyChill — New Movies &amp; OTT Releases This Week in ${e(m.name)}</title>
+  <title>FilmyChill — New Movies &amp; ${e(V.Releases)} This Week in ${e(m.name)}</title>
   <link>${e(home)}</link>
   <atom:link href="${e(self)}" rel="self" type="application/rss+xml"/>
-  <description>What's worth watching this week in ${e(m.name)} — new theatre and OTT releases with ratings and verdicts. Updated twice daily.</description>
+  <description>What's worth watching this week in ${e(m.name)} — new theatre and ${e(V.releases)} with ratings and verdicts. Updated twice daily.</description>
   <language>en</language>
   <lastBuildDate>${new Date(data.generatedAt || Date.now()).toUTCString()}</lastBuildDate>
 ${itemXml}
@@ -3949,6 +3965,9 @@ function writePlatformHubPages(data, cfg) {
 
 function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in" }) {
   const e = escHtml;
+  // Back-link copy follows the market ("theatres + OTT" in India/UAE, "theatres +
+  // streaming" everywhere else) — platform hubs exist for every country.
+  const V = streamVocab({ code });
   const ldJson = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
   const rowFor = (it) => {
     const badge = it.badge || (it.isRecent ? "New release" : null);
@@ -4038,7 +4057,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   <div class="frozen">${e(frozenNote)}</div>` : ""}
 ${sectionHtml}
 ${faqHtml}
-  <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + OTT)</a>${prevWeekHref ? `
+  <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + ${e(V.word)})</a>${prevWeekHref ? `
   <a class="btn" style="background:transparent;color:var(--indigo);border:1.5px solid var(--indigo)" href="${e(prevWeekHref)}">← Previous week</a>` : ""}
 </div>
 <footer>
@@ -4374,6 +4393,11 @@ function countryListForProse() {
 function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name, path: `/${cfg.code}/` };
   const url = `https://filmychill.com${m.path}`;
+  // The market's own word for streaming. India/UAE say "OTT"; a US, UK, German,
+  // Australian, Canadian or Singaporean searcher says "streaming" and would read
+  // "OTT" as jargon (or not at all) — so the title tag, description and share
+  // copy below are all built from V rather than a hardcoded "OTT".
+  const V = streamVocab(cfg);
 
   // SERP click-through: when this run's data is passed, the title carries the live month
   // (freshness a searcher can SEE in the results page) and the description leads with real
@@ -4384,7 +4408,7 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   if (data) {
     const monthYear = new Date(data.generatedAt || Date.now())
       .toLocaleDateString(localeFor(cfg.code), { month: "long", year: "numeric" });
-    dynTitle = `New Movies & OTT Releases This Week in ${m.name} (${monthYear}) | FilmyChill`;
+    dynTitle = `New Movies & ${V.Releases} This Week in ${m.name} (${monthYear}) | FilmyChill`;
     const all = [...(data.theatres || []), ...(data.ott || [])];
     // Two marquee names: the top theatre title and the top OTT title (fall back down the list).
     const names = [(data.theatres || [])[0], (data.ott || [])[0]].filter(Boolean).map((x) => x.title);
@@ -4402,7 +4426,7 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   // channel where daily entertainment content actually goes viral in India. One tag,
   // emitted on every page type (homepages here; film + ott-week pages set it themselves).
   const discover = `<meta name="robots" content="max-image-preview:large">`
-    + `\n<link rel="alternate" type="application/rss+xml" title="FilmyChill — New Movies & OTT" href="https://filmychill.com${m.path}feed.xml">`;
+    + `\n<link rel="alternate" type="application/rss+xml" title="FilmyChill — New Movies & ${V.Word}" href="https://filmychill.com${m.path}feed.xml">`;
 
   // On-page hreflang for the five homepages. Film + new-on-ott pages already emit these;
   // the homepages only declared alternates in the sitemap, which is the weaker signal —
@@ -4422,22 +4446,22 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
     + `<meta name="twitter:card" content="summary_large_image">`;
   if (cfg.code === "in") {
     // Root keeps the multi-country, India-first wording as the no-data fallback.
-    return `<title>${escHtml(dynTitle || "FilmyChill — Latest Movie & OTT Releases, with Reviews, Updated Daily")}</title>\n`
-      + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases across ${countryListForProse()} — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
+    return `<title>${escHtml(dynTitle || `FilmyChill — Latest Movie & ${V.Releases}, with Reviews, Updated Daily`)}</title>\n`
+      + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and ${V.releases} across ${countryListForProse()} — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
       + discover + "\n"
       + `<link rel="canonical" href="${url}">\n`
       + homeAlts + "\n"
       + `<meta property="og:title" content="${escHtml(dynTitle) || "FilmyChill — What's worth watching this week"}">\n`
-      + `<meta property="og:description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases across ${countryListForProse()} — trailers, ${ratingsWord}, verdicts. Auto-updated daily.`}">\n`
+      + `<meta property="og:description" content="${escHtml(dynDesc) || `Latest theatre and ${V.releases} across ${countryListForProse()} — trailers, ${ratingsWord}, verdicts. Auto-updated daily.`}">\n`
       + shareTags;
   }
-  return `<title>${escHtml(dynTitle) || `FilmyChill — Latest Movie &amp; OTT Releases in ${m.name}, with Reviews, Updated Daily`}</title>\n`
-    + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and OTT releases in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
+  return `<title>${escHtml(dynTitle) || `FilmyChill — Latest Movie &amp; ${V.Releases} in ${m.name}, with Reviews, Updated Daily`}</title>\n`
+    + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and ${V.releases} in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
     + discover + "\n"
     + `<link rel="canonical" href="${url}">\n`
     + homeAlts + "\n"
     + `<meta property="og:title" content="${escHtml(dynTitle) || `FilmyChill — What's worth watching this week in ${m.name}`}">\n`
-    + `<meta property="og:description" content="${escHtml(dynDesc) || `Top theatre releases + OTT picks in ${m.name} with trailers, ${ratingsWord} and verdicts. Auto-updated daily.`}">\n`
+    + `<meta property="og:description" content="${escHtml(dynDesc) || `Top theatre releases + ${V.word} picks in ${m.name} with trailers, ${ratingsWord} and verdicts. Auto-updated daily.`}">\n`
     + shareTags;
 }
 
@@ -4540,9 +4564,20 @@ function buildMoreLinks(code, data = null) {
 
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
+  const V = streamVocab(cfg);
   let html = templateHtml;
   html = replaceBetween(html, "HEAD", buildHeadTags(cfg, USE_IMDB, data));
-  html = replaceBetween(html, "PAGECODE", `<meta name="fc-page" content="${cfg.code}">`);
+  // fc-stream-word rides along with fc-page: the client script renders a few strings at
+  // runtime (My List tracking states, watchlist alerts) and must use the same word this
+  // page is written in, without re-deriving it from a duplicated country list.
+  html = replaceBetween(html, "PAGECODE",
+    `<meta name="fc-page" content="${cfg.code}"><meta name="fc-stream-word" content="${escHtml(V.word)}">`);
+  // Visible copy that names the concept. India/UAE keep "OTT"; every other market reads
+  // "streaming" — the word its visitors actually use and search with.
+  html = replaceBetween(html, "TAGLINE", `New movies &amp; ${escHtml(V.releases)} this week`);
+  html = replaceBetween(html, "MYLISTSUB", `tracked until they hit ${escHtml(V.word)}`);
+  html = replaceBetween(html, "OTTLINK", `All new ${escHtml(V.releases)} this week`);
+  html = replaceBetween(html, "FOOTOTT", `${escHtml(V.newOn)} this week`);
   html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code, data));
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
@@ -4573,12 +4608,32 @@ function prerenderIndex(data) {
   console.log("index.html pre-rendered with this week's films.");
 }
 
-// Local regeneration from existing data.json (no API calls): PAGES_ONLY=1 node scripts/update.js
+// Local regeneration from the data files already in the repo (no API calls):
+//   PAGES_ONLY=1   node scripts/update.js   -> India, full (film pages + homepage + weekly + feed)
+//   PAGES_ONLY=all node scripts/update.js   -> every country's COPY surfaces (homepage, weekly
+//                                              page, feed) rebuilt from data-<code>.json
+// The "all" scope exists for wording/template changes: those affect every country's homepage
+// and weekly page, and without it a copy fix sits unpublished until the next scheduled run.
+// It deliberately does NOT touch film pages or the sitemap — no API data, no archive churn.
 // Placed at end of file so all const declarations (COUNTRY_PAGE_META etc.) are initialized.
 if (process.env.PAGES_ONLY && require.main === module) {
+  const inCfg = COUNTRIES.find((c) => c.code === "in") || { code: "in", name: "India", region: "IN" };
+  if (String(process.env.PAGES_ONLY).toLowerCase() === "all") {
+    // One pristine read of the template, reused per country (injections never stack).
+    const template = fs.readFileSync("index.html", "utf8");
+    for (const cfg of COUNTRIES) {
+      const file = cfg.code === "in" ? "data.json" : `data-${cfg.code}.json`;
+      if (!fs.existsSync(file)) { console.warn(`  ${file} missing — ${cfg.code} skipped`); continue; }
+      const dc = JSON.parse(fs.readFileSync(file, "utf8"));
+      assignSlugs(dc);
+      renderCountryPage(template, cfg, dc);
+      writeOttWeekPage(dc, cfg, COUNTRIES); // full hreflang set, same as a real run
+      writeRssFeed(dc, cfg);
+    }
+    process.exit(0);
+  }
   const d = JSON.parse(fs.readFileSync("data.json", "utf8"));
   assignSlugs(d);
-  const inCfg = COUNTRIES.find((c) => c.code === "in") || { code: "in", name: "India", region: "IN" };
   const all = [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || [])];
   const slugSets = { in: new Set(all.map((x) => x.slug).filter(Boolean)) };
   generatePages(d, inCfg, slugSets); // India only in local regen
