@@ -2081,6 +2081,60 @@ test("headings and FAQ questions use the market's word", () => {
   assert.ok(/OTT release date/.test(U.streamVocab({ code: "in" }).faqQuestion("X")));
   assert.ok(!/OTT/.test(U.streamVocab({ code: "de" }).faqQuestion("X")));
 });
+test("page-copy forms exist in both registers (title-case, sentence-case, nav label)", () => {
+  const inV = U.streamVocab({ code: "in" }), usV = U.streamVocab({ code: "us" });
+  assert.strictEqual(inV.Releases, "OTT Releases");
+  assert.strictEqual(usV.Releases, "Streaming Releases");
+  assert.strictEqual(usV.releases, "streaming releases");
+  assert.strictEqual(usV.newOn, "New on streaming");
+  assert.strictEqual(usV.Word, "Streaming");
+  assert.strictEqual(inV.newOn, "New on OTT");
+});
+
+group("page copy — no 'OTT' reaches a streaming market");
+test("homepage title + description: US says Streaming, India still says OTT", () => {
+  const data = { generatedAt: "2026-08-24T07:00:00Z", theatres: [{ title: "Mutiny" }], ott: [{ title: "Reacher" }, { title: "Silo" }] };
+  const us = U.buildHeadTags({ code: "us", name: "United States" }, false, data);
+  assert.ok(us.includes("New Movies &amp; Streaming Releases This Week in the US"), us.slice(0, 160));
+  assert.ok(!/OTT/.test(us), "no OTT anywhere in the US head tags");
+  const ind = U.buildHeadTags({ code: "in", name: "India" }, false, data);
+  assert.ok(ind.includes("New Movies &amp; OTT Releases This Week in India"), "India wording is untouched");
+});
+test("homepage fallback wording (no data) is also per-market", () => {
+  const us = U.buildHeadTags({ code: "us", name: "United States" }, false);
+  assert.ok(!/OTT/.test(us), "static fallback title/description must not say OTT");
+  assert.ok(/streaming releases/.test(us));
+  assert.ok(/OTT/.test(U.buildHeadTags({ code: "in", name: "India" }, false)));
+});
+test("weekly page: US title, H1, FAQ and breadcrumb all say streaming", () => {
+  const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "us", name: "United States" }, OTT_WEEK_COUNTRIES);
+  assert.ok(html.includes("<title>New Streaming Releases This Week in the US"));
+  assert.ok(html.includes("<h1>New Streaming Releases This Week in the US</h1>"));
+  assert.ok(html.includes("best new streaming releases in the US"));
+  assert.ok(html.includes('"New on streaming this week"'), "breadcrumb label follows the market");
+  assert.ok(html.includes("theatres + streaming"), "back-link copy follows the market");
+  // The URL stays /new-on-ott/ (already indexed) — the ONLY place "ott" may appear.
+  const visible = html.replace(/https?:\/\/[^"'\s]+/g, "").replace(/href="[^"]*"/g, "");
+  assert.ok(!/OTT/.test(visible), "no OTT in any visible copy");
+});
+test("weekly page: India keeps OTT wording", () => {
+  const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
+  assert.ok(html.includes("<h1>New OTT Releases This Week in India</h1>"));
+  assert.ok(html.includes("theatres + OTT"));
+});
+test("RSS channel title follows the market", () => {
+  const data = { generatedAt: "2026-08-24T07:00:00Z", theatres: [], ott: [] };
+  assert.ok(U.buildRssFeed(data, { code: "us", name: "United States" })
+    .includes("New Movies &amp; Streaming Releases This Week in the US"));
+  assert.ok(U.buildRssFeed(data, { code: "in", name: "India" })
+    .includes("New Movies &amp; OTT Releases This Week in India"));
+});
+test("platform hubs: back-link wording follows the market", () => {
+  const args = { title: "T", desc: "D", canonical: "https://filmychill.com/us/new-on-netflix/", h1: "H",
+    updLine: "u", lead: "l", sections: [], faqs: [], homeUrl: "https://filmychill.com/us/" };
+  assert.ok(U.listingPageHtml({ ...args, code: "us" }).includes("theatres + streaming"));
+  assert.ok(U.listingPageHtml({ ...args, code: "in" }).includes("theatres + OTT"));
+});
 
 group("streamWindowEstimate()");
 test("Hindi film gets a 6-8 week window from its release", () => {
