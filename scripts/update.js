@@ -570,6 +570,63 @@ function fmtDateShort(dateStr, now = Date.now(), locale = "en-IN") {
   if (dt.getFullYear() !== new Date(now).getFullYear()) opts.year = "numeric";
   return dt.toLocaleDateString(locale, opts);
 }
+// ============================================================================
+// RELEASE STATE — one source of truth for every date-dependent word on the site.
+//
+// The failure this prevents: a page that says "Coming soon" next to a date that has
+// already passed. It happens two ways — bad data (a premiere date overriding the real
+// one) and TIME (a card built on Monday for a Tuesday release is still on disk, and in
+// the visitor's browser cache, on Wednesday). Data fixes only solve the first, so every
+// render path re-derives state from the date instead of trusting the bucket it's in.
+//
+//   date  < today  ->  "released"   never "Coming soon"
+//   date == today  ->  "today"      "Releases today"
+//   date  > today  ->  "upcoming"   "Coming soon"
+//
+// Compared as YYYY-MM-DD strings against the calendar day, not as timestamps: a film
+// releasing today is not "released" at 6am and must not read "Released" until tomorrow.
+// ============================================================================
+function todayStr(now = Date.now()) { return new Date(now).toISOString().slice(0, 10); }
+
+function releaseState(dateStr, now = Date.now()) {
+  if (!dateStr) return "unknown";
+  const d = String(dateStr).slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return "unknown";
+  const t = todayStr(now);
+  return d > t ? "upcoming" : d === t ? "today" : "released";
+}
+
+// Tense-correct date line for cards and pages: "Releases today" / "Releases 9 Oct" /
+// "Released 31 Jan". TV keeps its own "Latest season" wording (see freshLabel).
+function releaseLabel(dateStr, now = Date.now(), locale = "en-IN") {
+  const st = releaseState(dateStr, now);
+  if (st === "unknown") return "";
+  if (st === "today") return "Releases today";
+  return (st === "upcoming" ? "Releases " : "Released ") + fmtDateShort(dateStr, now, locale);
+}
+
+// Data hygiene for the upcoming bucket, applied at BUILD time and again at RENDER time.
+//   - `released` in the past but a known future date elsewhere (freshDate) -> the regional
+//     override lied; show the future date. This is the Bokshi case.
+//   - every known date in the past -> the film is out; it is not "coming soon" any more and
+//     is dropped. It still appears in theatres/streaming if it earned a slot there.
+// Pure, so the same rule is testable and cannot drift between the two call sites.
+function normalizeUpcoming(list, now = Date.now()) {
+  const out = [];
+  for (const item of list || []) {
+    if (!item) continue;
+    // `released` is the region's own date and is the RIGHT one whenever it is usable —
+    // Ramayana is 8 Nov in India and 6 Nov globally, and the India page must say 8 Nov.
+    // Only reach for the fallback when the regional date is unusable.
+    if (releaseState(item.released, now) !== "released" && item.released) { out.push(item); continue; }
+    const fallback = [item.freshDate].filter(Boolean).map((d) => String(d).slice(0, 10))
+      .find((d) => releaseState(d, now) !== "released");
+    if (!fallback) continue;                           // every known date has passed -> not upcoming
+    out.push({ ...item, released: fallback });
+  }
+  return out;
+}
+
 function freshLabel(item, now = Date.now(), locale = "en-IN") {
   // TV needs freshDate (latest season, not the series launch). Movies prefer `released`
   // (the region-localized date the modal already shows) over freshDate (TMDB's global
@@ -1784,8 +1841,16 @@ function theatreEligible(d, region, providers = []) {
 // from India; each country page should show (and gate freshness by) ITS OWN date.
 function regionalTheatricalDate(d, region) {
   const rel = d.release_dates?.results?.find((r) => r.iso_3166_1 === region);
+  // TYPE 2 (limited) and 3 (theatrical) only — deliberately NOT type 1 (premiere).
+  // A premiere is a festival/industry screening the public cannot buy a ticket to, and it
+  // can predate the real release by months: Bokshi premiered 31 Jan 2026 and releases
+  // 9 Oct 2026, so taking the earliest of types 1-3 stamped a PAST date on an UPCOMING
+  // film and printed "Released 31 Jan" under "Coming soon". Types 2/3 are also exactly what
+  // theatreEligible() already treats as a proven theatrical run, so the two now agree.
+  // No 2/3 entry -> null -> caller keeps TMDB's primary release_date, which is the better
+  // public date anyway.
   const dates = (rel?.release_dates || [])
-    .filter((x) => x.type >= 1 && x.type <= 3 && x.release_date)
+    .filter((x) => (x.type === 2 || x.type === 3) && x.release_date)
     .map((x) => String(x.release_date).slice(0, 10))
     .sort();
   return dates[0] || null;
@@ -2531,7 +2596,14 @@ async function main() {
   const pick = (pickPool.filter((x) => x.isRecent && x.rating >= 6.5).sort((a, b) => b.rating - a.rating)[0]) ||
                (pickPool.filter((x) => x.rating >= 7.0).sort((a, b) => b.rating - a.rating)[0]) || null;
 
-  const data = { generatedAt: new Date().toISOString(), country: cfg.code, pick: pick ? pick.title : null, theatres, ott, comingSoon };
+  // Last gate before the bucket is persisted: nothing whose date has already passed may be
+  // written as "coming soon" (see normalizeUpcoming).
+  const upcoming = normalizeUpcoming(comingSoon);
+  if (upcoming.length !== comingSoon.length) {
+    const dropped = comingSoon.filter((x) => !upcoming.includes(x) && !upcoming.some((u) => u.tmdbId === x.tmdbId));
+    for (const x of dropped) console.log(`[${cfg.code}] coming-soon: dropped "${x.title}" — release date ${x.released} has passed`);
+  }
+  const data = { generatedAt: new Date().toISOString(), country: cfg.code, pick: pick ? pick.title : null, theatres, ott, comingSoon: upcoming };
   // Strip internal-only fields (ranking helpers) so they never reach the data file.
   for (const list of [data.theatres, data.ott, data.comingSoon]) {
     for (const it of list) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; delete it._imdbRating; delete it._imdbVotes; delete it._w; }
@@ -2623,6 +2695,9 @@ async function main() {
   for (const cfg of builtCountries) {
     try { await sweepStreamingArrivals(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
     catch (e) { console.warn(`  sweep [${cfg.code}] skipped: ${e.message}`); }
+    // Free, local, no budget: move any page past its stamped release date (see patchDueIfPassed).
+    try { refreshDuePages(cfg, countryNameFor(cfg)); }
+    catch (e) { console.warn(`  due pass [${cfg.code}] skipped: ${e.message}`); }
   }
   fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
 
@@ -2704,8 +2779,12 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
   const country = countryNameFor(cfg); // "the US", not the config's "United States" — reads right in titles and prose
   const homeUrl = code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`;
   const year = (item.released || "").slice(0, 4);
-  const upcoming = item.released && item.released > new Date().toISOString().slice(0, 10);
-  const relLabel = upcoming ? "Releases" : "Released";
+  // Three states (see releaseState): a film releasing TODAY is neither "Released" nor
+  // "Coming soon". `upcoming` stays truthy for today so the page keeps its pre-release
+  // shape (no streaming estimate can be computed from a run that hasn't started).
+  const relState = releaseState(item.released);
+  const upcoming = relState === "upcoming" || relState === "today";
+  const relLabel = relState === "upcoming" ? "Releases" : relState === "today" ? "Releases today" : "Released";
   const synopsis = item.fullReview || item.review || "";
   const url = filmPageUrl(code, item.slug);
   const ytid = ytIdOf(item.trailer);
@@ -2905,7 +2984,7 @@ ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))
       <div class="meta">${[item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert].filter(Boolean).map(e).join(" · ")}</div>
       ${item.rating != null ? (() => { const dv = item.imdbRating != null ? item.imdbVotes : item.votes; return `<div class="rating">★ ${Number(item.rating).toFixed(1)}${dv ? ` <span style="color:var(--mute);font-weight:400;font-size:13px">(${e(dv)} votes)</span>` : ""}</div>`; })() : ""}
       ${item.verdict ? `<div class="verdict">▸ ${e(item.verdict)}</div>` : ""}
-      ${item.released ? `<div class="meta" style="margin-top:8px">${relLabel} ${e(item.released)}</div>` : ""}
+      ${item.released ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateShort(item.released, Date.now(), localeFor(code)))} ${e(String(item.released).slice(0, 4))}`}</div>` : ""}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(asOf)}</div>` : ""}
     </div>
   </div>
@@ -2929,7 +3008,15 @@ ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))
     if (item.platform !== "Theatres" && !upcoming) return "";
     const V = streamVocab(cfg);
     if (upcoming) {
-      return `<!--SW:pending--><h2>${e(V.heading(item.title))}</h2><p>${e(item.title)} hasn't had its theatrical release yet${item.released ? `, and is due ${e(item.released)}` : ""}. ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens — this page updates automatically the day it starts streaming.</p><!--/SW:pending-->`;
+      // The due date is stamped into the marker so refreshDuePages() can find this block on a
+      // FROZEN page once the date passes and rewrite it — without an API call and without
+      // re-rendering the page's earned prose. Without that, a page archived while the film was
+      // still upcoming would claim "hasn't had its theatrical release yet" forever.
+      const due = item.released ? String(item.released).slice(0, 10) : "";
+      const opens = relState === "today"
+        ? `${e(item.title)} opens in theatres in ${e(country)} today.`
+        : `${e(item.title)} hasn't had its theatrical release yet${due ? `, and is due ${e(fmtDateShort(due, Date.now(), localeFor(code)))} ${e(due.slice(0, 4))}` : ""}.`;
+      return `<!--SW:pending--><!--SW:due=${e(due)}--><h2>${e(V.heading(item.title))}</h2><p>${opens} ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens — this page updates automatically the day it starts streaming.</p><!--/SW:pending-->`;
     }
     const est = streamWindowEstimate(item.released, item.language);
     const body = est && !est.passed
@@ -2948,6 +3035,12 @@ ${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))
     if (providers.length) return `<h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}`;
     if (item.platform === "Theatres") return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>${rb.length ? rbRow + `<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>` : ""}${note}`;
     if (rb.length) return `<h2>Where to watch in ${e(country)}</h2>${rbRow}<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>${note}`;
+    // Unreleased film: previously this block rendered nothing at all, so the page answered
+    // "where to watch" with silence. State it plainly instead.
+    if (upcoming && item.released) {
+      const when = relState === "today" ? "today" : `${fmtDateShort(item.released, Date.now(), localeFor(code))} ${String(item.released).slice(0, 4)}`;
+      return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">${relState === "today" ? "In cinemas today" : `In cinemas from ${e(when)}`}</span></div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not out yet — nowhere to stream or rent it until it opens.</p>`;
+    }
     return "";
   })()}
   ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
@@ -3210,7 +3303,7 @@ function ssrSoonCard(item, code) {
   return `<a class="soon-card" href="${e(filmPagePath(code || "in", item.slug))}" style="text-decoration:none;color:inherit">
     ${item.poster ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : `<div class="soon-ph" aria-hidden="true"><span class="soon-ph-letter">${e((item.title || "?").charAt(0).toUpperCase())}</span><span class="soon-ph-note">Poster on the way</span></div>`}
     <div class="soon-body">
-      <div class="soon-date">${e(item.released ? fmtDateShort(item.released, Date.now(), localeFor(code)) : "")}</div>
+      <div class="soon-date">${e(releaseState(item.released) === "today" ? "Today" : (item.released ? fmtDateShort(item.released, Date.now(), localeFor(code)) : ""))}</div>
       <div class="soon-title">${e(item.title)}</div>
       <div class="soon-meta">${e(item.language || "")}</div>
     </div>
@@ -3789,6 +3882,59 @@ function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf }) {
   return { html: out, changed: true };
 }
 
+// ============================================================================
+// DUE-DATE PASS — the other half of the freshness problem.
+//
+// The arrival sweep fixes pages whose film reached STREAMING. This fixes pages whose film
+// reached THEATRES: a page frozen while the film was upcoming says "hasn't had its
+// theatrical release yet, and is due 9 Oct" — which becomes a lie on 10 Oct and stays one,
+// on exactly the query ("<film> release date") the page ranks for. Pure date logic against
+// the <!--SW:due=YYYY-MM-DD--> stamp, so it costs no API budget and can run every build for
+// every page. Rewrites only the pending block; the page's verdict and prose are untouched.
+// ============================================================================
+function patchDueIfPassed(html, { title, countryName, cfg, now = Date.now() }) {
+  const m = html.match(/<!--SW:due=(\d{4}-\d{2}-\d{2})-->/);
+  if (!m) return { html, changed: false };
+  if (releaseState(m[1], now) !== "released") return { html, changed: false }; // still ahead, or today
+  const V = streamVocab(cfg);
+  const e = escHtml;
+  const start = "<!--SW:pending-->", end = "<!--/SW:pending-->";
+  const a = html.indexOf(start), b = html.indexOf(end);
+  if (a === -1 || b === -1 || b < a) return { html, changed: false };
+  const opened = `${fmtDateShort(m[1], now, localeFor(cfg && cfg.code))} ${m[1].slice(0, 4)}`;
+  const block = `${start}<h2>${e(V.heading(title))}</h2>`
+    + `<p>${e(title)} opened in theatres in ${e(countryName)} on ${e(opened)}. ${e(V.article)} ${e(V.releaseDate)} hasn't been announced yet.</p>`
+    + `<p style="color:var(--mute);font-size:13px">We re-check every day and this page updates the moment it lands.</p>${end}`;
+  let out = html.slice(0, a) + block + html.slice(b + end.length);
+  // The pre-release pill is now wrong too.
+  out = out.replace(/<span class="pill">In cinemas (?:from [^<]*|today)<\/span>/,
+                    `<span class="pill">In theatres</span>`);
+  return { html: out, changed: true };
+}
+
+// Live pass: walk one country's film pages and apply the due-date patch. Local only.
+function refreshDuePages(cfg, countryName) {
+  const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
+  if (!fs.existsSync(dir)) return 0;
+  let n = 0;
+  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".html"))) {
+    const path = `${dir}/${f}`;
+    let html;
+    try { html = fs.readFileSync(path, "utf8"); } catch { continue; }
+    if (!html.includes("<!--SW:due=")) continue;
+    const { html: out, changed } = patchDueIfPassed(html, { title: titleFromPage(html) || f.replace(/\.html$/, ""), countryName, cfg });
+    if (changed) { fs.writeFileSync(path, out); n++; }
+  }
+  if (n) console.log(`[${cfg.code}] due-date pass: ${n} page(s) moved past their release date`);
+  return n;
+}
+
+// Best-effort title recovery from a built page (used only for the due-date rewrite).
+function titleFromPage(html) {
+  const m = html.match(/<h1[^>]*>([^<]{1,120})<\/h1>/);
+  return m ? m[1].replace(/&amp;/g, "&").replace(/&#39;/g, "'").trim() : null;
+}
+
 // Live pass: run the sweep for one country. Network-bound, so failures are logged
 // and skipped — a page that stays pending one more day is a non-event.
 async function sweepStreamingArrivals(manifest, cfg, asOf) {
@@ -4074,7 +4220,8 @@ function buildLanguagePage(data, langName, slug) {
   const monthYear = new Date(gen).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
   const updatedHuman = new Date(gen).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
   const of = (k) => (data[k] || []).filter((x) => x && x.language === langName);
-  const theatres = of("theatres"), ott = of("ott"), soon = of("comingSoon");
+  const theatres = of("theatres"), ott = of("ott");
+  const soon = normalizeUpcoming(of("comingSoon")); // never list a passed date under "Coming soon"
   const faqs = [];
   if (ott.length) faqs.push({
     q: `What's new in ${langName} on OTT this week?`,
@@ -4087,7 +4234,7 @@ function buildLanguagePage(data, langName, slug) {
   });
   if (soon.length) faqs.push({
     q: `Which ${langName} movies are releasing soon?`,
-    a: `Coming up: ${soon.map((x) => `${x.title}${x.released ? ` (${x.released})` : ""}`).join(", ")}.`,
+    a: `Coming up: ${soon.map((x) => `${x.title}${x.released ? ` (${fmtDateShort(x.released, Date.now(), "en-IN")} ${x.released.slice(0, 4)})` : ""}`).join(", ")}.`,
   });
   const all = [...theatres, ...ott].filter((x) => x.slug);
   const extraLd = [{
@@ -4582,7 +4729,9 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
   html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code));
-  html = replaceBetween(html, "SOON", (data.comingSoon || []).map((x) => ssrSoonCard(x, cfg.code)).join(""));
+  // Re-derived at render, not just at fetch: the committed data file can be a day old by the
+  // time a page is rebuilt, and a passed date must never render inside "Coming soon".
+  html = replaceBetween(html, "SOON", normalizeUpcoming(data.comingSoon).map((x) => ssrSoonCard(x, cfg.code)).join(""));
   // The SSR markers wrap the ENTIRE <script> element (never sit inside it): HTML
   // comments are NOT stripped inside <script>, so markers inside the tag made the
   // JSON-LD start with "<!--" — a syntax error to Google's structured-data parser.
@@ -4629,6 +4778,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
       renderCountryPage(template, cfg, dc);
       writeOttWeekPage(dc, cfg, COUNTRIES); // full hreflang set, same as a real run
       writeRssFeed(dc, cfg);
+      refreshDuePages(cfg, countryNameFor(cfg)); // date-only, no API needed
     }
     process.exit(0);
   }
@@ -4646,6 +4796,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
 
 // Export pure/helper functions for unit testing (only meaningful when required, not run).
 module.exports = {
+  releaseState, releaseLabel, normalizeUpcoming, patchDueIfPassed, regionalTheatricalDate,
   verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween, ARCHIVE_PATCH_VERSION,
   fmtRuntime, langCode, langName, LANG_CODE_OVERRIDES,
   streamVocab, streamWindowEstimate, sweepCandidates, applyArrivalPatch,
