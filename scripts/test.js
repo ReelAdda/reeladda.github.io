@@ -1177,7 +1177,10 @@ const LANG_DATA = {
     { title: "Hindi Film", slug: "hindi-film", language: "Hindi", platform: "Theatres", kind: "movie" },
   ],
   ott: [{ title: "Tamil Stream", slug: "tamil-stream", language: "Tamil", platform: "Netflix", rating: 8.0, kind: "movie", take: "Critics liked it, especially the performances." }],
-  comingSoon: [{ title: "Tamil Soon", slug: "tamil-soon", language: "Tamil", released: "2026-07-20", kind: "movie" }],
+  // Dated relative to now: a hardcoded date silently expires and turns this language-filter
+  // test into a date test the day it passes.
+  comingSoon: [{ title: "Tamil Soon", slug: "tamil-soon", language: "Tamil",
+    released: new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10), kind: "movie" }],
 };
 test("filters to the requested language only, across all three sections", () => {
   const html = U.buildLanguagePage(LANG_DATA, "Tamil", "tamil");
@@ -1445,10 +1448,13 @@ test("region with no cert entry -> null, NOT another country's rating", () => {
   assert.strictEqual(U.certFor("movie", TMDB_FIXTURE, "CA"), null); // CA has no movie entry
   assert.strictEqual(U.certFor("tv", TMDB_FIXTURE, "SG"), null);
 });
-test("each region gets ITS OWN theatrical date; earliest of types 1-3; digital (type 4) ignored", () => {
+test("each region gets ITS OWN theatrical date; premiere (1) and digital (4) both ignored", () => {
   assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "IN"), "2026-07-03");
   assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "AE"), "2026-07-10");
-  assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "SG"), "2026-07-01"); // earliest of the two
+  // SG has a type-1 premiere on 1 Jul and the real theatrical on 9 Jul. This previously
+  // returned the premiere — the same defect that printed "Released 31 Jan" on a film
+  // releasing in October. A screening the public can't buy a ticket to is not a release.
+  assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "SG"), "2026-07-09");
   assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "US"), null); // only a type-4 digital date
   assert.strictEqual(U.regionalTheatricalDate(TMDB_FIXTURE, "CA"), null); // no entry at all
 });
@@ -2089,6 +2095,90 @@ test("page-copy forms exist in both registers (title-case, sentence-case, nav la
   assert.strictEqual(usV.newOn, "New on streaming");
   assert.strictEqual(usV.Word, "Streaming");
   assert.strictEqual(inV.newOn, "New on OTT");
+});
+
+group("release state — no passed date may read as upcoming");
+const REL_NOW = new Date("2026-08-25T09:00:00Z").getTime();
+const todayISO = () => new Date().toISOString().slice(0, 10);
+test("three states, decided on the calendar day not the clock", () => {
+  assert.strictEqual(U.releaseState("2026-08-26", REL_NOW), "upcoming");
+  assert.strictEqual(U.releaseState("2026-08-25", REL_NOW), "today");   // not 'released' at 9am
+  assert.strictEqual(U.releaseState("2026-08-24", REL_NOW), "released");
+  assert.strictEqual(U.releaseState(null, REL_NOW), "unknown");
+  assert.strictEqual(U.releaseState("soon", REL_NOW), "unknown");
+});
+test("labels are tense-correct", () => {
+  assert.strictEqual(U.releaseLabel("2026-08-25", REL_NOW), "Releases today");
+  assert.ok(U.releaseLabel("2026-10-09", REL_NOW).startsWith("Releases "));
+  assert.ok(U.releaseLabel("2026-01-31", REL_NOW).startsWith("Released "));
+});
+test("a premiere date never overrides the real release (the Bokshi bug)", () => {
+  // TMDB type 1 = premiere (festival screening), 3 = theatrical. Taking the earliest of
+  // 1-3 stamped 31 Jan on a film that releases 9 Oct.
+  const d = { release_dates: { results: [{ iso_3166_1: "IN", release_dates: [
+    { type: 1, release_date: "2026-01-31T00:00:00.000Z" },
+    { type: 3, release_date: "2026-10-09T00:00:00.000Z" }] }] } };
+  assert.strictEqual(U.regionalTheatricalDate(d, "IN"), "2026-10-09");
+});
+test("premiere-only region yields null, so the primary date is kept", () => {
+  const d = { release_dates: { results: [{ iso_3166_1: "IN", release_dates: [
+    { type: 1, release_date: "2026-01-31T00:00:00.000Z" }] }] } };
+  assert.strictEqual(U.regionalTheatricalDate(d, "IN"), null);
+});
+test("normalizeUpcoming rescues an item whose displayed date is wrong", () => {
+  const out = U.normalizeUpcoming([{ title: "Bokshi", released: "2026-01-31", freshDate: "2026-10-09" }], REL_NOW);
+  assert.strictEqual(out.length, 1);
+  assert.strictEqual(out[0].released, "2026-10-09");
+});
+test("normalizeUpcoming drops an item that has genuinely released", () => {
+  assert.deepStrictEqual(U.normalizeUpcoming([{ title: "Old", released: "2026-02-01", freshDate: "2026-02-01" }], REL_NOW), []);
+});
+test("normalizeUpcoming keeps a film releasing TODAY", () => {
+  const out = U.normalizeUpcoming([{ title: "Now", released: "2026-08-25" }], REL_NOW);
+  assert.strictEqual(out.length, 1);
+});
+test("normalizeUpcoming leaves a correct future item untouched", () => {
+  const item = { title: "Later", released: "2026-11-08" };
+  assert.strictEqual(U.normalizeUpcoming([item], REL_NOW)[0], item); // same object, no copy
+});
+test("a usable regional date always wins over the global one", () => {
+  // Ramayana: 8 Nov in India, 6 Nov globally. The India page must keep 8 Nov — the fallback
+  // is only for a regional date that has already passed.
+  const item = { title: "Ramayana", released: "2026-11-08", freshDate: "2026-11-06" };
+  assert.strictEqual(U.normalizeUpcoming([item], REL_NOW)[0].released, "2026-11-08");
+});
+test("soon card is tense-correct for a same-day release", () => {
+  assert.ok(/>Today</.test(U.ssrSoonCard({ title: "Now", slug: "now", released: todayISO() }, "in")));
+  assert.ok(!/>Today</.test(U.ssrSoonCard({ title: "Later", slug: "later", released: "2026-11-08" }, "in")));
+});
+test("every coming-soon render path is wired through normalizeUpcoming", () => {
+  // renderCountryPage writes to disk, so assert the wiring at the source instead of calling it.
+  const src = require("fs").readFileSync("scripts/update.js", "utf8");
+  assert.ok(/replaceBetween\(html, "SOON", normalizeUpcoming\(data\.comingSoon\)/.test(src),
+    "homepage SSR must filter the bucket at render time");
+  assert.ok(/const soon = normalizeUpcoming\(of\("comingSoon"\)\)/.test(src),
+    "language pages must filter the bucket at render time");
+  assert.ok(/comingSoon: upcoming/.test(src), "build must persist the normalized bucket");
+  const client = require("fs").readFileSync("index.html", "utf8");
+  assert.ok(/const cs = upcomingOnly\(DATA\.comingSoon\)/.test(client),
+    "client render must filter against the visitor's own calendar day");
+});
+test("due-date stamp lets a frozen page correct itself once the date passes", () => {
+  const page = `<h1>Bokshi</h1><span class="pill">In cinemas from 9 Oct 2026</span>`
+    + `<!--SW:pending--><!--SW:due=2026-10-09--><h2>When is Bokshi coming to OTT?</h2>`
+    + `<p>Bokshi hasn't had its theatrical release yet, and is due 9 Oct 2026.</p><!--/SW:pending-->`;
+  const before = U.patchDueIfPassed(page, { title: "Bokshi", countryName: "India", cfg: { code: "in" }, now: REL_NOW });
+  assert.strictEqual(before.changed, false, "still upcoming on 25 Aug — leave it alone");
+  const after = U.patchDueIfPassed(page, { title: "Bokshi", countryName: "India", cfg: { code: "in" },
+    now: new Date("2026-10-11T00:00:00Z").getTime() });
+  assert.ok(after.changed);
+  assert.ok(!/hasn&#39;t had its theatrical release|hasn't had its theatrical release/.test(after.html));
+  assert.ok(/opened in theatres in India/.test(after.html));
+  assert.ok(/<span class="pill">In theatres<\/span>/.test(after.html), "pre-release pill is replaced too");
+});
+test("due pass never touches a page whose date is still ahead or is today", () => {
+  const page = `<!--SW:pending--><!--SW:due=2026-08-25--><p>x</p><!--/SW:pending-->`;
+  assert.strictEqual(U.patchDueIfPassed(page, { title: "T", countryName: "India", cfg: { code: "in" }, now: REL_NOW }).changed, false);
 });
 
 group("page copy — no 'OTT' reaches a streaming market");
