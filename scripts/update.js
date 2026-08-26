@@ -464,6 +464,180 @@ function whyWatch(item) {
   return { heading, text: second ? `${first} ${second}` : first };
 }
 
+// ============================================================================
+// SHARE CARDS — the branded og:image.
+//
+// Today every shared FilmyChill link previews as a TMDB backdrop: the film's art, none of
+// our identity. This renders a card that is unmistakably ours — verdict ladder, rating,
+// fit line, brand type — so a WhatsApp forward or an Instagram share advertises the site.
+//
+// Deliberately typographic, NO poster or backdrop art. Two reasons: studio key art in a
+// standalone branded card is promotional use of someone else's IP, and a poster card looks
+// like every other aggregator. Type is what makes a screenshot recognisable without a logo.
+//
+// Pure function -> SVG string, so it is fully testable without a rasteriser. PNG conversion
+// is a separate, optional step (see writeShareCards).
+// ============================================================================
+const CARD_W = 1200, CARD_H = 630;
+
+// SVG has no text wrapping. Estimate advance width per font (measured against the two
+// faces we ship) and break on word boundaries. Conservative on purpose: a slightly short
+// line is invisible, an overflowing one wrecks the card.
+function wrapForCard(text, fontSize, maxWidth, maxLines, face = "inter") {
+  const ratio = face === "anton" ? 0.44 : 0.52;
+  const perChar = fontSize * ratio;
+  const limit = Math.max(6, Math.floor(maxWidth / perChar));
+  const words = String(text || "").split(/\s+/).filter(Boolean);
+  const lines = [];
+  let cur = "";
+  for (const w of words) {
+    const next = cur ? `${cur} ${w}` : w;
+    if (next.length <= limit) { cur = next; continue; }
+    if (cur) lines.push(cur);
+    cur = w;
+    if (lines.length === maxLines) break;
+  }
+  if (cur && lines.length < maxLines) lines.push(cur);
+  if (lines.length === maxLines && words.join(" ").length > lines.join(" ").length) {
+    lines[maxLines - 1] = lines[maxLines - 1].replace(/[,;:]$/, "") + "…";
+  }
+  return lines.slice(0, maxLines);
+}
+
+// Status pill copy, reusing the release-state machine so a card can never contradict the
+// page it represents.
+function cardStatus(item, cfg) {
+  const st = releaseState(item.released);
+  if (st === "today") return "RELEASES TODAY";
+  if (st === "upcoming") return item.released
+    ? `IN CINEMAS ${fmtDateShort(item.released, Date.now(), localeFor(cfg && cfg.code)).toUpperCase()}`
+    : "COMING SOON";
+  if (item.platform === "Theatres") return "IN THEATRES";
+  if (item.platform) return `NOW ON ${String(item.platform).toUpperCase()}`;
+  return "OUT NOW";
+}
+
+// Vote counts are bucketed on the card, and that is a storage decision as much as a design
+// one: an exact count changes every single day for an active title, and each change rewrites
+// a PNG that lives in git history forever. Buckets round DOWN and are marked "+", so the
+// label is never an overstatement. Under 50 stays exact — that is precisely the range where
+// the reader needs to distrust the score.
+function voteCountLabel(votes) {
+  if (!votes) return "";
+  if (votes < 50) return `${votes} rating${votes === 1 ? "" : "s"}`;
+  if (votes < 1000) return `${Math.floor(votes / 50) * 50}+ ratings`;
+  if (votes < 10000) return `${(Math.floor(votes / 500) * 500 / 1000).toFixed(1)}k+ ratings`;
+  return `${Math.floor(votes / 5000) * 5}k+ ratings`;
+}
+
+function shareCardSvg(item, cfg) {
+  if (!item || !item.title) return null;
+  const e = escHtml;
+  const useImdb = item.imdbRating != null;
+  const rating = useImdb ? item.imdbRating : item.rating;
+  const votes = useImdb ? item.imdbVotes : item.votes;
+  // Never print a score the data doesn't support — the card is the most-copied surface on
+  // the site, so an unearned number travels furthest.
+  const showScore = rating != null && votes && votes >= 10;
+  const verdict = (item.verdict || "").toUpperCase();
+  const fit = whyWatch(item);
+  const blurb = item.take || (fit ? fit.text : "");
+  const status = cardStatus(item, cfg);
+  const titleLines = wrapForCard(item.title, 46, 620, 2, "inter");
+  const blurbLines = wrapForCard(blurb, 26, 660, 2, "inter");
+  const year = item.released ? String(item.released).slice(0, 4) : "";
+  const meta = [item.language, item.genre, item.runtime ? fmtRuntime(item.runtime) : null]
+    .filter(Boolean).join("  ·  ");
+  const scoreStr = showScore ? Number(rating).toFixed(1) : null;
+  const pillW = status.length * 14 + 44;
+  const titleTop = 322 - (titleLines.length - 1) * 28;
+  const blurbTop = titleTop + titleLines.length * 56 + 66;
+
+  // Flat fills only — no gradients. A smooth gradient costs ~110KB extra per PNG, and these
+  // files live in the repo forever; flat colour keeps a card around 25KB.
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}">
+<rect width="${CARD_W}" height="${CARD_H}" fill="#1A1633"/>
+<rect x="0" y="0" width="14" height="${CARD_H}" fill="#FFAD1F"/>
+<rect x="784" y="0" width="416" height="${CARD_H}" fill="#221D47"/>
+<text x="64" y="96" font-family="Anton" font-size="42" fill="#FFF7EC">FILMY<tspan fill="#FFAD1F">CHILL</tspan></text>
+<rect x="64" y="132" width="${pillW}" height="48" rx="24" fill="#FFFFFF" fill-opacity="0.10"/>
+<text x="${64 + pillW / 2}" y="164" text-anchor="middle" font-family="Inter" font-size="22" fill="#FFF7EC" letter-spacing="1.4">${e(status)}</text>
+${titleLines.map((l, i) => `<text x="64" y="${titleTop + i * 56}" font-family="Inter" font-size="46" fill="#FFF7EC">${e(l)}</text>`).join("\n")}
+<text x="64" y="${titleTop + titleLines.length * 56 - 4}" font-family="Inter" font-size="24" fill="#8F8BB8">${e(meta)}${year ? `  ·  ${e(year)}` : ""}</text>
+${blurbLines.map((l, i) => `<text x="64" y="${blurbTop + i * 36}" font-family="Inter" font-size="26" fill="#C9C5E8">${e(l)}</text>`).join("\n")}
+<text x="64" y="${CARD_H - 34}" font-family="Inter" font-size="23" fill="#6E6A96">filmychill.com</text>
+${scoreStr
+  ? `<text x="992" y="286" text-anchor="middle" font-family="Anton" font-size="168" fill="#FFAD1F">${scoreStr}</text>
+<text x="992" y="330" text-anchor="middle" font-family="Inter" font-size="26" fill="#8F8BB8">${e(voteCountLabel(votes))}</text>`
+  : `<text x="992" y="272" text-anchor="middle" font-family="Anton" font-size="104" fill="#FFAD1F">NEW</text>
+<text x="992" y="322" text-anchor="middle" font-family="Inter" font-size="26" fill="#8F8BB8">too early to rate</text>`}
+<rect x="864" y="378" width="256" height="4" fill="#FFAD1F" fill-opacity="0.5"/>
+${wrapForCard(verdict || "FRESH RELEASE", 44, 360, 2, "anton").map((l, i) =>
+  `<text x="992" y="${446 + i * 52}" text-anchor="middle" font-family="Anton" font-size="44" fill="#FFF7EC">${e(l)}</text>`).join("\n")}
+</svg>`;
+}
+
+// Where a card lives on disk / on the web. One card per (country, film): the status pill
+// and platform differ per market, so a shared /us/ link must not preview India's wording.
+function cardPaths(item, cfg) {
+  const code = (cfg && cfg.code) || "in";
+  const slug = item && item.slug;
+  if (!slug) return null;
+  return { file: `cards/${code}/${slug}.png`, url: `https://filmychill.com/cards/${code}/${slug}.png` };
+}
+
+// PNG rendering is OPTIONAL. @resvg/resvg-js is a native module; if it is missing or fails
+// to load, card generation is skipped, socialImage() falls back to the TMDB backdrop and
+// the build completes exactly as it does today. A branding upgrade must never be able to
+// take down the daily build.
+let _resvg = null, _resvgTried = false;
+function loadResvg() {
+  if (_resvgTried) return _resvg;
+  _resvgTried = true;
+  try { _resvg = require("@resvg/resvg-js").Resvg; }
+  catch { console.warn("  share cards: @resvg/resvg-js not installed — keeping TMDB backdrops"); }
+  return _resvg;
+}
+
+const CARD_FONTS = ["fonts/anton-latin.ttf", "fonts/inter-var-latin.ttf"];
+
+function writeShareCards(data, cfg) {
+  const Resvg = loadResvg();
+  if (!Resvg) return 0;
+  const fonts = CARD_FONTS.filter((f) => fs.existsSync(f));
+  if (!fonts.length) { console.warn("  share cards: brand fonts missing — skipped"); return 0; }
+  const code = (cfg && cfg.code) || "in";
+  const dir = `cards/${code}`;
+  fs.mkdirSync(dir, { recursive: true });
+  const items = [...(data.theatres || []), ...(data.ott || []), ...normalizeUpcoming(data.comingSoon)];
+  const keep = new Set();
+  let written = 0;
+  for (const item of items) {
+    const paths = cardPaths(item, cfg);
+    if (!paths) continue;
+    keep.add(`${item.slug}.png`);
+    let png;
+    try {
+      const svg = shareCardSvg(item, cfg);
+      if (!svg) continue;
+      png = Buffer.from(new Resvg(svg, { font: { fontFiles: fonts, loadSystemFonts: false, defaultFontFamily: "Inter" } }).render().asPng());
+    } catch (e) { console.warn(`  card [${code}/${item.slug}] skipped: ${e.message}`); continue; }
+    // Byte-compare before writing: an unchanged card must not produce a new git object.
+    // Ratings move constantly; without this every build would commit the whole set again.
+    if (fs.existsSync(paths.file) && fs.readFileSync(paths.file).equals(png)) continue;
+    fs.writeFileSync(paths.file, png);
+    written++;
+  }
+  // Films that left this week's lists lose their card: the directory tracks the live set
+  // instead of growing without bound. Their pages fall back to the backdrop.
+  let pruned = 0;
+  for (const f of fs.readdirSync(dir)) {
+    if (f.endsWith(".png") && !keep.has(f)) { fs.unlinkSync(`${dir}/${f}`); pruned++; }
+  }
+  console.log(`  share cards [${code}]: ${written} written, ${keep.size} live, ${pruned} pruned`);
+  return written;
+}
+
 function trim(text, n = 160) {
   if (!text) return "";
   if (text.length <= n) return text;
@@ -1896,8 +2070,13 @@ function img(path, size = "w342") {
 // shipping a 342px thumbnail Discover would ignore. Uses raw *Path fields when present
 // (real high-res); degrades to the pre-sized w780 backdrop / w342 poster strings only for
 // items that predate those fields, so nothing crashes on a stale cache.
-function socialImage(item) {
+function socialImage(item, cfg) {
   if (!item) return null;
+  // Branded card first — a shared link should preview as FilmyChill, not as a TMDB still.
+  // Existence-checked rather than assumed, so a skipped/failed render silently degrades to
+  // the backdrop instead of emitting an og:image that 404s.
+  const card = cardPaths(item, cfg);
+  if (card && fs.existsSync(card.file)) return card.url;
   if (item.backdropPath) return img(item.backdropPath, "w1280");
   if (item.posterPath) return img(item.posterPath, "w780");
   return item.backdrop || item.poster || null; // legacy fallback (already-sized strings)
@@ -2812,6 +2991,10 @@ async function main() {
   // Pass 2: now that ALL slug sets are known, generate per-film pages for every country (so
   // hreflang alternates between countries are accurate) and render each country homepage.
   for (const cfg of COUNTRIES) {
+    // Cards BEFORE pages: socialImage() checks the card file on disk, so the render order
+    // decides whether a page points at its branded card or falls back to the backdrop.
+    try { writeShareCards(dataByCode[cfg.code], cfg); }
+    catch (e) { console.warn(`  share cards [${cfg.code}] skipped: ${e.message}`); }
     generatePages(dataByCode[cfg.code], cfg, allSlugSets);
     if (pageTemplate) renderCountryPage(pageTemplate, cfg, dataByCode[cfg.code]);
     writeOttWeekPage(dataByCode[cfg.code], cfg, builtCountries); // /new-on-ott/ per country
@@ -3073,7 +3256,15 @@ function buildFilmPage(item, asOf, knownSlugs, cfg) {
 <meta property="og:type" content="${item.kind === "tv" ? "video.tv_show" : "video.movie"}">
 <meta property="og:url" content="${e(url)}">
 <meta property="og:locale" content="${cfg && cfg.code === "in" ? "en_IN" : "en_" + (((cfg || {}).region) || String((cfg || {}).code || "IN").toUpperCase())}">
-${socialImage(item) ? `<meta property="og:image" content="${e(socialImage(item))}">${item.backdropPath ? '\n<meta property="og:image:width" content="1280">\n<meta property="og:image:height" content="720">' : ""}` : ""}
+${(() => {
+  const src = socialImage(item, cfg);
+  if (!src) return "";
+  const isCard = /\/cards\//.test(src);
+  const dims = isCard ? '\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">'
+    : item.backdropPath ? '\n<meta property="og:image:width" content="1280">\n<meta property="og:image:height" content="720">' : "";
+  const alt = isCard ? `\n<meta property="og:image:alt" content="${e(`${item.title} — FilmyChill verdict${item.verdict ? `: ${item.verdict}` : ""}`)}">` : "";
+  return `<meta property="og:image" content="${e(src)}">${dims}${alt}`;
+})()}
 <meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
@@ -4947,6 +5138,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
   assignSlugs(d);
   const all = [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || [])];
   const slugSets = { in: new Set(all.map((x) => x.slug).filter(Boolean)) };
+  try { writeShareCards(d, inCfg); } catch (e) { console.warn(`  share cards skipped: ${e.message}`); }
   generatePages(d, inCfg, slugSets); // India only in local regen
   prerenderIndex(d);
   writeOttWeekPage(d, inCfg, [inCfg]);
@@ -4957,6 +5149,9 @@ if (process.env.PAGES_ONLY && require.main === module) {
 
 // Export pure/helper functions for unit testing (only meaningful when required, not run).
 module.exports = {
+  voteCountLabel,
+  writeShareCards, cardPaths,
+  shareCardSvg, wrapForCard, cardStatus,
   whyWatch, runtimePhrase, certClause,
   releaseState, releaseLabel, normalizeUpcoming, patchDueIfPassed, regionalTheatricalDate,
   verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween, ARCHIVE_PATCH_VERSION,
