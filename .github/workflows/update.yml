@@ -22,6 +22,13 @@ jobs:
         with:
           node-version: "24"
 
+      # OPTIONAL dependency: @resvg/resvg-js rasterises the branded share cards. It is in
+      # optionalDependencies and every call site is guarded, so if this step fails the build
+      # still completes — pages simply fall back to TMDB backdrops for og:image.
+      - name: Install optional deps (share-card renderer)
+        run: npm install --no-audit --no-fund
+        continue-on-error: true
+
       # Unit tests run FIRST (no API calls) so a code regression fails fast,
       # before we spend time/quota on the build. Covers pure functions + the
       # SSR-injection guard (incl. the comment-in-script regression test).
@@ -57,7 +64,7 @@ jobs:
         run: |
           git config user.name "filmychill-bot"
           git config user.email "actions@github.com"
-          git add data.json data-*.json ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ movie/ new-on-ott/ new-on-*/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ sitemap.xml
+          git add data.json data-*.json ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ movie/ new-on-ott/ new-on-*/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ cards/ sitemap.xml
           if git diff --staged --quiet; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit."
