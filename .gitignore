@@ -1,0 +1,5 @@
+# The share-card renderer (@resvg/resvg-js) installs here in CI. Never commit it:
+# native binaries, thousands of files. The workflow's git add is an explicit allowlist,
+# so this is belt-and-braces against a future `git add -A`.
+node_modules/
+package-lock.json
