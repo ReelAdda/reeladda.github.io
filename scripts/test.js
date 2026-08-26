@@ -2097,6 +2097,56 @@ test("page-copy forms exist in both registers (title-case, sentence-case, nav la
   assert.strictEqual(inV.newOn, "New on OTT");
 });
 
+group("share cards — branded og:image");
+test("card carries verdict, score, title and brand", () => {
+  const svg = U.shareCardSvg({ slug: "dc", title: "DC", verdict: "Must watch", rating: 8.0, votes: 13,
+    language: "Tamil", genre: "Romance / Action", runtime: 142, released: "2026-08-06", platform: "Theatres" }, { code: "in" });
+  assert.ok(/FILMY/.test(svg) && /CHILL/.test(svg));
+  assert.ok(/MUST WATCH/.test(svg));
+  assert.ok(/>8\.0</.test(svg));
+  assert.ok(/IN THEATRES/.test(svg));
+  assert.ok(/1200/.test(svg) && /630/.test(svg), "og-standard dimensions");
+});
+test("never prints a score the data can't support", () => {
+  const svg = U.shareCardSvg({ slug: "x", title: "X", rating: 9.4, votes: 3, verdict: "Not enough ratings yet" }, { code: "in" });
+  assert.ok(!/9\.4/.test(svg), "3 votes must not become a headline score");
+  assert.ok(/NEW/.test(svg) && /too early to rate/.test(svg));
+});
+test("titles and blurbs are escaped, not injected", () => {
+  const svg = U.shareCardSvg({ slug: "x", title: 'Q&A: <script>alert(1)</script> "Hi"', rating: 7, votes: 500, verdict: "Worth a watch" }, { code: "in" });
+  assert.ok(!/<script>/.test(svg), "no raw markup may reach the SVG");
+  assert.ok(/&amp;/.test(svg));
+});
+test("status pill follows the release-state machine", () => {
+  const base = { slug: "s", title: "S", rating: 7, votes: 900, verdict: "Worth a watch" };
+  const today = new Date().toISOString().slice(0, 10);
+  assert.ok(/RELEASES TODAY/.test(U.shareCardSvg({ ...base, released: today }, { code: "in" })));
+  assert.ok(/IN CINEMAS/.test(U.shareCardSvg({ ...base, released: "2099-01-01" }, { code: "in" })));
+  assert.ok(/NOW ON NETFLIX/.test(U.shareCardSvg({ ...base, released: "2020-01-01", platform: "Netflix" }, { code: "in" })));
+});
+test("long titles wrap to two lines and elide rather than overflow", () => {
+  const lines = U.wrapForCard("Operation Safed Sagar: The Untold Story of the Kargil War", 46, 620, 2);
+  assert.strictEqual(lines.length, 2);
+  assert.ok(lines[1].endsWith("…"));
+});
+test("vote buckets round DOWN so the label never overstates", () => {
+  assert.strictEqual(U.voteCountLabel(13), "13 ratings");     // exact where skepticism matters
+  assert.strictEqual(U.voteCountLabel(199), "150+ ratings");
+  assert.ok(/k\+ ratings/.test(U.voteCountLabel(52000)));
+  assert.strictEqual(U.voteCountLabel(0), "");
+});
+test("card path is per country so a /us/ share can't preview India's wording", () => {
+  assert.strictEqual(U.cardPaths({ slug: "dc" }, { code: "us" }).file, "cards/us/dc.png");
+  assert.ok(U.cardPaths({ slug: "dc" }, { code: "in" }).url.startsWith("https://filmychill.com/cards/in/"));
+  assert.strictEqual(U.cardPaths({}, { code: "in" }), null);
+});
+test("card generation is optional — a missing rasteriser can't fail the build", () => {
+  const src = require("fs").readFileSync("scripts/update.js", "utf8");
+  assert.ok(/catch \{ console\.warn\("  share cards: @resvg/.test(src), "resvg require must be guarded");
+  assert.ok(/if \(!Resvg\) return 0;/.test(src), "no rasteriser -> skip, not throw");
+  assert.ok(/fs\.existsSync\(card\.file\)/.test(src), "og:image must verify the card exists before pointing at it");
+});
+
 group("fit line — editorial value without fabrication");
 test("composes commitment + caveat from real signal", () => {
   const w = U.whyWatch({ tmdbId: 1, title: "X", runtime: 142, genre: "Romance / Action",
