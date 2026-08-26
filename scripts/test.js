@@ -2097,6 +2097,68 @@ test("page-copy forms exist in both registers (title-case, sentence-case, nav la
   assert.strictEqual(inV.newOn, "New on OTT");
 });
 
+group("fit line — editorial value without fabrication");
+test("composes commitment + caveat from real signal", () => {
+  const w = U.whyWatch({ tmdbId: 1, title: "X", runtime: 142, genre: "Romance / Action",
+    language: "Tamil", cert: "A", rating: 8.0, votes: 13, kind: "movie" });
+  assert.ok(/2h 22m of Tamil romance/.test(w.text));
+  assert.ok(/adults only/.test(w.text));
+  assert.ok(/13 (rating|people)/.test(w.text), "a strong score on 13 votes must be flagged");
+  assert.strictEqual(w.heading, "Should you spend 2h 22m on it?");
+});
+test("article agrees with the genre that follows it", () => {
+  const w = U.whyWatch({ tmdbId: 2, title: "Y", runtime: 120, genre: "Hindi Drama / Action", cert: "U" });
+  assert.ok(!/\ba action\b/.test(w.text), "never 'a action'");
+  assert.ok(!/\ban drama\b/.test(w.text), "never 'an drama'");
+});
+test("returns null rather than a generic line when signal is thin", () => {
+  assert.strictEqual(U.whyWatch({ title: "Untitled", genre: "Drama", language: "Hindi" }), null);
+  assert.strictEqual(U.whyWatch(null), null);
+});
+test("never states a rating the data doesn't have", () => {
+  const w = U.whyWatch({ tmdbId: 3, title: "Z", runtime: 110, genre: "Comedy", cert: "U/A 13+", rating: null, votes: 1 });
+  assert.ok(!/\d\.\d/.test(w.text.replace(/\dh \d+m/g, "")), "no invented score");
+});
+test("prefers IMDb pair when routed to IMDb, never mixes sources", () => {
+  const w = U.whyWatch({ tmdbId: 4, title: "M", runtime: 100, genre: "Action", cert: "A",
+    rating: 5.0, votes: 20, imdbRating: 7.9, imdbVotes: 90000 });
+  assert.ok(/7\.9|90,000/.test(w.text), "should speak in IMDb terms, not the TMDB pair");
+  assert.ok(!/ 20 ratings/.test(w.text));
+});
+test("TV is framed as a commitment, not a runtime", () => {
+  const w = U.whyWatch({ tmdbId: 5, title: "S", kind: "tv", seasons: 5, genre: "Drama", language: "English" });
+  assert.strictEqual(w.heading, "Is it worth starting?");
+  assert.ok(/5 seasons deep/.test(w.text));
+});
+test("rent-or-buy-only is surfaced as the cost decision it is", () => {
+  const w = U.whyWatch({ tmdbId: 6, title: "R", runtime: 95, genre: "Drama", cert: "A",
+    providers: [], rentBuy: [{ name: "Prime Video" }] });
+  assert.ok(/subscription|rent-or-buy/i.test(w.text));
+});
+test("variants are stable per film and spread across a run of films", () => {
+  const a = { tmdbId: 100, runtime: 95, genre: "Action", cert: "A" };
+  assert.strictEqual(U.whyWatch(a).text, U.whyWatch(a).text, "same film -> identical text (no git churn)");
+  // Identical-shape films must not all get the same sentence. TMDB ids arrive in near
+  // sequential runs, so this also guards the hash finalizer.
+  const texts = new Set();
+  for (let i = 0; i < 30; i++) texts.add(U.whyWatch({ tmdbId: 900000 + i, runtime: 95, genre: "Action", cert: "A" }).text);
+  assert.ok(texts.size >= 3, `expected the phrasings to spread, got ${texts.size}`);
+});
+test("no two different films in the live data share a fit line", () => {
+  const fs2 = require("fs"), seen = new Map();
+  for (const f of ["data.json", "data-us.json"]) {
+    if (!fs2.existsSync(f)) continue;
+    const d = JSON.parse(fs2.readFileSync(f, "utf8"));
+    for (const it of [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || [])]) {
+      const w = U.whyWatch(it);
+      if (!w) continue;
+      if (!seen.has(w.text)) seen.set(w.text, new Set());
+      seen.get(w.text).add(it.tmdbId || it.title);
+    }
+  }
+  for (const [text, ids] of seen) assert.strictEqual(ids.size, 1, `shared line: ${text}`);
+});
+
 group("release state — no passed date may read as upcoming");
 const REL_NOW = new Date("2026-08-25T09:00:00Z").getTime();
 const todayISO = () => new Date().toISOString().slice(0, 10);
