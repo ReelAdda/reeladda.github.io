@@ -4,6 +4,72 @@
 // what's new since last week's scan. Writes data.json for the website.
 
 const fs = require("fs");
+
+// Shared primitives (see lib/core.js).
+const {
+  COUNTRIES,
+  COUNTRY_PAGE_META,
+  LANGUAGE_PAGES,
+  escHtml,
+  filmPagePath,
+  filmPageUrl,
+  fmtDateShort,
+  fmtRuntime,
+  slugify,
+  trim,
+  xDefaultCode,
+  localeFor,
+} = require("./lib/core.js");
+
+const {
+  cardFontFiles,
+  cardPaths,
+  cardStatus,
+  loadResvg,
+  shareCardSvg,
+  voteCountLabel,
+  wrapForCard,
+  writeShareCards,
+} = require("./lib/cards.js");
+
+
+const {
+  browsePath,
+  buildBrowsePage,
+  filmIndexFor,
+  filmPageDir,
+  filmPageExists,
+  hashKey,
+  hreflangBlockFor,
+  patchHreflang,
+  relatedFilms,
+  relatedScore,
+  syncHreflangClusters,
+  writeBrowseIndex,
+  BROWSE_PER_PAGE,
+} = require("./lib/graph.js");
+
+
+const {
+  article,
+  cap,
+  certClause,
+  commitmentLine,
+  fitCaveat,
+  pickVariant,
+  runtimePhrase,
+  whyWatch,
+} = require("./lib/whywatch.js");
+
+
+const {
+  normalizeUpcoming,
+  releaseLabel,
+  releaseState,
+  todayStr,
+} = require("./lib/release.js");
+
+
 const zlib = require("zlib");
 const API_KEY = process.env.TMDB_API_KEY;
 const BASE = "https://api.themoviedb.org/3";
@@ -67,82 +133,6 @@ async function tmdb(path, params = {}) {
   throw lastErr || new Error(`TMDB ${path} failed after retries`);
 }
 
-// Per-country configuration. Each country runs the SAME pipeline parameterised by region,
-// watch_region, priority languages, and soft quotas. INDIA IS FIRST and reproduces the
-// existing single-country behaviour EXACTLY — its regionalLangs order, targets, and soon
-// quota match the previous hardcoded values, so its output stays byte-for-byte identical.
-const COUNTRIES = [
-  {
-    code: "in", name: "India", region: "IN", watchRegion: "IN", streamWord: "OTT",
-    priorityLangs: ["hi", "ta", "te"],
-    regionalLangs: ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"], // order = India's regionalOrder
-    ottRegionalLangs: ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"], // OTT regional pool langs
-    theatreTargets: [["hi", 3], ["en", 2], ["ta", 1], ["te", 1]],
-    soonTargets: [["en", 3], ["hi", 3], ["__regional__", 2]],
-  },
-  {
-    code: "us", name: "United States", region: "US", watchRegion: "US",
-    priorityLangs: ["en", "es"],
-    regionalLangs: ["es"],
-    ottRegionalLangs: ["es"],
-    theatreTargets: [["en", 5], ["es", 1]],
-    soonTargets: [["en", 5], ["es", 1], ["__regional__", 2]],
-  },
-  {
-    code: "uk", name: "United Kingdom", region: "GB", watchRegion: "GB",
-    priorityLangs: ["en"],
-    regionalLangs: ["hi", "pa"],
-    ottRegionalLangs: [], // English-only OTT: fill all slots from international (English) trending
-    theatreTargets: [["en", 6]],
-    soonTargets: [["en", 6], ["__regional__", 2]],
-  },
-  {
-    code: "au", name: "Australia", region: "AU", watchRegion: "AU",
-    priorityLangs: ["en"],
-    regionalLangs: ["hi", "zh", "ko"],
-    ottRegionalLangs: [], // English-only OTT: fill all slots from international (English) trending
-    theatreTargets: [["en", 6]],
-    soonTargets: [["en", 6], ["__regional__", 2]],
-  },
-  {
-    code: "de", name: "Germany", region: "DE", watchRegion: "DE",
-    priorityLangs: ["de", "en"],
-    regionalLangs: ["de"],
-    ottRegionalLangs: ["de"],
-    theatreTargets: [["de", 5], ["en", 2]],
-    soonTargets: [["de", 5], ["en", 2], ["__regional__", 1]],
-  },
-  // ---- Diaspora markets: countries where FilmyChill's India strength IS the edge. ----
-  // UAE: ~3.5M Indian expats; Indian films routinely top the UAE box office, with
-  // Malayalam cinema disproportionately huge (Kerala diaspora) alongside Hindi/Tamil.
-  {
-    code: "ae", name: "UAE", region: "AE", watchRegion: "AE", streamWord: "OTT",
-    priorityLangs: ["hi", "en", "ml"],
-    regionalLangs: ["hi", "ml", "ta", "te", "ar"],
-    ottRegionalLangs: ["hi", "ml", "ta", "te"],
-    theatreTargets: [["hi", 2], ["en", 2], ["ml", 1], ["ta", 1]],
-    soonTargets: [["en", 2], ["hi", 2], ["__regional__", 2]],
-  },
-  // Canada: the Punjabi-cinema capital outside India (Brampton/Surrey) plus a large
-  // Hindi audience; French included for Quebec theatrical coverage.
-  {
-    code: "ca", name: "Canada", region: "CA", watchRegion: "CA",
-    priorityLangs: ["en", "pa", "hi"],
-    regionalLangs: ["pa", "hi", "fr", "ta"],
-    ottRegionalLangs: ["pa", "hi"],
-    theatreTargets: [["en", 4], ["pa", 1], ["hi", 1]],
-    soonTargets: [["en", 4], ["__regional__", 3]],
-  },
-  // Singapore: Tamil is an official language; strong Mandarin-language box office too.
-  {
-    code: "sg", name: "Singapore", region: "SG", watchRegion: "SG",
-    priorityLangs: ["en", "ta", "zh"],
-    regionalLangs: ["ta", "zh", "hi", "ms"],
-    ottRegionalLangs: ["ta", "zh"],
-    theatreTargets: [["en", 4], ["ta", 1], ["zh", 1]],
-    soonTargets: [["en", 4], ["ta", 1], ["__regional__", 2]],
-  },
-];
 
 // ============================================================================
 // STREAMING VOCABULARY — the word each market actually searches with.
@@ -304,16 +294,6 @@ function langName(code) {
   return code;
 }
 
-// "145 min" reads like metadata; "2h 25m" reads like an answer to "do I have time
-// tonight?". Used on cards, modal, and film pages so runtime formats identically
-// everywhere. Under an hour stays "52m".
-function fmtRuntime(mins) {
-  const n = Number(mins);
-  if (!Number.isFinite(n) || n <= 0) return "";
-  const h = Math.floor(n / 60), m = Math.round(n % 60);
-  if (!h) return `${m}m`;
-  return m ? `${h}h ${m}m` : `${h}h`;
-}
 
 function verdict(rating, votes) {
   if (!votes || votes < 10) return "Not enough ratings yet";
@@ -323,610 +303,14 @@ function verdict(rating, votes) {
   return "Skip unless curious";
 }
 
-// ============================================================================
-// "SHOULD YOU SPEND 2 HOURS ON THIS?" — the fit line.
-//
-// Every film page carries the same architecture, which is the thin-content risk: hundreds
-// of pages whose only unique text is a title and a synopsis. This composes a short,
-// decision-useful paragraph from signal we ALREADY fetch — runtime, genre pair, language,
-// certification, rating confidence, format, and how you'd actually pay for it.
-//
-// Three rules, because a fit line that lies is worse than no fit line:
-//   1. Never assert anything not in the data. We know a film is 142 minutes of Tamil
-//      romance rated A; we do NOT know its plot is "straightforward", so we never say so.
-//   2. Never restate the verdict or the critics' take — those blocks are right above it.
-//      This answers a different question: what are you signing up for?
-//   3. Return null when the signal is too thin. A page with no fit line beats a page with
-//      a generic one; generic lines stamped across 500 pages ARE the duplication problem.
-// ============================================================================
-function runtimePhrase(mins) {
-  if (!mins || mins < 25) return null;
-  if (mins <= 100) return { text: `${mins} minutes`, band: "short" };
-  if (mins <= 135) return { text: fmtRuntime(mins), band: "standard" };
-  if (mins <= 165) return { text: fmtRuntime(mins), band: "long" };
-  return { text: fmtRuntime(mins), band: "epic" };
-}
 
-function certClause(cert) {
-  if (!cert) return null;
-  const c = String(cert).toUpperCase();
-  if (/^(A|R|NC-17|18)$/.test(c)) return "adults only";
-  if (/^(U\/A|UA|PG-13|12|15|TV-14|TV-MA)/.test(c)) return "not one for younger kids";
-  if (/^(U|G|PG|TV-G|TV-Y|TV-PG)$/.test(c)) return "fine for the whole family";
-  return null;
-}
 
-function article(word) { return /^[aeiou]/i.test(String(word || "")) ? "an" : "a"; }
 
-// Deterministic variant picker. Two films with the same shape must not produce the same
-// sentence — that is the "500 pages of the same template" failure — but the choice must be
-// STABLE across builds, or every rebuild churns the git diff. Keyed on the film's own id.
-function pickVariant(item, options) {
-  const key = String((item && (item.tmdbId || item.slug || item.title)) || "");
-  let h = 0;
-  for (let i = 0; i < key.length; i++) h = (Math.imul(h, 31) + key.charCodeAt(i)) >>> 0;
-  // Finalizer: TMDB ids are near-sequential, and a plain modulo maps neighbouring ids to
-  // the same bucket in runs. Mixing the bits first spreads adjacent films across variants.
-  h ^= h >>> 15; h = Math.imul(h, 2246822507) >>> 0; h ^= h >>> 13;
-  return options[h % options.length];
-}
 
-// Sentence 1 — what you are committing to.
-function commitmentLine(item) {
-  const rt = runtimePhrase(item.runtime);
-  const genres = String(item.genre || "").split("/").map((g) => g.trim()).filter(Boolean);
-  const lead = genres[0] ? genres[0].toLowerCase() : null;
-  const second = genres[1] ? genres[1].toLowerCase() : null;
-  const lang = item.language || null;
-  const cert = certClause(item.cert);
-  const blend = second ? pickVariant(item, [
-    ` with ${article(second)} ${second} streak`, ` with ${second} threaded through`, `, leaning ${second}`,
-  ]) : "";
-  if (item.kind === "tv") {
-    const n = item.seasons || 0;
-    if (!n && !lead) return null;
-    const shape = n > 1 ? `${n} seasons deep` : "a first season";
-    const what = [lang, lead].filter(Boolean).join(" ");
-    return `This is ${shape}${what ? ` — ${what}${blend}` : ""}${cert ? `, ${cert}` : ""}.`;
-  }
-  // A movie with neither a runtime nor a certificate has nothing to say that the metadata
-  // rows above don't already show. Say nothing.
-  if (!rt && !cert) return null;
-  if (rt && lead) return `${cap(rt.text)} of ${lang ? `${lang} ` : ""}${lead}${blend}${cert ? `, ${cert}` : ""}.`;
-  if (rt) return `${cap(rt.text)} long${cert ? `, ${cert}` : ""}.`;
-  return `${cap(lang ? `${lang} ${lead}` : lead || "")}${cert ? `, ${cert}` : ""}.`;
-}
 
-// Sentence 2 — the most decision-relevant thing we can defend, and only one of them.
-// Ordered by how much it should change the answer.
-function fitCaveat(item) {
-  const useImdb = item.imdbVotes != null && item.imdbRating != null;
-  const votes = useImdb ? item.imdbVotes : item.votes;
-  const rating = useImdb ? item.imdbRating : item.rating;
-  const rt = runtimePhrase(item.runtime);
-  if (!(item.providers || []).length && (item.rentBuy || []).length) {
-    return pickVariant(item, [
-      "No subscription covers it here — you'd be paying per view, so it wants to be a deliberate pick.",
-      "It's rent-or-buy only in this market, which makes it a decision rather than a background watch.",
-    ]);
-  }
-  if (rating != null && votes && votes < 50) {
-    return pickVariant(item, [
-      `The ${Number(rating).toFixed(1)} rests on just ${votes} rating${votes === 1 ? "" : "s"} so far — promising, not proven.`,
-      `Only ${votes} people have rated it, so treat that ${Number(rating).toFixed(1)} as an early signal rather than a verdict.`,
-    ]);
-  }
-  if (rating != null && votes && votes >= 5000) {
-    return pickVariant(item, [
-      `That score holds across ${Number(votes).toLocaleString("en-IN")} ratings, so it's about as safe as this week's list gets.`,
-      `With ${Number(votes).toLocaleString("en-IN")} ratings behind it, the number isn't going to move much — you know what you're getting.`,
-    ]);
-  }
-  if (item.kind === "tv" && (item.seasons || 0) > 2) {
-    return pickVariant(item, [
-      "Several seasons in, so it's a commitment to start rather than a one-night sampler.",
-      "Starting now means a backlog — worth knowing before you press play.",
-      "There's a lot of it, which is either the appeal or the problem depending on your week.",
-    ]);
-  }
-  if (!rt) return null;
-  if (rt.band === "epic") return pickVariant(item, [
-    "Past two and a half hours, it needs a proper evening rather than a weeknight.",
-    "At this length it's the whole evening's plan, not something to slot in after dinner.",
-  ]);
-  if (rt.band === "long") return pickVariant(item, [
-    "Long enough that it wants your full attention rather than a second screen.",
-    "A little over the usual, so start it earlier than you think.",
-  ]);
-  if (rt.band === "short") return pickVariant(item, [
-    "Short enough to finish on a weeknight without losing the next morning.",
-    "Under the two-hour mark — an easy weeknight watch.",
-    "Tight enough that it's an easy yes if you're undecided.",
-  ]);
-  return pickVariant(item, [
-    "Standard length — a normal evening's watch, nothing to plan around.",
-    "Runs about as long as you'd expect, so no scheduling gymnastics needed.",
-  ]);
-}
 
-function cap(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : str; }
 
-// Public: { heading, text } or null. The heading is per-film on purpose — no two pages
-// share an H2 ("Should you spend 2h 22m on it?").
-function whyWatch(item) {
-  if (!item) return null;
-  const first = commitmentLine(item);
-  if (!first) return null;                       // too thin to say anything true
-  const second = fitCaveat(item);
-  const rt = runtimePhrase(item.runtime);
-  const heading = item.kind === "tv" ? "Is it worth starting?"
-    : rt ? `Should you spend ${rt.text} on it?` : "Is it worth your time?";
-  return { heading, text: second ? `${first} ${second}` : first };
-}
 
-// ============================================================================
-// SHARE CARDS — the branded og:image.
-//
-// Today every shared FilmyChill link previews as a TMDB backdrop: the film's art, none of
-// our identity. This renders a card that is unmistakably ours — verdict ladder, rating,
-// fit line, brand type — so a WhatsApp forward or an Instagram share advertises the site.
-//
-// Deliberately typographic, NO poster or backdrop art. Two reasons: studio key art in a
-// standalone branded card is promotional use of someone else's IP, and a poster card looks
-// like every other aggregator. Type is what makes a screenshot recognisable without a logo.
-//
-// Pure function -> SVG string, so it is fully testable without a rasteriser. PNG conversion
-// is a separate, optional step (see writeShareCards).
-// ============================================================================
-const CARD_W = 1200, CARD_H = 630;
-
-// SVG has no text wrapping. Estimate advance width per font (measured against the two
-// faces we ship) and break on word boundaries. Conservative on purpose: a slightly short
-// line is invisible, an overflowing one wrecks the card.
-function wrapForCard(text, fontSize, maxWidth, maxLines, face = "inter") {
-  const ratio = face === "anton" ? 0.44 : 0.52;
-  const perChar = fontSize * ratio;
-  const limit = Math.max(6, Math.floor(maxWidth / perChar));
-  const words = String(text || "").split(/\s+/).filter(Boolean);
-  const lines = [];
-  let cur = "";
-  for (const w of words) {
-    const next = cur ? `${cur} ${w}` : w;
-    if (next.length <= limit) { cur = next; continue; }
-    if (cur) lines.push(cur);
-    cur = w;
-    if (lines.length === maxLines) break;
-  }
-  if (cur && lines.length < maxLines) lines.push(cur);
-  if (lines.length === maxLines && words.join(" ").length > lines.join(" ").length) {
-    lines[maxLines - 1] = lines[maxLines - 1].replace(/[,;:]$/, "") + "…";
-  }
-  return lines.slice(0, maxLines);
-}
-
-// Status pill copy, reusing the release-state machine so a card can never contradict the
-// page it represents.
-function cardStatus(item, cfg) {
-  const st = releaseState(item.released);
-  if (st === "today") return "RELEASES TODAY";
-  if (st === "upcoming") return item.released
-    ? `IN CINEMAS ${fmtDateShort(item.released, Date.now(), localeFor(cfg && cfg.code)).toUpperCase()}`
-    : "COMING SOON";
-  if (item.platform === "Theatres") return "IN THEATRES";
-  if (item.platform) return `NOW ON ${String(item.platform).toUpperCase()}`;
-  return "OUT NOW";
-}
-
-// Vote counts are bucketed on the card, and that is a storage decision as much as a design
-// one: an exact count changes every single day for an active title, and each change rewrites
-// a PNG that lives in git history forever. Buckets round DOWN and are marked "+", so the
-// label is never an overstatement. Under 50 stays exact — that is precisely the range where
-// the reader needs to distrust the score.
-function voteCountLabel(votes) {
-  if (!votes) return "";
-  if (votes < 50) return `${votes} rating${votes === 1 ? "" : "s"}`;
-  if (votes < 1000) return `${Math.floor(votes / 50) * 50}+ ratings`;
-  if (votes < 10000) return `${(Math.floor(votes / 500) * 500 / 1000).toFixed(1)}k+ ratings`;
-  return `${Math.floor(votes / 5000) * 5}k+ ratings`;
-}
-
-function shareCardSvg(item, cfg) {
-  if (!item || !item.title) return null;
-  const e = escHtml;
-  const useImdb = item.imdbRating != null;
-  const rating = useImdb ? item.imdbRating : item.rating;
-  const votes = useImdb ? item.imdbVotes : item.votes;
-  // Never print a score the data doesn't support — the card is the most-copied surface on
-  // the site, so an unearned number travels furthest.
-  const showScore = rating != null && votes && votes >= 10;
-  const verdict = (item.verdict || "").toUpperCase();
-  const fit = whyWatch(item);
-  const blurb = item.take || (fit ? fit.text : "");
-  const status = cardStatus(item, cfg);
-  const titleLines = wrapForCard(item.title, 46, 620, 2, "inter");
-  const blurbLines = wrapForCard(blurb, 26, 660, 2, "inter");
-  const year = item.released ? String(item.released).slice(0, 4) : "";
-  const meta = [item.language, item.genre, item.runtime ? fmtRuntime(item.runtime) : null]
-    .filter(Boolean).join("  ·  ");
-  const scoreStr = showScore ? Number(rating).toFixed(1) : null;
-  const pillW = status.length * 14 + 44;
-  const titleTop = 322 - (titleLines.length - 1) * 28;
-  const blurbTop = titleTop + titleLines.length * 56 + 66;
-
-  // Flat fills only — no gradients. A smooth gradient costs ~110KB extra per PNG, and these
-  // files live in the repo forever; flat colour keeps a card around 25KB.
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${CARD_W}" height="${CARD_H}" viewBox="0 0 ${CARD_W} ${CARD_H}">
-<rect width="${CARD_W}" height="${CARD_H}" fill="#1A1633"/>
-<rect x="0" y="0" width="14" height="${CARD_H}" fill="#FFAD1F"/>
-<rect x="784" y="0" width="416" height="${CARD_H}" fill="#221D47"/>
-<text x="64" y="96" font-family="Anton" font-size="42" fill="#FFF7EC">FILMY<tspan fill="#FFAD1F">CHILL</tspan></text>
-<rect x="64" y="132" width="${pillW}" height="48" rx="24" fill="#FFFFFF" fill-opacity="0.10"/>
-<text x="${64 + pillW / 2}" y="164" text-anchor="middle" font-family="Inter" font-size="22" fill="#FFF7EC" letter-spacing="1.4">${e(status)}</text>
-${titleLines.map((l, i) => `<text x="64" y="${titleTop + i * 56}" font-family="Inter" font-size="46" fill="#FFF7EC">${e(l)}</text>`).join("\n")}
-<text x="64" y="${titleTop + titleLines.length * 56 - 4}" font-family="Inter" font-size="24" fill="#8F8BB8">${e(meta)}${year ? `  ·  ${e(year)}` : ""}</text>
-${blurbLines.map((l, i) => `<text x="64" y="${blurbTop + i * 36}" font-family="Inter" font-size="26" fill="#C9C5E8">${e(l)}</text>`).join("\n")}
-<text x="64" y="${CARD_H - 34}" font-family="Inter" font-size="23" fill="#6E6A96">filmychill.com</text>
-${scoreStr
-  ? `<text x="992" y="286" text-anchor="middle" font-family="Anton" font-size="168" fill="#FFAD1F">${scoreStr}</text>
-<text x="992" y="330" text-anchor="middle" font-family="Inter" font-size="26" fill="#8F8BB8">${e(voteCountLabel(votes))}</text>`
-  : `<text x="992" y="272" text-anchor="middle" font-family="Anton" font-size="104" fill="#FFAD1F">NEW</text>
-<text x="992" y="322" text-anchor="middle" font-family="Inter" font-size="26" fill="#8F8BB8">too early to rate</text>`}
-<rect x="864" y="378" width="256" height="4" fill="#FFAD1F" fill-opacity="0.5"/>
-${wrapForCard(verdict || "FRESH RELEASE", 44, 360, 2, "anton").map((l, i) =>
-  `<text x="992" y="${446 + i * 52}" text-anchor="middle" font-family="Anton" font-size="44" fill="#FFF7EC">${e(l)}</text>`).join("\n")}
-</svg>`;
-}
-
-// Where a card lives on disk / on the web. One card per (country, film): the status pill
-// and platform differ per market, so a shared /us/ link must not preview India's wording.
-function cardPaths(item, cfg) {
-  const code = (cfg && cfg.code) || "in";
-  const slug = item && item.slug;
-  if (!slug) return null;
-  return { file: `cards/${code}/${slug}.png`, url: `https://filmychill.com/cards/${code}/${slug}.png` };
-}
-
-// PNG rendering is OPTIONAL. @resvg/resvg-js is a native module; if it is missing or fails
-// to load, card generation is skipped, socialImage() falls back to the TMDB backdrop and
-// the build completes exactly as it does today. A branding upgrade must never be able to
-// take down the daily build.
-let _resvg = null, _resvgTried = false;
-function loadResvg() {
-  if (_resvgTried) return _resvg;
-  _resvgTried = true;
-  try { _resvg = require("@resvg/resvg-js").Resvg; }
-  catch { console.warn("  share cards: @resvg/resvg-js not installed — keeping TMDB backdrops"); }
-  return _resvg;
-}
-
-// The rasteriser needs TTF/OTF. The .woff2 files the SITE uses will not do: resvg accepts
-// a woff2 without error and then draws NOTHING, so a wrong font path yields blank cards
-// rather than a failure. Both faces are therefore required, and each is looked up in the
-// preferred location first, then the repo root — uploads land there more often than not.
-const CARD_FONT_NAMES = ["anton-latin.ttf", "inter-var-latin.ttf"];
-const CARD_FONT_DIRS = ["fonts/", ""];
-
-function cardFontFiles() {
-  const found = [];
-  for (const name of CARD_FONT_NAMES) {
-    const hit = CARD_FONT_DIRS.map((d) => `${d}${name}`).find((p) => fs.existsSync(p));
-    if (hit) found.push(hit);
-    else console.warn(`  share cards: ${name} not found in ${CARD_FONT_DIRS.map((d) => d || "repo root").join(" or ")}`);
-  }
-  return found;
-}
-
-function writeShareCards(data, cfg) {
-  const Resvg = loadResvg();
-  if (!Resvg) return 0;
-  // Both faces or none: Anton carries the score and verdict, Inter the title and blurb, so
-  // rendering with one of them produces a card with invisible text — worse than no card.
-  const fonts = cardFontFiles();
-  if (fonts.length !== CARD_FONT_NAMES.length) { console.warn("  share cards: skipped (brand fonts incomplete)"); return 0; }
-  const code = (cfg && cfg.code) || "in";
-  const dir = `cards/${code}`;
-  fs.mkdirSync(dir, { recursive: true });
-  const items = [...(data.theatres || []), ...(data.ott || []), ...normalizeUpcoming(data.comingSoon)];
-  const keep = new Set();
-  let written = 0;
-  for (const item of items) {
-    const paths = cardPaths(item, cfg);
-    if (!paths) continue;
-    keep.add(`${item.slug}.png`);
-    let png;
-    try {
-      const svg = shareCardSvg(item, cfg);
-      if (!svg) continue;
-      png = Buffer.from(new Resvg(svg, { font: { fontFiles: fonts, loadSystemFonts: false, defaultFontFamily: "Inter" } }).render().asPng());
-    } catch (e) { console.warn(`  card [${code}/${item.slug}] skipped: ${e.message}`); continue; }
-    // Byte-compare before writing: an unchanged card must not produce a new git object.
-    // Ratings move constantly; without this every build would commit the whole set again.
-    if (fs.existsSync(paths.file) && fs.readFileSync(paths.file).equals(png)) continue;
-    fs.writeFileSync(paths.file, png);
-    written++;
-  }
-  // Films that left this week's lists lose their card: the directory tracks the live set
-  // instead of growing without bound. Their pages fall back to the backdrop.
-  let pruned = 0;
-  for (const f of fs.readdirSync(dir)) {
-    if (f.endsWith(".png") && !keep.has(f)) { fs.unlinkSync(`${dir}/${f}`); pruned++; }
-  }
-  console.log(`  share cards [${code}]: ${written} written, ${keep.size} live, ${pruned} pruned`);
-  return written;
-}
-
-// ============================================================================
-// FILM INDEX — the fix for orphaned pages.
-//
-// The site generates ~1,180 film pages but only links to the ~220 in this week's lists, so
-// Google reports the rest as "Discovered — currently not indexed": it has the URLs from the
-// sitemap and declines to spend a crawl on pages nothing recommends. A sitemap entry is a
-// suggestion; an internal link is a recommendation.
-//
-// This reads every page ALREADY on disk and recovers its metadata from the Movie JSON-LD it
-// already carries (name, genre, inLanguage, datePublished, image). No API calls, no new data
-// source, and it covers pages built months ago that will never be regenerated.
-// ============================================================================
-function filmIndexFor(cfg) {
-  const code = (cfg && cfg.code) || "in";
-  const dir = code === "in" ? "movie" : `${code}/movie`;
-  if (!fs.existsSync(dir)) return [];
-  const out = [];
-  for (const f of fs.readdirSync(dir)) {
-    if (!f.endsWith(".html")) continue;
-    let html;
-    try { html = fs.readFileSync(`${dir}/${f}`, "utf8"); } catch { continue; }
-    const m = html.match(/<script type="application\/ld\+json">(\{"@context[^<]*?"@type":"(?:Movie|TVSeries)"[\s\S]*?)<\/script>/);
-    if (!m) continue;
-    let ld;
-    try { ld = JSON.parse(m[1]); } catch { continue; }
-    if (!ld.name) continue;
-    out.push({
-      slug: f.slice(0, -5),
-      title: ld.name,
-      genre: ld.genre || "",
-      language: ld.inLanguage || "",
-      released: (ld.datePublished || "").slice(0, 10),
-      poster: ld.image || "",
-      kind: ld["@type"] === "TVSeries" ? "tv" : "movie",
-    });
-  }
-  return out;
-}
-
-// Score a candidate as a neighbour of `item`. Same language is the strongest signal on a
-// site this Indian-language-heavy; a shared genre next; closeness in time last, because a
-// 2026 release recommending a 2019 one reads like filler.
-function relatedScore(item, cand) {
-  if (!cand.slug || cand.slug === item.slug) return -1;
-  let score = 0;
-  const lang = (x) => String(x.language || "").toLowerCase();
-  // Language outweighs a full genre match on purpose: a reader on a Tamil film page wants
-  // another Tamil film more than an English film of the same genre. Two shared genres (36)
-  // must not beat a shared language (55), or the mesh drifts towards Hollywood titles.
-  if (lang(item) && lang(item) === lang(cand)) score += 55;
-  const genres = (x) => String(x.genre || "").split("/").map((g) => g.trim().toLowerCase()).filter(Boolean);
-  const shared = genres(item).filter((g) => genres(cand).includes(g)).length;
-  score += Math.min(shared, 2) * 18;
-  if (item.kind === cand.kind) score += 8;
-  const y = (x) => Number(String(x.released || "").slice(0, 4)) || 0;
-  if (y(item) && y(cand)) score += Math.max(0, 12 - Math.abs(y(item) - y(cand)) * 3);
-  return score;
-}
-
-// Pick N neighbours that ALL have real pages. Deliberately not "the N best": the top of the
-// ranking is the same handful of popular titles for every film, which would funnel every new
-// link into a dozen pages and leave the rest orphaned exactly as they are now. Candidates are
-// taken from a wider band and rotated per source film, so links spread across the archive.
-function relatedFilms(item, index, n = 6) {
-  const ranked = (index || [])
-    .map((c) => ({ c, s: relatedScore(item, c) }))
-    .filter((x) => x.s > 0)
-    .sort((a, b) => b.s - a.s || (a.c.slug < b.c.slug ? -1 : 1));
-  if (ranked.length <= n) return ranked.map((x) => x.c);
-  const band = ranked.slice(0, Math.max(n * 4, Math.min(40, ranked.length)));
-  const offset = Math.abs(hashKey(item.slug || item.title || "")) % band.length;
-  const picked = [];
-  for (let i = 0; i < band.length && picked.length < n; i++) picked.push(band[(offset + i) % band.length].c);
-  return picked;
-}
-
-function hashKey(key) {
-  let h = 0;
-  for (let i = 0; i < String(key).length; i++) h = (Math.imul(h, 31) + String(key).charCodeAt(i)) >>> 0;
-  h ^= h >>> 15; h = Math.imul(h, 2246822507) >>> 0; h ^= h >>> 13;
-  return h >>> 0;
-}
-
-// ============================================================================
-// BROWSE INDEX — makes indexation keep pace with generation.
-//
-// The related-films mesh fixes pages built from now on, but a page archived months ago is
-// frozen and never regenerated, so it can only gain links from NEW pages pointing back at
-// it. This closes the gap permanently: every film page, however old, is listed here, and
-// this index is linked from the footer of every page on the site. Result: nothing the build
-// generates is ever more than two clicks from the homepage, forever.
-//
-// Deliberately plain — titles, year, language, one link each. It is navigation, not content,
-// and padding it with descriptions would make 12 thin pages out of a useful one.
-// ============================================================================
-const BROWSE_PER_PAGE = 120;
-
-function browsePath(code, page) {
-  const base = code === "in" ? "/films/" : `/${code}/films/`;
-  return page <= 1 ? base : `${base}${page}/`;
-}
-
-function buildBrowsePage(index, cfg, page, totalPages, updatedHuman) {
-  const e = escHtml;
-  const code = (cfg && cfg.code) || "in";
-  const m = COUNTRY_PAGE_META[code] || { name: (cfg && cfg.name) || "India", path: `/${code}/` };
-  const start = (page - 1) * BROWSE_PER_PAGE;
-  const slice = index.slice(start, start + BROWSE_PER_PAGE);
-  const rows = slice.map((f) => {
-    const meta = [f.language, f.released ? String(f.released).slice(0, 4) : null,
-      f.kind === "tv" ? "Series" : null].filter(Boolean).join(" · ");
-    return `<li><a href="${e(filmPagePath(code, f.slug))}">${e(f.title)}</a>${meta ? ` <span class="bm">${e(meta)}</span>` : ""}</li>`;
-  }).join("\n      ");
-  const nav = [
-    page > 1 ? `<a class="btn" href="${e(browsePath(code, page - 1))}">← Previous</a>` : "",
-    page < totalPages ? `<a class="btn" href="${e(browsePath(code, page + 1))}">Next →</a>` : "",
-  ].filter(Boolean).join(" ");
-  // Every page of the set links to every other page: with 10+ pages a prev/next chain alone
-  // buries the tail dozens of hops deep, which is how paginated archives go uncrawled.
-  const pageLinks = Array.from({ length: totalPages }, (_, i) => i + 1)
-    .map((n) => n === page ? `<b>${n}</b>` : `<a href="${e(browsePath(code, n))}">${n}</a>`).join(" · ");
-  const url = `https://filmychill.com${browsePath(code, page)}`;
-  const title = page > 1
-    ? `Every film on FilmyChill ${m.name} — page ${page} of ${totalPages}`
-    : `Every movie and series we've covered in ${m.name} | FilmyChill`;
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${e(title)}</title>
-<meta name="description" content="${e(`Browse all ${index.length} movies and series FilmyChill has covered in ${m.name} — ratings, verdicts and where to watch each one.`)}">
-<link rel="canonical" href="${e(url)}">
-${page > 1 ? `<link rel="prev" href="${e(browsePath(code, page - 1))}">` : ""}
-${page < totalPages ? `<link rel="next" href="${e(browsePath(code, page + 1))}">` : ""}
-<meta property="og:title" content="${e(title)}">
-<meta property="og:url" content="${e(url)}">
-<style>
-  body { font-family: system-ui, -apple-system, sans-serif; max-width: 900px; margin: 0 auto;
-         padding: 24px 18px 60px; background: #FFF7EC; color: #1A1633; line-height: 1.6; }
-  h1 { font-size: 26px; margin: 0 0 4px; } .sub { color: #6B6890; font-size: 14px; margin-bottom: 22px; }
-  ul { list-style: none; padding: 0; columns: 2; column-gap: 34px; }
-  @media (max-width: 620px) { ul { columns: 1; } }
-  li { break-inside: avoid; padding: 5px 0; font-size: 15px; }
-  a { color: #4038C7; text-decoration: none; } a:hover { text-decoration: underline; }
-  .bm { color: #6B6890; font-size: 12.5px; }
-  .btn { display: inline-block; background: #4038C7; color: #fff; padding: 9px 16px;
-         border-radius: 8px; font-size: 14px; margin: 18px 6px 0 0; }
-  .pages { margin-top: 20px; font-size: 14px; color: #6B6890; } .pages a { margin: 0 2px; }
-  footer { margin-top: 34px; padding-top: 18px; border-top: 1px solid #E7DFD0; font-size: 13px; color: #6B6890; }
-</style></head><body>
-  <h1>Every film we've covered in ${e(m.name)}</h1>
-  <div class="sub">${index.length} titles · page ${page} of ${totalPages} · updated ${e(updatedHuman)}</div>
-  <ul>
-      ${rows}
-  </ul>
-  ${nav}
-  <div class="pages">Pages: ${pageLinks}</div>
-  <footer><a href="${e(m.path)}">← This week's picks</a> · <a href="/about/">About FilmyChill</a></footer>
-</body></html>`;
-}
-
-// Writes the whole paginated set and returns the URLs, for the sitemap.
-function writeBrowseIndex(index, cfg, updatedHuman) {
-  const code = (cfg && cfg.code) || "in";
-  const sorted = [...index].sort((a, b) => String(b.released || "").localeCompare(String(a.released || ""))
-    || String(a.title).localeCompare(String(b.title)));
-  const totalPages = Math.max(1, Math.ceil(sorted.length / BROWSE_PER_PAGE));
-  const urls = [];
-  for (let page = 1; page <= totalPages; page++) {
-    const dir = code === "in" ? (page === 1 ? "films" : `films/${page}`) : (page === 1 ? `${code}/films` : `${code}/films/${page}`);
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(`${dir}/index.html`, buildBrowsePage(sorted, cfg, page, totalPages, updatedHuman));
-    urls.push(`https://filmychill.com${browsePath(code, page)}`);
-  }
-  console.log(`  browse index [${code}]: ${sorted.length} films across ${totalPages} page(s)`);
-  return urls;
-}
-
-function filmPageDir(code) { return code === "in" ? "movie" : `${code}/movie`; }
-function filmPageExists(code, slug) {
-  return !!slug && fs.existsSync(`${filmPageDir(code)}/${slug}.html`);
-}
-
-// ============================================================================
-// HREFLANG SYNC — repairs clusters across the whole archive.
-//
-// The same film gets a page per country and those pages are ~63% identical (often more).
-// hreflang is what tells Google they are regional variants of one thing rather than
-// duplicates competing for a single index slot. Google's rule is strict: EVERY page in a
-// set must point to itself and to every other member, or the entire set is discarded.
-//
-// 74% of multi-country clusters were broken, because membership used to be computed from
-// the current week's lists and archived pages are never rebuilt. This walks every film page
-// on disk, works out the true cluster from the filesystem, and rewrites the alternates.
-// Pure string surgery on the <head>; nothing else on the page is touched.
-// ============================================================================
-function hreflangBlockFor(codes, slug) {
-  if (!codes || codes.length < 2) return "";
-  const ordered = COUNTRIES.map((c) => c.code).filter((c) => codes.includes(c));
-  const lines = ordered.map((c) => {
-    const region = (COUNTRIES.find((x) => x.code === c) || {}).region || c.toUpperCase();
-    return `<link rel="alternate" hreflang="${c === "in" ? "en-IN" : "en-" + region}" href="${filmPageUrl(c, slug)}"/>`;
-  });
-  lines.push(`<link rel="alternate" hreflang="x-default" href="${filmPageUrl(xDefaultCode(ordered), slug)}"/>`);
-  return lines.join("\n");
-}
-
-function patchHreflang(html, codes, slug) {
-  const block = hreflangBlockFor(codes, slug);
-  const existing = /(?:<link rel="alternate" hreflang="[^"]*" href="[^"]*"\/>\n?)+/;
-  const has = existing.test(html);
-  if (!block) return has ? { html: html.replace(existing, ""), changed: true } : { html, changed: false };
-  if (has) {
-    const current = (html.match(existing) || [""])[0].trim();
-    if (current === block) return { html, changed: false };
-    return { html: html.replace(existing, block + "\n"), changed: true };
-  }
-  const canon = html.match(/<link rel="canonical" href="[^"]*">/);
-  if (!canon) return { html, changed: false };
-  return { html: html.replace(canon[0], `${canon[0]}\n${block}`), changed: true };
-}
-
-function syncHreflangClusters() {
-  const bySlug = new Map();
-  for (const c of COUNTRIES) {
-    const dir = filmPageDir(c.code);
-    if (!fs.existsSync(dir)) continue;
-    for (const f of fs.readdirSync(dir)) {
-      if (!f.endsWith(".html")) continue;
-      const slug = f.slice(0, -5);
-      if (!bySlug.has(slug)) bySlug.set(slug, []);
-      bySlug.get(slug).push(c.code);
-    }
-  }
-  let fixed = 0, clusters = 0;
-  for (const [slug, codes] of bySlug) {
-    if (codes.length > 1) clusters++;
-    for (const code of codes) {
-      const path = `${filmPageDir(code)}/${slug}.html`;
-      let html;
-      try { html = fs.readFileSync(path, "utf8"); } catch { continue; }
-      const { html: out, changed } = patchHreflang(html, codes, slug);
-      if (changed) { fs.writeFileSync(path, out); fixed++; }
-    }
-  }
-  console.log(`  hreflang sync: ${clusters} multi-country cluster(s), ${fixed} page(s) corrected`);
-  return fixed;
-}
-
-function trim(text, n = 160) {
-  if (!text) return "";
-  if (text.length <= n) return text;
-  // Prefer ending at a sentence boundary when one exists past 60% of the budget — a
-  // complete sentence reads finished; a mid-thought "…" reads broken. Fall back to the
-  // old word-boundary cut when the last sentence end is too early (or absent).
-  const slice = text.slice(0, n);
-  let cut = -1;
-  for (const m of slice.matchAll(/[.!?](?:\s|$)/g)) cut = m.index;
-  if (cut >= Math.floor(n * 0.6)) return slice.slice(0, cut + 1);
-  // Word-boundary cut alone still ends on articles and connectives ("sparks a…",
-  // "the story of the…") which reads broken. Peel trailing function words and any
-  // dangling punctuation so the fragment ends on a content word before the ellipsis.
-  let w = slice.replace(/\s+\S*$/, "");
-  const TAIL = /\s+(?:a|an|the|and|or|but|nor|of|to|in|on|at|by|for|with|from|as|into|onto|over|under|after|before|between|during|through|that|which|who|whom|whose|his|her|their|its|is|are|was|were|be|been|has|have|had|will|would|can|could|should|must|may|might|when|while|where|whom|so|than|then)$/i;
-  while (TAIL.test(w)) w = w.replace(TAIL, "");
-  w = w.replace(/[\s,;:—–\-]+$/, "");
-  return w + "…";
-}
-
-// OTT freshness window: how recent a title's EFFECTIVE freshness date (release/season date
-// OR first sighting on a platform — see first-seen tracking below) must be to count as a
-// current OTT release. Tightened from 75 to 45 days: with first-seen tracking, a late OTT
-// arrival stays fresh via its arrival date, so the wide release-date window is no longer
-// needed to protect those — 45d keeps the list genuinely current. Revert knob: set 75.
 const OTT_FRESH_DAYS = 45;
 
 // Derive the freshness date for an OTT title from a TMDB detail object.
@@ -1138,73 +522,8 @@ function freshBadge(kind, freshDate, now = Date.now(), seasonCount = null) {
   return age <= BADGE_MOVIE_DAYS ? "New release" : null;
 }
 
-// Human-readable freshness line for a card's meta row, so recency is VISIBLE, not implied:
-// "Released 12 Jun" for movies, "Latest season 21 Jun" for TV (whose `released` field is
-// the series' original launch and would mislead). Year is appended only when it differs
-// from the current year, so a Dec title shown in Jan still reads unambiguously. Must stay
-// in sync with the client-side freshLabel()/fmtDate() in index.html. Pure -> unit-testable.
-function fmtDateShort(dateStr, now = Date.now(), locale = "en-IN") {
-  const dt = new Date(dateStr);
-  const opts = { day: "numeric", month: "short" };
-  if (dt.getFullYear() !== new Date(now).getFullYear()) opts.year = "numeric";
-  return dt.toLocaleDateString(locale, opts);
-}
-// ============================================================================
-// RELEASE STATE — one source of truth for every date-dependent word on the site.
-//
-// The failure this prevents: a page that says "Coming soon" next to a date that has
-// already passed. It happens two ways — bad data (a premiere date overriding the real
-// one) and TIME (a card built on Monday for a Tuesday release is still on disk, and in
-// the visitor's browser cache, on Wednesday). Data fixes only solve the first, so every
-// render path re-derives state from the date instead of trusting the bucket it's in.
-//
-//   date  < today  ->  "released"   never "Coming soon"
-//   date == today  ->  "today"      "Releases today"
-//   date  > today  ->  "upcoming"   "Coming soon"
-//
-// Compared as YYYY-MM-DD strings against the calendar day, not as timestamps: a film
-// releasing today is not "released" at 6am and must not read "Released" until tomorrow.
-// ============================================================================
-function todayStr(now = Date.now()) { return new Date(now).toISOString().slice(0, 10); }
 
-function releaseState(dateStr, now = Date.now()) {
-  if (!dateStr) return "unknown";
-  const d = String(dateStr).slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return "unknown";
-  const t = todayStr(now);
-  return d > t ? "upcoming" : d === t ? "today" : "released";
-}
 
-// Tense-correct date line for cards and pages: "Releases today" / "Releases 9 Oct" /
-// "Released 31 Jan". TV keeps its own "Latest season" wording (see freshLabel).
-function releaseLabel(dateStr, now = Date.now(), locale = "en-IN") {
-  const st = releaseState(dateStr, now);
-  if (st === "unknown") return "";
-  if (st === "today") return "Releases today";
-  return (st === "upcoming" ? "Releases " : "Released ") + fmtDateShort(dateStr, now, locale);
-}
-
-// Data hygiene for the upcoming bucket, applied at BUILD time and again at RENDER time.
-//   - `released` in the past but a known future date elsewhere (freshDate) -> the regional
-//     override lied; show the future date. This is the Bokshi case.
-//   - every known date in the past -> the film is out; it is not "coming soon" any more and
-//     is dropped. It still appears in theatres/streaming if it earned a slot there.
-// Pure, so the same rule is testable and cannot drift between the two call sites.
-function normalizeUpcoming(list, now = Date.now()) {
-  const out = [];
-  for (const item of list || []) {
-    if (!item) continue;
-    // `released` is the region's own date and is the RIGHT one whenever it is usable —
-    // Ramayana is 8 Nov in India and 6 Nov globally, and the India page must say 8 Nov.
-    // Only reach for the fallback when the regional date is unusable.
-    if (releaseState(item.released, now) !== "released" && item.released) { out.push(item); continue; }
-    const fallback = [item.freshDate].filter(Boolean).map((d) => String(d).slice(0, 10))
-      .find((d) => releaseState(d, now) !== "released");
-    if (!fallback) continue;                           // every known date has passed -> not upcoming
-    out.push({ ...item, released: fallback });
-  }
-  return out;
-}
 
 function freshLabel(item, now = Date.now(), locale = "en-IN") {
   // TV needs freshDate (latest season, not the series launch). Movies prefer `released`
@@ -3260,16 +2579,9 @@ async function main() {
     try { writeShareCards(dataByCode[cfg.code], cfg); }
     catch (e) { console.warn(`  share cards [${cfg.code}] skipped: ${e.message}`); }
     generatePages(dataByCode[cfg.code], cfg, allSlugSets);
-    // After pages exist, so this run's films are in the browse listing immediately.
-    try {
-      const gen = (dataByCode[cfg.code] || {}).generatedAt || new Date().toISOString();
-      writeBrowseIndex(filmIndexFor(cfg), cfg,
-        new Date(gen).toLocaleDateString(localeFor(cfg.code), { day: "numeric", month: "long", year: "numeric" }));
-    } catch (e) { console.warn(`  browse index [${cfg.code}] skipped: ${e.message}`); }
-    if (pageTemplate) renderCountryPage(pageTemplate, cfg, dataByCode[cfg.code]);
-    writeOttWeekPage(dataByCode[cfg.code], cfg, builtCountries); // /new-on-ott/ per country
-    writePlatformHubPages(dataByCode[cfg.code], cfg);             // /new-on-<platform>/ per country
-    writeRssFeed(dataByCode[cfg.code], cfg);                      // /feed.xml per country
+    // Everything local for this country, in one place (see writeCountrySurfaces). Runs after
+    // generatePages so this run's films are already in the browse listing and card lookups.
+    writeCountrySurfaces(cfg, dataByCode[cfg.code], { template: pageTemplate, allCountries: builtCountries });
   }
   // India-only surfaces: language landing pages (/tamil/, /hindi/, ...) and the
   // permanent weekly snapshot (/week/<year>-W<ww>/). Both are pure re-renders of
@@ -3332,13 +2644,6 @@ if (!process.env.PAGES_ONLY && require.main === module) main().catch((e) => {
 // archive accrues search value after films leave the lists.
 // ============================================================
 
-function escHtml(s) {
-  return String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-function slugify(t) {
-  return String(t || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-}
 
 function assignSlugs(data) {
   const used = new Map(); // slug -> tmdbId
@@ -3358,28 +2663,7 @@ function ytIdOf(url) {
   return m ? m[1] : null;
 }
 
-// Page path for a film in a given country. India keeps the legacy flat path /movie/<slug>.html
-// (preserves already-indexed URLs + the existing archive); other countries are namespaced under
-// /<code>/movie/<slug>.html so the same title in different markets never collides and each has
-// its own region-correct "where to watch". Used everywhere a film page is linked or written.
-// x-default for hreflang must point to a page that EXISTS. India is the canonical default
-// only when India actually has the film; otherwise a foreign-market film (never listed in
-// India) would advertise a dead India URL as its default — Google follows hreflang alternates
-// as discovery URLs and files the miss as a 404. Fallback: first available copy in COUNTRIES
-// order (deterministic; stable across runs).
-function xDefaultCode(codes) {
-  if (!codes || !codes.length) return "in";
-  if (codes.includes("in")) return "in";
-  for (const c of COUNTRIES) if (codes.includes(c.code)) return c.code;
-  return codes[0];
-}
 
-function filmPagePath(code, slug) {
-  return code === "in" ? `/movie/${slug}.html` : `/${code}/movie/${slug}.html`;
-}
-function filmPageUrl(code, slug) {
-  return `https://filmychill.com${filmPagePath(code, slug)}`;
-}
 
 function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const e = escHtml;
@@ -4659,17 +3943,6 @@ function writeOttWeekPage(data, cfg, allCountries) {
   console.log(`  OTT-week page: /${p.replace(/index\.html$/, "")}`);
 }
 
-// ============================================================================
-// LANGUAGE LANDING PAGES (India) — the query surface India actually uses.
-// Nobody searches "new movies India"; they search "new tamil movies on OTT".
-// One page per major language at /<language>/, filtered from India's data,
-// refreshed every run. Same licence-clean sources, same take lines, own
-// canonical + FAQ schema. Pure builder -> unit-testable; writer is thin.
-// ============================================================================
-const LANGUAGE_PAGES = [
-  ["Hindi", "hindi"], ["Tamil", "tamil"], ["Telugu", "telugu"],
-  ["Malayalam", "malayalam"], ["Kannada", "kannada"],
-];
 
 // Shared listing shell for language + week pages (same visual family as the
 // /new-on-ott/ pages). `sections` = [{ h2, items }]; rows link to film pages.
@@ -5179,23 +4452,11 @@ function writeLlmsTxt(dataByCode) {
 // About page lastmod for the sitemap — bump manually when about/index.html changes.
 const ABOUT_LASTMOD = "2026-07-06";
 
-const COUNTRY_PAGE_META = {
-  in: { name: "India", path: "/" },
-  us: { name: "the US", path: "/us/" },
-  uk: { name: "the UK", path: "/uk/" },
-  au: { name: "Australia", path: "/au/" },
-  de: { name: "Germany", path: "/de/" },
-  ae: { name: "the UAE", path: "/ae/" },
-  ca: { name: "Canada", path: "/ca/" },
-  sg: { name: "Singapore", path: "/sg/" },
-};
 
 // English locale conventions per country — grouping ("12,34,567" lakh-style is correct ONLY
 // for India; the US expects "1,234,567") and long-date order ("July 1, 2026" in the US vs
 // "1 July 2026" elsewhere). Germany gets en-GB: the site's language is English, and en-GB's
 // day-first order matches German convention for an English-language page.
-const COUNTRY_LOCALE = { in: "en-IN", us: "en-US", uk: "en-GB", au: "en-AU", de: "en-GB", ae: "en-AE", ca: "en-CA", sg: "en-SG" };
-const localeFor = (code) => COUNTRY_LOCALE[code] || "en-IN";
 // Prose-ready country name ("the US", not the config's "United States") for any cfg.
 const countryNameFor = (cfg) => (COUNTRY_PAGE_META[(cfg && cfg.code) || "in"] || {}).name || (cfg && cfg.name) || "India";
 // "India, US, UK, Australia, Germany, UAE, Canada &amp; Singapore" — generated from the
@@ -5388,6 +4649,32 @@ function buildMoreLinks(code, data = null) {
   return `${langs}${hubs ? " · " + hubs : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${about}<br>Also on FilmyChill: ${others}`;
 }
 
+// ============================================================================
+// writeCountrySurfaces — the ONE definition of what a country's local output is.
+//
+// This sequence used to exist twice: once in main() and once in the PAGES_ONLY path. They
+// drifted, and the drift was silent — a call added to the wrong copy referenced a variable
+// that only existed in the other, threw into a catch, and disabled the browse index on every
+// live run while looking perfectly healthy. Both callers now go through here, so a step
+// added once is a step that runs everywhere.
+//
+// Local only: no network, no API budget. Callers do the fetching and pass the data in.
+// ============================================================================
+function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNTRIES } = {}) {
+  const stamp = new Date(data.generatedAt || Date.now())
+    .toLocaleDateString(localeFor(cfg.code), { day: "numeric", month: "long", year: "numeric" });
+  const step = (name, fn) => {
+    try { fn(); }
+    catch (e) { console.warn(`  ${name} [${cfg.code}] skipped: ${e.message}`); }
+  };
+  if (template) step("country page", () => renderCountryPage(template, cfg, data));
+  step("weekly page", () => writeOttWeekPage(data, cfg, allCountries));
+  step("platform hubs", () => writePlatformHubPages(data, cfg));
+  step("rss feed", () => writeRssFeed(data, cfg));
+  step("due-date pass", () => refreshDuePages(cfg, countryNameFor(cfg)));
+  step("browse index", () => writeBrowseIndex(filmIndexFor(cfg), cfg, stamp));
+}
+
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   const V = streamVocab(cfg);
@@ -5454,13 +4741,8 @@ if (process.env.PAGES_ONLY && require.main === module) {
       if (!fs.existsSync(file)) { console.warn(`  ${file} missing — ${cfg.code} skipped`); continue; }
       const dc = JSON.parse(fs.readFileSync(file, "utf8"));
       assignSlugs(dc);
-      renderCountryPage(template, cfg, dc);
-      writeOttWeekPage(dc, cfg, COUNTRIES); // full hreflang set, same as a real run
-      writeRssFeed(dc, cfg);
-      refreshDuePages(cfg, countryNameFor(cfg)); // date-only, no API needed
-      writePlatformHubPages(dc, cfg);            // rebuilds hubs so hreflang lands locally too
-      writeBrowseIndex(filmIndexFor(cfg), cfg,
-        new Date(dc.generatedAt || Date.now()).toLocaleDateString(localeFor(cfg.code), { day: "numeric", month: "long", year: "numeric" }));
+      // Same sequence the live build runs — one definition, no drift.
+      writeCountrySurfaces(cfg, dc, { template });
     }
     process.exit(0);
   }
@@ -5479,6 +4761,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
 
 // Export pure/helper functions for unit testing (only meaningful when required, not run).
 module.exports = {
+  writeCountrySurfaces,
   syncHreflangClusters, patchHreflang, hreflangBlockFor, filmPageExists,
   buildBrowsePage, writeBrowseIndex, browsePath, BROWSE_PER_PAGE,
   filmIndexFor, relatedFilms, relatedScore,
