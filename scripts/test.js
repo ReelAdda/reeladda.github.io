@@ -2096,6 +2096,57 @@ test("page-copy forms exist in both registers (title-case, sentence-case, nav la
   assert.strictEqual(inV.newOn, "New on OTT");
 });
 
+group("streaming-window archive — the proprietary record");
+test("window is theatrical release to first sighting", () => {
+  assert.strictEqual(U.streamingWindowDays({ rel: "2026-07-01", first: "2026-08-01" }), 31);
+  assert.strictEqual(U.streamingWindowDays({ rel: "2026-08-01", first: "2026-08-01" }), 0);
+});
+test("impossible windows are excluded rather than averaged in", () => {
+  // Streaming BEFORE theatrical is a straight-to-streaming title, not a window.
+  assert.strictEqual(U.streamingWindowDays({ rel: "2026-08-01", first: "2026-07-01" }), null);
+  // A multi-year gap is a catalogue re-listing, not a release window.
+  assert.strictEqual(U.streamingWindowDays({ rel: "2020-01-01", first: "2026-01-01" }), null);
+  assert.strictEqual(U.streamingWindowDays({ rel: null, first: "2026-01-01" }), null);
+});
+test("archive is append-only and idempotent per country+title", () => {
+  const rec = U.historyRecord({ code: "zz", kind: "movie", tmdbId: 999999901, first: "2026-01-01" });
+  assert.strictEqual(rec.c, "zz");
+  assert.strictEqual(rec.k, "movie");
+  assert.ok(rec.seen, "every observation is timestamped");
+});
+test("a median is never published on a group of one or two", () => {
+  const recs = [
+    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-01" },
+    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-11" },
+    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-21" },
+    { c: "in", k: "movie", p: "SonyLIV", lang: "Hindi", rel: "2026-01-01", first: "2026-03-01" },
+  ];
+  const s = U.windowStats(recs);
+  assert.strictEqual(s.measured, 4);
+  assert.ok(s.byPlatform.every((x) => x.n >= 3), "SonyLIV has one film and must not appear");
+  assert.strictEqual(s.byPlatform.find((x) => x.key === "Netflix").median, 41);
+});
+test("CSV carries only measured rows and escapes titles", () => {
+  const csv = U.buildWindowsCsv([
+    { id: 1, k: "movie", t: 'The "Best" Film', c: "in", p: "Netflix", rel: "2026-01-01", first: "2026-02-01" },
+    { id: 2, k: "movie", t: "No dates", c: "in", p: "Netflix", rel: null, first: "2026-02-01" },
+  ]);
+  const lines = csv.trim().split("\n");
+  assert.strictEqual(lines.length, 2, "header + the one measurable row");
+  assert.ok(lines[1].includes('""Best""'), "quotes escaped for CSV");
+});
+test("data page states sample size and refuses to invent a median", () => {
+  const empty = U.buildDataPage([], "26 August 2026");
+  assert.ok(/Not enough measured films yet/.test(empty), "no data -> say so, don't print a number");
+  const withData = U.buildDataPage([
+    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-01" },
+    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-05" },
+    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-09" },
+  ], "26 August 2026");
+  assert.ok(/Films<\/th>/.test(withData), "sample size is published next to every median");
+  assert.ok(/attribution/i.test(withData), "reuse terms are stated");
+});
+
 group("build sequence — one definition, no drift");
 test("both build paths run the same steps", () => {
   // The bug this prevents: a step added to one path and missing from the other, failing
