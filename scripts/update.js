@@ -22,6 +22,10 @@ const {
 } = require("./lib/core.js");
 
 const {
+  HISTORY_FILE, appendHistory, readHistory, historyRecord, streamingWindowDays, windowStats,
+} = require("./lib/history.js");
+
+const {
   cardFontFiles,
   cardPaths,
   cardStatus,
@@ -2246,6 +2250,17 @@ async function main() {
     // First-seen tracking: this title was observed WITH a provider today. ottSince is the
     // (approximate) platform-arrival date; ottFreshDate is what the gate + recency decay use.
     const firstSeen = recordOttSeen(seenCountry, `${item.kind}:${item.tmdbId}`, item.freshDate, todayStr, seenColdStart);
+    // Mirror the sighting into the append-only archive (see lib/history.js). ott-seen.json
+    // prunes after 180 days because it is a freshness signal; this never prunes, because it
+    // is the record. Written for EVERY candidate observed with a provider — not only the ones
+    // that win a slot on the page — which is the difference between a sample and a census.
+    try {
+      appendHistory(historyRecord({
+        code: cfg.code, kind: item.kind, tmdbId: item.tmdbId, title: item.title,
+        platform: extra.providers && extra.providers[0], providers: extra.providers,
+        first: firstSeen, theatrical: item.released, language: item.language, genre: item.genre,
+      }));
+    } catch (e) { /* archive is additive; never let it break a build */ }
     const { effective, isArrival } = ottArrival(item.freshDate, firstSeen);
     item.ottSince = firstSeen;
     item.ottFreshDate = effective;
@@ -2547,6 +2562,24 @@ async function main() {
     builtCountries.push(cfg);
   }
 
+  // Watchlist for the 30-minute probe (scripts/probe.js): films that have opened in theatres
+  // but have not yet been observed with a provider anywhere. The probe polls only these, so
+  // its API cost stays bounded no matter how large the archive grows.
+  try {
+    const archived = new Set(readHistory().map((r) => `${r.c}:${r.k}:${r.id}`));
+    const watch = [];
+    for (const [code, d] of Object.entries(dataByCode)) {
+      for (const it of [...(d.theatres || []), ...(d.comingSoon || [])]) {
+        if (!it.tmdbId || it.kind === "tv") continue;
+        if (archived.has(`${code}:movie:${it.tmdbId}`)) continue;
+        watch.push({ code, kind: "movie", tmdbId: it.tmdbId, title: it.title,
+          released: it.released || null, language: it.language || null, genre: it.genre || null });
+      }
+    }
+    fs.writeFileSync("ott-watch.json", JSON.stringify(watch, null, 1));
+    console.log(`  probe watchlist: ${watch.length} title(s) awaiting a streaming sighting`);
+  } catch (e) { console.warn(`  watchlist skipped: ${e.message}`); }
+
   // Persist first-seen tracking (see ott-seen.json docs) — every country has now recorded
   // today's sightings; the workflow commits this file so tomorrow's run remembers them.
   fs.writeFileSync(OTT_SEEN_FILE, JSON.stringify(loadOttSeen(), null, 1));
@@ -2664,6 +2697,17 @@ function ytIdOf(url) {
 }
 
 
+
+let _filmHistory = null;
+const FILM_HISTORY = {
+  get(key) {
+    if (!_filmHistory) {
+      _filmHistory = new Map();
+      for (const r of readHistory()) _filmHistory.set(`${r.c}:${r.k}:${r.id}`, r);
+    }
+    return _filmHistory.get(key);
+  },
+};
 
 function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const e = escHtml;
@@ -2852,6 +2896,8 @@ ${(() => {
   .btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
   footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
   .vprose { font-size:15px; line-height:1.7; margin-top:8px; }
+  .fcdata { font-size:14px; line-height:1.6; margin-top:10px; padding:10px 12px; border-radius:8px;
+            background:rgba(64,56,199,.07); border-left:3px solid var(--indigo); }
   /* Fit line: same weight as body copy, warm card so it reads as the site's own voice
      rather than another metadata row. */
   .whywatch { font-size:15px; line-height:1.7; background:var(--bg); border-left:3px solid var(--marigold);
@@ -2901,6 +2947,16 @@ ${(() => {
   ${verdictProse ? `<h2>The verdict</h2><p class="vprose">${e(verdictProse)}</p>` : ""}
   ${item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
   ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
+  ${(() => {
+    // The one fact on this page no competitor can reproduce: measured from our own archive
+    // (lib/history.js), not from any API. TMDB stores no history of provider changes.
+    const rec = FILM_HISTORY.get(`${code}:${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}`);
+    const days = rec ? streamingWindowDays(rec) : null;
+    if (days == null) return "";
+    return `<p class="fcdata"><b>FilmyChill data:</b> reached streaming in ${e(country)} `
+      + `${days === 0 ? "the same day it opened" : `${days} day${days === 1 ? "" : "s"} after its theatrical release`}`
+      + `${rec.p ? `, on ${e(rec.p)}` : ""}.</p>`;
+  })()}
   ${(() => {
     // Fit line (see whyWatch). Sits after the reception blocks and before the synopsis:
     // by this point the reader knows if it's good — this answers whether it's for them.
@@ -4635,6 +4691,7 @@ function buildMoreLinks(code, data = null) {
   const about = `<a href="/about/">About FilmyChill</a>`;
   // The browse index has to be linked from everywhere, or it becomes another orphan itself.
   const browse = `<a href="${browsePath(code, 1)}">All films</a>`;
+  const dataLink = `<a href="/data/">Streaming-window data</a>`;
   // Crawlable links to the other markets. The country switcher is client-side, so before
   // this the ONLY paths to /us/, /uk/ etc. were the sitemap and hreflang — meaning 958 film
   // pages, seven browse indexes and every hub in those subtrees hung off homepages with zero
@@ -4644,9 +4701,9 @@ function buildMoreLinks(code, data = null) {
     return `<a href="${meta.path}">${escHtml(meta.name.replace(/^the /, ""))}</a>`;
   }).join(" · ");
   const hubs = data ? hubsFor(data).map((h) => `<a href="${code === "in" ? "" : "/" + code}/new-on-${h.slug}/">New on ${escHtml(h.name)}</a>`).join(" · ") : "";
-  if (code !== "in") return `${hubs ? hubs + " · " : ""}${browse} · ${about}<br>Also on FilmyChill: ${others}`;
+  if (code !== "in") return `${hubs ? hubs + " · " : ""}${browse} · ${dataLink} · ${about}<br>Also on FilmyChill: ${others}`;
   const langs = LANGUAGE_PAGES.map(([name, slug]) => `<a href="/${slug}/">${name}</a>`).join(" · ");
-  return `${langs}${hubs ? " · " + hubs : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${about}<br>Also on FilmyChill: ${others}`;
+  return `${langs}${hubs ? " · " + hubs : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${dataLink} · ${about}<br>Also on FilmyChill: ${others}`;
 }
 
 // ============================================================================
@@ -4660,6 +4717,89 @@ function buildMoreLinks(code, data = null) {
 //
 // Local only: no network, no API budget. Callers do the fetching and pass the data in.
 // ============================================================================
+// ============================================================================
+// /data/ — the citable page.
+//
+// A dataset nobody can see is not a moat. This publishes what the archive measures, states
+// the method plainly, and offers the raw CSV under attribution — the three things that make
+// a number quotable by someone writing an article. Deliberately shows the sample size next
+// to every median: a median of three films is not a finding, and saying so is what makes
+// the rest believable.
+// ============================================================================
+function buildDataPage(records, updatedHuman) {
+  const e = escHtml;
+  const s = windowStats(records);
+  const row = (r) => `<tr><td>${e(r.key)}</td><td class="n">${r.median}</td><td class="n">${r.n}</td></tr>`;
+  const table = (title, rows) => !rows.length ? "" :
+    `<h2>${e(title)}</h2><table><thead><tr><th>${title.includes("language") ? "Language" : "Platform"}</th>`
+    + `<th class="n">Median days</th><th class="n">Films</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>`;
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How long films take to reach streaming — FilmyChill data</title>
+<meta name="description" content="How many days films take to go from theatrical release to streaming, measured daily by FilmyChill across ${e(String(s.total))} titles in eight countries. Free to use with attribution.">
+<link rel="canonical" href="https://filmychill.com/data/">
+<meta name="robots" content="max-image-preview:large">
+<meta property="og:title" content="How long films take to reach streaming — FilmyChill data">
+<meta property="og:url" content="https://filmychill.com/data/">
+<style>
+  body { font-family: system-ui,-apple-system,sans-serif; max-width: 780px; margin: 0 auto;
+         padding: 26px 18px 70px; background: #FFF7EC; color: #1A1633; line-height: 1.65; }
+  h1 { font-size: 28px; margin-bottom: 6px; } h2 { font-size: 19px; margin-top: 32px; }
+  .sub { color: #6B6890; font-size: 14px; }
+  .big { font-size: 46px; font-weight: 800; color: #4038C7; margin: 18px 0 2px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 15px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #E7DFD0; }
+  th { font-size: 13px; color: #6B6890; font-weight: 600; } .n { text-align: right; }
+  .method { background: #fff; border-radius: 10px; padding: 14px 16px; margin-top: 26px; font-size: 14px; }
+  a { color: #4038C7; } code { background: #fff; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #E7DFD0; font-size: 13px; color: #6B6890; }
+</style></head><body>
+  <h1>How long does a film take to reach streaming?</h1>
+  <div class="sub">Measured by FilmyChill, updated ${e(updatedHuman)} · ${e(String(s.total))} titles tracked across eight countries</div>
+
+  ${s.overall != null ? `<div class="big">${s.overall} days</div>
+  <div class="sub">median from theatrical release to first streaming sighting, across ${e(String(s.measured))} films with both dates known</div>` :
+  `<p>Not enough measured films yet to publish a median. The archive is still filling.</p>`}
+
+  ${table("Median window by language", s.byLanguage)}
+  ${table("Median window by platform", s.byPlatform)}
+
+  <div class="method">
+    <b>Method.</b> FilmyChill checks streaming availability every day in eight countries and records the
+    first date each film appears with a provider. The window is that date minus the film's theatrical
+    release date. Straight-to-streaming titles and gaps over two years are excluded, since neither is a
+    theatrical window. Groups with fewer than three films are not shown. This is a record of when a film
+    became <i>visible to us</i>, which is normally the day it drops but is not a studio announcement.
+  </div>
+
+  <h2>Use the data</h2>
+  <p>The full record is available as <a href="/data/streaming-windows.csv">CSV</a>, free to use for any
+  purpose including commercially, with attribution to FilmyChill and a link to this page. No API key,
+  no signup. If you're writing something and want a cut we don't publish here, ask.</p>
+
+  <footer><a href="/">← FilmyChill</a> · <a href="/about/">About</a></footer>
+</body></html>`;
+}
+
+function buildWindowsCsv(records) {
+  const rows = [["tmdb_id", "kind", "title", "country", "platform", "theatrical_release", "first_seen_streaming", "window_days"]];
+  for (const r of records) {
+    const d = streamingWindowDays(r);
+    if (d == null) continue;
+    rows.push([r.id, r.k, `"${String(r.t || "").replace(/"/g, '""')}"`, r.c, `"${String(r.p || "").replace(/"/g, '""')}"`, r.rel, r.first, d]);
+  }
+  return rows.map((r) => r.join(",")).join("\n") + "\n";
+}
+
+function writeDataPage(updatedHuman) {
+  const records = readHistory();
+  fs.mkdirSync("data", { recursive: true });
+  fs.writeFileSync("data/index.html", buildDataPage(records, updatedHuman));
+  fs.writeFileSync("data/streaming-windows.csv", buildWindowsCsv(records));
+  const s = windowStats(records);
+  console.log(`  /data/: ${s.measured} measured window(s), median ${s.overall == null ? "n/a" : s.overall + "d"}`);
+}
+
 function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNTRIES } = {}) {
   const stamp = new Date(data.generatedAt || Date.now())
     .toLocaleDateString(localeFor(cfg.code), { day: "numeric", month: "long", year: "numeric" });
@@ -4673,6 +4813,7 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
   step("rss feed", () => writeRssFeed(data, cfg));
   step("due-date pass", () => refreshDuePages(cfg, countryNameFor(cfg)));
   step("browse index", () => writeBrowseIndex(filmIndexFor(cfg), cfg, stamp));
+  if (cfg.code === "in") step("data page", () => writeDataPage(stamp)); // site-wide, built once
 }
 
 function renderCountryPage(templateHtml, cfg, data) {
@@ -4761,6 +4902,8 @@ if (process.env.PAGES_ONLY && require.main === module) {
 
 // Export pure/helper functions for unit testing (only meaningful when required, not run).
 module.exports = {
+  buildDataPage, buildWindowsCsv, writeDataPage,
+  appendHistory, readHistory, historyRecord, streamingWindowDays, windowStats,
   writeCountrySurfaces,
   syncHreflangClusters, patchHreflang, hreflangBlockFor, filmPageExists,
   buildBrowsePage, writeBrowseIndex, browsePath, BROWSE_PER_PAGE,
@@ -4804,3 +4947,4 @@ module.exports = {
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
+
