@@ -1,4 +1,3 @@
-
 // ============================================================================
 // core.js — primitives shared by every other module: the country table, HTML
 // escaping, date/runtime formatting and film URL construction.
