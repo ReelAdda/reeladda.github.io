@@ -1,0 +1,48 @@
+# High-frequency arrival watcher. Deliberately NOT part of the site build:
+# it regenerates no pages and touches only the archive, so it can run often
+# without churning the repo. See scripts/probe.js.
+name: OTT arrival probe
+
+on:
+  schedule:
+    # Off-peak minutes on purpose: GitHub delays scheduled jobs at :00 and :30
+    # by hours. Twice an hour is enough to timestamp a drop to ~30 minutes.
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+
+# Never let two probes — or a probe and a site build — race on the same files.
+concurrency:
+  group: filmychill-writes
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Probe for streaming arrivals
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          PROBE_BUDGET: "40"
+        run: node scripts/probe.js
+
+      - name: Commit new observations
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          [ -f ott-history.jsonl ] && git add ott-history.jsonl || true
+          if git diff --staged --quiet; then
+            echo "no new arrivals"
+          else
+            git commit -m "OTT arrival probe: $(date -u +%Y-%m-%dT%H:%M)"
+            # The site build commits to the same branch; rebase rather than fail.
+            git pull --rebase --autostash origin main || true
+            git push
+          fi
