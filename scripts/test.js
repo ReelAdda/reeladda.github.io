@@ -2097,6 +2097,124 @@ test("page-copy forms exist in both registers (title-case, sentence-case, nav la
   assert.strictEqual(inV.newOn, "New on OTT");
 });
 
+group("crawl paths — every subtree reachable by a crawler");
+test("footer links to the other country homepages", () => {
+  const more = U.buildMoreLinks("in", null);
+  for (const c of ["/us/", "/uk/", "/au/", "/de/", "/ae/", "/ca/", "/sg/"]) {
+    assert.ok(more.includes(`href="${c}"`), `no crawlable link to ${c}`);
+  }
+  assert.ok(!/href="\/in\/"/.test(more), "never links a country to itself");
+});
+test("each country's footer points at the other seven, not its own", () => {
+  const us = U.buildMoreLinks("us", null);
+  assert.ok(us.includes('href="/"'), "must link back to the India root");
+  assert.ok(!us.includes('href="/us/"'));
+  assert.ok(us.includes('href="/uk/"'));
+});
+test("footer reaches that country's own browse index", () => {
+  assert.ok(U.buildMoreLinks("in", null).includes('href="/films/"'));
+  assert.ok(U.buildMoreLinks("us", null).includes('href="/us/films/"'));
+});
+
+group("hreflang clusters — regional variants, not duplicates");
+test("every member is listed, including the page itself", () => {
+  const b = U.hreflangBlockFor(["in", "uk", "ca"], "dastaar");
+  for (const tag of ["en-IN", "en-GB", "en-CA", "x-default"]) assert.ok(b.includes(tag), `missing ${tag}`);
+  assert.strictEqual((b.match(/rel="alternate"/g) || []).length, 4);
+});
+test("a single-country film gets no alternates at all", () => {
+  assert.strictEqual(U.hreflangBlockFor(["in"], "solo"), "");
+});
+test("members are emitted in a stable order so pages don't churn", () => {
+  assert.strictEqual(U.hreflangBlockFor(["ca", "uk", "in"], "x"), U.hreflangBlockFor(["in", "ca", "uk"], "x"));
+});
+test("patch repairs an incomplete set on a frozen page", () => {
+  const page = `<link rel="canonical" href="https://filmychill.com/uk/movie/d.html">
+<link rel="alternate" hreflang="en-CA" href="https://filmychill.com/ca/movie/d.html"/>
+<link rel="alternate" hreflang="x-default" href="https://filmychill.com/movie/d.html"/>
+<title>x</title>`;
+  const { html, changed } = U.patchHreflang(page, ["in", "uk", "ca"], "d");
+  assert.ok(changed);
+  assert.ok(html.includes('hreflang="en-GB"'), "the page must point at itself");
+  assert.ok(html.includes('hreflang="en-IN"'), "and at every other member");
+  assert.ok(html.includes("<title>x</title>"), "nothing else may be touched");
+});
+test("patch inserts a set where none existed", () => {
+  const page = `<link rel="canonical" href="https://filmychill.com/movie/d.html">\n<title>x</title>`;
+  const { html, changed } = U.patchHreflang(page, ["in", "us"], "d");
+  assert.ok(changed && html.includes('hreflang="en-US"') && html.includes('hreflang="en-IN"'));
+});
+test("patch strips a stale set when the film is now single-country", () => {
+  const page = `<link rel="canonical" href="https://filmychill.com/movie/d.html">
+<link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/movie/d.html"/>
+<title>x</title>`;
+  const { html, changed } = U.patchHreflang(page, ["in"], "d");
+  assert.ok(changed && !html.includes("alternate"));
+});
+test("patch is idempotent — a correct page is left alone", () => {
+  let page = `<link rel="canonical" href="https://filmychill.com/movie/d.html">\n<title>x</title>`;
+  page = U.patchHreflang(page, ["in", "us"], "d").html;
+  assert.strictEqual(U.patchHreflang(page, ["in", "us"], "d").changed, false);
+});
+test("cluster membership reads the filesystem, not the current week", () => {
+  const src = require("fs").readFileSync("scripts/update.js", "utf8");
+  assert.ok(/filmPageExists\(c\.code, item\.slug\)/.test(src),
+    "a film covered in different weeks per country must still form one cluster");
+});
+
+group("internal linking — orphaned pages");
+test("film index recovers metadata from pages already on disk", () => {
+  const idx = U.filmIndexFor({ code: "in" });
+  assert.ok(idx.length > 20, `expected a real index, got ${idx.length}`);
+  const one = idx.find((f) => f.title && f.genre && f.language);
+  assert.ok(one, "entries must carry title, genre and language for matching");
+  assert.ok(one.slug && !/\.html$/.test(one.slug));
+});
+test("related films are scored by language, then genre, then recency", () => {
+  const item = { slug: "a", title: "A", language: "Tamil", genre: "Action / Drama", released: "2026-01-01", kind: "movie" };
+  const sameLang = { slug: "b", title: "B", language: "Tamil", genre: "Comedy", released: "2026-01-01", kind: "movie" };
+  const sameGenre = { slug: "c", title: "C", language: "Korean", genre: "Action / Drama", released: "2026-01-01", kind: "movie" };
+  const neither = { slug: "d", title: "D", language: "Korean", genre: "Romance", released: "2011-01-01", kind: "tv" };
+  assert.ok(U.relatedScore(item, sameLang) > U.relatedScore(item, sameGenre));
+  assert.ok(U.relatedScore(item, sameGenre) > U.relatedScore(item, neither));
+  assert.strictEqual(U.relatedScore(item, item), -1, "never recommends itself");
+});
+test("every related pick resolves to a page that exists", () => {
+  const idx = U.filmIndexFor({ code: "in" });
+  const slugs = new Set(idx.map((f) => f.slug));
+  for (const seed of idx.slice(0, 25)) {
+    for (const r of U.relatedFilms(seed, idx, 6)) {
+      assert.ok(slugs.has(r.slug), `${r.slug} has no page`);
+      assert.notStrictEqual(r.slug, seed.slug);
+    }
+  }
+});
+test("links spread across the archive instead of funnelling into a few pages", () => {
+  // The whole point: if every page linked to the same top 6, the orphans stay orphaned.
+  const idx = U.filmIndexFor({ code: "in" });
+  if (idx.length < 40) return;
+  const hit = new Set();
+  for (const seed of idx.slice(0, 40)) for (const r of U.relatedFilms(seed, idx, 6)) hit.add(r.slug);
+  assert.ok(hit.size > 30, `40 pages should reach many distinct targets, reached ${hit.size}`);
+});
+test("browse index paginates and links every page to every other page", () => {
+  const idx = Array.from({ length: 300 }, (_, i) => ({ slug: `f${i}`, title: `Film ${i}`, language: "Hindi", released: "2026-01-01", kind: "movie" }));
+  const html = U.buildBrowsePage(idx, { code: "in", name: "India" }, 2, 3, "26 August 2026");
+  assert.ok(/page 2 of 3/.test(html));
+  assert.ok(/href="\/films\/"/.test(html) && /href="\/films\/3\/"/.test(html), "flat pagination, not just prev/next");
+  assert.strictEqual((html.match(/href="\/movie\//g) || []).length, U.BROWSE_PER_PAGE);
+});
+test("browse index is reachable from the site footer", () => {
+  const src = require("fs").readFileSync("scripts/update.js", "utf8");
+  assert.ok(/const browse = `<a href="\$\{browsePath\(code, 1\)\}">All films<\/a>`/.test(src),
+    "an unlinked browse index would just be another orphan");
+});
+test("browse paths are country-scoped", () => {
+  assert.strictEqual(U.browsePath("in", 1), "/films/");
+  assert.strictEqual(U.browsePath("in", 3), "/films/3/");
+  assert.strictEqual(U.browsePath("us", 2), "/us/films/2/");
+});
+
 group("share cards — branded og:image");
 test("card carries verdict, score, title and brand", () => {
   const svg = U.shareCardSvg({ slug: "dc", title: "DC", verdict: "Must watch", rating: 8.0, votes: 13,
