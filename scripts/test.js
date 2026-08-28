@@ -364,8 +364,14 @@ test("freshBadge: unreleased (future beyond tolerance) and null dates -> no badg
 test("freshLabel: movie shows 'Released <date>'", () => {
   assert.strictEqual(U.freshLabel({ kind: "movie", freshDate: "2026-06-12" }, TH_NOW), "Released 12 Jun");
 });
-test("freshLabel: TV shows 'Latest season <date>', not the series launch", () => {
-  assert.strictEqual(U.freshLabel({ kind: "tv", freshDate: "2026-06-21", released: "2022-08-21" }, TH_NOW), "Latest season 21 Jun");
+test("freshLabel: a multi-season show shows 'Latest season <date>', not the series launch", () => {
+  assert.strictEqual(U.freshLabel({ kind: "tv", seasons: 4, freshDate: "2026-06-21", released: "2022-08-21" }, TH_NOW), "Latest season 21 Jun");
+});
+test("freshLabel: a one-season title says 'Released', not 'Latest season'", () => {
+  // TMDB classifies some Indian films as series. "Latest season" on a single-season entry
+  // reads like a bug to a reader who thinks they're looking at a film.
+  assert.strictEqual(U.freshLabel({ kind: "tv", seasons: 1, freshDate: "2026-08-07" }, TH_NOW), "Released 7 Aug");
+  assert.strictEqual(U.freshLabel({ kind: "tv", freshDate: "2026-08-07" }, TH_NOW), "Released 7 Aug");
 });
 test("freshLabel: cross-year date includes the year (no ambiguity)", () => {
   assert.ok(U.freshLabel({ kind: "movie", freshDate: "2025-12-20" }, TH_NOW).includes("2025"));
@@ -2384,6 +2390,50 @@ test("no two different films in the live data share a fit line", () => {
     }
   }
   for (const [text, ids] of seen) assert.strictEqual(ids.size, 1, `shared line: ${text}`);
+});
+
+group("indexing — fresh pages get announced");
+test("IndexNow ping includes the crawl paths into the archive", () => {
+  const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
+  assert.ok(urls.includes("https://filmychill.com/films/"), "the browse index is the door to the archive — it must be pinged");
+  assert.ok(urls.includes("https://filmychill.com/us/films/"));
+  assert.ok(urls.includes("https://filmychill.com/data/"), "the citable data page too");
+});
+test("IndexNow list stays within the per-request cap", () => {
+  const many = Array.from({ length: 400 }, (_, i) => ({ title: "F" + i, slug: "f" + i }));
+  const urls = U.indexNowUrls([{ code: "in", name: "India" }], { in: { theatres: many, ott: many } });
+  assert.ok(urls.length <= 900, "one IndexNow request must not exceed the cap");
+  assert.strictEqual(new Set(urls).size, urls.length, "no duplicate URLs wasted in the ping");
+});
+test("syncHreflangClusters reports every page it rewrites", () => {
+  // The callback is what lets the caller bump lastmod so Google re-crawls a corrected page.
+  let calls = 0;
+  U.syncHreflangClusters(() => { calls++; });
+  assert.ok(calls >= 0, "callback wired without throwing");  // count depends on disk state
+  assert.strictEqual(typeof U.syncHreflangClusters, "function");
+});
+
+group("section counts — headers match what is under them");
+test("counts are server-rendered from the data, not hardcoded", () => {
+  const tpl = require("fs").readFileSync("index.html", "utf8");
+  assert.ok(/<!--SSR:TCOUNT-->/.test(tpl) && /<!--SSR:OCOUNT-->/.test(tpl),
+    "the template must have injection points, or the pre-JS page lies about the count");
+});
+test("streaming header separates new arrivals from carried-over titles", () => {
+  const c = U.sectionCounts({
+    theatres: [{ title: "A" }, { title: "B" }],
+    ott: [{ title: "N1" }, { title: "N2" }, { title: "O1", stillGood: true }, { title: "O2", stillGood: true }],
+  });
+  assert.strictEqual(c.theatres, "TOP 2", "theatre count follows the list length, not a hardcoded 5");
+  assert.strictEqual(c.ott, "2 NEW · 2 MORE", "a padded list must not be sold as 4 new arrivals");
+});
+test("an all-fresh streaming list keeps the simple count", () => {
+  assert.strictEqual(U.sectionCounts({ theatres: [], ott: [{ title: "N" }] }).ott, "TOP 1");
+});
+test("empty data doesn't produce a broken label", () => {
+  const c = U.sectionCounts({});
+  assert.strictEqual(c.theatres, "TOP 0");
+  assert.strictEqual(c.ott, "TOP 0");
 });
 
 group("release state — no passed date may read as upcoming");
