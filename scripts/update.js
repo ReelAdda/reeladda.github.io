@@ -536,7 +536,11 @@ function freshLabel(item, now = Date.now(), locale = "en-IN") {
   const d = item.kind === "tv" ? (item.freshDate || item.released) : (item.released || item.freshDate);
   if (!d) return "";
   if (item.kind === "tv" && (now - new Date(d)) > 400 * 864e5) return ""; // a years-old season date reads as a bug next to a "New on ..." badge
-  return (item.kind === "tv" ? "Latest season " : "Released ") + fmtDateShort(d, now, locale);
+  // "Latest season 7 Aug" on a one-season show reads like a mistake — and TMDB classifies
+  // some Indian films as series, so this fires more often than you'd think. Only claim a
+  // "latest season" when there is more than one.
+  const tvMulti = item.kind === "tv" && (item.seasons || 0) > 1;
+  return (tvMulti ? "Latest season " : "Released ") + fmtDateShort(d, now, locale);
 }
 
 // A badge on 6 of 7 cards is decoration, not signal. Keep "Trending" only on the top
@@ -2650,8 +2654,14 @@ async function main() {
   }
   // All countries are built by now, so the filesystem finally shows every cluster's true
   // membership — repair them in one pass before the sitemap is written.
-  try { syncHreflangClusters(); }
-  catch (e) { console.warn(`  hreflang sync skipped: ${e.message}`); }
+  try {
+    // When the sync rewrites a frozen page, bump its lastmod so the sitemap advertises a
+    // fresh date and Google re-crawls it — otherwise a corrected hreflang cluster ships
+    // with a months-old date and is never re-read.
+    syncHreflangClusters((code, slug) => {
+      if (pagesManifest[code] && pagesManifest[code][slug]) pagesManifest[code][slug].last = todayStr;
+    });
+  } catch (e) { console.warn(`  hreflang sync skipped: ${e.message}`); }
   fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
 
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
@@ -3131,7 +3141,9 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   // pages teaches crawlers to distrust the whole sitemap's lastmod signal.
   const filmLastmod = (code, slug) => {
     const e = pagesManifest && pagesManifest[code] && pagesManifest[code][slug];
-    return e ? (e.archivedOn || e.last || today) : today;
+    // Prefer the most recent touch: a page re-edited after archiving (hreflang fix, due-date
+    // rewrite, streaming arrival) should carry the EDIT date, not its original archive date.
+    return e ? (e.last || e.archivedOn || today) : today;
   };
   const pathFor = (code) => (code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`);
   const homeAlts = countries.map((c) =>
@@ -4360,9 +4372,13 @@ function writeWeekPage(data) {
 // workflow again. The key is public by design — IndexNow proves ownership via the
 // matching KEY.txt served from the repo root, not by keeping the key secret.
 function indexNowUrls(builtCountries, dataByCode = {}) {
-  const urls = ["https://filmychill.com/", "https://filmychill.com/new-on-ott/", "https://filmychill.com/llms-full.txt"];
+  const urls = ["https://filmychill.com/", "https://filmychill.com/new-on-ott/",
+    "https://filmychill.com/data/", "https://filmychill.com/llms-full.txt"];
   for (const cfg of builtCountries) {
     if (cfg.code !== "in") urls.push(`https://filmychill.com/${cfg.code}/`, `https://filmychill.com/${cfg.code}/new-on-ott/`);
+    // Browse index (page 1 per country): the crawl path into the archive. Announcing it on
+    // every run keeps the door Google walks through freshly stamped.
+    urls.push(`https://filmychill.com${browsePath(cfg.code, 1)}`);
     const d = dataByCode[cfg.code];
     if (!d) continue;
     for (const h of hubsFor(d)) urls.push(hubUrl(cfg.code, h.slug));
@@ -4816,6 +4832,18 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
   if (cfg.code === "in") step("data page", () => writeDataPage(stamp)); // site-wide, built once
 }
 
+// Section header labels. Pure, so the honesty rule is testable: a streaming list padded
+// with carried-over titles must not be sold as N new arrivals.
+function sectionCounts(data) {
+  const ott = (data && data.ott) || [];
+  const fresh = ott.filter((x) => !x.stillGood).length;
+  const older = ott.length - fresh;
+  return {
+    theatres: `TOP ${((data && data.theatres) || []).length}`,
+    ott: older ? `${fresh} NEW · ${older} MORE` : `TOP ${ott.length}`,
+  };
+}
+
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   const V = streamVocab(cfg);
@@ -4839,6 +4867,13 @@ function renderCountryPage(templateHtml, cfg, data) {
   // Re-derived at render, not just at fetch: the committed data file can be a day old by the
   // time a page is rebuilt, and a passed date must never render inside "Coming soon".
   html = replaceBetween(html, "SOON", normalizeUpcoming(data.comingSoon).map((x) => ssrSoonCard(x, cfg.code)).join(""));
+  // Counts were hardcoded "TOP 5" / "TOP 10" in the template while the sections rendered
+  // whatever the week produced — the theatre header said 5 above seven films. The client
+  // corrected it after hydration, but the server-rendered page (what Google reads, and what
+  // shows before JS runs) was wrong. Render them from the data instead.
+  const counts = sectionCounts(data);
+  html = replaceBetween(html, "TCOUNT", counts.theatres);
+  html = replaceBetween(html, "OCOUNT", counts.ott);
   // The SSR markers wrap the ENTIRE <script> element (never sit inside it): HTML
   // comments are NOT stripped inside <script>, so markers inside the tag made the
   // JSON-LD start with "<!--" — a syntax error to Google's structured-data parser.
@@ -4902,6 +4937,8 @@ if (process.env.PAGES_ONLY && require.main === module) {
 
 // Export pure/helper functions for unit testing (only meaningful when required, not run).
 module.exports = {
+  indexNowUrls,
+  sectionCounts,
   buildDataPage, buildWindowsCsv, writeDataPage,
   appendHistory, readHistory, historyRecord, streamingWindowDays, windowStats,
   writeCountrySurfaces,
