@@ -223,7 +223,7 @@ function patchHreflang(html, codes, slug) {
   return { html: html.replace(canon[0], `${canon[0]}\n${block}`), changed: true };
 }
 
-function syncHreflangClusters() {
+function syncHreflangClusters(onChange = null) {
   const bySlug = new Map();
   for (const c of COUNTRIES) {
     const dir = filmPageDir(c.code);
@@ -243,7 +243,7 @@ function syncHreflangClusters() {
       let html;
       try { html = fs.readFileSync(path, "utf8"); } catch { continue; }
       const { html: out, changed } = patchHreflang(html, codes, slug);
-      if (changed) { fs.writeFileSync(path, out); fixed++; }
+      if (changed) { fs.writeFileSync(path, out); fixed++; if (onChange) onChange(code, slug); }
     }
   }
   console.log(`  hreflang sync: ${clusters} multi-country cluster(s), ${fixed} page(s) corrected`);
