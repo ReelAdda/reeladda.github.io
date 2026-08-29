@@ -2392,6 +2392,43 @@ test("no two different films in the live data share a fit line", () => {
   for (const [text, ids] of seen) assert.strictEqual(ids.size, 1, `shared line: ${text}`);
 });
 
+group("embeddable widget — the backlink mechanism");
+test("widget shows this week's picks, freshest first, capped", () => {
+  const items = U.embedItems({ ott: [
+    { title: "New1", slug: "n1" }, { title: "New2", slug: "n2" },
+    { title: "Old1", slug: "o1", stillGood: true }, { title: "Old2", slug: "o2", stillGood: true },
+    { title: "New3", slug: "n3" }, { title: "New4", slug: "n4" }, { title: "New5", slug: "n5" },
+    { title: "New6", slug: "n6" }, { title: "New7", slug: "n7" },
+  ] }, 6);
+  assert.strictEqual(items.length, 6, "capped so it stays small on someone else's page");
+  assert.ok(!items.some((x) => x.stillGood), "fresh titles fill the slots before carried-over ones");
+});
+test("every widget link is a dofollow backlink that opens safely off-site", () => {
+  const html = U.buildEmbedPage({ ott: [{ title: "A Film", slug: "a-film", platform: "Netflix", language: "Tamil" }] }, { code: "in", name: "India" }, "28 August 2026");
+  // The whole point is the link back — it must be present, absolute, and not nofollow.
+  assert.ok(/href="https:\/\/filmychill\.com\/movie\/a-film\.html"/.test(html));
+  assert.ok(!/rel="[^"]*nofollow/.test(html), "a nofollow link would defeat the purpose");
+  assert.ok(/rel="noopener"/.test(html), "off-site links opened with target=_blank need noopener");
+  assert.ok(/filmychill\.com/.test(html), "the widget must carry the brand back to the host site");
+});
+test("widget is noindex so it can't compete with real pages", () => {
+  const html = U.buildEmbedPage({ ott: [] }, { code: "in", name: "India" }, "x");
+  assert.ok(/<meta name="robots" content="noindex">/.test(html),
+    "a near-duplicate widget page indexed would split ranking signal");
+});
+test("no unearned verdict or score leaks onto a third-party site", () => {
+  const html = U.buildEmbedPage({ ott: [
+    { title: "Fresh", slug: "f", platform: "Netflix", verdict: "Just released — verdict soon", rating: 9.9, votes: 3 },
+  ] }, { code: "in", name: "India" }, "x");
+  assert.ok(!/verdict soon/.test(html), "provisional verdicts must not appear on someone else's page");
+  assert.ok(!/9\.9/.test(html), "a score on 3 votes must not travel off-site");
+});
+test("instructions page carries a copyable iframe snippet", () => {
+  const html = U.buildEmbedInstructions();
+  assert.ok(/&lt;iframe/.test(html), "the snippet is shown escaped for copying");
+  assert.ok(/embed\/week\//.test(html));
+});
+
 group("indexing — fresh pages get announced");
 test("IndexNow ping includes the crawl paths into the archive", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});

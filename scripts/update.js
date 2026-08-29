@@ -25,6 +25,8 @@ const {
   HISTORY_FILE, appendHistory, readHistory, historyRecord, streamingWindowDays, windowStats,
 } = require("./lib/history.js");
 
+const { writeEmbed, buildEmbedPage, buildEmbedInstructions, embedItems } = require("./lib/embed.js");
+
 const {
   cardFontFiles,
   cardPaths,
@@ -3233,8 +3235,12 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   // It refreshes whenever the archive grows, hence changefreq weekly.
   const dataUrls = fs.existsSync("data/index.html")
     ? [`  <url><loc>https://filmychill.com/data/</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>`] : [];
+  // The /embed/ instructions page is indexable (people should find it); the widget pages
+  // under /embed/week/ are noindex, so they're intentionally NOT listed here.
+  const embedUrls = fs.existsSync("embed/index.html")
+    ? [`  <url><loc>https://filmychill.com/embed/</loc><lastmod>${today}</lastmod><priority>0.4</priority></url>`] : [];
   fs.writeFileSync("sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...browseUrls, ...dataUrls, ...weekUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
   console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${browseUrls.length} browse${dataUrls.length ? " + data" : ""} + ${weekUrls.length} week + ${filmCount} film pages.`);
 }
 
@@ -4713,6 +4719,7 @@ function buildMoreLinks(code, data = null) {
   // The browse index has to be linked from everywhere, or it becomes another orphan itself.
   const browse = `<a href="${browsePath(code, 1)}">All films</a>`;
   const dataLink = `<a href="/data/">Streaming-window data</a>`;
+  const embed = code === "in" ? ` · <a href="/embed/">Embed our widget</a>` : "";
   // Crawlable links to the other markets. The country switcher is client-side, so before
   // this the ONLY paths to /us/, /uk/ etc. were the sitemap and hreflang — meaning 958 film
   // pages, seven browse indexes and every hub in those subtrees hung off homepages with zero
@@ -4722,9 +4729,9 @@ function buildMoreLinks(code, data = null) {
     return `<a href="${meta.path}">${escHtml(meta.name.replace(/^the /, ""))}</a>`;
   }).join(" · ");
   const hubs = data ? hubsFor(data).map((h) => `<a href="${code === "in" ? "" : "/" + code}/new-on-${h.slug}/">New on ${escHtml(h.name)}</a>`).join(" · ") : "";
-  if (code !== "in") return `${hubs ? hubs + " · " : ""}${browse} · ${dataLink} · ${about}<br>Also on FilmyChill: ${others}`;
+  if (code !== "in") return `${hubs ? hubs + " · " : ""}${browse} · ${dataLink}${embed} · ${about}<br>Also on FilmyChill: ${others}`;
   const langs = LANGUAGE_PAGES.map(([name, slug]) => `<a href="/${slug}/">${name}</a>`).join(" · ");
-  return `${langs}${hubs ? " · " + hubs : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${dataLink} · ${about}<br>Also on FilmyChill: ${others}`;
+  return `${langs}${hubs ? " · " + hubs : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${dataLink}${embed} · ${about}<br>Also on FilmyChill: ${others}`;
 }
 
 // ============================================================================
@@ -4834,6 +4841,7 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
   step("rss feed", () => writeRssFeed(data, cfg));
   step("due-date pass", () => refreshDuePages(cfg, countryNameFor(cfg)));
   step("browse index", () => writeBrowseIndex(filmIndexFor(cfg), cfg, stamp));
+  step("embed widget", () => writeEmbed(data, cfg, stamp)); // /embed/week/ per country + /embed/ (India)
   if (cfg.code === "in") step("data page", () => writeDataPage(stamp)); // site-wide, built once
 }
 
@@ -4942,6 +4950,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
 
 // Export pure/helper functions for unit testing (only meaningful when required, not run).
 module.exports = {
+  buildEmbedPage, buildEmbedInstructions, embedItems, writeEmbed,
   indexNowUrls,
   sectionCounts,
   buildDataPage, buildWindowsCsv, writeDataPage,
@@ -4989,3 +4998,4 @@ module.exports = {
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
+
