@@ -2414,10 +2414,13 @@ test("syncHreflangClusters reports every page it rewrites", () => {
 });
 
 group("section counts — headers match what is under them");
-test("counts are server-rendered from the data, not hardcoded", () => {
-  const tpl = require("fs").readFileSync("index.html", "utf8");
-  assert.ok(/<!--SSR:TCOUNT-->/.test(tpl) && /<!--SSR:OCOUNT-->/.test(tpl),
-    "the template must have injection points, or the pre-JS page lies about the count");
+test("section counts are computed from the data, never hardcoded", () => {
+  const c = U.sectionCounts({
+    theatres: [{ title: "A" }, { title: "B" }, { title: "C" }],
+    ott: [{ title: "N" }],
+  });
+  assert.strictEqual(c.theatres, "TOP 3", "three films -> TOP 3, not a fixed TOP 5");
+  assert.strictEqual(c.ott, "TOP 1");
 });
 test("streaming header separates new arrivals from carried-over titles", () => {
   const c = U.sectionCounts({
