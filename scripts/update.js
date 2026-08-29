@@ -4832,15 +4832,15 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
   if (cfg.code === "in") step("data page", () => writeDataPage(stamp)); // site-wide, built once
 }
 
-// Section header labels. Pure, so the honesty rule is testable: a streaming list padded
-// with carried-over titles must not be sold as N new arrivals.
+// Section header labels, server-rendered from the data (so the header can't drift from the
+// list under it, which is the bug this fixed — it used to be a hardcoded TOP 5 / TOP 10).
+// Presented as a simple total: the "Still worth it — standouts from earlier weeks" divider
+// further down already separates new arrivals from carried-over titles, and each card has
+// its own freshness cue, so the header stays clean.
 function sectionCounts(data) {
-  const ott = (data && data.ott) || [];
-  const fresh = ott.filter((x) => !x.stillGood).length;
-  const older = ott.length - fresh;
   return {
     theatres: `TOP ${((data && data.theatres) || []).length}`,
-    ott: older ? `${fresh} NEW · ${older} MORE` : `TOP ${ott.length}`,
+    ott: `TOP ${((data && data.ott) || []).length}`,
   };
 }
 

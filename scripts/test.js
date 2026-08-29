@@ -2422,16 +2422,13 @@ test("section counts are computed from the data, never hardcoded", () => {
   assert.strictEqual(c.theatres, "TOP 3", "three films -> TOP 3, not a fixed TOP 5");
   assert.strictEqual(c.ott, "TOP 1");
 });
-test("streaming header separates new arrivals from carried-over titles", () => {
+test("counts follow the list length, not a hardcoded number", () => {
   const c = U.sectionCounts({
     theatres: [{ title: "A" }, { title: "B" }],
-    ott: [{ title: "N1" }, { title: "N2" }, { title: "O1", stillGood: true }, { title: "O2", stillGood: true }],
+    ott: [{ title: "N1" }, { title: "N2" }, { title: "O1" }, { title: "O2" }],
   });
-  assert.strictEqual(c.theatres, "TOP 2", "theatre count follows the list length, not a hardcoded 5");
-  assert.strictEqual(c.ott, "2 NEW · 2 MORE", "a padded list must not be sold as 4 new arrivals");
-});
-test("an all-fresh streaming list keeps the simple count", () => {
-  assert.strictEqual(U.sectionCounts({ theatres: [], ott: [{ title: "N" }] }).ott, "TOP 1");
+  assert.strictEqual(c.theatres, "TOP 2", "was a hardcoded TOP 5");
+  assert.strictEqual(c.ott, "TOP 4", "was a hardcoded TOP 10");
 });
 test("empty data doesn't produce a broken label", () => {
   const c = U.sectionCounts({});
