@@ -3228,9 +3228,14 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   }
   const aboutUrls = fs.existsSync("about/index.html")
     ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${ABOUT_LASTMOD}</lastmod><priority>0.3</priority></url>`] : [];
+  // /data/ was reaching IndexNow (so Bing saw it) but was absent from the sitemap, which is
+  // Google's main discovery path — so Google could only find it by crawling a footer link.
+  // It refreshes whenever the archive grows, hence changefreq weekly.
+  const dataUrls = fs.existsSync("data/index.html")
+    ? [`  <url><loc>https://filmychill.com/data/</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>`] : [];
   fs.writeFileSync("sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...browseUrls, ...weekUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
-  console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${browseUrls.length} browse + ${weekUrls.length} week + ${filmCount} film pages.`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...browseUrls, ...dataUrls, ...weekUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
+  console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${browseUrls.length} browse${dataUrls.length ? " + data" : ""} + ${weekUrls.length} week + ${filmCount} film pages.`);
 }
 
 // Manual/local regeneration from existing data.json: PAGES_ONLY=1 node scripts/update.js
@@ -4984,4 +4989,3 @@ module.exports = {
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
-
