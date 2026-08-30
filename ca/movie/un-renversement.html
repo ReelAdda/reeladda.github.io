@@ -18,7 +18,7 @@
 <meta property="og:image:alt" content="Un renversement — FilmyChill verdict">
 <meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Un renversement","url":"https://filmychill.com/ca/movie/un-renversement.html","image":"https://image.tmdb.org/t/p/w342/bAHf7n0TA83f5OUTtwRfjpInIhm.jpg","datePublished":"2026-09-11","dateModified":"2026-08-29","genre":"Documentary","inLanguage":"French","director":{"@type":"Person","name":"Amélie Hardy"},"actor":[{"@type":"Person","name":"Pauline Marois","image":"https://image.tmdb.org/t/p/w185/iLbQBKrXNu56efJittMsHgsOCtc.jpg"},{"@type":"Person","name":"Manon Massé","image":"https://image.tmdb.org/t/p/w185/evTZQzGoKWjKYwquRifzOfbVQhL.jpg"},{"@type":"Person","name":"Louise Harel","image":"https://image.tmdb.org/t/p/w185/p92qRly3I4kTuu8FrbneYFRqnEW.jpg"},{"@type":"Person","name":"Monique Jérôme-Forget","image":"https://image.tmdb.org/t/p/w185/tH2foCiYFlt3HgByXuH5bDSHj3c.jpg"},{"@type":"Person","name":"Françoise David","image":"https://image.tmdb.org/t/p/w185/w6ctdL6nwAATndXsmSNWiGvk7PU.jpg"},{"@type":"Person","name":"Véronique Hivon","image":"https://image.tmdb.org/t/p/w185/3LVmuh0f5I0vq4Cbp3hKKEFiHRZ.jpg"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Un renversement","url":"https://filmychill.com/ca/movie/un-renversement.html","image":"https://image.tmdb.org/t/p/w342/bAHf7n0TA83f5OUTtwRfjpInIhm.jpg","datePublished":"2026-09-11","dateModified":"2026-08-30","genre":"Documentary","inLanguage":"French","director":{"@type":"Person","name":"Amélie Hardy"},"actor":[{"@type":"Person","name":"Pauline Marois","image":"https://image.tmdb.org/t/p/w185/iLbQBKrXNu56efJittMsHgsOCtc.jpg"},{"@type":"Person","name":"Manon Massé","image":"https://image.tmdb.org/t/p/w185/evTZQzGoKWjKYwquRifzOfbVQhL.jpg"},{"@type":"Person","name":"Louise Harel","image":"https://image.tmdb.org/t/p/w185/p92qRly3I4kTuu8FrbneYFRqnEW.jpg"},{"@type":"Person","name":"Monique Jérôme-Forget","image":"https://image.tmdb.org/t/p/w185/tH2foCiYFlt3HgByXuH5bDSHj3c.jpg"},{"@type":"Person","name":"Françoise David","image":"https://image.tmdb.org/t/p/w185/w6ctdL6nwAATndXsmSNWiGvk7PU.jpg"},{"@type":"Person","name":"Véronique Hivon","image":"https://image.tmdb.org/t/p/w185/3LVmuh0f5I0vq4Cbp3hKKEFiHRZ.jpg"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/ca/"},{"@type":"ListItem","position":2,"name":"Un renversement","item":"https://filmychill.com/ca/movie/un-renversement.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Where can I watch Un renversement?","acceptedAnswer":{"@type":"Answer","text":"Un renversement hasn't released yet — it's due 2026-09-11. We'll list where to watch once it's out."}},{"@type":"Question","name":"When is Un renversement coming to streaming?","acceptedAnswer":{"@type":"Answer","text":"A streaming release date for Un renversement hasn't been officially announced yet. This page updates automatically the day it starts streaming."}},{"@type":"Question","name":"What language is Un renversement in?","acceptedAnswer":{"@type":"Answer","text":"Un renversement is a French film (Documentary)."}}]}</script>
 <style>
@@ -30,7 +30,15 @@
   .head { display:grid; grid-template-columns:140px 1fr; gap:16px; }
   .poster { width:140px; border-radius:12px; display:block; }
   h1 { font-size:24px; margin:0 0 6px; } .meta { color:var(--mute); font-size:14px; margin-bottom:10px; }
-  .rating { color:var(--indigo); font-weight:800; font-size:18px; }
+  .rating { color:var(--indigo); font-weight:800; font-size:18px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .cdot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .ctag { font-size:11px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; padding:2px 8px; border-radius:10px; }
+  .cvotes { color:var(--mute); font-weight:400; font-size:13px; }
+  .cbar { flex-basis:100%; height:4px; background:#EEE9DC; border-radius:2px; overflow:hidden; margin-top:2px; }
+  .cbar i { display:block; height:100%; border-radius:2px; }
+  .rating-solid .cdot, .rating-solid .cbar i { background:#2E9E5B; } .rating-solid .ctag { background:rgba(46,158,91,.13); color:#237A45; }
+  .rating-early .cdot, .rating-early .cbar i { background:#E39A1C; } .rating-early .ctag { background:rgba(227,154,28,.15); color:#B87910; }
+  .rating-few { color:var(--mute); font-weight:600; font-size:15px; } .rating-few .cdot, .rating-few .cbar i { background:#C4BEDA; } .rating-few .ctag { display:none; }
   .verdict { display:inline-block; background:rgba(64,56,199,.08); color:var(--indigo); font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; margin-top:8px; }
   h2 { font-size:16px; margin:24px 0 8px; } p { line-height:1.65; font-size:15px; margin:0; }
   .pill { display:inline-block; background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px; margin:0 6px 6px 0; }
@@ -81,10 +89,10 @@
     <div>
       <h1>Un renversement (2026)</h1>
       <div class="meta">French · Documentary</div>
-      
+      <div class="rating rating-few"><span class="cdot"></span>Rating still forming <span class="cvotes">— too few ratings yet</span></div>
       
       <div class="meta" style="margin-top:8px">Releases Sep 11 2026</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 2026-08-29</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 2026-08-30</div>
     </div>
   </div>
   <h2>The verdict</h2><p class="vprose">Un renversement is one of the more anticipated French releases on the calendar. It releases 2026-09-11; mark your calendar if it&#39;s on your list.</p>
