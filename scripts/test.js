@@ -2392,6 +2392,47 @@ test("no two different films in the live data share a fit line", () => {
   for (const [text, ids] of seen) assert.strictEqual(ids.size, 1, `shared line: ${text}`);
 });
 
+group("confidence score — trust the number by its vote count");
+test("the displayed rating is always TMDB's own, never the weighted value", () => {
+  const sc = U.filmScore({ rating: 8.0, votes: 13 });
+  assert.strictEqual(sc.displayRating, 8.0, "we annotate the real number, we don't alter it");
+  assert.notStrictEqual(sc.rank, 8.0, "the rank value is separate and lower");
+});
+test("tiers follow vote count with a text label, not colour alone", () => {
+  assert.strictEqual(U.confidenceTier(1500).key, "solid");
+  assert.strictEqual(U.confidenceTier(60).key, "early");
+  assert.strictEqual(U.confidenceTier(5).key, "few");
+  for (const v of [1500, 60, 5]) assert.ok(U.confidenceTier(v).label.length > 0, "every tier carries a label");
+});
+test("a thin high score does not outrank a proven similar one", () => {
+  const thin = { rating: 8.0, votes: 13 };
+  const proven = { rating: 8.2, votes: 1241 };
+  assert.ok(U.rankValue(proven) > U.rankValue(thin), "1,241 votes at 8.2 beats 13 votes at 8.0");
+  // and a proven mid score beats a thinner slightly-higher one
+  assert.ok(U.rankValue({ rating: 6.6, votes: 121 }) > U.rankValue({ rating: 6.7, votes: 43 }));
+});
+test("below the vote floor, no number is shown at all", () => {
+  const sc = U.filmScore({ rating: 9.4, votes: 3 });
+  assert.strictEqual(sc.displayRating, null, "3 votes must not surface a 9.4");
+  assert.strictEqual(sc.tier, "few");
+  assert.ok(sc.rank < 0, "and it sorts last among rated films");
+});
+test("provisional flag marks a shown-but-thin score", () => {
+  assert.strictEqual(U.filmScore({ rating: 7.5, votes: 40 }).provisional, true);
+  assert.strictEqual(U.filmScore({ rating: 7.5, votes: 5000 }).provisional, false);
+});
+test("rankFilms orders without mutating its input", () => {
+  const input = [{ rating: 8.0, votes: 13, id: "thin" }, { rating: 7.9, votes: 9000, id: "proven" }];
+  const out = U.rankFilms(input);
+  assert.strictEqual(out[0].id, "proven");
+  assert.strictEqual(input[0].id, "thin", "original array order preserved");
+});
+test("IMDb pair is used when present, never mixed with the TMDB pair", () => {
+  const sc = U.filmScore({ rating: 5.0, votes: 20, imdbRating: 7.9, imdbVotes: 90000 });
+  assert.strictEqual(sc.displayRating, 7.9);
+  assert.strictEqual(sc.tier, "solid");
+});
+
 group("embeddable widget — the backlink mechanism");
 test("widget shows this week's picks, freshest first, capped", () => {
   const items = U.embedItems({ ott: [

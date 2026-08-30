@@ -26,6 +26,7 @@ const {
 } = require("./lib/history.js");
 
 const { writeEmbed, buildEmbedPage, buildEmbedInstructions, embedItems } = require("./lib/embed.js");
+const { filmScore, confidenceTier, rankValue, rankFilms } = require("./lib/score.js");
 
 const {
   cardFontFiles,
@@ -2899,7 +2900,15 @@ ${(() => {
   .head { display:grid; grid-template-columns:140px 1fr; gap:16px; }
   .poster { width:140px; border-radius:12px; display:block; }
   h1 { font-size:24px; margin:0 0 6px; } .meta { color:var(--mute); font-size:14px; margin-bottom:10px; }
-  .rating { color:var(--indigo); font-weight:800; font-size:18px; }
+  .rating { color:var(--indigo); font-weight:800; font-size:18px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .cdot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .ctag { font-size:11px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; padding:2px 8px; border-radius:10px; }
+  .cvotes { color:var(--mute); font-weight:400; font-size:13px; }
+  .cbar { flex-basis:100%; height:4px; background:#EEE9DC; border-radius:2px; overflow:hidden; margin-top:2px; }
+  .cbar i { display:block; height:100%; border-radius:2px; }
+  .rating-solid .cdot, .rating-solid .cbar i { background:#2E9E5B; } .rating-solid .ctag { background:rgba(46,158,91,.13); color:#237A45; }
+  .rating-early .cdot, .rating-early .cbar i { background:#E39A1C; } .rating-early .ctag { background:rgba(227,154,28,.15); color:#B87910; }
+  .rating-few { color:var(--mute); font-weight:600; font-size:15px; } .rating-few .cdot, .rating-few .cbar i { background:#C4BEDA; } .rating-few .ctag { display:none; }
   .verdict { display:inline-block; background:rgba(64,56,199,.08); color:var(--indigo); font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; margin-top:8px; }
   h2 { font-size:16px; margin:24px 0 8px; } p { line-height:1.65; font-size:15px; margin:0; }
   .pill { display:inline-block; background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px; margin:0 6px 6px 0; }
@@ -2950,7 +2959,19 @@ ${(() => {
     <div>
       <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
       <div class="meta">${[item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert].filter(Boolean).map(e).join(" · ")}</div>
-      ${item.rating != null ? (() => { const dv = item.imdbRating != null ? item.imdbVotes : item.votes; return `<div class="rating">★ ${Number(item.rating).toFixed(1)}${dv ? ` <span style="color:var(--mute);font-weight:400;font-size:13px">(${e(dv)} votes)</span>` : ""}</div>`; })() : ""}
+      ${(() => {
+        // Confidence-tiered rating (see lib/score.js). The number stays TMDB's own; what we
+        // add is how much to trust it, from the vote count — so an 8.0 on 13 votes reads
+        // differently from an 8.2 on 1,200. Colour is backed by a text label, never alone.
+        const sc = filmScore(item);
+        if (sc.displayRating == null) {
+          return `<div class="rating rating-few"><span class="cdot"></span>Rating still forming <span class="cvotes">— too few ratings yet</span></div>`;
+        }
+        return `<div class="rating rating-${sc.tier}"><span class="cdot"></span>★ ${sc.displayRating}`
+          + ` <span class="ctag">${e(sc.tierLabel)}</span>`
+          + ` <span class="cvotes">${e(sc.votes.toLocaleString("en-IN"))} ratings</span>`
+          + `<span class="cbar"><i style="width:${Math.round(sc.confidencePct * 100)}%"></i></span></div>`;
+      })()}
       ${item.verdict ? `<div class="verdict">▸ ${e(item.verdict)}</div>` : ""}
       ${item.released ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateShort(item.released, Date.now(), localeFor(code)))} ${e(String(item.released).slice(0, 4))}`}</div>` : ""}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(asOf)}</div>` : ""}
@@ -3400,10 +3421,13 @@ function buildEditorNote(data, cfg, seed = null) {
   const r1 = (x) => Number(x.rating).toFixed(1);
 
   const an = (x) => (/^8/.test(x) ? "an" : "a"); // "an 8.1 from early audiences", "a 7.7"
-  const rt = rated(th).sort((a, b) => b.rating - a.rating);
+  // Confidence-weighted order (see lib/score.js): a high rating on a handful of votes must
+  // not be crowned the pick over a proven one. Display still shows the true rating; only the
+  // choice of WHICH film to highlight uses the weighted value.
+  const rt = rated(th).sort((a, b) => rankValue(b) - rankValue(a));
   const event = rt[0] && rt[0].rating >= 6.5 ? rt[0] : null;
   const skip = rt.length > 1 && rt[rt.length - 1].rating <= 5.9 && rt[rt.length - 1] !== event ? rt[rt.length - 1] : null;
-  const ro = rated(ott).sort((a, b) => b.rating - a.rating);
+  const ro = rated(ott).sort((a, b) => rankValue(b) - rankValue(a));
   const sleeper = ro[0] && ro[0].rating >= 7.8 && ro[0].platform && ro[0].platform !== "Theatres" ? ro[0] : null;
   if (!event && !skip && !sleeper) return null; // thin data -> say nothing
 
@@ -4950,6 +4974,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
 
 // Export pure/helper functions for unit testing (only meaningful when required, not run).
 module.exports = {
+  filmScore, confidenceTier, rankValue, rankFilms,
   buildEmbedPage, buildEmbedInstructions, embedItems, writeEmbed,
   indexNowUrls,
   sectionCounts,
