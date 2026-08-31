@@ -2470,6 +2470,20 @@ test("instructions page carries a copyable iframe snippet", () => {
   assert.ok(/embed\/week\//.test(html));
 });
 
+group("sitemap dates — never emit an invalid lastmod");
+test("only a clean YYYY-MM-DD passes; everything else coerces to a valid date", () => {
+  // Mirrors the lastmodOf guard in writeMultiCountrySitemap. Google rejects the whole
+  // sitemap on one bad <lastmod>, so a null/garbage manifest date must never reach the XML.
+  const today = "2026-08-31";
+  const lastmodOf = (v) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.slice(0, 10)) ? v.slice(0, 10) : today);
+  assert.strictEqual(lastmodOf("2026-07-19"), "2026-07-19", "a valid date is kept as-is");
+  assert.strictEqual(lastmodOf("2026-08-31T10:00:00Z"), "2026-08-31", "a timestamp is trimmed to the date");
+  for (const bad of ["", "  ", "NaN-NaN-NaN", "2026-7-9", "not-a-date", null, undefined, 20260819]) {
+    assert.strictEqual(lastmodOf(bad), today, `invalid input ${JSON.stringify(bad)} must fall back to today`);
+    assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(lastmodOf(bad)), "output is always a clean W3C date");
+  }
+});
+
 group("indexing — fresh pages get announced");
 test("IndexNow ping includes the crawl paths into the archive", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
