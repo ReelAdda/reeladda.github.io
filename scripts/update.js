@@ -3159,6 +3159,11 @@ function repairXDefaults(countries) {
 // those copies together; a film unique to one country stands alone.
 function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const today = new Date().toISOString().slice(0, 10);
+  // Every lastmod must be a valid W3C date or Google rejects the sitemap with "Invalid date".
+  // A single frozen page whose stored date was null/malformed once emitted an empty <lastmod>
+  // and flagged the whole file. This coerces anything that isn't a clean YYYY-MM-DD back to
+  // today, so one bad manifest value can never break the sitemap again.
+  const lastmodOf = (v) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.slice(0, 10)) ? v.slice(0, 10) : today);
   // Honest per-film lastmod: a page's date is when it was last actually written (current
   // films: today; archived films: their freeze date) — claiming lastmod=today for frozen
   // pages teaches crawlers to distrust the whole sitemap's lastmod signal.
@@ -3166,7 +3171,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     const e = pagesManifest && pagesManifest[code] && pagesManifest[code][slug];
     // Prefer the most recent touch: a page re-edited after archiving (hreflang fix, due-date
     // rewrite, streaming arrival) should carry the EDIT date, not its original archive date.
-    return e ? (e.last || e.archivedOn || today) : today;
+    return lastmodOf(e ? (e.last || e.archivedOn || today) : today);
   };
   const pathFor = (code) => (code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`);
   const homeAlts = countries.map((c) =>
@@ -3234,7 +3239,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   if (fs.existsSync("week")) {
     const cur = weekSlug(isoWeekOf());
     for (const d of fs.readdirSync("week").filter((x) => /^\d{4}-W\d{2}$/.test(x)).sort()) {
-      weekUrls.push(`  <url><loc>https://filmychill.com/week/${d}/</loc><lastmod>${d === cur ? today : isoWeekSunday(d)}</lastmod><priority>0.4</priority></url>`);
+      weekUrls.push(`  <url><loc>https://filmychill.com/week/${d}/</loc><lastmod>${lastmodOf(d === cur ? today : isoWeekSunday(d))}</lastmod><priority>0.4</priority></url>`);
     }
   }
   // Browse index pages. High priority: these are the crawl paths into the archive, so they
@@ -5023,4 +5028,3 @@ module.exports = {
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
-
