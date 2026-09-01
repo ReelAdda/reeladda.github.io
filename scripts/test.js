@@ -844,13 +844,15 @@ test("descriptions: never empty, never open with the unknown, name the platform"
   const bare = { title: "Law Order", slug: "law-order", kind: "movie", tmdbId: 3, language: "Hindi", genre: "Drama" };
   const d1 = /name="description" content="([^"]*)"/.exec(U.buildFilmPage(bare, "2026-08-14", new Set(), AUDIT_CFG))[1];
   assert.ok(d1.trim().length > 20, "blank description: " + d1);
+  // Descriptions now LEAD with the where/when-to-watch answer (the intent GSC shows these
+  // pages rank for), not with a bare status. Theatres-with-no-date still puts the unknown last.
   const th = { title: "T", slug: "t", kind: "movie", tmdbId: 4, platform: "Theatres", rating: 7.9, votes: 500, verdict: "Must watch" };
   const d2 = /name="description" content="([^"]*)"/.exec(U.buildFilmPage(th, "2026-08-14", new Set(), AUDIT_CFG))[1];
-  assert.ok(/^In theatres in India/.test(d2), d2);
-  assert.ok(/OTT date not announced/.test(d2) && d2.indexOf("OTT date") > d2.indexOf("theatres"), "unknown goes last: " + d2);
+  assert.ok(/^T is in cinemas in India/.test(d2), d2);
+  assert.ok(/release date coming soon/.test(d2), "pre-OTT films flag the pending date: " + d2);
   const st = { title: "Reacher", slug: "reacher", kind: "tv", tmdbId: 5, providers: ["Amazon Prime Video"], rating: 8.2, votes: 900, verdict: "Must watch" };
   const d3 = /name="description" content="([^"]*)"/.exec(U.buildFilmPage(st, "2026-08-14", new Set(), AUDIT_CFG))[1];
-  assert.ok(/^Streaming on Amazon Prime Video in India/.test(d3), d3);
+  assert.ok(/^Watch Reacher in India on Amazon Prime Video/.test(d3), "streaming desc names platform up front: " + d3);
 });
 test("similar strip: on-site titles jump the queue and render as anchors", () => {
   const item = { title: "T", slug: "t", kind: "movie", tmdbId: 6, rating: 7, votes: 100,
@@ -2390,6 +2392,29 @@ test("no two different films in the live data share a fit line", () => {
     }
   }
   for (const [text, ids] of seen) assert.strictEqual(ids.size, 1, `shared line: ${text}`);
+});
+
+group("lead answer line — SEO/AEO for where-to-watch intent");
+test("streaming film leads with the platform, as a snippet-shaped sentence", () => {
+  const h = U.buildFilmPage({ title: "X", slug: "x", kind: "movie", tmdbId: 1, providers: ["Netflix"], rating: 8, votes: 900, released: "2026-08-01" }, "2026-08-20", new Set(), AUDIT_CFG);
+  const ans = /<p class="answer">(.*?)<\/p>/s.exec(h)[1].replace(/<[^>]+>/g, "");
+  assert.ok(/^X is streaming in India on Netflix/.test(ans), ans);
+});
+test("upcoming film leads with the release date", () => {
+  const up = U.normalizeUpcoming([{ title: "Y", slug: "y", kind: "movie", tmdbId: 2, released: "2099-10-15" }])[0];
+  const h = U.buildFilmPage(up, "2026-08-20", new Set(), AUDIT_CFG);
+  const ans = /<p class="answer">(.*?)<\/p>/s.exec(h)[1].replace(/<[^>]+>/g, "");
+  assert.ok(/releases in India on/.test(ans), ans);
+});
+test("theatres-no-date answer flags the pending OTT date, never invents one", () => {
+  const h = U.buildFilmPage({ title: "Z", slug: "z", kind: "movie", tmdbId: 3, platform: "Theatres", released: "2026-08-10" }, "2026-08-20", new Set(), AUDIT_CFG);
+  const ans = /<p class="answer">(.*?)<\/p>/s.exec(h)[1].replace(/<[^>]+>/g, "");
+  assert.ok(/in cinemas in India/.test(ans) && /hasn't been announced/.test(ans), ans);
+  assert.ok(!/\d{4}-\d{2}-\d{2}/.test(ans), "must not print a raw or invented date");
+});
+test("the answer line is the first prose block, before the review", () => {
+  const h = U.buildFilmPage({ title: "Q", slug: "q", kind: "movie", tmdbId: 4, providers: ["Prime Video"], rating: 7, votes: 500, verdict: "Worth a watch", released: "2026-08-01" }, "2026-08-20", new Set(), AUDIT_CFG);
+  assert.ok(h.indexOf('class="answer"') < h.indexOf('class="vprose"') || h.indexOf('class="vprose"') === -1, "answer must precede the verdict prose");
 });
 
 group("confidence score — trust the number by its vote count");
