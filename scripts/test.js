@@ -2394,6 +2394,25 @@ test("no two different films in the live data share a fit line", () => {
   for (const [text, ids] of seen) assert.strictEqual(ids.size, 1, `shared line: ${text}`);
 });
 
+group("trailer VideoObject — valid for Google rich results");
+test("VideoObject carries uploadDate and an embed/content URL", () => {
+  const h = U.buildFilmPage({ title: "T", slug: "t", kind: "movie", tmdbId: 1, released: "2026-08-01",
+    freshDate: "2026-07-28", language: "Hindi", trailer: "https://www.youtube.com/watch?v=abc123XYZ00" },
+    "2026-08-20", new Set(), AUDIT_CFG);
+  const m = /"trailer":(\{[^}]*\})/.exec(h);
+  assert.ok(m, "trailer VideoObject must be present");
+  const v = JSON.parse(m[1]);
+  assert.ok(/^\d{4}-\d{2}-\d{2}T/.test(v.uploadDate), "uploadDate must be an ISO datetime (Google requires it): " + v.uploadDate);
+  assert.ok(v.embedUrl && /youtube-nocookie\.com\/embed\//.test(v.embedUrl), "embedUrl required: " + v.embedUrl);
+  assert.ok(v.contentUrl && /youtube\.com\/watch/.test(v.contentUrl), "contentUrl required: " + v.contentUrl);
+});
+test("uploadDate falls back to release date when freshDate is absent", () => {
+  const h = U.buildFilmPage({ title: "T2", slug: "t2", kind: "movie", tmdbId: 2, released: "2026-06-15",
+    trailer: "https://www.youtube.com/watch?v=zzz999" }, "2026-08-20", new Set(), AUDIT_CFG);
+  const v = JSON.parse(/"trailer":(\{[^}]*\})/.exec(h)[1]);
+  assert.ok(v.uploadDate.startsWith("2026-06-15"), "should use released as the proxy: " + v.uploadDate);
+});
+
 group("lead answer line — SEO/AEO for where-to-watch intent");
 test("streaming film leads with the platform, as a snippet-shaped sentence", () => {
   const h = U.buildFilmPage({ title: "X", slug: "x", kind: "movie", tmdbId: 1, providers: ["Netflix"], rating: 8, votes: 900, released: "2026-08-01" }, "2026-08-20", new Set(), AUDIT_CFG);
