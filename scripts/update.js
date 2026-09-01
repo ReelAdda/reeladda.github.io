@@ -2771,8 +2771,12 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // Guaranteed non-empty: five live pages had blank descriptions (no verdict, no synopsis).
   const dvotes = item.imdbRating != null ? item.imdbVotes : item.votes;
   const factBits = [];
-  if (providers.length) factBits.push(`Streaming on ${providers.slice(0, 2).join(" & ")} in ${country}`);
-  else if (item.platform === "Theatres") factBits.push(`In theatres in ${country}`);
+  // Lead the snippet with the where/when-to-watch answer — the intent GSC shows these pages
+  // rank for. Streaming: name the platform. Theatres with no date: say the date is pending
+  // (the query is "when does it release on OTT"). Rent/buy: say so.
+  if (providers.length) factBits.push(`Watch ${item.title} in ${country} on ${providers.slice(0, 2).join(" & ")}`);
+  else if ((item.rentBuy || []).length) factBits.push(`Rent or buy ${item.title} in ${country} on ${item.rentBuy.slice(0, 2).map(String).join(" & ")}`);
+  else if (item.platform === "Theatres") factBits.push(`${item.title} is in cinemas in ${country}${wantsOttTitle ? `; ${V_TITLE.word} release date coming soon` : ""}`);
   if (item.rating != null && dvotes >= 10) factBits.push(`rated ${Number(item.rating).toFixed(1)}/10`);
   const clean = (s) => String(s).trim().replace(/\.+$/, "");
   const descParts = [factBits.join(", "), item.verdict, synopsis].filter(Boolean).map(clean);
@@ -2917,6 +2921,8 @@ ${(() => {
   .btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
   footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
   .vprose { font-size:15px; line-height:1.7; margin-top:8px; }
+  .answer { font-size:16px; line-height:1.6; margin:14px 0 6px; padding:12px 14px; background:#fff;
+            border:1px solid #E7DFD0; border-left:3px solid var(--indigo); border-radius:0 8px 8px 0; }
   .fcdata { font-size:14px; line-height:1.6; margin-top:10px; padding:10px 12px; border-radius:8px;
             background:rgba(64,56,199,.07); border-left:3px solid var(--indigo); }
   /* Fit line: same weight as body copy, warm card so it reads as the site's own voice
@@ -2977,6 +2983,29 @@ ${(() => {
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(asOf)}</div>` : ""}
     </div>
   </div>
+  ${(() => {
+    // Lead answer line. The GSC data showed pages ranking on page 1 for "where to watch [film]"
+    // and "[film] ott release date" but pulling <1% CTR, and answer engines had nothing at the
+    // top to lift. This puts the direct answer FIRST, in one snippet-shaped sentence, before the
+    // review prose. Facts only — mirrors the FAQ, never invents a date or platform.
+    const provs = (item.providers || []).map(String);
+    const st = releaseState(item.released);
+    let ans;
+    if (st === "upcoming") {
+      ans = item.released
+        ? `<b>${e(item.title)}</b> releases in ${e(country)} on ${e(fmtDateShort(item.released, Date.now(), localeFor(code)))} ${e(String(item.released).slice(0,4))}. ${V_TITLE.article} ${e(V_TITLE.release)} date will be listed here as soon as it's announced.`
+        : `<b>${e(item.title)}</b> hasn't released yet in ${e(country)}. This page updates with the ${e(V_TITLE.release)} date the day it's announced.`;
+    } else if (provs.length) {
+      ans = `<b>${e(item.title)}</b> is streaming in ${e(country)} on ${e(provs.slice(0,3).join(", "))}${(item.rentBuy||[]).length && !provs.length ? "" : ""}.`;
+    } else if ((item.rentBuy || []).length) {
+      ans = `<b>${e(item.title)}</b> is available to rent or buy in ${e(country)} on ${e(item.rentBuy.slice(0,3).map(String).join(", "))}. No subscription carries it yet.`;
+    } else if (item.platform === "Theatres") {
+      ans = `<b>${e(item.title)}</b> is in cinemas in ${e(country)} now. Its ${e(V_TITLE.release)} date hasn't been announced — this page updates the day it lands on streaming.`;
+    } else {
+      ans = `Where to watch <b>${e(item.title)}</b> in ${e(country)} isn't confirmed yet — this page updates the moment a platform lists it.`;
+    }
+    return `<p class="answer">${ans}</p>`;
+  })()}
   ${verdictProse ? `<h2>The verdict</h2><p class="vprose">${e(verdictProse)}</p>` : ""}
   ${item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
   ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
@@ -5028,3 +5057,4 @@ module.exports = {
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
+
