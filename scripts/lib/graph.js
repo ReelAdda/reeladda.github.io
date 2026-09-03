@@ -47,14 +47,22 @@ function filmIndexFor(cfg) {
 // 2026 release recommending a 2019 one reads like filler.
 function relatedScore(item, cand) {
   if (!cand.slug || cand.slug === item.slug) return -1;
+  const genres = (x) => String(x.genre || "").split("/").map((g) => g.trim().toLowerCase()).filter(Boolean);
+  const mine = genres(item), theirs = genres(cand);
+  const shared = mine.filter((g) => theirs.includes(g)).length;
+  // HARD GATE. Language and recency alone used to qualify a candidate, which is how a
+  // horror page ended up recommending Moana: "English" and "is a movie" were the whole
+  // case for it. If the source film has genres, a candidate must share at least one —
+  // including candidates whose own genre data is missing, which would otherwise score on
+  // language alone and outrank a real genre match (measured: one such film took the top
+  // slot on the Backrooms page at 75 points against 38 for an actual horror neighbour).
+  if (mine.length && shared === 0) return -1;
   let score = 0;
   const lang = (x) => String(x.language || "").toLowerCase();
-  // Language outweighs a full genre match on purpose: a reader on a Tamil film page wants
-  // another Tamil film more than an English film of the same genre. Two shared genres (36)
-  // must not beat a shared language (55), or the mesh drifts towards Hollywood titles.
+  // Language still outweighs a full genre match, but now only WITHIN the genre-compatible
+  // set: a reader on a Tamil thriller page wants another Tamil thriller ahead of an
+  // English one, which is the original intent. It can no longer buy a cartoon a place.
   if (lang(item) && lang(item) === lang(cand)) score += 55;
-  const genres = (x) => String(x.genre || "").split("/").map((g) => g.trim().toLowerCase()).filter(Boolean);
-  const shared = genres(item).filter((g) => genres(cand).includes(g)).length;
   score += Math.min(shared, 2) * 18;
   if (item.kind === cand.kind) score += 8;
   const y = (x) => Number(String(x.released || "").slice(0, 4)) || 0;
@@ -72,12 +80,26 @@ function relatedFilms(item, index, n = 6) {
     .filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s || (a.c.slug < b.c.slug ? -1 : 1));
   if (ranked.length <= n) return ranked.map((x) => x.c);
-  const band = ranked.slice(0, Math.max(n * 4, Math.min(40, ranked.length)));
+  // The band used to be `max(n*4, min(40, len))`, i.e. up to 40 candidates. On a catalogue
+  // of ~40 films that IS the whole list, so the rotation below drew from everything and the
+  // ranking above became decorative — a horror page could and did surface six titles
+  // scoring at the floor. The band is now defined by SCORE, not by count: only candidates
+  // within QUALITY_WINDOW of the best one are eligible to be rotated between. Spread is
+  // preserved wherever there are genuinely comparable neighbours, and where there aren't,
+  // the best ones win outright — which is the correct answer for a small catalogue.
+  const best = ranked[0].s;
+  let band = ranked.filter((x) => x.s >= best - QUALITY_WINDOW);
+  if (band.length < n) band = ranked.slice(0, Math.max(n, band.length));
+  band = band.slice(0, Math.max(n * 2, Math.min(24, band.length)));
   const offset = Math.abs(hashKey(item.slug || item.title || "")) % band.length;
   const picked = [];
   for (let i = 0; i < band.length && picked.length < n; i++) picked.push(band[(offset + i) % band.length].c);
   return picked;
 }
+
+// One shared genre (18) plus a year of drift is inside the window; a language switch (55)
+// or a genre-count drop of two is not. Tuned so the band holds real alternatives only.
+const QUALITY_WINDOW = 30;
 
 function hashKey(key) {
   let h = 0;
