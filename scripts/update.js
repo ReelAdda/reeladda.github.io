@@ -449,6 +449,40 @@ function loadOttSeen() {
 const THEATRE_WINDOW_DAYS = 21;          // strict 3-week window
 const THEATRE_WINDOW_FALLBACK_DAYS = 35; // widened once when the strict pool runs thin
 const THEATRE_MIN_POOL = 8;              // enough candidates to fill 7 slots with choice
+
+// The visible "how fresh is this" line. Asserting a fixed window does not work: the gate
+// is 21 days but widens to 35 whenever the strict pool runs thin, so a hardcoded "last 3
+// weeks" is false on exactly the weeks the fallback fires. Measure the films actually
+// rendered instead — then the line is true by construction, and on a good week it says
+// something STRONGER than any fixed claim ("last 9 days" beats "last 3 weeks").
+// Returns null rather than guessing when the dates aren't there.
+function freshnessWindowLabel(items, now = Date.now(), bound = THEATRE_WINDOW_FALLBACK_DAYS, opts = {}) {
+  // verb/dateOf differ per section because the two lists promise different things.
+  // Theatres promise a RELEASE date. Streaming promises an ARRIVAL date - a 2019 film
+  // that landed on Netflix yesterday belongs on the list, and saying "Released in the
+  // last N days" about it would be false.
+  //
+  // Buckets, not raw day counts: "in the last 33 days" reads like a system log. Every
+  // bucket ROUNDS UP, so the phrase is always true of the oldest item on the page while
+  // staying readable. The top bucket is the one that matters - on a good week the line
+  // says "this week", which agrees with the page heading instead of undercutting it.
+  const verb = opts.verb || "Out";
+  const dateOf = opts.dateOf || ((x) => x && x.released);
+  const ages = (items || [])
+    .map(dateOf)
+    .filter(Boolean)
+    .map((d) => (now - new Date(d).getTime()) / 864e5)
+    .filter((a) => Number.isFinite(a) && a >= 0);
+  if (!ages.length) return null;
+  const oldest = Math.ceil(Math.max(...ages));
+  // An out-of-window outlier (a re-release, a bad TMDB date) must not produce an absurd
+  // label. Past the gate we stop naming a window rather than print a wrong one.
+  if (oldest > bound) return null;
+  if (oldest <= 7) return `${verb} this week`;
+  const weeks = Math.ceil(oldest / 7);
+  const WORD = { 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven" };
+  return `${verb} in the past ${WORD[weeks] || weeks} weeks`;
+}
 function filterTheatreFresh(pool, now = Date.now()) {
   const within = (m, days) => {
     if (!m.release_date) return false;
@@ -3614,7 +3648,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
   const platformNames = platforms.slice(0, 4).join(", ");
 
   const title = `New ${V.Releases} This Week in ${countryName} (${monthYear}) — ${platformNames || "Streaming"} | FilmyChill`;
-  const desc = `Every new movie and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated daily.`;
+  const desc = `Every new movie and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`;
 
   // FAQ per major platform + one "best of" — real answers from real data, mirrored in
   // FAQPage schema. Only platforms with titles get a question; schema only if >= 2 Q&As.
@@ -3742,8 +3776,8 @@ ${alts}
 <div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
 <div class="wrap">
   <h1>New ${e(V.Releases)} This Week in ${e(countryName)}</h1>
-  <div class="upd">Updated ${e(updatedHuman)} · refreshed daily</div>
-  <p class="lead">Every new movie and web series that started streaming in ${e(countryName)} this week, grouped by platform and ranked by rating — so you know what's actually worth your time.</p>
+  <div class="upd">Updated ${e(updatedHuman)} · refreshed twice daily</div>
+  <p class="lead">Every movie and web series that started streaming in ${e(countryName)} in the last 45 days, grouped by platform and ranked by rating — so you know what's actually worth your time.</p>
 ${sections}
 ${faqHtml}
   <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + ${e(V.word)})</a>
@@ -4192,10 +4226,10 @@ function buildPlatformHubPage(data, cfg, hub) {
   }
   return listingPageHtml({
     title: `New on ${hub.name} ${countryName} This Week (${monthYear}) | FilmyChill`,
-    desc: `Every movie and series newly streaming on ${hub.name} in ${countryName} this week — ratings, critics' verdicts, what to skip. Updated daily.`,
+    desc: `Every movie and series newly streaming on ${hub.name} in ${countryName} this week — ratings, critics' verdicts, what to skip. Updated twice daily.`,
     canonical: url,
     h1: `New on ${hub.name} in ${countryName} this week`,
-    updLine: `Updated ${updatedHuman} · refreshed daily`,
+    updLine: `Updated ${updatedHuman} · refreshed twice daily`,
     lead: `${hub.items.length} new ${hub.items.length === 1 ? "title" : "titles"} on ${hub.name} this week, ranked and rated — with an honest word on which are worth your evening.`,
     sections: (films.length && series.length)
       ? [{ h2: "Movies", items: films }, { h2: "Series", items: series }]
@@ -4363,10 +4397,10 @@ function buildLanguagePage(data, langName, slug) {
   }];
   return listingPageHtml({
     title: `New ${langName} Movies & OTT Releases This Week (${monthYear}) | FilmyChill`,
-    desc: `Every new ${langName} movie in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated daily.`,
+    desc: `Every new ${langName} movie in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`,
     canonical: url,
     h1: `New ${langName} Movies & OTT This Week`,
-    updLine: `Updated ${updatedHuman} · refreshed daily`,
+    updLine: `Updated ${updatedHuman} · refreshed twice daily`,
     lead: `Every ${langName} title that hit theatres or started streaming this week, ranked and rated — plus what's coming next.`,
     sections: [
       { h2: "In theatres", items: theatres },
@@ -4696,8 +4730,8 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
     + `<meta name="twitter:card" content="summary_large_image">`;
   if (cfg.code === "in") {
     // Root keeps the multi-country, India-first wording as the no-data fallback.
-    return `<title>${escHtml(dynTitle || `FilmyChill — Latest Movie & ${V.Releases}, with Reviews, Updated Daily`)}</title>\n`
-      + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and ${V.releases} across ${countryListForProse()} — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
+    return `<title>${escHtml(dynTitle || `FilmyChill — Latest Movie & ${V.Releases}, with Reviews, Updated Twice Daily`)}</title>\n`
+      + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and ${V.releases} across ${countryListForProse()} — trailers, ${ratingsWord}, verdicts, auto-updated twice daily.`}">\n`
       + discover + "\n"
       + `<link rel="canonical" href="${url}">\n`
       + homeAlts + "\n"
@@ -4705,8 +4739,8 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
       + `<meta property="og:description" content="${escHtml(dynDesc) || `Latest theatre and ${V.releases} across ${countryListForProse()} — trailers, ${ratingsWord}, verdicts. Auto-updated daily.`}">\n`
       + shareTags;
   }
-  return `<title>${escHtml(dynTitle) || `FilmyChill — Latest Movie &amp; ${V.Releases} in ${m.name}, with Reviews, Updated Daily`}</title>\n`
-    + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and ${V.releases} in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, ${ratingsWord}, verdicts, auto-updated daily.`}">\n`
+  return `<title>${escHtml(dynTitle) || `FilmyChill — Latest Movie &amp; ${V.Releases} in ${m.name}, with Reviews, Updated Twice Daily`}</title>\n`
+    + `<meta name="description" content="${escHtml(dynDesc) || `Latest theatre and ${V.releases} in ${m.name} on Netflix, Prime Video, Disney+ and more — trailers, ${ratingsWord}, verdicts, auto-updated twice daily.`}">\n`
     + discover + "\n"
     + `<link rel="canonical" href="${url}">\n`
     + homeAlts + "\n"
@@ -4976,6 +5010,11 @@ function renderCountryPage(templateHtml, cfg, data) {
   // shows before JS runs) was wrong. Render them from the data instead.
   const counts = sectionCounts(data);
   html = replaceBetween(html, "TCOUNT", counts.theatres);
+  // Measured, not asserted — see freshnessWindowLabel.
+  html = replaceBetween(html, "TWINDOW", freshnessWindowLabel(data.theatres) || "In cinemas now");
+  // Streaming measures ARRIVAL, not release — see freshnessWindowLabel.
+  html = replaceBetween(html, "OWINDOW", freshnessWindowLabel(data.ott, Date.now(), OTT_FRESH_DAYS,
+    { verb: "Added", dateOf: (x) => x && (x.freshDate || x.released) }) || "Newly added to streaming");
   html = replaceBetween(html, "OCOUNT", counts.ott);
   // The SSR markers wrap the ENTIRE <script> element (never sit inside it): HTML
   // comments are NOT stripped inside <script>, so markers inside the tag made the
@@ -5063,6 +5102,7 @@ module.exports = {
   footerAttribution, RATINGS_SOURCE, USE_IMDB,
   deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
   filterTheatreFresh, THEATRE_WINDOW_DAYS, THEATRE_WINDOW_FALLBACK_DAYS, THEATRE_MIN_POOL,
+  freshnessWindowLabel,
   ottRecencyBonus, OTT_RECENCY_MAX, freshBadge, freshLabel, fmtDateShort,
   buildOttWeekPage, ottWeekUrl, ottWeekPath,
   computeBuzz, fmtViews, trailerViewsLabel, localeFor, countryNameFor,
