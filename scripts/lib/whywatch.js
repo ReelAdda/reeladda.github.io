@@ -46,20 +46,11 @@ function pickVariant(item, options) {
   for (let i = 0; i < key.length; i++) h = (Math.imul(h, 31) + key.charCodeAt(i)) >>> 0;
   // Finalizer: TMDB ids are near-sequential, and a plain modulo maps neighbouring ids to
   // the same bucket in runs. Mixing the bits first spreads adjacent films across variants.
-  h ^= h >>> 15; h = Math.imul(h, 2246822507) >>> 0; h ^= h >>> 13;
-  return options[h % options.length];
-}
-
-// Deterministic variant picker. Two films with the same shape must not produce the same
-// sentence — that is the "500 pages of the same template" failure — but the choice must be
-// STABLE across builds, or every rebuild churns the git diff. Keyed on the film's own id.
-function pickVariant(item, options) {
-  const key = String((item && (item.tmdbId || item.slug || item.title)) || "");
-  let h = 0;
-  for (let i = 0; i < key.length; i++) h = (Math.imul(h, 31) + key.charCodeAt(i)) >>> 0;
-  // Finalizer: TMDB ids are near-sequential, and a plain modulo maps neighbouring ids to
-  // the same bucket in runs. Mixing the bits first spreads adjacent films across variants.
-  h ^= h >>> 15; h = Math.imul(h, 2246822507) >>> 0; h ^= h >>> 13;
+  // NOTE the trailing >>> 0. `h ^= h >>> 13` yields a SIGNED 32-bit int, so without the
+  // coercion h is negative for half of all inputs, `h % options.length` is negative, and
+  // options[-1] is undefined. That silently dropped the caveat sentence for ~25% of films
+  // and rendered a literal "undefined" into the page for any of them with two genres.
+  h ^= h >>> 15; h = Math.imul(h, 2246822507) >>> 0; h = (h ^ (h >>> 13)) >>> 0;
   return options[h % options.length];
 }
 
@@ -142,19 +133,6 @@ function fitCaveat(item) {
 }
 
 function cap(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : str; }
-
-// Public: { heading, text } or null. The heading is per-film on purpose — no two pages
-// share an H2 ("Should you spend 2h 22m on it?").
-function whyWatch(item) {
-  if (!item) return null;
-  const first = commitmentLine(item);
-  if (!first) return null;                       // too thin to say anything true
-  const second = fitCaveat(item);
-  const rt = runtimePhrase(item.runtime);
-  const heading = item.kind === "tv" ? "Is it worth starting?"
-    : rt ? `Should you spend ${rt.text} on it?` : "Is it worth your time?";
-  return { heading, text: second ? `${first} ${second}` : first };
-}
 
 // Public: { heading, text } or null. The heading is per-film on purpose — no two pages
 // share an H2 ("Should you spend 2h 22m on it?").
