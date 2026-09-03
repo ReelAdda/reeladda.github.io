@@ -2243,12 +2243,38 @@ test("film index recovers metadata from pages already on disk", () => {
 });
 test("related films are scored by language, then genre, then recency", () => {
   const item = { slug: "a", title: "A", language: "Tamil", genre: "Action / Drama", released: "2026-01-01", kind: "movie" };
-  const sameLang = { slug: "b", title: "B", language: "Tamil", genre: "Comedy", released: "2026-01-01", kind: "movie" };
+  // Same language AND a shared genre — the strongest neighbour.
+  const both = { slug: "b", title: "B", language: "Tamil", genre: "Action / Comedy", released: "2026-01-01", kind: "movie" };
   const sameGenre = { slug: "c", title: "C", language: "Korean", genre: "Action / Drama", released: "2026-01-01", kind: "movie" };
-  const neither = { slug: "d", title: "D", language: "Korean", genre: "Romance", released: "2011-01-01", kind: "tv" };
-  assert.ok(U.relatedScore(item, sameLang) > U.relatedScore(item, sameGenre));
-  assert.ok(U.relatedScore(item, sameGenre) > U.relatedScore(item, neither));
+  assert.ok(U.relatedScore(item, both) > U.relatedScore(item, sameGenre), "language ranks first within the genre-compatible set");
   assert.strictEqual(U.relatedScore(item, item), -1, "never recommends itself");
+});
+test("a shared language cannot qualify a film with no shared genre", () => {
+  // The Moana regression: a horror page recommended an animated family film because both
+  // were English movies. Language may ORDER neighbours; it may not create one.
+  const horror = { slug: "backrooms", title: "Backrooms", language: "English", genre: "Horror / Mystery", released: "2026-08-01", kind: "movie" };
+  const cartoon = { slug: "moana", title: "Moana", language: "English", genre: "Animation / Family", released: "2016-11-23", kind: "movie" };
+  const romcom = { slug: "office-romance", title: "Office Romance", language: "English", genre: "Romance / Comedy", released: "2026-06-01", kind: "movie" };
+  const realMatch = { slug: "bokshi", title: "Bokshi", language: "Hindi", genre: "Horror / Drama", released: "2026-07-01", kind: "movie" };
+  assert.strictEqual(U.relatedScore(horror, cartoon), -1);
+  assert.strictEqual(U.relatedScore(horror, romcom), -1);
+  assert.ok(U.relatedScore(horror, realMatch) > 0, "cross-language genre match must survive");
+});
+test("a candidate with no genre data cannot outrank a real genre match", () => {
+  const horror = { slug: "backrooms", title: "B", language: "English", genre: "Horror / Mystery", released: "2026-08-01", kind: "movie" };
+  const blank = { slug: "chaali-din", title: "C", language: "English", genre: "", released: "2026-08-01", kind: "movie" };
+  assert.strictEqual(U.relatedScore(horror, blank), -1, "missing genre scored 75 on language alone and took the top slot");
+});
+test("ranking is not discarded by the anti-orphan rotation", () => {
+  // The band used to be up to 40 candidates, which on a ~40-film catalogue was the whole
+  // index — every pick was a rotated slice of everything, scoring at the floor.
+  const seed = { slug: "s", title: "S", language: "Hindi", genre: "Horror / Thriller", released: "2026-01-01", kind: "movie" };
+  const idx = [];
+  for (let i = 0; i < 40; i++) idx.push({ slug: `far${i}`, title: `Far ${i}`, language: "Hindi", genre: "Romance / Comedy", released: "2020-01-01", kind: "movie" });
+  for (let i = 0; i < 8; i++) idx.push({ slug: `near${i}`, title: `Near ${i}`, language: "Hindi", genre: "Horror / Thriller", released: "2026-01-01", kind: "movie" });
+  const picks = U.relatedFilms(seed, idx, 6);
+  assert.strictEqual(picks.length, 6);
+  for (const p of picks) assert.ok(/^near/.test(p.slug), `floor-scoring filler surfaced: ${p.slug}`);
 });
 test("every related pick resolves to a page that exists", () => {
   const idx = U.filmIndexFor({ code: "in" });
