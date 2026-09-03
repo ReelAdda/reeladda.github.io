@@ -69,6 +69,9 @@ const {
 } = require("./lib/whywatch.js");
 
 
+const { watchFit } = require("./lib/watchfit.js");
+
+
 const {
   normalizeUpcoming,
   releaseLabel,
@@ -2923,6 +2926,12 @@ ${(() => {
   .rating-early .cdot, .rating-early .cbar i { background:#E39A1C; } .rating-early .ctag { background:rgba(227,154,28,.15); color:#B87910; }
   .rating-few { color:var(--mute); font-weight:600; font-size:15px; } .rating-few .cdot, .rating-few .cbar i { background:#C4BEDA; } .rating-few .ctag { display:none; }
   .verdict { display:inline-block; background:rgba(64,56,199,.08); color:var(--indigo); font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; margin-top:8px; }
+  .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
+  .fit dl { margin:0; }
+  .fit dt { font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--indigo); margin-top:12px; }
+  .fit dt:first-child { margin-top:0; }
+  .fit dd { margin:3px 0 0; font-size:15px; line-height:1.5; }
+  .fit dt.skip { color:#9a3412; }
   h2 { font-size:16px; margin:24px 0 8px; } p { line-height:1.65; font-size:15px; margin:0; }
   .pill { display:inline-block; background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px; margin:0 6px 6px 0; }
   .frame { position:relative; padding-top:56.25%; border-radius:12px; overflow:hidden; background:#000; margin-top:8px; }
@@ -3033,6 +3042,20 @@ ${(() => {
     // by this point the reader knows if it's good — this answers whether it's for them.
     const ww = whyWatch(item);
     return ww ? `<h2>${e(ww.heading)}</h2><p class="whywatch">${e(ww.text)}</p>` : "";
+  })()}
+  ${(() => {
+    // The scannable house format (lib/watchfit.js): same three rows, same order, on every
+    // page that qualifies. Sits directly under the fit prose because it is the same
+    // question compressed — a reader who skims takes this and leaves, which is the point.
+    // Gated inside watchFit(): returns null on thin signal rather than inventing rows.
+    const wf = watchFit(item);
+    if (!wf) return "";
+    const rows = [
+      wf.why ? `<dt>Why</dt><dd>${e(wf.why)}</dd>` : "",
+      wf.skipIf ? `<dt class="skip">Skip if</dt><dd>${e(wf.skipIf)}</dd>` : "",
+      wf.bestFor ? `<dt>Best for</dt><dd>${e(cap(wf.bestFor))}</dd>` : "",
+    ].join("");
+    return `<div class="fit"><dl>${rows}</dl></div>`;
   })()}
   ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${goodToKnow.length ? `<h2>Good to know</h2><table class="gtk">${goodToKnow.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : ""}

@@ -2790,6 +2790,81 @@ test("legacy OTT-worded pages in streaming markets still get patched", () => {
   assert.ok(/streaming release/.test(html), "replacement should use the market's own word");
 });
 
+group("pickVariant — hash finalizer must stay unsigned");
+test("never returns undefined across a wide id sweep", () => {
+  const { pickVariant } = require("./lib/whywatch.js");
+  let bad = 0;
+  for (let id = 1; id <= 20000; id++) {
+    if (pickVariant({ tmdbId: id }, ["a", "b", "c"]) === undefined) bad++;
+  }
+  assert.strictEqual(bad, 0, "negative modulo regression: options[-1] is undefined");
+});
+test("spreads roughly evenly across variants", () => {
+  const { pickVariant } = require("./lib/whywatch.js");
+  const seen = { a: 0, b: 0 };
+  for (let id = 1; id <= 10000; id++) seen[pickVariant({ tmdbId: id }, ["a", "b"])]++;
+  assert.ok(Math.min(seen.a, seen.b) / Math.max(seen.a, seen.b) > 0.85, "variant skew");
+});
+test("no 'undefined' leaks into rendered fit prose", () => {
+  const { whyWatch } = require("./lib/whywatch.js");
+  for (let id = 1; id <= 3000; id++) {
+    const w = whyWatch({ tmdbId: id, genre: "Action / Thriller", runtime: 145, cert: "U/A", language: "Hindi", kind: "movie" });
+    assert.ok(w && !/undefined/.test(w.text), `undefined leaked at id ${id}`);
+  }
+});
+test("stable across builds for the same film", () => {
+  const { pickVariant } = require("./lib/whywatch.js");
+  const it = { tmdbId: 4242 };
+  assert.strictEqual(pickVariant(it, ["a", "b", "c"]), pickVariant(it, ["a", "b", "c"]));
+});
+
+group("watchFit — structured Why / Skip if / Best for");
+const WF = require("./lib/watchfit.js");
+test("settled, well-rated film gets all three rows", () => {
+  const r = WF.watchFit({ tmdbId: 101, genre: "Thriller / Drama", runtime: 150, cert: "A", rating: 7.9, votes: 24000, kind: "movie", providers: ["Netflix"] });
+  assert.ok(r && r.why && r.skipIf && r.bestFor);
+  assert.ok(/7\.9/.test(r.why) && /24,000/.test(r.why));
+});
+test("thin sample suppresses Why but keeps the fit rows", () => {
+  const r = WF.watchFit({ tmdbId: 303, genre: "Drama", runtime: 120, cert: "U/A", rating: 8.1, votes: 12, kind: "movie", providers: ["Netflix"] });
+  assert.ok(r && r.why === null, "must not present a 12-vote score as a finding");
+  assert.ok(r.skipIf && r.bestFor);
+});
+test("Why never fires below the vote floor", () => {
+  const base = { tmdbId: 9, genre: "Drama", runtime: 120, rating: 8.0, kind: "movie" };
+  assert.strictEqual(WF.whyLine({ ...base, votes: WF.WHY_MIN_VOTES - 1 }), null);
+  assert.ok(WF.whyLine({ ...base, votes: WF.WHY_MIN_VOTES }));
+});
+test("rent-or-buy outranks the genre skip line", () => {
+  const r = WF.skipLine({ tmdbId: 404, genre: "Crime", runtime: 130, providers: [], rentBuy: ["Apple TV"] });
+  assert.ok(/pay per view|subscription/.test(r), "payment friction is the more decision-relevant skip");
+});
+test("multi-season TV outranks the genre skip line", () => {
+  const r = WF.skipLine({ tmdbId: 505, genre: "Sci-Fi & Fantasy", seasons: 4, kind: "tv" });
+  assert.ok(/seasons deep|backlog/.test(r));
+});
+test("returns null rather than inventing rows when signal is thin", () => {
+  assert.strictEqual(WF.watchFit({ tmdbId: 606, rating: 7.0, votes: 800, kind: "movie", providers: ["Netflix"] }), null);
+  assert.strictEqual(WF.watchFit(null), null);
+});
+test("every genre in the rubric yields a non-empty skip line", () => {
+  for (const g of Object.keys(WF.GENRE_SKIP)) {
+    const r = WF.skipLine({ tmdbId: 7, genre: g });
+    assert.ok(r && typeof r === "string" && r.length > 0, `empty skip line for ${g}`);
+    assert.ok(!/undefined/.test(r), `undefined in skip line for ${g}`);
+  }
+});
+test("Skip if never restates the verdict as a quality claim", () => {
+  for (const g of Object.keys(WF.GENRE_SKIP)) {
+    const r = WF.skipLine({ tmdbId: 3, genre: g });
+    assert.ok(!/\b(bad|terrible|weak|poor|awful)\b/i.test(r), `quality claim leaked into skip line for ${g}`);
+  }
+});
+test("IMDb fields take precedence when present", () => {
+  const r = WF.whyLine({ tmdbId: 55, rating: 5.0, votes: 100, imdbRating: 8.2, imdbVotes: 90000 });
+  assert.ok(/8\.2/.test(r) && /90,000/.test(r));
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");
