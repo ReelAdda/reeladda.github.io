@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-09-04T06:34:10.386Z",
+ "generatedAt": "2026-09-04T09:19:40.998Z",
  "country": "in",
- "pick": "The Gentlemen",
+ "pick": "Backrooms",
  "theatres": [
   {
    "title": "Mutiny",
@@ -99,13 +99,6 @@
      "kind": "movie"
     },
     {
-     "title": "The Best Man",
-     "slug": "the-best-man",
-     "poster": "https://image.tmdb.org/t/p/w342/c9f6mFZqkyz4AD0sxGmynE1pe0v.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Vendetta",
      "slug": "vendetta",
      "poster": "https://image.tmdb.org/t/p/w342/bvhmqU6GUkigo6SSYL3ttkBhNER.jpg",
@@ -123,6 +116,13 @@
      "title": "Under Siege",
      "slug": "under-siege",
      "poster": "https://image.tmdb.org/t/p/w342/7tzVzgGKhLsQoiyDh2tiGcPeTpH.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Commuter",
+     "slug": "the-commuter",
+     "poster": "https://image.tmdb.org/t/p/w342/rDeGK6FIUfVcXmuBdEORPAGPMNg.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -165,7 +165,7 @@
    ],
    "slug": "mutiny",
    "wikiWeeklyViews": 78307,
-   "trailerViews": 154499,
+   "trailerViews": 155024,
    "take": "Truly divisive — for every critic who bought in, one checked out.",
    "takeSrc": "wiki",
    "takeArticle": "Mutiny (2026 film)"
@@ -332,7 +332,7 @@
    ],
    "slug": "insidious-out-of-the-further",
    "wikiWeeklyViews": 131907,
-   "trailerViews": 3286579,
+   "trailerViews": 3287809,
    "take": "Critics are split clean down the middle on this one.",
    "takeSrc": "wiki",
    "takeArticle": "Insidious: Out of the Further",
@@ -667,7 +667,7 @@
    "slug": "toxic-a-fairy-tale-for-grown-ups",
    "wikiWeeklyViews": 2396530,
    "trending": true,
-   "trailerViews": 2137188,
+   "trailerViews": 2138118,
    "take": "Strong marks for the performances and story, less love for the pacing.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -838,7 +838,7 @@
    ],
    "slug": "tony",
    "wikiWeeklyViews": 99375,
-   "trailerViews": 11106950,
+   "trailerViews": 11107053,
    "take": "Good word from critics, with the performances and music earning most of the praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1176,7 +1176,7 @@
    ],
    "slug": "7-dogs",
    "wikiWeeklyViews": 16236,
-   "trailerViews": 111336,
+   "trailerViews": 111347,
    "take": "The action and production design drew the most notice from reviewers.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1187,6 +1187,138 @@
   }
  ],
  "ott": [
+  {
+   "title": "Grand Theft Auto VI: An Extended Look",
+   "genre": "Animation / Action",
+   "language": "English",
+   "released": "2026-08-27",
+   "review": "Captured entirely from in-game footage on PlayStation 5, this extended look at the next Grand Theft Auto showcases the biggest, most immersive evolution…",
+   "rating": 8.9,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.9/10"
+    }
+   ],
+   "votes": 307,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/xTZuh9ziUjIyHBWO9OvqNIPqVWe.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1744462,
+   "popularity": 303.7942,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=uphThaa97ig",
+   "providers": [
+    "Netflix"
+   ],
+   "cast": [],
+   "director": null,
+   "runtime": 27,
+   "imdbVotes": null,
+   "imdbId": "tt43749709",
+   "seasons": null,
+   "freshDate": "2026-08-27",
+   "badge": null,
+   "similar": [
+    {
+     "title": "Play Dirty",
+     "slug": "play-dirty",
+     "poster": "https://image.tmdb.org/t/p/w342/ovZ0zq0NwRghtWI1oLaM0lWuoEw.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Pickup",
+     "slug": "the-pickup",
+     "poster": "https://image.tmdb.org/t/p/w342/vFWvWhfAvij8UIngg2Vf6JV95Cr.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Sheroes",
+     "slug": "sheroes",
+     "poster": "https://image.tmdb.org/t/p/w342/itUAkQmihFmRxMYTa3AkvIzMCV4.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Enforcer",
+     "slug": "the-enforcer",
+     "poster": "https://image.tmdb.org/t/p/w342/72V1r1G8S87ELagVxjqAUdChMCt.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Trap House",
+     "slug": "trap-house",
+     "poster": "https://image.tmdb.org/t/p/w342/6tpAPeuuqbVnYWWPoOLEDLSBU7a.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Black Site",
+     "slug": "black-site",
+     "poster": "https://image.tmdb.org/t/p/w342/ipn8khVVC4eToWiGf89WF9J5PJn.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Absolution",
+     "slug": "absolution",
+     "poster": "https://image.tmdb.org/t/p/w342/gt70JOD9xsPlpJnuBJAWdOT4yRg.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Silverton Siege",
+     "slug": "silverton-siege",
+     "poster": "https://image.tmdb.org/t/p/w342/5HruMN0vvl84AqD7sCDXFNO4RhP.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Icefall",
+     "slug": "icefall",
+     "poster": "https://image.tmdb.org/t/p/w342/5Byv6nznAb2Izd0gHpODOXnuSbo.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "No Man's Land",
+     "slug": "no-man-s-land",
+     "poster": "https://image.tmdb.org/t/p/w342/h3F9Pm9Tav6aQolv3DqQ0DVvIYs.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Line of Duty",
+     "slug": "line-of-duty",
+     "poster": "https://image.tmdb.org/t/p/w342/h3mrc6JunZYFTmFas2gKilmw77q.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Rookie",
+     "slug": "the-rookie",
+     "poster": "https://image.tmdb.org/t/p/w342/pr37i12Qe1gGxMBf6GTIDZvfFIT.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/po0uFYwWNByHQzHLCVJ6FetkN4M.jpg",
+   "backdropPath": "/po0uFYwWNByHQzHLCVJ6FetkN4M.jpg",
+   "posterPath": "/xTZuh9ziUjIyHBWO9OvqNIPqVWe.jpg",
+   "fullReview": "Captured entirely from in-game footage on PlayStation 5, this extended look at the next Grand Theft Auto showcases the biggest, most immersive evolution of the series yet.",
+   "theatrical": false,
+   "platform": "Netflix",
+   "ottSince": "2026-08-29",
+   "ottFreshDate": "2026-08-27",
+   "slug": "grand-theft-auto-vi-an-extended-look",
+   "wikiWeeklyViews": 223,
+   "trailerViews": 6332508
+  },
   {
    "title": "KJQ",
    "genre": "Action / Drama",
@@ -1343,182 +1475,7 @@
    "ottFreshDate": "2026-08-31",
    "slug": "kjq",
    "wikiWeeklyViews": 19738,
-   "trailerViews": 1686415
-  },
-  {
-   "title": "The Gentlemen",
-   "genre": "Comedy / Drama",
-   "language": "English",
-   "released": "2024-03-07",
-   "review": "When aristocratic Eddie inherits the family estate, he discovers that it's home to an enormous weed empire — and its proprietors aren't going anywhere.",
-   "rating": 7.8,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "7.8/10"
-    }
-   ],
-   "votes": 859,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/8sQ0oDunlRpesa5vIO6UPhbJNxC.jpg",
-   "isRecent": true,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 236235,
-   "popularity": 145.5079,
-   "cert": "A",
-   "trailer": "https://www.youtube.com/watch?v=wyEOwHrpZH4",
-   "providers": [
-    "Netflix"
-   ],
-   "cast": [
-    "Theo James",
-    "Kaya Scodelario",
-    "Daniel Ings",
-    "Joely Richardson"
-   ],
-   "director": "Guy Ritchie",
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt13210838",
-   "seasons": 2,
-   "freshDate": "2026-09-03",
-   "badge": "New season",
-   "similar": [
-    {
-     "title": "The Outlaws",
-     "slug": "the-outlaws",
-     "poster": "https://image.tmdb.org/t/p/w342/s8vp0S0iz2nPb7TpOpV0rHbm1er.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Elsbeth",
-     "slug": "elsbeth",
-     "poster": "https://image.tmdb.org/t/p/w342/7lnNSbT90qwtrn1h9TvEkVFMz2P.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Lincoln Lawyer",
-     "slug": "the-lincoln-lawyer",
-     "poster": "https://image.tmdb.org/t/p/w342/4jSaIqEU8CPBBNn4iVCK6wzPjSx.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Murderville",
-     "slug": "murderville",
-     "poster": "https://image.tmdb.org/t/p/w342/q55FVqMOG5C091tGENGixgRggcx.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Power Book IV: Force",
-     "slug": "power-book-iv-force",
-     "poster": "https://image.tmdb.org/t/p/w342/yzL4Tqbw2JA9MCsHJWFC4xV1IYU.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Matlock",
-     "slug": "matlock",
-     "poster": "https://image.tmdb.org/t/p/w342/6kEAVyhalzv4HCAfnLfXUcF3nQZ.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Average Joe",
-     "slug": "average-joe",
-     "poster": "https://image.tmdb.org/t/p/w342/gZOvsaKla8PrZ9MXOzJFPLXNl6z.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Interior Chinatown",
-     "slug": "interior-chinatown",
-     "poster": "https://image.tmdb.org/t/p/w342/7lyvgPGYNNBt9EPyBotS7U1i1Kp.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Sneaky Pete",
-     "slug": "sneaky-pete",
-     "poster": "https://image.tmdb.org/t/p/w342/nNpcea9lLHI4iv8QpOIvHveVnT9.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Brassic",
-     "slug": "brassic",
-     "poster": "https://image.tmdb.org/t/p/w342/tnIq3yiLMZJpaJyRs8FNV7WJs6V.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Mr Inbetween",
-     "slug": "mr-inbetween",
-     "poster": "https://image.tmdb.org/t/p/w342/1FkONly4j7hxi6Pz5CmuhRN1Ops.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Patriot",
-     "slug": "patriot",
-     "poster": "https://image.tmdb.org/t/p/w342/xq3xeWFfjb8UeNy1y9JMUhL6Ptq.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/yG1wltFmkX5c5ocACKfpX0tp3SY.jpg",
-   "backdropPath": "/yG1wltFmkX5c5ocACKfpX0tp3SY.jpg",
-   "posterPath": "/8sQ0oDunlRpesa5vIO6UPhbJNxC.jpg",
-   "fullReview": "When aristocratic Eddie inherits the family estate, he discovers that it's home to an enormous weed empire — and its proprietors aren't going anywhere.",
-   "castPics": [
-    {
-     "name": "Theo James",
-     "character": "Eddie Horniman, Duke of Halstead",
-     "photo": "https://image.tmdb.org/t/p/w185/g4yeW1EgIpyht0fy1stv7EXUmPC.jpg"
-    },
-    {
-     "name": "Kaya Scodelario",
-     "character": "Susie Glass",
-     "photo": "https://image.tmdb.org/t/p/w185/uVp7VarM5GX08hfCEGt63OM5c5c.jpg"
-    },
-    {
-     "name": "Daniel Ings",
-     "character": "Freddy Horniman",
-     "photo": "https://image.tmdb.org/t/p/w185/oupwxNxbTwNEknTFo2jKlrXZsl6.jpg"
-    },
-    {
-     "name": "Joely Richardson",
-     "character": "Lady Sabrina Horniman",
-     "photo": "https://image.tmdb.org/t/p/w185/6OWUwieNiWcZNnu4h6gd8vyhxBV.jpg"
-    },
-    {
-     "name": "Vinnie Jones",
-     "character": "Geoff Seacombe",
-     "photo": "https://image.tmdb.org/t/p/w185/tkYWG9gY2QpoBfOh4OWNz8yQfsw.jpg"
-    },
-    {
-     "name": "Giancarlo Esposito",
-     "character": "Uncle Stan",
-     "photo": "https://image.tmdb.org/t/p/w185/rcXnr82TwDzU4ZGdBeNXfG0ZQnZ.jpg"
-    }
-   ],
-   "platform": "Netflix",
-   "ottSince": "2026-09-04",
-   "ottFreshDate": "2026-09-03",
-   "slug": "the-gentlemen",
-   "wikiWeeklyViews": 162098,
-   "trailerViews": 6384825,
-   "take": "Critics liked it, especially the second half.",
-   "takeSrc": "wiki",
-   "takeAspects": [
-    "second half"
-   ],
-   "takeArticle": "The Gentlemen (2024 TV series)",
-   "hook": "A spin-off of Ritchies 2019 film."
+   "trailerViews": 1688163
   },
   {
    "title": "Pallaburusu",
@@ -1660,7 +1617,7 @@
    "ottSince": "2026-09-02",
    "ottFreshDate": "2026-09-02",
    "slug": "pallaburusu",
-   "trailerViews": 641203
+   "trailerViews": 642526
   },
   {
    "title": "Reacher",
@@ -1829,7 +1786,7 @@
    "stillGood": true,
    "slug": "reacher",
    "wikiWeeklyViews": 159211,
-   "trailerViews": 11010618,
+   "trailerViews": 11012085,
    "take": "Most critics came away happy.",
    "takeSrc": "wiki",
    "takeArticle": "Reacher (TV series)"
@@ -2002,183 +1959,6 @@
    "stillGood": true,
    "slug": "pyaar-prema-kalyanam",
    "wikiWeeklyViews": 46995
-  },
-  {
-   "title": "Ted Lasso",
-   "genre": "Drama / Comedy",
-   "language": "English",
-   "released": "2020-08-14",
-   "review": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience.",
-   "rating": 8.4,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "8.4/10"
-    }
-   ],
-   "votes": 2615,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 97546,
-   "popularity": 283.3733,
-   "cert": "A",
-   "trailer": "https://www.youtube.com/watch?v=BwPcMIDFVKw",
-   "providers": [
-    "Apple TV",
-    "Apple TV Amazon Channel"
-   ],
-   "cast": [
-    "Jason Sudeikis",
-    "Hannah Waddingham",
-    "Jeremy Swift",
-    "Brett Goldstein"
-   ],
-   "director": "Bill Lawrence",
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt10986410",
-   "seasons": 4,
-   "freshDate": "2026-08-04",
-   "badge": null,
-   "similar": [
-    {
-     "title": "Running Point",
-     "slug": "running-point",
-     "poster": "https://image.tmdb.org/t/p/w342/66EyhDRHAFqE6OQDasY7Nz2LXTw.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Four Seasons",
-     "slug": "the-four-seasons",
-     "poster": "https://image.tmdb.org/t/p/w342/w09XeYl096pwES8riRMZwEA9rnh.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Platonic",
-     "slug": "platonic",
-     "poster": "https://image.tmdb.org/t/p/w342/7G8wB9CG82nITeFwRFIRSk0sQJs.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "My Life with the Walter Boys",
-     "slug": "my-life-with-the-walter-boys",
-     "poster": "https://image.tmdb.org/t/p/w342/dQOwpTpBQEqRUcev4423LrU32G6.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Never Have I Ever",
-     "slug": "never-have-i-ever",
-     "poster": "https://image.tmdb.org/t/p/w342/hd5fnBixab6IzfUwjC5wfdbX3eM.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Smiling Friends",
-     "slug": "smiling-friends",
-     "poster": "https://image.tmdb.org/t/p/w342/q3CSxl3G06MBc73TpHWwBYYTPxL.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Unstable",
-     "slug": "unstable",
-     "poster": "https://image.tmdb.org/t/p/w342/yiMhsbuMYygbWnsrPbdp7PiMvvP.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Other Black Girl",
-     "slug": "the-other-black-girl",
-     "poster": "https://image.tmdb.org/t/p/w342/zGRSem8r4GsUsva0RWTFiRB3fmO.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Ballers",
-     "slug": "ballers",
-     "poster": "https://image.tmdb.org/t/p/w342/WyIazPyjmcFMC42nWEpI0jr56x.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The League",
-     "slug": "the-league",
-     "poster": "https://image.tmdb.org/t/p/w342/w6IAasjDdANmalOWkjKcENhirQR.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Brassic",
-     "slug": "brassic",
-     "poster": "https://image.tmdb.org/t/p/w342/tnIq3yiLMZJpaJyRs8FNV7WJs6V.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Boston Legal",
-     "slug": "boston-legal",
-     "poster": "https://image.tmdb.org/t/p/w342/b0bXUCfpcsgQ6EVVmucU2G76ixT.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/nE94ejEbzNCU48bW1oju0dqBONz.jpg",
-   "backdropPath": "/nE94ejEbzNCU48bW1oju0dqBONz.jpg",
-   "posterPath": "/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
-   "fullReview": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience. With cynical players and a doubtful town, will he get them to see the Ted Lasso Way?",
-   "castPics": [
-    {
-     "name": "Jason Sudeikis",
-     "character": "Ted Lasso",
-     "photo": "https://image.tmdb.org/t/p/w185/uuacnP9DOHMsmj8FhBi0cWWDgrn.jpg"
-    },
-    {
-     "name": "Hannah Waddingham",
-     "character": "Rebecca Welton",
-     "photo": "https://image.tmdb.org/t/p/w185/eHAICyhvjiRZCgzKyJCk9hWnnjr.jpg"
-    },
-    {
-     "name": "Jeremy Swift",
-     "character": "Leslie Higgins",
-     "photo": "https://image.tmdb.org/t/p/w185/muRh4WbyEE4S2763bv777ywpKP3.jpg"
-    },
-    {
-     "name": "Brett Goldstein",
-     "character": "Roy Kent",
-     "photo": "https://image.tmdb.org/t/p/w185/xYdFNE7EkncE8uiPJzT3RrkqcAQ.jpg"
-    },
-    {
-     "name": "Brendan Hunt",
-     "character": "Coach Beard",
-     "photo": "https://image.tmdb.org/t/p/w185/7Z8q2WUop3q5BdyaBD6YvweGWrZ.jpg"
-    },
-    {
-     "name": "Juno Temple",
-     "character": "Keeley Jones",
-     "photo": "https://image.tmdb.org/t/p/w185/vwCjlWQLQWbmcUT2Lwn9G0O8r2.jpg"
-    }
-   ],
-   "platform": "Apple TV",
-   "ottSince": "2026-07-30",
-   "ottFreshDate": "2026-08-04",
-   "stillGood": true,
-   "slug": "ted-lasso",
-   "wikiWeeklyViews": 237945,
-   "trending": true,
-   "trailerViews": 169933,
-   "take": "Near-universal acclaim, with the music singled out most often.",
-   "takeSrc": "wiki",
-   "takeAspects": [
-    "music"
-   ],
-   "takeArticle": "Ted Lasso"
   },
   {
    "title": "Operation Safed Sagar: The Untold Story of the Kargil War",
@@ -2355,6 +2135,183 @@
    "takeArticle": "Operation Safed Sagar (TV series)"
   },
   {
+   "title": "Ted Lasso",
+   "genre": "Drama / Comedy",
+   "language": "English",
+   "released": "2020-08-14",
+   "review": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience.",
+   "rating": 8.4,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.4/10"
+    }
+   ],
+   "votes": 2615,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 97546,
+   "popularity": 283.3733,
+   "cert": "A",
+   "trailer": "https://www.youtube.com/watch?v=BwPcMIDFVKw",
+   "providers": [
+    "Apple TV",
+    "Apple TV Amazon Channel"
+   ],
+   "cast": [
+    "Jason Sudeikis",
+    "Hannah Waddingham",
+    "Jeremy Swift",
+    "Brett Goldstein"
+   ],
+   "director": "Bill Lawrence",
+   "runtime": null,
+   "imdbVotes": null,
+   "imdbId": "tt10986410",
+   "seasons": 4,
+   "freshDate": "2026-08-04",
+   "badge": null,
+   "similar": [
+    {
+     "title": "Running Point",
+     "slug": "running-point",
+     "poster": "https://image.tmdb.org/t/p/w342/66EyhDRHAFqE6OQDasY7Nz2LXTw.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Four Seasons",
+     "slug": "the-four-seasons",
+     "poster": "https://image.tmdb.org/t/p/w342/w09XeYl096pwES8riRMZwEA9rnh.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Platonic",
+     "slug": "platonic",
+     "poster": "https://image.tmdb.org/t/p/w342/7G8wB9CG82nITeFwRFIRSk0sQJs.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "My Life with the Walter Boys",
+     "slug": "my-life-with-the-walter-boys",
+     "poster": "https://image.tmdb.org/t/p/w342/dQOwpTpBQEqRUcev4423LrU32G6.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Never Have I Ever",
+     "slug": "never-have-i-ever",
+     "poster": "https://image.tmdb.org/t/p/w342/hd5fnBixab6IzfUwjC5wfdbX3eM.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Smiling Friends",
+     "slug": "smiling-friends",
+     "poster": "https://image.tmdb.org/t/p/w342/q3CSxl3G06MBc73TpHWwBYYTPxL.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Unstable",
+     "slug": "unstable",
+     "poster": "https://image.tmdb.org/t/p/w342/yiMhsbuMYygbWnsrPbdp7PiMvvP.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Other Black Girl",
+     "slug": "the-other-black-girl",
+     "poster": "https://image.tmdb.org/t/p/w342/zGRSem8r4GsUsva0RWTFiRB3fmO.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Ballers",
+     "slug": "ballers",
+     "poster": "https://image.tmdb.org/t/p/w342/WyIazPyjmcFMC42nWEpI0jr56x.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The League",
+     "slug": "the-league",
+     "poster": "https://image.tmdb.org/t/p/w342/w6IAasjDdANmalOWkjKcENhirQR.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Brassic",
+     "slug": "brassic",
+     "poster": "https://image.tmdb.org/t/p/w342/tnIq3yiLMZJpaJyRs8FNV7WJs6V.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Boston Legal",
+     "slug": "boston-legal",
+     "poster": "https://image.tmdb.org/t/p/w342/b0bXUCfpcsgQ6EVVmucU2G76ixT.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/nE94ejEbzNCU48bW1oju0dqBONz.jpg",
+   "backdropPath": "/nE94ejEbzNCU48bW1oju0dqBONz.jpg",
+   "posterPath": "/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
+   "fullReview": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience. With cynical players and a doubtful town, will he get them to see the Ted Lasso Way?",
+   "castPics": [
+    {
+     "name": "Jason Sudeikis",
+     "character": "Ted Lasso",
+     "photo": "https://image.tmdb.org/t/p/w185/uuacnP9DOHMsmj8FhBi0cWWDgrn.jpg"
+    },
+    {
+     "name": "Hannah Waddingham",
+     "character": "Rebecca Welton",
+     "photo": "https://image.tmdb.org/t/p/w185/eHAICyhvjiRZCgzKyJCk9hWnnjr.jpg"
+    },
+    {
+     "name": "Jeremy Swift",
+     "character": "Leslie Higgins",
+     "photo": "https://image.tmdb.org/t/p/w185/muRh4WbyEE4S2763bv777ywpKP3.jpg"
+    },
+    {
+     "name": "Brett Goldstein",
+     "character": "Roy Kent",
+     "photo": "https://image.tmdb.org/t/p/w185/xYdFNE7EkncE8uiPJzT3RrkqcAQ.jpg"
+    },
+    {
+     "name": "Brendan Hunt",
+     "character": "Coach Beard",
+     "photo": "https://image.tmdb.org/t/p/w185/7Z8q2WUop3q5BdyaBD6YvweGWrZ.jpg"
+    },
+    {
+     "name": "Juno Temple",
+     "character": "Keeley Jones",
+     "photo": "https://image.tmdb.org/t/p/w185/vwCjlWQLQWbmcUT2Lwn9G0O8r2.jpg"
+    }
+   ],
+   "platform": "Apple TV",
+   "ottSince": "2026-07-30",
+   "ottFreshDate": "2026-08-04",
+   "stillGood": true,
+   "slug": "ted-lasso",
+   "wikiWeeklyViews": 237945,
+   "trending": true,
+   "trailerViews": 169961,
+   "take": "Near-universal acclaim, with the music singled out most often.",
+   "takeSrc": "wiki",
+   "takeAspects": [
+    "music"
+   ],
+   "takeArticle": "Ted Lasso"
+  },
+  {
    "title": "Backrooms",
    "genre": "Horror / Mystery",
    "language": "English",
@@ -2367,7 +2324,7 @@
      "score": "7.1/10"
     }
    ],
-   "votes": 3106,
+   "votes": 3108,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/rhGx6E3qRNMgj3i5su2oukNHwIQ.jpg",
    "isRecent": true,
@@ -2521,7 +2478,7 @@
    "stillGood": true,
    "slug": "backrooms",
    "wikiWeeklyViews": 138260,
-   "trailerViews": 47941916,
+   "trailerViews": 47947452,
    "take": "Good word from critics, with the performances and writing earning most of the praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2720,7 +2677,7 @@
      "score": "8.1/10"
     }
    ],
-   "votes": 1454,
+   "votes": 1455,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/rzpHPSEgPTpRs8EHbygwsOw7jC0.jpg",
    "isRecent": false,
@@ -2875,7 +2832,7 @@
    "slug": "lioness",
    "wikiWeeklyViews": 192764,
    "trending": true,
-   "trailerViews": 1884884,
+   "trailerViews": 1884871,
    "take": "Critics can't agree — high marks for the performances and visuals, complaints about the story.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -3038,7 +2995,7 @@
     }
    ],
    "slug": "primetime",
-   "trailerViews": 46334302
+   "trailerViews": 46341078
   },
   {
    "title": "The Paradise",
@@ -3191,7 +3148,7 @@
     }
    ],
    "slug": "the-paradise",
-   "trailerViews": 23954517
+   "trailerViews": 23957887
   },
   {
    "title": "Forgotten Island",
@@ -3344,7 +3301,7 @@
     }
    ],
    "slug": "forgotten-island",
-   "trailerViews": 18604411
+   "trailerViews": 18605546
   },
   {
    "title": "Meesaya Murukku 2",
@@ -3780,7 +3737,7 @@
     }
    ],
    "slug": "bokshi",
-   "trailerViews": 302998
+   "trailerViews": 305451
   },
   {
    "title": "Ramayana",
@@ -3933,7 +3890,7 @@
     }
    ],
    "slug": "ramayana",
-   "trailerViews": 10591363
+   "trailerViews": 10592272
   },
   {
    "title": "V. Shantaram",
@@ -4065,5 +4022,5 @@
    "slug": "v-shantaram"
   }
  ],
- "trackedFilms": 198
+ "trackedFilms": 200
 }
