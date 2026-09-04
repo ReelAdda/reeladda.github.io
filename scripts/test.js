@@ -2894,15 +2894,15 @@ test("IMDb fields take precedence when present", () => {
 group("freshnessWindowLabel \u2014 measured, never asserted");
 const _FW_NOW = Date.parse("2026-09-03");
 const _fwAgo = (n) => new Date(_FW_NOW - n * 864e5).toISOString().slice(0, 10);
-const _OTT = { verb: "Added", dateOf: (x) => x && (x.freshDate || x.released) };
+const _OTT = { verb: "Added", past: "in the past", dateOf: (x) => x && (x.freshDate || x.released) };
 test("a genuinely fresh page says so plainly", () => {
   assert.strictEqual(U.freshnessWindowLabel([{ released: _fwAgo(2) }, { released: _fwAgo(6) }], _FW_NOW),
-    "Out this week");
+    "Releases from this week");
 });
 test("buckets round UP into readable weeks, never raw day counts", () => {
-  assert.strictEqual(U.freshnessWindowLabel([{ released: _fwAgo(9) }], _FW_NOW), "Out in the past two weeks");
-  assert.strictEqual(U.freshnessWindowLabel([{ released: _fwAgo(21) }], _FW_NOW), "Out in the past three weeks");
-  assert.strictEqual(U.freshnessWindowLabel([{ released: _fwAgo(33) }], _FW_NOW), "Out in the past five weeks");
+  assert.strictEqual(U.freshnessWindowLabel([{ released: _fwAgo(9) }], _FW_NOW), "Releases from the past two weeks");
+  assert.strictEqual(U.freshnessWindowLabel([{ released: _fwAgo(21) }], _FW_NOW), "Releases from the past three weeks");
+  assert.strictEqual(U.freshnessWindowLabel([{ released: _fwAgo(33) }], _FW_NOW), "Releases from the past five weeks");
   for (let d = 1; d <= U.THEATRE_WINDOW_FALLBACK_DAYS; d++) {
     assert.ok(!/\d/.test(U.freshnessWindowLabel([{ released: _fwAgo(d) }], _FW_NOW)), `digit leaked at ${d}d`);
   }
@@ -2911,7 +2911,7 @@ test("stays true when the 35-day fallback pool fires", () => {
   // The bug in the hardcoded version: it claimed 3 weeks on exactly the weeks the
   // strict pool ran thin and 35-day-old titles were admitted.
   assert.strictEqual(U.freshnessWindowLabel([{ released: _fwAgo(5) }, { released: _fwAgo(35) }], _FW_NOW),
-    "Out in the past five weeks");
+    "Releases from the past five weeks");
 });
 test("never names a window it can't stand behind", () => {
   assert.strictEqual(U.freshnessWindowLabel([{ released: _fwAgo(4) }, { released: _fwAgo(400) }], _FW_NOW), null,
@@ -2931,11 +2931,11 @@ test("the label never overstates freshness", () => {
 });
 test("each section measures its own date and verb", () => {
   // Streaming must measure ARRIVAL. A 2019 film that landed yesterday belongs on the
-  // list, and "Out this week" would be a false claim about its release.
+  // list, and "Releases from this week" would be a false claim about its release.
   const ott = [{ freshDate: _fwAgo(2), released: _fwAgo(400) }, { freshDate: _fwAgo(30), released: _fwAgo(600) }];
   const label = U.freshnessWindowLabel(ott, _FW_NOW, U.OTT_FRESH_DAYS, _OTT);
   assert.strictEqual(label, "Added in the past five weeks");
-  assert.ok(!/Out /.test(label), "streaming must not claim a release date");
+  assert.ok(!/Releases from/.test(label), "streaming must not claim a release date");
 });
 test("streaming uses the full 45-day gate as its bound", () => {
   assert.strictEqual(U.freshnessWindowLabel([{ freshDate: _fwAgo(44) }], _FW_NOW, U.OTT_FRESH_DAYS, _OTT),

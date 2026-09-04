@@ -466,7 +466,10 @@ function freshnessWindowLabel(items, now = Date.now(), bound = THEATRE_WINDOW_FA
   // bucket ROUNDS UP, so the phrase is always true of the oldest item on the page while
   // staying readable. The top bucket is the one that matters - on a good week the line
   // says "this week", which agrees with the page heading instead of undercutting it.
-  const verb = opts.verb || "Out";
+  // verb + past are separate so each section reads as a NOUN PHRASE next to the count
+  // badge ("TOP 7 \u00b7 Releases from the past three weeks"), not as a verb fragment.
+  const verb = opts.verb || "Releases from";
+  const past = opts.past || "the past";
   const dateOf = opts.dateOf || ((x) => x && x.released);
   const ages = (items || [])
     .map(dateOf)
@@ -481,7 +484,7 @@ function freshnessWindowLabel(items, now = Date.now(), bound = THEATRE_WINDOW_FA
   if (oldest <= 7) return `${verb} this week`;
   const weeks = Math.ceil(oldest / 7);
   const WORD = { 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven" };
-  return `${verb} in the past ${WORD[weeks] || weeks} weeks`;
+  return `${verb} ${past} ${WORD[weeks] || weeks} weeks`;
 }
 function filterTheatreFresh(pool, now = Date.now()) {
   const within = (m, days) => {
@@ -5011,10 +5014,10 @@ function renderCountryPage(templateHtml, cfg, data) {
   const counts = sectionCounts(data);
   html = replaceBetween(html, "TCOUNT", counts.theatres);
   // Measured, not asserted — see freshnessWindowLabel.
-  html = replaceBetween(html, "TWINDOW", freshnessWindowLabel(data.theatres) || "In cinemas now");
+  html = replaceBetween(html, "TWINDOW", freshnessWindowLabel(data.theatres) || "Now in cinemas");
   // Streaming measures ARRIVAL, not release — see freshnessWindowLabel.
   html = replaceBetween(html, "OWINDOW", freshnessWindowLabel(data.ott, Date.now(), OTT_FRESH_DAYS,
-    { verb: "Added", dateOf: (x) => x && (x.freshDate || x.released) }) || "Newly added to streaming");
+    { verb: "Added", past: "in the past", dateOf: (x) => x && (x.freshDate || x.released) }) || "Newly added to streaming");
   html = replaceBetween(html, "OCOUNT", counts.ott);
   // The SSR markers wrap the ENTIRE <script> element (never sit inside it): HTML
   // comments are NOT stripped inside <script>, so markers inside the tag made the
