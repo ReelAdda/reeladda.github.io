@@ -2277,6 +2277,34 @@ async function main() {
     await sleep(150);
   }
 
+  // Theatre pool for the language pages. The homepage keeps its 7 slots; the bench is the
+  // set of films that cleared the same quality bar and simply lost a slot to the quota, so
+  // a Malayalam film that was never going to beat three Hindi films for a homepage place
+  // still belongs on /malayalam/. Capped per language and enriched only for languages that
+  // have a page, so this costs nothing on countries without one.
+  const langTheatres = {};
+  {
+    const PAGE_LANGS_T = new Set(LANGUAGE_PAGES.map(([name]) => name));
+    const THEATRE_POOL_MAX = 6;
+    const onPage = new Set(theatres.map((t) => t.tmdbId));
+    for (const m of bench) {
+      if (THEATRE_EXCLUDE_IDS.has(m.id)) continue;
+      const name = langName(langCode(m));
+      if (!PAGE_LANGS_T.has(name)) continue;
+      const already = (langTheatres[name] || []).length + theatres.filter((t) => t.language === name).length;
+      if (already >= THEATRE_POOL_MAX) continue;
+      const item = { ...baseItem(m, "movie"), platform: "Theatres" };
+      try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); withImdb(item); }
+      catch (e) { console.warn(`enrich bench movie ${m.id}: ${e.message}`); continue; }
+      if (item.theatrical === false) continue;      // same digital-only gate as the homepage
+      if (onPage.has(item.tmdbId)) continue;        // already shown, don't duplicate
+      (langTheatres[name] = langTheatres[name] || []).push(item);
+      await sleep(150);
+    }
+    for (const [name, list] of Object.entries(langTheatres))
+      console.log(`  theatre-pool ${name}: +${list.length} beyond the homepage`);
+  }
+
   // ---------- TOP 10 ON OTT (international + fresh regional, IMDb-ranked, max 10) ----------
   // International from global trending (inherently fresh); regional from per-language
   // discover gated to recent releases so we never resurface all-time classics. Both
@@ -2393,11 +2421,27 @@ async function main() {
 
   // --- Regional pool: per-language discover, gated to recent releases (anti-staleness),
   //     Hindi first, IMDb-ranked. This is what surfaces fresh Hindi/regional OTT shows
-  //     that never trend globally. ---
+  //     that never trend globally.
+  //
+  //     FETCHING IS NOW DECOUPLED FROM SLOTTING. The loop used to break the moment the
+  //     homepage's 4 regional slots were full, which meant Hindi and Tamil consumed the
+  //     budget and the discover call for Malayalam, Kannada, Telugu, Punjabi, Marathi and
+  //     Bengali was NEVER MADE. /malayalam/ and /kannada/ rendered one film each not
+  //     because those languages had a quiet week but because nothing ever asked TMDB about
+  //     them. Every language in ottRegionalLangs is now queried on every run; the homepage
+  //     cap is unchanged and applied afterwards, and the full per-language pool is carried
+  //     out on langPool for the language pages to draw on. ---
   const regionalOrder = cfg.ottRegionalLangs || [];
-  const regional = [];
+  // Languages that have their own landing page need a pool deep enough to fill one; the
+  // rest only need enough candidates to compete for a homepage slot. Depth is bounded
+  // either way — each built item costs an enrich call, so this is the cost dial.
+  const PAGE_LANGS = new Set(LANGUAGE_PAGES.map(([name]) => name));
+  const CAND_CAP = 12;       // candidates per language that get a rating lookup
+  const POOL_DEEP = 8;       // built items kept for a language that has a landing page
+  const POOL_SHALLOW = 3;    // built items kept for a language that does not
+  const langPool = {};       // langName -> built OTT items, best-first (page data, not homepage)
+  const regionalByLang = new Map();
   for (const lang of regionalOrder) {
-    if (regional.length >= OTT_REGIONAL_TARGET) break;
     let cands = [];
     for (const kind of ["tv", "movie"]) {
       const dateField = kind === "tv" ? "first_air_date.gte" : "primary_release_date.gte";
@@ -2415,7 +2459,13 @@ async function main() {
       } catch (e) { console.warn(`ott-regional ${lang}/${kind}: ${e.message}`); }
     }
     cands = cands.filter((c) => !usedIds.has(c.id) && !isExcluded(c));
-    for (const c of cands) { await attachImdb(c); await sleep(150); }
+    // Trim by raw popularity BEFORE the rating lookups. Running every language now means
+    // ~8x the candidates, and attachImdb costs a detail call each; the titles below the
+    // popularity cap were never going to win a slot or a pool place. No-op in TMDB mode
+    // beyond the trim itself, where attachImdb returns immediately.
+    cands.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    cands = cands.slice(0, CAND_CAP);
+    for (const c of cands) { await attachImdb(c); if (USE_IMDB) await sleep(150); }
     // Quality floor on the best rating we have: IMDb if present, else TMDB. A film is
     // only allowed through unfloored when it has NO usable rating at all (genuinely too
     // new to judge) — then popularity decides. This stops mediocre thin-data films from
@@ -2429,12 +2479,35 @@ async function main() {
       .filter((c) => !isSuspicious(c)) // drop fake/manipulated entries
       .filter((c) => { const r = ottRating(c); return r == null || r >= 5.5; })
       .sort((a, b) => weighted402535(b) - weighted402535(a));
+    const name = langName(lang);
+    const depth = PAGE_LANGS.has(name) ? POOL_DEEP : POOL_SHALLOW;
+    const built = [];
     for (const c of cands) {
-      if (regional.length >= OTT_REGIONAL_TARGET) break;
+      if (built.length >= depth) break;
       if (usedIds.has(c.id)) continue;
-      try { const it = await buildOttItem(c); if (it) { regional.push(it); usedIds.add(c.id); } }
+      try { const it = await buildOttItem(c); if (it) built.push(it); }
       catch (e) { console.warn(`ott-regional-build ${c.id}: ${e.message}`); }
       await sleep(150);
+    }
+    if (built.length) {
+      langPool[name] = built;
+      regionalByLang.set(lang, built);
+      console.log(`  ott-pool ${lang} (${name}): ${built.length} title(s)`);
+    }
+  }
+
+  // Homepage regional slots: unchanged cap, filled in the config's language priority order
+  // so Hindi still leads. Everything not selected stays in langPool for the language pages,
+  // which is the whole point of fetching it. usedIds is only marked for the titles that
+  // actually take a homepage slot, so a pool title can still appear on its language page.
+  const regional = [];
+  for (const lang of regionalOrder) {
+    if (regional.length >= OTT_REGIONAL_TARGET) break;
+    for (const it of regionalByLang.get(lang) || []) {
+      if (regional.length >= OTT_REGIONAL_TARGET) break;
+      if (usedIds.has(it.tmdbId)) continue;
+      regional.push(it);
+      usedIds.add(it.tmdbId);
     }
   }
 
@@ -2611,12 +2684,24 @@ async function main() {
     const dropped = comingSoon.filter((x) => !upcoming.includes(x) && !upcoming.some((u) => u.tmdbId === x.tmdbId));
     for (const x of dropped) console.log(`[${cfg.code}] coming-soon: dropped "${x.title}" — release date ${x.released} has passed`);
   }
-  const data = { generatedAt: new Date().toISOString(), country: cfg.code, pick: pick ? pick.title : null, theatres, ott, comingSoon: upcoming };
+  // langPools carries the per-language surplus — titles that cleared the quality bar but lost
+  // a homepage slot to the quota. The homepage never reads it; buildLanguagePage does, which
+  // is what stops /malayalam/ and /kannada/ from being one-film pages. Only populated for
+  // languages that have a landing page, so it is absent on countries without them.
+  const langPools = {};
+  for (const [name] of LANGUAGE_PAGES) {
+    const t = (langTheatres[name] || []).filter((x) => !ottIds.has(x.tmdbId));
+    const o = (langPool[name] || []).filter((x) => !ott.some((y) => y.tmdbId === x.tmdbId));
+    if (t.length || o.length) langPools[name] = { theatres: t, ott: o };
+  }
+  const data = { generatedAt: new Date().toISOString(), country: cfg.code, pick: pick ? pick.title : null, theatres, ott, comingSoon: upcoming, langPools };
   // Strip internal-only fields (ranking helpers) so they never reach the data file.
-  for (const list of [data.theatres, data.ott, data.comingSoon]) {
+  const poolLists = Object.values(langPools).flatMap((p) => [p.theatres, p.ott]);
+  for (const list of [data.theatres, data.ott, data.comingSoon, ...poolLists]) {
     for (const it of list) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; delete it._imdbRating; delete it._imdbVotes; delete it._w; }
   }
-  console.log(`[${cfg.code}] ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming. Pick: ${data.pick}`);
+  const poolCount = poolLists.reduce((n, l) => n + l.length, 0);
+  console.log(`[${cfg.code}] ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming, ${poolCount} language-page extras. Pick: ${data.pick}`);
   return data;
   } // end buildCountry
 
@@ -4400,8 +4485,29 @@ function buildLanguagePage(data, langName, slug) {
   const gen = data.generatedAt || new Date().toISOString();
   const monthYear = new Date(gen).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
   const updatedHuman = new Date(gen).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  // Homepage titles in this language, PLUS the per-language pool built for exactly this page
+  // (see langPools in buildCountry). Before the pool existed these pages were a pure filter
+  // over a 7-slot theatre list and a 10-slot OTT list assembled for a mixed-language homepage,
+  // which is how /malayalam/ and /kannada/ ended up rendering a single film each. Homepage
+  // titles keep their order and lead; pool titles follow, deduped by tmdbId.
   const of = (k) => (data[k] || []).filter((x) => x && x.language === langName);
-  const theatres = of("theatres"), ott = of("ott");
+  const pool = (data.langPools && data.langPools[langName]) || { theatres: [], ott: [] };
+  const merge = (primary, extra) => {
+    const seen = new Set(primary.map((x) => x.tmdbId));
+    const out = [...primary];
+    for (const x of extra || []) {
+      if (!x || seen.has(x.tmdbId)) continue;
+      seen.add(x.tmdbId);
+      out.push(x);
+    }
+    return out;
+  };
+  const theatres = merge(of("theatres"), pool.theatres);
+  const ott = merge(of("ott"), pool.ott);
+  // A page with almost nothing on it must not promise "every" title — that is a completeness
+  // claim it cannot back, and thin-content-plus-overclaim is the worst combination to put in
+  // front of a crawler. Below the threshold the copy softens and says so plainly instead.
+  const thin = theatres.length + ott.length < 3;
   const soon = normalizeUpcoming(of("comingSoon")); // never list a passed date under "Coming soon"
   const faqs = [];
   if (ott.length) faqs.push({
@@ -4433,11 +4539,15 @@ function buildLanguagePage(data, langName, slug) {
   }];
   return listingPageHtml({
     title: `New ${langName} Movies & OTT Releases This Week (${monthYear}) | FilmyChill`,
-    desc: `Every new ${langName} movie in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`,
+    desc: thin
+      ? `New ${langName} movies in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`
+      : `Every new ${langName} movie in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`,
     canonical: url,
     h1: `New ${langName} Movies & OTT This Week`,
     updLine: `Updated ${updatedHuman} · refreshed twice daily`,
-    lead: `Every ${langName} title that hit theatres or started streaming this week, ranked and rated — plus what's coming next.`,
+    lead: thin
+      ? `The ${langName} titles in theatres and on OTT right now, ranked and rated — plus what's coming next. A quiet week for ${langName}; this page fills out as more lands.`
+      : `Every ${langName} title that hit theatres or started streaming this week, ranked and rated — plus what's coming next.`,
     sections: [
       { h2: "In theatres", items: theatres },
       { h2: "Streaming now", items: ott },
@@ -5165,3 +5275,4 @@ module.exports = {
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
+
