@@ -67,6 +67,7 @@ const {
   runtimePhrase,
   whyWatch,
 } = require("./lib/whywatch.js");
+const { skipIf } = require("./lib/skipif.js");
 
 
 const { watchFit } = require("./lib/watchfit.js");
@@ -3178,6 +3179,15 @@ ${(() => {
      rather than another metadata row. */
   .whywatch { font-size:15px; line-height:1.7; background:var(--bg); border-left:3px solid var(--marigold);
               padding:12px 14px; border-radius:0 10px 10px 0; margin-top:8px; }
+  /* Skip block: deliberately quieter than the fit line — muted rule, no fill, smaller type.
+     It is the counterweight to everything above it, not a warning banner. Shouting would
+     make it read as a content advisory; it is a preference mismatch, which is calmer. */
+  .skipif { margin-top:14px; padding:12px 14px; border-left:3px solid var(--mute);
+            border-radius:0 10px 10px 0; background:rgba(0,0,0,.02); }
+  .skipif h3 { font-size:13px; letter-spacing:.02em; text-transform:uppercase; color:var(--mute);
+               margin:0 0 8px; font-weight:700; }
+  .skipif ul { margin:0; padding-left:18px; }
+  .skipif li { font-size:14.5px; line-height:1.65; margin:4px 0; }
   .take { font-size:14.5px; font-weight:600; color:var(--indigo); line-height:1.6; margin-top:10px; }
   .tsrc { color:var(--mute); font-weight:400; font-size:12px; }
   .hook { font-size:13.5px; color:var(--mute); font-style:italic; margin-top:8px; }
@@ -3273,6 +3283,17 @@ ${(() => {
     // by this point the reader knows if it's good — this answers whether it's for them.
     const ww = whyWatch(item);
     return ww ? `<h2>${e(ww.heading)}</h2><p class="whywatch">${e(ww.text)}</p>` : "";
+  })()}
+  ${(() => {
+    // Skip block (see lib/skipif.js). Sits immediately after the fit line, because the two
+    // are one argument: here is who this is for, and here is who it is not for. Every other
+    // block on this page argues for watching; a page that never says "not you" is a page a
+    // reader learns to discount. Returns null on most films, and that is intended.
+    const skip = skipIf(item);
+    if (!skip) return "";
+    return `<div class="skipif"><h3>Don't watch this if\u2026</h3><ul>`
+      + skip.map((r) => `<li>${e(r)}</li>`).join("")
+      + `</ul></div>`;
   })()}
   ${(() => {
     // The scannable house format (lib/watchfit.js): same three rows, same order, on every

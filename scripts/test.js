@@ -3109,6 +3109,55 @@ test("a pool item never collides with a homepage slug", () => {
   assert.notStrictEqual(data.theatres[0].slug, data.ottExtra[0].slug);
 });
 
+group("skipIf() — the honest counterweight");
+const { skipIf } = require("./lib/skipif.js");
+const _sf = (o) => ({ title: "T", tmdbId: 7, rating: 7.5, votes: 500, runtime: 100, kind: "movie", ...o });
+test("returns null when fewer than two honest reasons hold", () => {
+  assert.strictEqual(skipIf(_sf({})), null);
+  assert.strictEqual(skipIf(_sf({ runtime: 200 })), null, "one reason alone is an afterthought");
+});
+test("a long adults-only film gets both reasons", () => {
+  const r = skipIf(_sf({ runtime: 195, cert: "A" }));
+  assert.ok(r && r.length >= 2);
+  assert.ok(r.some((x) => /3h/.test(x)) && r.some((x) => /\bA\b/.test(x)));
+});
+test("never restates the verdict the page already shows", () => {
+  // rating == null means the page is already displaying "verdict soon". Repeating it here
+  // would violate rule 3 and would fire on nearly every film on a this-week site.
+  const r = skipIf(_sf({ rating: null, votes: 3, runtime: 190, cert: "A" })) || [];
+  assert.ok(!r.some((x) => /too new|consensus|still settling|votes so far/i.test(x)));
+});
+test("low-vote confidence fires only when a rating is actually displayed", () => {
+  const r = skipIf(_sf({ rating: 8.1, votes: 20, runtime: 160 })) || [];
+  assert.ok(r.some((x) => /20 votes|still settling|consensus/i.test(x)));
+});
+test("genre alone is never a reason (rule 2)", () => {
+  const r = skipIf(_sf({ genre: "Horror / Thriller", cert: "U/A 13+", runtime: 95 }));
+  assert.strictEqual(r, null, "Horror on a horror film is not information");
+  const combo = skipIf(_sf({ genre: "Horror", cert: "A", runtime: 95, rating: 7.5, votes: 500 })) || [];
+  assert.ok(combo.length >= 2, "horror + adults-only certificate does say something");
+});
+test("a long-running series warns about the commitment", () => {
+  const r = skipIf(_sf({ kind: "tv", seasons: 5, cert: "A", runtime: 0 })) || [];
+  assert.ok(r.some((x) => /5 seasons|5-season/.test(x)));
+});
+test("rent-or-buy-only is surfaced; subscription titles are not", () => {
+  const paid = skipIf(_sf({ rentBuy: ["Apple TV"], providers: [], runtime: 165 })) || [];
+  assert.ok(paid.some((x) => /rent-or-buy|per film/i.test(x)));
+  const sub = skipIf(_sf({ rentBuy: ["Apple TV"], providers: ["Netflix"], runtime: 165, cert: "A" })) || [];
+  assert.ok(!sub.some((x) => /rent-or-buy|per film/i.test(x)));
+});
+test("variants are stable across builds but differ between films", () => {
+  const a = _sf({ tmdbId: 1, runtime: 200, cert: "A" }), b = _sf({ tmdbId: 2, runtime: 200, cert: "A" });
+  assert.deepStrictEqual(skipIf(a), skipIf(a), "same film must not churn the git diff");
+  assert.notDeepStrictEqual(skipIf(a), skipIf(b), "different films must not read identically");
+});
+test("never emits more than the cap", () => {
+  const r = skipIf(_sf({ runtime: 200, cert: "A", rating: 8, votes: 5, seasons: 6, kind: "tv",
+    genre: "Horror", take: "Critics are split down the middle.", rentBuy: ["X"], providers: [] }));
+  assert.ok(r.length <= 4);
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");
