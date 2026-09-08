@@ -1907,24 +1907,58 @@ test("platformSlug: clean, collision-safe slugs incl. overrides", () => {
   assert.strictEqual(U.platformSlug("Amazon Prime Video"), "prime-video");
   assert.strictEqual(U.platformSlug("Disney+"), "disney-plus");
 });
-test("hubsFor: groups by every provider, min-3 density, cap 5, keeps rank order", () => {
+test("hubsFor: groups by every provider, min-4 to create, cap 5, keeps rank order", () => {
   const mk = (slug, provs) => ({ title: slug, slug, platform: provs[0], providers: provs });
   const hubs = U.hubsFor({ ott: [mk("a", ["Netflix", "JioHotstar"]), mk("b", ["Netflix"]), mk("c", ["Netflix"]),
-    mk("d", ["JioHotstar"]), mk("e", ["JioHotstar"]), mk("f", ["Zee5"]), mk("g", ["Zee5"])] });
+    mk("h", ["Netflix"]), mk("d", ["JioHotstar"]), mk("e", ["JioHotstar"]), mk("i", ["JioHotstar"]),
+    mk("f", ["Zee5"]), mk("g", ["Zee5"])] });
   assert.deepStrictEqual(hubs.map((h) => h.name).sort(), ["JioHotstar", "Netflix"]);
-  assert.deepStrictEqual(hubs.find((h) => h.name === "Netflix").items.map((x) => x.slug), ["a", "b", "c"]);
+  assert.deepStrictEqual(hubs.find((h) => h.name === "Netflix").items.map((x) => x.slug), ["a", "b", "c", "h"]);
+});
+test("hubsFor: reads ottExtra, not just the capped homepage list", () => {
+  const mk = (slug, provs) => ({ title: slug, slug, tmdbId: slug.charCodeAt(0), platform: provs[0], providers: provs });
+  const data = { ott: [mk("a", ["Netflix"]), mk("b", ["Netflix"])],
+                 ottExtra: [mk("c", ["Netflix"]), mk("d", ["Netflix"])] };
+  assert.deepStrictEqual(U.hubsFor(data).map((h) => h.name), ["Netflix"]);
+  assert.strictEqual(U.hubsFor({ ott: data.ott }).length, 0, "two titles alone must not mint a hub");
+});
+test("hubsFor: provider variants collapse to one service", () => {
+  // "Apple TV" + "Apple TV Amazon Channel" is one destination to a viewer. Split across two
+  // buckets it cleared no threshold; it also minted /new-on-amazon-prime-video-with-ads/,
+  // a URL named after a billing tier.
+  const mk = (slug, provs) => ({ title: slug, slug, tmdbId: slug.charCodeAt(0), platform: provs[0], providers: provs });
+  const hubs = U.hubsFor({ ott: [mk("a", ["Apple TV"]), mk("b", ["Apple TV Amazon Channel"]),
+    mk("c", ["Apple TV+"]), mk("d", ["Apple TV"])] });
+  assert.deepStrictEqual(hubs.map((h) => h.name), ["Apple TV"]);
+  assert.strictEqual(hubs[0].items.length, 4);
+  assert.strictEqual(U.platformSlug("Amazon Prime Video with Ads"), "prime-video");
+  assert.strictEqual(U.platformSlug("Netflix Standard with Ads"), "netflix");
+});
+test("hubsFor: an existing hub survives on the lower keep threshold", () => {
+  const mk = (slug, provs) => ({ title: slug, slug, tmdbId: slug.charCodeAt(0), platform: provs[0], providers: provs });
+  const data = { ott: [mk("a", ["Netflix"]), mk("b", ["Netflix"]), mk("c", ["Netflix"])] };
+  assert.strictEqual(U.hubsFor(data).length, 0, "3 titles must not CREATE a hub");
+  assert.strictEqual(U.hubsFor(data, new Set(["netflix"])).length, 1, "3 titles must KEEP an existing hub");
+  const two = { ott: [mk("a", ["Netflix"]), mk("b", ["Netflix"])] };
+  assert.strictEqual(U.hubsFor(two, new Set(["netflix"])).length, 0, "2 titles must not survive either");
+});
+test("hubsFor: a title on the same provider twice is counted once", () => {
+  const dup = { title: "a", slug: "a", tmdbId: 1, platform: "Netflix", providers: ["Netflix"] };
+  const data = { ott: [dup, { ...dup, tmdbId: 2, slug: "b", title: "b" }], ottExtra: [dup] };
+  const hubs = U.hubsFor(data, new Set(["netflix"]));
+  assert.strictEqual(hubs.length, 0, "the duplicate must not inflate the count to 3");
 });
 test("buildPlatformHubPage: title, country-scoped links, ItemList + FAQ, no emoji", () => {
   const mk = (slug, r) => ({ title: slug.toUpperCase(), slug, kind: "movie", platform: "Netflix", providers: ["Netflix"], rating: r, votes: 100, language: "English", genre: "Drama" });
-  const data = { generatedAt: "2026-07-19T04:00:00Z", ott: [mk("aaa", 8.2), mk("bbb", 7.1), mk("ccc", 6.4)] };
+  const data = { generatedAt: "2026-07-19T04:00:00Z", ott: [mk("aaa", 8.2), mk("bbb", 7.1), mk("ccc", 6.4), mk("ddd", 6.1)] };
   const html = U.buildPlatformHubPage(data, { code: "us", name: "United States" }, U.hubsFor(data)[0]);
   assert.ok(/New on Netflix/.test(html) && html.includes('href="/us/movie/aaa.html"'));
-  assert.ok(html.includes('"ItemList"') && html.includes('"numberOfItems":3'));
+  assert.ok(html.includes('"ItemList"') && html.includes('"numberOfItems":4'));
   assert.ok(!/[\u{1F300}-\u{1FAFF}]/u.test(html));
 });
 test("indexNowUrls: hubs, this week's film pages, llms-full ride the ping; deduped", () => {
   const urls = U.indexNowUrls([{ code: "in" }], { in: { theatres: [{ slug: "the-odyssey" }],
-    ott: [{ slug: "p", title: "P", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "b", title: "B", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "c", title: "C", platform: "JioHotstar", providers: ["JioHotstar"] }] } });
+    ott: [{ slug: "p", title: "P", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "b", title: "B", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "c", title: "C", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "d", title: "D", platform: "JioHotstar", providers: ["JioHotstar"] }] } });
   assert.ok(urls.includes("https://filmychill.com/movie/the-odyssey.html") && urls.includes("https://filmychill.com/new-on-jiohotstar/") && urls.includes("https://filmychill.com/llms-full.txt"));
   assert.strictEqual(new Set(urls).size, urls.length);
 });
