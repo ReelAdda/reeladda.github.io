@@ -2943,6 +2943,48 @@ test("streaming uses the full 45-day gate as its bound", () => {
   assert.strictEqual(U.freshnessWindowLabel([{ freshDate: _fwAgo(46) }], _FW_NOW, U.OTT_FRESH_DAYS, _OTT), null);
 });
 
+group("language pages — fed by langPools, not homepage leftovers");
+const _lp = (t, lang, id, extra = {}) => ({
+  title: t, language: lang, tmdbId: id, slug: t.toLowerCase().replace(/\W+/g, "-"),
+  rating: 7.2, votes: 400, released: "2026-09-01", kind: "movie", ...extra,
+});
+const _lpData = (langPools) => ({
+  generatedAt: "2026-09-08T06:00:00Z",
+  theatres: [_lp("Toxic", "Kannada", 1)], ott: [], comingSoon: [], langPools,
+});
+test("pool titles are added to the page, not just homepage leftovers", () => {
+  const html = U.buildLanguagePage(_lpData({
+    Kannada: { theatres: [_lp("Bench A", "Kannada", 2)], ott: [_lp("Stream One", "Kannada", 3)] },
+  }), "Kannada", "kannada");
+  assert.ok(html.includes("Toxic"), "homepage title must still appear");
+  assert.ok(html.includes("Bench A"), "pool theatre title must appear");
+  assert.ok(html.includes("Stream One"), "pool OTT title must appear");
+});
+test("a pool title already on the homepage is not duplicated", () => {
+  // Regression: the first cut used `!seen.add(id)` as a filter guard. Set.add returns the
+  // Set, which is truthy, so the guard was always false and NOTHING merged. Guard both ways.
+  const html = U.buildLanguagePage(_lpData({
+    Kannada: { theatres: [_lp("Toxic", "Kannada", 1)], ott: [] },
+  }), "Kannada", "kannada");
+  assert.ok(html.includes("Toxic"));
+  assert.ok((html.match(/>Toxic</g) || []).length <= 2, "Toxic must not render twice");
+});
+test("missing langPools (countries without language pages) does not throw", () => {
+  const bare = { generatedAt: "2026-09-08T06:00:00Z", theatres: [_lp("X", "Tamil", 9)], ott: [], comingSoon: [] };
+  assert.doesNotThrow(() => U.buildLanguagePage(bare, "Tamil", "tamil"));
+});
+test("a thin page never claims to list EVERY title", () => {
+  const html = U.buildLanguagePage(_lpData({}), "Kannada", "kannada");
+  assert.ok(!/Every Kannada title/.test(html), "one-film page must not overclaim completeness");
+  assert.ok(!/Every new Kannada movie/.test(html), "thin meta description must not overclaim");
+});
+test("a filled-out page still makes the completeness claim", () => {
+  const html = U.buildLanguagePage(_lpData({
+    Kannada: { theatres: [_lp("Bench A", "Kannada", 2)], ott: [_lp("Stream One", "Kannada", 3)] },
+  }), "Kannada", "kannada");
+  assert.ok(/Every Kannada title/.test(html), "a substantial page keeps the stronger lead");
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");
