@@ -3158,6 +3158,34 @@ test("never emits more than the cap", () => {
   assert.ok(r.length <= 4);
 });
 
+group("shortenTitleTag() — archive title sweep");
+const _pg = (t) => `<head><title>${t}</title><meta property="og:title" content="${t}"></head>`;
+test("drops decoration until the title fits the 60-char budget", () => {
+  const r = U.shortenTitleTag(_pg("Aligned Apart (2026) &mdash; Review, Rating &amp; Where to Watch in India | FilmyChill".replace("&mdash;", "\u2014")), "India", { code: "in" });
+  assert.ok(r.changed);
+  assert.ok(r.html.match(/<title>([\s\S]*?)<\/title>/)[1].replace(/&amp;/g, "&").length <= 60);
+});
+test("leaves a title that already fits completely alone", () => {
+  const html = _pg("Alpha (2026) \u2014 Review");
+  assert.deepStrictEqual(U.shortenTitleTag(html, "India", { code: "in" }), { html, changed: false });
+});
+test("never lengthens a title it cannot fix", () => {
+  // The film's own name exceeds the budget — nothing left to trim, so leave it be.
+  const long = "Operation Safed Sagar: The Untold Story of the Kargil War (2026) \u2014 Review";
+  const r = U.shortenTitleTag(_pg(long), "India", { code: "in" });
+  assert.strictEqual(r.changed, false);
+});
+test("leaves an unrecognised title shape untouched rather than mangling it", () => {
+  const html = _pg("Some Completely Different Title Format That We Have Never Emitted Before");
+  assert.strictEqual(U.shortenTitleTag(html, "India", { code: "in" }).changed, false);
+});
+test("og:title is rewritten in step with the title tag", () => {
+  const r = U.shortenTitleTag(_pg("Ananthan Kaadu (2026) \u2014 Review, Rating &amp; Where to Watch in India | FilmyChill"), "India", { code: "in" });
+  const t = r.html.match(/<title>([\s\S]*?)<\/title>/)[1];
+  const og = r.html.match(/og:title" content="([^"]*)"/)[1];
+  assert.strictEqual(t, og, "the social title must not drift from the search title");
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");

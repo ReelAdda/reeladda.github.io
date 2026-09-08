@@ -4108,7 +4108,9 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 // Returns { html, changed }. No-op for OTT pages (their availability claims stay valid).
 // Bump when new patch patterns are added: already-archived pages get one re-sweep so
 // the fix reaches pages frozen before the pattern existed.
-const ARCHIVE_PATCH_VERSION = 3;
+// Bumped to 4 for the title-length sweep: pv-stamped pages below this version get one
+// re-pass so the archive picks up the 60-char cascade it was written before.
+const ARCHIVE_PATCH_VERSION = 4;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
@@ -4147,6 +4149,67 @@ const ARCHIVE_LEAD_SWAPS = [
    "ranked near the top of that week&#39;s $1 crop"],
 ];
 
+// Rewrite an over-long <title> (and its og:title twin) on a page already on disk.
+//
+// Film pages are only regenerated while the film is in a current list. Once it leaves, the
+// page is frozen — so every template improvement reaches only the ~5% of pages live that
+// week, and the archive keeps whatever was correct on the day it was written. The 60-char
+// title cascade shipped in August; 115 of 115 July pages are still stamped with the old
+// long form and would have stayed that way permanently.
+//
+// This reconstructs the film's own name from the frozen title by stripping the known
+// suffixes, then re-runs the same cascade the live builder uses. No TMDB call — everything
+// needed is already in the string. Pages already inside the budget are left untouched.
+const TITLE_SUFFIXES = [
+  / — Review, Rating & Where to Watch in .+? \| FilmyChill$/,
+  / — Review, Rating & Where to Watch in .+?$/,
+  / — Review & Where to Watch in .+?$/,
+  / — Review & Where to Watch$/,
+  / — Review$/,
+  / (?:OTT Release Date|Streaming Release Date), Review & Where to Watch \| FilmyChill$/,
+  / (?:OTT Release Date|Streaming Release Date), Review & Where to Watch$/,
+  / (?:OTT Release Date|Streaming Release Date) & Review$/,
+  / (?:OTT Release Date|Streaming Release Date)$/,
+];
+function shortenTitleTag(html, countryName, cfg = null) {
+  const TITLE_BUDGET = 60;
+  const m = html.match(/<title>([\s\S]*?)<\/title>/);
+  if (!m) return { html, changed: false };
+  const decode = (t) => t.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+  const current = decode(m[1]);
+  if (current.length <= TITLE_BUDGET) return { html, changed: false };
+
+  let stem = current;
+  for (const re of TITLE_SUFFIXES) {
+    if (re.test(stem)) { stem = stem.replace(re, ""); break; }
+  }
+  // No recognised suffix means an unknown shape — leave it alone rather than mangle it.
+  if (stem === current || !stem.trim()) return { html, changed: false };
+
+  const V = streamVocab(cfg);
+  const wasOtt = /(?:OTT|Streaming) Release Date/.test(current);
+  const opts = wasOtt
+    ? [`${stem} ${V.titleFragment}, Review & Where to Watch | FilmyChill`,
+       `${stem} ${V.titleFragment}, Review & Where to Watch`,
+       `${stem} ${V.titleFragment} & Review`,
+       `${stem} ${V.titleFragment}`]
+    : [`${stem} — Review, Rating & Where to Watch in ${countryName} | FilmyChill`,
+       `${stem} — Review, Rating & Where to Watch in ${countryName}`,
+       `${stem} — Review & Where to Watch in ${countryName}`,
+       `${stem} — Review & Where to Watch`,
+       `${stem} — Review`];
+  const next = opts.find((t) => t.length <= TITLE_BUDGET) || opts[opts.length - 1];
+  // Never lengthen. When the film's own name already exceeds the budget there is nothing
+  // left to trim, and the shortest cascade option can still come out longer than whatever
+  // was frozen on the page. Leaving the original alone is the right answer there.
+  if (next === current || next.length >= current.length) return { html, changed: false };
+
+  const esc = escHtml(next);
+  let out = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc}</title>`);
+  out = out.replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${esc}$2`);
+  return { html: out, changed: true };
+}
+
 function archivePatchHtml(html, countryName, cfg = null) {
   const V = streamVocab(cfg);
   // Pages frozen BEFORE the per-country vocabulary split carry India's "OTT" wording
@@ -4176,6 +4239,8 @@ function archivePatchHtml(html, countryName, cfg = null) {
     if (re.test(out)) { out = out.replace(re, to); changed = true; }
     re.lastIndex = 0; // global regexes are stateful across .test/.replace calls
   }
+  const t = shortenTitleTag(out, countryName, cfg);
+  if (t.changed) { out = t.html; changed = true; }
   return { html: out, changed };
 }
 
@@ -5468,6 +5533,7 @@ module.exports = {
   reseedTake, isPoolTake, isLegacyTake, mineViewerAspects, composeTmdbTake, dedupeProviders, rankSimilar, TAKE_VERSION, xDefaultCode, repairXDefaults,
   capTrending, buildEditorNote, ssrEditorNote,
   platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls, poolItems,
+  shortenTitleTag,
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
