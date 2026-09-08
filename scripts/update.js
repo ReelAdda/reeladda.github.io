@@ -2192,10 +2192,30 @@ async function main() {
     s.p = Math.max(s.p, Math.log10((m.popularity || 0) + 1));
     cohortStats.set(L, s);
   }
+  // Median scale across the language cohorts — what a TYPICAL language looks like in this
+  // pool, as opposed to what the biggest one looks like.
+  const medianCohort = (key) => {
+    const xs = [...cohortStats.values()].filter((s) => s.n >= MIN_COHORT).map((s) => s[key]).sort((a, b) => a - b);
+    if (!xs.length) return null;
+    return xs[Math.floor(xs.length / 2)];
+  };
+  const medV = medianCohort("v"), medP = medianCohort("p");
+
   const scaleFor = (m, key, globalMax) => {
     const s = cohortStats.get(langCode(m) || "??");
-    if (!s || s.n < MIN_COHORT) return globalMax;
-    const cohort = Math.max(s[key], COHORT_FLOOR * globalMax) || globalMax;
+    // A cohort too thin to have a meaningful max of its own does NOT fall back to the global
+    // max — that is the Western-skewed quantity this whole mechanism exists to neutralise, so
+    // falling back to it silently disabled the fix for exactly the languages that needed it.
+    // Observed in production on 8 Sept 2026: Kannada had ONE film in the pool, so the highest-
+    // rated film of the week (8.0) was scored against Hollywood's vote counts and stayed at
+    // position 5 while a 6.4 English title led the page. Fall back to the median cohort scale
+    // instead: harsher than the language's own max (which would hand a lone film a free 1.0),
+    // far fairer than the global max.
+    const med = key === "v" ? medV : medP;
+    let cohort;
+    if (s && s.n >= MIN_COHORT) cohort = Math.max(s[key], COHORT_FLOOR * globalMax);
+    else if (med != null) cohort = Math.max(med, COHORT_FLOOR * globalMax);
+    else return globalMax;
     return COHORT_BLEND * cohort + (1 - COHORT_BLEND) * globalMax;
   };
 
@@ -2759,7 +2779,7 @@ async function main() {
     const data = await buildCountry(cfg);
     assignSlugs(data);
     dataByCode[cfg.code] = data;
-    const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || [])];
+    const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || []), ...poolItems(data)];
     allSlugSets[cfg.code] = new Set(all.map((x) => x.slug).filter(Boolean));
     builtCountries.push(cfg);
   }
@@ -2886,9 +2906,28 @@ if (!process.env.PAGES_ONLY && require.main === module) main().catch((e) => {
 // ============================================================
 
 
+// Every item the site renders anywhere, including the language-page and /new-on-ott/ pools.
+// These are real enriched films, but they live outside data.theatres/ott/comingSoon, so any
+// loop that hardcodes those three lists silently skips them. That is how pool titles ended up
+// on /malayalam/ as unlinked plain text with slug === undefined, and how some were dropped
+// outright by `.filter(x => x.slug)` further downstream.
+function poolItems(data) {
+  if (!data) return [];
+  const out = [...(data.ottExtra || [])];
+  for (const p of Object.values(data.langPools || {})) out.push(...(p.theatres || []), ...(p.ott || []));
+  const seen = new Set();
+  return out.filter((x) => {
+    if (!x) return false;
+    if (x.tmdbId == null) return true;
+    if (seen.has(x.tmdbId)) return false;
+    seen.add(x.tmdbId);
+    return true;
+  });
+}
+
 function assignSlugs(data) {
   const used = new Map(); // slug -> tmdbId
-  for (const list of [data.theatres, data.ott, data.comingSoon]) {
+  for (const list of [data.theatres, data.ott, data.comingSoon, poolItems(data)]) {
     for (const item of list || []) {
       let slug = slugify(item.title) || `film-${item.tmdbId || ""}`;
       const year = (item.released || "").slice(0, 4);
@@ -3331,7 +3370,9 @@ function generatePages(data, cfg, allSlugSets) {
   const dir = code === "in" ? "movie" : `${code}/movie`;
   const asOf = (data.generatedAt || new Date().toISOString()).slice(0, 10);
   fs.mkdirSync(dir, { recursive: true });
-  const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || [])];
+  // Pool items get film pages too. Without them the language pages and /new-on-ott/ would
+  // link to slugs that 404, which is worse than the unlinked text they rendered before.
+  const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || []), ...poolItems(data)];
   // Slugs that resolve to a real page in THIS country: this run + this country's archive.
   const archived = fs.existsSync(dir)
     ? fs.readdirSync(dir).filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5))
@@ -5405,7 +5446,7 @@ module.exports = {
   theatreEligible, THEATRE_EXCLUDE_IDS,
   reseedTake, isPoolTake, isLegacyTake, mineViewerAspects, composeTmdbTake, dedupeProviders, rankSimilar, TAKE_VERSION, xDefaultCode, repairXDefaults,
   capTrending, buildEditorNote, ssrEditorNote,
-  platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls,
+  platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls, poolItems,
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
