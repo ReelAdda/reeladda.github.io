@@ -2157,10 +2157,52 @@ async function main() {
   const poolForNorm = pool.filter((m) => !isSuspicious(m));
   const maxLogV = Math.max(1, ...poolForNorm.map((m) => Math.log10((m._imdbVotes || m.vote_count || 0) + 1)));
   const maxLogP = Math.max(0.01, ...poolForNorm.map((m) => Math.log10((m.popularity || 0) + 1)));
+
+  // LANGUAGE-COHORT NORMALIZATION. The 35% vote-volume and 25% buzz terms measure how many
+  // people worldwide have logged a film — and TMDB's userbase is heavily Western. Normalizing
+  // those two terms across the whole mixed-language pool therefore compares a Kannada film's
+  // vote count against Hollywood's, which it structurally cannot win: the biggest Kannada
+  // release of the year carries a fraction of the votes of a forgettable English action title.
+  // The result is 60% of the score quietly measuring "is this English?" on a page for India.
+  //
+  // score.js already flags this bias in its header, and REP_BAR above already compensates for
+  // it in the representation gate — this closes the same gap in the ranking itself. Volume and
+  // buzz are now scaled against the film's OWN language cohort, so the term reads "how big is
+  // this film for its language" rather than "how big is this film in America". Rating (40%) is
+  // untouched: it was never the biased part.
+  //
+  // Two guards keep a thin cohort from inflating a weak film to a perfect 1.0:
+  //   - a cohort needs MIN_COHORT films before it gets its own scale, else it uses the global one
+  //   - a cohort scale can't fall below COHORT_FLOOR of the global scale, so a language whose
+  //     films are all tiny doesn't get its biggest tiny film scored like a blockbuster
+  // COHORT_BLEND is partial on purpose. At 1.0 the volume term stops discriminating between
+  // languages entirely — every language's biggest film scores a flat 1.0 — and the page loses
+  // any signal that something is a genuine mass phenomenon rather than merely the largest film
+  // in a small pool. At 0.65 a regional standout can lead the page on merit while a real
+  // blockbuster still carries weight. This is the one number to turn if the balance drifts.
+  const COHORT_BLEND = 0.65;
+  const MIN_COHORT = 3;      // below this the cohort max is noise, not a scale
+  const COHORT_FLOOR = 0.55; // a cohort's scale is at least 55% of the global scale
+  const cohortStats = new Map();
+  for (const m of poolForNorm) {
+    const L = langCode(m) || "??";
+    const s = cohortStats.get(L) || { n: 0, v: 0, p: 0 };
+    s.n += 1;
+    s.v = Math.max(s.v, Math.log10((m._imdbVotes || m.vote_count || 0) + 1));
+    s.p = Math.max(s.p, Math.log10((m.popularity || 0) + 1));
+    cohortStats.set(L, s);
+  }
+  const scaleFor = (m, key, globalMax) => {
+    const s = cohortStats.get(langCode(m) || "??");
+    if (!s || s.n < MIN_COHORT) return globalMax;
+    const cohort = Math.max(s[key], COHORT_FLOOR * globalMax) || globalMax;
+    return COHORT_BLEND * cohort + (1 - COHORT_BLEND) * globalMax;
+  };
+
   const weighted402535 = (m) => {
     const rN = (bestRating(m) ?? PRIOR_C) / 10;
-    const vN = Math.log10((bestVotes(m)) + 1) / maxLogV;
-    const pN = Math.log10((m.popularity || 0) + 1) / maxLogP;
+    const vN = Math.min(1, Math.log10((bestVotes(m)) + 1) / scaleFor(m, "v", maxLogV));
+    const pN = Math.min(1, Math.log10((m.popularity || 0) + 1) / scaleFor(m, "p", maxLogP));
     const base = 0.40 * rN + 0.35 * vN + 0.25 * pN;
     // freshness nudge: scale recencyBonus (0..2) to a small 0..0.10 multiplier-add so the
     // newest films get a slight edge without overriding the quality+popularity signal.
@@ -2202,28 +2244,19 @@ async function main() {
   }
   picks = picks.slice(0, MAX_PICKS).sort((a, b) => weighted402535(b) - weighted402535(a));
 
-  // Soft top-3 reserve: the first three slots prefer English/Hindi (broad-audience lead),
-  // but this is a preference, not a hard quota — if the best available English/Hindi film
-  // is much weaker than a regional film (gap > TOP3_TOLERANCE in quality score), the
-  // regional film keeps the slot rather than fronting a weak title.
-  const TOP3_TOLERANCE = 0.15; // on the 0..1 weighted score: a regional film must beat the
-                                // best English/Hindi film by this margin to keep a top-3 slot
-  const isLead = (m) => langCode(m) === "en" || langCode(m) === "hi";
-  const reordered = [];
-  const remaining = [...picks]; // already quality-sorted
-  for (let pos = 0; pos < 3 && remaining.length; pos++) {
-    const topRegional = remaining.find((m) => !isLead(m));
-    const topLead = remaining.find((m) => isLead(m));
-    let choice;
-    if (!topLead) choice = remaining[0];
-    else if (!topRegional) choice = topLead;
-    else {
-      choice = (weighted402535(topRegional) - weighted402535(topLead) > TOP3_TOLERANCE) ? topRegional : topLead;
-    }
-    reordered.push(choice);
-    remaining.splice(remaining.indexOf(choice), 1);
-  }
-  picks = [...reordered, ...remaining]; // top 3 settled, rest stay in quality order
+  // The soft top-3 language reserve that used to sit here has been REMOVED.
+  //
+  // It reserved the first three slots for English/Hindi films unless a regional film beat the
+  // best of them by 0.15 on the weighted score. That rule existed to compensate for a score
+  // that under-rated regional cinema — but the compensation happened at the wrong layer, and
+  // now that the score itself is de-biased by language-cohort normalization above, keeping it
+  // would double-count the preference and re-introduce exactly the bug it was masking.
+  //
+  // Concretely, on this week's India set it put Mutiny (weighted 0.866) at position 1 above
+  // Toxic (0.897): a list that was visibly not sorted by its own score, and that contradicted
+  // the editor's note recommending Toxic. Language REPRESENTATION is still guaranteed — that is
+  // what the TARGETS quota above does, and it is untouched. This block only ever controlled the
+  // ORDER within an already-representative set, and quality order is the honest answer there.
 
   // Enrich picks with a THEATRICAL gate + bench refill: a pick that turns out to be a
   // digital-only release (the Ikka class) is dropped, and the next ranked film that
@@ -5132,4 +5165,3 @@ module.exports = {
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
-
