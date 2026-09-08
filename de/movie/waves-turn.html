@@ -61,6 +61,15 @@
      rather than another metadata row. */
   .whywatch { font-size:15px; line-height:1.7; background:var(--bg); border-left:3px solid var(--marigold);
               padding:12px 14px; border-radius:0 10px 10px 0; margin-top:8px; }
+  /* Skip block: deliberately quieter than the fit line — muted rule, no fill, smaller type.
+     It is the counterweight to everything above it, not a warning banner. Shouting would
+     make it read as a content advisory; it is a preference mismatch, which is calmer. */
+  .skipif { margin-top:14px; padding:12px 14px; border-left:3px solid var(--mute);
+            border-radius:0 10px 10px 0; background:rgba(0,0,0,.02); }
+  .skipif h3 { font-size:13px; letter-spacing:.02em; text-transform:uppercase; color:var(--mute);
+               margin:0 0 8px; font-weight:700; }
+  .skipif ul { margin:0; padding-left:18px; }
+  .skipif li { font-size:14.5px; line-height:1.65; margin:4px 0; }
   .take { font-size:14.5px; font-weight:600; color:var(--indigo); line-height:1.6; margin-top:10px; }
   .tsrc { color:var(--mute); font-weight:400; font-size:12px; }
   .hook { font-size:13.5px; color:var(--mute); font-style:italic; margin-top:8px; }
@@ -109,6 +118,7 @@
   
   
   <h2>Should you spend 73 minutes on it?</h2><p class="whywatch">73 minutes of German documentary. Tight enough that it&#39;s an easy yes if you&#39;re undecided.</p>
+  
   <div class="fit"><dl><dt class="skip">Skip if</dt><dd>you want a story rather than an argument</dd><dt>Best for</dt><dd>A weeknight</dd></dl></div>
   <h2>Story</h2><p>Women reflect on their first year of motherhood and the many joys and challenges it brings – for parent and baby. A gentle, curious and informative conversational documentary about postpartum life, of sublime analogue beauty.</p>
   <h2>Good to know</h2><table class="gtk"><tr><td>Runtime</td><td>1h 13m — short</td></tr><tr><td>Genre</td><td>Documentary</td></tr><tr><td>Language</td><td>German</td></tr></table>
