@@ -3074,6 +3074,41 @@ test("a full week keeps the completeness claim", () => {
   assert.ok(/Every new movie and web series/.test(html), "a 10-title page keeps the stronger claim");
 });
 
+group("pool items are first-class — slugs and film pages");
+test("poolItems collects langPools and ottExtra, deduped", () => {
+  const it = (t, id) => ({ title: t, tmdbId: id, language: "Kannada" });
+  const data = { ottExtra: [it("A", 1), it("B", 2)],
+                 langPools: { Kannada: { theatres: [it("C", 3)], ott: [it("A", 1)] } } };
+  assert.deepStrictEqual(U.poolItems(data).map((x) => x.title), ["A", "B", "C"]);
+});
+test("poolItems is empty and safe when neither field exists", () => {
+  assert.deepStrictEqual(U.poolItems({ theatres: [{ title: "X" }] }), []);
+  assert.deepStrictEqual(U.poolItems(null), []);
+});
+test("assignSlugs reaches pool items, not just the three homepage lists", () => {
+  // Regression: assignSlugs iterated [theatres, ott, comingSoon] only, so pool titles kept
+  // slug === undefined. They rendered on /malayalam/ as unlinked text and some were dropped
+  // outright by a downstream `.filter(x => x.slug)`.
+  const data = {
+    theatres: [{ title: "Homepage Film", tmdbId: 1, released: "2026-09-01" }],
+    ott: [], comingSoon: [],
+    langPools: { Malayalam: { theatres: [{ title: "Pool Film", tmdbId: 2, released: "2026-09-01" }], ott: [] } },
+    ottExtra: [{ title: "Extra Film", tmdbId: 3, released: "2026-09-01" }],
+  };
+  U.assignSlugs(data);
+  assert.strictEqual(data.langPools.Malayalam.theatres[0].slug, "pool-film");
+  assert.strictEqual(data.ottExtra[0].slug, "extra-film");
+});
+test("a pool item never collides with a homepage slug", () => {
+  const data = {
+    theatres: [{ title: "Same Name", tmdbId: 1, released: "2026-09-01" }],
+    ott: [], comingSoon: [],
+    ottExtra: [{ title: "Same Name", tmdbId: 2, released: "2025-04-02" }],
+  };
+  U.assignSlugs(data);
+  assert.notStrictEqual(data.theatres[0].slug, data.ottExtra[0].slug);
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");
