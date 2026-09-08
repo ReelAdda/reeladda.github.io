@@ -64,11 +64,15 @@ jobs:
         run: |
           git config user.name "filmychill-bot"
           git config user.email "actions@github.com"
-          git add data.json data-*.json ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ movie/ new-on-ott/ new-on-*/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ films/ */films/ data/ embed/ */embed/ ott-history.jsonl ott-watch.json sitemap.xml
+          # -A so DELETIONS are staged, not just additions and modifications. Platform hubs
+          # that stop qualifying are removed from disk by the build; without -A, git recorded
+          # the new sitemap (which correctly drops them) while leaving the orphaned directory
+          # committed and still served — a page reachable by URL that nothing updates.
+          git add -A data.json data-*.json ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ movie/ new-on-ott/ new-on-*/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ films/ */films/ data/ embed/ */embed/ ott-history.jsonl ott-watch.json sitemap.xml
           # Share cards are OPTIONAL: the directory only exists when the renderer AND the
           # brand fonts are both present. `git add` on a missing pathspec exits 128 and would
           # fail the commit step for a purely cosmetic feature, so it is added conditionally.
-          [ -d cards ] && git add cards/ || true
+          [ -d cards ] && git add -A cards/ || true
           if git diff --staged --quiet; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit."
