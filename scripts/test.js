@@ -2985,6 +2985,61 @@ test("a filled-out page still makes the completeness claim", () => {
   assert.ok(/Every Kannada title/.test(html), "a substantial page keeps the stronger lead");
 });
 
+group("/new-on-ott/ — fed by ottExtra, not just the homepage ten");
+const _ow = (t, id, platform, extra = {}) => ({
+  title: t, tmdbId: id, platform, slug: t.toLowerCase().replace(/\W+/g, "-"),
+  language: "English", rating: 7.4, votes: 500, kind: "movie", ...extra,
+});
+const _owCfg = { code: "in", name: "India" };
+test("ottExtra titles render alongside the homepage list", () => {
+  const data = {
+    generatedAt: "2026-09-08T06:00:00Z",
+    ott: [_ow("Homepage One", 1, "Netflix")],
+    ottExtra: [_ow("Overflow Two", 2, "Netflix"), _ow("Surplus Three", 3, "JioHotstar")],
+  };
+  const html = U.buildOttWeekPage(data, _owCfg, [_owCfg]);
+  assert.ok(html.includes("Homepage One"));
+  assert.ok(html.includes("Overflow Two"), "overflow title must reach the page");
+  assert.ok(html.includes("Surplus Three"), "surplus title must reach the page");
+});
+test("a title in both lists is not rendered twice", () => {
+  const data = {
+    generatedAt: "2026-09-08T06:00:00Z",
+    ott: [_ow("Dup", 1, "Netflix")], ottExtra: [_ow("Dup", 1, "Netflix")],
+  };
+  const html = U.buildOttWeekPage(data, _owCfg, [_owCfg]);
+  assert.ok((html.match(/>Dup</g) || []).length <= 2, "duplicate tmdbId must collapse to one row");
+});
+test("items without a tmdbId are kept, not collapsed into one", () => {
+  // Regression: deduping on a missing id let the first undefined claim the slot and silently
+  // dropped every later id-less item, turning a full page into a single row.
+  const data = {
+    generatedAt: "2026-09-08T06:00:00Z",
+    ott: [{ title: "No Id A", platform: "Netflix" }, { title: "No Id B", platform: "Netflix" }],
+    ottExtra: [],
+  };
+  const html = U.buildOttWeekPage(data, _owCfg, [_owCfg]);
+  assert.ok(html.includes("No Id A") && html.includes("No Id B"));
+});
+test("missing ottExtra (older data file) does not throw", () => {
+  const data = { generatedAt: "2026-09-08T06:00:00Z", ott: [_ow("Only", 1, "Netflix")] };
+  assert.doesNotThrow(() => U.buildOttWeekPage(data, _owCfg, [_owCfg]));
+});
+test("a thin week does not claim to list EVERY streaming release", () => {
+  const data = { generatedAt: "2026-09-08T06:00:00Z", ott: [_ow("Only", 1, "Netflix")], ottExtra: [] };
+  const html = U.buildOttWeekPage(data, _owCfg, [_owCfg]);
+  assert.ok(!/Every new movie and web series/.test(html), "thin page must not overclaim");
+});
+test("a full week keeps the completeness claim", () => {
+  const data = {
+    generatedAt: "2026-09-08T06:00:00Z",
+    ott: Array.from({ length: 6 }, (_, i) => _ow(`T${i}`, i + 1, "Netflix")),
+    ottExtra: Array.from({ length: 4 }, (_, i) => _ow(`E${i}`, i + 20, "JioHotstar")),
+  };
+  const html = U.buildOttWeekPage(data, _owCfg, [_owCfg]);
+  assert.ok(/Every new movie and web series/.test(html), "a 10-title page keeps the stronger claim");
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");
