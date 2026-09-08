@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-08T17:36:38.222Z",
+ "generatedAt": "2026-09-08T18:26:26.607Z",
  "country": "de",
  "pick": "Mayday",
  "theatres": [
@@ -85,13 +85,6 @@
      "kind": "movie"
     },
     {
-     "title": "Not Without Hope",
-     "slug": "not-without-hope",
-     "poster": "https://image.tmdb.org/t/p/w342/w5WJMJ6DWPFK0Gx0Ongh0FZBAlK.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "The Apology",
      "slug": "the-apology",
      "poster": "https://image.tmdb.org/t/p/w342/gUFHThondPpmjqeh3XI1yXnCRDa.jpg",
@@ -123,6 +116,13 @@
      "title": "The Pelican Brief",
      "slug": "the-pelican-brief",
      "poster": "https://image.tmdb.org/t/p/w342/7B1HS0SqfJR1jbeHS6V0ZWdzLXP.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Rainmaker",
+     "slug": "the-rainmaker",
+     "poster": "https://image.tmdb.org/t/p/w342/twLGHXPjQtS8UyVGp5GXmhJiTM7.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -261,13 +261,6 @@
      "kind": "movie"
     },
     {
-     "title": "Not Without Hope",
-     "slug": "not-without-hope",
-     "poster": "https://image.tmdb.org/t/p/w342/w5WJMJ6DWPFK0Gx0Ongh0FZBAlK.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Gigi & Nate",
      "slug": "gigi-nate",
      "poster": "https://image.tmdb.org/t/p/w342/xP1GXV1gms9b5BpHZP7S8qs8FO.jpg",
@@ -285,6 +278,13 @@
      "title": "Tigertail",
      "slug": "tigertail",
      "poster": "https://image.tmdb.org/t/p/w342/416Pzzz2xzkSEOdiGMz1EOrKcBm.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Home",
+     "slug": "home",
+     "poster": "https://image.tmdb.org/t/p/w342/jNhATWlOG7uUWzZOETLfEbXUkw4.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -957,7 +957,7 @@
    "slug": "toxic-a-fairy-tale-for-grown-ups",
    "wikiWeeklyViews": 1159360,
    "trending": true,
-   "trailerViews": 2165703,
+   "trailerViews": 2165941,
    "take": "Strong marks for the performances and story, less love for the pacing.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1129,7 +1129,7 @@
    "slug": "coyote-vs-acme",
    "wikiWeeklyViews": 606190,
    "trending": true,
-   "trailerViews": 5980356,
+   "trailerViews": 5981740,
    "take": "Critics have been largely positive on this one.",
    "takeSrc": "wiki",
    "takeArticle": "Coyote vs. Acme"
@@ -1149,7 +1149,7 @@
      "score": "8.0/10"
     }
    ],
-   "votes": 308,
+   "votes": 309,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/hVXjX1jLZ1ljFSNGXpjJfbTUOa7.jpg",
    "isRecent": true,
@@ -1305,7 +1305,7 @@
    "slug": "mayday",
    "wikiWeeklyViews": 267754,
    "trending": true,
-   "trailerViews": 6977791,
+   "trailerViews": 6980693,
    "take": "Genuinely divisive — critics can't settle this one.",
    "takeSrc": "wiki",
    "takeArticle": "Mayday (2026 film)",
@@ -1478,7 +1478,7 @@
    "ottFreshDate": "2026-09-03",
    "slug": "the-runner",
    "wikiWeeklyViews": 266292,
-   "trailerViews": 1362052,
+   "trailerViews": 1365502,
    "take": "Reviewers came away cold on this one.",
    "takeSrc": "wiki",
    "takeArticle": "The Runner (2026 film)"
@@ -1650,7 +1650,7 @@
    "slug": "the-gentlemen",
    "wikiWeeklyViews": 552106,
    "trending": true,
-   "trailerViews": 6491612,
+   "trailerViews": 6492612,
    "take": "Critics liked it, especially the second half.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1998,7 +1998,7 @@
    "stillGood": true,
    "slug": "reacher",
    "wikiWeeklyViews": 150696,
-   "trailerViews": 11078814,
+   "trailerViews": 11079451,
    "take": "Most critics came away happy.",
    "takeSrc": "wiki",
    "takeArticle": "Reacher (TV series)"
@@ -3014,7 +3014,7 @@
     }
    ],
    "slug": "gentle-monster",
-   "trailerViews": 1384886
+   "trailerViews": 1384963
   },
   {
    "title": "Adam's Eight",
@@ -3314,7 +3314,7 @@
     }
    ],
    "slug": "coyote-vs-acme",
-   "trailerViews": 5980356
+   "trailerViews": 5981740
   },
   {
    "title": "Resident Evil",
@@ -3462,7 +3462,7 @@
     }
    ],
    "slug": "resident-evil",
-   "trailerViews": 11690727
+   "trailerViews": 11694556
   },
   {
    "title": "Waves Turn",
@@ -3710,7 +3710,7 @@
     }
    ],
    "slug": "london",
-   "trailerViews": 2752
+   "trailerViews": 2753
   },
   {
    "title": "Free at Heart",
@@ -4016,7 +4016,7 @@
     }
    ],
    "slug": "the-mongoose",
-   "trailerViews": 318919
+   "trailerViews": 319394
   }
  ],
  "langPools": {
@@ -4560,13 +4560,6 @@
        "kind": "movie"
       },
       {
-       "title": "Hunting Season",
-       "slug": "hunting-season",
-       "poster": "https://image.tmdb.org/t/p/w342/cbryTyaWdqrKpQCw6K7zm2jrB5v.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
        "title": "Black Site",
        "slug": "black-site",
        "poster": "https://image.tmdb.org/t/p/w342/ipn8khVVC4eToWiGf89WF9J5PJn.jpg",
@@ -4633,6 +4626,13 @@
        "title": "Icefall",
        "slug": "icefall",
        "poster": "https://image.tmdb.org/t/p/w342/5Byv6nznAb2Izd0gHpODOXnuSbo.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "Misdirection",
+       "slug": "misdirection",
+       "poster": "https://image.tmdb.org/t/p/w342/z7padnoIDHbmxPdqEHryhqlaVqc.jpg",
        "language": "English",
        "kind": "movie"
       }
@@ -4860,7 +4860,7 @@
      "score": "6.8/10"
     }
    ],
-   "votes": 524,
+   "votes": 528,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/6UqflU8Qqkz7Dq4swJPqs0ZJjY4.jpg",
    "isRecent": false,
@@ -5264,9 +5264,9 @@
      "kind": "tv"
     },
     {
-     "title": "Fringe",
-     "slug": "fringe",
-     "poster": "https://image.tmdb.org/t/p/w342/sY9hg5dLJ93RJOyKEiu1nAtBRND.jpg",
+     "title": "The Stand",
+     "slug": "the-stand",
+     "poster": "https://image.tmdb.org/t/p/w342/w6XiuRK5QQaLNmIqDRCWOpEcHwi.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -5593,13 +5593,6 @@
      "kind": "tv"
     },
     {
-     "title": "Stumble",
-     "slug": "stumble",
-     "poster": "https://image.tmdb.org/t/p/w342/yb9x05LNrgs06QjAYZE7A4UvSuj.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "UnPrisoned",
      "slug": "unprisoned",
      "poster": "https://image.tmdb.org/t/p/w342/nJxyT4SVRocp6Pd8xZkdyrrBXL4.jpg",
@@ -5638,6 +5631,13 @@
      "title": "Undeclared",
      "slug": "undeclared",
      "poster": "https://image.tmdb.org/t/p/w342/cCCy0WYZvMxoz3LC2kyHX4Vy6eT.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Portlandia",
+     "slug": "portlandia",
+     "poster": "https://image.tmdb.org/t/p/w342/pfaxCP6YqlFHCL3QytnTanwRTL5.jpg",
      "language": "English",
      "kind": "tv"
     }
