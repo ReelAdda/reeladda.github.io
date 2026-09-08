@@ -2525,6 +2525,25 @@ async function main() {
     }
   }
 
+  // --- International surplus for /new-on-ott/. The homepage caps at 10; that page promises
+  //     "all", links to itself from the homepage as "All new OTT releases this week", and until
+  //     now rendered the SAME ten titles regrouped by platform — a click that gave the reader
+  //     nothing they had not just seen. langPools fixes this for India, but it is empty on
+  //     countries with no language pages, so those pages need their own surplus. Bounded, and
+  //     it reuses candidates already fetched from trending — only the enrich call is new. ---
+  const OTT_SURPLUS_MAX = 6;
+  const surplus = [];
+  for (const c of intlCands) {
+    if (surplus.length >= OTT_SURPLUS_MAX) break;
+    if (usedIds.has(c.id)) continue;
+    try {
+      const it = await buildOttItem(c);
+      if (it && ottIsFresh(it)) { surplus.push(it); usedIds.add(c.id); } // same recency gate
+    }
+    catch (e) { console.warn(`ott-surplus ${c.id}: ${e.message}`); }
+    await sleep(150);
+  }
+
   // --- Recency-decay re-rank (see ottRecencyBonus, module scope). Selection above is
   //     quality-greedy; ORDER is quality + freshness, so this week's drops lead and a
   //     near-expiry season sinks toward the bottom instead of camping in the top 3.
@@ -2548,6 +2567,10 @@ async function main() {
   const ottDisplay = orderOttForDisplay(ott);
   ott.length = 0;
   ott.push(...ottDisplay);
+  // Everything past the homepage cap is already built, already through the integrity gate and
+  // already in display order — it was simply being deleted. Keep it for /new-on-ott/ at zero
+  // extra cost, then truncate the homepage list exactly as before.
+  const ottOverflow = ott.slice(OTT_MAX);
   ott.length = Math.min(ott.length, OTT_MAX);
 
   // ---------- COMING SOON (next releases in India, soft language quota) ----------
@@ -2694,9 +2717,23 @@ async function main() {
     const o = (langPool[name] || []).filter((x) => !ott.some((y) => y.tmdbId === x.tmdbId));
     if (t.length || o.length) langPools[name] = { theatres: t, ott: o };
   }
-  const data = { generatedAt: new Date().toISOString(), country: cfg.code, pick: pick ? pick.title : null, theatres, ott, comingSoon: upcoming, langPools };
+
+  // ottExtra is what /new-on-ott/ adds on top of the homepage ten: the display-order overflow
+  // (free — it was being deleted), the international surplus, and every regional title the
+  // homepage's 4-slot cap left behind. Deduped against the homepage list and against itself.
+  const ottExtra = [];
+  {
+    const seen = new Set(ott.map((x) => x.tmdbId));
+    const pools = Object.values(langPools).map((p) => p.ott);
+    for (const x of [...ottOverflow, ...surplus, ...pools.flat()]) {
+      if (!x || seen.has(x.tmdbId)) continue;
+      seen.add(x.tmdbId);
+      ottExtra.push(x);
+    }
+  }
+  const data = { generatedAt: new Date().toISOString(), country: cfg.code, pick: pick ? pick.title : null, theatres, ott, comingSoon: upcoming, langPools, ottExtra };
   // Strip internal-only fields (ranking helpers) so they never reach the data file.
-  const poolLists = Object.values(langPools).flatMap((p) => [p.theatres, p.ott]);
+  const poolLists = [...Object.values(langPools).flatMap((p) => [p.theatres, p.ott]), ottExtra];
   for (const list of [data.theatres, data.ott, data.comingSoon, ...poolLists]) {
     for (const it of list) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; delete it._imdbRating; delete it._imdbVotes; delete it._w; }
   }
@@ -3757,7 +3794,19 @@ function buildOttWeekPage(data, cfg, allCountries) {
   const monthYear = new Date(gen).toLocaleDateString(localeFor(code), { month: "long", year: "numeric" });
   const updatedHuman = new Date(gen).toLocaleDateString(localeFor(code), { day: "numeric", month: "long", year: "numeric" });
 
-  const items = (data.ott || []).filter((x) => x && x.title);
+  // The homepage ten PLUS everything the homepage's caps left behind (see ottExtra). This page
+  // is linked from the homepage as "All new OTT releases this week" and its description says
+  // "every" — until this pool existed it rendered the identical ten titles regrouped by
+  // platform, so the reader clicked a promise of more and got the same set reshuffled.
+  const extra = (data.ottExtra || []).filter((x) => x && x.title);
+  const seenIds = new Set();
+  const items = [...(data.ott || []), ...extra].filter((x) => {
+    if (!x || !x.title) return false;
+    if (x.tmdbId == null) return true;   // no id to dedup on — keep it rather than collapse the list
+    if (seenIds.has(x.tmdbId)) return false;
+    seenIds.add(x.tmdbId);
+    return true;
+  });
   // Group by platform, preserving the ranked order inside each group; biggest platforms first.
   const groups = new Map();
   for (const it of items) {
@@ -3769,7 +3818,11 @@ function buildOttWeekPage(data, cfg, allCountries) {
   const platformNames = platforms.slice(0, 4).join(", ");
 
   const title = `New ${V.Releases} This Week in ${countryName} (${monthYear}) — ${platformNames || "Streaming"} | FilmyChill`;
-  const desc = `Every new movie and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`;
+  // Same rule as the language pages: only claim completeness when the page can back it.
+  const thin = items.length < 8;
+  const desc = thin
+    ? `New movies and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`
+    : `Every new movie and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`;
 
   // FAQ per major platform + one "best of" — real answers from real data, mirrored in
   // FAQPage schema. Only platforms with titles get a question; schema only if >= 2 Q&As.
