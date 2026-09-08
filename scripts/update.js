@@ -3475,13 +3475,20 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     }
   }
   // Language landing pages (India) — daily-refreshed discovery surfaces.
+  // Only hubs written on THIS run (see LIVE_HUBS). Falls back to a directory scan when the
+  // registry is empty — a sitemap-only rebuild that never called writePlatformHubPages —
+  // so this can never silently drop every hub from the sitemap.
   const hubUrls = [];
   for (const c of countries) {
     const base = c.code === "in" ? "." : c.code;
     if (!fs.existsSync(base)) continue;
-    for (const d of fs.readdirSync(base)) {
-      if (d.startsWith("new-on-") && d !== "new-on-ott" && fs.existsSync(`${base}/${d}/index.html`))
-        hubUrls.push(`  <url><loc>https://filmychill.com${c.code === "in" ? "" : "/" + c.code}/${d}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
+    const live = LIVE_HUBS.get(c.code);
+    const slugs = (live && live.size)
+      ? [...live]
+      : (LIVE_HUBS.size ? [] : [...existingHubSlugs(c.code)]);
+    for (const slug of slugs) {
+      if (!fs.existsSync(`${base}/new-on-${slug}/index.html`)) continue;
+      hubUrls.push(`  <url><loc>https://filmychill.com${c.code === "in" ? "" : "/" + c.code}/new-on-${slug}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
     }
   }
   const langUrls = LANGUAGE_PAGES.filter(([, slug]) => fs.existsSync(`${slug}/index.html`))
@@ -4333,28 +4340,79 @@ function writeOttWeekPage(data, cfg, allCountries) {
 // HUB_MAX_PER_COUNTRY providers get pages. Same licence-clean sources, CollectionPage +
 // ItemList + FAQ schema.
 // ============================================================================
-const HUB_MIN_TITLES = 3;
+// Two thresholds, not one. A hub needs HUB_MIN_NEW titles to be CREATED but only
+// HUB_MIN_KEEP to SURVIVE. Without that hysteresis a provider sitting on the boundary
+// gets its page minted and pruned on alternate runs, which is a worse signal to a crawler
+// than never having had the page. The create bar is the higher one because a three-title
+// hub is thin content and this pipeline mints hubs automatically.
+const HUB_MIN_NEW = 4;
+const HUB_MIN_KEEP = 3;
 const HUB_MAX_PER_COUNTRY = 5;
 const PLATFORM_SLUG_OVERRIDES = { "Amazon Prime Video": "prime-video", "Apple TV": "apple-tv", "Apple TV+": "apple-tv", "Disney+": "disney-plus", "Disney Plus": "disney-plus" };
-function platformSlug(name) {
-  if (PLATFORM_SLUG_OVERRIDES[name]) return PLATFORM_SLUG_OVERRIDES[name];
-  return String(name).toLowerCase().replace(/\+/g, " plus").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+// TMDB reports the same service under several provider strings — "Apple TV" and "Apple TV
+// Amazon Channel" are one destination to a viewer, as are "Amazon Prime Video", "Prime Video"
+// and "Amazon Prime Video with Ads". Grouping on the raw strings split each service's titles
+// across two or three buckets, so a service with four titles showed as two-and-two and cleared
+// no threshold at all. It also minted /new-on-amazon-prime-video-with-ads/ — a URL named after
+// a billing tier, which nobody searches for. Canonicalise before grouping.
+const PROVIDER_CANON = [
+  [/^Apple TV\+?( Amazon Channel| Channel)?$/i, "Apple TV"],
+  [/^(Amazon )?Prime Video( with Ads)?$/i, "Prime Video"],
+  [/^Netflix( Standard with Ads| basic with Ads)?$/i, "Netflix"],
+  [/^(JioHotstar|Disney\+ Hotstar|Hotstar)$/i, "JioHotstar"],
+  [/^(HBO )?Max( Amazon Channel)?$/i, "HBO Max"],
+  [/^Paramount\+?( Premium| Amazon Channel)?$/i, "Paramount+"],
+  [/^Crunchyroll( Amazon Channel)?$/i, "Crunchyroll"],
+];
+function canonProvider(name) {
+  const n = String(name || "").trim();
+  for (const [re, canon] of PROVIDER_CANON) if (re.test(n)) return canon;
+  return n;
 }
-function hubsFor(data) {
+function platformSlug(name) {
+  const n = canonProvider(name);
+  if (PLATFORM_SLUG_OVERRIDES[n]) return PLATFORM_SLUG_OVERRIDES[n];
+  return String(n).toLowerCase().replace(/\+/g, " plus").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+// `existingSlugs` is the set of hub pages already on disk for this country. Pass it and a
+// provider that has slipped from HUB_MIN_NEW to HUB_MIN_KEEP keeps its page instead of
+// flapping. Omit it (tests, callers that only want the current shape) and only the create
+// bar applies.
+function hubsFor(data, existingSlugs) {
   const groups = new Map();
-  for (const it of (data && data.ott) || []) {
+  // Read the FULL pool, not the ten that fit the homepage. Grouping ten titles across six
+  // providers meant a provider almost never reached the threshold, so the footer showed two
+  // links that changed identity week to week depending on which service happened to land a
+  // third title. ottExtra is the same pool /new-on-ott/ uses.
+  const source = [...((data && data.ott) || []), ...((data && data.ottExtra) || [])];
+  const seen = new Set();
+  for (const it of source) {
     if (!it || !it.title) continue;
-    const provs = new Set([...(Array.isArray(it.providers) ? it.providers : []), ...(it.platform && it.platform !== "Theatres" ? [it.platform] : [])]);
+    if (it.tmdbId != null) { if (seen.has(it.tmdbId)) continue; seen.add(it.tmdbId); }
+    const provs = new Set([...(Array.isArray(it.providers) ? it.providers : []), ...(it.platform && it.platform !== "Theatres" ? [it.platform] : [])]
+      .map(canonProvider).filter(Boolean));
     for (const p of provs) {
       if (!groups.has(p)) groups.set(p, []);
       groups.get(p).push(it);
     }
   }
+  const have = existingSlugs instanceof Set ? existingSlugs : new Set();
   return [...groups.entries()]
-    .filter(([, items]) => items.length >= HUB_MIN_TITLES)
+    .filter(([name, items]) => items.length >= (have.has(platformSlug(name)) ? HUB_MIN_KEEP : HUB_MIN_NEW))
     .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
     .slice(0, HUB_MAX_PER_COUNTRY)
     .map(([name, items]) => ({ name, slug: platformSlug(name), items }));
+}
+
+// Hub directories currently on disk for a country, by slug.
+function existingHubSlugs(code) {
+  const base = code === "in" ? "." : code;
+  if (!fs.existsSync(base)) return new Set();
+  return new Set(fs.readdirSync(base)
+    .filter((d) => d.startsWith("new-on-") && d !== "new-on-ott" && fs.existsSync(`${base}/${d}/index.html`))
+    .map((d) => d.slice("new-on-".length)));
 }
 function hubPath(code, slug) { return code === "in" ? `new-on-${slug}/index.html` : `${code}/new-on-${slug}/index.html`; }
 function hubUrl(code, slug) { return code === "in" ? `https://filmychill.com/new-on-${slug}/` : `https://filmychill.com/${code}/new-on-${slug}/`; }
@@ -4412,14 +4470,37 @@ function buildPlatformHubPage(data, cfg, hub) {
   });
 }
 
+// Hub pages written on the most recent run, per country code. The sitemap reads this instead
+// of scanning directories: a directory on disk proves a page was written ONCE, not that it is
+// current, and the scan was stamping lastmod=today on every hub it found — including one last
+// rewritten five weeks earlier. Telling a crawler a stale page changed today is worse than
+// omitting it.
+const LIVE_HUBS = new Map(); // code -> Set(slug)
+
 function writePlatformHubPages(data, cfg) {
   const code = (cfg && cfg.code) || "in";
-  const hubs = hubsFor(data);
+  const existing = existingHubSlugs(code);
+  const hubs = hubsFor(data, existing);
   for (const hub of hubs) {
     const p = hubPath(code, hub.slug);
     const dir = p.slice(0, p.lastIndexOf("/"));
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(p, buildPlatformHubPage(data, cfg, hub));
+  }
+  const live = new Set(hubs.map((h) => h.slug));
+  LIVE_HUBS.set(code, live);
+
+  // Prune hubs that no longer qualify. They stop being rewritten but were never removed, so
+  // they lingered as unlinked pages serving month-old data while the sitemap kept claiming
+  // they were fresh. Removing the directory lets the branded 404 handle any inbound link,
+  // which drops them from the index cleanly. The keep-threshold above is what stops a
+  // boundary provider from being created and pruned on alternate runs.
+  const base = code === "in" ? "." : code;
+  for (const slug of existing) {
+    if (live.has(slug)) continue;
+    const dir = `${base}/new-on-${slug}`;
+    try { fs.rmSync(dir, { recursive: true, force: true }); console.log(`  hub pruned (${code}): new-on-${slug} — no longer qualifies`); }
+    catch (e) { console.warn(`hub prune ${dir}: ${e.message}`); }
   }
   if (hubs.length) console.log(`  platform hubs (${code}): ${hubs.map((h) => "new-on-" + h.slug).join(", ")}`);
   return hubs;
