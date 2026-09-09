@@ -3266,7 +3266,8 @@ const _cfgIn = { code: "in", name: "India", region: "IN" };
 test("a hub's FAQ answer names only titles that arrived this week", () => {
   const hub = { name: "Netflix", slug: "netflix", items: _mixed.ott };
   const html = U.buildPlatformHubPage(_mixed, _cfgIn, hub);
-  const a = (html.match(/What's new on Netflix in India this week\?<\/summary><div class="fa">([^<]*)/) || [])[1] || "";
+  // NB: apostrophes are HTML-escaped in the rendered summary.
+  const a = (html.match(/new on Netflix in India this week\?<\/summary><div class="fa">([^<]*)/) || [])[1] || "";
   assert.ok(/Landed Today/.test(a));
   assert.ok(!/Old Favourite/.test(a), "the most quotable sentence on the page must be true");
 });
@@ -3283,8 +3284,10 @@ test("the hub lead counts new titles, not total rows", () => {
 });
 test("/new-on-ott/ keeps carried titles out of 'New on X this week' groups", () => {
   const html = U.buildOttWeekPage({ ..._mixed, ottExtra: [] }, _cfgIn, [_cfgIn]);
-  const netflixSection = (html.split("Still worth it")[0] || "");
-  assert.ok(!/Old Favourite/.test(netflixSection), "a five-week-old title under a 'this week' heading is a false claim");
+  // Check the rendered body, not the <head> schema (covered separately below).
+  const body = html.slice(html.indexOf("<h1"));
+  const beforeCarried = body.split("Still worth it")[0] || "";
+  assert.ok(!/Old Favourite/.test(beforeCarried), "a five-week-old title under a 'this week' heading is a false claim");
   assert.ok(/Still worth it/.test(html));
 });
 test("'best new this week' ranks this week's arrivals only", () => {
@@ -3292,6 +3295,13 @@ test("'best new this week' ranks this week's arrivals only", () => {
   const a = (html.match(/best new [^<]*this week\?<\/summary><div class="fa">([^<]*)/) || [])[1] || "";
   assert.ok(!/Old Favourite/.test(a), "the 8.9 carried-over title must not win 'best new'");
   assert.ok(/Landed Today/.test(a));
+});
+test("the ItemList schema under a 'This Week' CollectionPage holds only new arrivals", () => {
+  const html = U.buildOttWeekPage({ ..._mixed, ottExtra: [] }, _cfgIn, [_cfgIn]);
+  const ld = JSON.parse(html.match(/"@type":"CollectionPage"[\s\S]*?\}(?=<\/script>)/) ? html.match(/\{"@context":"https:\/\/schema\.org","@type":"CollectionPage"[\s\S]*?\]\}\}/)[0] : "{}");
+  const names = (ld.mainEntity && ld.mainEntity.itemListElement || []).map((x) => x.name);
+  assert.ok(!names.includes("Old Favourite"), "structured data is what answer engines trust most");
+  assert.ok(names.includes("Landed Today"));
 });
 test("a week with no new arrivals says so rather than pretending", () => {
   const onlyOld = { ..._mixed, ott: [_mkOtt("Old Favourite", { stillGood: true })] };
