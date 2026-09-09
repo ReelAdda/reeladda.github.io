@@ -3790,7 +3790,16 @@ function buildEditorNote(data, cfg, seed = null) {
   const rt = rated(th).sort((a, b) => rankValue(b) - rankValue(a));
   const event = rt[0] && rt[0].rating >= 6.5 ? rt[0] : null;
   const skip = rt.length > 1 && rt[rt.length - 1].rating <= 5.9 && rt[rt.length - 1] !== event ? rt[rt.length - 1] : null;
-  const ro = rated(ott).sort((a, b) => rankValue(b) - rankValue(a));
+  // The sleeper must come from THIS WEEK'S arrivals, not the whole six-week window. The
+  // OTT list deliberately carries a tail of older standouts (flagged stillGood, rendered
+  // under "Still worth it — standouts from earlier weeks"), and those are the highest-rated
+  // things on the page almost by definition — a long-running show with thousands of votes
+  // beats anything that landed on Thursday. Without this filter the note crowned Ted Lasso
+  // (season added 4 Aug, series from 2020, 8.4) "the week's real winner" five weeks running.
+  // Every sleeper phrasing below claims currency — "this week", "the week's real winner" —
+  // so the candidate set has to be current or the sentence is simply false.
+  // llms.txt already filters on !stillGood for the same reason; this brings the note in line.
+  const ro = rated(ott).filter((x) => !x.stillGood).sort((a, b) => rankValue(b) - rankValue(a));
   const sleeper = ro[0] && ro[0].rating >= 7.8 && ro[0].platform && ro[0].platform !== "Theatres" ? ro[0] : null;
   if (!event && !skip && !sleeper) return null; // thin data -> say nothing
 
@@ -3912,9 +3921,15 @@ function buildOttWeekPage(data, cfg, allCountries) {
     seenIds.add(x.tmdbId);
     return true;
   });
+  // Carried-over titles are held out of the per-platform "New on X this week" groups and
+  // given their own labelled section at the end. The section headings on this page are
+  // literally "New on Netflix this week" — putting a title that arrived five weeks ago
+  // under one is a false claim in a heading, which is the worst place to put one.
+  const freshItems = items.filter((x) => !x.stillGood);
+  const carriedItems = items.filter((x) => x.stillGood);
   // Group by platform, preserving the ranked order inside each group; biggest platforms first.
   const groups = new Map();
-  for (const it of items) {
+  for (const it of freshItems) {
     const p = it.platform || "More platforms";
     if (!groups.has(p)) groups.set(p, []);
     groups.get(p).push(it);
@@ -3924,7 +3939,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
 
   const title = `New ${V.Releases} This Week in ${countryName} (${monthYear}) — ${platformNames || "Streaming"} | FilmyChill`;
   // Same rule as the language pages: only claim completeness when the page can back it.
-  const thin = items.length < 8;
+  const thin = freshItems.length < 8;
   const desc = thin
     ? `New movies and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`
     : `Every new movie and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`;
@@ -3936,11 +3951,21 @@ function buildOttWeekPage(data, cfg, allCountries) {
     const titles = groups.get(p).map((t) => `${t.title}${t.language ? ` (${t.language})` : ""}`).join(", ");
     faqs.push({ q: `What's new on ${p} in ${countryName} this week?`, a: `New on ${p} this week: ${titles}.` });
   }
-  const best = items.filter((x) => x.rating != null).sort((a, b) => b.rating - a.rating).slice(0, 3);
+  // "Best new ... this week" must rank THIS WEEK'S arrivals. Ranking the whole list by
+  // rating hands the answer to whichever long-running series has the most votes, and this
+  // string is the one an answer engine quotes.
+  const bestPool = freshItems.length ? freshItems : items;
+  const best = bestPool.filter((x) => x.rating != null).sort((a, b) => b.rating - a.rating).slice(0, 3);
   if (best.length >= 2) {
     faqs.push({
       q: `What are the best new ${V.releases} in ${countryName} this week?`,
       a: `Top-rated this week: ${best.map((x) => `${x.title} (${Number(x.rating).toFixed(1)}/10 on ${x.platform})`).join(", ")}.`,
+    });
+  }
+  if (carriedItems.length >= 2) {
+    faqs.push({
+      q: `What else is worth watching right now in ${countryName}?`,
+      a: `Not new this week, but still worth it: ${carriedItems.slice(0, 4).map((x) => `${x.title} (${x.platform})`).join(", ")}.`,
     });
   }
   const faqLd = faqs.length >= 2 ? {
@@ -3994,7 +4019,15 @@ function buildOttWeekPage(data, cfg, allCountries) {
   <section>
     <h2>New on ${e(p)} <span class="cnt">${groups.get(p).length}</span></h2>
     ${groups.get(p).map(rowFor).join("\n")}
-  </section>`).join("\n");
+  </section>`).join("\n")
+  // Carried-over titles get one honest section at the end, mirroring the homepage's
+  // "Still worth it" divider, rather than being folded into a "New on X this week" heading.
+  + (carriedItems.length ? `
+  <section>
+    <h2>Still worth it <span class="cnt">${carriedItems.length}</span></h2>
+    <p class="rm" style="margin:0 0 10px">Not new this week — added in earlier weeks and still worth your evening.</p>
+    ${carriedItems.map(rowFor).join("\n")}
+  </section>` : "");
 
   const faqHtml = faqs.length ? `
   <section>
@@ -4772,12 +4805,27 @@ function buildPlatformHubPage(data, cfg, hub) {
   const gen = data.generatedAt || new Date().toISOString();
   const monthYear = new Date(gen).toLocaleDateString(localeFor(code), { month: "long", year: "numeric" });
   const updatedHuman = new Date(gen).toLocaleDateString(localeFor(code), { day: "numeric", month: "long", year: "numeric" });
-  const films = hub.items.filter((x) => x.kind !== "tv"), series = hub.items.filter((x) => x.kind === "tv");
+  // FRESH vs CARRIED-OVER. The homepage OTT list deliberately carries a tail of older
+  // standouts (flagged stillGood) and labels them under "Still worth it — standouts from
+  // earlier weeks". Hub pages inherited the items but NOT the label, so a page whose H1,
+  // description, FAQ answer and lead all say "this week" was listing titles from three to
+  // five weeks ago — Reacher (2022 series), Lioness (2023), Ted Lasso (2020) — flat, as
+  // new arrivals. Every currency claim on this page is now computed from `fresh` only;
+  // carried-over titles still appear, under their own labelled section, because they are
+  // genuinely worth watching and dropping them would thin the page for no gain.
+  const fresh = hub.items.filter((x) => !x.stillGood);
+  const carried = hub.items.filter((x) => x.stillGood);
+  const claimSet = fresh.length ? fresh : hub.items;   // never leave the page claim-less
+  const films = fresh.filter((x) => x.kind !== "tv"), series = fresh.filter((x) => x.kind === "tv");
 
-  const faqs = [{ q: `What's new on ${hub.name} in ${countryName} this week?`, a: `New on ${hub.name} this week: ${hub.items.map((t) => t.title).join(", ")}.` }];
-  const best = hub.items.filter((x) => x.rating != null).sort((a, b) => b.rating - a.rating)[0];
+  // The FAQ answer is the single most quotable sentence on the page — it is what answer
+  // engines lift verbatim. It must name only titles that actually arrived this week.
+  const faqs = [{ q: `What's new on ${hub.name} in ${countryName} this week?`, a: `New on ${hub.name} this week: ${claimSet.map((t) => t.title).join(", ")}.` }];
+  const best = claimSet.filter((x) => x.rating != null).sort((a, b) => b.rating - a.rating)[0];
   if (best) faqs.push({ q: `What's the best new title on ${hub.name} right now?`,
     a: `${best.title} is the top-rated new arrival on ${hub.name} at ${Number(best.rating).toFixed(1)}/10${best.verdict ? ` — ${best.verdict}` : ""}.` });
+  if (carried.length) faqs.push({ q: `What else is worth watching on ${hub.name} right now?`,
+    a: `Still worth your time from earlier weeks: ${carried.map((t) => t.title).join(", ")}.` });
 
   const linked = hub.items.filter((x) => x.slug);
   const extraLd = [{
@@ -4805,14 +4853,22 @@ function buildPlatformHubPage(data, cfg, hub) {
   }
   return listingPageHtml({
     title: `New on ${hub.name} ${countryName} This Week (${monthYear}) | FilmyChill`,
-    desc: `Every movie and series newly streaming on ${hub.name} in ${countryName} this week — ratings, critics' verdicts, what to skip. Updated twice daily.`,
+    desc: `${fresh.length ? "Every movie and series newly streaming" : "What's streaming"} on ${hub.name} in ${countryName} this week — ratings, critics' verdicts, what to skip. Updated twice daily.`,
     canonical: url,
     h1: `New on ${hub.name} in ${countryName} this week`,
     updLine: `Updated ${updatedHuman} · refreshed twice daily`,
-    lead: `${hub.items.length} new ${hub.items.length === 1 ? "title" : "titles"} on ${hub.name} this week, ranked and rated — with an honest word on which are worth your evening.`,
-    sections: (films.length && series.length)
-      ? [{ h2: "Movies", items: films }, { h2: "Series", items: series }]
-      : [{ h2: `Added this week`, items: hub.items }],
+    // The count in the lead must be the count of NEW titles, not the page's total rows —
+    // saying "10 new titles" above a list where four landed a month ago is the same false
+    // claim in smaller type.
+    lead: fresh.length
+      ? `${fresh.length} new ${fresh.length === 1 ? "title" : "titles"} on ${hub.name} this week, ranked and rated — with an honest word on which are worth your evening.${carried.length ? ` Plus ${carried.length} still worth catching from earlier weeks.` : ""}`
+      : `Nothing new landed on ${hub.name} this week. Here's what's still worth watching from recent weeks, ranked and rated.`,
+    sections: [
+      ...((films.length && series.length)
+        ? [{ h2: "Movies", items: films }, { h2: "Series", items: series }]
+        : (fresh.length ? [{ h2: `Added this week`, items: fresh }] : [])),
+      ...(carried.length ? [{ h2: "Still worth it — from earlier weeks", items: carried }] : []),
+    ],
     faqs, extraLd, homeUrl: `https://filmychill.com${m.path}`, code, altPaths,
   });
 }
@@ -5242,7 +5298,17 @@ function buildLlmsFullTxt(dataByCode) {
     if (!data) continue;
     const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name };
     lines.push(`## ${m.name} — week of ${data.generatedAt ? String(data.generatedAt).slice(0, 10) : ""}`);
-    for (const [label, list] of [["In theatres", data.theatres], ["New on OTT / streaming", data.ott]]) {
+    // Split the OTT list the same way every other surface does. An answer engine asked
+    // "what's new on streaming in India this week" was being handed Ted Lasso and Reacher
+    // under a "New on OTT" heading, because this file took data.ott whole. llms.txt (the
+    // short index) already filters stillGood; this is its -full companion and must agree.
+    const ottFresh = (data.ott || []).filter((x) => !x.stillGood);
+    const ottCarried = (data.ott || []).filter((x) => x.stillGood);
+    for (const [label, list] of [
+      ["In theatres", data.theatres],
+      ["New on OTT / streaming", ottFresh],
+      ["Still worth watching (added in earlier weeks, not new this week)", ottCarried],
+    ]) {
       if (!list || !list.length) continue;
       lines.push("", `### ${label}`, "");
       list.forEach((it, i) => {
@@ -5757,3 +5823,4 @@ module.exports = {
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
+
