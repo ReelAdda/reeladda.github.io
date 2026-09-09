@@ -3980,10 +3980,14 @@ function buildOttWeekPage(data, cfg, allCountries) {
     url,
     dateModified: gen,
     isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+    // The ItemList sits under a CollectionPage named "New ... This Week", so it must contain
+    // this week's arrivals only. Including carried-over titles made the structured data say
+    // something the visible page (correctly) does not — and structured data is exactly what
+    // an answer engine trusts over the prose.
     mainEntity: {
       "@type": "ItemList",
-      numberOfItems: items.filter((x) => x.slug).length,
-      itemListElement: items.filter((x) => x.slug).map((x, i) => ({
+      numberOfItems: freshItems.filter((x) => x.slug).length,
+      itemListElement: freshItems.filter((x) => x.slug).map((x, i) => ({
         "@type": "ListItem", position: i + 1, name: x.title, url: filmPageUrl(code, x.slug),
       })),
     },
