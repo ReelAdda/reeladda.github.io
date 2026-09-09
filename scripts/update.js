@@ -2265,6 +2265,37 @@ async function main() {
   }
   picks = picks.slice(0, MAX_PICKS).sort((a, b) => weighted402535(b) - weighted402535(a));
 
+  // SCORE TRACE. The language-cohort normalization above has now been tuned twice against
+  // reconstructed pools and twice failed to change the live ordering, because the real pool
+  // is larger than anything reconstructable from the published data files and its cohort
+  // statistics are therefore unknown. Rather than guess a third time, print the actual
+  // inputs. Each line shows the three weighted components, the scale each film was measured
+  // against, and whether that scale came from its own cohort or the median fallback — which
+  // is exactly the information needed to tell WHY a 6.4 outranks a 7.9. Cheap, log-only,
+  // and it makes the next run answer the question definitively.
+  if (process.env.SCORE_TRACE !== "0") {
+    console.log(`  [score trace ${cfg.code}] pool=${pool.length} normPool=${poolForNorm.length} maxLogV=${maxLogV.toFixed(3)} maxLogP=${maxLogP.toFixed(3)} medV=${medV == null ? "—" : medV.toFixed(3)} medP=${medP == null ? "—" : medP.toFixed(3)}`);
+    const cohortLine = [...cohortStats.entries()]
+      .sort((a, b) => b[1].n - a[1].n)
+      .map(([L, st]) => `${L}:n=${st.n},v=${st.v.toFixed(2)}`).join("  ");
+    console.log(`  [score trace ${cfg.code}] cohorts  ${cohortLine}`);
+    for (const m of picks) {
+      const L = langCode(m) || "??";
+      const st = cohortStats.get(L);
+      const own = !!(st && st.n >= MIN_COHORT);
+      const sv = scaleFor(m, "v", maxLogV);
+      const rN = (bestRating(m) ?? PRIOR_C) / 10;
+      const vN = Math.min(1, Math.log10(bestVotes(m) + 1) / sv);
+      const pN = Math.min(1, Math.log10((m.popularity || 0) + 1) / scaleFor(m, "p", maxLogP));
+      console.log(
+        `  [score trace ${cfg.code}] ${String(weighted402535(m).toFixed(3)).padStart(5)}` +
+        ` = r${(0.40 * rN).toFixed(3)} + v${(0.35 * vN).toFixed(3)} + p${(0.25 * pN).toFixed(3)}` +
+        ` | ${L} ${own ? "own-cohort" : "MEDIAN-FALLBACK"} scaleV=${sv.toFixed(3)}` +
+        ` | rating=${bestRating(m) ?? "—"} votes=${bestVotes(m)} pop=${(m.popularity || 0).toFixed(0)}` +
+        ` | ${String(m.title || "").slice(0, 34)}`);
+    }
+  }
+
   // The soft top-3 language reserve that used to sit here has been REMOVED.
   //
   // It reserved the first three slots for English/Hindi films unless a regional film beat the
@@ -5726,4 +5757,3 @@ module.exports = {
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
-
