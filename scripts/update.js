@@ -2867,6 +2867,11 @@ async function main() {
   for (const cfg of builtCountries) {
     try { await sweepStreamingArrivals(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
     catch (e) { console.warn(`  sweep [${cfg.code}] skipped: ${e.message}`); }
+    // The mirror pass: recheck claims we already made (see sweepStreamingDepartures).
+    // Budgeted and slow-cadence, so this adds a flat ~15 calls per country per run no
+    // matter how large the archive grows.
+    try { await sweepStreamingDepartures(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
+    catch (e) { console.warn(`  departure sweep [${cfg.code}] skipped: ${e.message}`); }
     // Free, local, no budget: move any page past its stamped release date (see patchDueIfPassed).
     try { refreshDuePages(cfg, countryNameFor(cfg)); }
     catch (e) { console.warn(`  due pass [${cfg.code}] skipped: ${e.message}`); }
@@ -4318,7 +4323,10 @@ function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf }) {
   const a = html.indexOf(start), b = html.indexOf(end);
   if (a === -1 || b === -1 || b < a) return { html, changed: false };
   const list = providers.join(", ");
-  const block = `${start}<h2>${e(V.heading(title))}</h2><p><strong>It's streaming now.</strong> ${e(title)} is available in ${e(countryName)} on ${e(list)}.</p><p style="color:var(--mute);font-size:13px">Spotted by our daily availability check${asOf ? ` on ${e(asOf)}` : ""}. Platforms can change over time.</p>${end}`;
+  // The <!--SW:live--> stamp is what makes departures detectable. Without it, a page that
+  // has been patched to "streaming on X" is indistinguishable from any other frozen page,
+  // and the claim can never be rechecked. It carries the date so the sweep can pace itself.
+  const block = `${start}<!--SW:live=${e(asOf || "")}--><h2>${e(V.heading(title))}</h2><p><strong>It's streaming now.</strong> ${e(title)} is available in ${e(countryName)} on ${e(list)}.</p><p style="color:var(--mute);font-size:13px">Spotted by our daily availability check${asOf ? ` on ${e(asOf)}` : ""}. We recheck periodically — platforms do drop titles.</p>${end}`;
   let out = html.slice(0, a) + block + html.slice(b + end.length);
   // The archived page still advertises a finished theatrical run in its pills.
   const pills = providers.map((pv) => `<span class="pill">${e(pv)}</span>`).join("");
@@ -4331,6 +4339,180 @@ function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf }) {
     if (out.includes(stale)) { out = out.split(stale).join(pills); break; }
   }
   return { html: out, changed: true };
+}
+
+// ============================================================================
+// DEPARTURE SWEEP — the missing half of the availability lifecycle.
+//
+// The arrival sweep polls frozen pages until a film REACHES a platform, patches the page,
+// and stops. Nothing ever polled it again, so "Streaming on Netflix" was a permanent claim.
+// Licences expire; a page frozen in August still asserting Netflix in March is precisely
+// the failure this site's whole gating philosophy exists to avoid, and it is the one a
+// reader discovers personally — they open the app, it isn't there, and every other verdict
+// on the site is retroactively suspect.
+//
+// Design, and the reasoning behind each choice:
+//
+//   CONFIRMATION BEFORE REWRITE. TMDB's provider data is occasionally empty for a title
+//   that has not moved — a bad response, a regional blip. Rewriting on a single miss would
+//   introduce exactly the wrong claim we are removing. A page is only rewritten after
+//   DEPART_CONFIRM_MISSES consecutive empty checks on separate runs. One miss is noise;
+//   two, days apart, is a signal.
+//
+//   RENT/BUY IS NOT A DEPARTURE. A film that leaves a subscription tier but is still
+//   purchasable has not vanished — saying "no longer available" there would be its own
+//   false claim. That case gets its own honest wording.
+//
+//   SLOW CADENCE, HARD CAP. Arrivals are urgent (being first is the point); departures are
+//   not (a week late is a non-event). Each page is rechecked at most every
+//   DEPART_RECHECK_DAYS, oldest first, capped per country per run, so the cost stays flat
+//   as the archive grows without bound.
+//
+//   NEVER GUESS WHY. The page says what we can prove — we could not find it, on this date,
+//   on any subscription service in this country. It does not claim the film "was removed",
+//   which we cannot know.
+// ============================================================================
+const DEPART_RECHECK_DAYS = 30;    // how stale a live claim gets before we recheck it
+const DEPART_MAX_CHECKS = 15;      // per country per run — keeps API cost flat as the archive grows
+const DEPART_CONFIRM_MISSES = 2;   // consecutive empty checks before we touch the page
+
+// Pure: pick which live-claim pages are due a recheck. Oldest claim first, so the most
+// likely to be wrong is always checked before the budget runs out.
+function departureCandidates(entries, now = new Date(), max = DEPART_MAX_CHECKS) {
+  const MS_DAY = 86400000;
+  return entries
+    .filter((x) => x.tmdbId && x.live && x.live.since)
+    .map((x) => {
+      const last = x.live.lastCheck || x.live.since;
+      const daysSince = (now.getTime() - new Date(last + "T00:00:00Z").getTime()) / MS_DAY;
+      return { ...x, daysSince };
+    })
+    .filter((x) => Number.isFinite(x.daysSince) && x.daysSince >= DEPART_RECHECK_DAYS)
+    .sort((a, b) => b.daysSince - a.daysSince)
+    .slice(0, max);
+}
+
+// Pure: rewrite a live claim into an honest "we could not find it" block. Mirrors
+// applyArrivalPatch — same markers, same shape, opposite direction.
+function applyDeparturePatch(html, { title, was, rentBuy, countryName, cfg, asOf }) {
+  const V = streamVocab(cfg);
+  const e = escHtml;
+  const start = "<!--SW:pending-->", end = "<!--/SW:pending-->";
+  const a = html.indexOf(start), b = html.indexOf(end);
+  if (a === -1 || b === -1 || b < a) return { html, changed: false };
+  const wasList = (was || []).join(", ");
+  const rb = (rentBuy || []).filter(Boolean);
+
+  // Two genuinely different situations, and conflating them would be a false claim either
+  // way: still purchasable is not the same as gone.
+  const body = rb.length
+    ? `<p><strong>Not on subscription any more.</strong> ${e(title)} is no longer included with a subscription in ${e(countryName)}${wasList ? ` — it was on ${e(wasList)}` : ""}. You can still rent or buy it on ${e(rb.slice(0, 3).join(", "))}.</p>`
+    : `<p><strong>We can't find it streaming right now.</strong> ${e(title)} isn't on any subscription service we track in ${e(countryName)}${wasList ? ` — it was on ${e(wasList)}` : ""}. Rights move around, so it may return.</p>`;
+
+  // NOT V.heading() — that asks "when is it coming to OTT", which is the arrival question
+  // and reads as nonsense above a departure notice.
+  const heading = `Where to watch ${title}`;
+  const block = `${start}<!--SW:gone=${e(asOf || "")}--><h2>${e(heading)}</h2>${body}`
+    + `<p style="color:var(--mute);font-size:13px">Checked ${e(asOf || "recently")}. We keep looking — if it comes back, this page updates.</p>${end}`;
+  let out = html.slice(0, a) + block + html.slice(b + end.length);
+
+  // Strip the stale provider pills. `was` comes from the manifest claim, but a page patched
+  // before live-claims existed has no manifest record — so fall back to the provider names
+  // written into the page's own streaming sentence rather than leaving pills that contradict
+  // the notice directly above them.
+  const names = new Set(was || []);
+  if (!names.size) {
+    const m2 = html.match(/is available in [^<]*? on ([^<.]+)\./);
+    if (m2) m2[1].split(/,| & /).map((x) => x.trim()).filter(Boolean).forEach((x) => names.add(x));
+  }
+  for (const pv of names) {
+    const stale = `<span class="pill">${e(pv)}</span>`;
+    if (out.includes(stale)) out = out.split(stale).join("");
+  }
+  const pill = rb.length
+    ? `<span class="pill">Rent or buy only</span>`
+    : `<span class="pill">Not currently streaming</span>`;
+  out = out.replace(`<h2>${e(heading)}</h2>`, `${pill}<h2>${e(heading)}</h2>`);
+  return { html: out, changed: true };
+}
+
+// Live pass: recheck live claims for one country. Network-bound and strictly budgeted;
+// failures are logged and skipped, because a claim that stays one more month is survivable
+// and a wrong rewrite is not.
+// Pages patched to "streaming now" BEFORE live claims existed carry no <!--SW:live--> stamp
+// and no manifest claim, so the departure sweep would skip them forever — and those are
+// exactly the oldest, most likely to be wrong. Stamp them once, dating the claim from
+// whenever the page was last touched so they enter the normal recheck rotation.
+function backfillLiveClaims(manifest, cfg) {
+  const m = manifest[cfg.code] || {};
+  const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
+  if (!fs.existsSync(dir)) return 0;
+  let n = 0;
+  for (const [slug, v] of Object.entries(m)) {
+    if (!v || v.live || !v.tmdbId) continue;
+    const p = `${dir}/${slug}.html`;
+    let html;
+    try { html = fs.readFileSync(p, "utf8"); } catch { continue; }
+    if (html.includes("<!--SW:live=") || !html.includes("It&#39;s streaming now.")) continue;
+    const since = v.last || v.archivedOn;
+    if (!since) continue;
+    const m2 = html.match(/is available in [^<]*? on ([^<.]+)\./);
+    const provs = m2 ? m2[1].split(/,| & /).map((x) => x.trim()).filter(Boolean) : [];
+    m[slug].live = { since, providers: provs, lastCheck: since, misses: 0 };
+    try { fs.writeFileSync(p, html.replace("<!--SW:pending-->", `<!--SW:pending--><!--SW:live=${escHtml(since)}-->`)); }
+    catch { continue; }
+    n++;
+  }
+  if (n) console.log(`  live-claim backfill [${cfg.code}]: ${n} page(s) brought into the recheck rotation`);
+  return n;
+}
+
+async function sweepStreamingDepartures(manifest, cfg, asOf) {
+  const m = manifest[cfg.code] || {};
+  const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
+  if (!fs.existsSync(dir)) return;
+  backfillLiveClaims(manifest, cfg);
+  const entries = Object.entries(m).map(([slug, v]) => ({ slug, ...v }));
+  const candidates = departureCandidates(entries).filter((x) => {
+    try { return fs.readFileSync(`${dir}/${x.slug}.html`, "utf8").includes("<!--SW:live="); }
+    catch { return false; }
+  });
+  if (!candidates.length) return;
+  let confirmed = 0, stillThere = 0, pending = 0;
+  for (const c of candidates) {
+    try {
+      const kind = c.kind === "tv" ? "tv" : "movie";
+      const d = await tmdb(`/${kind}/${c.tmdbId}/watch/providers`);
+      const region = d?.results?.[cfg.watchRegion] || {};
+      const provs = dedupeProviders((region.flatrate || []).map((x) => x.provider_name)).slice(0, 4);
+      const rentBuy = dedupeProviders([...(region.rent || []), ...(region.buy || [])].map((x) => x.provider_name)).slice(0, 3);
+      const live = m[c.slug].live || {};
+
+      if (provs.length) {
+        // Still streaming. Record the check and refresh the provider list if it moved.
+        m[c.slug].live = { ...live, providers: provs, lastCheck: asOf, misses: 0 };
+        stillThere++;
+        continue;
+      }
+      // Empty result. One miss is noise — count it and wait for the next pass.
+      const misses = (live.misses || 0) + 1;
+      m[c.slug].live = { ...live, lastCheck: asOf, misses, rentBuy };
+      if (misses < DEPART_CONFIRM_MISSES) { pending++; continue; }
+
+      const p = `${dir}/${c.slug}.html`;
+      const { html, changed } = applyDeparturePatch(fs.readFileSync(p, "utf8"), {
+        title: c.title || c.slug, was: live.providers || [], rentBuy,
+        countryName: countryNameFor(cfg), cfg, asOf,
+      });
+      if (changed) {
+        fs.writeFileSync(p, html);
+        m[c.slug].last = asOf;
+        delete m[c.slug].live;      // claim retired; the page no longer asserts a platform
+        confirmed++;
+      }
+    } catch (e) { console.warn(`  departure ${c.slug}: ${e.message}`); }
+  }
+  console.log(`  departure sweep [${cfg.code}]: ${candidates.length} rechecked, ${stillThere} still streaming, ${pending} awaiting confirmation, ${confirmed} retired`);
 }
 
 // ============================================================================
@@ -4408,7 +4590,14 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
       const { html, changed } = applyArrivalPatch(fs.readFileSync(p, "utf8"), {
         title: c.title || c.slug, providers: provs, countryName: countryNameFor(cfg), cfg, asOf,
       });
-      if (changed) { fs.writeFileSync(p, html); m[c.slug].last = asOf; found++; }
+      if (changed) {
+        fs.writeFileSync(p, html);
+        m[c.slug].last = asOf;
+        // Open a live claim. This is what the departure sweep later rechecks — without it
+        // the assertion we just wrote onto the page could never be revisited.
+        m[c.slug].live = { since: asOf, providers: provs, lastCheck: asOf, misses: 0 };
+        found++;
+      }
     } catch (e) { console.warn(`  sweep ${c.slug}: ${e.message}`); }
   }
   console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming`);
@@ -5533,7 +5722,7 @@ module.exports = {
   reseedTake, isPoolTake, isLegacyTake, mineViewerAspects, composeTmdbTake, dedupeProviders, rankSimilar, TAKE_VERSION, xDefaultCode, repairXDefaults,
   capTrending, buildEditorNote, ssrEditorNote,
   platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls, poolItems,
-  shortenTitleTag,
+  shortenTitleTag, departureCandidates, applyDeparturePatch, backfillLiveClaims,
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
