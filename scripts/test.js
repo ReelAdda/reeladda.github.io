@@ -3226,6 +3226,80 @@ test("a page with no pending block is left untouched", () => {
   assert.deepStrictEqual(U.applyDeparturePatch(plain, { title: "X", was: [], rentBuy: [], countryName: "India", cfg: { code: "in" }, asOf: "2026-09-09" }), { html: plain, changed: false });
 });
 
+group("editor's note — the sleeper must actually be new");
+const _ottItem = (o) => ({ title: "X", rating: 8.0, votes: 400, platform: "Netflix", kind: "tv", ...o });
+test("an older standout is never crowned the week's winner", () => {
+  // Regression: the sleeper sorted the whole six-week OTT list by rating. The stillGood tail
+  // (long-running shows with thousands of votes) wins that sort almost by definition, so the
+  // note called a 2020 series with a 4 Aug season "the week's real winner".
+  const data = { theatres: [], ott: [
+    _ottItem({ title: "Old Favourite", rating: 8.6, votes: 5000, stillGood: true }),
+    _ottItem({ title: "This Week", rating: 8.1, votes: 400, stillGood: false }),
+  ] };
+  const note = U.buildEditorNote(data, { code: "in" }, 1) || "";
+  assert.ok(!/Old Favourite/.test(note), "a stillGood title must not be the sleeper");
+  assert.ok(/This Week/.test(note), "the current arrival should take the slot");
+});
+test("no sleeper at all rather than a stale one", () => {
+  const data = { theatres: [], ott: [_ottItem({ title: "Old Favourite", rating: 8.9, votes: 9000, stillGood: true })] };
+  const note = U.buildEditorNote(data, { code: "in" }, 1);
+  assert.ok(!note || !/Old Favourite/.test(note), "say nothing before saying something untrue");
+});
+test("a fresh title still clears the sleeper bar normally", () => {
+  const data = { theatres: [], ott: [_ottItem({ title: "Fresh Hit", rating: 8.2, votes: 500 })] };
+  assert.ok(/Fresh Hit/.test(U.buildEditorNote(data, { code: "in" }, 1) || ""));
+});
+
+group("currency claims — carried-over titles never presented as new");
+const _mkOtt = (title, o = {}) => ({ title, slug: title.toLowerCase().replace(/\W+/g, "-"), tmdbId: title.length * 7,
+  platform: "Netflix", language: "English", rating: 8.0, votes: 500, kind: "movie", ...o });
+const _mixed = {
+  generatedAt: "2026-09-09T06:00:00Z",
+  theatres: [],
+  ott: [
+    _mkOtt("Landed Today", { rating: 7.6, votes: 300 }),
+    _mkOtt("Also New", { rating: 7.4, votes: 250 }),
+    _mkOtt("Old Favourite", { rating: 8.9, votes: 9000, stillGood: true }),
+  ],
+};
+const _cfgIn = { code: "in", name: "India", region: "IN" };
+test("a hub's FAQ answer names only titles that arrived this week", () => {
+  const hub = { name: "Netflix", slug: "netflix", items: _mixed.ott };
+  const html = U.buildPlatformHubPage(_mixed, _cfgIn, hub);
+  const a = (html.match(/What's new on Netflix in India this week\?<\/summary><div class="fa">([^<]*)/) || [])[1] || "";
+  assert.ok(/Landed Today/.test(a));
+  assert.ok(!/Old Favourite/.test(a), "the most quotable sentence on the page must be true");
+});
+test("a hub still lists carried-over titles, under their own label", () => {
+  const hub = { name: "Netflix", slug: "netflix", items: _mixed.ott };
+  const html = U.buildPlatformHubPage(_mixed, _cfgIn, hub);
+  assert.ok(/Old Favourite/.test(html), "worth watching — keep it on the page");
+  assert.ok(/Still worth it/.test(html), "but label it");
+});
+test("the hub lead counts new titles, not total rows", () => {
+  const hub = { name: "Netflix", slug: "netflix", items: _mixed.ott };
+  const html = U.buildPlatformHubPage(_mixed, _cfgIn, hub);
+  assert.ok(/2 new titles/.test(html), "3 rows, 2 of them new");
+});
+test("/new-on-ott/ keeps carried titles out of 'New on X this week' groups", () => {
+  const html = U.buildOttWeekPage({ ..._mixed, ottExtra: [] }, _cfgIn, [_cfgIn]);
+  const netflixSection = (html.split("Still worth it")[0] || "");
+  assert.ok(!/Old Favourite/.test(netflixSection), "a five-week-old title under a 'this week' heading is a false claim");
+  assert.ok(/Still worth it/.test(html));
+});
+test("'best new this week' ranks this week's arrivals only", () => {
+  const html = U.buildOttWeekPage({ ..._mixed, ottExtra: [] }, _cfgIn, [_cfgIn]);
+  const a = (html.match(/best new [^<]*this week\?<\/summary><div class="fa">([^<]*)/) || [])[1] || "";
+  assert.ok(!/Old Favourite/.test(a), "the 8.9 carried-over title must not win 'best new'");
+  assert.ok(/Landed Today/.test(a));
+});
+test("a week with no new arrivals says so rather than pretending", () => {
+  const onlyOld = { ..._mixed, ott: [_mkOtt("Old Favourite", { stillGood: true })] };
+  const hub = { name: "Netflix", slug: "netflix", items: onlyOld.ott };
+  const html = U.buildPlatformHubPage(onlyOld, _cfgIn, hub);
+  assert.ok(/Nothing new landed/.test(html));
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");
