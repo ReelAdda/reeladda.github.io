@@ -3186,6 +3186,46 @@ test("og:title is rewritten in step with the title tag", () => {
   assert.strictEqual(t, og, "the social title must not drift from the search title");
 });
 
+group("departure sweep — rechecking claims we already made");
+const _liveEnt = (slug, lastCheck, extra = {}) => ({ slug, tmdbId: 1, title: slug, live: { since: lastCheck, lastCheck, providers: ["Netflix"], misses: 0 }, ...extra });
+test("only pages with an open live claim are candidates", () => {
+  const c = U.departureCandidates([_liveEnt("a", "2026-06-01"), { slug: "b", tmdbId: 2 }], new Date("2026-09-09"));
+  assert.deepStrictEqual(c.map((x) => x.slug), ["a"]);
+});
+test("a recently checked claim is left alone", () => {
+  assert.strictEqual(U.departureCandidates([_liveEnt("a", "2026-09-05")], new Date("2026-09-09")).length, 0);
+});
+test("the stalest claim is checked first", () => {
+  const c = U.departureCandidates([_liveEnt("newer", "2026-07-01"), _liveEnt("older", "2026-05-01")], new Date("2026-09-09"));
+  assert.deepStrictEqual(c.map((x) => x.slug), ["older", "newer"]);
+});
+const _livePage = '<span class="pill">Netflix</span><!--SW:pending--><!--SW:live=2026-07-01--><h2>When is X coming to OTT?</h2><p><strong>It&#39;s streaming now.</strong> X is available in India on Netflix.</p><!--/SW:pending-->';
+test("a gone title says what we can prove, not why", () => {
+  const r = U.applyDeparturePatch(_livePage, { title: "X", was: ["Netflix"], rentBuy: [], countryName: "India", cfg: { code: "in" }, asOf: "2026-09-09" });
+  assert.ok(r.changed);
+  assert.ok(/can't find it streaming/.test(r.html));
+  assert.ok(!/removed|delisted|taken down/i.test(r.html), "never claim a reason we cannot know");
+  assert.ok(!r.html.includes('<span class="pill">Netflix</span>'), "stale provider pill must go");
+});
+test("rent-or-buy is not treated as a departure", () => {
+  const r = U.applyDeparturePatch(_livePage, { title: "X", was: ["Netflix"], rentBuy: ["Apple TV"], countryName: "India", cfg: { code: "in" }, asOf: "2026-09-09" });
+  assert.ok(/rent or buy it on Apple TV/.test(r.html));
+  assert.ok(!/can't find it streaming/.test(r.html), "still purchasable is not gone");
+});
+test("the departure block does not reuse the arrival heading", () => {
+  const r = U.applyDeparturePatch(_livePage, { title: "X", was: ["Netflix"], rentBuy: [], countryName: "India", cfg: { code: "in" }, asOf: "2026-09-09" });
+  assert.ok(!/coming to OTT/.test(r.html), "asking when it arrives above a departure notice is nonsense");
+});
+test("provider names are recovered from the page when the manifest has none", () => {
+  // Pages patched before live claims existed have no recorded provider list.
+  const r = U.applyDeparturePatch(_livePage, { title: "X", was: [], rentBuy: [], countryName: "India", cfg: { code: "in" }, asOf: "2026-09-09" });
+  assert.ok(!r.html.includes('<span class="pill">Netflix</span>'));
+});
+test("a page with no pending block is left untouched", () => {
+  const plain = "<html><body><p>nothing here</p></body></html>";
+  assert.deepStrictEqual(U.applyDeparturePatch(plain, { title: "X", was: [], rentBuy: [], countryName: "India", cfg: { code: "in" }, asOf: "2026-09-09" }), { html: plain, changed: false });
+});
+
 console.log(`Tests: ${passed} passed, ${failed} failed`);
 if (failed > 0) { console.error("FAIL"); process.exit(1); }
 console.log("PASS");
