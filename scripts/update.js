@@ -218,6 +218,16 @@ function windowForLanguage(languageName) {
   }
   return STREAM_WINDOW_DEFAULT;
 }
+// Whether the language above resolved to a REAL measured window or fell through to the
+// default. Naming the language in a snippet ("the usual Arabic window") implies we have data
+// for it; for anything outside STREAM_WINDOW_WEEKS we do not, and the copy must not pretend.
+function hasLanguageWindow(languageName) {
+  if (!languageName) return false;
+  for (const [code, name] of Object.entries(LANG)) {
+    if (name === languageName && STREAM_WINDOW_WEEKS[code]) return true;
+  }
+  return false;
+}
 
 // Pure: given a theatrical release date and language, describe the expected window.
 // Returns null when we have no release date to anchor to (say nothing rather than guess),
@@ -235,6 +245,25 @@ function streamWindowEstimate(releasedISO, languageName, now = new Date()) {
   const label = (d) => `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
   const span = label(from) === label(to) ? label(from) : `${label(from)} and ${label(to)}`;
   return { lo, hi, span, passed: now.getTime() > to.getTime() };
+}
+
+// The same window, compacted for a meta description ("Sep–Oct 2026"). Body copy has room for
+// "September 2026 and October 2026"; a 155-character snippet does not, and that span is the
+// single most clickable thing we can put in one. Returns null when there is no live window to
+// quote — never a vague placeholder, which is exactly what killed CTR in the first place.
+const MONTHS_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function streamWindowShort(releasedISO, languageName, now = new Date()) {
+  const est = streamWindowEstimate(releasedISO, languageName, now);
+  if (!est || est.passed) return null;
+  const rel = new Date(releasedISO + "T00:00:00Z");
+  const from = new Date(rel.getTime() + est.lo * 7 * 86400000);
+  const to = new Date(rel.getTime() + est.hi * 7 * 86400000);
+  const fm = from.getUTCMonth(), fy = from.getUTCFullYear();
+  const tm = to.getUTCMonth(), ty = to.getUTCFullYear();
+  const short = (fm === tm && fy === ty) ? `${MONTHS_ABBR[fm]} ${fy}`
+    : fy === ty ? `${MONTHS_ABBR[fm]}\u2013${MONTHS_ABBR[tm]} ${ty}`
+    : `${MONTHS_ABBR[fm]} ${fy}\u2013${MONTHS_ABBR[tm]} ${ty}`;
+  return { ...est, short, known: hasLanguageWindow(languageName) };
 }
 
 // Manual exclusion list — films that should NEVER appear regardless of what TMDB returns
@@ -2993,6 +3022,146 @@ const FILM_HISTORY = {
   },
 };
 
+
+// ============================================================================
+// FILM META DESCRIPTION — a snippet is an ad, not an answer.
+//
+// Sept 2026 GSC: 367 queries ranked inside Google's top 10 and returned 0.69% CTR across
+// 3,928 impressions; 346 of them took ZERO clicks. The cause was the old builder doing its
+// job too well. Both shapes it produced ENDED the search inside the results page:
+//   streaming  -> "Watch X in the UK on Netflix"  (answered; the click went to Netflix)
+//   theatrical -> "OTT release date coming soon"  (no answer exists; nothing worth clicking)
+// Every fact below still lives in the H1, the body copy and the JSON-LD, so Google matches
+// these queries exactly as it did before. What changes is that the reader has to open the
+// page to finish the thought. Exactly one thing is now withheld: the PLATFORM NAME on
+// streaming titles. The theatrical branch does the opposite and LEADS with the window
+// estimate — the one thing competitors cannot source, and which streamWindowEstimate has
+// been rendering on-page since August without ever reaching a snippet.
+//
+// Shape is lifted from buildHeadTags' homepage description ("This week: X, Y + 15 more…"),
+// which is the only description on this site already clearing 16% CTR.
+//
+// Pure and self-contained so the frozen-archive patcher (rewriteMetaDescription) can call it
+// with a synthetic item rebuilt from a page on disk. One source of truth, one shape, one
+// place to change it — the same reason streamVocab exists.
+// `opts.runEnded` is set by the archive patcher for pages whose theatrical run is over:
+// without it a frozen page says "Theatrical run ended" in its body and "is in cinemas"
+// in its description, which is how filmychill.com/movie/insidious-out-of-the-further.html
+// shipped on 14 Sept 2026.
+// ============================================================================
+function filmMetaDescription(item, cfg = null, opts = {}) {
+  const country = countryNameFor(cfg);
+  const V = streamVocab(cfg);
+  const year = (item.released || "").slice(0, 4);
+  const yr = year ? ` (${year})` : "";
+  const providers = Array.isArray(item.providers) ? item.providers : [];
+  const rentBuy = Array.isArray(item.rentBuy) ? item.rentBuy : [];
+  const relState = releaseState(item.released);
+  const upcoming = relState === "upcoming" || relState === "today";
+  const runEnded = !!opts.runEnded;
+  const now = opts.now ? new Date(opts.now) : new Date();
+
+  // Pick the first candidate inside Google's ~155-char display, else trim the shortest.
+  // Same degradation ladder as fitTitle, for the same reason: the clause that earns the click
+  // must survive truncation, so it goes early and the decoration goes last. The old code
+  // appended its payoff line and THEN trimmed to 155, which amputated it on every live page —
+  // the "this page updates the day it streams" promise never once reached a SERP.
+  const fitDesc = (optsList) => {
+    const live = optsList.filter(Boolean);
+    return live.find((t) => t.length <= 155) || trim(live[live.length - 1] || "", 155);
+  };
+
+  const dvotes = item.imdbRating != null ? item.imdbVotes : item.votes;
+  const ratingBit = item.rating != null && dvotes >= 10 ? `${Number(item.rating).toFixed(1)}/10` : "";
+  const runtimeBit = item.kind === "tv" ? "" : fmtRuntime(item.runtime);
+  const stats = [ratingBit, runtimeBit].filter(Boolean).join(", ");
+  const statsClause = stats ? `${stats}, ` : "";
+  const thing = item.kind === "tv" ? "series" : "film";
+  // Title already ending in punctuation must not collect a second colon
+  // ("Abijit Ganguly: Baby: OTT release expected…").
+  // A title already ending in punctuation must not collect a second colon, and a title that
+  // already CONTAINS one ("Insidious: Out of the Further") reads badly with a third — the
+  // highest-impression page on the site is exactly that shape, so it gets a dash instead.
+  const rawTitle = String(item.title || "").trim();
+  const titleSep = /[:.!?\u2014-]$/.test(rawTitle) ? "" : (rawTitle.includes(":") ? " \u2014" : ":");
+  // Quote the window only where doing so is honest: a released theatrical title, nothing
+  // streaming or rentable yet, and a window that has not already lapsed.
+  const est = (item.kind !== "tv" && !providers.length && !rentBuy.length
+    && item.platform === "Theatres" && !upcoming)
+    ? streamWindowShort(item.released, item.language, now) : null;
+  const inCinemas = runEnded ? `theatrical run over in ${country}` : `in cinemas in ${country} now`;
+  // Name the language only when STREAM_WINDOW_WEEKS actually carries one for it. Everything
+  // else gets the honest generic phrasing rather than an implied dataset we don't have.
+  const windowBasis = est && est.known ? `the usual ${item.language} window` : "the usual window for a release like this";
+
+  let desc;
+  if (upcoming && item.released) {
+    // Pre-release: the date is the draw and it is public anyway, so lead with it. What is held
+    // back is what the searcher wants next — is it any good, how long, when will it stream.
+    const when = `${fmtDateShort(item.released, now.getTime(), localeFor((cfg && cfg.code) || "in"))} ${String(item.released).slice(0, 4)}`;
+    desc = fitDesc([
+      `${item.title} opens in cinemas in ${country} on ${when}. Runtime, cast, the trailer and the early reception \u2014 plus when it's likely to reach ${V.word}.`,
+      `${item.title} opens in cinemas in ${country} on ${when}. Runtime, cast, trailer and when it's likely to reach ${V.word}.`,
+      `${item.title} opens in ${country} on ${when} \u2014 runtime, cast, trailer and early reception.`,
+      `${item.title} opens in cinemas in ${country} on ${when}.`,
+    ]);
+  } else if (providers.length) {
+    // NEVER open with the platform name. That one clause is what put
+    // /uk/movie/don-t-say-good-luck.html at position 1.12 with ZERO clicks from 247
+    // impressions: the searcher read "Netflix" in the results page and went to Netflix.
+    // Saying it IS streaming keeps the snippet honest and on-intent; not saying WHERE is the
+    // entire reason to click.
+    desc = fitDesc([
+      `${item.title} is streaming in ${country} \u2014 but is it worth your evening? ${statsClause}the critics' take, the audience counterpoint and every platform carrying it.`,
+      `${item.title} is streaming in ${country} \u2014 but is it worth your evening? ${statsClause}critics' take and every platform carrying it.`,
+      `${item.title} is streaming in ${country}. ${statsClause}verdict, critics' take and where to watch it.`,
+      `${item.title} is streaming in ${country} \u2014 the verdict and where to watch.`,
+    ]);
+  } else if (rentBuy.length) {
+    desc = fitDesc([
+      `${item.title} isn't on any subscription in ${country} yet \u2014 where to rent or buy it, ${statsClause}the critics' take and whether it's worth paying for.`,
+      `${item.title} isn't on a subscription in ${country} yet. Where to rent or buy it, ${statsClause}and whether it's worth paying for.`,
+      `${item.title} in ${country}: where to rent or buy it, ${statsClause}and the verdict.`,
+      `${item.title} \u2014 where to rent or buy it in ${country}, and the verdict.`,
+    ]);
+  } else if (est) {
+    // The money branch. "<film> ott release date" is the highest-volume query shape these
+    // pages rank for, and the snippet used to answer it with "coming soon". A dated window,
+    // labelled as a pattern, beats both a non-answer and a competitor's unsourced guess.
+    desc = fitDesc([
+      `${item.title}${titleSep} ${V.word} release expected around ${est.short} (${windowBasis}, not a confirmed date). ${cap(inCinemas)}; ${statsClause}verdict inside.`,
+      `${item.title}${titleSep} ${V.word} release expected around ${est.short} (${windowBasis}, not a confirmed date). ${statsClause}verdict and runtime inside.`,
+      `${item.title}${titleSep} ${V.word} release expected around ${est.short} (a pattern, not a confirmed date). ${cap(inCinemas)}.`,
+      `${item.title}${titleSep} ${V.word} release expected around ${est.short}. ${cap(inCinemas)}.`,
+    ]);
+  } else if (item.platform === "Theatres") {
+    // No usable window (no release date on file, or the window already lapsed). There is
+    // genuinely nothing to promise about the date, so the payoff clause carries the click.
+    const lead = runEnded
+      ? `${item.title} has finished its theatrical run in ${country}`
+      : `${item.title} is in cinemas in ${country}`;
+    desc = fitDesc([
+      `${lead}. We re-check for ${V.article.toLowerCase()} ${V.releaseDate} every single day \u2014 ${statsClause}critics' take and the verdict inside.`,
+      `${lead}. We check daily for ${V.article.toLowerCase()} ${V.releaseDate} \u2014 ${statsClause}critics' take and the verdict.`,
+      `${lead} \u2014 ${statsClause}critics' take and the verdict.`,
+      `${lead}.`,
+    ]);
+  } else {
+    // Availability unknown. The old generic line at least named the film; give it a payoff
+    // clause too, rather than trailing off into a truncated synopsis.
+    desc = fitDesc([
+      `${item.title}${yr}: ${[item.language, item.genre].filter(Boolean).join(" ")} ${thing} \u2014 ${statsClause}the verdict, the critics' take and where to watch it in ${country}.`,
+      `${item.title}${yr}: ${[item.language, item.genre].filter(Boolean).join(" ")} ${thing} \u2014 rating, verdict and where to watch in ${country}.`,
+      `${item.title}${yr} \u2014 rating, verdict and where to watch in ${country}.`,
+    ]);
+  }
+  // Last-resort guard: five live pages once shipped with an empty description. Never again.
+  if (!desc || desc.trim().length < 20) {
+    desc = trim(`${item.title}${yr}: ${[item.language, item.genre, thing].filter(Boolean).join(" ")} \u2014 review, rating and where to watch in ${country}`, 155);
+  }
+  return desc;
+}
+
 function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const e = escHtml;
   const code = (cfg && cfg.code) || "in";
@@ -3037,23 +3206,29 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
         `${item.title}${yr} — Review & Where to Watch`,
         `${item.title}${yr} — Review`,
       ]);
-  // Description order: what IS true (platform / theatres / rating) leads, the synopsis
-  // fills, and the one unknown (OTT date) goes LAST — an unknown is a terrible opener.
-  // Guaranteed non-empty: five live pages had blank descriptions (no verdict, no synopsis).
-  const dvotes = item.imdbRating != null ? item.imdbVotes : item.votes;
-  const factBits = [];
-  // Lead the snippet with the where/when-to-watch answer — the intent GSC shows these pages
-  // rank for. Streaming: name the platform. Theatres with no date: say the date is pending
-  // (the query is "when does it release on OTT"). Rent/buy: say so.
-  if (providers.length) factBits.push(`Watch ${item.title} in ${country} on ${providers.slice(0, 2).join(" & ")}`);
-  else if ((item.rentBuy || []).length) factBits.push(`Rent or buy ${item.title} in ${country} on ${item.rentBuy.slice(0, 2).map(String).join(" & ")}`);
-  else if (item.platform === "Theatres") factBits.push(`${item.title} is in cinemas in ${country}${wantsOttTitle ? `; ${V_TITLE.word} release date coming soon` : ""}`);
-  if (item.rating != null && dvotes >= 10) factBits.push(`rated ${Number(item.rating).toFixed(1)}/10`);
-  const clean = (s) => String(s).trim().replace(/\.+$/, "");
-  const descParts = [factBits.join(", "), item.verdict, synopsis].filter(Boolean).map(clean);
-  if (wantsOttTitle) descParts.push(`${V_TITLE.word === "OTT" ? "OTT" : "Streaming"} date not announced yet — this page updates the day it streams`);
-  const desc = trim(descParts.filter(Boolean).join(". "), 155)
-    || trim(`${item.title}${yr}: ${[item.language, item.genre, item.kind === "tv" ? "series" : "film"].filter(Boolean).join(" ")} — review, rating and where to watch in ${country}`, 155);
+  // See filmMetaDescription above for why this is no longer built inline: the same function
+  // has to serve both this live render and the frozen-archive patcher, or the fix reaches
+  // only the ~5% of film pages that happen to be in a current list this week.
+  const desc = filmMetaDescription(item, cfg);
+
+  // ---- EMPTY-SHELL COUNTRY PAGES ------------------------------------------
+  // A NON-India film page carrying no market-specific availability at all — no provider, no
+  // rent/buy option, no theatrical run, no upcoming date — is a shell: same title, synopsis
+  // and verdict as the India copy, with nothing a searcher in that market can act on. Sept
+  // 2026 GSC: 454 country film pages drew 4,100 impressions and ZERO clicks between them,
+  // while single films ran to eight indexed URLs apiece.
+  // The page is still WRITTEN (hubs link to it, and it fills in the moment data lands) — it
+  // just leaves the index, so the cluster's ranking sits on one URL instead of being split.
+  // DELIBERATELY NARROW. Any page with a provider, a rent/buy option, a theatrical run or a
+  // release date ahead of it is a real localised answer and stays indexed:
+  // /sg/movie/the-rope-curse-4-kuntilanak earns Singapore clicks at position 6.7 and must
+  // never be caught by this rule.
+  const isShellPage = code !== "in" && !providers.length && !(item.rentBuy || []).length
+    && item.platform !== "Theatres" && !upcoming;
+  const robotsTag = isShellPage
+    ? `<meta name="robots" content="noindex,follow,max-image-preview:large">`
+    : `<meta name="robots" content="max-image-preview:large">`;
+  void wantsOttTitle; void synopsis;
 
   // hreflang alternates: the SAME film may have a page in several countries. crossCountry maps
   // code -> true for every other country whose current run also has this slug. Passed in by
@@ -3154,7 +3329,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(titleTag)}</title>
 <meta name="description" content="${e(desc)}">
-<meta name="robots" content="max-image-preview:large">
+${robotsTag}
 <link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl(xDefaultCode(alts.map((a) => a.code)), item.slug))}"/>` : ""}
 <meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">
 <meta property="og:description" content="${e(desc)}">
@@ -3545,12 +3720,23 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const filmUrlFor = (code, slug) => (code === "in"
     ? `https://filmychill.com/movie/${slug}.html`
     : `https://filmychill.com/${code}/movie/${slug}.html`);
+  // A page carrying noindex must not appear in the sitemap: submitting a URL you have asked
+  // Google not to index is a contradictory signal, and Search Console reports it outright as
+  // "Submitted URL marked noindex". Cheap — only the head is read, and these same files are
+  // already walked by repairXDefaults and filmIndexFor on every run.
+  const noIndexed = new Set(); // "code/slug" — excluded from the sitemap AND from hreflang
+  const isNoIndex = (path) => {
+    try {
+      return /<meta name="robots" content="[^"]*noindex/.test(fs.readFileSync(path, "utf8").slice(0, 2048));
+    } catch { return false; }
+  };
   const slugCodes = {}; // slug -> Set(codes)
   for (const c of countries) {
     const dir = dirFor(c.code);
     if (!fs.existsSync(dir)) continue;
     for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".html"))) {
       const slug = f.slice(0, -5);
+      if (isNoIndex(`${dir}/${f}`)) { noIndexed.add(`${c.code}/${slug}`); continue; }
       (slugCodes[slug] = slugCodes[slug] || new Set()).add(c.code);
     }
   }
@@ -3562,6 +3748,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     if (!fs.existsSync(dir)) continue;
     for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".html")).sort()) {
       const slug = f.slice(0, -5);
+      if (noIndexed.has(`${c.code}/${slug}`)) continue; // empty-shell country page
       const codes = [...(slugCodes[slug] || [])];
       const alts = codes.length > 1
         ? "\n" + codes.map((cc) =>
@@ -4183,7 +4370,9 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 // the fix reaches pages frozen before the pattern existed.
 // Bumped to 4 for the title-length sweep: pv-stamped pages below this version get one
 // re-pass so the archive picks up the 60-char cascade it was written before.
-const ARCHIVE_PATCH_VERSION = 4;
+// 5: one-time re-sweep of the whole archive for the Sept 2026 meta-description rewrite.
+// Bumping this is what actually ships the CTR fix — frozen pages are otherwise never touched.
+const ARCHIVE_PATCH_VERSION = 5;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
@@ -4283,6 +4472,79 @@ function shortenTitleTag(html, countryName, cfg = null) {
   return { html: out, changed: true };
 }
 
+// ============================================================================
+// FROZEN-PAGE DESCRIPTION REWRITE — without this, the CTR fix reaches almost nobody.
+//
+// Film pages freeze the moment a film leaves the weekly lists (see shortenTitleTag's note:
+// template improvements reach "only the ~5% of pages live that week"). Verified: a full
+// PAGES_ONLY=all rebuild on 14 Sept 2026 rewrote hubs, feeds and browse indexes and left all
+// 1,546 film pages byte-identical. Every impression in the GSC window that made this fix
+// worth doing comes from pages that froze weeks ago, so shipping the new builder alone would
+// have changed nothing measurable.
+//
+// Everything needed is already in the HTML — no TMDB call, no data.json lookup. JSON-LD
+// carries name/inLanguage/datePublished/duration/genre; the visible strip carries the star
+// rating; the SW markers carry the streaming state; the where-to-watch pills carry providers
+// and rent/buy. Reconstruct a synthetic item, run the SAME filmMetaDescription the live
+// builder uses, and swap the description and its og: twin.
+// ============================================================================
+function frozenFilmFacts(html) {
+  const m = html.match(/<script type="application\/ld\+json">(\{"@context[^<]*?"@type":"(?:Movie|TVSeries)"[\s\S]*?)<\/script>/);
+  if (!m) return null;
+  let ld;
+  try { ld = JSON.parse(m[1]); } catch { return null; }
+  if (!ld.name) return null; // unrecognised shape — leave the page alone rather than mangle it
+  const dur = /^PT(?:(\d+)H)?(?:(\d+)M)?$/.exec(ld.duration || "");
+  const star = /\u2605\s*([0-9]+(?:\.[0-9])?)/.exec(html);
+  // The pill block under "Where to watch" holds subscription providers first, then a
+  // "Rent or buy" sub-heading and its own pills. Split on that label rather than guessing.
+  const wtw = /<h2>Where to watch[^<]*<\/h2>([\s\S]{0,900}?)(?:<h2|<footer)/.exec(html);
+  const chunk = wtw ? wtw[1] : "";
+  const cut = chunk.indexOf("Rent or buy");
+  const pillsIn = (t) => [...t.matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((x) => x[1].trim());
+  const subPills = pillsIn(cut >= 0 ? chunk.slice(0, cut) : chunk);
+  const rentBuy = cut >= 0 ? pillsIn(chunk.slice(cut)) : [];
+  // "In theatres", "In cinemas from …" and the archive patcher's "Theatrical run ended — …"
+  // are status pills, not platforms.
+  const statusPill = /theatre|cinema|Theatrical run/i;
+  const providers = subPills.filter((p) => !statusPill.test(p));
+  const pending = /<!--SW:pending-->/.test(html);
+  const runEnded = /Theatrical run ended/.test(html);
+  return {
+    runEnded,
+    item: {
+      title: ld.name,
+      kind: ld["@type"] === "TVSeries" ? "tv" : "movie",
+      language: ld.inLanguage || "",
+      genre: ld.genre || "",
+      released: String(ld.datePublished || "").slice(0, 10),
+      runtime: dur ? (Number(dur[1] || 0) * 60 + Number(dur[2] || 0)) : null,
+      // The star only renders once the page's own confidence gate has passed, so a visible
+      // rating is already vote-qualified. votes is set past the gate to say so.
+      rating: star ? Number(star[1]) : null,
+      votes: star ? 999 : 0,
+      providers,
+      rentBuy,
+      platform: providers.length ? providers[0] : (pending || runEnded ? "Theatres" : ""),
+    },
+  };
+}
+
+// Returns {html, changed} like the other patchers. Never lengthens past the snippet budget,
+// never writes when the parse failed, never writes when the result is identical.
+function rewriteMetaDescription(html, cfg = null) {
+  const cur = /<meta name="description" content="([^"]*)"/.exec(html);
+  if (!cur) return { html, changed: false };
+  const facts = frozenFilmFacts(html);
+  if (!facts) return { html, changed: false };
+  const next = filmMetaDescription(facts.item, cfg, { runEnded: facts.runEnded });
+  const esc = escHtml(next);
+  if (!next || next.length < 20 || esc === cur[1]) return { html, changed: false };
+  let out = html.replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc}$2`);
+  out = out.replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${esc}$2`);
+  return { html: out, changed: true };
+}
+
 function archivePatchHtml(html, countryName, cfg = null) {
   const V = streamVocab(cfg);
   // Pages frozen BEFORE the per-country vocabulary split carry India's "OTT" wording
@@ -4314,6 +4576,11 @@ function archivePatchHtml(html, countryName, cfg = null) {
   }
   const t = shortenTitleTag(out, countryName, cfg);
   if (t.changed) { out = t.html; changed = true; }
+  // Runs LAST, after the body swaps above have set "Theatrical run ended" — frozenFilmFacts
+  // reads that marker to decide between "in cinemas" and "theatrical run over", so ordering
+  // here is load-bearing.
+  const d = rewriteMetaDescription(out, cfg);
+  if (d.changed) { out = d.html; changed = true; }
   return { html: out, changed };
 }
 
@@ -5021,7 +5288,10 @@ ${faqHtml}
 }
 
 // Pure: India data + language name -> full language landing page HTML.
-function buildLanguagePage(data, langName, slug) {
+// `archive` is this country's film index (see filmIndexFor) — every film page already on
+// disk. It feeds the cumulative "More <language>" section below. Optional: tests and ad-hoc
+// renders pass three arguments and get the old week-only page.
+function buildLanguagePage(data, langName, slug, archive = null) {
   const url = `https://filmychill.com/${slug}/`;
   const gen = data.generatedAt || new Date().toISOString();
   const monthYear = new Date(gen).toLocaleDateString("en-IN", { month: "long", year: "numeric" });
@@ -5064,6 +5334,25 @@ function buildLanguagePage(data, langName, slug) {
     q: `Which ${langName} movies are releasing soon?`,
     a: `Coming up: ${soon.map((x) => `${x.title}${x.released ? ` (${fmtDateShort(x.released, Date.now(), "en-IN")} ${x.released.slice(0, 4)})` : ""}`).join(", ")}.`,
   });
+  // ---- CUMULATIVE DEPTH ---------------------------------------------------
+  // Sept 2026 GSC: the five language hubs drew 1,224 impressions for 11 clicks at average
+  // position 42.4. /malayalam/ sat at 51.8 rendering ONE film under the line "A quiet week for
+  // Malayalam". They were chasing head terms ("new malayalam movies") with less content than
+  // every competitor on the page, because a strict this-week filter throws away every film
+  // page we have ever built.
+  // This adds the back catalogue we already own: same language, page exists on disk, released
+  // in the last ~6 months, not already listed above. It is LABELLED as a back catalogue and
+  // kept deliberately OUT of the this-week counts, the FAQ answers and the CollectionPage
+  // ItemList — all of which make currency claims only this week's arrivals may back (see the
+  // "currency claims" group in test.js).
+  const BACK_CATALOGUE_DAYS = 180;
+  const listedSlugs = new Set([...theatres, ...ott, ...soon].map((x) => x.slug).filter(Boolean));
+  const bcCutoff = new Date(Date.parse(gen) - BACK_CATALOGUE_DAYS * 86400000).toISOString().slice(0, 10);
+  const backCatalogue = (Array.isArray(archive) ? archive : [])
+    .filter((x) => x && x.slug && x.language === langName && !listedSlugs.has(x.slug))
+    .filter((x) => x.released && x.released >= bcCutoff && x.released <= gen.slice(0, 10))
+    .sort((a, b) => String(b.released).localeCompare(String(a.released)))
+    .slice(0, 24);
   const all = [...theatres, ...ott].filter((x) => x.slug);
   const extraLd = [{
     "@context": "https://schema.org", "@type": "CollectionPage",
@@ -5093,15 +5382,19 @@ function buildLanguagePage(data, langName, slug) {
       { h2: "In theatres", items: theatres },
       { h2: "Streaming now", items: ott },
       { h2: "Coming soon", items: soon },
+      // The heading names the timeframe outright, so the page can never imply these are new.
+      { h2: `More ${langName} from the last six months`, items: backCatalogue },
     ],
     faqs, extraLd, homeUrl: "https://filmychill.com/",
   });
 }
 
 function writeLanguagePages(data) {
+  // One disk walk for all five hubs, not one per hub.
+  const archive = filmIndexFor({ code: "in" });
   for (const [langName, slug] of LANGUAGE_PAGES) {
     if (!fs.existsSync(slug)) fs.mkdirSync(slug, { recursive: true });
-    fs.writeFileSync(`${slug}/index.html`, buildLanguagePage(data, langName, slug));
+    fs.writeFileSync(`${slug}/index.html`, buildLanguagePage(data, langName, slug, archive));
   }
   console.log(`Language pages: ${LANGUAGE_PAGES.map(([, sl]) => "/" + sl + "/").join(" ")}`);
 }
@@ -5389,7 +5682,26 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   if (data) {
     const monthYear = new Date(data.generatedAt || Date.now())
       .toLocaleDateString(localeFor(cfg.code), { month: "long", year: "numeric" });
-    dynTitle = `New Movies & ${V.Releases} This Week in ${m.name} (${monthYear}) | FilmyChill`;
+    const monthShort = new Date(data.generatedAt || Date.now())
+      .toLocaleDateString(localeFor(cfg.code), { month: "short", year: "numeric" });
+    // The live homepage title ran 73 characters ("New Movies & OTT Releases This Week in
+    // India (September 2026) | FilmyChill"), so Google truncated it mid-month — the freshness
+    // signal the month exists to carry was the part being cut. Film pages have had a 60-char
+    // cascade since August; the site's single best-converting page did not. Every tier keeps
+    // the month, because that is the clause earning the click.
+    // Priority when trimming: the query phrase ("New Movies", "This Week"), the market's own
+    // word (OTT / Streaming), the country, and the month. The brand goes first — it is the
+    // only part a searcher already knows. "Releases" goes next, being the one redundant noun.
+    const homeTitleOpts = [
+      `New Movies & ${V.Releases} This Week in ${m.name} (${monthYear}) | FilmyChill`,
+      `New Movies & ${V.Releases} This Week in ${m.name} (${monthYear})`,
+      `New Movies & ${V.Word} This Week in ${m.name} (${monthYear})`,
+      // Abbreviated month before dropping it: Singapore's long name pushed the full form past
+      // the budget, and losing the month loses the freshness signal the title exists to carry.
+      `New Movies & ${V.Word} This Week in ${m.name} (${monthShort})`,
+      `New Movies & ${V.Word} This Week in ${m.name}`,
+    ];
+    dynTitle = homeTitleOpts.find((t) => t.length <= 60) || homeTitleOpts[homeTitleOpts.length - 1];
     const all = [...(data.theatres || []), ...(data.ott || [])];
     // Two marquee names: the top theatre title and the top OTT title (fall back down the list).
     const names = [(data.theatres || [])[0], (data.ott || [])[0]].filter(Boolean).map((x) => x.title);
@@ -5794,7 +6106,8 @@ module.exports = {
   releaseState, releaseLabel, normalizeUpcoming, patchDueIfPassed, regionalTheatricalDate,
   verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween, ARCHIVE_PATCH_VERSION,
   fmtRuntime, langCode, langName, LANG_CODE_OVERRIDES,
-  streamVocab, streamWindowEstimate, sweepCandidates, applyArrivalPatch,
+  streamVocab, streamWindowEstimate, streamWindowShort, filmMetaDescription,
+  frozenFilmFacts, rewriteMetaDescription, sweepCandidates, applyArrivalPatch,
   assignSlugs, buildHeadTags, buildHomeJsonLd, ssrCard, ssrSoonCard,
   footerAttribution, RATINGS_SOURCE, USE_IMDB,
   deriveFreshDate, isOttFresh, OTT_FRESH_DAYS,
