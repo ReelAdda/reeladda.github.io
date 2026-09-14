@@ -335,6 +335,15 @@ function langName(code) {
 }
 
 
+// May this item carry a critics' take? An isFresh item (released within 7 days AND under
+// 20 votes) shows "Just released — verdict soon" on its rating pill, and every take template
+// asserts a settled consensus — so the two lines contradicted each other on the same card.
+// Pure and recency-scoped: an older niche film on "Not enough ratings yet" has thin AUDIENCE
+// votes, not an unsettled critical consensus, and keeps its line.
+function takeConfident(item) {
+  return !!item && !item.isFresh;
+}
+
 function verdict(rating, votes) {
   if (!votes || votes < 10) return "Not enough ratings yet";
   if (rating >= 7.5) return "Must watch";
@@ -1412,7 +1421,20 @@ async function attachTakes(dataByCode) {
         const takeAspects = entry.a?.praised?.length ? entry.a.praised
           : entry.ta?.praised?.length ? entry.ta.praised : null;
         for (const it of items) {
-          if (entry.take) {
+          // CONFIDENCE GATE — mirrors the one already on the rating. An isFresh item
+          // (released within 7 days AND under 20 votes) renders "Just released — verdict
+          // soon" on its pill. Every take template asserts a SETTLED consensus ("a critical
+          // darling", "critics can't agree", "the ambition drew the bulk of the complaints")
+          // and that is exactly the claim a three-day-old Wikipedia reception stub cannot
+          // support. Printing both put "verdict soon" and a verdict on the same card —
+          // Mandaadi, Sardar 2 and The Revolutionaries all shipped that contradiction.
+          // Same principle as llmsRatingConfident() and audienceCounterpoint's rating!=null
+          // guard: low-confidence commentary is WITHHELD, not softened.
+          // Scoped to RECENCY, not vote count: an older niche film sitting on "Not enough
+          // ratings yet" can have a perfectly settled critical consensus, and keeps its line.
+          // The take stays CACHED in takes.json either way — only the attach is gated — so
+          // the line appears on its own once the film ages out, with no refetch.
+          if (entry.take && takeConfident(it)) {
             it.take = seededTake;
             it.takeSrc = entry.src;
             if (takeAspects) it.takeAspects = takeAspects; // feeds the editor's note flourish
@@ -2908,6 +2930,9 @@ async function main() {
   }
   writeIndexNowPayload(builtCountries, dataByCode); // fresh URL list for the workflow's IndexNow ping
   writeLlmsTxt(dataByCode); // AI-answer-engine site map with this week's actual picks
+  // Keep the About page's country sentence in step with the config (see patchAboutPage).
+  // Non-fatal: a broken marker should surface loudly in the log, not kill a good build.
+  try { patchAboutPage(); } catch (e) { console.warn(`  about page skipped: ${e.message}`); }
 
   // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
   // and the manifest records real lastmod dates for the sitemap (see module-scope docs).
@@ -5647,7 +5672,23 @@ function writeLlmsTxt(dataByCode) {
 }
 
 // About page lastmod for the sitemap — bump manually when about/index.html changes.
-const ABOUT_LASTMOD = "2026-07-06";
+const ABOUT_LASTMOD = "2026-09-14";
+
+// The About page is hand-written, but ONE sentence in it is a fact the config owns: which
+// countries the site covers. It drifted — the page still said "India (plus the US, UK,
+// Australia and Germany)" three markets after UAE, Canada and Singapore shipped, which is a
+// factual error on the page whose entire job is being trustworthy. The list now lives behind
+// an SSR marker and is refilled from COUNTRIES on every run, so adding a market updates the
+// page for free. replaceBetween throws on a missing marker, so a broken template fails the
+// build rather than silently shipping. Absent file = nothing to do (the sitemap already
+// treats about/ as optional).
+function patchAboutPage() {
+  const p = "about/index.html";
+  if (!fs.existsSync(p)) return;
+  const html = fs.readFileSync(p, "utf8");
+  const next = replaceBetween(html, "COUNTRIES", countryListForProse());
+  if (next !== html) { fs.writeFileSync(p, next); console.log("About: country list refreshed"); }
+}
 
 
 // English locale conventions per country — grouping ("12,34,567" lakh-style is correct ONLY
@@ -5662,6 +5703,50 @@ function countryListForProse() {
   const short = { "United States": "US", "United Kingdom": "UK" };
   const names = COUNTRIES.map((c) => short[c.name] || c.name);
   return names.slice(0, -1).join(", ") + " &amp; " + names[names.length - 1];
+}
+
+// Reverse of the LANG display map ("Hindi" -> "hi"). Items carry a DISPLAY language
+// (langName), country configs carry ISO codes (priorityLangs), so marquee selection needs
+// the bridge. Every priorityLang across every market is in LANG, so this covers all of them.
+const LANG_CODE_BY_NAME = Object.fromEntries(Object.entries(LANG).map(([c, n]) => [n, c]));
+
+// RECOGNITION score for the homepage meta description's marquee names.
+// The description names two films, and those names are the only concrete hook in the whole
+// string — everything after the dash is boilerplate every aggregator prints. Rail position
+// answers "what did the ranker score highest"; the description needs "whose NAME will a
+// searcher in THIS market recognise", which is a different question. Taking theatres[0] and
+// ott[0] conflated the two: India's live description read "This week: Tony, Crew Girl" — an
+// English indie and a teen rowing drama — while Mirzapur: The Movie and Toxic, the two names
+// an Indian searcher actually knows, sat further down the same rails. The cost is highest on
+// share previews (WhatsApp, Instagram), which render this string verbatim with no rewrite.
+// Signals, in weight order:
+//   • local language — a priorityLangs title for this market, decaying by priority rank
+//   • Wikipedia weekly pageviews — a direct "people are looking this name up" measure
+//   • the trending flag, then TMDB popularity as the fallback when pageview data is absent
+// Country-generic by construction: India scores Hindi/Tamil/Telugu up, the US English and
+// Spanish, Germany German. Both count terms are log-scaled so one huge number can't swamp
+// the rest, and an item with no signals scores 0 — which preserves rail order (see pick).
+function marqueeScore(it, cfg) {
+  if (!it) return -Infinity;
+  const full = (cfg && COUNTRIES.find((c) => c.code === cfg.code)) || cfg || null;
+  const pri = (full && full.priorityLangs) || [];
+  const idx = pri.indexOf(LANG_CODE_BY_NAME[it.language] || "\u0000");
+  return (idx === -1 ? 0 : 6 - idx * 1.5)            // 6 / 4.5 / 3 by priority rank
+    + Math.log10(1 + (it.wikiWeeklyViews || 0))      // ~0..6
+    + (it.trending ? 2 : 0)
+    + Math.log10(1 + (it.popularity || 0)) * 0.5;    // ~0..1.5
+}
+// Most recognisable title in a rail. Strict > keeps the rail's own order on ties, so a cold
+// cache, a market with no pageview data, or a partial cfg falls back to today's behaviour.
+function marqueePick(list, cfg) {
+  const arr = (list || []).filter(Boolean);
+  if (!arr.length) return null;
+  let best = arr[0], bestScore = marqueeScore(arr[0], cfg);
+  for (const it of arr) {
+    const s = marqueeScore(it, cfg);
+    if (s > bestScore) { best = it; bestScore = s; }
+  }
+  return best;
 }
 
 function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
@@ -5703,11 +5788,24 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
     ];
     dynTitle = homeTitleOpts.find((t) => t.length <= 60) || homeTitleOpts[homeTitleOpts.length - 1];
     const all = [...(data.theatres || []), ...(data.ott || [])];
-    // Two marquee names: the top theatre title and the top OTT title (fall back down the list).
-    const names = [(data.theatres || [])[0], (data.ott || [])[0]].filter(Boolean).map((x) => x.title);
+    // Two marquee names: the most RECOGNISABLE theatre title and OTT title for this market
+    // (see marqueeScore) rather than the top-ranked one, which answers a different question.
+    const picks = [marqueePick(data.theatres, cfg), marqueePick(data.ott, cfg)].filter(Boolean);
+    const names = picks.map((x) => x.title);
+    const desc = (n, more) => `This week: ${n} + ${more} more — ratings, verdicts & where to watch in ${m.name}. Updated twice daily.`;
     if (names.length && all.length > names.length) {
-      dynDesc = `This week: ${names.join(", ")} + ${all.length - names.length} more — ratings, verdicts & where to watch in ${m.name}. Updated twice daily.`;
-      if (dynDesc.length > 158) dynDesc = `This week: ${names[0]} + ${all.length - 1} more — ratings, verdicts & where to watch in ${m.name}. Updated twice daily.`;
+      dynDesc = desc(names.join(", "), all.length - names.length);
+      if (dynDesc.length > 158) {
+        // Overflow -> keep the STRONGER name, not reflexively the theatre one: two long
+        // titles used to collapse to names[0] regardless of which had earned the click.
+        // Try each in recognition order; if even one name can't fit (very long title in a
+        // long-named market), leave dynDesc null so the static description is used.
+        dynDesc = null;
+        for (const p of picks.slice().sort((a, b) => marqueeScore(b, cfg) - marqueeScore(a, cfg))) {
+          const d = desc(p.title, all.length - 1);
+          if (d.length <= 158) { dynDesc = d; break; }
+        }
+      }
     }
   }
   // Ratings wording follows the active source (same principle as footerAttribution): IMDb's
@@ -6104,7 +6202,8 @@ module.exports = {
   shareCardSvg, wrapForCard, cardStatus,
   whyWatch, runtimePhrase, certClause,
   releaseState, releaseLabel, normalizeUpcoming, patchDueIfPassed, regionalTheatricalDate,
-  verdict, trim, img, slugify, escHtml, ytIdOf, replaceBetween, ARCHIVE_PATCH_VERSION,
+  verdict, takeConfident, marqueeScore, marqueePick,
+  trim, img, slugify, escHtml, ytIdOf, replaceBetween, ARCHIVE_PATCH_VERSION,
   fmtRuntime, langCode, langName, LANG_CODE_OVERRIDES,
   streamVocab, streamWindowEstimate, streamWindowShort, filmMetaDescription,
   frozenFilmFacts, rewriteMetaDescription, sweepCandidates, applyArrivalPatch,
@@ -6126,7 +6225,7 @@ module.exports = {
   ottRenderable, hasCardSubstance, isStillWorthIt, orderOttForDisplay, STILL_WORTH_DAYS,
   buildLanguagePage, LANGUAGE_PAGES, listingPageHtml,
   isoWeekOf, weekSlug, isoWeekMonday, isoWeekSunday, buildWeekPage,
-  ssrOttSection, buildMoreLinks, ABOUT_LASTMOD,
+  ssrOttSection, buildMoreLinks, ABOUT_LASTMOD, patchAboutPage, countryListForProse,
   isExcluded, EXCLUDE_TITLES,
   extractHook, audienceCounterpoint,
   certFor, regionalTheatricalDate, countryListForProse,
