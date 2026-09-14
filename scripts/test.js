@@ -616,11 +616,20 @@ test("buildHeadTags: with data — live month in title, real film names in descr
     theatres: [{ title: "Toy Story 5" }, { title: "Supergirl" }],
     ott: [{ title: "House of the Dragon" }, { title: "Silo" }] };
   const html = U.buildHeadTags({ code: "in", name: "India" }, false, data);
-  assert.ok(html.includes("<title>New Movies &amp; OTT Releases This Week in India (July 2026) | FilmyChill</title>"));
+  // The homepage title now runs the same 60-char cascade film pages have had since August.
+  // Live on 14 Sept 2026 it was 73 chars, so Google cut it mid-month and threw away the one
+  // freshness signal in the string. Every tier keeps the month and the market's own word.
+  const title = /<title>([^<]*)<\/title>/.exec(html)[1].replace(/&amp;/g, "&");
+  assert.ok(title.length <= 60, "homepage title must fit the SERP: " + title.length + " — " + title);
+  assert.ok(/^New Movies & OTT/.test(title), "query words lead: " + title);
+  assert.ok(/This Week in India/.test(title), "country + recency survive: " + title);
+  assert.ok(/\(July 2026\)/.test(title), "the month must never be the part that gets cut: " + title);
   assert.ok(html.includes("This week: Toy Story 5, House of the Dragon + 2 more"));
   assert.ok(html.includes("Updated twice daily"));
   const us = U.buildHeadTags({ code: "us", name: "United States" }, false, data);
-  assert.ok(us.includes("This Week in the US (July 2026)"));
+  const usTitle = /<title>([^<]*)<\/title>/.exec(us)[1].replace(/&amp;/g, "&");
+  assert.ok(usTitle.length <= 60, usTitle);
+  assert.ok(/This Week in the US \(July 2026\)/.test(usTitle), usTitle);
 });
 test("buildHeadTags: without data — legacy static wording unchanged (backward compatible)", () => {
   const html = U.buildHeadTags({ code: "in", name: "India" }, false);
@@ -636,7 +645,9 @@ test("buildHeadTags: on-page hreflang alternates for all five homepages + x-defa
 test("buildHeadTags: og mirrors the dynamic snippet; og:url, og:locale, twitter:card present", () => {
   const data = { generatedAt: "2026-07-04T07:22:38Z", theatres: [{ title: "Toy Story 5" }], ott: [{ title: "Silo" }, { title: "X" }] };
   const html = U.buildHeadTags({ code: "in", name: "India" }, false, data);
-  assert.ok(html.includes('og:title" content="New Movies &amp; OTT Releases This Week in India (July 2026) | FilmyChill"'), "share title = SERP title");
+  // og:title must stay a mirror of whatever tier the cascade picked, not a frozen string.
+  const serpTitle = /<title>([^<]*)<\/title>/.exec(html)[1];
+  assert.ok(html.includes(`og:title" content="${serpTitle}"`), "share title = SERP title");
   assert.ok(html.includes('og:url" content="https://filmychill.com/"'));
   assert.ok(html.includes('og:locale" content="en_IN"'));
   assert.ok(html.includes('twitter:card" content="summary_large_image"'));
@@ -840,19 +851,96 @@ test("film title tags fit 60 chars, keeping the query words", () => {
   const t2 = /<title>([^<]*)<\/title>/.exec(U.buildFilmPage(short, "2026-08-14", new Set(), AUDIT_CFG))[1].replace(/&amp;/g, "&");
   assert.ok(t2.length <= 60 && /OTT Release Date/.test(t2), t2 + " (" + t2.length + ")");
 });
-test("descriptions: never empty, never open with the unknown, name the platform", () => {
+test("descriptions: never empty, never a complete answer, always a reason to click", () => {
+  // REWRITTEN Sept 2026. The contract here used to assert the OPPOSITE of what now ships: it
+  // REQUIRED the snippet to name the platform up front and to say "release date coming soon".
+  // Both shapes measured 0.69% CTR across 3,928 top-10 impressions, because both ended the
+  // search inside the results page. What follows protects the fix from being undone.
+  const desc = (item, cfg = AUDIT_CFG) =>
+    /name="description" content="([^"]*)"/.exec(U.buildFilmPage(item, "2026-09-14", new Set(), cfg))[1];
+
   const bare = { title: "Law Order", slug: "law-order", kind: "movie", tmdbId: 3, language: "Hindi", genre: "Drama" };
-  const d1 = /name="description" content="([^"]*)"/.exec(U.buildFilmPage(bare, "2026-08-14", new Set(), AUDIT_CFG))[1];
+  const d1 = desc(bare);
   assert.ok(d1.trim().length > 20, "blank description: " + d1);
-  // Descriptions now LEAD with the where/when-to-watch answer (the intent GSC shows these
-  // pages rank for), not with a bare status. Theatres-with-no-date still puts the unknown last.
-  const th = { title: "T", slug: "t", kind: "movie", tmdbId: 4, platform: "Theatres", rating: 7.9, votes: 500, verdict: "Must watch" };
-  const d2 = /name="description" content="([^"]*)"/.exec(U.buildFilmPage(th, "2026-08-14", new Set(), AUDIT_CFG))[1];
-  assert.ok(/^T is in cinemas in India/.test(d2), d2);
-  assert.ok(/release date coming soon/.test(d2), "pre-OTT films flag the pending date: " + d2);
+
+  // Theatrical with a live window: LEAD with the estimate (the one thing competitors cannot
+  // source) and always label it a pattern rather than a date.
+  const th = { title: "T", slug: "t", kind: "movie", tmdbId: 4, platform: "Theatres", released: "2026-08-21",
+    language: "English", runtime: 106, rating: 7.9, votes: 500, verdict: "Must watch" };
+  const d2 = desc(th);
+  assert.ok(/OTT release expected around \w{3}/.test(d2), "the window estimate reaches the snippet: " + d2);
+  assert.ok(/not a confirmed date|a pattern/.test(d2), "an estimate is labelled, never promised: " + d2);
+  assert.ok(!/coming soon/.test(d2), "the dead-end phrasing must never come back: " + d2);
+
+  // Theatrical with NO usable window: nothing may be promised about the date, so the payoff
+  // clause has to carry the click instead. Still never a bare unknown.
+  const th2 = { title: "T", slug: "t", kind: "movie", tmdbId: 44, platform: "Theatres", rating: 7.9, votes: 500 };
+  const d2b = desc(th2);
+  assert.ok(/^T is in cinemas in India/.test(d2b), d2b);
+  assert.ok(/verdict|critics/.test(d2b), "no-window pages still promise something: " + d2b);
+  assert.ok(!/coming soon/.test(d2b), d2b);
+
+  // Streaming: the STATUS may be stated, the PLATFORM NAME may not. Naming it hands the click
+  // to the platform — this is the /uk/movie/don-t-say-good-luck.html failure exactly
+  // (position 1.12, 247 impressions, zero clicks).
   const st = { title: "Reacher", slug: "reacher", kind: "tv", tmdbId: 5, providers: ["Amazon Prime Video"], rating: 8.2, votes: 900, verdict: "Must watch" };
-  const d3 = /name="description" content="([^"]*)"/.exec(U.buildFilmPage(st, "2026-08-14", new Set(), AUDIT_CFG))[1];
-  assert.ok(/^Watch Reacher in India on Amazon Prime Video/.test(d3), "streaming desc names platform up front: " + d3);
+  const d3 = desc(st);
+  assert.ok(!/Amazon Prime Video/.test(d3), "streaming desc must NOT name the platform: " + d3);
+  assert.ok(/is streaming in India/.test(d3), "…but must still say that it IS streaming: " + d3);
+  assert.ok(/worth your evening|verdict/.test(d3), "…and must give a reason to click: " + d3);
+
+  // Every branch fits the display width. The old code appended its payoff line and THEN
+  // trimmed to 155, so the payoff never survived to a SERP on any live page.
+  for (const [label, d] of [["bare", d1], ["theatres", d2], ["no-window", d2b], ["streaming", d3]]) {
+    assert.ok(d.length <= 160, label + " description overruns the snippet: " + d.length + " — " + d);
+  }
+});
+test("empty-shell country pages are noindexed; real localised pages are not", () => {
+  const UK = { code: "uk", name: "United Kingdom", region: "GB", streamWord: "streaming" };
+  const shell = { title: "Shell", slug: "shell", kind: "movie", tmdbId: 70, released: "2026-05-01", language: "English" };
+  assert.ok(/content="noindex,follow/.test(U.buildFilmPage(shell, "2026-09-14", new Set(), UK)),
+    "a country page with no availability at all leaves the index");
+  // India is the x-default and is never shelled, whatever it carries.
+  assert.ok(!/noindex/.test(U.buildFilmPage(shell, "2026-09-14", new Set(), AUDIT_CFG)), "India copy stays indexed");
+  // Anything with a real localised answer stays indexed. /sg/movie/the-rope-curse-4-kuntilanak
+  // earns Singapore clicks at position 6.7 and must never be caught by this rule.
+  for (const real of [{ providers: ["Netflix"] }, { rentBuy: ["Apple TV"] }, { platform: "Theatres" }, { released: "2027-01-01" }]) {
+    const page = U.buildFilmPage({ ...shell, ...real }, "2026-09-14", new Set(), UK);
+    assert.ok(!/noindex/.test(page), "real localised page wrongly noindexed: " + JSON.stringify(real));
+  }
+});
+test("frozen archive pages get the new description, and stop contradicting their own body", () => {
+  // Film pages freeze when a film leaves the weekly lists; a full PAGES_ONLY rebuild on
+  // 14 Sept 2026 left all 1,546 of them byte-identical. Without this patcher the CTR fix
+  // reaches ~5% of pages and none of the impressions that motivated it.
+  const IN = { code: "in", name: "India", region: "IN" };
+  const live = U.buildFilmPage({ title: "Insidious: Out of the Further", slug: "i", kind: "movie", tmdbId: 80,
+    platform: "Theatres", released: "2026-08-21", language: "English", runtime: 106, rating: 6.5, votes: 130,
+    genre: "Horror / Thriller", verdict: "Decent one-time watch" }, "2026-09-14", new Set(), IN);
+
+  const facts = U.frozenFilmFacts(live);
+  assert.ok(facts, "facts must parse back off a rendered page");
+  assert.strictEqual(facts.item.title, "Insidious: Out of the Further");
+  assert.strictEqual(facts.item.language, "English");
+  assert.strictEqual(facts.item.runtime, 106);
+  assert.strictEqual(facts.item.rating, 6.5);
+  assert.strictEqual(facts.item.platform, "Theatres");
+
+  // Simulate the archive patch having already ended the theatrical run in the body. The
+  // description must follow it — the live site shipped a page whose body said "Theatrical run
+  // ended" while its description still said "is in cinemas in India".
+  const ended = live.replace(/<span class="pill">In theatres<\/span>/,
+    '<span class="pill">Theatrical run ended — OTT arrival pending</span>');
+  const out = U.rewriteMetaDescription(ended, IN);
+  assert.ok(out.changed, "a frozen page with a stale description must be rewritten");
+  const d = /name="description" content="([^"]*)"/.exec(out.html)[1];
+  assert.ok(!/in cinemas/.test(d), "must not claim a theatrical run that has ended: " + d);
+  assert.ok(/OTT release expected around|finished its theatrical run/.test(d), d);
+  assert.ok(out.html.includes(`og:description" content="${d}"`), "og twin follows the description");
+  // Idempotent: a second pass over an already-correct page changes nothing.
+  assert.ok(!U.rewriteMetaDescription(out.html, IN).changed, "patcher must not thrash on re-run");
+  // Unparseable input is left strictly alone rather than mangled.
+  assert.ok(!U.rewriteMetaDescription("<html><head></head><body>x</body></html>", IN).changed);
 });
 test("similar strip: on-site titles jump the queue and render as anchors", () => {
   const item = { title: "T", slug: "t", kind: "movie", tmdbId: 6, rating: 7, votes: 100,
@@ -2715,10 +2803,12 @@ group("page copy — no 'OTT' reaches a streaming market");
 test("homepage title + description: US says Streaming, India still says OTT", () => {
   const data = { generatedAt: "2026-08-24T07:00:00Z", theatres: [{ title: "Mutiny" }], ott: [{ title: "Reacher" }, { title: "Silo" }] };
   const us = U.buildHeadTags({ code: "us", name: "United States" }, false, data);
-  assert.ok(us.includes("New Movies &amp; Streaming Releases This Week in the US"), us.slice(0, 160));
+  // The 60-char cascade may drop the redundant noun ("Releases"), never the market's own
+  // word — a US searcher must not read "OTT", and an Indian one must still read it.
+  assert.ok(us.includes("New Movies &amp; Streaming This Week in the US"), us.slice(0, 200));
   assert.ok(!/OTT/.test(us), "no OTT anywhere in the US head tags");
   const ind = U.buildHeadTags({ code: "in", name: "India" }, false, data);
-  assert.ok(ind.includes("New Movies &amp; OTT Releases This Week in India"), "India wording is untouched");
+  assert.ok(/New Movies &amp; OTT[^<]*This Week in India/.test(ind), "India keeps its own word");
 });
 test("homepage fallback wording (no data) is also per-market", () => {
   const us = U.buildHeadTags({ code: "us", name: "United States" }, false);
