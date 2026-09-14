@@ -631,6 +631,111 @@ test("buildHeadTags: with data — live month in title, real film names in descr
   assert.ok(usTitle.length <= 60, usTitle);
   assert.ok(/This Week in the US \(July 2026\)/.test(usTitle), usTitle);
 });
+// ---------------- About page — the promises it makes must be true ----------------
+group("About page — the promises it makes must be true");
+const fsAbout = require("fs");
+const ABOUT_SRC = fsAbout.existsSync("about/index.html") ? fsAbout.readFileSync("about/index.html", "utf8") : "";
+test("about: the country sentence is rebuilt from config, not hand-typed", () => {
+  // It drifted: the page said "India (plus the US, UK, Australia and Germany)" three
+  // markets after UAE, Canada and Singapore shipped. Now it lives behind an SSR marker.
+  assert.ok(ABOUT_SRC.includes("<!--SSR:COUNTRIES-->"), "opening marker present");
+  assert.ok(ABOUT_SRC.includes("<!--/SSR:COUNTRIES-->"), "closing marker present");
+  const patched = U.patchAboutPage ? U.replaceBetween(ABOUT_SRC, "COUNTRIES", U.countryListForProse()) : ABOUT_SRC;
+  for (const c of ["India", "Singapore", "Canada", "UAE"]) {
+    assert.ok(patched.includes(c), c + " must appear once the marker is filled");
+  }
+  assert.ok(!patched.includes("plus the US, UK, Australia and Germany"), "stale hand-typed list gone");
+});
+test("about: documents the confidence gate the code actually enforces", () => {
+  assert.ok(/no rating, no verdict and no critics' take/.test(ABOUT_SRC), "gate is described");
+  // The page must not promise something takeConfident() doesn't do.
+  assert.strictEqual(U.takeConfident({ isFresh: true }), false);
+  assert.strictEqual(U.takeConfident({ isFresh: false, votes: 9 }), true);
+});
+test("about: the no-tracking claim matches what the site actually ships", () => {
+  assert.ok(/no analytics, no third-party scripts and no cookies/.test(ABOUT_SRC));
+  for (const f of ["index.html", "about/index.html"]) {
+    if (!fsAbout.existsSync(f)) continue;
+    const html = fsAbout.readFileSync(f, "utf8");
+    assert.ok(!/goatcounter|google-analytics|googletagmanager|gtag\(|document\.cookie/.test(html),
+      "no tracker may appear in " + f + " while the About page promises none");
+  }
+});
+
+// ---------------- takeConfident() — critics' line confidence gate ----------------
+group("takeConfident() — critics' line confidence gate");
+test("takeConfident: an isFresh film gets no critics' line (no 'verdict soon' + a verdict)", () => {
+  // Live on 14 Sept: Mandaadi showed "Just released — verdict soon" AND "A critical
+  // darling — reviewers kept coming back to the performances and music." on one card.
+  assert.strictEqual(U.takeConfident({ title: "Mandaadi", isFresh: true, rating: null }), false);
+  assert.strictEqual(U.takeConfident({ title: "Sardar 2", isFresh: true, rating: null }), false);
+});
+test("takeConfident: thin AUDIENCE votes alone never suppress a settled critical consensus", () => {
+  // "Not enough ratings yet" is a vote-count statement about viewers, not about critics —
+  // an older niche title keeps its line. The gate is recency-scoped on purpose.
+  assert.strictEqual(U.takeConfident({ title: "Gandhari", isFresh: false, rating: null, votes: 4 }), true);
+  assert.strictEqual(U.takeConfident({ title: "Ted Lasso", isFresh: false, rating: 8.4 }), true);
+});
+test("takeConfident: an IMDb rating clears isFresh, so the line returns the same run", () => {
+  assert.strictEqual(U.takeConfident({ isFresh: false, rating: 7.1, imdbRating: 7.1 }), true);
+});
+
+// ---------------- marqueeScore() — meta description name selection ----------------
+group("marqueeScore() — meta description name selection");
+test("marqueeScore: a market's own language outscores a foreign title with equal buzz", () => {
+  const cfg = { code: "in", name: "India" }; // partial cfg resolves against COUNTRIES
+  const hi = { title: "Mirzapur: The Movie", language: "Hindi", popularity: 40 };
+  const en = { title: "Tony", language: "English", popularity: 40 };
+  assert.ok(U.marqueeScore(hi, cfg) > U.marqueeScore(en, cfg), "Hindi leads on the India page");
+  const us = { code: "us", name: "United States" };
+  assert.ok(U.marqueeScore(en, us) > U.marqueeScore(hi, us), "and English leads on the US page");
+});
+test("marqueeScore: priority rank decays — first priorityLang beats the third", () => {
+  const cfg = { code: "in" };
+  assert.ok(U.marqueeScore({ language: "Hindi" }, cfg) > U.marqueeScore({ language: "Telugu" }, cfg));
+  assert.ok(U.marqueeScore({ language: "Telugu" }, cfg) > U.marqueeScore({ language: "Korean" }, cfg));
+});
+test("marqueePick: picks the recognisable title, not rail position", () => {
+  const cfg = { code: "in", name: "India" };
+  const rail = [
+    { title: "Tony", language: "English", popularity: 30 },
+    { title: "Mirzapur: The Movie", language: "Hindi", trending: true, wikiWeeklyViews: 90000 },
+    { title: "Toxic", language: "Kannada", trending: true, wikiWeeklyViews: 60000 },
+  ];
+  assert.strictEqual(U.marqueePick(rail, cfg).title, "Mirzapur: The Movie");
+});
+test("marqueePick: no signals at all -> rail order, so cold caches behave as before", () => {
+  const rail = [{ title: "First" }, { title: "Second" }, { title: "Third" }];
+  assert.strictEqual(U.marqueePick(rail, { code: "in" }).title, "First");
+  assert.strictEqual(U.marqueePick([], { code: "in" }), null);
+  assert.strictEqual(U.marqueePick(null, { code: "in" }), null);
+});
+test("buildHeadTags: the description names the films an Indian searcher recognises", () => {
+  const data = { generatedAt: "2026-09-14T07:22:38Z",
+    theatres: [
+      { title: "Tony", language: "English", popularity: 30 },
+      { title: "Mirzapur: The Movie", language: "Hindi", trending: true, wikiWeeklyViews: 90000 },
+      { title: "Toxic", language: "Kannada", trending: true, wikiWeeklyViews: 60000 },
+    ],
+    ott: [
+      { title: "Crew Girl", language: "English", popularity: 12 },
+      { title: "Chumbak", language: "Hindi", wikiWeeklyViews: 8000 },
+    ] };
+  const html = U.buildHeadTags({ code: "in", name: "India" }, false, data);
+  assert.ok(html.includes("This week: Mirzapur: The Movie, Chumbak + 3 more"), html.slice(0, 400));
+  assert.ok(!html.includes("Tony, Crew Girl"), "the old rail-position pick is gone");
+});
+test("buildHeadTags: overflow keeps the stronger name, not reflexively the theatre one", () => {
+  const long = "A Very Long Theatrical Title That Eats The Entire Description Budget Alone";
+  const data = { generatedAt: "2026-09-14T07:22:38Z",
+    theatres: [{ title: long, language: "English" }],
+    ott: [{ title: "Chumbak", language: "Hindi", wikiWeeklyViews: 8000 }, { title: "X" }] };
+  const html = U.buildHeadTags({ code: "in", name: "India" }, false, data);
+  const d = /name="description" content="([^"]*)"/.exec(html)[1];
+  assert.ok(d.includes("Chumbak"), d);
+  assert.ok(!d.includes(long), "the budget-eating title is dropped, not the good one");
+  assert.ok(d.length <= 158, "description stays inside the SERP budget: " + d.length);
+});
 test("buildHeadTags: without data — legacy static wording unchanged (backward compatible)", () => {
   const html = U.buildHeadTags({ code: "in", name: "India" }, false);
   assert.ok(html.includes("FilmyChill — Latest Movie &amp; OTT Releases, with Reviews, Updated Twice Daily"));
