@@ -4397,7 +4397,11 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 // re-pass so the archive picks up the 60-char cascade it was written before.
 // 5: one-time re-sweep of the whole archive for the Sept 2026 meta-description rewrite.
 // Bumping this is what actually ships the CTR fix — frozen pages are otherwise never touched.
-const ARCHIVE_PATCH_VERSION = 5;
+// 6: strip aggregateRating from frozen JSON-LD. The live builder dropped it (see the Movie
+//    schema note in buildFilmPage) but 325 archived pages froze before that change and still
+//    mark up TMDB numbers as a site rating — GSC was still reporting a Review snippet
+//    appearance in Sept 2026 because of them.
+const ARCHIVE_PATCH_VERSION = 6;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
@@ -4570,6 +4574,17 @@ function rewriteMetaDescription(html, cfg = null) {
   return { html: out, changed: true };
 }
 
+// Pure: remove "aggregateRating":{...} from JSON-LD on a frozen page. The object is flat
+// (@type/ratingValue/ratingCount/bestRating), so a no-nested-braces match is exact; the
+// surrounding comma is consumed on whichever side carries it so the JSON stays valid.
+function stripAggregateRating(html) {
+  if (!html.includes('"aggregateRating"')) return { html, changed: false };
+  const out = html
+    .replace(/,"aggregateRating":\{[^{}]*\}/g, "")
+    .replace(/"aggregateRating":\{[^{}]*\},?/g, "");
+  return { html: out, changed: out !== html };
+}
+
 function archivePatchHtml(html, countryName, cfg = null) {
   const V = streamVocab(cfg);
   // Pages frozen BEFORE the per-country vocabulary split carry India's "OTT" wording
@@ -4599,6 +4614,8 @@ function archivePatchHtml(html, countryName, cfg = null) {
     if (re.test(out)) { out = out.replace(re, to); changed = true; }
     re.lastIndex = 0; // global regexes are stateful across .test/.replace calls
   }
+  const r = stripAggregateRating(out);
+  if (r.changed) { out = r.html; changed = true; }
   const t = shortenTitleTag(out, countryName, cfg);
   if (t.changed) { out = t.html; changed = true; }
   // Runs LAST, after the body swaps above have set "Theatrical run ended" — frozenFilmFacts
@@ -6216,7 +6233,7 @@ module.exports = {
   buildOttWeekPage, ottWeekUrl, ottWeekPath,
   computeBuzz, fmtViews, trailerViewsLabel, localeFor, countryNameFor,
   ottArrival, recordOttSeen, pruneOttSeen, laterDate, earlierDate,
-  buildRssFeed, archivePatchHtml, reconcilePagesManifest,
+  buildRssFeed, archivePatchHtml, stripAggregateRating, reconcilePagesManifest,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, ARRIVAL_MAX_RELEASE_AGE, SEEN_RETENTION_DAYS,
   socialImage,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
