@@ -427,6 +427,31 @@ test("archivePatchHtml + generator SYNC GUARD: a real theatrical page gets hones
   assert.ok(html.includes("finished its theatrical run in India"));
   assert.ok(!html.includes('<span class="pill">In theatres</span>'));
 });
+test("archive patch v6: frozen JSON-LD loses aggregateRating, stays valid JSON, idempotent", () => {
+  const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj)}</script>`;
+  const agg = { "@type": "AggregateRating", ratingValue: 7.3, ratingCount: 38, bestRating: 10 };
+  const shapes = [
+    { "@context": "https://schema.org", "@type": "Movie", name: "A", actor: [{ "@type": "Person", name: "X" }], aggregateRating: agg },
+    { "@context": "https://schema.org", "@type": "Movie", name: "B", actor: [], aggregateRating: agg, citation: { "@type": "CreativeWork", name: "W" } },
+    { "@context": "https://schema.org", "@type": "Movie", aggregateRating: agg, name: "C" },
+  ];
+  for (const shape of shapes) {
+    const page = `<html><head>${ld(shape)}</head><body>★ 7.3</body></html>`;
+    const once = U.stripAggregateRating(page);
+    assert.ok(once.changed, "strip fires on " + shape.name);
+    assert.ok(!once.html.includes("aggregateRating"));
+    const json = JSON.parse(/<script type="application\/ld\+json">(.*?)<\/script>/.exec(once.html)[1]);
+    assert.strictEqual(json.name, shape.name, "other schema fields survive");
+    assert.ok(once.html.includes("★ 7.3"), "visible, attributed rating in the body is untouched");
+    assert.ok(!U.stripAggregateRating(once.html).changed, "idempotent");
+  }
+  const live = U.buildFilmPage({ title: "T", slug: "t", kind: "movie", language: "Hindi", platform: "Theatres",
+    released: "2026-06-01", rating: 7.0, votes: 500, verdict: "Worth a watch", runtime: 120 },
+    "2026-06-17", new Set(["t"]), { code: "in", name: "India", region: "IN" });
+  assert.ok(!live.includes("aggregateRating"), "live builder still emits no aggregateRating");
+  const frozen = `<html><head>${ld(shapes[0])}</head></html>`;
+  assert.ok(U.archivePatchHtml(frozen, "India").changed, "archivePatchHtml wires the strip in");
+});
 test("archivePatchHtml: OTT availability lines stay untouched; only time-relative leads patch", () => {
   // Mid-band lead is timeless -> a streaming page with it is a true no-op.
   const mid = { title: "S", slug: "s", kind: "tv", language: "English", platform: "Netflix",
