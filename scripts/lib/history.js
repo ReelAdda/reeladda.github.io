@@ -115,7 +115,47 @@ function windowStats(records, { code = null } = {}) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// MONTHLY VIEWS — what the archive is FOR, besides the /data/ medians.
+// The weekly hubs answer "what landed this week" and are stale in eight days. The same
+// observations grouped by month give a page per month that stays true forever: "everything
+// that started streaming in India in September 2026" is a question with a permanent answer,
+// and this file is the only place that answer exists.
+// ---------------------------------------------------------------------------
+function monthKey(dateISO) {
+  const d = String(dateISO || "").slice(0, 7);
+  return /^\d{4}-\d{2}$/.test(d) ? d : null;
+}
+
+function monthLabel(month, locale = "en-IN") {
+  if (!monthKey(month)) return "";
+  const [y, m] = month.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString(locale, { month: "long", year: "numeric", timeZone: "UTC" });
+}
+
+// Months that actually have arrivals for this country, newest first: [{ month, n }].
+function historyMonths(records, code = null) {
+  const counts = new Map();
+  for (const r of records || []) {
+    if (code && r.c !== code) continue;
+    const k = monthKey(r.first);
+    if (!k) continue;
+    counts.set(k, (counts.get(k) || 0) + 1);
+  }
+  return [...counts.entries()].map(([month, n]) => ({ month, n })).sort((a, b) => b.month.localeCompare(a.month));
+}
+
+// One month's arrivals for one country, newest sighting first then alphabetical — a stable
+// order, so a rebuilt page is byte-identical unless the data actually changed.
+function historyForMonth(records, code, month) {
+  if (!monthKey(month)) return [];
+  return (records || [])
+    .filter((r) => r && r.c === code && monthKey(r.first) === month)
+    .sort((a, b) => String(b.first).localeCompare(String(a.first)) || String(a.t || "").localeCompare(String(b.t || "")));
+}
+
 module.exports = {
   HISTORY_FILE, appendHistory, readHistory, loadHistoryIndex,
   historyRecord, streamingWindowDays, windowStats, median,
+  monthKey, monthLabel, historyMonths, historyForMonth,
 };
