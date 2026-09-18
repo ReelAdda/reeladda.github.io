@@ -42,6 +42,14 @@ jobs:
           # Google Cloud Console (YouTube Data API v3) and add it as a repo secret named
           # YT_API_KEY. If absent, the build simply skips trailer stats — nothing breaks.
           YT_API_KEY: ${{ secrets.YT_API_KEY }}
+          # Back-catalogue backfill (see backfillCatalog in scripts/update.js). Builds a batch
+          # of already-streaming catalogue titles per country per run — the long tail that
+          # answers "where can I watch X" years after any release week. Each built page costs
+          # one enrich call, so CATALOG_BATCH is the cost dial: start small, read one run's
+          # log, then raise it. Set CATALOG to "0" to pause the backfill without losing the
+          # queue cursor in catalog-manifest.json.
+          CATALOG: "1"
+          CATALOG_BATCH: "10"
         run: node scripts/update.js
 
       # Smoke test validates the SHAPE + freshness of EVERY country's data file.
@@ -68,7 +76,7 @@ jobs:
           # that stop qualifying are removed from disk by the build; without -A, git recorded
           # the new sitemap (which correctly drops them) while leaving the orphaned directory
           # committed and still served — a page reachable by URL that nothing updates.
-          git add -A data.json data-*.json ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ movie/ new-on-ott/ new-on-*/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ films/ */films/ data/ embed/ */embed/ ott-history.jsonl ott-watch.json sitemap.xml
+          git add -A data.json data-*.json ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json catalog-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ movie/ new-on-ott/ new-on-*/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ films/ */films/ data/ embed/ */embed/ ott-history.jsonl ott-watch.json sitemap.xml
           # Share cards are OPTIONAL: the directory only exists when the renderer AND the
           # brand fonts are both present. `git add` on a missing pathspec exits 128 and would
           # fail the commit step for a purely cosmetic feature, so it is added conditionally.
