@@ -23,9 +23,25 @@ const {
 
 const {
   HISTORY_FILE, appendHistory, readHistory, historyRecord, streamingWindowDays, windowStats,
+  historyForMonth,
+  historyMonths,
+  monthKey,
+  monthLabel,
 } = require("./lib/history.js");
 
 const { writeEmbed, buildEmbedPage, buildEmbedInstructions, embedItems } = require("./lib/embed.js");
+
+const {
+  CATALOG_BATCH_DEFAULT,
+  CATALOG_MIN_VOTES,
+  catalogEligible,
+  catalogProgress,
+  catalogQueues,
+  catalogSlug,
+  markQueue,
+  nextQueue,
+  noteBuilt,
+} = require("./lib/catalog.js");
 const { filmScore, confidenceTier, rankValue, rankFilms } = require("./lib/score.js");
 
 const {
@@ -2961,6 +2977,18 @@ async function main() {
     try { refreshDuePages(cfg, countryNameFor(cfg)); }
     catch (e) { console.warn(`  due pass [${cfg.code}] skipped: ${e.message}`); }
   }
+  // Back-catalogue backfill (see backfillCatalog). Runs after the weekly pipeline has taken
+  // every slug it wants and before the hreflang + sitemap passes, so new catalogue pages join
+  // their clusters and the sitemap in the same run they are written.
+  if (CATALOG_ENABLED) {
+    const catalogState = loadCatalogManifest();
+    for (const cfg of builtCountries) {
+      try { await backfillCatalog(cfg, pagesManifest, { state: catalogState, baseItem, withImdb, batch: CATALOG_BATCH }); }
+      catch (e) { console.warn(`  catalog [${cfg.code}] skipped: ${e.message}`); }
+    }
+    fs.writeFileSync(CATALOG_MANIFEST_FILE, JSON.stringify(catalogState, null, 1));
+  }
+
   // All countries are built by now, so the filesystem finally shows every cluster's true
   // membership — repair them in one pass before the sitemap is written.
   try {
@@ -2968,7 +2996,7 @@ async function main() {
     // fresh date and Google re-crawls it — otherwise a corrected hreflang cluster ships
     // with a months-old date and is never re-read.
     syncHreflangClusters((code, slug) => {
-      if (pagesManifest[code] && pagesManifest[code][slug]) pagesManifest[code][slug].last = todayStr;
+      if (pagesManifest[code] && pagesManifest[code][slug]) pagesManifest[code][slug].last = todayStr();
     });
   } catch (e) { console.warn(`  hreflang sync skipped: ${e.message}`); }
   fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
@@ -3187,6 +3215,53 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
   return desc;
 }
 
+// ============================================================================
+// FILM-PAGE TITLE — pure, so the live builder and the frozen-archive retitler cannot drift.
+//
+// Sept 2026 GSC forced this rule. India film pages that were NOT streaming carried an
+// "<film> OTT Release Date" title, on the theory that the query shape is where the volume is.
+// The volume is real and the titles rank: 8,616 impressions from "ott release date" queries
+// in 28 days, at positions 4-10. They produced 37 clicks — 0.43%. The reason is visible in
+// the SERP: the page ranks, the snippet honestly says the date has not been announced, and
+// the searcher picks a result that claims to know. A title that promises an answer the page
+// cannot give earns the impression and loses the click, and a page-1 listing that nobody
+// clicks is a ranking signal working against every other query the site competes for.
+//
+// So the date wording is now reserved for the case where the page HAS the answer: the film
+// is streaming, the date arrived, and the page can say where. Everything else targets
+// "where to watch <film>", which is what these pages can always answer truthfully.
+//
+// Google shows ~60 chars; the ladder drops decoration (brand, country) before it drops the
+// query-bearing words, so truncation never eats the part that earns the click.
+function filmTitleTag(item, cfg = null) {
+  const country = countryNameFor(cfg);
+  const V = streamVocab(cfg);
+  const year = (item.released || "").slice(0, 4);
+  const yr = year ? ` (${year})` : "";
+  const providers = Array.isArray(item.providers) ? item.providers : [];
+  const fitTitle = (opts) => opts.find((t) => t.length <= 60) || opts[opts.length - 1];
+  // "OTT" is Indian-market phrasing; TV has no OTT release date to speak of; and with no
+  // provider on file there is no date to report.
+  const canAnswerDate = V.word === "OTT" && item.kind !== "tv" && providers.length > 0;
+  return canAnswerDate
+    ? fitTitle([
+        `${item.title}${yr} ${V.titleFragment}, Review & Where to Watch | FilmyChill`,
+        `${item.title}${yr} ${V.titleFragment}, Review & Where to Watch`,
+        `${item.title}${yr} ${V.titleFragment} & Review`,
+        `${item.title}${yr} ${V.titleFragment}`,
+      ])
+    // "Where to Watch" is the query-bearing phrase in this branch, so it survives to the
+      // LAST tier. The old ladder ended at "— Review", which threw the query words away on
+      // exactly the long titles that most needed them.
+    : fitTitle([
+        `${item.title}${yr} — Review, Rating & Where to Watch in ${country} | FilmyChill`,
+        `${item.title}${yr} — Review, Rating & Where to Watch in ${country}`,
+        `${item.title}${yr} — Review & Where to Watch in ${country}`,
+        `${item.title}${yr} — Where to Watch in ${country}`,
+        `${item.title}${yr} — Where to Watch`,
+      ]);
+}
+
 function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const e = escHtml;
   const code = (cfg && cfg.code) || "in";
@@ -3204,33 +3279,10 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const ytid = ytIdOf(item.trailer);
   const cast = Array.isArray(item.cast) ? item.cast.slice(0, 6) : [];
   const providers = Array.isArray(item.providers) ? item.providers : [];
-  // India film pages that aren't streaming yet target "<title> ott release date" — the
-  // highest-volume non-brand query shape for Indian releases (GSC showed impressions were
-  // almost all brand queries; this is the intended fix). Search volume for that query peaks
-  // exactly in the theatrical/pre-OTT window this branch covers, and the FAQ + auto-update
-  // mechanic already answer it. Streaming titles, TV, and other countries keep the
-  // review/where-to-watch shape ("OTT" is Indian-market phrasing).
+  // Title cascade lives in filmTitleTag (pure) so the frozen-archive retitler runs the
+  // identical rule — see the note there for why the date wording is gated on availability.
   const V_TITLE = streamVocab(cfg);
-  const wantsOttTitle = V_TITLE.word === "OTT" && item.kind !== "tv" && providers.length === 0;
-  // Google shows ~60 chars of a title; every India film title was over it, so the query
-  // words were the part being cut. Drop decoration first (brand, country), keep the
-  // query-bearing words ("OTT Release Date" / "Review") to the last tier.
-  const yr = year ? ` (${year})` : "";
-  const fitTitle = (opts) => opts.find((t) => t.length <= 60) || opts[opts.length - 1];
-  const titleTag = wantsOttTitle
-    ? fitTitle([
-        `${item.title}${yr} ${V_TITLE.titleFragment}, Review & Where to Watch | FilmyChill`,
-        `${item.title}${yr} ${V_TITLE.titleFragment}, Review & Where to Watch`,
-        `${item.title}${yr} ${V_TITLE.titleFragment} & Review`,
-        `${item.title}${yr} ${V_TITLE.titleFragment}`,
-      ])
-    : fitTitle([
-        `${item.title}${yr} — Review, Rating & Where to Watch in ${country} | FilmyChill`,
-        `${item.title}${yr} — Review, Rating & Where to Watch in ${country}`,
-        `${item.title}${yr} — Review & Where to Watch in ${country}`,
-        `${item.title}${yr} — Review & Where to Watch`,
-        `${item.title}${yr} — Review`,
-      ]);
+  const titleTag = filmTitleTag(item, cfg);
   // See filmMetaDescription above for why this is no longer built inline: the same function
   // has to serve both this live render and the frozen-archive patcher, or the fix reaches
   // only the ~5% of film pages that happen to be in a current list this week.
@@ -3253,7 +3305,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const robotsTag = isShellPage
     ? `<meta name="robots" content="noindex,follow,max-image-preview:large">`
     : `<meta name="robots" content="max-image-preview:large">`;
-  void wantsOttTitle; void synopsis;
+  void synopsis;
 
   // hreflang alternates: the SAME film may have a page in several countries. crossCountry maps
   // code -> true for every other country whose current run also has this slug. Passed in by
@@ -3669,6 +3721,111 @@ function generatePages(data, cfg, allSlugSets) {
   console.log(`Pages [${code}]: ${written} written, ${total} total in ${dir}/.`);
 }
 
+// ============================================================================
+// BACK-CATALOGUE BACKFILL — the long tail, built a batch at a time.
+//
+// The weekly pipeline covers what is NEW. This covers what is ALREADY STREAMING: the
+// catalogue titles people search for by name ("is <film> on Netflix", "where to watch
+// <film>") long after any release week. That query shape is the one this site converts on
+// today — the pages that earn clicks are the ones that can answer it — and unlike release
+// traffic it doesn't decay, because the film stays on the platform for years.
+//
+// Cost control is the whole design. Each built page costs one discover call amortised across
+// ~20 results plus one enrich call, so a batch of CATALOG_BATCH per country per run is a
+// known, flat budget. The queue cursor lives in catalog-manifest.json, so consecutive runs
+// walk the catalogue instead of re-reading page 1 forever.
+//
+// Off by default: set CATALOG=1 (optionally CATALOG_BATCH=n) in the workflow to enable.
+// ============================================================================
+const CATALOG_MANIFEST_FILE = "catalog-manifest.json";
+const CATALOG_ENABLED = process.env.CATALOG === "1";
+const CATALOG_BATCH = Math.max(1, Number(process.env.CATALOG_BATCH || CATALOG_BATCH_DEFAULT));
+
+function loadCatalogManifest() {
+  try { return JSON.parse(fs.readFileSync(CATALOG_MANIFEST_FILE, "utf8")); }
+  catch { return {}; }
+}
+
+async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, batch = CATALOG_BATCH }) {
+  const code = cfg.code;
+  const dir = code === "in" ? "movie" : `${code}/movie`;
+  fs.mkdirSync(dir, { recursive: true });
+  const queues = catalogQueues(cfg);
+  // Slugs this country already has a page for. The backfill must never overwrite a page the
+  // weekly pipeline owns: that page carries this week's live claims and gets regenerated.
+  const have = new Set(fs.readdirSync(dir).filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5)));
+  const filmIndex = filmIndexFor(cfg);
+  const today = todayStr();
+  const ageCutoff = new Date(Date.now() - 120 * 864e5).toISOString().slice(0, 10);
+  let built = 0, calls = 0;
+  const CALL_BUDGET = batch * 3 + 10;   // hard ceiling: a bad queue can never run away with the build
+  while (built < batch && calls < CALL_BUDGET) {
+    const q = nextQueue(state, code, queues);
+    if (!q) { console.log(`  catalog [${code}]: every queue exhausted — catalogue covered for this source`); break; }
+    const dateField = q.kind === "tv" ? "first_air_date.lte" : "primary_release_date.lte";
+    let d = null;
+    try {
+      d = await tmdb(`/discover/${q.kind}`, {
+        watch_region: cfg.watchRegion,
+        with_watch_monetization_types: "flatrate",   // in-region subscription only: the page must be actionable
+        with_original_language: q.lang,
+        sort_by: "popularity.desc",                  // the catalogue people actually search for, first
+        "vote_count.gte": String(CATALOG_MIN_VOTES),
+        [dateField]: ageCutoff,
+        include_adult: "false",
+        page: String(q.page),
+      });
+      calls++;
+      await sleep(150);
+    } catch (e) {
+      console.warn(`  catalog discover ${code}/${q.key} p${q.page}: ${e.message}`);
+      markQueue(state, code, q.key, { results: 0 });
+      calls++;
+      continue;
+    }
+    const results = (d.results || []).map((m) => ({ ...m, kind: q.kind }));
+    const usable = results.filter((m) => catalogEligible(m, { kind: q.kind, have, slugOf: slugify, excludeIds: EXCLUDE_IDS }));
+    markQueue(state, code, q.key, { usable: usable.length, results: results.length });
+    for (const m of usable) {
+      if (built >= batch || calls >= CALL_BUDGET) break;
+      const slug = catalogSlug(m, { slugOf: slugify, have });
+      if (!slug) continue;
+      let item;
+      try {
+        item = { ...baseItem(m, q.kind) };
+        Object.assign(item, await enrich(q.kind, m.id, cfg.watchRegion));
+        withImdb(item);
+        calls++;
+        await sleep(150);
+      } catch (e) { console.warn(`  catalog enrich ${code}/${m.id}: ${e.message}`); calls++; continue; }
+      // Discover said flatrate; the detail call is the truth. No provider -> no answer -> no page.
+      const providers = Array.isArray(item.providers) ? item.providers : [];
+      if (!providers.length) continue;
+      item.slug = slug;
+      item.platform = providers[0];
+      have.add(slug);
+      try {
+        fs.writeFileSync(`${dir}/${slug}.html`, buildFilmPage(item, today, have, cfg, filmIndex));
+      } catch (e) { console.warn(`  catalog page ${code}/${slug}: ${e.message}`); continue; }
+      // Feed the neighbour graph so later titles in this same batch can link to it.
+      filmIndex.push({ slug, title: item.title, genre: item.genre || "", language: item.language || "",
+        released: item.released || "", poster: item.poster || "", kind: item.kind || "movie" });
+      // Born frozen: a catalogue page is written by the CURRENT builder, so it needs no archive
+      // patch (pv is stamped current). It still joins the manifest so the streaming-departure
+      // sweep re-checks its claims and the sitemap gets a truthful lastmod.
+      const mf = (pagesManifest[code] = pagesManifest[code] || {});
+      mf[slug] = { last: today, archivedOn: today, pv: ARCHIVE_PATCH_VERSION, catalog: true,
+        tmdbId: item.tmdbId, released: item.released || null, lang: item.language || null,
+        kind: item.kind || "movie", title: item.title };
+      built++;
+      noteBuilt(state, code, 1);
+    }
+  }
+  const prog = catalogProgress(state, code);
+  console.log(`  catalog [${code}]: +${built} pages this run (${calls} API calls, ${prog.built} total, ${prog.done}/${prog.queues} queues retired)`);
+  return built;
+}
+
 // One-time in effect: fix FROZEN (archived) film pages whose on-page hreflang still
 // declares x-default = the India copy when no India copy exists on disk. Current pages are
 // regenerated fresh each run and get the correct x-default by construction; frozen pages are
@@ -3824,6 +3981,20 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
         browseUrls.push(`  <url><loc>https://filmychill.com${browsePath(c.code, Number(d))}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>`);
     }
   }
+  // Monthly OTT archive (see buildOttMonthPage). The current month changes daily; a closed
+  // month reports the last day of that month and never moves again.
+  const monthUrls = [];
+  const curMonth = monthKey(new Date().toISOString());
+  for (const c of countries) {
+    const base = c.code === "in" ? "new-on-ott" : `${c.code}/new-on-ott`;
+    if (!fs.existsSync(base)) continue;
+    for (const d of fs.readdirSync(base).filter((x) => /^\d{4}-\d{2}$/.test(x)).sort()) {
+      if (!fs.existsSync(`${base}/${d}/index.html`)) continue;
+      const [yy, mm] = d.split("-").map(Number);
+      const lastDay = new Date(Date.UTC(yy, mm, 0)).toISOString().slice(0, 10);
+      monthUrls.push(`  <url><loc>${ottMonthUrl(c.code, d)}</loc><lastmod>${d === curMonth ? today : lastDay}</lastmod><priority>${d === curMonth ? "0.7" : "0.5"}</priority></url>`);
+    }
+  }
   const aboutUrls = fs.existsSync("about/index.html")
     ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${ABOUT_LASTMOD}</lastmod><priority>0.3</priority></url>`] : [];
   // /data/ was reaching IndexNow (so Bing saw it) but was absent from the sitemap, which is
@@ -3836,8 +4007,8 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const embedUrls = fs.existsSync("embed/index.html")
     ? [`  <url><loc>https://filmychill.com/embed/</loc><lastmod>${today}</lastmod><priority>0.4</priority></url>`] : [];
   fs.writeFileSync("sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
-  console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${browseUrls.length} browse${dataUrls.length ? " + data" : ""} + ${weekUrls.length} week + ${filmCount} film pages.`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
+  console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${browseUrls.length} browse${dataUrls.length ? " + data" : ""} + ${weekUrls.length} week + ${monthUrls.length} month + ${filmCount} film pages.`);
 }
 
 // Manual/local regeneration from existing data.json: PAGES_ONLY=1 node scripts/update.js
@@ -4401,7 +4572,10 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 //    schema note in buildFilmPage) but 325 archived pages froze before that change and still
 //    mark up TMDB numbers as a site rating — GSC was still reporting a Review snippet
 //    appearance in Sept 2026 because of them.
-const ARCHIVE_PATCH_VERSION = 6;
+// 7: retitle sweep. The "OTT Release Date" title shape is now reserved for pages that can
+//    answer it (see filmTitleTag); frozen pages written under the old rule need the one-time
+//    pass or the change reaches only the ~5% of films in a current list.
+const ARCHIVE_PATCH_VERSION = 7;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
@@ -4456,6 +4630,9 @@ const TITLE_SUFFIXES = [
   / — Review, Rating & Where to Watch in .+?$/,
   / — Review & Where to Watch in .+?$/,
   / — Review & Where to Watch$/,
+  / — Where to Watch in .+? \| FilmyChill$/,
+  / — Where to Watch in .+?$/,
+  / — Where to Watch$/,
   / — Review$/,
   / (?:OTT Release Date|Streaming Release Date), Review & Where to Watch \| FilmyChill$/,
   / (?:OTT Release Date|Streaming Release Date), Review & Where to Watch$/,
@@ -4487,8 +4664,8 @@ function shortenTitleTag(html, countryName, cfg = null) {
     : [`${stem} — Review, Rating & Where to Watch in ${countryName} | FilmyChill`,
        `${stem} — Review, Rating & Where to Watch in ${countryName}`,
        `${stem} — Review & Where to Watch in ${countryName}`,
-       `${stem} — Review & Where to Watch`,
-       `${stem} — Review`];
+       `${stem} — Where to Watch in ${countryName}`,
+       `${stem} — Where to Watch`];
   const next = opts.find((t) => t.length <= TITLE_BUDGET) || opts[opts.length - 1];
   // Never lengthen. When the film's own name already exceeds the budget there is nothing
   // left to trim, and the shortest cascade option can still come out longer than whatever
@@ -4585,6 +4762,23 @@ function stripAggregateRating(html) {
   return { html: out, changed: out !== html };
 }
 
+// Retitle a FROZEN page whose title was written under the old availability rule (see
+// filmTitleTag). Frozen pages are never regenerated, so without this the 1,289 archived pages
+// keep promising an "OTT Release Date" they cannot supply — which is the bulk of the traffic
+// the rule change is meant to fix. Everything needed is already in the HTML: frozenFilmFacts
+// reads the provider pills, so the same rule decides the same way it does on a live render.
+// Only <title> is touched; og:title carries the "— FilmyChill verdict" social form.
+function retitleFrozen(html, cfg = null) {
+  const cur = /<title>([\s\S]*?)<\/title>/.exec(html);
+  if (!cur) return { html, changed: false };
+  const facts = frozenFilmFacts(html);
+  if (!facts) return { html, changed: false };
+  const next = filmTitleTag(facts.item, cfg);
+  const esc = escHtml(next);
+  if (!next || esc === cur[1]) return { html, changed: false };
+  return { html: html.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc}</title>`), changed: true };
+}
+
 function archivePatchHtml(html, countryName, cfg = null) {
   const V = streamVocab(cfg);
   // Pages frozen BEFORE the per-country vocabulary split carry India's "OTT" wording
@@ -4616,6 +4810,8 @@ function archivePatchHtml(html, countryName, cfg = null) {
   }
   const r = stripAggregateRating(out);
   if (r.changed) { out = r.html; changed = true; }
+  const rt = retitleFrozen(out, cfg);
+  if (rt.changed) { out = rt.html; changed = true; }
   const t = shortenTitleTag(out, countryName, cfg);
   if (t.changed) { out = t.html; changed = true; }
   // Runs LAST, after the body swaps above have set "Theatrical run ended" — frozenFilmFacts
@@ -5012,6 +5208,153 @@ function archiveDepartedPages(manifest, cfg, currentSlugs, meta = null) {
   if (sweep.size) console.log(`  archive [${cfg.code}]: ${sweep.size} pages archived or re-swept, ${patched} honesty-patched`);
 }
 
+// ============================================================================
+// MONTHLY OTT ARCHIVE — /new-on-ott/<YYYY-MM>/ per country.
+//
+// The weekly hub answers "what landed this week" and is worthless eight days later; it has
+// one URL, so every week's work overwrites the last. Sept 2026 GSC: the 59 hub pages drew
+// 2,345 impressions for 27 clicks at positions 27-59, because one thin, constantly-rewritten
+// page cannot outrank sites with a page per month going back years.
+//
+// This builds that page per month, from ott-history.jsonl — the append-only record of the day
+// each title was first seen carrying a provider in each country. That record is the one asset
+// here nobody else has: TMDB keeps no provider history and JustWatch publishes none, so
+// "everything that started streaming in India in September 2026, and where" is a question
+// only this site can answer. Grouped by platform, because "new on netflix september 2026" is
+// how people ask it.
+//
+// Past months are frozen the moment they are complete: written once, never rewritten (their
+// data cannot change — `first` is a first-sighting date and never moves backwards).
+// ============================================================================
+const MONTH_PAGE_MIN = 6;   // fewer arrivals than this is a thin page, not an archive
+
+function ottMonthPath(code, month) {
+  return code === "in" ? `new-on-ott/${month}/index.html` : `${code}/new-on-ott/${month}/index.html`;
+}
+function ottMonthUrl(code, month) {
+  return code === "in" ? `https://filmychill.com/new-on-ott/${month}/` : `https://filmychill.com/${code}/new-on-ott/${month}/`;
+}
+
+// Pure: archive records for ONE country+month -> the page. `index` is this country's film
+// index (see filmIndexFor) so rows link to the film page when one exists and stay plain text
+// when it doesn't — a listing that links to 404s is worse than one that doesn't link.
+function buildOttMonthPage(recs, cfg, { month, months = [], index = [], now = Date.now() }) {
+  const code = (cfg && cfg.code) || "in";
+  const country = countryNameFor(cfg);
+  const V = streamVocab(cfg);
+  const label = monthLabel(month, localeFor(code));
+  const url = ottMonthUrl(code, month);
+  const bySlug = new Map((index || []).map((x) => [x.slug, x]));
+  const rowOf = (r) => {
+    const slug = slugify(r.t || "");
+    const page = bySlug.get(slug);
+    return {
+      title: r.t,
+      slug: page ? slug : null,
+      platform: r.p || null,
+      genre: r.g || "",
+      language: r.lang || "",
+      released: r.rel || null,
+      freshDate: r.first || null,
+      poster: page ? page.poster || "" : "",
+      kind: r.k === "tv" ? "tv" : "movie",
+      // The arrival date is the whole point of this page and exists nowhere else — but the row
+      // meta already shows it for series (freshLabel uses freshDate for TV) and for anything
+      // that went straight to streaming on release day. Only add the line when it says
+      // something the row doesn't already.
+      hook: (r.k !== "tv" && r.first && String(r.first).slice(0, 10) !== String(r.rel || "").slice(0, 10))
+        ? `Started streaming ${fmtDateShort(r.first, now, localeFor(code))}` : null,
+    };
+  };
+  // One section per platform, biggest first: "new on netflix september 2026" is a query, and
+  // a page that groups by platform answers it on the page instead of burying it in a list.
+  const byPlatform = new Map();
+  for (const r of recs) {
+    const key = r.p || "Other platforms";
+    if (!byPlatform.has(key)) byPlatform.set(key, []);
+    byPlatform.get(key).push(rowOf(r));
+  }
+  const sections = [...byPlatform.entries()]
+    .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
+    .map(([name, items]) => ({ h2: `${name} — ${label}`, items }));
+  const total = recs.length;
+  const platformList = [...byPlatform.entries()].sort((a, b) => b[1].length - a[1].length)
+    .slice(0, 4).map(([n, xs]) => `${n} (${xs.length})`).join(", ");
+  const faqs = [];
+  if (total) faqs.push({
+    q: `How many titles started streaming in ${country} in ${label}?`,
+    a: `${total} — ${platformList}. FilmyChill records each title on the day it first appears on a subscription service in ${country}.`,
+  });
+  const films = recs.filter((r) => r.k !== "tv").length;
+  if (films && total - films) faqs.push({
+    q: `Were they films or series?`,
+    a: `${films} film${films === 1 ? "" : "s"} and ${total - films} series arrived on ${V.word} in ${country} during ${label}.`,
+  });
+  const langs = [...new Set(recs.map((r) => r.lang).filter(Boolean))].slice(0, 6);
+  if (langs.length > 1) faqs.push({
+    q: `Which languages were covered in ${label}?`,
+    a: `${langs.join(", ")} — every ${V.word} arrival FilmyChill tracked in ${country} that month.`,
+  });
+  // Month nav: the previous and next months that actually have a page, plus the weekly hub.
+  const have = months.map((m) => m.month).sort();
+  const i = have.indexOf(month);
+  const navLinks = [];
+  if (i > 0) navLinks.push({ href: ottMonthUrl(code, have[i - 1]), label: `← ${monthLabel(have[i - 1], localeFor(code))}` });
+  if (i >= 0 && i < have.length - 1) navLinks.push({ href: ottMonthUrl(code, have[i + 1]), label: `${monthLabel(have[i + 1], localeFor(code))} →` });
+  navLinks.push({ href: ottWeekUrl(code), label: `This week's ${V.word} releases` });
+  const isCurrent = month === monthKey(new Date(now).toISOString());
+  const linkable = sections.flatMap((sec) => sec.items).filter((x) => x.slug);
+  const extraLd = [{
+    "@context": "https://schema.org", "@type": "CollectionPage",
+    name: `New on ${V.word} in ${country} — ${label}`, url,
+    isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+    mainEntity: { "@type": "ItemList", numberOfItems: linkable.length,
+      itemListElement: linkable.map((x, n) => ({ "@type": "ListItem", position: n + 1, name: x.title, url: filmPageUrl(code, x.slug) })) },
+  }, {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "FilmyChill", item: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/` },
+      { "@type": "ListItem", position: 2, name: `New on ${V.word}`, item: ottWeekUrl(code) },
+      { "@type": "ListItem", position: 3, name: label, item: url },
+    ],
+  }];
+  return listingPageHtml({
+    title: `Everything New on ${V.word} in ${country} — ${label} | FilmyChill`,
+    desc: `Every film and series that started streaming in ${country} during ${label} — ${total} titles across ${byPlatform.size} platform${byPlatform.size === 1 ? "" : "s"}, with ratings and verdicts.`,
+    canonical: url,
+    h1: `New on ${V.word} in ${country} — ${label}`,
+    updLine: isCurrent ? `Updated ${new Date(now).toLocaleDateString(localeFor(code), { day: "numeric", month: "long", year: "numeric" })} · this month is still filling up`
+      : `A complete record of ${label}`,
+    lead: `Every title FilmyChill saw arrive on a subscription service in ${country} during ${label}, grouped by platform and dated the day it appeared.`,
+    frozenNote: isCurrent ? null
+      : `${label} is closed. This page is the record of what arrived that month and no longer changes — new arrivals appear on the current month's page.`,
+    sections, faqs, extraLd, navLinks, code,
+    homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
+  });
+}
+
+// Writes the current month every run (it is still filling up) and back-fills any past month
+// that has enough arrivals and no page yet. Past months already on disk are left alone.
+function writeOttMonthPages(cfg, records = null, index = null) {
+  const code = (cfg && cfg.code) || "in";
+  const recs = records || readHistory();
+  const months = historyMonths(recs, code).filter((m) => m.n >= MONTH_PAGE_MIN);
+  if (!months.length) return 0;
+  const idx = index || filmIndexFor(cfg);
+  const current = monthKey(new Date().toISOString());
+  let written = 0;
+  for (const { month } of months) {
+    const path = ottMonthPath(code, month);
+    if (month !== current && fs.existsSync(path)) continue;   // frozen: complete and unchanging
+    const dir = path.slice(0, path.lastIndexOf("/"));
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path, buildOttMonthPage(historyForMonth(recs, code, month), cfg, { month, months, index: idx }));
+    written++;
+  }
+  if (written) console.log(`  month archive [${code}]: ${written} page(s) written of ${months.length} month(s) on record`);
+  return written;
+}
+
 function writeOttWeekPage(data, cfg, allCountries) {
   const p = ottWeekPath(cfg.code);
   const dir = p.slice(0, p.lastIndexOf("/"));
@@ -5222,7 +5565,7 @@ function writePlatformHubPages(data, cfg) {
   return hubs;
 }
 
-function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null }) {
+function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null }) {
   const e = escHtml;
   // Back-link copy follows the market ("theatres + OTT" in India/UAE, "theatres +
   // streaming" everywhere else) — platform hubs exist for every country.
@@ -5289,6 +5632,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   h1 { font-size:24px; margin:0 0 4px; line-height:1.3; }
   .upd { color:var(--mute); font-size:13px; margin-bottom:6px; }
   .lead { font-size:14.5px; line-height:1.6; color:var(--mute); margin:0 0 8px; }
+  .nav { font-size:13px; line-height:2; margin:8px 0 2px; } .nav a { color:var(--indigo); text-decoration:none; font-weight:600; }
   .frozen { background:rgba(64,56,199,.07); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:13px; color:var(--mute); margin:10px 0 0; }
   h2 { font-size:17px; margin:26px 0 10px; } .cnt { color:var(--marigold); }
   .row { display:grid; grid-template-columns:92px 1fr; gap:12px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; text-decoration:none; color:inherit; }
@@ -5315,7 +5659,8 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
 <div class="wrap">
   <h1>${e(h1)}</h1>
   <div class="upd">${e(updLine)}</div>
-  <p class="lead">${e(lead)}</p>${frozenNote ? `
+  <p class="lead">${e(lead)}</p>${navLinks && navLinks.length ? `
+  <nav class="nav">${navLinks.map((l) => `<a href="${e(l.href)}">${e(l.label)}</a>`).join(" · ")}</nav>` : ""}${frozenNote ? `
   <div class="frozen">${e(frozenNote)}</div>` : ""}
 ${sectionHtml}
 ${faqHtml}
@@ -5976,10 +6321,16 @@ function buildMoreLinks(code, data = null) {
     const meta = COUNTRY_PAGE_META[c.code] || { name: c.name, path: `/${c.code}/` };
     return `<a href="${meta.path}">${escHtml(meta.name.replace(/^the /, ""))}</a>`;
   }).join(" · ");
+  // The month archive is a crawl path into every past month (each page links to its
+  // neighbours), so one link here reaches the whole series.
+  const thisMonth = monthKey(new Date().toISOString());
+  const monthLink = fs.existsSync(ottMonthPath(code, thisMonth))
+    ? `<a href="${code === "in" ? "" : "/" + code}/new-on-ott/${thisMonth}/">Everything new on ${escHtml(streamVocab({ code }).word)} this month</a>`
+    : "";
   const hubs = data ? hubsFor(data).map((h) => `<a href="${code === "in" ? "" : "/" + code}/new-on-${h.slug}/">New on ${escHtml(h.name)}</a>`).join(" · ") : "";
-  if (code !== "in") return `${hubs ? hubs + " · " : ""}${browse} · ${dataLink}${embed} · ${about}<br>Also on FilmyChill: ${others}`;
+  if (code !== "in") return `${hubs ? hubs + " · " : ""}${monthLink ? monthLink + " · " : ""}${browse} · ${dataLink}${embed} · ${about}<br>Also on FilmyChill: ${others}`;
   const langs = LANGUAGE_PAGES.map(([name, slug]) => `<a href="/${slug}/">${name}</a>`).join(" · ");
-  return `${langs}${hubs ? " · " + hubs : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${dataLink}${embed} · ${about}<br>Also on FilmyChill: ${others}`;
+  return `${langs}${hubs ? " · " + hubs : ""}${monthLink ? " · " + monthLink : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${dataLink}${embed} · ${about}<br>Also on FilmyChill: ${others}`;
 }
 
 // ============================================================================
@@ -6083,6 +6434,10 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
     try { fn(); }
     catch (e) { console.warn(`  ${name} [${cfg.code}] skipped: ${e.message}`); }
   };
+  // Month archive FIRST: the footer's "everything new this month" link is only written when
+  // the page it points at exists, so building it after the country page would delay the link
+  // by a full run (and permanently, on a month's first build).
+  step("month archive", () => writeOttMonthPages(cfg));
   if (template) step("country page", () => renderCountryPage(template, cfg, data));
   step("weekly page", () => writeOttWeekPage(data, cfg, allCountries));
   step("platform hubs", () => writePlatformHubPages(data, cfg));
@@ -6233,7 +6588,8 @@ module.exports = {
   buildOttWeekPage, ottWeekUrl, ottWeekPath,
   computeBuzz, fmtViews, trailerViewsLabel, localeFor, countryNameFor,
   ottArrival, recordOttSeen, pruneOttSeen, laterDate, earlierDate,
-  buildRssFeed, archivePatchHtml, stripAggregateRating, reconcilePagesManifest,
+  buildRssFeed, archivePatchHtml, stripAggregateRating, retitleFrozen, filmTitleTag, reconcilePagesManifest,
+  buildOttMonthPage, writeOttMonthPages, ottMonthPath, ottMonthUrl, backfillCatalog,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, ARRIVAL_MAX_RELEASE_AGE, SEEN_RETENTION_DAYS,
   socialImage,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,

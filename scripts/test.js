@@ -411,6 +411,131 @@ test("buildRssFeed: country feeds use their own namespace and XML-escapes titles
   assert.ok(!xml.includes("Tom & Jerry <3"));
 });
 
+// ---------------- Back-catalogue backfill (the long-tail build) ----------------
+group("catalogue backfill: queue bookkeeping and the eligibility bar");
+const CAT = require("./lib/catalog.js");
+const CAT_CFG = { code: "in", name: "India", region: "IN", watchRegion: "IN",
+  ottRegionalLangs: ["hi", "ml"], priorityLangs: ["hi", "ta"] };
+
+test("catalogQueues: market languages first, English always, no duplicates, movie+tv each", () => {
+  const q = CAT.catalogQueues(CAT_CFG);
+  assert.deepStrictEqual(q.map((x) => x.key),
+    ["hi:movie", "hi:tv", "ml:movie", "ml:tv", "ta:movie", "ta:tv", "en:movie", "en:tv"]);
+  assert.strictEqual(CAT.catalogQueues({}).length, 2, "a config with no languages still walks English");
+});
+
+test("nextQueue: round-robins, skips retired queues, and reports exhaustion", () => {
+  const state = {}, queues = CAT.catalogQueues(CAT_CFG);
+  const first = CAT.nextQueue(state, "in", queues);
+  assert.strictEqual(first.key, "hi:movie");
+  assert.strictEqual(first.page, 1, "a fresh queue starts at page 1");
+  assert.strictEqual(CAT.nextQueue(state, "in", queues).key, "hi:tv", "cursor advances between calls");
+  // Retire everything except one queue: that queue is what comes back, every time.
+  for (const q of queues) if (q.key !== "ml:movie") CAT.queueState(state, "in", q.key).done = true;
+  assert.strictEqual(CAT.nextQueue(state, "in", queues).key, "ml:movie");
+  CAT.queueState(state, "in", "ml:movie").done = true;
+  assert.strictEqual(CAT.nextQueue(state, "in", queues), null, "every queue retired -> null, not a loop");
+});
+
+test("markQueue: pages advance, barren queues retire, an empty response retires immediately", () => {
+  const state = {};
+  const q = () => CAT.queueState(state, "in", "hi:movie");
+  CAT.markQueue(state, "in", "hi:movie", { usable: 4, results: 20 });
+  assert.strictEqual(q().page, 2);
+  assert.ok(!q().done);
+  for (let i = 0; i < 3; i++) CAT.markQueue(state, "in", "hi:movie", { usable: 0, results: 20 });
+  assert.ok(q().done, "three barren pages running -> retired, not re-fetched every run forever");
+  const state2 = {};
+  CAT.markQueue(state2, "in", "en:tv", { usable: 0, results: 0 });
+  assert.ok(CAT.queueState(state2, "in", "en:tv").done, "TMDB out of pages -> retired");
+  const state3 = {};
+  CAT.queueState(state3, "in", "en:tv").page = CAT.CATALOG_MAX_PAGE;
+  CAT.markQueue(state3, "in", "en:tv", { usable: 5, results: 20 });
+  assert.ok(CAT.queueState(state3, "in", "en:tv").done, "depth cap retires the queue");
+});
+
+test("catalogEligible: only titles that can actually answer a question get a page", () => {
+  const slugOf = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const old = new Date(Date.now() - 400 * 864e5).toISOString().slice(0, 10);
+  const base = { id: 1, title: "Old Favourite", poster_path: "/p.jpg", overview: "A synopsis.",
+    vote_count: 500, vote_average: 7.2, release_date: old };
+  const ok = (over = {}, opts = {}) => CAT.catalogEligible({ ...base, ...over }, { slugOf, ...opts });
+  assert.ok(ok(), "a popular, rated, old, streaming title qualifies");
+  assert.ok(!ok({ vote_count: 12 }), "no audience numbers -> no honest verdict -> no page");
+  assert.ok(!ok({ poster_path: null }), "posterless card is a shell");
+  assert.ok(!ok({ overview: "  " }), "no synopsis is a shell");
+  assert.ok(!ok({ adult: true }));
+  assert.ok(!ok({ release_date: new Date().toISOString().slice(0, 10) }), "new releases belong to the weekly pipeline");
+  assert.ok(!ok({ release_date: "" }), "undated title cannot be aged");
+  assert.ok(!ok({}, { have: new Set(["old-favourite"]) }), "never overwrite a page the weekly pipeline owns");
+  assert.ok(!ok({}, { excludeIds: new Set([1]) }), "the manual exclusion list still wins");
+  assert.ok(ok({ title: null, name: "A Series", first_air_date: old, release_date: null }, {}), "TV shape works too");
+});
+
+test("catalogSlug: disambiguates by year exactly like assignSlugs, or declines", () => {
+  const slugOf = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const m = { id: 7, title: "Drishyam", release_date: "2015-07-31" };
+  assert.strictEqual(CAT.catalogSlug(m, { slugOf, have: new Set() }), "drishyam");
+  assert.strictEqual(CAT.catalogSlug(m, { slugOf, have: new Set(["drishyam"]) }), "drishyam-2015");
+  assert.strictEqual(CAT.catalogSlug({ id: 8, title: "Drishyam" }, { slugOf, have: new Set(["drishyam"]) }), null,
+    "no year to disambiguate with -> skip the title rather than clobber a page");
+});
+
+// ---------------- Monthly OTT archive (hub depth) ----------------
+group("monthly archive: the arrival record as a permanent page");
+const HIST = require("./lib/history.js");
+const MONTH_RECS = [
+  { c: "in", k: "movie", id: 1, t: "Alpha", p: "Netflix", first: "2026-08-04", rel: "2026-06-01", lang: "Hindi", g: "Drama" },
+  { c: "in", k: "movie", id: 2, t: "Beta", p: "Netflix", first: "2026-08-19", rel: "2026-08-19", lang: "Tamil", g: "Action" },
+  { c: "in", k: "tv", id: 3, t: "Gamma", p: "JioHotstar", first: "2026-08-22", rel: "2019-01-01", lang: "English", g: "Comedy" },
+  { c: "in", k: "movie", id: 4, t: "Delta", p: "Netflix", first: "2026-09-02", rel: "2026-07-07", lang: "Hindi", g: "Drama" },
+  { c: "uk", k: "movie", id: 5, t: "Epsilon", p: "Netflix", first: "2026-08-08", rel: "2026-05-05", lang: "English", g: "Drama" },
+];
+
+test("historyMonths / historyForMonth: per country, newest first, nothing borrowed", () => {
+  assert.deepStrictEqual(HIST.historyMonths(MONTH_RECS, "in"), [{ month: "2026-09", n: 1 }, { month: "2026-08", n: 3 }]);
+  assert.deepStrictEqual(HIST.historyForMonth(MONTH_RECS, "in", "2026-08").map((r) => r.t), ["Gamma", "Beta", "Alpha"]);
+  assert.deepStrictEqual(HIST.historyForMonth(MONTH_RECS, "uk", "2026-08").map((r) => r.t), ["Epsilon"],
+    "a UK arrival never appears on an India page");
+  assert.deepStrictEqual(HIST.historyForMonth(MONTH_RECS, "in", "nonsense"), []);
+  assert.strictEqual(HIST.monthLabel("2026-08"), "August 2026");
+});
+
+test("buildOttMonthPage: groups by platform, links only pages that exist, counts honestly", () => {
+  const aug = HIST.historyForMonth(MONTH_RECS, "in", "2026-08");
+  const html = U.buildOttMonthPage(aug, { code: "in", name: "India", region: "IN", streamWord: "OTT" }, {
+    month: "2026-08", months: HIST.historyMonths(MONTH_RECS, "in"),
+    index: [{ slug: "alpha", title: "Alpha", poster: "https://image.tmdb.org/t/p/w342/a.jpg" }],
+    now: Date.parse("2026-09-18T00:00:00Z"),
+  });
+  assert.ok(/<title>Everything New on OTT in India — August 2026/.test(html));
+  assert.ok(html.indexOf("Netflix — August 2026") < html.indexOf("JioHotstar — August 2026"), "biggest platform first");
+  assert.ok(/href="\/movie\/alpha.html"/.test(html), "a title with a page gets a link");
+  assert.ok(!/href="\/movie\/beta.html"/.test(html), "a title with no page is not linked to a 404");
+  assert.ok(/>Beta</.test(html), "...but it is still listed");
+  assert.ok(/3 — Netflix \(2\), JioHotstar \(1\)/.test(html), "FAQ counts match the rows");
+  assert.ok(/Started streaming 4 Aug/.test(html), "a film that streamed later than release says when");
+  assert.ok(!/Beta[\s\S]{0,300}Started streaming/.test(html), "a same-day arrival doesn't repeat itself");
+  assert.ok(/September 2026 →/.test(html) && /This week&#39;s OTT releases/.test(html), "month nav is present");
+});
+
+test("buildOttMonthPage: a closed month says so; the current month says it is still filling", () => {
+  const now = Date.parse("2026-09-18T00:00:00Z");
+  const cfg = { code: "in", name: "India", region: "IN", streamWord: "OTT" };
+  const months = HIST.historyMonths(MONTH_RECS, "in");
+  const closed = U.buildOttMonthPage(HIST.historyForMonth(MONTH_RECS, "in", "2026-08"), cfg, { month: "2026-08", months, now });
+  const current = U.buildOttMonthPage(HIST.historyForMonth(MONTH_RECS, "in", "2026-09"), cfg, { month: "2026-09", months, now });
+  assert.ok(/August 2026 is closed/.test(closed) && /A complete record of August 2026/.test(closed));
+  assert.ok(!/is closed/.test(current) && /still filling up/.test(current));
+});
+
+test("month archive paths and URLs are namespaced per country", () => {
+  assert.strictEqual(U.ottMonthPath("in", "2026-08"), "new-on-ott/2026-08/index.html");
+  assert.strictEqual(U.ottMonthPath("ae", "2026-08"), "ae/new-on-ott/2026-08/index.html");
+  assert.strictEqual(U.ottMonthUrl("in", "2026-08"), "https://filmychill.com/new-on-ott/2026-08/");
+  assert.strictEqual(U.ottMonthUrl("uk", "2026-08"), "https://filmychill.com/uk/new-on-ott/2026-08/");
+});
+
 // ---------------- Film-page archive (honest long tail) ----------------
 test("archivePatchHtml + generator SYNC GUARD: a real theatrical page gets honestly archived", () => {
   // Build an actual page with buildFilmPage, then archive-patch it. If someone rewords the
@@ -468,6 +593,33 @@ test("archivePatchHtml: OTT availability lines stay untouched; only time-relativ
   assert.ok(!/right now|at the moment|the current /.test(out.html));
   assert.ok(before && out.html.includes(before[0]), "streaming availability line untouched");
 });
+test("archive patch v7: frozen titles stop promising a date the page cannot give", () => {
+  const IN = { code: "in", name: "India", region: "IN" };
+  // A real frozen theatrical page: built live, then archived.
+  const theatrical = U.buildFilmPage({ title: "Dastaar", slug: "dastaar", kind: "movie", language: "Punjabi",
+    platform: "Theatres", released: "2026-06-01", rating: 7.1, votes: 400, verdict: "Worth a watch", runtime: 130 },
+    "2026-06-17", new Set(["dastaar"]), IN);
+  const frozen = U.archivePatchHtml(theatrical, "India", IN).html;
+  const titleOf = (h) => /<title>([^<]*)<\/title>/.exec(h)[1];
+  assert.ok(!/OTT Release Date/.test(titleOf(frozen)), "no provider on the page -> no date promise: " + titleOf(frozen));
+  assert.ok(/Where to Watch/.test(titleOf(frozen)));
+  assert.ok(!U.retitleFrozen(frozen, IN).changed, "idempotent");
+
+  // The inverse: a streaming page CAN answer it, so the query words belong there.
+  const streaming = U.buildFilmPage({ title: "Dastaar", slug: "dastaar", kind: "movie", language: "Punjabi",
+    platform: "Netflix", providers: ["Netflix"], released: "2026-06-01", rating: 7.1, votes: 400,
+    verdict: "Worth a watch", runtime: 130 }, "2026-08-17", new Set(["dastaar"]), IN);
+  assert.ok(/OTT Release Date/.test(titleOf(streaming)));
+  // Simulate a page frozen under the OLD rule (date title, no providers) and re-sweep it.
+  const stale = frozen.replace(/<title>[^<]*<\/title>/, "<title>Dastaar (2026) OTT Release Date, Review &amp; Where to Watch</title>");
+  const swept = U.retitleFrozen(stale, IN);
+  assert.ok(swept.changed && !/OTT Release Date/.test(titleOf(swept.html)), "the stale promise is rewritten");
+  assert.ok(/&amp;|Where to Watch/.test(titleOf(swept.html)) && !/<title>[^<]*<script/.test(swept.html));
+
+  // A page whose JSON-LD can't be read is left exactly alone.
+  assert.ok(!U.retitleFrozen("<html><head><title>Whatever</title></head></html>", IN).changed);
+});
+
 test("reconcilePagesManifest: current bumps last + clears archive; departed marked ONCE", () => {
   const today = "2026-07-04";
   const manifest = { in: {
@@ -972,14 +1124,20 @@ test("no seriess: series pluralizes as series in every band", () => {
 group("audit fixes: titles, descriptions, inlinks, freshness, schema");
 const AUDIT_CFG = { code: "in", name: "India", region: "IN" };
 test("film title tags fit 60 chars, keeping the query words", () => {
+  // REWRITTEN Sept 2026 with the availability rule (see filmTitleTag). The date wording is
+  // reserved for pages that can answer it; a page with no provider targets "where to watch".
+  const titleOf = (item) => /<title>([^<]*)<\/title>/.exec(U.buildFilmPage(item, "2026-08-14", new Set(), AUDIT_CFG))[1]
+    .replace(/&#39;/g, "x").replace(/&amp;/g, "&");
   const long = { title: "Teenage Sex and Death at Camp Miasma", slug: "x", kind: "movie", tmdbId: 9, released: "2026-06-06", platform: "Theatres" };
-  const page = U.buildFilmPage(long, "2026-08-14", new Set(), AUDIT_CFG);
-  const t = /<title>([^<]*)<\/title>/.exec(page)[1].replace(/&#39;|&amp;/g, "x");
+  const t = titleOf(long);
   assert.ok(t.length <= 62, t + " (" + t.length + ")");
-  assert.ok(/OTT Release Date/.test(t), "query words survive trimming: " + t);
-  const short = { ...long, title: "Raftaar" };
-  const t2 = /<title>([^<]*)<\/title>/.exec(U.buildFilmPage(short, "2026-08-14", new Set(), AUDIT_CFG))[1].replace(/&amp;/g, "&");
-  assert.ok(t2.length <= 60 && /OTT Release Date/.test(t2), t2 + " (" + t2.length + ")");
+  assert.ok(/Where to Watch/.test(t), "query words survive trimming: " + t);
+  const streamingLong = { ...long, platform: "Netflix", providers: ["Netflix"] };
+  const t2 = titleOf(streamingLong);
+  assert.ok(t2.length <= 62, t2 + " (" + t2.length + ")");
+  assert.ok(/OTT Release Date/.test(t2), "streaming page keeps the answerable query words: " + t2);
+  const t3 = titleOf({ ...streamingLong, title: "Raftaar" });
+  assert.ok(t3.length <= 60 && /OTT Release Date/.test(t3), t3 + " (" + t3.length + ")");
 });
 test("descriptions: never empty, never a complete answer, always a reason to click", () => {
   // REWRITTEN Sept 2026. The contract here used to assert the OPPOSITE of what now ships: it
@@ -1206,11 +1364,13 @@ test("buildFilmPage: defaults to India when no cfg passed (backward compatible)"
   const item = { title: "X", slug: "x", kind: "movie", platform: "Theatres" };
   const html = U.buildFilmPage(item, "2026-06-17", new Set(["x"]));
   assert.ok(/rel="canonical" href="https:\/\/filmychill.com\/movie\/x.html"/.test(html));
-  // India film not yet streaming -> title targets the "<title> ott release date" query
-  assert.ok(/<title>X OTT Release Date, Review &amp; Where to Watch \| FilmyChill<\/title>/.test(html));
-  // once streaming, the review/where-to-watch title shape returns
+  // INVERTED Sept 2026: an India film with no provider cannot supply an OTT release date, so
+  // it targets "where to watch" instead of promising one (see filmTitleTag).
+  assert.ok(/<title>X — Review, Rating &amp; Where to Watch in India \| FilmyChill<\/title>/.test(html), html.slice(0, 400));
+  assert.ok(!/OTT Release Date/.test(/<title>[^<]*<\/title>/.exec(html)[0]), "no date promise without a date");
+  // once streaming, the page CAN answer the date question, so the query words come back
   const html2 = U.buildFilmPage({ title: "Y", slug: "y", kind: "movie", platform: "Netflix", providers: ["Netflix"] }, "2026-06-17", new Set(["y"]));
-  assert.ok(/Where to Watch in India/.test(html2));
+  assert.ok(/<title>Y OTT Release Date, Review &amp; Where to Watch \| FilmyChill<\/title>/.test(html2));
 });
 test("buildFilmPage: hreflang alternates emitted for shared film", () => {
   const item = { title: "Shared", slug: "shared", kind: "movie", platform: "Theatres", _alts: [{ code: "in", region: "IN" }] };
