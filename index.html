@@ -286,7 +286,7 @@
     <option value="ca">🇨🇦 Canada</option>
     <option value="sg">🇸🇬 Singapore</option>
   </select>
-  <div class="updated"><div class="dot"></div><span id="lastScan">Loading fresh picks…</span></div>
+  <div class="updated"><div class="dot"></div><span id="lastScan"><!--SSR:LASTSCAN-->Loading fresh picks…<!--/SSR:LASTSCAN--></span></div>
   <div class="conf-strip" id="confStrip"></div>
 </header>
 
@@ -759,21 +759,30 @@ function releaseState(dateStr) {
   const today = new Date(n.getTime() - n.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   return d > today ? 'upcoming' : d === today ? 'today' : 'released';
 }
+// Mirrors normalizeUpcoming() in scripts/lib/release.js. The regional date (`released`) wins
+// whenever it hasn't passed; freshDate is TMDB's GLOBAL date and is only a fallback for a
+// regional date that has already gone by. Picking the earlier of the two showed India visitors
+// the US date (Digger 30 Sept instead of 2 Oct) and silently overwrote the server-rendered
+// cards, which had it right — the page contradicted its own HTML a second after load.
 function upcomingOnly(list) {
   return (list || []).map(function (it) {
     if (!it) return null;
-    var dates = [it.released, it.freshDate].filter(Boolean)
+    if (it.released && releaseState(it.released) !== 'released') return it;
+    var fallback = [it.freshDate].filter(Boolean)
       .map(function (d) { return String(d).slice(0, 10); })
-      .filter(function (d) { return releaseState(d) !== 'released'; }).sort();
-    if (!dates.length) return null;
-    return dates[0] === it.released ? it : Object.assign({}, it, { released: dates[0] });
+      .find(function (d) { return releaseState(d) !== 'released'; });
+    return fallback ? Object.assign({}, it, { released: fallback }) : null;
   }).filter(Boolean);
 }
 function daysAway(dateStr) {
   const st = releaseState(dateStr);
   if (st === 'unknown' || st === 'released') return null;
   if (st === 'today') return 'Today';
-  const diff = Math.ceil((new Date(dateStr) - new Date().setHours(0,0,0,0)) / 86400000);
+  // Count calendar days in the VISITOR's zone. new Date('YYYY-MM-DD') parses as UTC midnight,
+  // so everywhere east of UTC (India, UAE, Singapore, Australia, Germany) read a day high:
+  // 25 Sept showed "In 10 days" on the 16th.
+  const p = String(dateStr).slice(0, 10).split('-').map(Number);
+  const diff = Math.round((new Date(p[0], p[1] - 1, p[2]) - new Date().setHours(0,0,0,0)) / 86400000);
   if (diff === 1) return 'Tomorrow';
   return 'In ' + diff + ' days';
 }
