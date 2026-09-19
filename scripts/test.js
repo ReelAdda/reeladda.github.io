@@ -411,6 +411,121 @@ test("buildRssFeed: country feeds use their own namespace and XML-escapes titles
   assert.ok(!xml.includes("Tom & Jerry <3"));
 });
 
+// ---------------- Analytics (cookieless, kill-switchable) ----------------
+group("analytics: present on every page type, allowed by every CSP, removable everywhere");
+
+test("analyticsTag + cspWith: the tag and the policy that permits it move together", () => {
+  if (!U.GC_SITE) return;   // analytics switched off in this build — nothing to assert
+  const tag = U.analyticsTag();
+  assert.ok(/data-goatcounter="https:\/\/[a-z0-9-]+\.goatcounter\.com\/count"/.test(tag), tag);
+  assert.ok(/src="https:\/\/gc\.zgo\.at\/count\.js"/.test(tag) && /async/.test(tag), "loaded async, from the documented host");
+  assert.ok(!/cookie|localStorage/i.test(tag), "nothing that would need a consent banner");
+  const policy = U.cspWith("default-src 'self'; script-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'");
+  assert.ok(/script-src 'self' https:\/\/gc\.zgo\.at/.test(policy), "script host allowed: " + policy);
+  assert.ok(/connect-src 'self' https:\/\/[a-z0-9-]+\.goatcounter\.com/.test(policy), "beacon allowed: " + policy);
+  assert.ok(!/"/.test(policy), "policy must never contain a double quote — it lives in an attribute");
+  // A policy with no connect-src would fall back to default-src and silently block the beacon.
+  const noConnect = U.cspWith("default-src 'self'; script-src 'self'; object-src 'none'");
+  assert.ok(/connect-src/.test(noConnect), "a missing connect-src is added, not assumed: " + noConnect);
+});
+
+test("ensureAnalytics: frozen archive pages get the tag, keep valid CSP, and stay idempotent", () => {
+  if (!U.GC_SITE) return;   // analytics switched off in this build — nothing to assert
+  const frozen = `<html><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data:; object-src 'none'"><title>X</title></head><body>b</body></html>`;
+  const once = U.ensureAnalytics(frozen);
+  assert.ok(once.changed && once.html.includes("gc.zgo.at/count.js"), "archive pages are measured too");
+  const csp = /content="([^"]*)"/.exec(once.html)[1];
+  assert.ok(/script-src 'self' https:\/\/gc\.zgo\.at/.test(csp) && /connect-src/.test(csp), csp);
+  assert.ok(!U.ensureAnalytics(once.html).changed, "idempotent — a re-sweep doesn't stack tags");
+  assert.strictEqual((once.html.match(/gc\.zgo\.at/g) || []).length, 2, "one script tag, one CSP mention");
+  // A page whose head we don't recognise is left exactly alone.
+  assert.ok(!U.ensureAnalytics("<html><head><title>no csp</title></head></html>").changed);
+});
+
+test("every generated page type carries the tag", () => {
+  if (!U.GC_SITE) return;   // analytics switched off in this build — nothing to assert
+  const IN = { code: "in", name: "India", region: "IN" };
+  const film = U.buildFilmPage({ title: "A", slug: "a", kind: "movie", platform: "Netflix", providers: ["Netflix"] }, "2026-09-19", new Set(["a"]), IN);
+  assert.ok(film.includes("gc.zgo.at/count.js"), "film page");
+  assert.ok(/script-src[^;]*gc\.zgo\.at/.test(film), "film page CSP allows it");
+  const month = U.buildOttMonthPage(
+    [{ c: "in", k: "movie", id: 1, t: "A", p: "Netflix", first: "2026-09-04", rel: "2026-08-01", lang: "Hindi", g: "Drama" }],
+    IN, { month: "2026-09", months: [{ month: "2026-09", n: 1 }] });
+  assert.ok(month.includes("gc.zgo.at/count.js"), "listing pages (hubs, months, weeks, languages)");
+});
+
+// ---------------- Scoped month archives (platform x month, language x month) ----------
+group("scoped month archives: the arrival record, cut by platform and by language");
+const SCOPE_RECS = [
+  { c: "in", k: "movie", id: 1, t: "Alpha", p: "Netflix", first: "2026-09-04", rel: "2026-07-01", lang: "Hindi", g: "Drama" },
+  { c: "in", k: "movie", id: 2, t: "Beta", p: "Netflix", first: "2026-09-12", rel: "2026-09-12", lang: "Tamil", g: "Action" },
+  { c: "in", k: "tv", id: 3, t: "Gamma", p: "Netflix", first: "2026-09-14", rel: "2019-01-01", lang: "Hindi", g: "Comedy" },
+  { c: "in", k: "movie", id: 4, t: "Delta", p: "Netflix", first: "2026-09-20", rel: "2026-06-06", lang: "Hindi", g: "Thriller" },
+];
+
+test("buildScopedMonthPage (platform): groups by language, links back up both axes", () => {
+  const html = U.buildScopedMonthPage(SCOPE_RECS, { code: "in", name: "India", region: "IN", streamWord: "OTT" }, {
+    scope: { kind: "platform", name: "Netflix", slug: "netflix" },
+    month: "2026-09", months: ["2026-08", "2026-09"],
+    index: [{ slug: "alpha", title: "Alpha", poster: "https://image.tmdb.org/t/p/w342/a.jpg" }],
+    now: Date.parse("2026-09-25T00:00:00Z"),
+  });
+  assert.ok(/<title>New on Netflix in India — September 2026/.test(html));
+  assert.ok(/rel="canonical" href="https:\/\/filmychill.com\/new-on-netflix\/2026-09\/"/.test(html));
+  assert.ok(html.indexOf("Hindi — September 2026") < html.indexOf("Tamil — September 2026"), "biggest language group first");
+  assert.ok(/4 — Hindi \(3\), Tamil \(1\)/.test(html), "counts in the FAQ match the rows");
+  assert.ok(/href="\/movie\/alpha.html"/.test(html) && !/href="\/movie\/beta.html"/.test(html), "links only where a page exists");
+  assert.ok(/← August 2026/.test(html), "previous month in the same scope");
+  assert.ok(/Everything new in September 2026/.test(html), "up to the whole month");
+  assert.ok(/Netflix this week/.test(html), "up to the platform's weekly hub");
+});
+
+test("buildScopedMonthPage (language): groups by platform and names the language", () => {
+  const html = U.buildScopedMonthPage(SCOPE_RECS.filter((r) => r.lang === "Hindi"),
+    { code: "in", name: "India", region: "IN", streamWord: "OTT" },
+    { scope: { kind: "language", name: "Hindi", slug: "hindi" }, month: "2026-09", months: ["2026-09"],
+      index: [], now: Date.parse("2026-09-25T00:00:00Z") });
+  assert.ok(/<title>New Hindi on OTT in India — September 2026/.test(html), (/<title>[^<]*/.exec(html) || [])[0]);
+  assert.ok(/rel="canonical" href="https:\/\/filmychill.com\/hindi\/2026-09\/"/.test(html));
+  assert.ok(/Netflix — September 2026/.test(html), "a language page groups by platform");
+  assert.ok(/Hindi this week/.test(html));
+});
+
+test("a closed scoped month freezes; the current one says it is still filling", () => {
+  const cfg = { code: "in", name: "India", region: "IN", streamWord: "OTT" };
+  const opts = (month) => ({ scope: { kind: "platform", name: "Netflix", slug: "netflix" }, month,
+    months: ["2026-08", "2026-09"], index: [], now: Date.parse("2026-09-25T00:00:00Z") });
+  assert.ok(/still filling up/.test(U.buildScopedMonthPage(SCOPE_RECS, cfg, opts("2026-09"))));
+  const closed = U.buildScopedMonthPage(SCOPE_RECS, cfg, opts("2026-08"));
+  assert.ok(/August 2026 is closed/.test(closed) && /A complete record of August 2026/.test(closed));
+});
+
+test("scoped month paths and URLs are namespaced per country; language months are India-only", () => {
+  assert.strictEqual(U.platformMonthPath("in", "netflix", "2026-09"), "new-on-netflix/2026-09/index.html");
+  assert.strictEqual(U.platformMonthPath("ae", "netflix", "2026-09"), "ae/new-on-netflix/2026-09/index.html");
+  assert.strictEqual(U.platformMonthUrl("sg", "apple-tv", "2026-09"), "https://filmychill.com/sg/new-on-apple-tv/2026-09/");
+  assert.strictEqual(U.languageMonthPath("telugu", "2026-09"), "telugu/2026-09/index.html");
+  assert.strictEqual(U.languageMonthUrl("telugu", "2026-09"), "https://filmychill.com/telugu/2026-09/");
+  assert.ok(U.SCOPED_MONTH_MIN >= 3, "a thin month must not get its own page");
+});
+
+// ---------------- Film page -> hub crawl paths ----------------
+test("film pages link out to their platform hub and their arrival month, never to a 404", () => {
+  const IN = { code: "in", name: "India", region: "IN" };
+  // No provider -> no hub links at all (a theatrical page belongs to no platform).
+  const theatrical = U.buildFilmPage({ title: "T", slug: "t", kind: "movie", platform: "Theatres", released: "2026-09-01" },
+    "2026-09-19", new Set(["t"]), IN);
+  assert.ok(!/Everything new on /.test(theatrical), "nothing to link to yet");
+  // With a provider, the link appears only when the hub page exists on disk. Both branches are
+  // valid depending on the working tree, so assert the invariant that matters: no dead links.
+  const streaming = U.buildFilmPage({ title: "S", slug: "s", kind: "movie", platform: "Netflix", providers: ["Netflix"], tmdbId: 1 },
+    "2026-09-19", new Set(["s"]), IN);
+  for (const href of (streaming.match(/href="\/new-on-[a-z0-9-]+\/(?:\d{4}-\d{2}\/)?"/g) || [])) {
+    const path = href.slice(6, -1).replace(/^\//, "") + "index.html";
+    assert.ok(require("fs").existsSync(path), "linked hub must exist on disk: " + path);
+  }
+});
+
 // ---------------- Back-catalogue backfill (the long-tail build) ----------------
 group("catalogue backfill: queue bookkeeping and the eligibility bar");
 const CAT = require("./lib/catalog.js");
@@ -829,13 +944,27 @@ test("about: documents the confidence gate the code actually enforces", () => {
   assert.strictEqual(U.takeConfident({ isFresh: true }), false);
   assert.strictEqual(U.takeConfident({ isFresh: false, votes: 9 }), true);
 });
-test("about: the no-tracking claim matches what the site actually ships", () => {
-  assert.ok(/no analytics, no third-party scripts and no cookies/.test(ABOUT_SRC));
+test("about: the privacy claim matches what the site actually ships", () => {
+  // REWRITTEN Sept 2026. The site now counts page views (GoatCounter, cookieless). The rule
+  // this test protects is unchanged and is the important one: the About page must describe
+  // exactly what ships. A cookie-setting or profiling tracker still fails outright, and if
+  // analytics is ever switched off, the copy has to come back with it.
+  const analyticsShipped = !!U.GC_SITE;
+  assert.ok(/no account to create/.test(ABOUT_SRC), "the standing claims stay");
+  if (analyticsShipped) {
+    assert.ok(/GoatCounter/.test(ABOUT_SRC) && /cookieless/.test(ABOUT_SRC),
+      "the counter must be disclosed by name on the About page");
+    assert.ok(/sets no cookies/.test(ABOUT_SRC) && !/ships no analytics/.test(ABOUT_SRC),
+      "the copy must not still promise no analytics while shipping some");
+  } else {
+    assert.ok(/ships no analytics/.test(ABOUT_SRC), "analytics off -> the stronger claim returns");
+  }
   for (const f of ["index.html", "about/index.html"]) {
     if (!fsAbout.existsSync(f)) continue;
     const html = fsAbout.readFileSync(f, "utf8");
-    assert.ok(!/goatcounter|google-analytics|googletagmanager|gtag\(|document\.cookie/.test(html),
-      "no tracker may appear in " + f + " while the About page promises none");
+    assert.ok(!/google-analytics|googletagmanager|gtag\(|document\.cookie/.test(html),
+      "no cookie-setting or profiling tracker may ever appear in " + f);
+    if (!analyticsShipped) assert.ok(!/goatcounter/i.test(html), "kill switch off -> no tag anywhere: " + f);
   }
 });
 
