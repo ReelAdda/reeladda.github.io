@@ -3262,6 +3262,84 @@ function filmTitleTag(item, cfg = null) {
       ]);
 }
 
+// ============================================================================
+// ANALYTICS — GoatCounter, cookieless.
+//
+// Until now the site measured nothing at all. That is a defensible privacy stance and a bad
+// operating position: there was no way to tell whether anyone returns, whether search visitors
+// ever reach the WhatsApp channel, or which pages lose people. GoatCounter was chosen because
+// it needs no cookies, no consent banner, no personal data and no account for the visitor: it
+// records a page view and a referrer, and it honours Do Not Track.
+//
+// GC_SITE is the subdomain of the GoatCounter account (https://<code>.goatcounter.com). Set
+// GC_SITE="" in the workflow to strip the tag from every page in the next build — the kill
+// switch matters more than the tag, since this is the one piece of the site that touches a
+// third party at runtime.
+//
+// Every page type carries a restrictive CSP, so the script host and the counting endpoint have
+// to be allowed explicitly or the browser silently blocks it (see cspWith below). That is why
+// both live in one place instead of being pasted into each template.
+// ============================================================================
+const GC_SITE = process.env.GC_SITE === undefined ? "filmychill" : String(process.env.GC_SITE).trim();
+
+function analyticsTag() {
+  if (!GC_SITE) return "";
+  return `<script data-goatcounter="https://${escHtml(GC_SITE)}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>`;
+}
+
+// Add the analytics origins to a CSP string, and nothing else. Returns the policy unchanged
+// when analytics is off, so switching GC_SITE off also closes the hole it opened.
+function cspWith(policy) {
+  if (!GC_SITE) return policy;
+  const host = `https://${GC_SITE}.goatcounter.com`;
+  return policy
+    .replace(/script-src ([^;]*)/, `script-src $1 https://gc.zgo.at`)
+    .replace(/img-src ([^;]*)/, `img-src $1 ${host}`)
+    .replace(/connect-src ([^;]*)/, `connect-src $1 ${host}`)
+    // Pages whose policy has no connect-src at all inherit default-src 'self' and would block
+    // the beacon, so give them one.
+    .replace(/(default-src 'self';)(?![\s\S]*connect-src)/, `$1 connect-src 'self' ${host};`);
+}
+
+// Arrival dates from the append-only archive, indexed once per process: country:kind:id ->
+// first-seen date. buildFilmPage runs ~1,600 times a build, so this can't re-read the file.
+let _arrivalIdx = null;
+function arrivalDateFor(code, kind, tmdbId) {
+  if (!_arrivalIdx) {
+    _arrivalIdx = new Map();
+    for (const r of readHistory()) {
+      if (r && r.c && r.id) _arrivalIdx.set(`${r.c}:${r.k}:${r.id}`, r.first);
+    }
+  }
+  return _arrivalIdx.get(`${code}:${kind === "tv" ? "tv" : "movie"}:${tmdbId}`) || null;
+}
+
+// Crawl paths OUT of a film page, into the two hubs it belongs to: the platform carrying it
+// and the month it arrived. Sept 2026: a Netflix title linked to five language hubs and the
+// weekly OTT page, and to nothing Netflix-related — the platform hubs had almost no inbound
+// links from the archive that feeds them. Both links are written only when the target page
+// exists on disk, so this can never point at a 404.
+function filmHubLinks(item, cfg) {
+  const code = (cfg && cfg.code) || "in";
+  const out = [];
+  const providers = Array.isArray(item.providers) ? item.providers : [];
+  if (providers.length) {
+    const name = canonProvider(providers[0]);
+    const slug = platformSlug(name);
+    if (slug && fs.existsSync(hubPath(code, slug))) {
+      out.push(`<a href="${escHtml(code === "in" ? `/new-on-${slug}/` : `/${code}/new-on-${slug}/`)}">Everything new on ${escHtml(name)}</a>`);
+    }
+    const arrival = arrivalDateFor(code, item.kind, item.tmdbId);
+    const m = arrival ? monthKey(arrival) : null;
+    if (m && fs.existsSync(ottMonthPath(code, m))) {
+      out.push(`<a href="${escHtml(code === "in" ? `/new-on-ott/${m}/` : `/${code}/new-on-ott/${m}/`)}">Everything that arrived in ${escHtml(monthLabel(m, localeFor(code)))}</a>`);
+    }
+  }
+  return out.length
+    ? `<p style="color:var(--mute);font-size:12.5px;margin-top:10px">More: ${out.join(" · ")}</p>`
+    : "";
+}
+
 function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const e = escHtml;
   const code = (cfg && cfg.code) || "in";
@@ -3423,7 +3501,7 @@ ${(() => {
   return `<meta property="og:image" content="${e(src)}">${dims}${alt}`;
 })()}
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'">
+<meta http-equiv="Content-Security-Policy" content="${cspWith("default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'")}">${analyticsTag()}
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 <script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>${faqLd ? `
 <script type="application/ld+json">${JSON.stringify(faqLd)}</script>` : ""}
@@ -3638,7 +3716,7 @@ ${(() => {
     const rb = Array.isArray(item.rentBuy) ? item.rentBuy : [];
     const rbRow = rb.length ? `<div style="margin-top:10px"><div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:5px">Rent or buy</div><div>${rb.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div></div>` : "";
     const note = `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${e(asOf || "")} — platforms may change over time.</p>`;
-    if (providers.length) return `<h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}`;
+    if (providers.length) return `<h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}${filmHubLinks(item, cfg)}`;
     if (item.platform === "Theatres") return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>${rb.length ? rbRow + `<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>` : ""}${note}`;
     if (rb.length) return `<h2>Where to watch in ${e(country)}</h2>${rbRow}<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>${note}`;
     // Unreleased film: previously this block rendered nothing at all, so the page answered
@@ -3995,6 +4073,30 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       monthUrls.push(`  <url><loc>${ottMonthUrl(c.code, d)}</loc><lastmod>${d === curMonth ? today : lastDay}</lastmod><priority>${d === curMonth ? "0.7" : "0.5"}</priority></url>`);
     }
   }
+  // Scoped month archives: platform x month (every country) and language x month (India).
+  // Same lastmod rule as the site-wide month pages — a closed month reports its own last day.
+  const scopedMonthUrls = [];
+  const lastDayOf = (m) => { const [yy, mm] = m.split("-").map(Number); return new Date(Date.UTC(yy, mm, 0)).toISOString().slice(0, 10); };
+  for (const c of countries) {
+    const base = c.code === "in" ? "." : c.code;
+    if (!fs.existsSync(base)) continue;
+    for (const dir of fs.readdirSync(base).filter((x) => x.startsWith("new-on-") && x !== "new-on-ott")) {
+      const full = `${base}/${dir}`;
+      if (!fs.statSync(full).isDirectory()) continue;
+      for (const m of fs.readdirSync(full).filter((x) => /^\d{4}-\d{2}$/.test(x)).sort()) {
+        if (!fs.existsSync(`${full}/${m}/index.html`)) continue;
+        const loc = `https://filmychill.com${c.code === "in" ? "" : "/" + c.code}/${dir}/${m}/`;
+        scopedMonthUrls.push(`  <url><loc>${loc}</loc><lastmod>${m === curMonth ? today : lastDayOf(m)}</lastmod><priority>${m === curMonth ? "0.6" : "0.4"}</priority></url>`);
+      }
+    }
+  }
+  for (const [, slug] of LANGUAGE_PAGES) {
+    if (!fs.existsSync(slug)) continue;
+    for (const m of fs.readdirSync(slug).filter((x) => /^\d{4}-\d{2}$/.test(x)).sort()) {
+      if (!fs.existsSync(`${slug}/${m}/index.html`)) continue;
+      scopedMonthUrls.push(`  <url><loc>https://filmychill.com/${slug}/${m}/</loc><lastmod>${m === curMonth ? today : lastDayOf(m)}</lastmod><priority>${m === curMonth ? "0.6" : "0.4"}</priority></url>`);
+    }
+  }
   const aboutUrls = fs.existsSync("about/index.html")
     ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${ABOUT_LASTMOD}</lastmod><priority>0.3</priority></url>`] : [];
   // /data/ was reaching IndexNow (so Bing saw it) but was absent from the sitemap, which is
@@ -4007,8 +4109,8 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const embedUrls = fs.existsSync("embed/index.html")
     ? [`  <url><loc>https://filmychill.com/embed/</loc><lastmod>${today}</lastmod><priority>0.4</priority></url>`] : [];
   fs.writeFileSync("sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
-  console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${browseUrls.length} browse${dataUrls.length ? " + data" : ""} + ${weekUrls.length} week + ${monthUrls.length} month + ${filmCount} film pages.`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...scopedMonthUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
+  console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${browseUrls.length} browse${dataUrls.length ? " + data" : ""} + ${weekUrls.length} week + ${monthUrls.length} month + ${scopedMonthUrls.length} scoped-month + ${filmCount} film pages.`);
 }
 
 // Manual/local regeneration from existing data.json: PAGES_ONLY=1 node scripts/update.js
@@ -4440,7 +4542,7 @@ ${alts}
 <meta property="og:url" content="${e(url)}">
 <meta property="og:image" content="https://filmychill.com/og-image.png">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'">
+<meta http-equiv="Content-Security-Policy" content="${cspWith("default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'")}">${analyticsTag()}
 <script type="application/ld+json">${ldJson(ld)}</script>
 <script type="application/ld+json">${ldJson(breadcrumb)}</script>${faqLd ? `
 <script type="application/ld+json">${ldJson(faqLd)}</script>` : ""}
@@ -4575,7 +4677,9 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 // 7: retitle sweep. The "OTT Release Date" title shape is now reserved for pages that can
 //    answer it (see filmTitleTag); frozen pages written under the old rule need the one-time
 //    pass or the change reaches only the ~5% of films in a current list.
-const ARCHIVE_PATCH_VERSION = 7;
+// 8: analytics sweep. The archive is never regenerated, so frozen pages would otherwise be
+//    the only pages on the site that aren't measured — and they are most of the traffic.
+const ARCHIVE_PATCH_VERSION = 8;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
@@ -4779,6 +4883,27 @@ function retitleFrozen(html, cfg = null) {
   return { html: html.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc}</title>`), changed: true };
 }
 
+// Frozen pages need the analytics tag too, or the measurement misses exactly the pages that
+// get the traffic: 1,289 of the ~1,600 film pages are archived and are never regenerated, and
+// they are where most search visitors land. Adds the tag and widens the page's CSP to allow
+// it; with GC_SITE off it does the reverse, so the kill switch reaches the archive as well.
+function ensureAnalytics(html) {
+  const has = html.includes("gc.zgo.at/count.js");
+  if (!GC_SITE) {
+    if (!has) return { html, changed: false };
+    const host = "https://[a-z0-9-]+\\.goatcounter\\.com";
+    let out = html.replace(/<script data-goatcounter="[^"]*"[^>]*><\/script>\n?/g, "");
+    out = out.replace(/ https:\/\/gc\.zgo\.at/g, "").replace(new RegExp(` ${host}`, "g"), "");
+    return { html: out, changed: out !== html };
+  }
+  if (has) return { html, changed: false };
+  const m = /<meta http-equiv="Content-Security-Policy" content="([^"]*)">/.exec(html);
+  if (!m) return { html, changed: false };   // unknown shape — leave the page alone
+  const next = `<meta http-equiv="Content-Security-Policy" content="${cspWith(m[1])}">${analyticsTag()}`;
+  const out = html.replace(m[0], next);
+  return { html: out, changed: out !== html };
+}
+
 function archivePatchHtml(html, countryName, cfg = null) {
   const V = streamVocab(cfg);
   // Pages frozen BEFORE the per-country vocabulary split carry India's "OTT" wording
@@ -4812,6 +4937,8 @@ function archivePatchHtml(html, countryName, cfg = null) {
   if (r.changed) { out = r.html; changed = true; }
   const rt = retitleFrozen(out, cfg);
   if (rt.changed) { out = rt.html; changed = true; }
+  const an = ensureAnalytics(out);
+  if (an.changed) { out = an.html; changed = true; }
   const t = shortenTitleTag(out, countryName, cfg);
   if (t.changed) { out = t.html; changed = true; }
   // Runs LAST, after the body swaps above have set "Theatrical run ended" — frozenFilmFacts
@@ -5238,6 +5365,30 @@ function ottMonthUrl(code, month) {
 // Pure: archive records for ONE country+month -> the page. `index` is this country's film
 // index (see filmIndexFor) so rows link to the film page when one exists and stay plain text
 // when it doesn't — a listing that links to 404s is worse than one that doesn't link.
+// One archive record -> one listing row. Shared by every month page (site-wide, per platform,
+// per language) so a title renders identically wherever it is listed. Links only when the film
+// page actually exists on disk: a listing that links to 404s is worse than one that doesn't link.
+function monthRow(r, { bySlug, code = "in", now = Date.now() }) {
+  const slug = slugify(r.t || "");
+  const page = bySlug.get(slug);
+  return {
+    title: r.t,
+    slug: page ? slug : null,
+    platform: r.p || null,
+    genre: r.g || "",
+    language: r.lang || "",
+    released: r.rel || null,
+    freshDate: r.first || null,
+    poster: page ? page.poster || "" : "",
+    kind: r.k === "tv" ? "tv" : "movie",
+    // The arrival date is the whole point of these pages and exists nowhere else — but the row
+    // meta already shows it for series (freshLabel uses freshDate for TV) and for anything that
+    // went straight to streaming on release day. Only add the line when it adds something.
+    hook: (r.k !== "tv" && r.first && String(r.first).slice(0, 10) !== String(r.rel || "").slice(0, 10))
+      ? `Started streaming ${fmtDateShort(r.first, now, localeFor(code))}` : null,
+  };
+}
+
 function buildOttMonthPage(recs, cfg, { month, months = [], index = [], now = Date.now() }) {
   const code = (cfg && cfg.code) || "in";
   const country = countryNameFor(cfg);
@@ -5245,27 +5396,7 @@ function buildOttMonthPage(recs, cfg, { month, months = [], index = [], now = Da
   const label = monthLabel(month, localeFor(code));
   const url = ottMonthUrl(code, month);
   const bySlug = new Map((index || []).map((x) => [x.slug, x]));
-  const rowOf = (r) => {
-    const slug = slugify(r.t || "");
-    const page = bySlug.get(slug);
-    return {
-      title: r.t,
-      slug: page ? slug : null,
-      platform: r.p || null,
-      genre: r.g || "",
-      language: r.lang || "",
-      released: r.rel || null,
-      freshDate: r.first || null,
-      poster: page ? page.poster || "" : "",
-      kind: r.k === "tv" ? "tv" : "movie",
-      // The arrival date is the whole point of this page and exists nowhere else — but the row
-      // meta already shows it for series (freshLabel uses freshDate for TV) and for anything
-      // that went straight to streaming on release day. Only add the line when it says
-      // something the row doesn't already.
-      hook: (r.k !== "tv" && r.first && String(r.first).slice(0, 10) !== String(r.rel || "").slice(0, 10))
-        ? `Started streaming ${fmtDateShort(r.first, now, localeFor(code))}` : null,
-    };
-  };
+  const rowOf = (r) => monthRow(r, { bySlug, code, now });
   // One section per platform, biggest first: "new on netflix september 2026" is a query, and
   // a page that groups by platform answers it on the page instead of burying it in a list.
   const byPlatform = new Map();
@@ -5302,6 +5433,14 @@ function buildOttMonthPage(recs, cfg, { month, months = [], index = [], now = Da
   if (i > 0) navLinks.push({ href: ottMonthUrl(code, have[i - 1]), label: `← ${monthLabel(have[i - 1], localeFor(code))}` });
   if (i >= 0 && i < have.length - 1) navLinks.push({ href: ottMonthUrl(code, have[i + 1]), label: `${monthLabel(have[i + 1], localeFor(code))} →` });
   navLinks.push({ href: ottWeekUrl(code), label: `This week's ${V.word} releases` });
+  // Down into the per-platform cut of the SAME month, where one exists. The platform pages
+  // link back up (see buildScopedMonthPage), so the two axes stay reachable from each other.
+  for (const [name, items] of [...byPlatform.entries()].sort((a, b) => b[1].length - a[1].length)) {
+    if (items.length < SCOPED_MONTH_MIN || name === "Other platforms") continue;
+    const slug = platformSlug(canonProvider(name));
+    if (!slug || !fs.existsSync(platformMonthPath(code, slug, month))) continue;
+    navLinks.push({ href: platformMonthUrl(code, slug, month), label: `${name} only` });
+  }
   const isCurrent = month === monthKey(new Date(now).toISOString());
   const linkable = sections.flatMap((sec) => sec.items).filter((x) => x.slug);
   const extraLd = [{
@@ -5335,6 +5474,186 @@ function buildOttMonthPage(recs, cfg, { month, months = [], index = [], now = Da
 
 // Writes the current month every run (it is still filling up) and back-fills any past month
 // that has enough arrivals and no page yet. Past months already on disk are left alone.
+// ============================================================================
+// SCOPED MONTH ARCHIVES — /new-on-netflix/2026-09/ and /telugu/2026-09/.
+//
+// Same record, two more axes. The site-wide month page answers "what arrived in September";
+// these answer "what arrived on Netflix in September" and "what Telugu arrived in September",
+// which is how the questions are actually typed. Both are regroups of ott-history.jsonl — no
+// new content, no new data source, and nothing that exists only because a query exists: every
+// page is a factual record of one month on one platform or in one language.
+//
+// Gated on SCOPED_MONTH_MIN. A platform-month with two titles is a thin page, and forty of
+// them a month is the pattern search engines rightly punish. Below the gate, no page.
+// ============================================================================
+const SCOPED_MONTH_MIN = 4;
+
+function platformMonthPath(code, slug, month) {
+  return code === "in" ? `new-on-${slug}/${month}/index.html` : `${code}/new-on-${slug}/${month}/index.html`;
+}
+function platformMonthUrl(code, slug, month) {
+  return code === "in" ? `https://filmychill.com/new-on-${slug}/${month}/` : `https://filmychill.com/${code}/new-on-${slug}/${month}/`;
+}
+function languageMonthPath(langSlug, month) { return `${langSlug}/${month}/index.html`; }
+function languageMonthUrl(langSlug, month) { return `https://filmychill.com/${langSlug}/${month}/`; }
+
+// Pure: one month of arrivals, narrowed to a platform or a language, as a page.
+// `scope` = { kind: "platform" | "language", name, slug }. The grouping flips with the scope:
+// a platform page groups by language, a language page groups by platform — each answers the
+// question the other axis leaves open.
+function buildScopedMonthPage(recs, cfg, { scope, month, months = [], index = [], now = Date.now() }) {
+  const code = (cfg && cfg.code) || "in";
+  const country = countryNameFor(cfg);
+  const V = streamVocab(cfg);
+  const label = monthLabel(month, localeFor(code));
+  const isPlatform = scope.kind === "platform";
+  const url = isPlatform ? platformMonthUrl(code, scope.slug, month) : languageMonthUrl(scope.slug, month);
+  const bySlug = new Map((index || []).map((x) => [x.slug, x]));
+  const rows = recs.map((r) => monthRow(r, { bySlug, code, now }));
+  const groupKey = (r) => (isPlatform ? (r.lang || "Other languages") : (r.p || "Other platforms"));
+  const groups = new Map();
+  for (const r of recs) {
+    const k = groupKey(r);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(monthRow(r, { bySlug, code, now }));
+  }
+  const sections = [...groups.entries()]
+    .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
+    .map(([name, items]) => ({ h2: `${name} — ${label}`, items }));
+  const total = rows.length;
+  const films = recs.filter((r) => r.k !== "tv").length;
+  const headline = isPlatform
+    ? `New on ${scope.name} in ${country} — ${label}`
+    : `New ${scope.name} on ${V.word} in ${country} — ${label}`;
+  const breakdown = [...groups.entries()].sort((a, b) => b[1].length - a[1].length)
+    .slice(0, 4).map(([n, xs]) => `${n} (${xs.length})`).join(", ");
+  const faqs = [];
+  faqs.push({
+    q: isPlatform
+      ? `How many titles were added to ${scope.name} in ${country} in ${label}?`
+      : `How many ${scope.name} titles reached ${V.word} in ${country} in ${label}?`,
+    a: `${total} — ${breakdown}. FilmyChill records each title on the day it first appears on a subscription service in ${country}.`,
+  });
+  if (films && total - films) faqs.push({
+    q: `Were they films or series?`,
+    a: `${films} film${films === 1 ? "" : "s"} and ${total - films} series.`,
+  });
+  // Month nav within the SAME scope, plus the two pages one level up: the whole month, and
+  // this scope's current week.
+  const have = months.slice().sort();
+  const i = have.indexOf(month);
+  const navLinks = [];
+  const urlFor = (m) => (isPlatform ? platformMonthUrl(code, scope.slug, m) : languageMonthUrl(scope.slug, m));
+  if (i > 0) navLinks.push({ href: urlFor(have[i - 1]), label: `← ${monthLabel(have[i - 1], localeFor(code))}` });
+  if (i >= 0 && i < have.length - 1) navLinks.push({ href: urlFor(have[i + 1]), label: `${monthLabel(have[i + 1], localeFor(code))} →` });
+  navLinks.push({ href: ottMonthUrl(code, month), label: `Everything new in ${label}` });
+  navLinks.push({ href: isPlatform ? hubUrl(code, scope.slug) : `https://filmychill.com/${scope.slug}/`, label: `${scope.name} this week` });
+  const linkable = rows.filter((x) => x.slug);
+  const isCurrent = month === monthKey(new Date(now).toISOString());
+  const extraLd = [{
+    "@context": "https://schema.org", "@type": "CollectionPage",
+    name: headline, url,
+    isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+    mainEntity: { "@type": "ItemList", numberOfItems: linkable.length,
+      itemListElement: linkable.map((x, n) => ({ "@type": "ListItem", position: n + 1, name: x.title, url: filmPageUrl(code, x.slug) })) },
+  }, {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "FilmyChill", item: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/` },
+      { "@type": "ListItem", position: 2, name: isPlatform ? `New on ${scope.name}` : scope.name,
+        item: isPlatform ? hubUrl(code, scope.slug) : `https://filmychill.com/${scope.slug}/` },
+      { "@type": "ListItem", position: 3, name: label, item: url },
+    ],
+  }];
+  return listingPageHtml({
+    title: `${headline} | FilmyChill`.length <= 65 ? `${headline} | FilmyChill` : headline,
+    desc: isPlatform
+      ? `Every film and series added to ${scope.name} in ${country} during ${label} — ${total} titles, dated, rated and reviewed.`
+      : `Every ${scope.name} film and series that started streaming in ${country} during ${label} — ${total} titles with platforms, ratings and verdicts.`,
+    canonical: url,
+    h1: headline,
+    updLine: isCurrent
+      ? `Updated ${new Date(now).toLocaleDateString(localeFor(code), { day: "numeric", month: "long", year: "numeric" })} · this month is still filling up`
+      : `A complete record of ${label}`,
+    lead: isPlatform
+      ? `Everything FilmyChill saw arrive on ${scope.name} in ${country} during ${label}, dated the day it appeared.`
+      : `Every ${scope.name} title FilmyChill saw reach a subscription service in ${country} during ${label}, grouped by platform.`,
+    frozenNote: isCurrent ? null
+      : `${label} is closed. This page is the record of that month and no longer changes.`,
+    sections, faqs, extraLd, navLinks, code,
+    homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
+  });
+}
+
+// Platform x month for one country. Current month rewritten every run; a closed month is
+// written once and then left alone (its data cannot change).
+function writePlatformMonthPages(cfg, records = null, index = null) {
+  const code = (cfg && cfg.code) || "in";
+  const recs = (records || readHistory()).filter((r) => r && r.c === code && r.p && monthKey(r.first));
+  if (!recs.length) return 0;
+  const idx = index || filmIndexFor(cfg);
+  const current = monthKey(new Date().toISOString());
+  // (platform slug, month) -> records
+  const buckets = new Map();
+  for (const r of recs) {
+    const name = canonProvider(r.p);
+    const key = `${platformSlug(name)}|${monthKey(r.first)}`;
+    if (!buckets.has(key)) buckets.set(key, { name, slug: platformSlug(name), month: monthKey(r.first), rows: [] });
+    buckets.get(key).rows.push(r);
+  }
+  const monthsBySlug = new Map();
+  for (const b of buckets.values()) {
+    if (b.rows.length < SCOPED_MONTH_MIN) continue;
+    if (!monthsBySlug.has(b.slug)) monthsBySlug.set(b.slug, []);
+    monthsBySlug.get(b.slug).push(b.month);
+  }
+  let written = 0;
+  for (const b of buckets.values()) {
+    if (b.rows.length < SCOPED_MONTH_MIN) continue;
+    const path = platformMonthPath(code, b.slug, b.month);
+    if (b.month !== current && fs.existsSync(path)) continue;
+    fs.mkdirSync(path.slice(0, path.lastIndexOf("/")), { recursive: true });
+    fs.writeFileSync(path, buildScopedMonthPage(
+      b.rows.slice().sort((x, y) => String(y.first).localeCompare(String(x.first))),
+      cfg, { scope: { kind: "platform", name: b.name, slug: b.slug }, month: b.month,
+             months: monthsBySlug.get(b.slug) || [], index: idx }));
+    written++;
+  }
+  if (written) console.log(`  platform months [${code}]: ${written} page(s)`);
+  return written;
+}
+
+// Language x month — India only, for the five languages that already have a landing page.
+function writeLanguageMonthPages(records = null, index = null) {
+  const cfg = COUNTRIES.find((c) => c.code === "in") || { code: "in", name: "India", region: "IN" };
+  const recs = (records || readHistory()).filter((r) => r && r.c === "in" && r.lang && monthKey(r.first));
+  if (!recs.length) return 0;
+  const idx = index || filmIndexFor(cfg);
+  const current = monthKey(new Date().toISOString());
+  let written = 0;
+  for (const [langName, langSlug] of LANGUAGE_PAGES) {
+    const mine = recs.filter((r) => r.lang === langName);
+    const byMonth = new Map();
+    for (const r of mine) {
+      const m = monthKey(r.first);
+      if (!byMonth.has(m)) byMonth.set(m, []);
+      byMonth.get(m).push(r);
+    }
+    const months = [...byMonth.entries()].filter(([, rows]) => rows.length >= SCOPED_MONTH_MIN).map(([m]) => m);
+    for (const m of months) {
+      const path = languageMonthPath(langSlug, m);
+      if (m !== current && fs.existsSync(path)) continue;
+      fs.mkdirSync(path.slice(0, path.lastIndexOf("/")), { recursive: true });
+      fs.writeFileSync(path, buildScopedMonthPage(
+        byMonth.get(m).slice().sort((x, y) => String(y.first).localeCompare(String(x.first))),
+        cfg, { scope: { kind: "language", name: langName, slug: langSlug }, month: m, months, index: idx }));
+      written++;
+    }
+  }
+  if (written) console.log(`  language months: ${written} page(s)`);
+  return written;
+}
+
 function writeOttMonthPages(cfg, records = null, index = null) {
   const code = (cfg && cfg.code) || "in";
   const recs = records || readHistory();
@@ -5620,7 +5939,7 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
 <meta property="og:url" content="${e(canonical)}">
 <meta property="og:image" content="https://filmychill.com/og-image.png">
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'">
+<meta http-equiv="Content-Security-Policy" content="${cspWith("default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'")}">${analyticsTag()}
 ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</script>`).join("\n")}${faqLd ? `
 <script type="application/ld+json">${ldJson(faqLd)}</script>` : ""}
 <style>
@@ -6048,8 +6367,11 @@ function patchAboutPage() {
   const p = "about/index.html";
   if (!fs.existsSync(p)) return;
   const html = fs.readFileSync(p, "utf8");
-  const next = replaceBetween(html, "COUNTRIES", countryListForProse());
-  if (next !== html) { fs.writeFileSync(p, next); console.log("About: country list refreshed"); }
+  let next = replaceBetween(html, "COUNTRIES", countryListForProse());
+  // The About page is hand-written, not generated, so the analytics tag is patched in here —
+  // otherwise it would be the one page the GC_SITE kill switch can't reach.
+  next = replaceBetween(next, "ANALYTICS", analyticsTag());
+  if (next !== html) { fs.writeFileSync(p, next); console.log("About: refreshed"); }
 }
 
 
@@ -6361,6 +6683,7 @@ function buildDataPage(records, updatedHuman) {
     `<h2>${e(title)}</h2><table><thead><tr><th>${title.includes("language") ? "Language" : "Platform"}</th>`
     + `<th class="n">Median days</th><th class="n">Films</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>`;
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+${analyticsTag()}
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How long films take to reach streaming — FilmyChill data</title>
 <meta name="description" content="How many days films take to go from theatrical release to streaming, measured daily by FilmyChill across ${e(String(s.total))} titles in eight countries. Free to use with attribution.">
@@ -6438,12 +6761,14 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
   // the page it points at exists, so building it after the country page would delay the link
   // by a full run (and permanently, on a month's first build).
   step("month archive", () => writeOttMonthPages(cfg));
+  step("platform months", () => writePlatformMonthPages(cfg));
+  if (cfg.code === "in") step("language months", () => writeLanguageMonthPages());
   if (template) step("country page", () => renderCountryPage(template, cfg, data));
   step("weekly page", () => writeOttWeekPage(data, cfg, allCountries));
   step("platform hubs", () => writePlatformHubPages(data, cfg));
   step("rss feed", () => writeRssFeed(data, cfg));
   step("due-date pass", () => refreshDuePages(cfg, countryNameFor(cfg)));
-  step("browse index", () => writeBrowseIndex(filmIndexFor(cfg), cfg, stamp));
+  step("browse index", () => writeBrowseIndex(filmIndexFor(cfg), cfg, stamp, analyticsTag()));
   step("embed widget", () => writeEmbed(data, cfg, stamp)); // /embed/week/ per country + /embed/ (India)
   if (cfg.code === "in") step("data page", () => writeDataPage(stamp)); // site-wide, built once
 }
@@ -6478,6 +6803,11 @@ function ssrLastScan(data, cfg = null) {
   return `Updated ${gen.toLocaleDateString(localeFor((cfg && cfg.code) || "in"), { day: "numeric", month: "short" })}`;
 }
 
+// The homepage's own policy. Looser than the generated pages' (the page runs its own inline
+// script and self-hosted fonts), and the single place it is defined now that the CSP is
+// rendered rather than hardcoded in the template.
+const HOME_CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; connect-src 'self'; object-src 'none'; base-uri 'self'";
+
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   const V = streamVocab(cfg);
@@ -6495,6 +6825,10 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "OTTLINK", `All new ${escHtml(V.releases)} this week`);
   html = replaceBetween(html, "FOOTOTT", `${escHtml(V.newOn)} this week`);
   html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code, data));
+  // Analytics and the policy that has to allow it are rendered together: turning GC_SITE off
+  // strips the tag AND closes the CSP hole in the same build (see analyticsTag/cspWith).
+  html = replaceBetween(html, "CSP", `<meta http-equiv="Content-Security-Policy" content="${cspWith(HOME_CSP)}">`);
+  html = replaceBetween(html, "ANALYTICS", analyticsTag());
   html = replaceBetween(html, "LASTSCAN", escHtml(ssrLastScan(data, cfg)));
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
@@ -6609,6 +6943,9 @@ module.exports = {
   ottArrival, recordOttSeen, pruneOttSeen, laterDate, earlierDate,
   buildRssFeed, archivePatchHtml, stripAggregateRating, retitleFrozen, filmTitleTag, reconcilePagesManifest,
   buildOttMonthPage, writeOttMonthPages, ottMonthPath, ottMonthUrl, backfillCatalog,
+  buildScopedMonthPage, writePlatformMonthPages, writeLanguageMonthPages, monthRow,
+  analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
+  platformMonthPath, platformMonthUrl, languageMonthPath, languageMonthUrl, SCOPED_MONTH_MIN,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, ARRIVAL_MAX_RELEASE_AGE, SEEN_RETENTION_DAYS,
   socialImage,
   buildVerdictProse, buildGoodToKnow, buildFaqs, buildFilmPage,
