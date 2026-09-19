@@ -289,11 +289,24 @@
   "checked": "2026-07-15"
  },
  "tt37287335": {
-  "take": "Critics liked it, especially the performances.",
+  "take": "Critics were won over, largely on the strength of the performances.",
   "src": "wiki",
   "hook": null,
   "article": "Obsession (2025 film)",
-  "checked": "2026-07-31"
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 93
+   }
+  },
+  "checked": "2026-09-19",
+  "v": 5
  },
  "tt26657236": {
   "take": "Good word from critics, with the performances and writing earning most of the praise.",
@@ -4194,7 +4207,7 @@
    "divided": [],
    "score": null
   },
-  "checked": "2026-09-18",
+  "checked": "2026-09-19",
   "v": 5
  },
  "tt32149571": {
@@ -4269,6 +4282,38 @@
   "v": 5
  },
  "tv:299939": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-09-19",
+  "v": 5
+ },
+ "tt38984184": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-09-19",
+  "v": 5
+ },
+ "tt18332852": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "hook": "Based on the book by Diana Gabaldon.",
+  "article": "Outlander: Blood of My Blood",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 91
+   }
+  },
+  "checked": "2026-09-19",
+  "v": 5
+ },
+ "tt43679244": {
   "take": null,
   "src": null,
   "hook": null,
