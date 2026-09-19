@@ -127,7 +127,7 @@ function browsePath(code, page) {
   return page <= 1 ? base : `${base}${page}/`;
 }
 
-function buildBrowsePage(index, cfg, page, totalPages, updatedHuman) {
+function buildBrowsePage(index, cfg, page, totalPages, updatedHuman, headExtra = "") {
   const e = escHtml;
   const code = (cfg && cfg.code) || "in";
   const m = COUNTRY_PAGE_META[code] || { name: (cfg && cfg.name) || "India", path: `/${code}/` };
@@ -159,6 +159,7 @@ ${page > 1 ? `<link rel="prev" href="${e(browsePath(code, page - 1))}">` : ""}
 ${page < totalPages ? `<link rel="next" href="${e(browsePath(code, page + 1))}">` : ""}
 <meta property="og:title" content="${e(title)}">
 <meta property="og:url" content="${e(url)}">
+${headExtra || ""}
 <style>
   body { font-family: system-ui, -apple-system, sans-serif; max-width: 900px; margin: 0 auto;
          padding: 24px 18px 60px; background: #FFF7EC; color: #1A1633; line-height: 1.6; }
@@ -185,7 +186,7 @@ ${page < totalPages ? `<link rel="next" href="${e(browsePath(code, page + 1))}">
 }
 
 // Writes the whole paginated set and returns the URLs, for the sitemap.
-function writeBrowseIndex(index, cfg, updatedHuman) {
+function writeBrowseIndex(index, cfg, updatedHuman, headExtra = "") {
   const code = (cfg && cfg.code) || "in";
   const sorted = [...index].sort((a, b) => String(b.released || "").localeCompare(String(a.released || ""))
     || String(a.title).localeCompare(String(b.title)));
@@ -194,7 +195,7 @@ function writeBrowseIndex(index, cfg, updatedHuman) {
   for (let page = 1; page <= totalPages; page++) {
     const dir = code === "in" ? (page === 1 ? "films" : `films/${page}`) : (page === 1 ? `${code}/films` : `${code}/films/${page}`);
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(`${dir}/index.html`, buildBrowsePage(sorted, cfg, page, totalPages, updatedHuman));
+    fs.writeFileSync(`${dir}/index.html`, buildBrowsePage(sorted, cfg, page, totalPages, updatedHuman, headExtra));
     urls.push(`https://filmychill.com${browsePath(code, page)}`);
   }
   console.log(`  browse index [${code}]: ${sorted.length} films across ${totalPages} page(s)`);
