@@ -6460,6 +6460,24 @@ function sectionCounts(data) {
   };
 }
 
+// The freshness stamp under the header, rendered at BUILD time.
+//
+// It used to ship as the literal text "Loading fresh picks…" and was only filled in once the
+// client had fetched data-<code>.json. Every other visible string on this page is
+// server-rendered, so a page full of real, current films carried the one line that looked
+// broken — for crawlers, for anyone with JS blocked, and for the first moment of every slow
+// connection.
+//
+// An ABSOLUTE date, not the client's relative wording. The client computes "Updated today"
+// live and is right to; the same words baked into a static file would keep claiming today
+// forever on a stale cache. A date can't go false — it just gets older, which is the honest
+// thing for it to do.
+function ssrLastScan(data, cfg = null) {
+  const gen = data && data.generatedAt ? new Date(data.generatedAt) : null;
+  if (!gen || isNaN(gen.getTime())) return "Updated this week";
+  return `Updated ${gen.toLocaleDateString(localeFor((cfg && cfg.code) || "in"), { day: "numeric", month: "short" })}`;
+}
+
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   const V = streamVocab(cfg);
@@ -6477,6 +6495,7 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "OTTLINK", `All new ${escHtml(V.releases)} this week`);
   html = replaceBetween(html, "FOOTOTT", `${escHtml(V.newOn)} this week`);
   html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code, data));
+  html = replaceBetween(html, "LASTSCAN", escHtml(ssrLastScan(data, cfg)));
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
   html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
   html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code));
@@ -6605,7 +6624,7 @@ module.exports = {
   extractCastPics,
   prevWeekSlug, writeIndexNowPayload, buildLlmsTxt,
   theatreEligible, THEATRE_EXCLUDE_IDS,
-  reseedTake, isPoolTake, isLegacyTake, mineViewerAspects, composeTmdbTake, dedupeProviders, rankSimilar, TAKE_VERSION, xDefaultCode, repairXDefaults,
+  ssrLastScan, reseedTake, isPoolTake, isLegacyTake, mineViewerAspects, composeTmdbTake, dedupeProviders, rankSimilar, TAKE_VERSION, xDefaultCode, repairXDefaults,
   capTrending, buildEditorNote, ssrEditorNote,
   platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls, poolItems,
   shortenTitleTag, departureCandidates, applyDeparturePatch, backfillLiveClaims,

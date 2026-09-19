@@ -3054,6 +3054,51 @@ test("normalizeUpcoming leaves a correct future item untouched", () => {
   const item = { title: "Later", released: "2026-11-08" };
   assert.strictEqual(U.normalizeUpcoming([item], REL_NOW)[0], item); // same object, no copy
 });
+test("client upcomingOnly + daysAway (index.html) mirror the server rule and count local days", () => {
+  // The client re-renders Coming Soon over the server HTML, so its date rules must match
+  // normalizeUpcoming exactly or the page contradicts itself a second after load.
+  const vm = require("vm");
+  const src = require("fs").readFileSync("index.html", "utf8");
+  const grab = (name) => {
+    const i = src.indexOf("function " + name + "(");
+    assert.ok(i >= 0, name + " present in index.html");
+    let depth = 0, j = src.indexOf("{", i);
+    for (; j < src.length; j++) { if (src[j] === "{") depth++; else if (src[j] === "}" && --depth === 0) break; }
+    return src.slice(i, j + 1);
+  };
+  const pad = (n) => String(n).padStart(2, "0");
+  const plus = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+  for (const tz of ["Asia/Kolkata", "America/Los_Angeles", "UTC", "Australia/Sydney"]) {
+    const prev = process.env.TZ;
+    process.env.TZ = tz;
+    try {
+      const ctx = {}; vm.createContext(ctx);
+      vm.runInContext([grab("releaseState"), grab("upcomingOnly"), grab("daysAway")].join("\n") + "\nthis.U={upcomingOnly,daysAway};", ctx);
+      const C = ctx.U;
+      assert.strictEqual(C.upcomingOnly([{ title: "Digger", released: plus(13), freshDate: plus(11) }])[0].released, plus(13),
+        tz + ": the market's own date wins over TMDB's earlier global date");
+      assert.strictEqual(C.upcomingOnly([{ title: "Bokshi", released: plus(-200), freshDate: plus(23) }])[0].released, plus(23),
+        tz + ": a passed regional date falls back to the global one");
+      assert.strictEqual(C.upcomingOnly([{ title: "Old", released: plus(-3), freshDate: plus(-5) }]).length, 0,
+        tz + ": everything passed -> dropped, never shown under Coming soon");
+      assert.strictEqual(C.daysAway(plus(9)), "In 9 days", tz + ": calendar days in the visitor's zone, no UTC overshoot");
+      assert.strictEqual(C.daysAway(plus(1)), "Tomorrow", tz);
+      assert.strictEqual(C.daysAway(plus(0)), "Today", tz);
+    } finally { if (prev === undefined) delete process.env.TZ; else process.env.TZ = prev; }
+  }
+});
+
+test("the freshness stamp is server-rendered, absolute, and can't go false on a stale cache", () => {
+  const src = require("fs").readFileSync("index.html", "utf8");
+  assert.ok(/<span id="lastScan"><!--SSR:LASTSCAN-->[\s\S]*?<!--\/SSR:LASTSCAN--><\/span>/.test(src),
+    "the stamp carries SSR markers so renderCountryPage can fill it");
+  assert.strictEqual(U.ssrLastScan({ generatedAt: "2026-09-19T06:46:00Z" }, { code: "in" }), "Updated 19 Sept");
+  assert.ok(!/today|yesterday|ago/i.test(U.ssrLastScan({ generatedAt: new Date().toISOString() }, { code: "in" })),
+    "never a relative claim: a cached page would keep asserting it forever");
+  assert.strictEqual(U.ssrLastScan({}), "Updated this week", "no timestamp -> a claim that stays true");
+  assert.strictEqual(U.ssrLastScan({ generatedAt: "not a date" }), "Updated this week");
+});
+
 test("a usable regional date always wins over the global one", () => {
   // Ramayana: 8 Nov in India, 6 Nov globally. The India page must keep 8 Nov — the fallback
   // is only for a regional date that has already passed.
