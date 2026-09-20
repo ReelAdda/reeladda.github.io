@@ -278,14 +278,7 @@
   <div class="logo">FILMY<span>CHILL</span></div>
   <h1 class="tagline"><!--SSR:TAGLINE-->New movies &amp; OTT releases this week<!--/SSR:TAGLINE--> · <span id="countryLabel">🌐</span></h1>
   <select id="countrySel" aria-label="Choose country" onchange="setCountry(this.value)" style="margin-top:6px;background:rgba(255,255,255,.08);color:inherit;border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:4px 8px;font-size:13px">
-    <option value="in">🇮🇳 India</option>
-    <option value="us">🇺🇸 United States</option>
-    <option value="uk">🇬🇧 United Kingdom</option>
-    <option value="au">🇦🇺 Australia</option>
-    <option value="de">🇩🇪 Germany</option>
-    <option value="ae">🇦🇪 UAE</option>
-    <option value="ca">🇨🇦 Canada</option>
-    <option value="sg">🇸🇬 Singapore</option>
+    <!--SSR:COUNTRYOPTS--><option value="in">🇮🇳 India</option><!--/SSR:COUNTRYOPTS-->
   </select>
   <div class="updated"><div class="dot"></div><span id="lastScan"><!--SSR:LASTSCAN-->Updated 20 Sept<!--/SSR:LASTSCAN--></span></div>
   <div class="conf-strip" id="confStrip"></div>
@@ -1171,9 +1164,15 @@ if (WHATSAPP_CHANNEL_URL) {
 // Each country has its own page: India at "/", others at "/us/", "/uk/", "/au/", "/de/".
 // FC_PAGE is injected per-page by the build (the country this page was generated for).
 const SUPPORTED_COUNTRIES = { in: 'India', us: 'United States', uk: 'United Kingdom', au: 'Australia', de: 'Germany', ae: 'UAE', ca: 'Canada', sg: 'Singapore' };
-const COUNTRY_LABELS = { in: '🇮🇳 India', us: '🇺🇸 United States', uk: '🇬🇧 United Kingdom', au: '🇦🇺 Australia', de: '🇩🇪 Germany', ae: '🇦🇪 UAE', ca: '🇨🇦 Canada', sg: '🇸🇬 Singapore' };
+// Both maps are read from the country switcher, which the build renders from COUNTRIES
+// (see renderCountryPage). SSR markers can't live inside a <script> — HTML comments break
+// JS there — and a hardcoded copy went stale every time a country was added, so the rendered
+// DOM is the single source. Falls back to India alone if the select is ever missing.
+const COUNTRY_OPTS = [...document.querySelectorAll('#countrySel option')]
+  .map(o => [o.value, o.textContent.trim()]).filter(([v]) => /^[a-z]{2}$/.test(v));
+const COUNTRY_LABELS = Object.fromEntries(COUNTRY_OPTS.length ? COUNTRY_OPTS : [['in', '🇮🇳 India']]);
 // Path each country page lives at (relative to site root).
-const COUNTRY_PATH = { in: '/', us: '/us/', uk: '/uk/', au: '/au/', de: '/de/', ae: '/ae/', ca: '/ca/', sg: '/sg/' };
+const COUNTRY_PATH = Object.fromEntries(Object.keys(COUNTRY_LABELS).map(c => [c, c === 'in' ? '/' : '/' + c + '/']));
 // FC_PAGE is injected per-page by the build via a <meta name="fc-page"> tag (read from the
 // DOM — NOT an inline-script global, because HTML comment markers inside a <script> would
 // break the assignment). Defaults to India if missing/unknown.
