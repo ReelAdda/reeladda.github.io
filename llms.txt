@@ -1,6 +1,6 @@
 # FilmyChill
 
-> FilmyChill is a daily-updated guide to what is worth watching this week — new theatrical releases and OTT/streaming arrivals — for India and seven other countries, with audience ratings, honest verdicts, and critics' takes synthesised from published review coverage. Lists are rebuilt twice daily from TMDB (streaming availability via JustWatch), Wikipedia critical-reception coverage, and YouTube trailer statistics. No pay-for-placement: no studio or platform can buy a position on any list. Last build: 2026-09-20T07:06:37.275Z.
+> FilmyChill is a daily-updated guide to what is worth watching this week — new theatrical releases and OTT/streaming arrivals — for India and seven other countries, with audience ratings, honest verdicts, and critics' takes synthesised from published review coverage. Lists are rebuilt twice daily from TMDB (streaming availability via JustWatch), Wikipedia critical-reception coverage, and YouTube trailer statistics. No pay-for-placement: no studio or platform can buy a position on any list. Last build: 2026-09-20T16:34:40.086Z.
 
 ## This week in India (2026-09-20)
 
@@ -16,9 +16,10 @@ In theatres:
 New on OTT / streaming:
 - Neagley — on Amazon Prime Video — https://filmychill.com/movie/neagley.html
 - Monster: The Lizzie Borden Story — on Netflix — https://filmychill.com/movie/monster-the-lizzie-borden-story.html
-- Ali Baba Aur 40 Bhoot (Hindi) — on JioHotstar — https://filmychill.com/movie/ali-baba-aur-40-bhoot.html
+- Lust Stories 3 (Hindi) — on Netflix — https://filmychill.com/movie/lust-stories-3.html
 - MobLand — on JioHotstar — rated 8.4/10 — https://filmychill.com/movie/mobland.html
-- The Revolutionaries (Hindi) — on Amazon Prime Video — https://filmychill.com/movie/the-revolutionaries.html
+- Zakir Khan: Papa Yaar (Hindi) — on Netflix — https://filmychill.com/movie/zakir-khan-papa-yaar.html
+- Ali Baba Aur 40 Bhoot (Hindi) — on JioHotstar — https://filmychill.com/movie/ali-baba-aur-40-bhoot.html
 
 ## Key pages
 
@@ -44,6 +45,12 @@ New on OTT / streaming:
 - [UAE](https://filmychill.com/ae/) · [New on OTT](https://filmychill.com/ae/new-on-ott/)
 - [Canada](https://filmychill.com/ca/) · [New on OTT](https://filmychill.com/ca/new-on-ott/)
 - [Singapore](https://filmychill.com/sg/) · [New on OTT](https://filmychill.com/sg/new-on-ott/)
+- [Malaysia](https://filmychill.com/my/) · [New on OTT](https://filmychill.com/my/new-on-ott/)
+- [Philippines](https://filmychill.com/ph/) · [New on OTT](https://filmychill.com/ph/new-on-ott/)
+- [New Zealand](https://filmychill.com/nz/) · [New on OTT](https://filmychill.com/nz/new-on-ott/)
+- [South Korea](https://filmychill.com/kr/) · [New on OTT](https://filmychill.com/kr/new-on-ott/)
+- [Japan](https://filmychill.com/jp/) · [New on OTT](https://filmychill.com/jp/new-on-ott/)
+- [Indonesia](https://filmychill.com/id/) · [New on OTT](https://filmychill.com/id/new-on-ott/)
 
 ## Film pages
 
@@ -61,6 +68,12 @@ Every listed film has a page at https://filmychill.com/movie/<slug>.html (or /<c
 - https://filmychill.com/data-ae.json — current picks for the UAE (JSON)
 - https://filmychill.com/data-ca.json — current picks for Canada (JSON)
 - https://filmychill.com/data-sg.json — current picks for Singapore (JSON)
+- https://filmychill.com/data-my.json — current picks for Malaysia (JSON)
+- https://filmychill.com/data-ph.json — current picks for the Philippines (JSON)
+- https://filmychill.com/data-nz.json — current picks for New Zealand (JSON)
+- https://filmychill.com/data-kr.json — current picks for South Korea (JSON)
+- https://filmychill.com/data-jp.json — current picks for Japan (JSON)
+- https://filmychill.com/data-id.json — current picks for Indonesia (JSON)
 
 JSON fields per item: title, kind (movie|tv), language, genre, runtime, cert, released (ISO date), platform, providers, rating (TMDB /10), votes, verdict, take (critics' line), hook, director, cast, slug (page: /movie/<slug>.html), trailer.
 All files are static, CORS-open, and rebuilt twice daily. Attribution when citing: "FilmyChill (filmychill.com)".
