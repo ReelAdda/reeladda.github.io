@@ -505,7 +505,21 @@ test("the country switcher is rendered from config, and the page reads its maps 
   assert.ok(/<!--SSR:COUNTRYOPTS-->[\s\S]*?<!--\/SSR:COUNTRYOPTS-->/.test(src), "switcher is build-rendered");
   assert.ok(/document\.querySelectorAll\('#countrySel option'\)/.test(src),
     "labels and paths derive from the rendered list — no second hardcoded copy to go stale");
-  assert.ok(!/const COUNTRY_LABELS = \{ in:.*us:/.test(src), "no hardcoded country label map");
+  // No hand-maintained country map may survive anywhere in the page. A stale SUPPORTED_COUNTRIES
+  // map is what made the six new countries appear in the switcher and then refuse to load:
+  // setCountry() rejected them, and their own pages fell back to FC_PAGE 'in' and rendered
+  // India's data under a /kr/ URL. Any object literal listing three or more country codes fails.
+  const inlineJs = [...src.matchAll(/<script(?![^>]*application\/ld)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join("\n");
+  const hardcoded = inlineJs.match(/\{[^{}]*\b(?:us|uk|au|de|ae|ca|sg|kr|jp|my|nz|ph|id)\s*:[^{}]*\}/g) || [];
+  for (const lit of hardcoded) {
+    const codes = (lit.match(/\b[a-z]{2}\s*:/g) || []).length;
+    assert.ok(codes < 3, "hardcoded country map in page JS — derive it from the switcher instead: " + lit.slice(0, 120));
+  }
+  // Every country the build knows about must be reachable from the page's own maps.
+  for (const c of CORE.COUNTRIES) {
+    assert.ok(/SUPPORTED_COUNTRIES = COUNTRY_LABELS/.test(src),
+      "the supported-country gate must derive from the rendered switcher (checking " + c.code + ")");
+  }
   // Markers must never sit inside a <script>: HTML comments are not comments there.
   const scripts = [...src.matchAll(/<script(?![^>]*application\/ld)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
   for (const body of scripts) assert.ok(!/<!--SSR:/.test(body), "an SSR marker inside a <script> would break the page");

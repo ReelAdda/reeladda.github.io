@@ -6859,7 +6859,7 @@ function renderCountryPage(templateHtml, cfg, data) {
   // runtime (My List tracking states, watchlist alerts) and must use the same word this
   // page is written in, without re-deriving it from a duplicated country list.
   html = replaceBetween(html, "PAGECODE",
-    `<meta name="fc-page" content="${cfg.code}"><meta name="fc-stream-word" content="${escHtml(V.word)}">`);
+    `<meta name="fc-page" content="${cfg.code}"><meta name="fc-stream-word" content="${escHtml(V.word)}"><meta name="fc-locale" content="${escHtml(localeFor(cfg.code))}">`);
   // Visible copy that names the concept. India/UAE keep "OTT"; every other market reads
   // "streaming" — the word its visitors actually use and search with.
   html = replaceBetween(html, "TAGLINE", `New movies &amp; ${escHtml(V.releases)} this week`);
