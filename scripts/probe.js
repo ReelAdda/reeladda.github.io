@@ -19,7 +19,10 @@ const { appendHistory, historyRecord, readHistory } = require("./lib/history.js"
 const API_KEY = process.env.TMDB_API_KEY;
 const MAX_CALLS = Number(process.env.PROBE_BUDGET || 40);
 const WATCH_FILE = "ott-watch.json";           // titles we are waiting on
-const COUNTRIES = { in: "IN", us: "US", uk: "GB", au: "AU", de: "DE", ae: "AE", ca: "CA", sg: "SG" };
+// Derived from the one country list (scripts/lib/core.js) — this used to be a second,
+// hand-maintained copy, so a country added to the site silently never got probed.
+const { COUNTRIES: COUNTRY_CFG } = require("./lib/core.js");
+const COUNTRIES = Object.fromEntries(COUNTRY_CFG.map((c) => [c.code, c.watchRegion || c.region]));
 
 async function tmdb(path, params = {}) {
   const url = new URL(`https://api.themoviedb.org/3${path}`);

@@ -411,6 +411,106 @@ test("buildRssFeed: country feeds use their own namespace and XML-escapes titles
   assert.ok(!xml.includes("Tom & Jerry <3"));
 });
 
+// ---------------- Age certificates across every market's rating board ----------------
+group("certAudience: one reading of 14 different rating boards");
+
+test("every live market's real rating labels land in the right bucket", () => {
+  // Boards as the relevant authority publishes them. A wrong answer here is worse than none:
+  // this drives "Is X family friendly?" on the film page and in FAQPage schema.
+  const boards = {
+    IN: [["U", "family"], ["U/A 7+", "family"], ["U/A 13+", "teens"], ["U/A 16+", "teens"], ["A", "adults"]],
+    US: [["G", "family"], ["PG", "family"], ["PG-13", "teens"], ["R", "adults"], ["NC-17", "adults"], ["TV-MA", "adults"], ["TV-14", "teens"]],
+    GB: [["U", "family"], ["PG", "family"], ["12A", "teens"], ["15", "teens"], ["18", "adults"]],
+    AU: [["G", "family"], ["M", "teens"], ["MA15+", "teens"], ["R18+", "adults"]],
+    NZ: [["G", "family"], ["M", "teens"], ["R13", "teens"], ["R16", "teens"], ["R18", "adults"]],
+    DE: [["0", "family"], ["6", "family"], ["12", "teens"], ["16", "teens"], ["18", "adults"]],
+    AE: [["G", "family"], ["PG13", "teens"], ["15+", "teens"], ["18TC", "adults"]],
+    SG: [["G", "family"], ["PG13", "teens"], ["NC16", "teens"], ["M18", "adults"], ["R21", "adults"]],
+    MY: [["U", "family"], ["P13", "teens"], ["18", "adults"]],
+    PH: [["G", "family"], ["PG", "family"], ["R-13", "teens"], ["R-16", "teens"], ["R-18", "adults"]],
+    JP: [["G", "family"], ["PG12", "teens"], ["R15+", "teens"], ["R18+", "adults"]],
+    KR: [["ALL", "family"], ["12", "teens"], ["15", "teens"], ["19", "adults"]],
+    ID: [["SU", "family"], ["13+", "teens"], ["17+", "teens"], ["21+", "adults"]],
+  };
+  for (const [board, rows] of Object.entries(boards)) {
+    for (const [cert, want] of rows) {
+      assert.strictEqual(U.certAudience(cert).bucket, want, `${board} "${cert}" should be ${want}`);
+    }
+  }
+});
+
+test("the labels that used to break: universal ratings are never called adults-only", () => {
+  // Korea's ALL and the R-prefixed teen ratings were read as adults-only by the old
+  // India/US/UK regexes — the exact failure that adding Asia-Pacific markets exposed.
+  assert.strictEqual(U.certAudience("ALL").label, "Yes — family friendly");
+  assert.strictEqual(U.certAudience("R-13").label, "Older kids & up");
+  assert.strictEqual(U.certAudience("R13").label, "Older kids & up");
+  assert.strictEqual(U.certAudience("SU").label, "Yes — family friendly");
+  assert.strictEqual(U.certAudience("17+").bucket, "teens");
+  assert.strictEqual(U.certAudience("21+").bucket, "adults");
+  // And nothing unknown is guessed at.
+  assert.strictEqual(U.certAudience("").bucket, "unknown");
+  assert.strictEqual(U.certAudience("BANANA").label, "Check rating");
+});
+
+test("the film page and its FAQ read the same certificate the same way", () => {
+  for (const [cert, needle] of [["ALL", "suitable for family viewing"], ["R-13", "older kids"], ["R18+", "adult audiences"]]) {
+    const faq = U.buildFaqs({ title: "X", slug: "x", kind: "movie", cert }, "South Korea", { code: "kr", name: "South Korea" });
+    const line = faq.find((f) => /family friendly/.test(f.q));
+    assert.ok(line && line.a.toLowerCase().includes(needle), cert + " -> " + (line || {}).a);
+  }
+});
+
+// ---------------- Country roster ----------------
+group("country roster: every market is complete, and the switcher is built from it");
+const CORE = require("./lib/core.js");
+
+test("every country config is complete and internally consistent", () => {
+  const seen = new Set();
+  for (const c of CORE.COUNTRIES) {
+    assert.ok(/^[a-z]{2}$/.test(c.code), "code is a 2-letter slug: " + c.code);
+    assert.ok(!seen.has(c.code), "no duplicate country: " + c.code);
+    seen.add(c.code);
+    assert.ok(/^[A-Z]{2}$/.test(c.region), c.code + " needs an ISO region");
+    assert.ok(/^[A-Z]{2}$/.test(c.watchRegion || c.region), c.code + " needs a TMDB watch region");
+    assert.ok(CORE.COUNTRY_PAGE_META[c.code], c.code + " has no page meta (name + path)");
+    assert.ok(CORE.COUNTRY_LOCALE[c.code], c.code + " has no locale — dates and counts would fall back to India's");
+    assert.ok(CORE.COUNTRY_FLAG[c.code], c.code + " has no flag for the switcher");
+    assert.ok(Array.isArray(c.priorityLangs) && c.priorityLangs.length, c.code + " needs priority languages");
+    assert.ok(Array.isArray(c.ottRegionalLangs), c.code + " needs an ottRegionalLangs array (empty is valid)");
+    assert.ok(c.theatreTargets.length && c.soonTargets.length, c.code + " needs slate targets");
+    const path = CORE.COUNTRY_PAGE_META[c.code].path;
+    assert.strictEqual(path, c.code === "in" ? "/" : `/${c.code}/`, "path must match the code: " + path);
+    // The locale has to be one Intl actually understands, or every date on that country's
+    // pages silently falls back to the default format.
+    assert.doesNotThrow(() => new Date().toLocaleDateString(CORE.COUNTRY_LOCALE[c.code]), c.code);
+  }
+});
+
+test("locales render English dates and counts, not another script or grouping", () => {
+  for (const c of CORE.COUNTRIES) {
+    const loc = CORE.COUNTRY_LOCALE[c.code];
+    const d = new Date("2026-09-25T00:00:00Z").toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+    assert.ok(/2026/.test(d) && /[A-Za-z]/.test(d), c.code + " date looks wrong: " + d);
+    // Comma grouping only. India's lakh grouping ("12,34,567") is correct and stays; what must
+    // never ship is dot grouping (en-ID gives "1.234.567"), which an English reader parses as
+    // a decimal point.
+    const grouped = (1234567).toLocaleString(loc);
+    assert.ok(/^[\d,]+$/.test(grouped), c.code + " groups numbers oddly: " + grouped);
+  }
+});
+
+test("the country switcher is rendered from config, and the page reads its maps back from it", () => {
+  const src = require("fs").readFileSync("index.html", "utf8");
+  assert.ok(/<!--SSR:COUNTRYOPTS-->[\s\S]*?<!--\/SSR:COUNTRYOPTS-->/.test(src), "switcher is build-rendered");
+  assert.ok(/document\.querySelectorAll\('#countrySel option'\)/.test(src),
+    "labels and paths derive from the rendered list — no second hardcoded copy to go stale");
+  assert.ok(!/const COUNTRY_LABELS = \{ in:.*us:/.test(src), "no hardcoded country label map");
+  // Markers must never sit inside a <script>: HTML comments are not comments there.
+  const scripts = [...src.matchAll(/<script(?![^>]*application\/ld)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  for (const body of scripts) assert.ok(!/<!--SSR:/.test(body), "an SSR marker inside a <script> would break the page");
+});
+
 // ---------------- Analytics (cookieless, kill-switchable) ----------------
 group("analytics: present on every page type, allowed by every CSP, removable everywhere");
 
