@@ -82,6 +82,74 @@ const COUNTRIES = [
     theatreTargets: [["en", 4], ["ta", 1], ["zh", 1]],
     soonTargets: [["en", 4], ["ta", 1], ["__regional__", 2]],
   },
+  // ---- Asia-Pacific, added Sept 2026. ------------------------------------------------
+  // English-language pages in markets whose own language is not English: the audience is
+  // the English-reading slice (expats, students, the Indian and Filipino diaspora, and the
+  // large domestic audiences that search in English for international titles). Coverage is
+  // built from each market's real TMDB provider data, so a page only ever claims what is
+  // actually streaming there.
+  //
+  // Malaysia: ~2M-strong Indian community, Tamil cinema releases theatrically alongside
+  // Malay and Chinese-language films — the closest fit to the Singapore edition that
+  // already converts well.
+  {
+    code: "my", name: "Malaysia", region: "MY", watchRegion: "MY",
+    priorityLangs: ["en", "ms", "ta"],
+    regionalLangs: ["ms", "ta", "zh", "hi"],
+    ottRegionalLangs: ["ms", "ta", "zh"],
+    theatreTargets: [["en", 3], ["ms", 1], ["ta", 1], ["zh", 1]],
+    soonTargets: [["en", 4], ["ms", 1], ["__regional__", 2]],
+  },
+  // Philippines: English is an official language and the local search language, so this
+  // edition needs no translation to work. Tagalog carries the domestic slate.
+  {
+    code: "ph", name: "Philippines", region: "PH", watchRegion: "PH",
+    priorityLangs: ["en", "tl"],
+    regionalLangs: ["tl", "ko"],
+    ottRegionalLangs: ["tl", "ko"],
+    theatreTargets: [["en", 4], ["tl", 2]],
+    soonTargets: [["en", 4], ["tl", 1], ["__regional__", 2]],
+  },
+  // New Zealand: same shape as the Australian edition — English slate, with the Indian
+  // diaspora and Korean/Chinese-language titles filling the regional slots.
+  {
+    code: "nz", name: "New Zealand", region: "NZ", watchRegion: "NZ",
+    priorityLangs: ["en"],
+    regionalLangs: ["hi", "zh", "ko"],
+    ottRegionalLangs: [], // English-only OTT: fill all slots from international trending
+    theatreTargets: [["en", 6]],
+    soonTargets: [["en", 6], ["__regional__", 2]],
+  },
+  // South Korea: a domestic slate that travels (Korean film and series are searched for in
+  // English worldwide), plus the English-reading expat and student audience.
+  {
+    code: "kr", name: "South Korea", region: "KR", watchRegion: "KR",
+    priorityLangs: ["ko", "en"],
+    regionalLangs: ["ko"],
+    ottRegionalLangs: ["ko"],
+    theatreTargets: [["ko", 4], ["en", 2]],
+    soonTargets: [["ko", 4], ["en", 2], ["__regional__", 1]],
+  },
+  // Japan: the same logic as Korea, with anime doing much of the travelling. Japanese-origin
+  // titles dominate the local slate; English titles fill the rest.
+  {
+    code: "jp", name: "Japan", region: "JP", watchRegion: "JP",
+    priorityLangs: ["ja", "en"],
+    regionalLangs: ["ja"],
+    ottRegionalLangs: ["ja"],
+    theatreTargets: [["ja", 4], ["en", 2]],
+    soonTargets: [["ja", 4], ["en", 2], ["__regional__", 1]],
+  },
+  // Indonesia: the region's largest streaming market by subscribers. Indonesian-language
+  // titles lead; the English slate and Korean imports fill the rest.
+  {
+    code: "id", name: "Indonesia", region: "ID", watchRegion: "ID",
+    priorityLangs: ["id", "en"],
+    regionalLangs: ["id", "ko"],
+    ottRegionalLangs: ["id", "ko"],
+    theatreTargets: [["id", 3], ["en", 3]],
+    soonTargets: [["en", 3], ["id", 3], ["__regional__", 1]],
+  },
 ];
 
 // "145 min" reads like metadata; "2h 25m" reads like an answer to "do I have time
@@ -181,12 +249,32 @@ const COUNTRY_PAGE_META = {
   ae: { name: "the UAE", path: "/ae/" },
   ca: { name: "Canada", path: "/ca/" },
   sg: { name: "Singapore", path: "/sg/" },
+  my: { name: "Malaysia", path: "/my/" },
+  ph: { name: "the Philippines", path: "/ph/" },
+  nz: { name: "New Zealand", path: "/nz/" },
+  kr: { name: "South Korea", path: "/kr/" },
+  jp: { name: "Japan", path: "/jp/" },
+  id: { name: "Indonesia", path: "/id/" },
 };
 
-const COUNTRY_LOCALE = { in: "en-IN", us: "en-US", uk: "en-GB", au: "en-AU", de: "en-GB", ae: "en-AE", ca: "en-CA", sg: "en-SG" };
+// Flag + label for the country switcher. Kept here, beside COUNTRIES, because the switcher
+// is rendered from this map at build time — the old hardcoded <option> list in index.html
+// silently went stale every time a country was added.
+const COUNTRY_FLAG = {
+  in: "🇮🇳", us: "🇺🇸", uk: "🇬🇧", au: "🇦🇺", de: "🇩🇪", ae: "🇦🇪", ca: "🇨🇦", sg: "🇸🇬",
+  my: "🇲🇾", ph: "🇵🇭", nz: "🇳🇿", kr: "🇰🇷", jp: "🇯🇵", id: "🇮🇩",
+};
+
+// en-GB for markets with no usable English locale of their own: Germany already uses it, and
+// Japan, Korea and Indonesia join it for the same reason — en-ID renders "1.234.567" for vote
+// counts, and en-JP/en-KR fall back to US month-first dates that read oddly in an
+// English-language page written for Asia.
+const COUNTRY_LOCALE = { in: "en-IN", us: "en-US", uk: "en-GB", au: "en-AU", de: "en-GB", ae: "en-AE", ca: "en-CA", sg: "en-SG",
+  my: "en-MY", ph: "en-PH", nz: "en-NZ", kr: "en-GB", jp: "en-GB", id: "en-GB" };
 const localeFor = (code) => COUNTRY_LOCALE[code] || "en-IN";
 
 module.exports = {
+  COUNTRY_FLAG,
   COUNTRY_LOCALE,
   localeFor,
   COUNTRIES,
