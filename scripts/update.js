@@ -8,6 +8,7 @@ const fs = require("fs");
 // Shared primitives (see lib/core.js).
 const {
   COUNTRIES,
+  COUNTRY_FLAG,
   COUNTRY_PAGE_META,
   LANGUAGE_PAGES,
   escHtml,
@@ -1669,11 +1670,7 @@ function buildGoodToKnow(item) {
     const c = String(item.cert).toUpperCase();
     // Order matters: check restrictive/age-gated patterns BEFORE bare "U", because "U/A 16+"
     // starts with "U" but is NOT a universal rating.
-    const family =
-      /^(A|R|NC-17|18)/.test(c) ? "Adults only"
-      : /(U\/A|UA|12|13|14|15|16|PG-13)/.test(c) ? "Older kids & up"
-      : /^(U|G|7|PG)/.test(c) ? "Yes — family friendly"
-      : "Check rating";
+    const family = certAudience(item.cert).label;   // one rule for 14 rating boards
     rows.push({ label: "Watch with family?", value: `${item.cert} · ${family}` });
   }
   if (item.genre) rows.push({ label: "Genre", value: item.genre });
@@ -1746,11 +1743,11 @@ function buildFaqs(item, countryName = "India", cfg = null) {
 
   // Q3: family friendly (only if we have a cert)
   if (item.cert) {
-    const c = String(item.cert).toUpperCase();
+    const bucket = certAudience(item.cert).bucket;
     const a =
-      /^(A|R|NC-17|18)/.test(c) ? `${item.title} is rated ${item.cert} — aimed at adult audiences.`
-      : /(U\/A|UA|12|13|14|15|16|PG-13)/.test(c) ? `${item.title} is rated ${item.cert}. Fine for older kids with guidance.`
-      : /^(U|G|7|PG)/.test(c) ? `${item.title} is rated ${item.cert}, suitable for family viewing.`
+      bucket === "adults" ? `${item.title} is rated ${item.cert} — aimed at adult audiences.`
+      : bucket === "teens" ? `${item.title} is rated ${item.cert}. Fine for older kids with guidance.`
+      : bucket === "family" ? `${item.title} is rated ${item.cert}, suitable for family viewing.`
       : `${item.title} is rated ${item.cert}.`;
     faqs.push({ q: `Is ${item.title} family friendly?`, a });
   }
@@ -1842,6 +1839,44 @@ function certFor(kind, d, region) {
     return rel?.release_dates?.find((x) => x.certification)?.certification || null;
   }
   return d.content_ratings?.results?.find((r) => r.iso_3166_1 === region)?.rating || null;
+}
+
+// ============================================================================
+// AGE CERTIFICATES — one reading of a rating label, for 14 different rating boards.
+//
+// The old rule was three regexes tuned to India, the US and the UK, and it broke the moment
+// the site added Asia-Pacific markets:
+//   Korea's "ALL" (the universal rating) starts with "A" and was read as adults-only.
+//   The Philippines' "R-13" and New Zealand's "R13" start with "R" and were read the same way.
+//   Indonesia's "17+" and "21+" matched nothing and fell through to "Check rating".
+// Telling a parent that a universal-rating film is adults-only is a worse failure than saying
+// nothing, so the rule now reads the AGE out of the label — which is what every board encodes
+// — and only falls back to letters when there is no number.
+//
+// Returns { bucket, label } where bucket is "adults" | "teens" | "family" | "unknown".
+// Boards covered by the live markets: IN (U, U/A 7+/13+/16+, A), US (G, PG, PG-13, R, NC-17,
+// TV-MA), GB (U, PG, 12A, 15, 18), AU/NZ (G, PG, M, MA15+, R13, R16, R18), DE (0, 6, 12, 16,
+// 18), AE (G, PG13, 15+, 18TC), CA, SG (G, PG13, NC16, M18, R21), MY (U, P13, 18), PH (G, PG,
+// R-13, R-16, R-18), JP (G, PG12, R15+, R18+), KR (ALL, 12, 15, 19), ID (SU, 13+, 17+, 21+).
+function certAudience(cert) {
+  const c = String(cert || "").toUpperCase().trim();
+  if (!c) return { bucket: "unknown", label: "Check rating" };
+  // NC-17 carries a number that would otherwise read as "teens".
+  if (/^NC-?17/.test(c) || /^(TV-MA|X|A|R|R21|AO)$/.test(c)) return { bucket: "adults", label: "Adults only" };
+  const n = (c.match(/\d{1,2}/) || [])[0];
+  if (n !== undefined) {
+    const age = Number(n);
+    if (age >= 18) return { bucket: "adults", label: "Adults only" };
+    if (age >= 12) return { bucket: "teens", label: "Older kids & up" };
+    return { bucket: "family", label: "Yes — family friendly" };   // U/A 7+, DE 0/6, TV-Y7
+  }
+  // No age in the label: universal and guidance ratings first, then the adult letters.
+  if (/^(ALL|SU|U|G|E|P|AL|TV-G|TV-Y|K-A|PG|TV-PG|GP)$/.test(c)) {
+    return { bucket: "family", label: "Yes — family friendly" };
+  }
+  if (/^(M|MA|TV-14)$/.test(c)) return { bucket: "teens", label: "Older kids & up" };  // AU/NZ "M" is advisory
+  if (/^(NC|AO|18|ADULT)/.test(c)) return { bucket: "adults", label: "Adults only" };
+  return { bucket: "unknown", label: "Check rating" };
 }
 
 // SECTION-scoped override: streaming originals TMDB has misfiled into theatrical pools.
@@ -5719,6 +5754,13 @@ const PROVIDER_CANON = [
   [/^(HBO )?Max( Amazon Channel)?$/i, "HBO Max"],
   [/^Paramount\+?( Premium| Amazon Channel)?$/i, "Paramount+"],
   [/^Crunchyroll( Amazon Channel)?$/i, "Crunchyroll"],
+  // Asia-Pacific services TMDB reports under several strings — free/ad tiers and casing.
+  // Ungrouped, each split its titles across two buckets and neither cleared the hub threshold.
+  [/^Disney\+?( Plus)?$/i, "Disney+"],
+  [/^Viu( Free)?$/i, "Viu"],
+  [/^WeTV( Free)?$/i, "WeTV"],
+  [/^iQIYI( Free)?$/i, "iQIYI"],
+  [/^U-?NEXT$/i, "U-NEXT"],
 ];
 function canonProvider(name) {
   const n = String(name || "").trim();
@@ -6825,6 +6867,12 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "OTTLINK", `All new ${escHtml(V.releases)} this week`);
   html = replaceBetween(html, "FOOTOTT", `${escHtml(V.newOn)} this week`);
   html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code, data));
+  // The country switcher is rendered from COUNTRIES. It used to be a hardcoded <option>
+  // list, which is why adding a country meant editing the same names in four places.
+  html = replaceBetween(html, "COUNTRYOPTS", COUNTRIES.map((c) =>
+    `<option value="${c.code}">${COUNTRY_FLAG[c.code] || ""} ${escHtml(c.name)}</option>`).join("\n    "));
+  // The page's own JS reads its country labels and paths back out of the rendered <option>
+  // list — markers can't go inside a <script>, and one rendered list beats three copies.
   // Analytics and the policy that has to allow it are rendered together: turning GC_SITE off
   // strips the tag AND closes the CSP hole in the same build (see analyticsTag/cspWith).
   html = replaceBetween(html, "CSP", `<meta http-equiv="Content-Security-Policy" content="${cspWith(HOME_CSP)}">`);
@@ -6944,7 +6992,7 @@ module.exports = {
   buildRssFeed, archivePatchHtml, stripAggregateRating, retitleFrozen, filmTitleTag, reconcilePagesManifest,
   buildOttMonthPage, writeOttMonthPages, ottMonthPath, ottMonthUrl, backfillCatalog,
   buildScopedMonthPage, writePlatformMonthPages, writeLanguageMonthPages, monthRow,
-  analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
+  certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
   platformMonthPath, platformMonthUrl, languageMonthPath, languageMonthUrl, SCOPED_MONTH_MIN,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, ARRIVAL_MAX_RELEASE_AGE, SEEN_RETENTION_DAYS,
   socialImage,
