@@ -147,13 +147,20 @@ function buildBrowsePage(index, cfg, page, totalPages, updatedHuman, headExtra =
   const pageLinks = Array.from({ length: totalPages }, (_, i) => i + 1)
     .map((n) => n === page ? `<b>${n}</b>` : `<a href="${e(browsePath(code, n))}">${n}</a>`).join(" · ");
   const url = `https://filmychill.com${browsePath(code, page)}`;
+  // Page 1 drops the brand suffix when it would push the title past ~60 characters (Google
+  // cuts there; "…covered in Singapore | FilmyChill" was 62). Later pages name their position,
+  // and so does every description — the three pages used to share one description exactly.
+  const title1 = `Every movie and series we've covered in ${m.name} | FilmyChill`;
   const title = page > 1
     ? `Every film on FilmyChill ${m.name} — page ${page} of ${totalPages}`
-    : `Every movie and series we've covered in ${m.name} | FilmyChill`;
+    : (title1.length > 60 ? title1.replace(/ \| FilmyChill$/, "") : title1);
+  const desc = page > 1
+    ? `Page ${page} of ${totalPages}: films and series ${start + 1}–${start + slice.length} of the ${index.length} FilmyChill has covered in ${m.name}, with ratings, verdicts and where to watch.`
+    : `Browse all ${index.length} movies and series FilmyChill has covered in ${m.name} — ratings, verdicts and where to watch each one.`;
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${e(title)}</title>
-<meta name="description" content="${e(`Browse all ${index.length} movies and series FilmyChill has covered in ${m.name} — ratings, verdicts and where to watch each one.`)}">
+<meta name="description" content="${e(desc)}">
 <link rel="canonical" href="${e(url)}">
 ${page > 1 ? `<link rel="prev" href="${e(browsePath(code, page - 1))}">` : ""}
 ${page < totalPages ? `<link rel="next" href="${e(browsePath(code, page + 1))}">` : ""}

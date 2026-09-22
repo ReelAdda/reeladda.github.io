@@ -29,7 +29,17 @@
 // ============================================================================
 "use strict";
 
-const CATALOG_MIN_VOTES = 80;        // below this there is no honest verdict to give
+// 15, not 80 (Sept 2026). At 80, India's Telugu, Malayalam, Kannada, Punjabi, Marathi and
+// Bengali queues ran out of TMDB results after 2–4 pages: most Indian regional films never
+// collect 80 TMDB votes, however popular they are at home. A catalogue page's job is "where
+// can I watch this", not a verdict — and pages under the site's rating-confidence gate
+// already hide the star and verdict. The gates that keep a page honest are unchanged: a
+// real poster, a real synopsis, and a real subscription listing in this country.
+const CATALOG_MIN_VOTES = 15;
+// Bumped whenever the eligibility bar changes. A queue retired under an older bar is
+// re-opened once (see reopenForBar), because "TMDB ran out of results" at 80 votes says
+// nothing about what exists at 15.
+const CATALOG_BAR_VERSION = 2;
 const CATALOG_MIN_AGE_DAYS = 120;    // younger than this belongs to the weekly pipeline
 const CATALOG_MAX_PAGE = 20;         // discover past ~20 pages is long-tail noise, not catalogue
 const CATALOG_BATCH_DEFAULT = 25;    // pages built per country per run (each costs one enrich call)
@@ -79,11 +89,14 @@ function nextQueue(state, code, queues) {
 
 // Record what a discover page yielded. `usable` is how many results cleared eligibility, so a
 // queue that keeps coming back empty retires instead of burning a call every run forever.
-function markQueue(state, code, key, { usable = 0, results = 0 } = {}) {
+// `known` = results that already have a page here. A page of results we've ALREADY built
+// isn't barren — it's the part of the list a re-opened queue has to walk past to reach the
+// titles the lower bar let in. Counting it as barren retired queues on their way back.
+function markQueue(state, code, key, { usable = 0, results = 0, known = 0 } = {}) {
   const qs = queueState(state, code, key);
   qs.page += 1;
   if (!results) { qs.done = true; return qs; }       // TMDB has no more pages here
-  qs.empty = usable ? 0 : (qs.empty || 0) + 1;
+  qs.empty = (usable || known) ? 0 : (qs.empty || 0) + 1;
   if (qs.empty >= 3) qs.done = true;                  // three barren pages running -> retire
   if (qs.page > CATALOG_MAX_PAGE) qs.done = true;
   return qs;
@@ -133,6 +146,25 @@ function catalogSlug(m, { slugOf, have = new Set() }) {
   return year ? `${base}-${year}` : null;   // no year to disambiguate with -> skip the title
 }
 
+// One-time re-open when the eligibility bar changes: every queue goes back to page 1 and
+// live. Already-built titles are skipped by slug (and no longer count as barren), so the
+// cost of re-walking is one discover call per page, not a rebuild.
+function reopenForBar(state) {
+  const meta = (state._meta = state._meta || {});
+  if (meta.bar === CATALOG_BAR_VERSION) return 0;
+  let reopened = 0;
+  for (const [code, cs] of Object.entries(state)) {
+    if (code === "_meta" || !cs || !cs.q) continue;
+    for (const qs of Object.values(cs.q)) {
+      if (qs.done) reopened++;
+      qs.done = false; qs.page = 1; qs.empty = 0;
+    }
+    cs.cursor = 0;
+  }
+  meta.bar = CATALOG_BAR_VERSION;
+  return reopened;
+}
+
 function catalogProgress(state, code) {
   const s = countryState(state, code);
   const queues = Object.values(s.q);
@@ -140,7 +172,7 @@ function catalogProgress(state, code) {
 }
 
 module.exports = {
-  CATALOG_MIN_VOTES, CATALOG_MIN_AGE_DAYS, CATALOG_MAX_PAGE, CATALOG_BATCH_DEFAULT,
+  CATALOG_MIN_VOTES, CATALOG_MIN_AGE_DAYS, CATALOG_MAX_PAGE, CATALOG_BATCH_DEFAULT, CATALOG_BAR_VERSION, reopenForBar,
   catalogQueues, nextQueue, markQueue, noteBuilt, catalogEligible, catalogSlug,
   catalogProgress, queueState, countryState,
 };
