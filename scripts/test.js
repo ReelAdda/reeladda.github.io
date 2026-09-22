@@ -464,7 +464,7 @@ test("freshenFrozenCopy: India's OTT wording becomes the market's own, titles un
 test("freshenFrozenCopy: raw ISO header dates become the edition's human date", () => {
   const r = U.freshenFrozenCopy(`<div class="meta" style="margin-top:8px">Released 2026-06-12</div>`,
     { countryName: "the US", cfg: FR_US, now: Date.parse("2026-09-22T00:00:00Z") });
-  assert.ok(/>Released Jun 12 2026</.test(r.html), r.html);
+  assert.ok(/>Released Jun 12, 2026</.test(r.html), r.html);
 });
 
 test("freshenFrozenCopy: a streaming-window estimate is dropped only once its window has closed", () => {
@@ -630,6 +630,132 @@ test("the due pass and the archive sweep both carry the settle", () => {
   const past = h.replace(new RegExp(SETTLE_REL, "g"), "2020-01-15");
   const arch = U.archivePatchHtml(past, "Singapore", SETTLE_CFG);
   assert.ok(!STALE.test(arch.html), "archive chain includes the settle");
+});
+
+// ---------------- The ten fixes of 22 Sept 2026 ----------------
+group("audit fixes: catalogue, dead links, hero, titles, dates");
+
+test("fmtDateFull prints the year exactly once, in every locale", () => {
+  const { fmtDateFull } = require("./lib/core.js");
+  for (const loc of ["en-IN", "en-GB", "en-US", "en-PH", "en-MY", "en-NZ", "en-SG", "en-AE", "en-CA", "en-AU"]) {
+    const d = fmtDateFull("2025-06-12", loc);
+    assert.strictEqual((d.match(/2025/g) || []).length, 1, `${loc}: ${d}`);
+    assert.strictEqual((fmtDateFull("2026-09-22", loc).match(/2026/g) || []).length, 1, loc);
+  }
+});
+
+test("no film page prints a year twice, and frozen pages that did are repaired", () => {
+  const IN = { code: "in", name: "India", region: "IN" };
+  const US = { code: "us", name: "United States", region: "US" };
+  for (const cfg of [IN, US]) {
+    const h = U.buildFilmPage({ title: "Old One", slug: "old", kind: "movie", platform: "Netflix", providers: ["Netflix"],
+      released: "2019-03-10" }, "2025-06-12", new Set(["old"]), cfg);
+    assert.ok(!/\b(\d{4}) \1\b/.test(h.replace(/<script[\s\S]*?<\/script>/g, "")), cfg.code + ": doubled year in a fresh page");
+  }
+  const broken = `<div class="meta" style="margin-top:8px">Released 12 Jun 2025 2025</div><p>opened on Jun 12, 2025 2025.</p>`;
+  const r = U.freshenFrozenCopy(broken, { cfg: IN });
+  assert.ok(/Released 12 Jun 2025</.test(r.html) && /Jun 12, 2025\./.test(r.html), r.html);
+  assert.ok(!U.freshenFrozenCopy(r.html, { cfg: IN }).changed, "idempotent");
+  assert.ok(!U.freshenFrozenCopy(`<p>1917 1917</p>`, { cfg: IN }).changed, "a bare repeated number is not a date");
+});
+
+test("catalogue: re-opening under a new bar, and already-built results never retire a queue", () => {
+  const CAT2 = require("./lib/catalog.js");
+  assert.strictEqual(CAT2.CATALOG_MIN_VOTES, 15);
+  const state = { in: { cursor: 3, built: 150, q: { "te:movie": { page: 4, done: true, empty: 0 }, "en:movie": { page: 5, done: false, empty: 1 } } } };
+  assert.strictEqual(CAT2.reopenForBar(state), 1, "one retired queue re-opened");
+  assert.deepStrictEqual(state.in.q["te:movie"], { page: 1, done: false, empty: 0 });
+  assert.strictEqual(state.in.q["en:movie"].page, 1, "every queue re-walks from the top under the new bar");
+  assert.strictEqual(CAT2.reopenForBar(state), 0, "only once per bar version");
+  for (let i = 0; i < 5; i++) CAT2.markQueue(state, "in", "te:movie", { usable: 0, results: 20, known: 20 });
+  assert.ok(!state.in.q["te:movie"].done, "pages of titles we already have are not barren");
+  for (let i = 0; i < 3; i++) CAT2.markQueue(state, "in", "te:movie", { usable: 0, results: 20, known: 0 });
+  assert.ok(state.in.q["te:movie"].done, "genuinely barren pages still retire it");
+});
+
+testAsync("catalogue pages are written in past tense, and thin-vote pages carry no verdict", async () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-cat-"));
+  const cwd = process.cwd();
+  try {
+    process.chdir(tmp);
+    const cfg = { code: "sg", name: "Singapore", region: "SG", watchRegion: "SG", ottRegionalLangs: [], priorityLangs: [] };
+    const old = new Date(Date.now() - 900 * 864e5).toISOString().slice(0, 10);
+    const disc = [
+      { id: 1, title: "Well Loved", release_date: old, vote_average: 8.4, vote_count: 900, poster_path: "/a.jpg", overview: "A.", genre_ids: [18], original_language: "en" },
+      { id: 2, title: "Barely Rated", release_date: old, vote_average: 8.9, vote_count: 20, poster_path: "/b.jpg", overview: "B.", genre_ids: [18], original_language: "en" },
+    ];
+    const api = { pause: async () => {}, tmdb: async () => ({ results: disc }), enrich: async () => ({ providers: ["Netflix"], runtime: 100 }) };
+    const baseItem = (m, kind) => ({ title: m.title, released: m.release_date, kind, tmdbId: m.id, language: "English", genre: "Drama",
+      poster: `https://image.tmdb.org/t/p/w342${m.poster_path}`, rating: m.vote_average, votes: m.vote_count,
+      verdict: U.verdict(m.vote_average, m.vote_count), review: m.overview });
+    const manifest = {};
+    const n = await U.backfillCatalog(cfg, manifest, { state: {}, baseItem, withImdb: (x) => x, batch: 2, api });
+    assert.strictEqual(n, 2);
+    const loved = fsx.readFileSync("sg/movie/well-loved.html", "utf8");
+    assert.ok(!/on offer right now|right now\./.test(loved), "born through the archive chain");
+    const thin = fsx.readFileSync("sg/movie/barely-rated.html", "utf8");
+    assert.ok(/Rating still forming/.test(thin) && !/Must watch/.test(thin), "20 votes never earns 'Must watch'");
+    assert.ok(/Netflix/.test(thin), "…but the page still answers where to watch");
+    assert.strictEqual(manifest.sg["barely-rated"].catalog, true);
+  } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
+});
+
+test("dead hub links are removed from frozen pages; live ones are kept", () => {
+  const line = (a) => `<p style="color:var(--mute);font-size:12.5px;margin-top:10px">More: ${a}</p>`;
+  const h = `<p>a</p>${line(`<a href="/sg/new-on-apple-tv/">Everything new on Apple TV</a> · <a href="/sg/new-on-ott/2026-09/">Everything that arrived in September 2026</a>`)}<p>b</p>`;
+  const one = U.pruneDeadHubLinks(h, (href) => !href.includes("apple"));
+  assert.ok(one.changed && !/apple-tv/.test(one.html) && /2026-09/.test(one.html) && !/More: *·/.test(one.html));
+  const none = U.pruneDeadHubLinks(h, () => false);
+  assert.ok(!/More:/.test(none.html) && /<p>a<\/p><p>b<\/p>/.test(none.html), "an empty line is removed, not left saying 'More:'");
+  assert.ok(!U.pruneDeadHubLinks(h, () => true).changed);
+});
+
+test("Pick of the Week is server-rendered and its backdrop preloaded", () => {
+  const data = { pick: "MobLand", theatres: [], ott: [{ title: "MobLand", platform: "JioHotstar", genre: "Crime / Drama", language: "English",
+    verdict: "Must watch", backdrop: "https://image.tmdb.org/t/p/w780/v.jpg" }] };
+  const hero = U.ssrHero(data);
+  assert.ok(!/display:none/.test(hero), "visible in the HTML — no reveal, no layout shift");
+  assert.ok(/id="heroTitle">MobLand</.test(hero) && /id="heroVerdict">▸ Must watch</.test(hero));
+  assert.ok(/background-image:url\(&quot;https:\/\/image\.tmdb\.org\/t\/p\/w780\/v\.jpg&quot;\)/.test(hero));
+  assert.ok(/<link rel="preload" as="image" href="https:\/\/image\.tmdb\.org\/t\/p\/w780\/v\.jpg" fetchpriority="high">/.test(U.heroPreload(data)));
+  assert.ok(/style="display:none"/.test(U.ssrHero({ pick: "Nope", theatres: [], ott: [] })), "no pick -> hidden, as before");
+  assert.strictEqual(U.heroPreload({}), "");
+  const src = require("fs").readFileSync("index.html", "utf8");
+  assert.ok(/<!--SSR:HERO-->[\s\S]*id="hero"[\s\S]*<!--\/SSR:HERO-->/.test(src) && /<!--SSR:HEROPRELOAD-->/.test(src));
+  const first = U.ssrCard({ title: "A", poster: "https://image.tmdb.org/t/p/w342/a.jpg" }, 0, "in", { eager: true });
+  const later = U.ssrCard({ title: "B", poster: "https://image.tmdb.org/t/p/w342/b.jpg" }, 5, "in");
+  assert.ok(/loading="eager"/.test(first) && /loading="lazy"/.test(later));
+});
+
+test("browse pages: every page has its own description; page 1 title fits", () => {
+  const G = require("./lib/graph.js");
+  const idx = Array.from({ length: 318 }, (_, i) => ({ slug: "f" + i, title: "F" + i }));
+  const descs = [1, 2, 3].map((p) => (/name="description" content="([^"]*)"/.exec(G.buildBrowsePage(idx, { code: "sg" }, p, 3, "x")) || [])[1]);
+  assert.strictEqual(new Set(descs).size, 3, JSON.stringify(descs));
+  assert.ok(/Page 2 of 3/.test(descs[1]));
+  const t1 = (/<title>([^<]*)/.exec(G.buildBrowsePage(idx, { code: "sg" }, 1, 3, "x")) || [])[1].replace(/&#39;/g, "'");
+  assert.ok(t1.length <= 60, t1);
+});
+
+test("hub and /new-on-ott/ titles and descriptions stay inside Google's budget", () => {
+  assert.strictEqual(U.fitSiteTitle("New Telugu Movies & OTT Releases This Week (September 2026) | FilmyChill"),
+    "New Telugu Movies & OTT Releases This Week (September 2026)");
+  assert.strictEqual(U.fitSiteTitle("Short | FilmyChill"), "Short | FilmyChill", "short titles keep the brand");
+  const items = ["Netflix", "Prime Video", "Disney+", "Apple TV", "HBO Max"].map((p, i) => ({ title: "T" + i, platform: p, providers: [p],
+    kind: "movie", freshDate: new Date().toISOString().slice(0, 10), isRecent: true, isFresh: true, released: "2026-01-01", slug: "t" + i }));
+  const page = U.buildOttWeekPage({ ott: items, ottExtra: [], theatres: [] }, { code: "ph", name: "Philippines", region: "PH" }, [{ code: "ph", region: "PH" }]);
+  const title = (/<title>([^<]*)/.exec(page) || [])[1].replace(/&amp;/g, "&");
+  const desc = (/name="description" content="([^"]*)"/.exec(page) || [])[1];
+  assert.ok(/^New .* This Week in/.test(title), "query words kept: " + title);
+  assert.ok(desc.length <= 160, desc.length + " " + desc);
+});
+
+test("long film titles keep the country before they lose it", () => {
+  const t = U.filmTitleTag({ title: "Monster: The Lizzie Borden Story", released: "2026-09-01", kind: "tv" }, { code: "uk", name: "United Kingdom" });
+  assert.strictEqual(t, "Monster: The Lizzie Borden Story — Where to Watch in the UK");
+  const short = U.filmTitleTag({ title: "Short", released: "2026-09-01", kind: "tv" }, { code: "uk", name: "United Kingdom" });
+  assert.ok(/\(2026\)/.test(short), "the year is only dropped when it's the price of keeping the country");
 });
 
 // ---------------- Theatrical run state on frozen pages ----------------
