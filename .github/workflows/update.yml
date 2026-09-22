@@ -49,7 +49,7 @@ jobs:
           # log, then raise it. Set CATALOG to "0" to pause the backfill without losing the
           # queue cursor in catalog-manifest.json.
           CATALOG: "1"
-          CATALOG_BATCH: "10"
+          CATALOG_BATCH: "25"
         run: node scripts/update.js
 
       # Smoke test validates the SHAPE + freshness of EVERY country's data file.
