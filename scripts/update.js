@@ -1642,7 +1642,7 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
   let whereBit = "";
   const provs = Array.isArray(item.providers) ? item.providers : [];
   if (upcoming && item.released) {
-    whereBit = ` It releases ${item.released}; mark your calendar if it's on your list.`;
+    whereBit = ` It releases on ${fmtDateShort(item.released, Date.now(), locale)} ${String(item.released).slice(0, 4)}; mark your calendar if it's on your list.`;
   } else if (provs.length) {
     whereBit = ` In ${countryName} you can stream it on ${provs.slice(0, 3).join(", ")}.`;
   } else if (item.platform === "Theatres") {
@@ -1714,7 +1714,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   }
   // Q2: where to watch
   let whereA;
-  if (upcoming) whereA = `${item.title} hasn't released yet${item.released ? ` — it's due ${item.released}` : ""}. We'll list where to watch once it's out.`;
+  if (upcoming) whereA = `${item.title} hasn't released yet${item.released ? ` — it's due ${fmtDateShort(item.released, Date.now(), localeFor(cfg && cfg.code))} ${String(item.released).slice(0, 4)}` : ""}. We'll list where to watch once it's out.`;
   else if (provs.length) whereA = `You can stream ${item.title} in ${countryName} on ${provs.join(", ")}.`;
   else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across ${countryName}. ${V.article} ${V.release} hasn't been announced yet.`;
   else whereA = `Streaming availability for ${item.title} in ${countryName} isn't confirmed yet — check back as platforms update.`;
@@ -3009,8 +3009,14 @@ async function main() {
     try { await sweepStreamingDepartures(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
     catch (e) { console.warn(`  departure sweep [${cfg.code}] skipped: ${e.message}`); }
     // Free, local, no budget: move any page past its stamped release date (see patchDueIfPassed).
-    try { refreshDuePages(cfg, countryNameFor(cfg)); }
+    try { refreshDuePages(cfg, countryNameFor(cfg), pagesManifest); }
     catch (e) { console.warn(`  due pass [${cfg.code}] skipped: ${e.message}`); }
+  }
+  // Wrong-market legacy pages (see repairLegacyPages). Before hreflang sync so rebuilt pages
+  // rejoin their clusters in the same run.
+  for (const cfg of builtCountries) {
+    try { await repairLegacyPages(cfg, pagesManifest, { baseItem, withImdb }); }
+    catch (e) { console.warn(`  legacy repair [${cfg.code}] skipped: ${e.message}`); }
   }
   // Back-catalogue backfill (see backfillCatalog). Runs after the weekly pipeline has taken
   // every slug it wants and before the hreflang + sitemap passes, so new catalogue pages join
@@ -3832,6 +3838,156 @@ function generatePages(data, cfg, allSlugSets) {
   }
   const total = fs.readdirSync(dir).filter((f) => f.endsWith(".html")).length;
   console.log(`Pages [${code}]: ${written} written, ${total} total in ${dir}/.`);
+}
+
+// ============================================================================
+// CROSS-COUNTRY LEGACY PAGES — built for one market with another market's data.
+//
+// A batch of pages frozen in mid-2026, before the pipeline was fully country-generic, was
+// rendered for the US, UK, Australia, Germany, Canada, the UAE, Singapore and Malaysia with
+// India's copy and India's data inside the right country's shell. Sept 2026 audit, 136
+// pages. The failures are not cosmetic:
+//   "In India you can stream it on Prime Video"   on the AUSTRALIAN edition
+//   "is currently playing in theatres across India" on the German one
+//   an India CBFC certificate ("A", "U/A 16+") in the family-viewing row of a US page
+// A reader in Sydney is being told India's availability. No text patch can fix that,
+// because the right answer (Australia's providers, Australia's rating) isn't on the page.
+//
+// So these pages are REBUILT, once, from TMDB for their own market by the current builder,
+// then passed through the archive chain like any frozen page. The TMDB id comes from the
+// manifest, or a same-slug entry in another edition, or a title+year search — and in every
+// case it must match the poster already on the page before anything is overwritten, so a
+// same-titled different film can never replace the page. A page whose film can't be
+// identified with certainty gets the wrong-country claims removed instead (neutralized),
+// which leaves less on the page but nothing false.
+// ============================================================================
+const LEGACY_REPAIR_BUDGET = 30;   // pages per country per run; ~3 TMDB calls each
+
+// Pure: why this page is wrong for its own edition. [] means it's fine.
+function crossCountryLeak(html, cfg) {
+  const code = (cfg && cfg.code) || "in";
+  const own = new Set(countryNameForms(cfg));
+  const reasons = [];
+  const body = html.split("Also on FilmyChill")[0];
+  // Only the builder's own claim sentences — never a synopsis ("In Singapore, Krishna is
+  // forced…" is a plot, not an availability claim) or a title ("The India Story").
+  const NAME = "((?:the )?[A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)?)";
+  const claim = new RegExp([
+    `in theatres in ${NAME} now`,
+    `playing in theatres across ${NAME}\\.`,
+    `\\bIn ${NAME} you can stream it on`,
+    `You can stream [^<".]{1,80}? in ${NAME} on`,
+    `Where to watch in ${NAME}<`,
+  ].join("|"), "g");
+  const markets = new Map();
+  for (const c of COUNTRIES) for (const n of countryNameForms({ code: c.code })) markets.set(n, c.code);
+  for (const m of body.matchAll(claim)) {
+    const name = m.slice(1).find(Boolean);
+    if (markets.has(name) && !own.has(name) && markets.get(name) !== code) reasons.push(`names ${name}`);
+  }
+  if (code !== "in" && /<td>Watch with family\?<\/td><td>(?:A|UA[^<·]*|U\/A[^<·]*) ·/.test(html)) reasons.push("India certificate");
+  return [...new Set(reasons)];
+}
+
+// Pure: remove the wrong-country claims when the film can't be identified for a rebuild.
+function neutralizeCrossCountry(html, cfg, title) {
+  const own = new Set(countryNameForms(cfg));
+  const others = [];
+  for (const c of COUNTRIES) for (const n of countryNameForms({ code: c.code })) if (!own.has(n)) others.push(reEsc(n));
+  const O = others.sort((a, b) => b.length - a.length).join("|");
+  const country = countryNameFor(cfg);
+  const A = "(?:'|&#39;)";
+  const unknown = (m) => `Streaming availability for ${m.includes("&#39;") ? escHtml(title) : title} in ${m.includes("&#39;") ? escHtml(country) : country} isn${m.includes("&#39;") ? "&#39;" : "'"}t confirmed yet — check back as platforms update.`;
+  let out = html
+    .replace(new RegExp(` It${A}s in theatres in (?:${O}) now — best caught on the big screen\\.`, "g"), "")
+    .replace(new RegExp(` In (?:${O}) you can stream it on [^.<"]+\\.`, "g"), "")
+    .replace(new RegExp(`[^.<">]*? is currently playing in theatres across (?:${O})\\.[^<"]*?announced yet\\.`, "g"), unknown)
+    .replace(new RegExp(`You can stream [^.<"]+? in (?:${O}) on [^.<"]+\\.`, "g"), unknown);
+  if ((cfg && cfg.code) !== "in") {
+    // An India CBFC certificate says nothing true about this market: drop the row, and the
+    // FAQ answer built from it, in both the visible HTML and the FAQPage schema.
+    out = out.replace(/<tr><td>Watch with family\?<\/td><td>(?:A|UA[^<·]*|U\/A[^<·]*) ·[^<]*<\/td><\/tr>/g, "");
+    out = out.replace(/<details><summary>Is [^<]*? family friendly\?<\/summary><div[^>]*>[^<]*? is rated (?:A|UA[^<.]*|U\/A[^<.]*)[\s\S]*?<\/details>/g, "");
+    out = out.replace(/<script type="application\/ld\+json">(\{"@context":"https:\/\/schema\.org","@type":"FAQPage"[\s\S]*?)<\/script>/, (m, json) => {
+      try {
+        const d = JSON.parse(json);
+        d.mainEntity = (d.mainEntity || []).filter((q) => !(/family friendly\?$/.test(q.name) && / is rated (?:A|UA|U\/A)\b/.test((q.acceptedAnswer || {}).text || "")));
+        return `<script type="application/ld+json">${JSON.stringify(d).replace(/</g, "\\u003c")}</script>`;
+      } catch { return m; }
+    });
+  }
+  return { html: out, changed: out !== html };
+}
+
+// `api` is injectable so the whole path — identification, the poster guard, rebuild vs
+// neutralize, the manifest stamp — is testable without the network.
+async function repairLegacyPages(cfg, pagesManifest, { baseItem, withImdb, budget = LEGACY_REPAIR_BUDGET,
+  api = { tmdb, enrich, pause: sleep } }) {
+  const code = cfg.code;
+  const dir = code === "in" ? "movie" : `${code}/movie`;
+  if (!fs.existsSync(dir)) return 0;
+  const m = (pagesManifest[code] = pagesManifest[code] || {});
+  const have = new Set(fs.readdirSync(dir).filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5)));
+  const filmIndex = filmIndexFor(cfg);
+  const today = todayStr();
+  const countryName = countryNameFor(cfg);
+  let rebuilt = 0, neutralized = 0, tried = 0;
+  for (const slug of [...have].sort()) {
+    if (tried >= budget) break;
+    const p = `${dir}/${slug}.html`;
+    let html;
+    try { html = fs.readFileSync(p, "utf8"); } catch { continue; }
+    if (!crossCountryLeak(html, cfg).length) continue;
+    tried++;
+    const kind = /"@type":"TVSeries"/.test(html) ? "tv" : "movie";
+    const poster = (html.match(/image\.tmdb\.org\/t\/p\/w\d+(\/[A-Za-z0-9_-]+\.(?:jpg|png))/) || [])[1] || null;
+    const h1 = (html.match(/<h1[^>]*>([^<]+)<\/h1>/) || [])[1] || "";
+    const title = h1.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/\s*\((\d{4})\)\s*$/, "").trim();
+    const year = (h1.match(/\((\d{4})\)\s*$/) || [])[1];
+    const candidates = [];
+    if (m[slug] && m[slug].tmdbId) candidates.push(m[slug].tmdbId);
+    for (const c of COUNTRIES) { const e = (pagesManifest[c.code] || {})[slug]; if (e && e.tmdbId) candidates.push(e.tmdbId); }
+    let chosen = null;
+    try {
+      for (const id of [...new Set(candidates)]) {
+        const d = await api.tmdb(`/${kind}/${id}`); await api.pause(120);
+        if (d && d.id && poster && d.poster_path === poster) { chosen = d; break; }
+      }
+      if (!chosen && poster && title) {
+        const q = { query: title, include_adult: "false" };
+        if (year) q[kind === "tv" ? "first_air_date_year" : "year"] = year;
+        const r = await api.tmdb(`/search/${kind}`, q); await api.pause(120);
+        const hit = (r.results || []).find((x) => x.poster_path === poster);
+        if (hit) { chosen = await api.tmdb(`/${kind}/${hit.id}`); await api.pause(120); }
+      }
+    } catch (e) { console.warn(`  legacy lookup ${code}/${slug}: ${e.message}`); }
+
+    if (!chosen) {
+      // Can't prove which film this is — remove what is false rather than guess.
+      const n = neutralizeCrossCountry(html, cfg, title || slug);
+      if (n.changed) { fs.writeFileSync(p, n.html); neutralized++; if (m[slug]) m[slug].last = today; }
+      continue;
+    }
+    try {
+      const d0 = { ...chosen, genre_ids: (chosen.genres || []).map((g) => g.id) };
+      const item = { ...baseItem(d0, kind) };
+      Object.assign(item, await api.enrich(kind, chosen.id, cfg.watchRegion));
+      withImdb(item);
+      await api.pause(120);
+      item.slug = slug;
+      const providers = Array.isArray(item.providers) ? item.providers : [];
+      item.platform = providers[0] || null;
+      let page = buildFilmPage(item, today, have, cfg, filmIndex);
+      page = archivePatchHtml(page, countryName, cfg).html;   // it is a frozen page: past tense
+      fs.writeFileSync(p, page);
+      m[slug] = { ...(m[slug] || {}), last: today, archivedOn: (m[slug] && m[slug].archivedOn) || today,
+        pv: ARCHIVE_PATCH_VERSION, tmdbId: item.tmdbId, released: item.released || null,
+        lang: item.language || null, kind, title: item.title, repairedOn: today };
+      rebuilt++;
+    } catch (e) { console.warn(`  legacy rebuild ${code}/${slug}: ${e.message}`); }
+  }
+  if (rebuilt || neutralized) console.log(`  legacy repair [${code}]: ${rebuilt} rebuilt for ${countryName}, ${neutralized} neutralized`);
+  return rebuilt + neutralized;
 }
 
 // ============================================================================
@@ -4714,7 +4870,12 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 //    pass or the change reaches only the ~5% of films in a current list.
 // 8: analytics sweep. The archive is never regenerated, so frozen pages would otherwise be
 //    the only pages on the site that aren't measured — and they are most of the traffic.
-const ARCHIVE_PATCH_VERSION = 8;
+// 9: freshness sweep (Sept 2026 audit). Frozen pages past their release date still carried
+//    pre-release copy (settleReleasedCopy, 118 pages); "in theatres now" survived on 270
+//    pages whose country name didn't match the literal swaps, India's "OTT" wording on 358
+//    pages in streaming markets, raw ISO header dates on 650, expired window estimates on 2
+//    (freshenFrozenCopy).
+const ARCHIVE_PATCH_VERSION = 9;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
@@ -4939,6 +5100,87 @@ function ensureAnalytics(html) {
   return { html: out, changed: out !== html };
 }
 
+// ============================================================================
+// FROZEN-PAGE FRESHNESS, PART 2 — the phrasings the name-literal swaps never matched.
+//
+// archivePatchHtml's theatrical swaps compare exact strings built from TODAY's country
+// name. Pages frozen under older templates used other forms of the same name ("United
+// States" vs "the US"), or were written before the per-country vocabulary split, so the
+// swaps silently missed them. Sept 2026 audit, after every earlier sweep:
+//   270 frozen pages still said a film was "in theatres … now" months after its run.
+//   358 pages in "streaming" markets still used India's "OTT" template wording.
+//   650 page headers showed a raw ISO date ("Released 2026-06-12").
+//     2 pages still offered a streaming-window estimate whose window had already ended.
+// Every rule below matches the page's own template sentence, in both the HTML-escaped
+// (&#39;) and JSON-LD (') forms, and only when the named country is THIS edition's country
+// in one of its name forms. A sentence naming a different country is not a tense problem —
+// the page was built with the wrong market's data, and repairLegacyPage handles that.
+// ============================================================================
+function countryNameForms(cfg) {
+  const code = (cfg && cfg.code) || "in";
+  const c = COUNTRIES.find((x) => x.code === code) || {};
+  const forms = new Set([c.name, (COUNTRY_PAGE_META[code] || {}).name, countryNameFor(cfg)].filter(Boolean));
+  for (const f of [...forms]) { forms.add(f.replace(/^the /, "")); if (!/^the /.test(f) && /^(US|UK|UAE|Philippines)$/.test(f)) forms.add(`the ${f}`); }
+  if (code === "us") forms.add("United States").add("the United States");
+  if (code === "uk") forms.add("United Kingdom").add("the United Kingdom");
+  return [...forms].sort((a, b) => b.length - a.length);   // longest first: "the US" before "US"
+}
+const reEsc = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+function freshenFrozenCopy(html, { countryName, cfg = null, now = Date.now() } = {}) {
+  const code = (cfg && cfg.code) || "in";
+  const V = streamVocab(cfg);
+  const names = countryNameForms(cfg).map(reEsc).join("|");
+  const country = countryName || countryNameFor(cfg);
+  const A = "(?:'|&#39;)";
+  const ap = (m) => (m.includes("&#39;") ? "&#39;" : "'");
+  let out = html;
+
+  // Theatrical present tense, any name form of THIS country.
+  out = out.replace(new RegExp(`It${A}s in theatres in (?:${names}) now — best caught on the big screen\\.`, "g"),
+    (m) => `It had its theatrical run in ${escHtml(country)} — check back here for its ${V.arrival}.`);
+  out = out.replace(new RegExp(`is currently playing in theatres across (?:${names})\\. An? (?:OTT|streaming) release hasn${A}t been announced yet\\.`, "g"),
+    (m) => `has finished its theatrical run in ${m.includes("&#39;") ? escHtml(country) : country}. Its ${V.release} hasn${ap(m)}t been announced yet — check back soon.`);
+
+  // India's vocabulary on a "streaming" market — template phrases only, never film titles.
+  if (V.word !== "OTT") {
+    out = out
+      .replace(/Theatrical run ended — OTT arrival pending/g, `Theatrical run ended — ${V.arrival} pending`)
+      .replace(/check back here for its OTT arrival/g, `check back here for its ${V.arrival}`)
+      .replace(/\bAn OTT release hasn(?:'|&#39;)t been announced yet/g, (m) => `A streaming release hasn${ap(m)}t been announced yet`)
+      .replace(/\bIts OTT release hasn(?:'|&#39;)t been announced yet/g, (m) => `Its streaming release hasn${ap(m)}t been announced yet`)
+      .replace(/\bAn OTT release date for /g, "A streaming release date for ")
+      .replace(/\bOTT releases typically reach streaming/g, "releases typically reach streaming")
+      // The FAQ question itself, frozen with India's doubled phrasing — in the visible
+      // <summary> and in the FAQPage schema's "name", both of which Google shows.
+      .replace(/When is ([^<"?]+?) releasing on OTT\? \(OTT release date\)/g, (m, t) => V.faqQuestion(t));
+  }
+
+  // Header date: raw ISO -> the edition's human date.
+  out = out.replace(/(<div class="meta" style="margin-top:8px">)(Released|Releases) (\d{4}-\d{2}-\d{2})(<\/div>)/,
+    (m, a, verb, iso, b) => `${a}${verb} ${escHtml(fmtDateShort(iso, now, localeFor(code)))} ${iso.slice(0, 4)}${b}`);
+
+  // A streaming-window estimate whose window has already closed is no longer a pattern, it is
+  // a missed prediction. Drop the clause; the "not announced" sentence around it stays true.
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  out = out.replace(/ ([A-Za-z]+ )?releases typically reach streaming about \d+–\d+ weeks after their theatrical run, which would put it around (?:(\w+) (\d{4}) and )?(\w+) (\d{4}) — that(?:'|&#39;)s a pattern, not a confirmed date\./g,
+    (m, _lang, _m1, _y1, m2, y2) => {
+      const idx = MONTHS.indexOf(m2);
+      if (idx < 0) return m;
+      const end = Date.UTC(Number(y2), idx + 1, 1);          // first day after the window
+      return now >= end ? "" : m;
+    });
+  return { html: out, changed: out !== html };
+}
+
+// Visible text of a page, for deciding whether a patch changed what a reader sees. A patch
+// that only touches markup (an analytics tag, a CSP) must not move the sitemap's lastmod;
+// one that corrects a sentence must, or Google keeps serving the stale snippet for months.
+function visibleText(html) {
+  return String(html).replace(/<script(?![^>]*application\/ld)[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g, "")
+    .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
 function archivePatchHtml(html, countryName, cfg = null) {
   const V = streamVocab(cfg);
   // Pages frozen BEFORE the per-country vocabulary split carry India's "OTT" wording
@@ -4974,6 +5216,10 @@ function archivePatchHtml(html, countryName, cfg = null) {
   if (rt.changed) { out = rt.html; changed = true; }
   const an = ensureAnalytics(out);
   if (an.changed) { out = an.html; changed = true; }
+  const st = settleReleasedCopy(out, { countryName, cfg });
+  if (st.changed) { out = st.html; changed = true; }
+  const fz = freshenFrozenCopy(out, { countryName, cfg });
+  if (fz.changed) { out = fz.html; changed = true; }
   const t = shortenTitleTag(out, countryName, cfg);
   if (t.changed) { out = t.html; changed = true; }
   // Runs LAST, after the body swaps above have set "Theatrical run ended" — frozenFilmFacts
@@ -5006,6 +5252,9 @@ function reconcilePagesManifest(manifest, code, currentSlugs, diskSlugs, todaySt
     }
     delete entry.archivedOn;
   }
+  // Entries that lost `last` to an old bug (a function was stored instead of a date, and
+  // JSON.stringify dropped it) fall back to their freeze date — the truest date available.
+  for (const e of Object.values(m)) if (e && !e.last && e.archivedOn) e.last = e.archivedOn;
   const toArchive = [];
   for (const slug of diskSlugs) {
     if (currentSlugs.has(slug)) continue;
@@ -5050,7 +5299,7 @@ function sweepCandidates(entries, now = new Date(), max = SWEEP_MAX_CHECKS) {
 
 // Pure: swap a page's pending block for a "now streaming" answer, and upgrade the
 // theatrical pill to real provider pills. Returns {html, changed} like archivePatchHtml.
-function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf }) {
+function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf, now = Date.now() }) {
   if (!providers || !providers.length) return { html, changed: false };
   const V = streamVocab(cfg);
   const e = escHtml;
@@ -5073,6 +5322,8 @@ function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf }) {
   ]) {
     if (out.includes(stale)) { out = out.split(stale).join(pills); break; }
   }
+  // The FAQ and the "not on any service" lines still describe the page before arrival.
+  out = settleReleasedCopy(out, { countryName, cfg, now }).html;
   return { html: out, changed: true };
 }
 
@@ -5260,6 +5511,71 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
 // the <!--SW:due=YYYY-MM-DD--> stamp, so it costs no API budget and can run every build for
 // every page. Rewrites only the pending block; the page's verdict and prose are untouched.
 // ============================================================================
+// ============================================================================
+// SETTLING A FROZEN PAGE PAST ITS RELEASE DATE.
+//
+// A page frozen before release carries pre-release copy in SIX places, and the due-date pass
+// (patchDueIfPassed) only ever rewrote one of them — the streaming block. The rest kept
+// saying the film was still to come, long after it opened:
+//   header        "Releases 27 Aug 2026"
+//   verdict       "It releases 2026-08-27; mark your calendar…"
+//   where-to-watch "Not out yet — nowhere to stream or rent it until it opens."
+//   FAQ + schema  "…hasn't released yet — it's due 2026-08-27. We'll list where to watch once it's out."
+// Sept 2026: 107 pages site-wide showed a past release date beside a "coming soon" answer,
+// and the FAQ one also sits in FAQPage schema, where Google can quote it verbatim.
+//
+// Two states, read from the page itself:
+//   pending — released, not streaming. Says so, with the date it opened.
+//   live    — the arrival sweep has stamped <!--SW:live-->. The FAQ says it's streaming and
+//             the "not on any service" lines go, because the pills above now name them.
+// Both states are idempotent, and pending -> live converts cleanly, so this runs safely from
+// the due pass, the arrival patch and the archive sweep in any order.
+//
+// Only the page's own template sentences are matched; anything unrecognised is left alone.
+// Apostrophes are matched in both forms because the same sentence lives in visible HTML
+// (&#39;) and in JSON-LD ('), and each replacement keeps the escaping of the text it replaces.
+// ============================================================================
+function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } = {}) {
+  const date = (html.match(/"datePublished":"(\d{4}-\d{2}-\d{2})/) || html.match(/<!--SW:due=(\d{4}-\d{2}-\d{2})-->/) || [])[1];
+  if (!date || releaseState(date, now) !== "released") return { html, changed: false };
+  const live = html.includes("<!--SW:live=");
+  const country = countryName || countryNameFor(cfg);
+  const opened = `${fmtDateShort(date, now, localeFor(cfg && cfg.code))} ${date.slice(0, 4)}`;
+  const APOS = "(?:'|&#39;)";
+  const apos = (matched) => (matched.includes("&#39;") ? "&#39;" : "'");
+  let out = html;
+
+  // Header line.
+  out = out.replace(/(<div class="meta" style="margin-top:8px">)Releases (?:today|[^<]+)(<\/div>)/, `$1Released ${escHtml(opened)}$2`);
+
+  // Verdict close — ISO or human date, both forms the template has produced.
+  out = out.replace(new RegExp(` It releases (?:on )?[^;<]+; mark your calendar if it${APOS}s on your list\\.`, "g"),
+    (m) => ` It opened in theatres in ${escHtml(country)} on ${escHtml(opened)}.`);
+
+  // Where-to-watch note.
+  const pendingNote = `Not on a subscription service or to rent in ${escHtml(country)} yet.`;
+  out = out.replace("Not out yet — nowhere to stream or rent it until it opens.", pendingNote);
+
+  // FAQ "Where can I watch" — visible HTML and FAQPage JSON-LD.
+  const tail = (a) => live
+    ? `opened in theatres in ${country} on ${opened}, and it${a}s streaming there now — see where to watch above.`
+    : `opened in theatres in ${country} on ${opened}. It isn${a}t streaming yet — this page updates the day it is.`;
+  out = out.replace(new RegExp(`hasn${APOS}t released yet(?: — it${APOS}s due [^.<"]+)?\\. We${APOS}ll list where to watch once it${APOS}s out\\.`, "g"),
+    (m) => tail(apos(m)));
+
+  if (live) {
+    // A page that settled while pending and has since started streaming.
+    out = out.replace(new RegExp(`\\. It isn${APOS}t streaming yet — this page updates the day it is\\.`, "g"),
+      (m) => `, and it${apos(m)}s streaming there now — see where to watch above.`);
+    out = out.split(pendingNote).join("");
+    // The streaming-date FAQ ("…hasn't been officially announced yet… updates the day it
+    // starts streaming") is answered now. The arrival patch never reached it either.
+    out = out.replace(new RegExp(`\\bAn? (?:OTT|streaming|Streaming) [^<"]*?hasn${APOS}t been officially announced yet\\.[^<"]*?This page updates automatically the day it starts streaming\\.`, "g"),
+      (m) => `It${apos(m)}s streaming in ${m.includes("&#39;") ? escHtml(country) : country} now — see where to watch above.`);
+  }
+  return { html: out, changed: out !== html };
+}
+
 function patchDueIfPassed(html, { title, countryName, cfg, now = Date.now() }) {
   const m = html.match(/<!--SW:due=(\d{4}-\d{2}-\d{2})-->/);
   if (!m) return { html, changed: false };
@@ -5277,11 +5593,13 @@ function patchDueIfPassed(html, { title, countryName, cfg, now = Date.now() }) {
   // The pre-release pill is now wrong too.
   out = out.replace(/<span class="pill">In cinemas (?:from [^<]*|today)<\/span>/,
                     `<span class="pill">In theatres</span>`);
+  // ...and so is every other pre-release sentence on the page (see settleReleasedCopy).
+  out = settleReleasedCopy(out, { countryName, cfg, now }).html;
   return { html: out, changed: true };
 }
 
 // Live pass: walk one country's film pages and apply the due-date patch. Local only.
-function refreshDuePages(cfg, countryName) {
+function refreshDuePages(cfg, countryName, manifest = null) {
   const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
   if (!fs.existsSync(dir)) return 0;
   let n = 0;
@@ -5291,7 +5609,11 @@ function refreshDuePages(cfg, countryName) {
     try { html = fs.readFileSync(path, "utf8"); } catch { continue; }
     if (!html.includes("<!--SW:due=")) continue;
     const { html: out, changed } = patchDueIfPassed(html, { title: titleFromPage(html) || f.replace(/\.html$/, ""), countryName, cfg });
-    if (changed) { fs.writeFileSync(path, out); n++; }
+    if (changed) {
+      fs.writeFileSync(path, out); n++;
+      const e = manifest && manifest[cfg.code] && manifest[cfg.code][f.replace(/\.html$/, "")];
+      if (e) e.last = todayStr();   // the page now says something different — recrawl it
+    }
   }
   if (n) console.log(`[${cfg.code}] due-date pass: ${n} page(s) moved past their release date`);
   return n;
@@ -5362,9 +5684,14 @@ function archiveDepartedPages(manifest, cfg, currentSlugs, meta = null) {
   for (const slug of sweep) {
     const p = `${dir}/${slug}.html`;
     try {
-      const { html, changed } = archivePatchHtml(fs.readFileSync(p, "utf8"), countryName, cfg);
+      const before = fs.readFileSync(p, "utf8");
+      const { html, changed } = archivePatchHtml(before, countryName, cfg);
       if (changed) { fs.writeFileSync(p, html); patched++; }
-      if (m[slug]) m[slug].pv = ARCHIVE_PATCH_VERSION;
+      if (m[slug]) {
+        m[slug].pv = ARCHIVE_PATCH_VERSION;
+        // Corrected text is new content: let the sitemap say so, so the fix gets recrawled.
+        if (changed && visibleText(before) !== visibleText(html)) m[slug].last = todayStr();
+      }
     } catch (e) { console.warn(`  archive: ${p} skipped (${e.message})`); }
   }
   if (sweep.size) console.log(`  archive [${cfg.code}]: ${sweep.size} pages archived or re-swept, ${patched} honesty-patched`);
@@ -6297,7 +6624,7 @@ function buildLlmsTxt(dataByCode) {
   const countries = COUNTRIES.filter((c) => c.code !== "in").map((c) => `- [${c.name}](https://filmychill.com/${c.code}/) · [New on OTT](https://filmychill.com/${c.code}/new-on-ott/)`).join("\n");
   return `# FilmyChill
 
-> FilmyChill is a daily-updated guide to what is worth watching this week — new theatrical releases and OTT/streaming arrivals — for India and seven other countries, with audience ratings, honest verdicts, and critics' takes synthesised from published review coverage. Lists are rebuilt twice daily from TMDB (streaming availability via JustWatch), Wikipedia critical-reception coverage, and YouTube trailer statistics. No pay-for-placement: no studio or platform can buy a position on any list. Last build: ${gen}.
+> FilmyChill is a daily-updated guide to what is worth watching this week — new theatrical releases and OTT/streaming arrivals — for India and ${COUNTRIES.length - 1} other countries, with audience ratings, honest verdicts, and critics' takes synthesised from published review coverage. Lists are rebuilt twice daily from TMDB (streaming availability via JustWatch), Wikipedia critical-reception coverage, and YouTube trailer statistics. No pay-for-placement: no studio or platform can buy a position on any list. Last build: ${gen}.
 
 ## This week in India (${day})
 
@@ -6381,7 +6708,7 @@ function buildLlmsFullTxt(dataByCode) {
 function llmsMachineSection() {
   const dataFiles = COUNTRIES.map((c) => `- https://filmychill.com/data${c.code === "in" ? "" : "-" + c.code}.json — current picks for ${(COUNTRY_PAGE_META[c.code] || {}).name || c.name} (JSON)`).join("\n");
   return `\n## Machine-readable data (for AI systems and agents)\n\n` +
-    `- [Full current knowledge base](https://filmychill.com/llms-full.txt): every current pick across all 8 countries with facts, verdicts, critics' lines, and source attribution — answerable from one fetch\n` +
+    `- [Full current knowledge base](https://filmychill.com/llms-full.txt): every current pick across all ${COUNTRIES.length} countries with facts, verdicts, critics' lines, and source attribution — answerable from one fetch\n` +
     `- [RSS feed](https://filmychill.com/feed.xml): newest arrivals as they enter the lists\n` +
     `${dataFiles}\n` +
     `\nJSON fields per item: title, kind (movie|tv), language, genre, runtime, cert, released (ISO date), platform, providers, rating (TMDB /10), votes, verdict, take (critics' line), hook, director, cast, slug (page: /movie/<slug>.html), trailer.\n` +
@@ -6728,7 +7055,7 @@ function buildDataPage(records, updatedHuman) {
 ${analyticsTag()}
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How long films take to reach streaming — FilmyChill data</title>
-<meta name="description" content="How many days films take to go from theatrical release to streaming, measured daily by FilmyChill across ${e(String(s.total))} titles in eight countries. Free to use with attribution.">
+<meta name="description" content="How many days films take to go from theatrical release to streaming, measured daily by FilmyChill across ${e(String(s.total))} titles in ${COUNTRIES.length} countries. Free to use with attribution.">
 <link rel="canonical" href="https://filmychill.com/data/">
 <meta name="robots" content="max-image-preview:large">
 <meta property="og:title" content="How long films take to reach streaming — FilmyChill data">
@@ -6747,7 +7074,7 @@ ${analyticsTag()}
   footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #E7DFD0; font-size: 13px; color: #6B6890; }
 </style></head><body>
   <h1>How long does a film take to reach streaming?</h1>
-  <div class="sub">Measured by FilmyChill, updated ${e(updatedHuman)} · ${e(String(s.total))} titles tracked across eight countries</div>
+  <div class="sub">Measured by FilmyChill, updated ${e(updatedHuman)} · ${e(String(s.total))} titles tracked across ${COUNTRIES.length} countries</div>
 
   ${s.overall != null ? `<div class="big">${s.overall} days</div>
   <div class="sub">median from theatrical release to first streaming sighting, across ${e(String(s.measured))} films with both dates known</div>` :
@@ -6757,7 +7084,7 @@ ${analyticsTag()}
   ${table("Median window by platform", s.byPlatform)}
 
   <div class="method">
-    <b>Method.</b> FilmyChill checks streaming availability every day in eight countries and records the
+    <b>Method.</b> FilmyChill checks streaming availability every day in ${COUNTRIES.length} countries and records the
     first date each film appears with a provider. The window is that date minus the film's theatrical
     release date. Straight-to-streaming titles and gaps over two years are excluded, since neither is a
     theatrical window. Groups with fewer than three films are not shown. This is a record of when a film
@@ -6992,7 +7319,7 @@ module.exports = {
   buildRssFeed, archivePatchHtml, stripAggregateRating, retitleFrozen, filmTitleTag, reconcilePagesManifest,
   buildOttMonthPage, writeOttMonthPages, ottMonthPath, ottMonthUrl, backfillCatalog,
   buildScopedMonthPage, writePlatformMonthPages, writeLanguageMonthPages, monthRow,
-  certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
+  visibleText, crossCountryLeak, neutralizeCrossCountry, repairLegacyPages, freshenFrozenCopy, countryNameForms, settleReleasedCopy, patchDueIfPassed, applyArrivalPatch, certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
   platformMonthPath, platformMonthUrl, languageMonthPath, languageMonthUrl, SCOPED_MONTH_MIN,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, ARRIVAL_MAX_RELEASE_AGE, SEEN_RETENTION_DAYS,
   socialImage,
