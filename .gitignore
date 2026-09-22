@@ -3,3 +3,7 @@
 # so this is belt-and-braces against a future `git add -A`.
 node_modules/
 package-lock.json
+
+# The test suite's sandbox country (code "zz"). Tests write real files under it; they
+# must never be committed — the workflow's '*/films/' glob once published them.
+zz/
