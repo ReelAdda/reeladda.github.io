@@ -595,7 +595,8 @@ test("once the date passes, every pre-release sentence is settled — visible HT
   assert.ok(!new RegExp(`${SETTLE_REL}[;.]`).test(r.html.replace(/"datePublished":"[^"]*"/g, "")), "no raw ISO date in prose");
   const faq = ldOf(r.html).find((x) => x["@type"] === "FAQPage");
   const where = faq.mainEntity.find((q) => /Where can I watch/.test(q.name)).acceptedAnswer.text;
-  assert.ok(where.includes(`opened in theatres in Singapore on ${SETTLE_HUMAN}. It isn't streaming yet`), where);
+  // 5 days after opening: inside the run window, so it may still be on — and says so.
+  assert.ok(where.includes(`opened in theatres in Singapore on ${SETTLE_HUMAN} and may still be showing — check local cinema listings. It isn't streaming yet`), where);
   assert.ok(/Rope's Curse opened/.test(where), "apostrophes stay plain in JSON-LD, escaped in HTML");
   assert.ok(!U.settleReleasedCopy(r.html, { countryName: "Singapore", cfg: SETTLE_CFG, now: AFTER }).changed, "idempotent");
 });
@@ -629,6 +630,74 @@ test("the due pass and the archive sweep both carry the settle", () => {
   const past = h.replace(new RegExp(SETTLE_REL, "g"), "2020-01-15");
   const arch = U.archivePatchHtml(past, "Singapore", SETTLE_CFG);
   assert.ok(!STALE.test(arch.html), "archive chain includes the settle");
+});
+
+// ---------------- Theatrical run state on frozen pages ----------------
+group("run state: a frozen page says whether the film may still be in cinemas");
+const RUN_CFG = { code: "sg", name: "Singapore", region: "SG", watchRegion: "SG" };
+const RUN_REL = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);   // real future: pre-release copy
+const RUN_AT = (days) => Date.parse(`${RUN_REL}T00:00:00Z`) + days * 864e5;
+const runFixture = () => U.buildFilmPage({ title: "The Rope Curse 4", slug: "rope", kind: "movie", language: "Chinese",
+  platform: "Theatres", released: RUN_REL, tmdbId: 5 }, new Date().toISOString().slice(0, 10), new Set(["rope"]), RUN_CFG);
+const runLd = (h) => [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]))
+  .flatMap((x) => x["@graph"] || [x]).find((x) => x["@type"] === "FAQPage").mainEntity
+  .find((q) => /Where can I watch/.test(q.name)).acceptedAnswer.text;
+
+test("theatreRunState uses the site's own theatre window — the same rule as the homepage lists", () => {
+  const rel = "2026-08-27";
+  const at = (d) => Date.parse(`${rel}T00:00:00Z`) + d * 864e5;
+  assert.strictEqual(U.theatreRunState(rel, at(0)), "open");
+  assert.strictEqual(U.theatreRunState(rel, at(26)), "open", "The Rope Curse 4 on 22 Sept: 26 days in");
+  assert.strictEqual(U.theatreRunState(rel, at(U.THEATRE_WINDOW_FALLBACK_DAYS || 35)), "ended");
+  assert.strictEqual(U.theatreRunState(rel, at(-1)), null, "not released yet: no run to describe");
+  assert.strictEqual(U.theatreRunState(null), null);
+});
+
+test("inside the window: FAQ, schema and pill all say 'may still be showing' — none says the run ended", () => {
+  const h = U.settleReleasedCopy(runFixture(), { countryName: "Singapore", cfg: RUN_CFG, now: RUN_AT(10) }).html;
+  assert.ok(/may still be showing — check local cinema listings\. It isn't streaming yet/.test(runLd(h)), runLd(h));
+  assert.ok(/may still be showing — check local cinema listings\. It isn&#39;t streaming yet/.test(h), "visible FAQ too");
+  assert.ok(/<span class="pill">Opened in cinemas [^<]+ — not streaming yet<\/span>/.test(h));
+  assert.ok(!/Theatrical run ended/.test(h), "a film ten days into its run is not 'ended'");
+});
+
+test("the archive patch no longer declares a run over on release day", () => {
+  // Frozen on opening day, as The Rope Curse 4 was: the sweep used to stamp "run ended".
+  const opened = U.patchDueIfPassed(runFixture(), { title: "The Rope Curse 4", countryName: "Singapore", cfg: RUN_CFG, now: RUN_AT(1) }).html;
+  const swept = U.settleReleasedCopy(opened.replace(/<span class="pill">[^<]*<\/span>/, `<span class="pill">Theatrical run ended — streaming arrival pending</span>`),
+    { countryName: "Singapore", cfg: RUN_CFG, now: RUN_AT(1) }).html;
+  assert.ok(!/Theatrical run ended/.test(swept) && /Opened in cinemas/.test(swept), "premature 'ended' is corrected");
+});
+
+test("past the window: the page moves to 'most likely ended' — once, and stays there", () => {
+  const open = U.settleReleasedCopy(runFixture(), { countryName: "Singapore", cfg: RUN_CFG, now: RUN_AT(10) }).html;
+  const later = U.settleReleasedCopy(open, { countryName: "Singapore", cfg: RUN_CFG, now: RUN_AT(40) });
+  assert.ok(later.changed);
+  assert.ok(/its cinema run has most likely ended\. It isn't streaming yet/.test(runLd(later.html)), runLd(later.html));
+  assert.ok(/<span class="pill">Theatrical run ended — streaming arrival pending<\/span>/.test(later.html));
+  assert.ok(!/may still be showing|Opened in cinemas/.test(later.html), "no open-state leftovers");
+  assert.ok(!U.settleReleasedCopy(later.html, { countryName: "Singapore", cfg: RUN_CFG, now: RUN_AT(90) }).changed,
+    "no daily rewrites after the one transition");
+});
+
+test("the description says 'opened on', never 'in cinemas now', for an open frozen page", () => {
+  const h = U.settleReleasedCopy(runFixture(), { countryName: "Singapore", cfg: RUN_CFG, now: RUN_AT(10) }).html;
+  const d = U.rewriteMetaDescription(h, RUN_CFG).html;
+  const desc = (/name="description" content="([^"]*)"/.exec(d) || [])[1] || "";
+  assert.ok(!/in cinemas in Singapore now|is in cinemas in Singapore/.test(desc), desc);
+});
+
+test("arrival replaces the open pill with the platform", () => {
+  const h = U.settleReleasedCopy(runFixture(), { countryName: "Singapore", cfg: RUN_CFG, now: RUN_AT(10) }).html;
+  const a = U.applyArrivalPatch(h, { title: "The Rope Curse 4", providers: ["Netflix"], countryName: "Singapore", cfg: RUN_CFG, asOf: "x", now: RUN_AT(12) });
+  assert.ok(!/Opened in cinemas|may still be showing|isn't streaming yet/.test(a.html));
+  assert.ok(/<span class="pill">Netflix<\/span>/.test(a.html));
+});
+
+test("reformatting the 'Page updated' stamp is not a content change for the sitemap", () => {
+  const a = `<p>Story</p><div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 2026-08-26</div>`;
+  const b = a.replace("2026-08-26", "26 Aug 2026");
+  assert.strictEqual(U.visibleText(a), U.visibleText(b));
 });
 
 // ---------------- Age certificates across every market's rating board ----------------
@@ -1707,7 +1776,7 @@ test("similar strip: on-site titles jump the queue and render as anchors", () =>
 test("film page shows a visible updated stamp and the footer nav + how-we-rate line", () => {
   const item = { title: "T", slug: "t", kind: "movie", tmdbId: 7, rating: 7, votes: 100, released: "2026-08-01" };
   const page = U.buildFilmPage(item, "2026-08-14", new Set(), AUDIT_CFG);
-  assert.ok(page.includes("Page updated 2026-08-14"));
+  assert.ok(page.includes("Page updated 14 Aug 2026"), "human date in the edition's format, not ISO");
   assert.ok(page.includes('href="/hindi/"') && page.includes('href="/new-on-ott/"') && page.includes("how we rate"));
   const us = U.buildFilmPage(item, "2026-08-14", new Set(), { code: "us", name: "the US", region: "US" });
   assert.ok(us.includes('href="/us/new-on-ott/"') && !us.includes('href="/hindi/"'));
