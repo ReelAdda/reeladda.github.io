@@ -43,6 +43,7 @@
 <link rel="preconnect" href="https://image.tmdb.org">
 <link rel="preload" href="/fonts/anton-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<!--SSR:HEROPRELOAD--><!--/SSR:HEROPRELOAD-->
 <style>
   /* Self-hosted (subsetted latin) — no Google Fonts CDN, keeping the zero-tracking promise. */
   @font-face { font-family: 'Anton'; font-style: normal; font-weight: 400; font-display: swap;
@@ -303,7 +304,7 @@
   <div class="conf-strip" id="confStrip"></div>
 </header>
 
-<div class="hero" id="hero" style="display:none">
+<!--SSR:HERO--><div class="hero" id="hero" style="display:none">
   <div class="hero-card" id="heroCard">
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-grad"></div>
@@ -314,7 +315,7 @@
       <div class="hero-verdict" id="heroVerdict"></div>
     </div>
   </div>
-</div>
+</div><!--/SSR:HERO-->
 
 <div class="toolbar">
   <button class="tonight-btn" onclick="openMood()"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> What to watch tonight?</button>
