@@ -3153,6 +3153,8 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
   const relState = releaseState(item.released);
   const upcoming = relState === "upcoming" || relState === "today";
   const runEnded = !!opts.runEnded;
+  // A frozen page inside the run window: we know when it opened, not that it is still on.
+  const runOpen = !runEnded && !!opts.runOpen;
   const now = opts.now ? new Date(opts.now) : new Date();
 
   // Pick the first candidate inside Google's ~155-char display, else trim the shortest.
@@ -3183,7 +3185,10 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
   const est = (item.kind !== "tv" && !providers.length && !rentBuy.length
     && item.platform === "Theatres" && !upcoming)
     ? streamWindowShort(item.released, item.language, now) : null;
-  const inCinemas = runEnded ? `theatrical run over in ${country}` : `in cinemas in ${country} now`;
+  const openedOn = item.released ? `${fmtDateShort(item.released, now.getTime(), localeFor(cfg && cfg.code))}` : "";
+  const inCinemas = runEnded ? `theatrical run over in ${country}`
+    : runOpen ? `opened in cinemas in ${country}${openedOn ? ` on ${openedOn}` : ""}`
+    : `in cinemas in ${country} now`;
   // Name the language only when STREAM_WINDOW_WEEKS actually carries one for it. Everything
   // else gets the honest generic phrasing rather than an implied dataset we don't have.
   const windowBasis = est && est.known ? `the usual ${item.language} window` : "the usual window for a release like this";
@@ -3233,6 +3238,7 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
     // genuinely nothing to promise about the date, so the payoff clause carries the click.
     const lead = runEnded
       ? `${item.title} has finished its theatrical run in ${country}`
+      : runOpen ? `${item.title} opened in cinemas in ${country}${openedOn ? ` on ${openedOn}` : ""}`
       : `${item.title} is in cinemas in ${country}`;
     desc = fitDesc([
       `${lead}. We re-check for ${V.article.toLowerCase()} ${V.releaseDate} every single day \u2014 ${statsClause}critics' take and the verdict inside.`,
@@ -3646,7 +3652,7 @@ ${(() => {
       })()}
       ${item.verdict ? `<div class="verdict">▸ ${e(item.verdict)}</div>` : ""}
       ${item.released ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateShort(item.released, Date.now(), localeFor(code)))} ${e(String(item.released).slice(0, 4))}`}</div>` : ""}
-      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(asOf)}</div>` : ""}
+      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(fmtDateShort(asOf, Date.now(), localeFor(code)))} ${e(String(asOf).slice(0, 4))}</div>` : ""}
     </div>
   </div>
   ${(() => {
@@ -3756,7 +3762,7 @@ ${(() => {
     // (flatrate vs rent/buy) answers it for free from data we already fetch.
     const rb = Array.isArray(item.rentBuy) ? item.rentBuy : [];
     const rbRow = rb.length ? `<div style="margin-top:10px"><div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:5px">Rent or buy</div><div>${rb.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div></div>` : "";
-    const note = `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${e(asOf || "")} — platforms may change over time.</p>`;
+    const note = `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${asOf ? e(`${fmtDateShort(asOf, Date.now(), localeFor(code))} ${String(asOf).slice(0, 4)}`) : ""} — platforms may change over time.</p>`;
     if (providers.length) return `<h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}${filmHubLinks(item, cfg)}`;
     if (item.platform === "Theatres") return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>${rb.length ? rbRow + `<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>` : ""}${note}`;
     if (rb.length) return `<h2>Where to watch in ${e(country)}</h2>${rbRow}<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>${note}`;
@@ -4875,7 +4881,10 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 //    pages whose country name didn't match the literal swaps, India's "OTT" wording on 358
 //    pages in streaming markets, raw ISO header dates on 650, expired window estimates on 2
 //    (freshenFrozenCopy).
-const ARCHIVE_PATCH_VERSION = 9;
+// 10: run-state sweep. Frozen pages past release now say whether the film may still be in
+//     cinemas (theatreRunState), and pages stamped "Theatrical run ended" inside the run
+//     window — often on their release day — are corrected.
+const ARCHIVE_PATCH_VERSION = 10;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
@@ -5016,8 +5025,10 @@ function frozenFilmFacts(html) {
   const providers = subPills.filter((p) => !statusPill.test(p));
   const pending = /<!--SW:pending-->/.test(html);
   const runEnded = /Theatrical run ended/.test(html);
+  const runOpen = OPEN_PILL_RE.test(html);
   return {
     runEnded,
+    runOpen,
     item: {
       title: ld.name,
       kind: ld["@type"] === "TVSeries" ? "tv" : "movie",
@@ -5031,7 +5042,7 @@ function frozenFilmFacts(html) {
       votes: star ? 999 : 0,
       providers,
       rentBuy,
-      platform: providers.length ? providers[0] : (pending || runEnded ? "Theatres" : ""),
+      platform: providers.length ? providers[0] : (pending || runEnded || runOpen ? "Theatres" : ""),
     },
   };
 }
@@ -5043,7 +5054,7 @@ function rewriteMetaDescription(html, cfg = null) {
   if (!cur) return { html, changed: false };
   const facts = frozenFilmFacts(html);
   if (!facts) return { html, changed: false };
-  const next = filmMetaDescription(facts.item, cfg, { runEnded: facts.runEnded });
+  const next = filmMetaDescription(facts.item, cfg, { runEnded: facts.runEnded, runOpen: facts.runOpen });
   const esc = escHtml(next);
   if (!next || next.length < 20 || esc === cur[1]) return { html, changed: false };
   let out = html.replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc}$2`);
@@ -5156,6 +5167,12 @@ function freshenFrozenCopy(html, { countryName, cfg = null, now = Date.now() } =
       .replace(/When is ([^<"?]+?) releasing on OTT\? \(OTT release date\)/g, (m, t) => V.faqQuestion(t));
   }
 
+  // "Page updated 2026-08-26" -> the edition's date format. Cosmetic: visibleText ignores this
+  // line, so reformatting it never counts as a content change for the sitemap.
+  out = out.replace(/(<div class="meta" style="margin-top:2px;font-size:12\.5px">Page updated )(\d{4}-\d{2}-\d{2})(<\/div>)/,
+    (m, a, iso, b) => `${a}${escHtml(fmtDateShort(iso, now, localeFor(code)))} ${iso.slice(0, 4)}${b}`);
+  out = out.replace(/Availability as of (\d{4}-\d{2}-\d{2}) — /g,
+    (m, iso) => `Availability as of ${escHtml(fmtDateShort(iso, now, localeFor(code)))} ${iso.slice(0, 4)} — `);
   // Header date: raw ISO -> the edition's human date.
   out = out.replace(/(<div class="meta" style="margin-top:8px">)(Released|Releases) (\d{4}-\d{2}-\d{2})(<\/div>)/,
     (m, a, verb, iso, b) => `${a}${verb} ${escHtml(fmtDateShort(iso, now, localeFor(code)))} ${iso.slice(0, 4)}${b}`);
@@ -5177,7 +5194,7 @@ function freshenFrozenCopy(html, { countryName, cfg = null, now = Date.now() } =
 // that only touches markup (an analytics tag, a CSP) must not move the sitemap's lastmod;
 // one that corrects a sentence must, or Google keeps serving the stale snippet for months.
 function visibleText(html) {
-  return String(html).replace(/<script(?![^>]*application\/ld)[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g, "")
+  return String(html).replace(/<div class="meta" style="margin-top:2px;font-size:12\.5px">Page updated [^<]*<\/div>/g, "").replace(/<script(?![^>]*application\/ld)[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g, "")
     .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
@@ -5322,6 +5339,7 @@ function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf, now
   ]) {
     if (out.includes(stale)) { out = out.split(stale).join(pills); break; }
   }
+  out = out.replace(OPEN_PILL_RE, pills);
   // The FAQ and the "not on any service" lines still describe the page before arrival.
   out = settleReleasedCopy(out, { countryName, cfg, now }).html;
   return { html: out, changed: true };
@@ -5512,6 +5530,33 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
 // every page. Rewrites only the pending block; the page's verdict and prose are untouched.
 // ============================================================================
 // ============================================================================
+// THEATRICAL RUN STATE ON A FROZEN PAGE — what we can honestly say about "is it still on".
+//
+// No free source publishes per-cinema showtimes by country, so no page on this site can
+// PROVE a film is still screening. What the site does have is its own working definition:
+// the theatre lists only take films inside THEATRE_WINDOW_FALLBACK_DAYS of release. The run
+// state uses exactly that, so a film page can never disagree with the homepage it came from:
+//   open   — inside the window: "may still be showing — check local cinema listings"
+//   ended  — past the window:   "its cinema run has most likely ended"
+// Both are hedged on purpose. What this replaces was unhedged in both directions: the
+// archive patch stamped "Theatrical run ended" the moment a film left the list — which for
+// a coming-soon title is often RELEASE DAY (The Rope Curse 4, Singapore: frozen and marked
+// "run ended" on 27 Aug, the day it opened) — while the FAQ said nothing either way.
+// A page moves from open to ended once, on the day it crosses the window (see
+// refreshDuePages), so the claim tracks time without rewriting the page every day.
+// ============================================================================
+function theatreRunState(released, now = Date.now()) {
+  if (!released) return null;
+  const days = Math.floor((now - Date.parse(`${released}T00:00:00Z`)) / 864e5);
+  if (!Number.isFinite(days) || days < 0) return null;
+  return days < THEATRE_WINDOW_FALLBACK_DAYS ? "open" : "ended";
+}
+// The frozen-page status pill for the open state. It names a fact (the opening date) rather
+// than asserting a current screening, and it stays recognisable as a status pill ("cinema").
+const openPill = (d) => `<span class="pill">Opened in cinemas ${escHtml(d)} — not streaming yet</span>`;
+const OPEN_PILL_RE = /<span class="pill">Opened in cinemas [^<]* — not streaming yet<\/span>/;
+
+// ============================================================================
 // SETTLING A FROZEN PAGE PAST ITS RELEASE DATE.
 //
 // A page frozen before release carries pre-release copy in SIX places, and the due-date pass
@@ -5556,18 +5601,57 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
   const pendingNote = `Not on a subscription service or to rent in ${escHtml(country)} yet.`;
   out = out.replace("Not out yet — nowhere to stream or rent it until it opens.", pendingNote);
 
-  // FAQ "Where can I watch" — visible HTML and FAQPage JSON-LD.
+  // FAQ "Where can I watch" — visible HTML and FAQPage JSON-LD. Pending pages also say
+  // whether it may still be in cinemas (see theatreRunState): "opened on…" alone left the
+  // one question a reader actually has — can I still see it? — unanswered.
+  const run = live ? null : theatreRunState(date, now);
+  const runClause = (a) => run === "open"
+    ? ` and may still be showing — check local cinema listings`
+    : run === "ended" ? `, and its cinema run has most likely ended` : "";
   const tail = (a) => live
     ? `opened in theatres in ${country} on ${opened}, and it${a}s streaming there now — see where to watch above.`
-    : `opened in theatres in ${country} on ${opened}. It isn${a}t streaming yet — this page updates the day it is.`;
+    : `opened in theatres in ${country} on ${opened}${runClause(a)}. It isn${a}t streaming yet — this page updates the day it is.`;
   out = out.replace(new RegExp(`hasn${APOS}t released yet(?: — it${APOS}s due [^.<"]+)?\\. We${APOS}ll list where to watch once it${APOS}s out\\.`, "g"),
     (m) => tail(apos(m)));
+  if (!live) {
+    // Pages settled before the run clause existed, or crossing from open to ended: rewrite the
+    // sentence into the current state. Matches all three forms this template has produced.
+    out = out.replace(new RegExp(`opened in theatres in ([^<"]+?) on ([^<".,]+?)(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?\\. It isn${APOS}t streaming yet — this page updates the day it is\\.`, "g"),
+      (m, c, d) => `opened in theatres in ${c} on ${d}${runClause(apos(m))}. It isn${apos(m)}t streaming yet — this page updates the day it is.`);
+    // The archive patch's own run sentences say the run is over, unconditionally. Bring them
+    // into the same state as the FAQ and the pill, or a page says "may still be showing" in
+    // one place and "has finished its theatrical run" two paragraphs up.
+    const V = streamVocab(cfg);
+    out = out.replace(/It (?:had its theatrical run in|opened in theatres in) ([^<"—]+?)(?: on [^<"—]+?)? — check back here for its ((?:OTT|streaming) arrival)\./g,
+      (m, c, arr) => run === "open"
+        ? `It opened in theatres in ${c} on ${escHtml(opened)} — check back here for its ${V.arrival}.`
+        : `It had its theatrical run in ${c} — check back here for its ${V.arrival}.`);
+    out = out.replace(new RegExp(`(?:has finished its theatrical run in ([^<".]+?)|opened in theatres in ([^<".]+?) on [^<".,]+?(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?)\\. (Its (?:OTT|streaming) release hasn${APOS}t been announced yet — check back soon\\.)`, "g"),
+      (m, c1, c2, rest) => {
+        const c = c1 || c2;
+        const d = m.includes("&#39;") ? escHtml(opened) : opened;
+        return run === "open"
+          ? `opened in theatres in ${c} on ${d} and may still be showing — check local cinema listings. ${rest}`
+          : `opened in theatres in ${c} on ${d}, and its cinema run has most likely ended. ${rest}`;
+      });
+    // The status pill. Only a THEATRICAL status pill is touched — never a provider.
+    const short = fmtDateShort(date, now, localeFor(cfg && cfg.code));
+    const statusPills = [OPEN_PILL_RE, /<span class="pill">Theatrical run ended — (?:OTT|streaming) arrival pending<\/span>/, /<span class="pill">In theatres<\/span>/];
+    const want = run === "open" ? openPill(short)
+      : `<span class="pill">Theatrical run ended — ${streamVocab(cfg).arrival} pending</span>`;
+    for (const re of statusPills) { if (re.test(out)) { out = out.replace(re, want); break; } }
+  }
 
   if (live) {
     // A page that settled while pending and has since started streaming.
-    out = out.replace(new RegExp(`\\. It isn${APOS}t streaming yet — this page updates the day it is\\.`, "g"),
-      (m) => `, and it${apos(m)}s streaming there now — see where to watch above.`);
+    // The run clause goes with it — "may still be showing" is not the news any more.
+    out = out.replace(new RegExp(`opened in theatres in ([^<"]+?) on ([^<".,]+?)(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?\\. It isn${APOS}t streaming yet — this page updates the day it is\\.`, "g"),
+      (m, c, d) => `opened in theatres in ${c} on ${d}, and it${apos(m)}s streaming there now — see where to watch above.`);
     out = out.split(pendingNote).join("");
+    out = out.replace(/It (?:had its theatrical run in|opened in theatres in) ([^<"—]+?)(?: on [^<"—]+?)? — check back here for its (?:OTT|streaming) arrival\./g,
+      (m, c) => `It had its theatrical run in ${c} and is streaming there now.`);
+    out = out.replace(new RegExp(`(?:has finished its theatrical run in ([^<".]+?)|opened in theatres in ([^<".]+?) on [^<".,]+?(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?)\\. Its (?:OTT|streaming) release hasn${APOS}t been announced yet — check back soon\\.`, "g"),
+      (m, c1, c2) => `has finished its theatrical run in ${c1 || c2} and is streaming there now — see where to watch above.`);
     // The streaming-date FAQ ("…hasn't been officially announced yet… updates the day it
     // starts streaming") is answered now. The arrival patch never reached it either.
     out = out.replace(new RegExp(`\\bAn? (?:OTT|streaming|Streaming) [^<"]*?hasn${APOS}t been officially announced yet\\.[^<"]*?This page updates automatically the day it starts streaming\\.`, "g"),
@@ -5607,8 +5691,18 @@ function refreshDuePages(cfg, countryName, manifest = null) {
     const path = `${dir}/${f}`;
     let html;
     try { html = fs.readFileSync(path, "utf8"); } catch { continue; }
-    if (!html.includes("<!--SW:due=")) continue;
-    const { html: out, changed } = patchDueIfPassed(html, { title: titleFromPage(html) || f.replace(/\.html$/, ""), countryName, cfg });
+    let out = html, changed = false;
+    if (html.includes("<!--SW:due=")) {
+      ({ html: out, changed } = patchDueIfPassed(html, { title: titleFromPage(html) || f.replace(/\.html$/, ""), countryName, cfg }));
+    } else if (OPEN_PILL_RE.test(html)) {
+      // Open run: re-settle so it flips to "most likely ended" on the day it crosses the
+      // window, and rebuild the description, which states the same thing.
+      const st = settleReleasedCopy(html, { countryName, cfg });
+      if (st.changed) {
+        out = rewriteMetaDescription(st.html, cfg).html;
+        changed = true;
+      }
+    } else continue;
     if (changed) {
       fs.writeFileSync(path, out); n++;
       const e = manifest && manifest[cfg.code] && manifest[cfg.code][f.replace(/\.html$/, "")];
@@ -7319,7 +7413,7 @@ module.exports = {
   buildRssFeed, archivePatchHtml, stripAggregateRating, retitleFrozen, filmTitleTag, reconcilePagesManifest,
   buildOttMonthPage, writeOttMonthPages, ottMonthPath, ottMonthUrl, backfillCatalog,
   buildScopedMonthPage, writePlatformMonthPages, writeLanguageMonthPages, monthRow,
-  visibleText, crossCountryLeak, neutralizeCrossCountry, repairLegacyPages, freshenFrozenCopy, countryNameForms, settleReleasedCopy, patchDueIfPassed, applyArrivalPatch, certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
+  theatreRunState, visibleText, crossCountryLeak, neutralizeCrossCountry, repairLegacyPages, freshenFrozenCopy, countryNameForms, settleReleasedCopy, patchDueIfPassed, applyArrivalPatch, certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
   platformMonthPath, platformMonthUrl, languageMonthPath, languageMonthUrl, SCOPED_MONTH_MIN,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, ARRIVAL_MAX_RELEASE_AGE, SEEN_RETENTION_DAYS,
   socialImage,
