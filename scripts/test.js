@@ -10,6 +10,11 @@ function test(name, fn) {
   try { fn(); passed++; console.log(`  \u2713 ${name}`); }
   catch (e) { failed++; console.error(`  \u2717 ${name}\n      ${e.message}`); }
 }
+// Async tests run AFTER every sync test, one at a time, and are awaited before the totals
+// print. test() can't take them: it would count an unresolved promise as a pass, and a test
+// that changes the working directory would leak it into every test after it.
+const ASYNC_TESTS = [];
+function testAsync(name, fn) { ASYNC_TESTS.push([name, fn]); }
 function group(title) { console.log(`\n${title}`); }
 
 // ---------------- verdict() ----------------
@@ -409,6 +414,221 @@ test("buildRssFeed: country feeds use their own namespace and XML-escapes titles
   assert.ok(xml.includes("https://filmychill.com/us/movie/tj.html"));
   assert.ok(xml.includes("Tom &amp; Jerry &lt;3"));
   assert.ok(!xml.includes("Tom & Jerry <3"));
+});
+
+// ---------------- Freshness audit (Sept 2026) ----------------
+group("freshness: frozen pages never keep present-tense, wrong-market or expired claims");
+const FR_US = { code: "us", name: "United States", region: "US", watchRegion: "US" };
+const FR_IN = { code: "in", name: "India", region: "IN", watchRegion: "IN" };
+
+const legacyUsPage = (title, slug, poster) => U.buildFilmPage({ title, slug, kind: "movie", platform: "Theatres",
+    released: "2026-05-29", poster: `https://image.tmdb.org/t/p/w342/${poster}.jpg`, cert: "A", rating: 6.1, votes: 400,
+    verdict: "Worth a watch" }, "2026-06-01", new Set([slug]), FR_US)
+  .replace(/in theatres in the US now/g, "in theatres in India now")
+  .replace(/playing in theatres across the US\./g, "playing in theatres across India.");
+
+test("freshenFrozenCopy: 'in theatres now' is settled whatever form of the name the page used", () => {
+  for (const form of ["United States", "the US", "US"]) {
+    const html = `<p>It&#39;s in theatres in ${form} now — best caught on the big screen.</p>` +
+      `<div class="fa">X is currently playing in theatres across ${form}. An OTT release hasn&#39;t been announced yet.</div>` +
+      `<script type="application/ld+json">{"text":"X is currently playing in theatres across ${form}. An OTT release hasn't been announced yet."}</script>`;
+    const r = U.freshenFrozenCopy(html, { countryName: "the US", cfg: FR_US });
+    assert.ok(r.changed, form);
+    assert.ok(!/in theatres in [^<]* now|currently playing/.test(r.html), `${form}: present tense survived`);
+    assert.ok(/had its theatrical run in the US/.test(r.html) && /finished its theatrical run in the US/.test(r.html));
+    assert.ok(/hasn't been announced yet — check back soon/.test(r.html), "JSON-LD form (plain apostrophe) is fixed too");
+    JSON.parse(/ld\+json">(.*?)<\/script>/.exec(r.html)[1]);
+    assert.ok(!U.freshenFrozenCopy(r.html, { countryName: "the US", cfg: FR_US }).changed, "idempotent");
+  }
+});
+
+test("freshenFrozenCopy: never rewrites a sentence about ANOTHER country (that page needs a rebuild)", () => {
+  const html = `<p>It&#39;s in theatres in India now — best caught on the big screen.</p>`;
+  assert.ok(!U.freshenFrozenCopy(html, { countryName: "the US", cfg: FR_US }).changed,
+    "turning India's claim into a US claim would invent a fact");
+});
+
+test("freshenFrozenCopy: India's OTT wording becomes the market's own, titles untouched", () => {
+  const html = `<title>OTT Mania (2026) — Review</title><span class="pill">Theatrical run ended — OTT arrival pending</span>` +
+    `<summary>When is OTT Mania releasing on OTT? (OTT release date)</summary>` +
+    `<script type="application/ld+json">{"name":"When is OTT Mania releasing on OTT? (OTT release date)"}</script>`;
+  const r = U.freshenFrozenCopy(html, { countryName: "the US", cfg: FR_US });
+  assert.ok(/streaming arrival pending/.test(r.html));
+  assert.ok(/<summary>When is OTT Mania coming to streaming\?<\/summary>/.test(r.html), r.html);
+  assert.ok(/"name":"When is OTT Mania coming to streaming\?"/.test(r.html));
+  assert.ok(/<title>OTT Mania \(2026\)/.test(r.html), "a film title containing 'OTT' is not a template phrase");
+  // India keeps its own vocabulary.
+  assert.ok(!U.freshenFrozenCopy(html, { countryName: "India", cfg: FR_IN }).html.includes("coming to streaming"));
+});
+
+test("freshenFrozenCopy: raw ISO header dates become the edition's human date", () => {
+  const r = U.freshenFrozenCopy(`<div class="meta" style="margin-top:8px">Released 2026-06-12</div>`,
+    { countryName: "the US", cfg: FR_US, now: Date.parse("2026-09-22T00:00:00Z") });
+  assert.ok(/>Released Jun 12 2026</.test(r.html), r.html);
+});
+
+test("freshenFrozenCopy: a streaming-window estimate is dropped only once its window has closed", () => {
+  const est = (span) => `<p>A streaming release date hasn&#39;t been officially announced yet. Hindi releases typically reach streaming about 4–8 weeks after their theatrical run, which would put it around ${span} — that&#39;s a pattern, not a confirmed date. This page updates automatically the day it starts streaming.</p>`;
+  const now = Date.parse("2026-09-22T00:00:00Z");
+  const closed = U.freshenFrozenCopy(est("July 2026 and August 2026"), { cfg: FR_US, now });
+  assert.ok(!/pattern, not a confirmed date/.test(closed.html) && /officially announced yet\. This page updates/.test(closed.html), closed.html);
+  const open = U.freshenFrozenCopy(est("September 2026 and October 2026"), { cfg: FR_US, now });
+  assert.ok(/pattern, not a confirmed date/.test(open.html), "a window still running is a valid pattern");
+});
+
+test("crossCountryLeak: finds wrong-market claims and India certificates, ignores plots and titles", () => {
+  const leak = `<p>In India you can stream it on Prime Video.</p><table><tr><td>Watch with family?</td><td>A · Adults only</td></tr></table>`;
+  const r = U.crossCountryLeak(leak, { code: "au" });
+  assert.ok(r.includes("names India") && r.includes("India certificate"), JSON.stringify(r));
+  assert.deepStrictEqual(U.crossCountryLeak(`<h2>Story</h2><p>In Singapore, Krishna is forced to use his powers.</p>`, FR_IN), [],
+    "a synopsis mentioning a country is not an availability claim");
+  assert.deepStrictEqual(U.crossCountryLeak(`<p>In India you can stream it on Netflix.</p>`, FR_IN), [], "own market is fine");
+  assert.deepStrictEqual(U.crossCountryLeak(`<tr><td>Watch with family?</td><td>A · Adults only</td></tr>`, FR_IN), [],
+    "India's own certificate on India's page is correct");
+});
+
+test("neutralizeCrossCountry: removes every false claim and keeps the page valid", () => {
+  // What the real legacy pages look like: the US shell (heading, description, pills) with the
+  // India-defaulted builder's sentences and CBFC certificate inside it.
+  const page = legacyUsPage("Backrooms", "backrooms", "poster-real");
+  assert.ok(U.crossCountryLeak(page, FR_US).length, "fixture: India's copy inside a US page");
+  const r = U.neutralizeCrossCountry(page, FR_US, "Backrooms");
+  assert.deepStrictEqual(U.crossCountryLeak(r.html, FR_US), [], "nothing false left");
+  assert.ok(!/Watch with family\?<\/td><td>A ·/.test(r.html), "India's CBFC row is gone");
+  for (const m of r.html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(m[1]);
+  assert.ok(!/is rated A/.test(r.html), "…and the FAQ built from it, in HTML and schema");
+});
+
+testAsync("repairLegacyPages: rebuilds for the right market only when the poster proves the film", async () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-legacy-"));
+  const cwd = process.cwd();
+  try {
+    process.chdir(tmp);
+    fsx.mkdirSync("us/movie", { recursive: true });
+    fsx.writeFileSync("us/movie/backrooms.html", legacyUsPage("Backrooms", "backrooms", "poster-real"));
+    fsx.writeFileSync("us/movie/impostor.html", legacyUsPage("Impostor", "impostor", "poster-other"));
+    const manifest = { us: { backrooms: { last: "2026-06-01", archivedOn: "2026-06-01" }, impostor: { last: "2026-06-01", archivedOn: "2026-06-01" } } };
+    const calls = [];
+    const api = {
+      pause: async () => {},
+      tmdb: async (url) => {
+        calls.push(url);
+        if (url.startsWith("/search/")) return { results: [{ id: 11, poster_path: "/poster-real.jpg" }, { id: 12, poster_path: "/somebody-else.jpg" }] };
+        return { id: 11, title: "Backrooms", release_date: "2026-05-29", vote_average: 6.1, vote_count: 400, poster_path: "/poster-real.jpg",
+          overview: "A door.", genres: [{ id: 27, name: "Horror" }], original_language: "en" };
+      },
+      enrich: async () => ({ providers: ["Max"], cert: "R", runtime: 111 }),
+    };
+    const baseItem = (m, kind) => ({ title: m.title, released: m.release_date, kind, tmdbId: m.id, language: "English",
+      poster: `https://image.tmdb.org/t/p/w342${m.poster_path}`, rating: 6.1, votes: 400, verdict: "Worth a watch", review: m.overview });
+    const n = await U.repairLegacyPages(FR_US, manifest, { baseItem, withImdb: (x) => x, api });
+    assert.strictEqual(n, 2);
+    const fixed = fsx.readFileSync("us/movie/backrooms.html", "utf8");
+    assert.deepStrictEqual(U.crossCountryLeak(fixed, FR_US), [], "rebuilt page is clean");
+    assert.ok(/Max/.test(fixed) && /R · /.test(fixed), "US providers and the US rating board, from the US region");
+    assert.strictEqual(manifest.us.backrooms.tmdbId, 11);
+    assert.ok(manifest.us.backrooms.repairedOn && manifest.us.backrooms.last, "joins the lifecycle sweeps, and the sitemap says it changed");
+    // The impostor's poster matched nothing: it must NOT have been rebuilt as Backrooms.
+    const imp = fsx.readFileSync("us/movie/impostor.html", "utf8");
+    assert.ok(/Impostor/.test(imp) && !/Backrooms/.test(imp), "no same-titled or wrong film is ever written over a page");
+    assert.deepStrictEqual(U.crossCountryLeak(imp, FR_US), [], "…but its false claims are still removed");
+  } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
+});
+
+test("visibleText ignores markup-only changes, catches wording changes", () => {
+  const a = `<html><head><script async src="x"></script></head><body><p>Hello there</p></body></html>`;
+  assert.strictEqual(U.visibleText(a), U.visibleText(a.replace("<script async src=\"x\"></script>", "")));
+  assert.notStrictEqual(U.visibleText(a), U.visibleText(a.replace("Hello there", "Goodbye")));
+});
+
+test("the commit step stages deletions, ships the About page, and never publishes the test sandbox", () => {
+  const wf = require("fs").readFileSync(".github/workflows/update.yml", "utf8");
+  const add = (wf.match(/git add -A -- ([^\n]+)/) || [])[1] || "";
+  assert.ok(/\babout\//.test(add), "about/ must be committed or its country list never ships");
+  for (const unquoted of [" new-on-*/", " */films/", " */embed/"]) {
+    assert.ok(!add.includes(unquoted), "unquoted glob: the shell drops deleted dirs, so their deletion is never staged");
+  }
+  assert.ok(add.includes("':(glob)new-on-*/**'"), "git itself must match hub paths, including deleted ones");
+  assert.ok(/git rm -r --cached --quiet --ignore-unmatch zz/.test(wf));
+  assert.ok(/^zz\/$/m.test(require("fs").readFileSync(".gitignore", "utf8")));
+  // Every country directory is in the commit list.
+  for (const c of require("./lib/core.js").COUNTRIES) if (c.code !== "in") assert.ok(add.includes(` ${c.code}/`), c.code);
+});
+
+test("no page states a country count by hand", () => {
+  const src = require("fs").readFileSync("scripts/update.js", "utf8");
+  for (const bad of ["seven other countries", "all 8 countries", "eight countries"]) {
+    assert.ok(!src.includes(bad), `hardcoded "${bad}" — derive it from COUNTRIES.length`);
+  }
+});
+
+// ---------------- Frozen pages past their release date ----------------
+group("settleReleasedCopy: no 'coming soon' copy on a page whose date has passed");
+const SETTLE_CFG = { code: "sg", name: "Singapore", region: "SG", watchRegion: "SG" };
+// The builder reads the real clock, so the fixture's release date must be in the real future
+// for it to render pre-release copy; the settle is then run with a `now` just past that date.
+const SETTLE_REL = (() => { const d = new Date(Date.now() + 30 * 864e5); return d.toISOString().slice(0, 10); })();
+const SETTLE_HUMAN = new Date(`${SETTLE_REL}T00:00:00Z`).toLocaleDateString("en-SG", { day: "numeric", month: "short", timeZone: "UTC" }) + " " + SETTLE_REL.slice(0, 4);
+const settleFixture = () => U.buildFilmPage({
+  title: "Rope's Curse", slug: "ropes-curse", kind: "movie", language: "Chinese", genre: "Thriller",
+  platform: "Theatres", released: SETTLE_REL, tmdbId: 7,
+}, new Date().toISOString().slice(0, 10), new Set(["ropes-curse"]), SETTLE_CFG);
+const ldOf = (h) => [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
+  .map((m) => JSON.parse(m[1])).flatMap((x) => x["@graph"] || [x]);
+const STALE = /hasn(?:'|&#39;)t released yet|mark your calendar|Not out yet — nowhere|>Releases [0-9]/;
+const AFTER = Date.parse(`${SETTLE_REL}T00:00:00Z`) + 5 * 864e5;
+
+test("a page frozen before release has pre-release copy in several places (the bug's shape)", () => {
+  // Built the day before release, as the archive freezes it. If this ever stops holding, the
+  // fixture no longer models the real failure and the tests below prove nothing.
+  const h = settleFixture();
+  assert.ok(STALE.test(h), "fixture must carry the pre-release sentences");
+});
+
+test("once the date passes, every pre-release sentence is settled — visible HTML and schema", () => {
+  const r = U.settleReleasedCopy(settleFixture(), { countryName: "Singapore", cfg: SETTLE_CFG, now: AFTER });
+  assert.ok(r.changed);
+  assert.ok(!STALE.test(r.html), "no 'hasn't released' / 'mark your calendar' / 'Releases <date>' left");
+  assert.ok(r.html.includes(`>Released ${SETTLE_HUMAN}<`), "header moves to past tense with a human date");
+  assert.ok(r.html.includes(`opened in theatres in Singapore on ${SETTLE_HUMAN}`));
+  assert.ok(!new RegExp(`${SETTLE_REL}[;.]`).test(r.html.replace(/"datePublished":"[^"]*"/g, "")), "no raw ISO date in prose");
+  const faq = ldOf(r.html).find((x) => x["@type"] === "FAQPage");
+  const where = faq.mainEntity.find((q) => /Where can I watch/.test(q.name)).acceptedAnswer.text;
+  assert.ok(where.includes(`opened in theatres in Singapore on ${SETTLE_HUMAN}. It isn't streaming yet`), where);
+  assert.ok(/Rope's Curse opened/.test(where), "apostrophes stay plain in JSON-LD, escaped in HTML");
+  assert.ok(!U.settleReleasedCopy(r.html, { countryName: "Singapore", cfg: SETTLE_CFG, now: AFTER }).changed, "idempotent");
+});
+
+test("before the date, nothing is touched", () => {
+  const h = settleFixture();
+  assert.ok(!U.settleReleasedCopy(h, { countryName: "Singapore", cfg: SETTLE_CFG, now: Date.now() }).changed);
+});
+
+test("arrival after settling: the page says it's streaming, and nothing says it isn't", () => {
+  const settled = U.settleReleasedCopy(settleFixture(), { countryName: "Singapore", cfg: SETTLE_CFG, now: AFTER }).html;
+  const a = U.applyArrivalPatch(settled, { title: "Rope's Curse", providers: ["Netflix"], countryName: "Singapore", cfg: SETTLE_CFG, asOf: "2026-09-22", now: AFTER });
+  assert.ok(a.changed);
+  assert.ok(!/isn(?:'|&#39;)t streaming yet|Not on a subscription service|hasn(?:'|&#39;)t been officially announced/.test(a.html),
+    "no pending sentence survives an arrival");
+  const faq = ldOf(a.html).find((x) => x["@type"] === "FAQPage");
+  assert.ok(faq.mainEntity.every((q) => !/not been|hasn't been officially announced/.test(q.acceptedAnswer.text)));
+  assert.ok(/streaming there now/.test(faq.mainEntity.find((q) => /Where can I watch/.test(q.name)).acceptedAnswer.text));
+});
+
+test("the due pass and the archive sweep both carry the settle", () => {
+  // Due pass: page stamped <!--SW:due--> at freeze time.
+  const h = settleFixture();
+  if (/<!--SW:due=/.test(h)) {
+    const d = U.patchDueIfPassed(h, { title: "Rope's Curse", countryName: "Singapore", cfg: SETTLE_CFG, now: AFTER });
+    assert.ok(d.changed && !STALE.test(d.html), "due pass settles the whole page, not only the streaming block");
+  }
+  // Archive sweep (v9): pages the due pass already rewrote before this existed.
+  // The archive chain runs on the real clock; prove it calls the settle by feeding it a page
+  // already past its date (the settle itself is covered above with an explicit clock).
+  const past = h.replace(new RegExp(SETTLE_REL, "g"), "2020-01-15");
+  const arch = U.archivePatchHtml(past, "Singapore", SETTLE_CFG);
+  assert.ok(!STALE.test(arch.html), "archive chain includes the settle");
 });
 
 // ---------------- Age certificates across every market's rating board ----------------
@@ -3978,6 +4198,16 @@ test("a week with no new arrivals says so rather than pretending", () => {
   assert.ok(/Nothing new landed/.test(html));
 });
 
-console.log(`Tests: ${passed} passed, ${failed} failed`);
-if (failed > 0) { console.error("FAIL"); process.exit(1); }
-console.log("PASS");
+(async () => {
+  if (ASYNC_TESTS.length) console.log("\nasync");
+  for (const [name, fn] of ASYNC_TESTS) {
+    try { await fn(); passed++; console.log(`  \u2713 ${name}`); }
+    catch (e) { failed++; console.error(`  \u2717 ${name}\n      ${e.message}`); }
+  }
+  // The sandbox country's files are test output, never site content. Remove them so a run
+  // in the repo leaves no zz/ behind to be committed and served.
+  try { require("fs").rmSync("zz", { recursive: true, force: true }); } catch {}
+  console.log(`Tests: ${passed} passed, ${failed} failed`);
+  if (failed > 0) { console.error("FAIL"); process.exit(1); }
+  console.log("PASS");
+})();
