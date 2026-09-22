@@ -15,6 +15,7 @@ const {
   filmPagePath,
   filmPageUrl,
   fmtDateShort,
+  fmtDateFull,
   fmtRuntime,
   slugify,
   trim,
@@ -42,6 +43,7 @@ const {
   markQueue,
   nextQueue,
   noteBuilt,
+  reopenForBar,
 } = require("./lib/catalog.js");
 const { filmScore, confidenceTier, rankValue, rankFilms } = require("./lib/score.js");
 
@@ -1642,7 +1644,7 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
   let whereBit = "";
   const provs = Array.isArray(item.providers) ? item.providers : [];
   if (upcoming && item.released) {
-    whereBit = ` It releases on ${fmtDateShort(item.released, Date.now(), locale)} ${String(item.released).slice(0, 4)}; mark your calendar if it's on your list.`;
+    whereBit = ` It releases on ${fmtDateFull(item.released, locale)}; mark your calendar if it's on your list.`;
   } else if (provs.length) {
     whereBit = ` In ${countryName} you can stream it on ${provs.slice(0, 3).join(", ")}.`;
   } else if (item.platform === "Theatres") {
@@ -1714,7 +1716,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   }
   // Q2: where to watch
   let whereA;
-  if (upcoming) whereA = `${item.title} hasn't released yet${item.released ? ` — it's due ${fmtDateShort(item.released, Date.now(), localeFor(cfg && cfg.code))} ${String(item.released).slice(0, 4)}` : ""}. We'll list where to watch once it's out.`;
+  if (upcoming) whereA = `${item.title} hasn't released yet${item.released ? ` — it's due ${fmtDateFull(item.released, localeFor(cfg && cfg.code))}` : ""}. We'll list where to watch once it's out.`;
   else if (provs.length) whereA = `You can stream ${item.title} in ${countryName} on ${provs.join(", ")}.`;
   else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across ${countryName}. ${V.article} ${V.release} hasn't been announced yet.`;
   else whereA = `Streaming availability for ${item.title} in ${countryName} isn't confirmed yet — check back as platforms update.`;
@@ -3023,6 +3025,8 @@ async function main() {
   // their clusters and the sitemap in the same run they are written.
   if (CATALOG_ENABLED) {
     const catalogState = loadCatalogManifest();
+    const reopened = reopenForBar(catalogState);
+    if (reopened) console.log(`  catalog: eligibility bar changed — ${reopened} retired queue(s) re-opened`);
     for (const cfg of builtCountries) {
       try { await backfillCatalog(cfg, pagesManifest, { state: catalogState, baseItem, withImdb, batch: CATALOG_BATCH }); }
       catch (e) { console.warn(`  catalog [${cfg.code}] skipped: ${e.message}`); }
@@ -3046,6 +3050,9 @@ async function main() {
   // Frozen archived pages are never rewritten, so pages generated before the x-default
   // fix carry a dead India URL in their hreflang forever unless repaired in place.
   repairXDefaults(builtCountries);
+
+  // Every hub for this run has been written or pruned by now, so disk is the truth.
+  try { sweepDeadHubLinks(COUNTRIES); } catch (e) { console.warn(`  dead hub links skipped: ${e.message}`); }
 
   writeMultiCountrySitemap(builtCountries, pagesManifest);
   console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.`);
@@ -3197,7 +3204,7 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
   if (upcoming && item.released) {
     // Pre-release: the date is the draw and it is public anyway, so lead with it. What is held
     // back is what the searcher wants next — is it any good, how long, when will it stream.
-    const when = `${fmtDateShort(item.released, now.getTime(), localeFor((cfg && cfg.code) || "in"))} ${String(item.released).slice(0, 4)}`;
+    const when = fmtDateFull(item.released, localeFor((cfg && cfg.code) || "in"));
     desc = fitDesc([
       `${item.title} opens in cinemas in ${country} on ${when}. Runtime, cast, the trailer and the early reception \u2014 plus when it's likely to reach ${V.word}.`,
       `${item.title} opens in cinemas in ${country} on ${when}. Runtime, cast, trailer and when it's likely to reach ${V.word}.`,
@@ -3305,8 +3312,13 @@ function filmTitleTag(item, cfg = null) {
         `${item.title}${yr} — Review, Rating & Where to Watch in ${country}`,
         `${item.title}${yr} — Review & Where to Watch in ${country}`,
         `${item.title}${yr} — Where to Watch in ${country}`,
+        // Long titles used to fall straight to the bare tier, so all 14 editions of the same
+        // film showed an identical title with no country in it. The year is the cheaper thing
+        // to lose: the H1 and the page carry it, and the country is what tells a searcher in
+        // Manila that this result is about Manila.
+        year ? `${item.title} — Where to Watch in ${country}` : null,
         `${item.title}${yr} — Where to Watch`,
-      ]);
+      ].filter(Boolean));
 }
 
 // ============================================================================
@@ -3651,8 +3663,8 @@ ${(() => {
           + `<span class="cbar"><i style="width:${Math.round(sc.confidencePct * 100)}%"></i></span></div>`;
       })()}
       ${item.verdict ? `<div class="verdict">▸ ${e(item.verdict)}</div>` : ""}
-      ${item.released ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateShort(item.released, Date.now(), localeFor(code)))} ${e(String(item.released).slice(0, 4))}`}</div>` : ""}
-      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(fmtDateShort(asOf, Date.now(), localeFor(code)))} ${e(String(asOf).slice(0, 4))}</div>` : ""}
+      ${item.released ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
+      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
     </div>
   </div>
   ${(() => {
@@ -3746,7 +3758,7 @@ ${(() => {
       const due = item.released ? String(item.released).slice(0, 10) : "";
       const opens = relState === "today"
         ? `${e(item.title)} opens in theatres in ${e(country)} today.`
-        : `${e(item.title)} hasn't had its theatrical release yet${due ? `, and is due ${e(fmtDateShort(due, Date.now(), localeFor(code)))} ${e(due.slice(0, 4))}` : ""}.`;
+        : `${e(item.title)} hasn't had its theatrical release yet${due ? `, and is due ${e(fmtDateFull(due, localeFor(code)))}` : ""}.`;
       return `<!--SW:pending--><!--SW:due=${e(due)}--><h2>${e(V.heading(item.title))}</h2><p>${opens} ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens — this page updates automatically the day it starts streaming.</p><!--/SW:pending-->`;
     }
     const est = streamWindowEstimate(item.released, item.language);
@@ -3762,14 +3774,14 @@ ${(() => {
     // (flatrate vs rent/buy) answers it for free from data we already fetch.
     const rb = Array.isArray(item.rentBuy) ? item.rentBuy : [];
     const rbRow = rb.length ? `<div style="margin-top:10px"><div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:5px">Rent or buy</div><div>${rb.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div></div>` : "";
-    const note = `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${asOf ? e(`${fmtDateShort(asOf, Date.now(), localeFor(code))} ${String(asOf).slice(0, 4)}`) : ""} — platforms may change over time.</p>`;
+    const note = `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${asOf ? e(fmtDateFull(asOf, localeFor(code))) : ""} — platforms may change over time.</p>`;
     if (providers.length) return `<h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}${filmHubLinks(item, cfg)}`;
     if (item.platform === "Theatres") return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>${rb.length ? rbRow + `<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>` : ""}${note}`;
     if (rb.length) return `<h2>Where to watch in ${e(country)}</h2>${rbRow}<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>${note}`;
     // Unreleased film: previously this block rendered nothing at all, so the page answered
     // "where to watch" with silence. State it plainly instead.
     if (upcoming && item.released) {
-      const when = relState === "today" ? "today" : `${fmtDateShort(item.released, Date.now(), localeFor(code))} ${String(item.released).slice(0, 4)}`;
+      const when = relState === "today" ? "today" : fmtDateFull(item.released, localeFor(code));
       return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">${relState === "today" ? "In cinemas today" : `In cinemas from ${e(when)}`}</span></div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not out yet — nowhere to stream or rent it until it opens.</p>`;
     }
     return "";
@@ -4013,6 +4025,9 @@ async function repairLegacyPages(cfg, pagesManifest, { baseItem, withImdb, budge
 // Off by default: set CATALOG=1 (optionally CATALOG_BATCH=n) in the workflow to enable.
 // ============================================================================
 const CATALOG_MANIFEST_FILE = "catalog-manifest.json";
+// The site's own "an audience, not a handful" line (see the counterpoint gate: < 50 voters is
+// too few to call it an audience). Catalogue pages below it show no rating or verdict.
+const CATALOG_RATING_MIN_VOTES = 50;
 const CATALOG_ENABLED = process.env.CATALOG === "1";
 const CATALOG_BATCH = Math.max(1, Number(process.env.CATALOG_BATCH || CATALOG_BATCH_DEFAULT));
 
@@ -4021,7 +4036,9 @@ function loadCatalogManifest() {
   catch { return {}; }
 }
 
-async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, batch = CATALOG_BATCH }) {
+// `api` is injectable for tests (same pattern as repairLegacyPages).
+async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, batch = CATALOG_BATCH,
+  api = { tmdb, enrich, pause: sleep } }) {
   const code = cfg.code;
   const dir = code === "in" ? "movie" : `${code}/movie`;
   fs.mkdirSync(dir, { recursive: true });
@@ -4040,7 +4057,7 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
     const dateField = q.kind === "tv" ? "first_air_date.lte" : "primary_release_date.lte";
     let d = null;
     try {
-      d = await tmdb(`/discover/${q.kind}`, {
+      d = await api.tmdb(`/discover/${q.kind}`, {
         watch_region: cfg.watchRegion,
         with_watch_monetization_types: "flatrate",   // in-region subscription only: the page must be actionable
         with_original_language: q.lang,
@@ -4051,7 +4068,7 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
         page: String(q.page),
       });
       calls++;
-      await sleep(150);
+      await api.pause(150);
     } catch (e) {
       console.warn(`  catalog discover ${code}/${q.key} p${q.page}: ${e.message}`);
       markQueue(state, code, q.key, { results: 0 });
@@ -4060,7 +4077,8 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
     }
     const results = (d.results || []).map((m) => ({ ...m, kind: q.kind }));
     const usable = results.filter((m) => catalogEligible(m, { kind: q.kind, have, slugOf: slugify, excludeIds: EXCLUDE_IDS }));
-    markQueue(state, code, q.key, { usable: usable.length, results: results.length });
+    const known = results.filter((m) => have.has(slugify(m.title || m.name || ""))).length;
+    markQueue(state, code, q.key, { usable: usable.length, results: results.length, known });
     for (const m of usable) {
       if (built >= batch || calls >= CALL_BUDGET) break;
       const slug = catalogSlug(m, { slugOf: slugify, have });
@@ -4068,19 +4086,32 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
       let item;
       try {
         item = { ...baseItem(m, q.kind) };
-        Object.assign(item, await enrich(q.kind, m.id, cfg.watchRegion));
+        Object.assign(item, await api.enrich(q.kind, m.id, cfg.watchRegion));
         withImdb(item);
         calls++;
-        await sleep(150);
+        await api.pause(150);
       } catch (e) { console.warn(`  catalog enrich ${code}/${m.id}: ${e.message}`); calls++; continue; }
       // Discover said flatrate; the detail call is the truth. No provider -> no answer -> no page.
       const providers = Array.isArray(item.providers) ? item.providers : [];
       if (!providers.length) continue;
+      // The bar is low so that "where to watch" pages exist for regional films TMDB barely
+      // rates — not so that 20 votes can earn "Must watch". Under CATALOG_RATING_MIN_VOTES the
+      // page withholds the number and the verdict ("Rating still forming") and keeps every
+      // other answer: platform, cast, runtime, certificate, synopsis.
+      if ((item.votes || 0) < CATALOG_RATING_MIN_VOTES) {
+        item.rating = null;
+        item.scores = [];
+        item.verdict = verdict(null, 0);
+      }
       item.slug = slug;
       item.platform = providers[0];
       have.add(slug);
       try {
-        fs.writeFileSync(`${dir}/${slug}.html`, buildFilmPage(item, today, have, cfg, filmIndex));
+        // Born frozen, so it's written the way every frozen page reads: through the archive
+        // chain. Written raw, catalogue pages said "on offer right now" forever — the chain
+        // never ran on them because they were stamped with the current patch version at birth.
+        const page = archivePatchHtml(buildFilmPage(item, today, have, cfg, filmIndex), countryNameFor(cfg), cfg).html;
+        fs.writeFileSync(`${dir}/${slug}.html`, page);
       } catch (e) { console.warn(`  catalog page ${code}/${slug}: ${e.message}`); continue; }
       // Feed the neighbour graph so later titles in this same batch can link to it.
       filmIndex.push({ slug, title: item.title, genre: item.genre || "", language: item.language || "",
@@ -4140,6 +4171,56 @@ function repairXDefaults(countries) {
 // Complete sitemap: every country homepage (with hreflang alternates) + every country's
 // per-film pages. A film that exists in several countries gets hreflang alternates linking
 // those copies together; a film unique to one country stands alone.
+// ============================================================================
+// DEAD HUB LINKS ON FROZEN PAGES.
+//
+// A film page links to the hubs it belongs to ("Everything new on Apple TV", "Everything that
+// arrived in September") — but only if the hub existed when the page was written. Platform
+// hubs come and go as platforms clear or miss the weekly threshold, and frozen pages are never
+// regenerated, so a pruned hub left a dead link behind: 17 in Sept 2026, across 8 countries,
+// with more on every prune. This pass drops links whose target is gone. It never adds one;
+// the next page built for that film links whatever exists then.
+// ============================================================================
+const HUB_LINE_RE = /<p style="color:var\(--mute\);font-size:12\.5px;margin-top:10px">More: ([\s\S]*?)<\/p>/;
+
+// Pure. `exists(href)` answers whether an internal URL resolves.
+function pruneDeadHubLinks(html, exists) {
+  const m = HUB_LINE_RE.exec(html);
+  if (!m) return { html, changed: false };
+  const links = m[1].split(" · ");
+  const keep = links.filter((a) => {
+    const href = (/href="([^"]+)"/.exec(a) || [])[1];
+    return !href || exists(href);
+  });
+  if (keep.length === links.length) return { html, changed: false };
+  const next = keep.length ? m[0].replace(m[1], keep.join(" · ")) : "";
+  return { html: html.replace(m[0], next), changed: true };
+}
+
+function hrefExistsOnDisk(href) {
+  const p = String(href).replace(/^\//, "");
+  return fs.existsSync(p === "" || p.endsWith("/") ? `${p}index.html` : p);
+}
+
+function sweepDeadHubLinks(countries) {
+  let fixed = 0;
+  for (const c of countries) {
+    const dir = c.code === "in" ? "movie" : `${c.code}/movie`;
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir)) {
+      if (!f.endsWith(".html")) continue;
+      const p = `${dir}/${f}`;
+      let html;
+      try { html = fs.readFileSync(p, "utf8"); } catch { continue; }
+      if (!html.includes("More: ")) continue;
+      const r = pruneDeadHubLinks(html, hrefExistsOnDisk);
+      if (r.changed) { fs.writeFileSync(p, r.html); fixed++; }
+    }
+  }
+  if (fixed) console.log(`  dead hub links: removed from ${fixed} film page(s)`);
+  return fixed;
+}
+
 function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const today = new Date().toISOString().slice(0, 10);
   // Every lastmod must be a valid W3C date or Google rejects the sitemap with "Invalid date".
@@ -4348,7 +4429,7 @@ function rankSimilar(results, kind, origLang) {
     .map((r) => r.x);
 }
 
-function ssrCard(item, i, code) {
+function ssrCard(item, i, code, { eager = false } = {}) {
   const e = escHtml;
   // Badge text comes from the data (freshBadge). Fallback to the old isRecent flag so a
   // template regen against a pre-badge data.json still renders sensibly.
@@ -4361,7 +4442,7 @@ function ssrCard(item, i, code) {
   const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null, rt, when || null].filter(Boolean).map(e).join(" · ");
   const inner = `
     <div class="rank">${String(i + 1).padStart(2, "0")}</div>
-    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" loading="lazy">` : ""}
+    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" ${eager ? 'loading="eager" decoding="async"' : 'loading="lazy"'}>` : ""}
     <div>
       <div class="title-row"><h3>${e(item.title)}</h3>${item.platform && item.platform !== "Theatres" ? `<span class="platform">${e(item.platform)}</span>` : ""}${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}${item.trending ? '<span class="fresh-badge trend"><svg class="ic" aria-hidden="true"><use href="#icTrend"/></svg> Trending</span>' : ""}</div>
       <div class="meta">${bits}</div>
@@ -4619,12 +4700,26 @@ function buildOttWeekPage(data, cfg, allCountries) {
   const platforms = [...groups.keys()].sort((a, b) => groups.get(b).length - groups.get(a).length || a.localeCompare(b));
   const platformNames = platforms.slice(0, 4).join(", ");
 
-  const title = `New ${V.Releases} This Week in ${countryName} (${monthYear}) — ${platformNames || "Streaming"} | FilmyChill`;
+  // Titles ran past 100 characters once four platform names were appended, and descriptions
+  // past 170 on 13 country pages. Both now degrade: platforms trimmed first, then dropped,
+  // the query words ("New … Releases This Week in …") always kept.
+  const two = platforms.slice(0, 2).join(", ");
+  const base = `New ${V.Releases} This Week in ${countryName} (${monthYear})`;
+  const title = fitFirst([
+    `${base} — ${platformNames || "Streaming"} | FilmyChill`,
+    `${base} — ${platformNames || "Streaming"}`,
+    two ? `${base} — ${two}` : null,
+    base,
+  ], 60);
   // Same rule as the language pages: only claim completeness when the page can back it.
   const thin = freshItems.length < 8;
-  const desc = thin
-    ? `New movies and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`
-    : `Every new movie and web series streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`;
+  const lead = thin ? "New movies and web series" : "Every new movie and web series";
+  const desc = fitFirst([
+    `${lead} streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`,
+    `${lead} streaming in ${countryName} this week${two ? ` on ${two}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`,
+    `${lead} streaming in ${countryName} this week — with ratings, verdicts and where to watch. Updated twice daily.`,
+    `${lead} streaming in ${countryName} this week — ratings, verdicts and where to watch.`,
+  ], 160);
 
   // FAQ per major platform + one "best of" — real answers from real data, mirrored in
   // FAQPage schema. Only platforms with titles get a question; schema only if >= 2 Q&As.
@@ -4884,7 +4979,11 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 // 10: run-state sweep. Frozen pages past release now say whether the film may still be in
 //     cinemas (theatreRunState), and pages stamped "Theatrical run ended" inside the run
 //     window — often on their release day — are corrected.
-const ARCHIVE_PATCH_VERSION = 10;
+// 11: catalogue pages were stamped current at birth and never swept, so 50 of them still said
+//     "on offer right now". One sweep for the ones already built; new ones are now written
+//     through the chain (see backfillCatalog). Also carries the dead-hub-link and title-ladder
+//     changes to frozen pages.
+const ARCHIVE_PATCH_VERSION = 11;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
@@ -5167,15 +5266,20 @@ function freshenFrozenCopy(html, { countryName, cfg = null, now = Date.now() } =
       .replace(/When is ([^<"?]+?) releasing on OTT\? \(OTT release date\)/g, (m, t) => V.faqQuestion(t));
   }
 
+  // "Released 12 Jun 2025 2025": the year printed twice by an earlier date fix (fmtDateShort
+  // already includes the year for past-year dates). Both locale shapes: "12 Jun 2025 2025" and
+  // "Jun 12, 2025 2025". Only a day-month-year followed by the same year matches.
+  out = out.replace(/\b(\d{1,2} [A-Z][a-z]{2,4} (\d{4})) \2\b/g, "$1")
+    .replace(/\b([A-Z][a-z]{2,4} \d{1,2}, (\d{4})) \2\b/g, "$1");
   // "Page updated 2026-08-26" -> the edition's date format. Cosmetic: visibleText ignores this
   // line, so reformatting it never counts as a content change for the sitemap.
   out = out.replace(/(<div class="meta" style="margin-top:2px;font-size:12\.5px">Page updated )(\d{4}-\d{2}-\d{2})(<\/div>)/,
-    (m, a, iso, b) => `${a}${escHtml(fmtDateShort(iso, now, localeFor(code)))} ${iso.slice(0, 4)}${b}`);
+    (m, a, iso, b) => `${a}${escHtml(fmtDateFull(iso, localeFor(code)))}${b}`);
   out = out.replace(/Availability as of (\d{4}-\d{2}-\d{2}) — /g,
-    (m, iso) => `Availability as of ${escHtml(fmtDateShort(iso, now, localeFor(code)))} ${iso.slice(0, 4)} — `);
+    (m, iso) => `Availability as of ${escHtml(fmtDateFull(iso, localeFor(code)))} — `);
   // Header date: raw ISO -> the edition's human date.
   out = out.replace(/(<div class="meta" style="margin-top:8px">)(Released|Releases) (\d{4}-\d{2}-\d{2})(<\/div>)/,
-    (m, a, verb, iso, b) => `${a}${verb} ${escHtml(fmtDateShort(iso, now, localeFor(code)))} ${iso.slice(0, 4)}${b}`);
+    (m, a, verb, iso, b) => `${a}${verb} ${escHtml(fmtDateFull(iso, localeFor(code)))}${b}`);
 
   // A streaming-window estimate whose window has already closed is no longer a pattern, it is
   // a missed prediction. Drop the clause; the "not announced" sentence around it stays true.
@@ -5585,7 +5689,7 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
   if (!date || releaseState(date, now) !== "released") return { html, changed: false };
   const live = html.includes("<!--SW:live=");
   const country = countryName || countryNameFor(cfg);
-  const opened = `${fmtDateShort(date, now, localeFor(cfg && cfg.code))} ${date.slice(0, 4)}`;
+  const opened = fmtDateFull(date, localeFor(cfg && cfg.code));
   const APOS = "(?:'|&#39;)";
   const apos = (matched) => (matched.includes("&#39;") ? "&#39;" : "'");
   let out = html;
@@ -5616,7 +5720,7 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
   if (!live) {
     // Pages settled before the run clause existed, or crossing from open to ended: rewrite the
     // sentence into the current state. Matches all three forms this template has produced.
-    out = out.replace(new RegExp(`opened in theatres in ([^<"]+?) on ([^<".,]+?)(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?\\. It isn${APOS}t streaming yet — this page updates the day it is\\.`, "g"),
+    out = out.replace(new RegExp(`opened in theatres in ([^<"]+?) on ([^<".]+?)(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?\\. It isn${APOS}t streaming yet — this page updates the day it is\\.`, "g"),
       (m, c, d) => `opened in theatres in ${c} on ${d}${runClause(apos(m))}. It isn${apos(m)}t streaming yet — this page updates the day it is.`);
     // The archive patch's own run sentences say the run is over, unconditionally. Bring them
     // into the same state as the FAQ and the pill, or a page says "may still be showing" in
@@ -5626,7 +5730,7 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
       (m, c, arr) => run === "open"
         ? `It opened in theatres in ${c} on ${escHtml(opened)} — check back here for its ${V.arrival}.`
         : `It had its theatrical run in ${c} — check back here for its ${V.arrival}.`);
-    out = out.replace(new RegExp(`(?:has finished its theatrical run in ([^<".]+?)|opened in theatres in ([^<".]+?) on [^<".,]+?(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?)\\. (Its (?:OTT|streaming) release hasn${APOS}t been announced yet — check back soon\\.)`, "g"),
+    out = out.replace(new RegExp(`(?:has finished its theatrical run in ([^<".]+?)|opened in theatres in ([^<".]+?) on [^<".]+?(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?)\\. (Its (?:OTT|streaming) release hasn${APOS}t been announced yet — check back soon\\.)`, "g"),
       (m, c1, c2, rest) => {
         const c = c1 || c2;
         const d = m.includes("&#39;") ? escHtml(opened) : opened;
@@ -5645,12 +5749,12 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
   if (live) {
     // A page that settled while pending and has since started streaming.
     // The run clause goes with it — "may still be showing" is not the news any more.
-    out = out.replace(new RegExp(`opened in theatres in ([^<"]+?) on ([^<".,]+?)(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?\\. It isn${APOS}t streaming yet — this page updates the day it is\\.`, "g"),
+    out = out.replace(new RegExp(`opened in theatres in ([^<"]+?) on ([^<".]+?)(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?\\. It isn${APOS}t streaming yet — this page updates the day it is\\.`, "g"),
       (m, c, d) => `opened in theatres in ${c} on ${d}, and it${apos(m)}s streaming there now — see where to watch above.`);
     out = out.split(pendingNote).join("");
     out = out.replace(/It (?:had its theatrical run in|opened in theatres in) ([^<"—]+?)(?: on [^<"—]+?)? — check back here for its (?:OTT|streaming) arrival\./g,
       (m, c) => `It had its theatrical run in ${c} and is streaming there now.`);
-    out = out.replace(new RegExp(`(?:has finished its theatrical run in ([^<".]+?)|opened in theatres in ([^<".]+?) on [^<".,]+?(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?)\\. Its (?:OTT|streaming) release hasn${APOS}t been announced yet — check back soon\\.`, "g"),
+    out = out.replace(new RegExp(`(?:has finished its theatrical run in ([^<".]+?)|opened in theatres in ([^<".]+?) on [^<".]+?(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?)\\. Its (?:OTT|streaming) release hasn${APOS}t been announced yet — check back soon\\.`, "g"),
       (m, c1, c2) => `has finished its theatrical run in ${c1 || c2} and is streaming there now — see where to watch above.`);
     // The streaming-date FAQ ("…hasn't been officially announced yet… updates the day it
     // starts streaming") is answered now. The arrival patch never reached it either.
@@ -5669,7 +5773,7 @@ function patchDueIfPassed(html, { title, countryName, cfg, now = Date.now() }) {
   const start = "<!--SW:pending-->", end = "<!--/SW:pending-->";
   const a = html.indexOf(start), b = html.indexOf(end);
   if (a === -1 || b === -1 || b < a) return { html, changed: false };
-  const opened = `${fmtDateShort(m[1], now, localeFor(cfg && cfg.code))} ${m[1].slice(0, 4)}`;
+  const opened = fmtDateFull(m[1], localeFor(cfg && cfg.code));
   const block = `${start}<h2>${e(V.heading(title))}</h2>`
     + `<p>${e(title)} opened in theatres in ${e(countryName)} on ${e(opened)}. ${e(V.article)} ${e(V.releaseDate)} hasn't been announced yet.</p>`
     + `<p style="color:var(--mute);font-size:13px">We re-check every day and this page updates the moment it lands.</p>${end}`;
@@ -6347,7 +6451,21 @@ function writePlatformHubPages(data, cfg) {
   return hubs;
 }
 
+// Page titles: Google shows roughly 60 characters. The brand suffix is the first thing to go,
+// because the query-bearing words come first on every page type and must survive intact.
+function fitSiteTitle(t) {
+  const s = String(t || "");
+  return s.length > 60 && / \| FilmyChill$/.test(s) ? s.replace(/ \| FilmyChill$/, "") : s;
+}
+// First candidate that fits `max`, else the shortest.
+function fitFirst(options, max) {
+  const opts = options.filter(Boolean);
+  return opts.find((x) => x.length <= max) || opts.reduce((a, b) => (b.length < a.length ? b : a), opts[0] || "");
+}
+
 function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null }) {
+  // ~80 hubs, month archives and week pages ran 61–72 characters; see fitSiteTitle.
+  title = fitSiteTitle(title);
   const e = escHtml;
   // Back-link copy follows the market ("theatres + OTT" in India/UAE, "theatres +
   // streaming" everywhere else) — platform hubs exist for every country.
@@ -6501,7 +6619,7 @@ function buildLanguagePage(data, langName, slug, archive = null) {
   });
   if (soon.length) faqs.push({
     q: `Which ${langName} movies are releasing soon?`,
-    a: `Coming up: ${soon.map((x) => `${x.title}${x.released ? ` (${fmtDateShort(x.released, Date.now(), "en-IN")} ${x.released.slice(0, 4)})` : ""}`).join(", ")}.`,
+    a: `Coming up: ${soon.map((x) => `${x.title}${x.released ? ` (${fmtDateFull(x.released, "en-IN")})` : ""}`).join(", ")}.`,
   });
   // ---- CUMULATIVE DEPTH ---------------------------------------------------
   // Sept 2026 GSC: the five language hubs drew 1,224 impressions for 11 clicks at average
@@ -7271,6 +7389,63 @@ function ssrLastScan(data, cfg = null) {
 // rendered rather than hardcoded in the template.
 const HOME_CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; connect-src 'self'; object-src 'none'; base-uri 'self'";
 
+// ============================================================================
+// PICK OF THE WEEK, SERVER-RENDERED.
+//
+// The hero used to ship as display:none with an empty backdrop, and only appeared once the
+// page's JavaScript had fetched this country's data file. On a phone that meant two things:
+// the biggest image above the fold (the backdrop — the page's LCP element) could not even
+// start downloading until JS and a JSON fetch had finished, and when the hero did appear it
+// pushed every card below it down the screen (layout shift). 71% of clicks are mobile.
+// Rendering it at build time, with the backdrop preloaded at high priority, fixes both. The
+// client code still runs and sets the same values — it just no longer has to reveal anything.
+// ============================================================================
+const HERO_HIDDEN = `<div class="hero" id="hero" style="display:none">
+  <div class="hero-card" id="heroCard">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-grad"></div>
+    <div class="hero-content">
+      <span class="hero-eyebrow"><svg class="ic" aria-hidden="true"><use href="#icTrophy"/></svg> Pick of the Week</span>
+      <div class="hero-title" id="heroTitle"></div>
+      <div class="hero-meta" id="heroMeta"></div>
+      <div class="hero-verdict" id="heroVerdict"></div>
+    </div>
+  </div>
+</div>`;
+
+function heroPickOf(data) {
+  if (!data || !data.pick) return null;
+  return [...(data.theatres || []), ...(data.ott || [])].find((x) => x && x.title === data.pick) || null;
+}
+// Same sanitising the client applies before putting the URL in a CSS url("…").
+const heroBgUrl = (u) => String(u || "").replace(/["'()\\]/g, "");
+
+function ssrHero(data) {
+  const pick = heroPickOf(data);
+  if (!pick) return HERO_HIDDEN;
+  const e = escHtml;
+  const bg = pick.backdrop ? ` style="background-image:url(&quot;${e(heroBgUrl(pick.backdrop))}&quot;)"` : "";
+  const meta = [pick.platform, pick.genre, pick.language].filter(Boolean).join(" · ");
+  return `<div class="hero" id="hero">
+  <div class="hero-card" id="heroCard">
+    <div class="hero-bg" id="heroBg"${bg}></div>
+    <div class="hero-grad"></div>
+    <div class="hero-content">
+      <span class="hero-eyebrow"><svg class="ic" aria-hidden="true"><use href="#icTrophy"/></svg> Pick of the Week</span>
+      <div class="hero-title" id="heroTitle">${e(pick.title)}</div>
+      <div class="hero-meta" id="heroMeta">${e(meta)}</div>
+      <div class="hero-verdict" id="heroVerdict">▸ ${e(pick.verdict || "")}</div>
+    </div>
+  </div>
+</div>`;
+}
+
+function heroPreload(data) {
+  const pick = heroPickOf(data);
+  if (!pick || !pick.backdrop) return "";
+  return `<link rel="preload" as="image" href="${escHtml(heroBgUrl(pick.backdrop))}" fetchpriority="high">`;
+}
+
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   const V = streamVocab(cfg);
@@ -7300,7 +7475,10 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "ANALYTICS", analyticsTag());
   html = replaceBetween(html, "LASTSCAN", escHtml(ssrLastScan(data, cfg)));
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
-  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code)).join(""));
+  html = replaceBetween(html, "HERO", ssrHero(data));
+  html = replaceBetween(html, "HEROPRELOAD", heroPreload(data));
+  // The first two theatre posters sit above the fold on desktop: load them immediately.
+  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code, { eager: i < 2 })).join(""));
   html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code));
   // Re-derived at render, not just at fetch: the committed data file can be a day old by the
   // time a page is rebuilt, and a passed date must never render inside "Coming soon".
@@ -7413,7 +7591,7 @@ module.exports = {
   buildRssFeed, archivePatchHtml, stripAggregateRating, retitleFrozen, filmTitleTag, reconcilePagesManifest,
   buildOttMonthPage, writeOttMonthPages, ottMonthPath, ottMonthUrl, backfillCatalog,
   buildScopedMonthPage, writePlatformMonthPages, writeLanguageMonthPages, monthRow,
-  theatreRunState, visibleText, crossCountryLeak, neutralizeCrossCountry, repairLegacyPages, freshenFrozenCopy, countryNameForms, settleReleasedCopy, patchDueIfPassed, applyArrivalPatch, certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
+  fitSiteTitle, fitFirst, ssrHero, heroPreload, ssrCard, pruneDeadHubLinks, sweepDeadHubLinks, theatreRunState, visibleText, crossCountryLeak, neutralizeCrossCountry, repairLegacyPages, freshenFrozenCopy, countryNameForms, settleReleasedCopy, patchDueIfPassed, applyArrivalPatch, certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
   platformMonthPath, platformMonthUrl, languageMonthPath, languageMonthUrl, SCOPED_MONTH_MIN,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, ARRIVAL_MAX_RELEASE_AGE, SEEN_RETENTION_DAYS,
   socialImage,
