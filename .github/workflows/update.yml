@@ -76,7 +76,16 @@ jobs:
           # that stop qualifying are removed from disk by the build; without -A, git recorded
           # the new sitemap (which correctly drops them) while leaving the orphaned directory
           # committed and still served — a page reachable by URL that nothing updates.
-          git add -A data.json data-*.json ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json catalog-manifest.json feed.xml index.html us/ uk/ au/ de/ ae/ ca/ sg/ my/ ph/ nz/ kr/ jp/ id/ movie/ new-on-ott/ new-on-*/ hindi/ tamil/ telugu/ malayalam/ kannada/ week/ films/ */films/ data/ embed/ */embed/ ott-history.jsonl ott-watch.json sitemap.xml
+          # The globs are QUOTED so git matches them, not the shell. An unquoted new-on-*/
+          # expands only to directories that still exist, so a hub the build pruned was never
+          # in the pathspec and its deletion was never staged — the August "Amazon Prime Video
+          # with Ads" hub stayed live a month after it was removed. about/ was missing entirely,
+          # so the About page's country list and analytics disclosure never shipped.
+          git add -A -- data.json 'data-*.json' ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json catalog-manifest.json feed.xml index.html about/ us/ uk/ au/ de/ ae/ ca/ sg/ my/ ph/ nz/ kr/ jp/ id/ movie/ new-on-ott/ ':(glob)new-on-*/**' hindi/ tamil/ telugu/ malayalam/ kannada/ week/ films/ ':(glob)*/films/**' data/ embed/ ':(glob)*/embed/**' ott-history.jsonl ott-watch.json sitemap.xml
+          # zz/ is the test suite's sandbox country. The ':(glob)*/films/**' and ':(glob)*/embed/**' globs used to
+          # sweep it into the commit, publishing test pages at filmychill.com/zz/. It is in
+          # .gitignore now; this untracks the copies already committed. Idempotent.
+          git rm -r --cached --quiet --ignore-unmatch zz
           # Share cards are OPTIONAL: the directory only exists when the renderer AND the
           # brand fonts are both present. `git add` on a missing pathspec exits 128 and would
           # fail the commit step for a purely cosmetic feature, so it is added conditionally.
