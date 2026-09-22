@@ -195,6 +195,16 @@ function fmtDateShort(dateStr, now = Date.now(), locale = "en-IN") {
   return dt.toLocaleDateString(locale, opts);
 }
 
+// A date with its year, exactly once: "12 Jun 2025" / "Jun 12, 2025". fmtDateShort already
+// adds the year for any date outside the current year, so the old "${fmtDateShort(d)} ${year}"
+// pattern printed "Released 12 Jun 2025 2025" on every page dated before this year — 1,299
+// live pages in Sept 2026. Use this wherever a year must always show.
+function fmtDateFull(dateStr, locale = "en-IN") {
+  const dt = new Date(dateStr);
+  if (isNaN(dt.getTime())) return String(dateStr || "");
+  return dt.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
+}
+
 function escHtml(s) {
   return String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -284,6 +294,7 @@ module.exports = {
   filmPagePath,
   filmPageUrl,
   fmtDateShort,
+  fmtDateFull,
   fmtRuntime,
   slugify,
   trim,
