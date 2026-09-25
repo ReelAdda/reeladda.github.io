@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-25T06:43:40.286Z",
+ "generatedAt": "2026-09-25T18:06:54.461Z",
  "country": "us",
  "pick": "Physical 100: Mexico",
  "theatres": [
@@ -16,7 +16,7 @@
      "score": "7.3/10"
     }
    ],
-   "votes": 428,
+   "votes": 447,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/i7UyjfPio0VFHB9rBUZSFyhOoM8.jpg",
    "isRecent": false,
@@ -46,13 +46,6 @@
      "title": "Die Alone",
      "slug": "die-alone",
      "poster": "https://image.tmdb.org/t/p/w342/dQdIj2OYELhLzECWONY932wGRxA.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Resident Evil: Welcome to Raccoon City",
-     "slug": "resident-evil-welcome-to-raccoon-city",
-     "poster": "https://image.tmdb.org/t/p/w342/bArhvjRHl535XMaSh9VjInF2mSZ.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -125,6 +118,13 @@
      "poster": "https://image.tmdb.org/t/p/w342/iPunx6eRmwxCDuDGB0N0o1jqADP.jpg",
      "language": "English",
      "kind": "movie"
+    },
+    {
+     "title": "Dawn of the Dead",
+     "slug": "dawn-of-the-dead",
+     "poster": "https://image.tmdb.org/t/p/w342/ttquyxStEEctzghtA2f4PUGprDr.jpg",
+     "language": "English",
+     "kind": "movie"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/3icyRAqgakNcQn6aDVz9libFmBA.jpg",
@@ -166,7 +166,7 @@
    "slug": "resident-evil",
    "wikiWeeklyViews": 1482927,
    "trending": true,
-   "trailerViews": 16857656,
+   "trailerViews": 17002050,
    "take": "Mostly good reviews — the performances and humour impressed, even if the pacing didn't.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -181,14 +181,14 @@
    "language": "English",
    "released": "2026-09-25",
    "review": "After a harrowing plane crash, Special Forces officer James Belmont and his combat dog, Odin, find themselves stranded deep in the Alaskan wilderness.",
-   "rating": 7.7,
+   "rating": 7.9,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.7/10"
+     "score": "7.9/10"
     }
    ],
-   "votes": 32,
+   "votes": 40,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/1ApfSA8JTqeha3GTFEY8syV4auq.jpg",
    "isRecent": true,
@@ -203,7 +203,8 @@
    "cast": [
     "Brad Pitt",
     "J.K. Simmons",
-    "Anna Lambe"
+    "Anna Lambe",
+    "Uber"
    ],
    "director": "David Ayer",
    "runtime": 101,
@@ -217,6 +218,13 @@
      "title": "Against the Ice",
      "slug": "against-the-ice",
      "poster": "https://image.tmdb.org/t/p/w342/6FSGYvPEhIx3ThOikGqHmKxeyNN.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Dead of Winter",
+     "slug": "dead-of-winter",
+     "poster": "https://image.tmdb.org/t/p/w342/5DcrN62sGAiRJxt8rXSRlSRLwIE.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -289,13 +297,6 @@
      "poster": "https://image.tmdb.org/t/p/w342/r562gvTRVHnDSvG7MrKHEECSn1V.jpg",
      "language": "English",
      "kind": "movie"
-    },
-    {
-     "title": "Daylight",
-     "slug": "daylight",
-     "poster": "https://image.tmdb.org/t/p/w342/bRWNxtm3q0QvIIM52uQqRIEvpl2.jpg",
-     "language": "English",
-     "kind": "movie"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/bicMU6xVD5deVyKP2azpyx7xkmH.jpg",
@@ -317,11 +318,16 @@
      "name": "Anna Lambe",
      "character": "Amber",
      "photo": "https://image.tmdb.org/t/p/w185/cKm5ZnAOVc6nD8KAgSDMJdZclYH.jpg"
+    },
+    {
+     "name": "Uber",
+     "character": "Odin The Dog",
+     "photo": "https://image.tmdb.org/t/p/w185/jUQdIsuHRhgBBz0j0tKYgzV24uZ.jpg"
     }
    ],
    "slug": "heart-of-the-beast",
    "wikiWeeklyViews": 186341,
-   "trailerViews": 2847262,
+   "trailerViews": 2851057,
    "take": "The reviews lean clearly positive.",
    "takeSrc": "wiki",
    "takeArticle": "Heart of the Beast"
@@ -366,6 +372,13 @@
    "badge": null,
    "similar": [
     {
+     "title": "Rage of Stars",
+     "slug": "rage-of-stars",
+     "poster": "https://image.tmdb.org/t/p/w342/oLld47ZT1I3iecM3OWhIphohQUJ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Prey",
      "slug": "prey",
      "poster": "https://image.tmdb.org/t/p/w342/2FKjLRt7oK1bRRIrxgWmthbBdFh.jpg",
@@ -401,6 +414,13 @@
      "kind": "movie"
     },
     {
+     "title": "Monster Hunters",
+     "slug": "monster-hunters",
+     "poster": "https://image.tmdb.org/t/p/w342/3UrOHqUlzdeXz4SLaQIETaRd2W.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "War Machine",
      "slug": "war-machine",
      "poster": "https://image.tmdb.org/t/p/w342/ril8yx5SOmj0KjNlftsdfIp00fr.jpg",
@@ -408,16 +428,16 @@
      "kind": "movie"
     },
     {
-     "title": "Resident Evil: Welcome to Raccoon City",
-     "slug": "resident-evil-welcome-to-raccoon-city",
-     "poster": "https://image.tmdb.org/t/p/w342/bArhvjRHl535XMaSh9VjInF2mSZ.jpg",
+     "title": "Predator 2",
+     "slug": "predator-2",
+     "poster": "https://image.tmdb.org/t/p/w342/83X4VwY9sdSJykskmsplIVG0a4h.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Predator 2",
-     "slug": "predator-2",
-     "poster": "https://image.tmdb.org/t/p/w342/83X4VwY9sdSJykskmsplIVG0a4h.jpg",
+     "title": "Babylon 5: The Legend of the Rangers - To Live and Die in Starlight",
+     "slug": "babylon-5-the-legend-of-the-rangers-to-live-and-die-in-starlight",
+     "poster": "https://image.tmdb.org/t/p/w342/bIhOn8xKsOQGjiNCQ8sKoQyYmNa.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -432,20 +452,6 @@
      "title": "Serenity",
      "slug": "serenity",
      "poster": "https://image.tmdb.org/t/p/w342/4sqUOaPFoP2W81mq1UYqZqf5WzA.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The X-Files: I Want to Believe",
-     "slug": "the-x-files-i-want-to-believe",
-     "poster": "https://image.tmdb.org/t/p/w342/3zQMhutUMJP6lK49x7i2YfsOHL9.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Spectral",
-     "slug": "spectral",
-     "poster": "https://image.tmdb.org/t/p/w342/5yprxs7ZyBr58RsTQJrKCVmqk8X.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -488,7 +494,7 @@
    ],
    "slug": "hope",
    "wikiWeeklyViews": 118243,
-   "trailerViews": 112684,
+   "trailerViews": 113574,
    "take": "Critics have been largely positive on this one.",
    "takeSrc": "wiki",
    "takeArticle": "Hope (2026 film)"
@@ -617,8 +623,8 @@
      "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/eYvHMdFl1Qp0o810lCsRtjfs2sY.jpg",
-   "backdropPath": "/eYvHMdFl1Qp0o810lCsRtjfs2sY.jpg",
+   "backdrop": "https://image.tmdb.org/t/p/w780/2o9FzuBzCqrDTdlHRuEVnGD2d5h.jpg",
+   "backdropPath": "/2o9FzuBzCqrDTdlHRuEVnGD2d5h.jpg",
    "posterPath": "/myd1K3gefdNAWFsGNRDdMeiK9Qg.jpg",
    "fullReview": "While celebrating their last night together, high school graduates and best friends Jo and Raissa stumble upon a mysterious portal that transports them to the fantastical island of Nakali. When they discover that the memories of their entire friendship are the price for returning home, Jo and Raissa must race to find a way to leave the island before they forget each other forever.",
    "castPics": [
@@ -656,7 +662,7 @@
    "slug": "forgotten-island",
    "wikiWeeklyViews": 194040,
    "trending": true,
-   "trailerViews": 2410158
+   "trailerViews": 2411024
   },
   {
    "title": "The Fix",
@@ -671,7 +677,7 @@
      "score": "7.2/10"
     }
    ],
-   "votes": 27,
+   "votes": 28,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/yopXjun3ICFfJci2ukcEzceZjUs.jpg",
    "isRecent": false,
@@ -820,7 +826,7 @@
    ],
    "slug": "the-fix",
    "wikiWeeklyViews": 49864,
-   "trailerViews": 1497632,
+   "trailerViews": 1502187,
    "take": "Critics largely gave this one a pass.",
    "takeSrc": "wiki",
    "takeArticle": "The Fix (2026 film)"
@@ -942,9 +948,9 @@
      "kind": "movie"
     },
     {
-     "title": "The Twilight Saga: Breaking Dawn - Part 1",
-     "slug": "the-twilight-saga-breaking-dawn-part-1",
-     "poster": "https://image.tmdb.org/t/p/w342/qs8LsHKYlVRmJbFUiSUhhRAygwj.jpg",
+     "title": "Addams Family Values",
+     "slug": "addams-family-values",
+     "poster": "https://image.tmdb.org/t/p/w342/sdxT2VjVSx9DRicwnuECUdBHeE7.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -987,7 +993,7 @@
    ],
    "slug": "practical-magic-2",
    "wikiWeeklyViews": 162701,
-   "trailerViews": 23432816,
+   "trailerViews": 23435890,
    "take": "Genuinely divisive — critics can't settle this one.",
    "takeSrc": "wiki",
    "takeArticle": "Practical Magic 2",
@@ -1006,7 +1012,7 @@
      "score": "7.6/10"
     }
    ],
-   "votes": 35,
+   "votes": 36,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/yBKMAIj7clP42UkFejhGDBBoTpb.jpg",
    "isRecent": false,
@@ -1155,7 +1161,7 @@
    ],
    "slug": "runner",
    "wikiWeeklyViews": 65937,
-   "trailerViews": 1648132,
+   "trailerViews": 1648633,
    "take": "Truly divisive — for every critic who bought in, one checked out.",
    "takeSrc": "wiki",
    "takeArticle": "Runner (2026 American film)"
@@ -1175,9 +1181,9 @@
      "score": "8.3/10"
     }
    ],
-   "votes": 132,
+   "votes": 146,
    "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/vfZxVHextAGC70zrNhS8lsROqP1.jpg",
+   "poster": "https://image.tmdb.org/t/p/w342/g9rXb8I143ikhEjHK1BZdZ2tQzt.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "movie",
@@ -1245,6 +1251,13 @@
      "kind": "movie"
     },
     {
+     "title": "Sidelined 2: Intercepted",
+     "slug": "sidelined-2-intercepted",
+     "poster": "https://image.tmdb.org/t/p/w342/sEIP1pTVXa8BJaYSuVeVG3wFN10.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Sex Appeal",
      "slug": "sex-appeal",
      "poster": "https://image.tmdb.org/t/p/w342/mpwXOeSSQdBjUpyQqf6YHYbSTFO.jpg",
@@ -1278,18 +1291,11 @@
      "poster": "https://image.tmdb.org/t/p/w342/rrAYdezO3h1mjdYTaQyTXoj8IZ4.jpg",
      "language": "English",
      "kind": "movie"
-    },
-    {
-     "title": "What's Your Number?",
-     "slug": "what-s-your-number",
-     "poster": "https://image.tmdb.org/t/p/w342/eqn3UeXMY9W1Ow3jIZ6COqbjUWX.jpg",
-     "language": "English",
-     "kind": "movie"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/o7Oy9Gbx1CCyaweL8xUhtMW4Puq.jpg",
    "backdropPath": "/o7Oy9Gbx1CCyaweL8xUhtMW4Puq.jpg",
-   "posterPath": "/wlb6vunPuBjboYnmy4r3NlKZWji.jpg",
+   "posterPath": "/g9rXb8I143ikhEjHK1BZdZ2tQzt.jpg",
    "fullReview": "Olive Smith, a biology PhD candidate, and Dr. Adam Carlsen, a hotshot professor and well-known tyrant, enter into a fake relationship, seeing each of their carefully calculated theories on love get thrown into chaos.",
    "castPics": [
     {
@@ -1329,7 +1335,7 @@
    "ottFreshDate": "2026-09-23",
    "slug": "the-love-hypothesis",
    "wikiWeeklyViews": 151193,
-   "trailerViews": 15191844,
+   "trailerViews": 15292717,
    "take": "Critics are split clean down the middle on this one.",
    "takeSrc": "wiki",
    "takeArticle": "The Love Hypothesis (film)",
@@ -1348,7 +1354,7 @@
      "score": "8.4/10"
     }
    ],
-   "votes": 897,
+   "votes": 900,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/5Xc7WpWsgflfgEMoBlf9TmWhfbH.jpg",
    "isRecent": true,
@@ -1399,16 +1405,16 @@
      "kind": "tv"
     },
     {
-     "title": "Task",
-     "slug": "task",
-     "poster": "https://image.tmdb.org/t/p/w342/9JdL1aQdAQiyYYQ2xCqbHaEcZt8.jpg",
+     "title": "BMF",
+     "slug": "bmf",
+     "poster": "https://image.tmdb.org/t/p/w342/5gUlUufL3fom30qxKawwlWuD7kC.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "BMF",
-     "slug": "bmf",
-     "poster": "https://image.tmdb.org/t/p/w342/5gUlUufL3fom30qxKawwlWuD7kC.jpg",
+     "title": "Task",
+     "slug": "task",
+     "poster": "https://image.tmdb.org/t/p/w342/9JdL1aQdAQiyYYQ2xCqbHaEcZt8.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1423,6 +1429,13 @@
      "title": "Tulsa King",
      "slug": "tulsa-king",
      "poster": "https://image.tmdb.org/t/p/w342/rOYLWCdAifpUtPlTf1WHxyaxeMt.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Power Book IV: Force",
+     "slug": "power-book-iv-force",
+     "poster": "https://image.tmdb.org/t/p/w342/yzL4Tqbw2JA9MCsHJWFC4xV1IYU.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1460,13 +1473,6 @@
      "poster": "https://image.tmdb.org/t/p/w342/rTmal9fDbwh5F0waol2hq35U4ah.jpg",
      "language": "English",
      "kind": "tv"
-    },
-    {
-     "title": "The Shield",
-     "slug": "the-shield",
-     "poster": "https://image.tmdb.org/t/p/w342/AfdZXqqlFsPUEfi6kWWWthxw7Nz.jpg",
-     "language": "English",
-     "kind": "tv"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/mdkhMbqAhPf66VWDqscMAFwIEQQ.jpg",
@@ -1496,7 +1502,7 @@
     },
     {
      "name": "Lara Pulver",
-     "character": "Bella Harrigan",
+     "character": "Isabella 'Bella' Harrigan",
      "photo": "https://image.tmdb.org/t/p/w185/uacMDTL4YnuJD6frGF35CHLFh43.jpg"
     },
     {
@@ -1510,11 +1516,182 @@
    "ottFreshDate": "2026-09-18",
    "slug": "mobland",
    "wikiWeeklyViews": 239012,
-   "trailerViews": 11721826,
+   "trailerViews": 11730866,
    "take": "A love-it-or-hate-it reception, right down the middle.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
    "takeCounter": "The audience isn't buying the reviews — they rate it far higher."
+  },
+  {
+   "title": "JoJo's Bizarre Adventure",
+   "genre": "Animation / Action & Adventure",
+   "language": "Japanese",
+   "released": "2012-10-06",
+   "review": "Follow the intergenerational feud between the Joestar Family and various forces of evil, the most prominent of which is Dio Brando and his followers.",
+   "rating": 8.6,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.6/10"
+    }
+   ],
+   "votes": 1657,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/ogAWwbh3frWtiTyyXrZaVFtqCgp.jpg",
+   "isRecent": true,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 45790,
+   "popularity": 114.3989,
+   "cert": "TV-MA",
+   "trailer": "https://www.youtube.com/watch?v=fOvrr5izejw",
+   "providers": [
+    "Hulu",
+    "Netflix",
+    "Amazon Prime Video",
+    "Crunchyroll"
+   ],
+   "cast": [
+    "Shogo Sakata",
+    "Yohei Azakami",
+    "Kaito Ishikawa",
+    "Rie Takahashi"
+   ],
+   "director": null,
+   "runtime": 24,
+   "imdbVotes": null,
+   "rentBuy": [
+    "Amazon Video",
+    "Apple TV Store",
+    "Google Play Movies"
+   ],
+   "imdbId": "tt2359704",
+   "seasons": 6,
+   "freshDate": "2026-03-19",
+   "badge": "New on Hulu",
+   "similar": [
+    {
+     "title": "Hell's Paradise",
+     "slug": "hell-s-paradise",
+     "poster": "https://image.tmdb.org/t/p/w342/1V9I7SvZbYoMbSvdtnlkkq9SB1k.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "The Case Study of Vanitas",
+     "slug": "the-case-study-of-vanitas",
+     "poster": "https://image.tmdb.org/t/p/w342/hk9joSlfsrVTmcoYzQ7rFg028Fq.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "Harem in the Labyrinth of Another World",
+     "slug": "harem-in-the-labyrinth-of-another-world",
+     "poster": "https://image.tmdb.org/t/p/w342/drAnsk5w2PX5x3ooPv7I2xr3ksq.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "Skeleton Knight in Another World",
+     "slug": "skeleton-knight-in-another-world",
+     "poster": "https://image.tmdb.org/t/p/w342/qvL6teyHqTemldh30vioZc4Bzo9.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "Chained Soldier",
+     "slug": "chained-soldier",
+     "poster": "https://image.tmdb.org/t/p/w342/9SFBctEZE0X4t1A2q16MC7EJrsC.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "Dorohedoro",
+     "slug": "dorohedoro",
+     "poster": "https://image.tmdb.org/t/p/w342/zSMmRTopPIRr6913KX8pyiV6zsK.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "Tengoku Daimakyo",
+     "slug": "tengoku-daimakyo",
+     "poster": "https://image.tmdb.org/t/p/w342/74EYbgajUt8X2kxpu62dMR7q8jH.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "Suicide Squad Isekai",
+     "slug": "suicide-squad-isekai",
+     "poster": "https://image.tmdb.org/t/p/w342/AbVwsBJnLoqJzPJn8dlGFSGfygy.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "MARS RED",
+     "slug": "mars-red",
+     "poster": "https://image.tmdb.org/t/p/w342/z0AaUo0hCb2RF2JGr9AmaDyJj7d.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "Malevolent Spirits: Mononogatari",
+     "slug": "malevolent-spirits-mononogatari",
+     "poster": "https://image.tmdb.org/t/p/w342/j79vHpQsZ9vlQ3PQWfYKf1FsSkx.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "Daemons of the Shadow Realm",
+     "slug": "daemons-of-the-shadow-realm",
+     "poster": "https://image.tmdb.org/t/p/w342/vIE1llfr1lcmzlsV4xn8vhgtlQN.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
+     "title": "Seraph of the End",
+     "slug": "seraph-of-the-end",
+     "poster": "https://image.tmdb.org/t/p/w342/5IlxL2PfQ8CyY4TLRru9TcU56b3.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/5mUYDoFjDlPmDvnUWSknhYjGBBh.jpg",
+   "backdropPath": "/5mUYDoFjDlPmDvnUWSknhYjGBBh.jpg",
+   "posterPath": "/ogAWwbh3frWtiTyyXrZaVFtqCgp.jpg",
+   "fullReview": "Follow the intergenerational feud between the Joestar Family and various forces of evil, the most prominent of which is Dio Brando and his followers.",
+   "castPics": [
+    {
+     "name": "Shogo Sakata",
+     "character": "Johnny Joestar (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/fRRPNBz3OCNRdmLdUTdpq7dGqxM.jpg"
+    },
+    {
+     "name": "Yohei Azakami",
+     "character": "Gyro Zeppeli (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/rLIqw8pIjVIxPb5engrTbu9iOex.jpg"
+    },
+    {
+     "name": "Kaito Ishikawa",
+     "character": "Diego Brando (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/fzjIkotjUHHs3wgftM9tqdsG8ph.jpg"
+    },
+    {
+     "name": "Rie Takahashi",
+     "character": "Lucy Steel (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/aeB7z0cBTASdjKOjQriBAO6hYq4.jpg"
+    },
+    {
+     "name": "Kenta Miyake",
+     "character": "Steven Steel (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/7YL8vM2KYzPMeQqTpHWmNj6s1AP.jpg"
+    }
+   ],
+   "platform": "Hulu",
+   "ottSince": "2026-09-25",
+   "ottFreshDate": "2026-09-25",
+   "slug": "jojo-s-bizarre-adventure",
+   "wikiWeeklyViews": 5048,
+   "trailerViews": 26448
   },
   {
    "title": "South Park",
@@ -1529,7 +1706,7 @@
      "score": "8.3/10"
     }
    ],
-   "votes": 5161,
+   "votes": 5163,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/k7n2EVge7G77eMr3brztRGG1fFU.jpg",
    "isRecent": true,
@@ -1580,13 +1757,6 @@
      "kind": "tv"
     },
     {
-     "title": "Mike Judge's Beavis and Butt-Head",
-     "slug": "mike-judge-s-beavis-and-butt-head",
-     "poster": "https://image.tmdb.org/t/p/w342/75am8jsmRHHcpIPkm4RyrMn851A.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "Ten Year Old Tom",
      "slug": "ten-year-old-tom",
      "poster": "https://image.tmdb.org/t/p/w342/mayaOgDJUn6c5ZbVPpH6OnCZGYX.jpg",
@@ -1597,6 +1767,13 @@
      "title": "Long Story Short",
      "slug": "long-story-short",
      "poster": "https://image.tmdb.org/t/p/w342/22nh2kTuFpitrqTxxixhWjxEqFa.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Saturday Morning All Star Hits!",
+     "slug": "saturday-morning-all-star-hits",
+     "poster": "https://image.tmdb.org/t/p/w342/vHB2sMGWVjknajaKYhRPutJyQDd.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1615,23 +1792,9 @@
      "kind": "tv"
     },
     {
-     "title": "Family Guy",
-     "slug": "family-guy",
-     "poster": "https://image.tmdb.org/t/p/w342/3PFsEuAiyLkWsP4GG6dIV37Q6gu.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "Portlandia",
      "slug": "portlandia",
      "poster": "https://image.tmdb.org/t/p/w342/pfaxCP6YqlFHCL3QytnTanwRTL5.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Beavis and Butt-Head",
-     "slug": "beavis-and-butt-head",
-     "poster": "https://image.tmdb.org/t/p/w342/8BwmD9hMsfUHTAAsVephjJS8pIF.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1643,9 +1806,23 @@
      "kind": "tv"
     },
     {
-     "title": "Aqua Teen Hunger Force",
-     "slug": "aqua-teen-hunger-force",
-     "poster": "https://image.tmdb.org/t/p/w342/jCWOkfMLsT2sGHadCkmR65MWtJu.jpg",
+     "title": "Beavis and Butt-Head",
+     "slug": "beavis-and-butt-head",
+     "poster": "https://image.tmdb.org/t/p/w342/8BwmD9hMsfUHTAAsVephjJS8pIF.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "A.P. Bio",
+     "slug": "a-p-bio",
+     "poster": "https://image.tmdb.org/t/p/w342/8GwiuZazRFNrmvSkagZlEDH7qSS.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Life & Times of Tim",
+     "slug": "the-life-times-of-tim",
+     "poster": "https://image.tmdb.org/t/p/w342/rbMgK2e5HuOMqHFqBMDMahU7h4S.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1681,179 +1858,7 @@
    "ottFreshDate": "2026-09-16",
    "slug": "south-park",
    "wikiWeeklyViews": 68575,
-   "trailerViews": 2943924
-  },
-  {
-   "title": "Slow Horses",
-   "genre": "Crime / Drama",
-   "language": "English",
-   "released": "2022-04-01",
-   "review": "Follow a dysfunctional team of MI5 agents—and their obnoxious boss, the notorious Jackson Lamb—as they navigate the espionage world's smoke and mirrors…",
-   "rating": 8,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "8.0/10"
-    }
-   ],
-   "votes": 997,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
-   "isRecent": true,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 95480,
-   "popularity": 181.86,
-   "cert": "TV-MA",
-   "trailer": "https://www.youtube.com/watch?v=O9ZJChzPn0U",
-   "providers": [
-    "Apple TV",
-    "Apple TV Amazon Channel"
-   ],
-   "cast": [
-    "Gary Oldman",
-    "Jack Lowden",
-    "Kristin Scott Thomas",
-    "Hugo Weaving"
-   ],
-   "director": null,
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt5875444",
-   "seasons": 6,
-   "freshDate": "2026-09-16",
-   "badge": "New season",
-   "similar": [
-    {
-     "title": "The Night Agent",
-     "slug": "the-night-agent",
-     "poster": "https://image.tmdb.org/t/p/w342/4c5yUNcaff4W4aPrkXE6zr7papX.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Cross",
-     "slug": "cross",
-     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Veil",
-     "slug": "the-veil",
-     "poster": "https://image.tmdb.org/t/p/w342/6aM5Lyp3zUtPyc0WVofES6UrV06.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Down Cemetery Road",
-     "slug": "down-cemetery-road",
-     "poster": "https://image.tmdb.org/t/p/w342/pjmQbrJ3FesJobbqCnUwBCtfcvH.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Fool Me Once",
-     "slug": "fool-me-once",
-     "poster": "https://image.tmdb.org/t/p/w342/Ertv4WLEyHgi8zN4ldOKgPcGAZ.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Citadel",
-     "slug": "citadel",
-     "poster": "https://image.tmdb.org/t/p/w342/5MHtxPEfmN4b0rHzfEZRcm6v9WI.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Bodies",
-     "slug": "bodies",
-     "poster": "https://image.tmdb.org/t/p/w342/qWX71nLvoLsBNPEjddZMC75lq6I.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Rabbit Hole",
-     "slug": "rabbit-hole",
-     "poster": "https://image.tmdb.org/t/p/w342/zb5MArsrMxK4mSSLzUmbfcXAc60.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Dalgliesh",
-     "slug": "dalgliesh",
-     "poster": "https://image.tmdb.org/t/p/w342/8pqCanIwJFehhZdP00gXE0qc9xc.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Spooks",
-     "slug": "spooks",
-     "poster": "https://image.tmdb.org/t/p/w342/5kODxCYihuM49oQWke6GfHdsRT6.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Night Manager",
-     "slug": "the-night-manager",
-     "poster": "https://image.tmdb.org/t/p/w342/1MccRnw41qQjREuZkovqP2UX1i3.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Capture",
-     "slug": "the-capture",
-     "poster": "https://image.tmdb.org/t/p/w342/6keUrgntgKt299a39UJCDYldb8b.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/xpSxYoqTyz0Fb8Wn2S3bp0NIqVc.jpg",
-   "backdropPath": "/xpSxYoqTyz0Fb8Wn2S3bp0NIqVc.jpg",
-   "posterPath": "/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
-   "fullReview": "Follow a dysfunctional team of MI5 agents—and their obnoxious boss, the notorious Jackson Lamb—as they navigate the espionage world's smoke and mirrors to defend England from sinister forces.",
-   "castPics": [
-    {
-     "name": "Gary Oldman",
-     "character": "Jackson Lamb",
-     "photo": "https://image.tmdb.org/t/p/w185/yhaSM5habNNI1Tf4ALRwRk3VvSZ.jpg"
-    },
-    {
-     "name": "Jack Lowden",
-     "character": "River Cartwright",
-     "photo": "https://image.tmdb.org/t/p/w185/3wSE6uHLkslE9xvRiMbnphuI0VK.jpg"
-    },
-    {
-     "name": "Kristin Scott Thomas",
-     "character": "Diana Taverner",
-     "photo": "https://image.tmdb.org/t/p/w185/axksw0vAjBPSW02ZqpcC0V8rPD7.jpg"
-    },
-    {
-     "name": "Hugo Weaving",
-     "character": "Frank Harkness",
-     "photo": "https://image.tmdb.org/t/p/w185/lSC8Et0PYi5zeQb3IpPkFje7hgR.jpg"
-    },
-    {
-     "name": "Saskia Reeves",
-     "character": "Catherine Standish",
-     "photo": "https://image.tmdb.org/t/p/w185/1NM6rp95ec83tPa2Tnq66RV6Frc.jpg"
-    },
-    {
-     "name": "Christopher Chung",
-     "character": "Roddy Ho",
-     "photo": "https://image.tmdb.org/t/p/w185/wV4r6tVjP9Prk2acj7bYTmdtaMF.jpg"
-    }
-   ],
-   "platform": "Apple TV",
-   "ottSince": "2026-09-15",
-   "ottFreshDate": "2026-09-16",
-   "slug": "slow-horses",
-   "wikiWeeklyViews": 281280,
-   "trailerViews": 5704243,
-   "take": "Critics loved this one; reception has been close to universal acclaim.",
-   "takeSrc": "wiki",
-   "takeArticle": "Slow Horses"
+   "trailerViews": 2944145
   },
   {
    "title": "Physical 100: Mexico",
@@ -1861,14 +1866,14 @@
    "language": "Spanish",
    "released": "2026-09-16",
    "review": "Reality competition show based on the original Korean format.",
-   "rating": 9.2,
+   "rating": 9.1,
    "scores": [
     {
      "source": "TMDB",
-     "score": "9.2/10"
+     "score": "9.1/10"
     }
    ],
-   "votes": 27,
+   "votes": 28,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/vPsjiq0O8PCX9vdMCmXbbvVQmlC.jpg",
    "isRecent": true,
@@ -1881,7 +1886,12 @@
    "providers": [
     "Netflix"
    ],
-   "cast": [],
+   "cast": [
+    "Carlos Salcido",
+    "Pascal Nadaud",
+    "Juan Francisco Estrada",
+    "Pee Wee"
+   ],
    "director": null,
    "runtime": null,
    "imdbVotes": null,
@@ -1919,9 +1929,16 @@
      "kind": "tv"
     },
     {
-     "title": "Dancing with the Stars",
-     "slug": "dancing-with-the-stars",
-     "poster": "https://image.tmdb.org/t/p/w342/iisHVZ6we56PE4BcV1csB46SbiG.jpg",
+     "title": "The Amazing Race",
+     "slug": "the-amazing-race",
+     "poster": "https://image.tmdb.org/t/p/w342/x1jq0atcQg6UkaZpco0kFL6QHuM.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Voice",
+     "slug": "the-voice",
+     "poster": "https://image.tmdb.org/t/p/w342/7ah1WExcMkzbq7sARCTmcC23tBr.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1966,25 +1983,2282 @@
      "poster": "https://image.tmdb.org/t/p/w342/qHTuJ9LvGlLImr7n8Rg0KaTxG9L.jpg",
      "language": "English",
      "kind": "tv"
-    },
-    {
-     "title": "Fear Factor",
-     "slug": "fear-factor",
-     "poster": "https://image.tmdb.org/t/p/w342/jJ7rgZSPSRKvZKITrC9moKZi72J.jpg",
-     "language": "English",
-     "kind": "tv"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/u1D8LJejEZA0HqoPYKg9MAgHfYc.jpg",
    "backdropPath": "/u1D8LJejEZA0HqoPYKg9MAgHfYc.jpg",
    "posterPath": "/vPsjiq0O8PCX9vdMCmXbbvVQmlC.jpg",
    "fullReview": "Reality competition show based on the original Korean format.",
+   "castPics": [
+    {
+     "name": "Carlos Salcido",
+     "character": "self",
+     "photo": "https://image.tmdb.org/t/p/w185/9uNc93nnwkWxMkCldY8eEjyQnoY.jpg"
+    },
+    {
+     "name": "Pascal Nadaud",
+     "character": "self",
+     "photo": "https://image.tmdb.org/t/p/w185/d8FqsHSoTQ8QoeNMt2vFh77sJlH.jpg"
+    },
+    {
+     "name": "Juan Francisco Estrada",
+     "character": "self",
+     "photo": "https://image.tmdb.org/t/p/w185/d8Ifaj1hyJAFto4Lowl3oRxdEHQ.jpg"
+    },
+    {
+     "name": "Carmen Baqué",
+     "character": "Self",
+     "photo": "https://image.tmdb.org/t/p/w185/tNuM47Fb5kxPYC11a72iylhHgBs.jpg"
+    },
+    {
+     "name": "Luis Hernández",
+     "character": "Self",
+     "photo": "https://image.tmdb.org/t/p/w185/nIJplrarh8DuyQG0zrB69ITZ8YS.jpg"
+    },
+    {
+     "name": "Atlantis Jr.",
+     "character": "Self",
+     "photo": "https://image.tmdb.org/t/p/w185/sseHBRV4dgdN9WPhMGcP2PxgifU.jpg"
+    }
+   ],
    "platform": "Netflix",
    "ottSince": "2026-09-22",
    "ottFreshDate": "2026-09-16",
    "slug": "physical-100-mexico",
-   "trailerViews": 306021
+   "trailerViews": 309979
   },
+  {
+   "title": "Slow Horses",
+   "genre": "Crime / Drama",
+   "language": "English",
+   "released": "2022-04-01",
+   "review": "Follow a dysfunctional team of MI5 agents—and their obnoxious boss, the notorious Jackson Lamb—as they navigate the espionage world's smoke and mirrors…",
+   "rating": 8,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.0/10"
+    }
+   ],
+   "votes": 997,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
+   "isRecent": true,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 95480,
+   "popularity": 181.86,
+   "cert": "TV-MA",
+   "trailer": "https://www.youtube.com/watch?v=O9ZJChzPn0U",
+   "providers": [
+    "Apple TV",
+    "Apple TV Amazon Channel"
+   ],
+   "cast": [
+    "Gary Oldman",
+    "Jack Lowden",
+    "Kristin Scott Thomas",
+    "Hugo Weaving"
+   ],
+   "director": null,
+   "runtime": null,
+   "imdbVotes": null,
+   "imdbId": "tt5875444",
+   "seasons": 6,
+   "freshDate": "2026-09-16",
+   "badge": "New season",
+   "similar": [
+    {
+     "title": "The Agency",
+     "slug": "the-agency",
+     "poster": "https://image.tmdb.org/t/p/w342/zoLZbm5gtTQurjMxp5VOdHIpMmz.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Night Agent",
+     "slug": "the-night-agent",
+     "poster": "https://image.tmdb.org/t/p/w342/4c5yUNcaff4W4aPrkXE6zr7papX.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Cross",
+     "slug": "cross",
+     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Veil",
+     "slug": "the-veil",
+     "poster": "https://image.tmdb.org/t/p/w342/6aM5Lyp3zUtPyc0WVofES6UrV06.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Down Cemetery Road",
+     "slug": "down-cemetery-road",
+     "poster": "https://image.tmdb.org/t/p/w342/pjmQbrJ3FesJobbqCnUwBCtfcvH.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Black Doves",
+     "slug": "black-doves",
+     "poster": "https://image.tmdb.org/t/p/w342/uoXtkm2P4HPPL8T3IBJ02G3hCC4.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Fool Me Once",
+     "slug": "fool-me-once",
+     "poster": "https://image.tmdb.org/t/p/w342/Ertv4WLEyHgi8zN4ldOKgPcGAZ.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Citadel",
+     "slug": "citadel",
+     "poster": "https://image.tmdb.org/t/p/w342/5MHtxPEfmN4b0rHzfEZRcm6v9WI.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Bodies",
+     "slug": "bodies",
+     "poster": "https://image.tmdb.org/t/p/w342/qWX71nLvoLsBNPEjddZMC75lq6I.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Spooks",
+     "slug": "spooks",
+     "poster": "https://image.tmdb.org/t/p/w342/5kODxCYihuM49oQWke6GfHdsRT6.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Night Manager",
+     "slug": "the-night-manager",
+     "poster": "https://image.tmdb.org/t/p/w342/1MccRnw41qQjREuZkovqP2UX1i3.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Capture",
+     "slug": "the-capture",
+     "poster": "https://image.tmdb.org/t/p/w342/6keUrgntgKt299a39UJCDYldb8b.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/bDfboQUb45Cv9MYyVBDZw8M8xSM.jpg",
+   "backdropPath": "/bDfboQUb45Cv9MYyVBDZw8M8xSM.jpg",
+   "posterPath": "/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
+   "fullReview": "Follow a dysfunctional team of MI5 agents—and their obnoxious boss, the notorious Jackson Lamb—as they navigate the espionage world's smoke and mirrors to defend England from sinister forces.",
+   "castPics": [
+    {
+     "name": "Gary Oldman",
+     "character": "Jackson Lamb",
+     "photo": "https://image.tmdb.org/t/p/w185/yhaSM5habNNI1Tf4ALRwRk3VvSZ.jpg"
+    },
+    {
+     "name": "Jack Lowden",
+     "character": "River Cartwright",
+     "photo": "https://image.tmdb.org/t/p/w185/3wSE6uHLkslE9xvRiMbnphuI0VK.jpg"
+    },
+    {
+     "name": "Kristin Scott Thomas",
+     "character": "Diana Taverner",
+     "photo": "https://image.tmdb.org/t/p/w185/axksw0vAjBPSW02ZqpcC0V8rPD7.jpg"
+    },
+    {
+     "name": "Hugo Weaving",
+     "character": "Frank Harkness",
+     "photo": "https://image.tmdb.org/t/p/w185/lSC8Et0PYi5zeQb3IpPkFje7hgR.jpg"
+    },
+    {
+     "name": "Saskia Reeves",
+     "character": "Catherine Standish",
+     "photo": "https://image.tmdb.org/t/p/w185/1NM6rp95ec83tPa2Tnq66RV6Frc.jpg"
+    },
+    {
+     "name": "Christopher Chung",
+     "character": "Roddy Ho",
+     "photo": "https://image.tmdb.org/t/p/w185/wV4r6tVjP9Prk2acj7bYTmdtaMF.jpg"
+    }
+   ],
+   "platform": "Apple TV",
+   "ottSince": "2026-09-15",
+   "ottFreshDate": "2026-09-16",
+   "slug": "slow-horses",
+   "wikiWeeklyViews": 281280,
+   "trending": true,
+   "trailerViews": 5706142,
+   "take": "Critics loved this one; reception has been close to universal acclaim.",
+   "takeSrc": "wiki",
+   "takeArticle": "Slow Horses"
+  },
+  {
+   "title": "The Trial",
+   "genre": "Drama",
+   "language": "Spanish",
+   "released": "2026-09-11",
+   "review": "A teenager and her father struggle for justice after she is sexually assaulted by the scion of a successful businessman.",
+   "rating": 9.1,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "9.1/10"
+    }
+   ],
+   "votes": 48,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/3k5HpocqX4grgmqCecT2OdYMyT0.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 260249,
+   "popularity": 48.347,
+   "cert": "TV-14",
+   "trailer": "https://www.youtube.com/results?search_query=The%20Trial%20official%20trailer",
+   "providers": [
+    "Amazon Prime Video"
+   ],
+   "cast": [
+    "Eugenio Derbez",
+    "Pedro Alonso",
+    "Karla Gaytán",
+    "Íker Sánchez Solano"
+   ],
+   "director": null,
+   "runtime": null,
+   "imdbVotes": null,
+   "imdbId": "tt33023009",
+   "seasons": 1,
+   "freshDate": "2026-09-11",
+   "badge": null,
+   "similar": [
+    {
+     "title": "Raising Voices",
+     "slug": "raising-voices",
+     "poster": "https://image.tmdb.org/t/p/w342/lCU77Jp0iWN2e1WuSJvR7M35ebN.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "Fake Profile",
+     "slug": "fake-profile",
+     "poster": "https://image.tmdb.org/t/p/w342/3KyyfuG5VxUmpJFnw0pa1SkTsuL.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "Her Mother's Killer",
+     "slug": "her-mother-s-killer",
+     "poster": "https://image.tmdb.org/t/p/w342/imkU3fNak8NkXyCD0RJpAtP9jeK.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "Between Father and Son",
+     "slug": "between-father-and-son",
+     "poster": "https://image.tmdb.org/t/p/w342/uOh3yStvGlWiaktHs4VFtZdquK8.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "Sisters' Feud",
+     "slug": "sisters-feud",
+     "poster": "https://image.tmdb.org/t/p/w342/uNvHCu79A4hsvX6HkRZK31nO2H8.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "Medusa",
+     "slug": "medusa",
+     "poster": "https://image.tmdb.org/t/p/w342/mFsjwJdNBKDRYLqPdBFaoVCKXLq.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "Unspeakable Sins",
+     "slug": "unspeakable-sins",
+     "poster": "https://image.tmdb.org/t/p/w342/30eSqR2XPGz53eGElt6YAvH7cPX.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "The Guest",
+     "slug": "the-guest",
+     "poster": "https://image.tmdb.org/t/p/w342/fBMRxziwviMBVLOCe1i4qtwRXKj.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "Land of Honor",
+     "slug": "land-of-honor",
+     "poster": "https://image.tmdb.org/t/p/w342/cwBNC3e86zvWrznlqrImsv1MJdB.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "Jenni Rivera: Mariposa de Barrio",
+     "slug": "jenni-rivera-mariposa-de-barrio",
+     "poster": "https://image.tmdb.org/t/p/w342/vIHwoZF3YjLkoFKJGJMIiIO4HsF.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "Rosario Tijeras (Mexico)",
+     "slug": "rosario-tijeras-mexico",
+     "poster": "https://image.tmdb.org/t/p/w342/sqe3I68PRfHig0lgiDUrWVEVlsk.jpg",
+     "language": "Spanish",
+     "kind": "tv"
+    },
+    {
+     "title": "Bel-Air",
+     "slug": "bel-air",
+     "poster": "https://image.tmdb.org/t/p/w342/j8tbXWXrL15RucA6H4khq87dEXa.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/bLcF9mcinphgFlXEfk7RkCSfqCv.jpg",
+   "backdropPath": "/bLcF9mcinphgFlXEfk7RkCSfqCv.jpg",
+   "posterPath": "/3k5HpocqX4grgmqCecT2OdYMyT0.jpg",
+   "fullReview": "A teenager and her father struggle for justice after she is sexually assaulted by the scion of a successful businessman. Not only will the father and daughter have to navigate a failed judicial system, but they must also contend with a wealthy adversary bent on using all his power to protect his son.",
+   "castPics": [
+    {
+     "name": "Eugenio Derbez",
+     "character": "Miguel",
+     "photo": "https://image.tmdb.org/t/p/w185/6o1w3mYF947N6TTakQXcs3NNy4w.jpg"
+    },
+    {
+     "name": "Pedro Alonso",
+     "character": "Huerta",
+     "photo": "https://image.tmdb.org/t/p/w185/38HeVKeOBztVYrLJOWzAtEZiB02.jpg"
+    },
+    {
+     "name": "Karla Gaytán",
+     "character": "Andrea Portillo",
+     "photo": "https://image.tmdb.org/t/p/w185/brrYnEezWDbjM4aLbRXT4iCwnd5.jpg"
+    },
+    {
+     "name": "Íker Sánchez Solano",
+     "character": "Carlos Huerta",
+     "photo": "https://image.tmdb.org/t/p/w185/eHvL807cehcshUoxwJMSCod8IjR.jpg"
+    },
+    {
+     "name": "Sergio Gava",
+     "character": "Agente MP",
+     "photo": "https://image.tmdb.org/t/p/w185/zWGEgeP8rA6vZ4toS5NmfDl5xbK.jpg"
+    },
+    {
+     "name": "Héctor Jiménez",
+     "character": "Joaquín Portillo",
+     "photo": "https://image.tmdb.org/t/p/w185/i6Q6G8HWLof7zXNbTgvpI6MuC3P.jpg"
+    }
+   ],
+   "platform": "Amazon Prime Video",
+   "ottSince": "2026-09-15",
+   "ottFreshDate": "2026-09-11",
+   "stillGood": true,
+   "slug": "the-trial"
+  },
+  {
+   "title": "Reacher",
+   "genre": "Action & Adventure / Crime",
+   "language": "English",
+   "released": "2022-02-03",
+   "review": "Jack Reacher, a veteran military police investigator, has just recently entered civilian life. Reacher is a drifter, carrying no phone and the barest…",
+   "rating": 8.1,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.1/10"
+    }
+   ],
+   "votes": 3399,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 108978,
+   "popularity": 743.5217,
+   "cert": "TV-MA",
+   "trailer": "https://www.youtube.com/watch?v=GSycMV-_Csw",
+   "providers": [
+    "Amazon Prime Video"
+   ],
+   "cast": [
+    "Alan Ritchson",
+    "Agnez Mo",
+    "Sydelle Noel",
+    "Anggun"
+   ],
+   "director": "Nick Santora",
+   "runtime": null,
+   "imdbVotes": null,
+   "rentBuy": [
+    "Amazon Video",
+    "Apple TV Store",
+    "Google Play Movies",
+    "Fandango At Home"
+   ],
+   "imdbId": "tt9288030",
+   "seasons": 4,
+   "freshDate": "2026-08-12",
+   "badge": null,
+   "similar": [
+    {
+     "title": "The Old Man",
+     "slug": "the-old-man",
+     "poster": "https://image.tmdb.org/t/p/w342/8Ec9zCZl2Go8WhDN1JWjjgQRlEi.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Day of the Jackal",
+     "slug": "the-day-of-the-jackal",
+     "poster": "https://image.tmdb.org/t/p/w342/tYLecM3WSEjlkKhkGiH5G68Dprm.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Terminal List",
+     "slug": "the-terminal-list",
+     "poster": "https://image.tmdb.org/t/p/w342/xyFAzP7RKK8cARCSalIZ9A9T0jV.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Black Doves",
+     "slug": "black-doves",
+     "poster": "https://image.tmdb.org/t/p/w342/uoXtkm2P4HPPL8T3IBJ02G3hCC4.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Cross",
+     "slug": "cross",
+     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Slow Horses",
+     "slug": "slow-horses",
+     "poster": "https://image.tmdb.org/t/p/w342/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Furious",
+     "slug": "furious",
+     "poster": "https://image.tmdb.org/t/p/w342/xnxxrEKtBaIcI1ewq50pLkOMU6u.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Night Agent",
+     "slug": "the-night-agent",
+     "poster": "https://image.tmdb.org/t/p/w342/4c5yUNcaff4W4aPrkXE6zr7papX.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Legends",
+     "slug": "legends",
+     "poster": "https://image.tmdb.org/t/p/w342/eYYTgBtsvvA3fC1feyvoqv0G9Gl.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Countdown",
+     "slug": "countdown",
+     "poster": "https://image.tmdb.org/t/p/w342/gcSNS5cy1iOmYawIdJCzoc873rQ.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Gangs of London",
+     "slug": "gangs-of-london",
+     "poster": "https://image.tmdb.org/t/p/w342/fVgwa6wGw9ddGM5O7mqrrwB6gHK.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Dexter: New Blood",
+     "slug": "dexter-new-blood",
+     "poster": "https://image.tmdb.org/t/p/w342/9EBKgrFIsCFSV1RZKWhYUdbtGiv.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/pF0qkRsrHkdYadPWY9AMeFZfcwk.jpg",
+   "backdropPath": "/pF0qkRsrHkdYadPWY9AMeFZfcwk.jpg",
+   "posterPath": "/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg",
+   "fullReview": "Jack Reacher, a veteran military police investigator, has just recently entered civilian life. Reacher is a drifter, carrying no phone and the barest of essentials as he travels the country and explores the nation he once served.",
+   "castPics": [
+    {
+     "name": "Alan Ritchson",
+     "character": "Jack Reacher",
+     "photo": "https://image.tmdb.org/t/p/w185/92YNEEpCyugkTzPprJwZpvVtvuK.jpg"
+    },
+    {
+     "name": "Agnez Mo",
+     "character": "Lila Hoth",
+     "photo": "https://image.tmdb.org/t/p/w185/7GuBJxf5szQRCKLk3iG2ztfCo39.jpg"
+    },
+    {
+     "name": "Sydelle Noel",
+     "character": "Tamara Green",
+     "photo": "https://image.tmdb.org/t/p/w185/fCOlRtkZVMOMDRPYhdRLeKqymVa.jpg"
+    },
+    {
+     "name": "Anggun",
+     "character": "Amisha Hoth",
+     "photo": "https://image.tmdb.org/t/p/w185/4WxHGTehDvZudrunxTZmnR66CBi.jpg"
+    },
+    {
+     "name": "Christopher Rodriguez Marquette",
+     "character": "Jacob Merrick",
+     "photo": "https://image.tmdb.org/t/p/w185/8AL7UPXM4sVkOMgTHIxNdRi2SXP.jpg"
+    },
+    {
+     "name": "Kevin Corrigan",
+     "character": "Shaun Docherty",
+     "photo": "https://image.tmdb.org/t/p/w185/obSUGc68mQDvFONalMg25Xw5GZM.jpg"
+    }
+   ],
+   "platform": "Amazon Prime Video",
+   "ottSince": "2026-07-26",
+   "ottFreshDate": "2026-08-12",
+   "stillGood": true,
+   "slug": "reacher",
+   "wikiWeeklyViews": 156859,
+   "trailerViews": 12339142,
+   "take": "Most critics came away happy.",
+   "takeSrc": "wiki",
+   "takeArticle": "Reacher (TV series)"
+  },
+  {
+   "title": "Drawn Together",
+   "genre": "Romance / Thriller",
+   "language": "Spanish",
+   "released": "2026-09-09",
+   "review": "Marfil, daughter of a powerful Spanish businessman, sees her life in New York turned upside down when she is kidnapped and released without explanation.",
+   "rating": 6.7,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "6.7/10"
+    }
+   ],
+   "votes": 117,
+   "verdict": "Worth a watch",
+   "poster": "https://image.tmdb.org/t/p/w342/6rpvddXbaQPOi0fB2HKWbZ3uUSg.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1440098,
+   "popularity": 143.0148,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=WlGzP8FvsfY",
+   "providers": [
+    "Amazon Prime Video"
+   ],
+   "cast": [
+    "Ester Expósito",
+    "Hugo Diego Garcia",
+    "Pablo Molinero",
+    "Lluís Homar"
+   ],
+   "director": "Óscar Pedraza",
+   "runtime": 104,
+   "imdbVotes": null,
+   "imdbId": "tt36073210",
+   "seasons": null,
+   "freshDate": "2026-09-09",
+   "badge": null,
+   "similar": [
+    {
+     "title": "A Widow's Game",
+     "slug": "a-widow-s-game",
+     "poster": "https://image.tmdb.org/t/p/w342/yZOdrJDl2GwREoigC0y40kMosxj.jpg",
+     "language": "Spanish",
+     "kind": "movie"
+    },
+    {
+     "title": "A Working Man",
+     "slug": "a-working-man",
+     "poster": "https://image.tmdb.org/t/p/w342/6FRFIogh3zFnVWn7Z6zcYnIbRcX.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Black Book",
+     "slug": "the-black-book",
+     "poster": "https://image.tmdb.org/t/p/w342/kn28W24slBLyGr8ZIZnxNE5YZrY.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Stowaway",
+     "slug": "stowaway",
+     "poster": "https://image.tmdb.org/t/p/w342/8ZfKo5349nEssW0n2wqNf4vPtbZ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Protector",
+     "slug": "protector",
+     "poster": "https://image.tmdb.org/t/p/w342/icOZpnGuH9YrEaW3wrw5GJaXGih.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Stolen Girl",
+     "slug": "stolen-girl",
+     "poster": "https://image.tmdb.org/t/p/w342/njU663VbT88zZjsJYizfWcam6sS.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Shadow Force",
+     "slug": "shadow-force",
+     "poster": "https://image.tmdb.org/t/p/w342/9LCpHFXZgkqp2AWiYq0mGbfZauk.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Girl in the Basement",
+     "slug": "girl-in-the-basement",
+     "poster": "https://image.tmdb.org/t/p/w342/tPP9n6r5QrIKPnshnJqE7klptj2.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Hunting Grounds",
+     "slug": "hunting-grounds",
+     "poster": "https://image.tmdb.org/t/p/w342/cgZjpqRQt9sk6XMCwZ3B1NPAaoy.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Body Brokers",
+     "slug": "body-brokers",
+     "poster": "https://image.tmdb.org/t/p/w342/fNQUUrtlN79pDIMAPigX8NUvNW2.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "All the Devils Are Here",
+     "slug": "all-the-devils-are-here",
+     "poster": "https://image.tmdb.org/t/p/w342/4GJTUSjbCGynQo4PpTTNzzxYfBM.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Bad Sister",
+     "slug": "bad-sister",
+     "poster": "https://image.tmdb.org/t/p/w342/jKrIlgfJPIWNeowaOZPBZuOPmq0.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/i65y7cMae36K0giN0GRaMjAHUru.jpg",
+   "backdropPath": "/i65y7cMae36K0giN0GRaMjAHUru.jpg",
+   "posterPath": "/6rpvddXbaQPOi0fB2HKWbZ3uUSg.jpg",
+   "fullReview": "Marfil, daughter of a powerful Spanish businessman, sees her life in New York turned upside down when she is kidnapped and released without explanation. Her father hires Sebastian Moore as bodyguard and, forced to spend every minute together, an inevitable attraction ignites in a world where nothing is as it seems.",
+   "castPics": [
+    {
+     "name": "Ester Expósito",
+     "character": "Marfil",
+     "photo": "https://image.tmdb.org/t/p/w185/p6VTokjlBYQLoCaUX06ibMVsp5j.jpg"
+    },
+    {
+     "name": "Hugo Diego Garcia",
+     "character": "Sebastian",
+     "photo": "https://image.tmdb.org/t/p/w185/mC0Aly8hHgNIYvZSa1SZmYU47pn.jpg"
+    },
+    {
+     "name": "Pablo Molinero",
+     "character": "Alejandro Cortés",
+     "photo": "https://image.tmdb.org/t/p/w185/mtoRws2DEpETuGJGmvI5DALUcce.jpg"
+    },
+    {
+     "name": "Lluís Homar",
+     "character": "Logan",
+     "photo": "https://image.tmdb.org/t/p/w185/p1AFBzyZRbHzA6S8q3RWw0YXoAf.jpg"
+    },
+    {
+     "name": "Joaquín Ferreira",
+     "character": "Ray",
+     "photo": "https://image.tmdb.org/t/p/w185/dGpDGDPMtvsZpc4ZMMgjy1DOGpU.jpg"
+    },
+    {
+     "name": "Zoe Bonafonte",
+     "character": "Gabriela",
+     "photo": "https://image.tmdb.org/t/p/w185/pwjNbRQP4GXVREfB96SuzHh2hqq.jpg"
+    }
+   ],
+   "theatrical": false,
+   "platform": "Amazon Prime Video",
+   "ottSince": "2026-09-10",
+   "ottFreshDate": "2026-09-09",
+   "stillGood": true,
+   "slug": "drawn-together",
+   "wikiWeeklyViews": 31732,
+   "trailerViews": 795757
+  },
+  {
+   "title": "Lanterns",
+   "genre": "Drama / Mystery",
+   "language": "English",
+   "released": "2026-08-16",
+   "review": "Two intergalactic cops, new recruit John Stewart and Lantern legend Hal Jordan, are drawn into a dark, Earth-based mystery as they investigate a murder…",
+   "rating": 8.3,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.3/10"
+    }
+   ],
+   "votes": 422,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/gpC7h43xPMEV3goYMQShfJbTtLq.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 95350,
+   "popularity": 255.8752,
+   "cert": "TV-MA",
+   "trailer": "https://www.youtube.com/watch?v=7UIBOsuUwc4",
+   "providers": [
+    "HBO Max Amazon Channel",
+    "HBO Max"
+   ],
+   "cast": [
+    "Kyle Chandler",
+    "Aaron Pierre",
+    "Kelly Macdonald"
+   ],
+   "director": "Damon Lindelof",
+   "runtime": null,
+   "imdbVotes": null,
+   "imdbId": "tt26545992",
+   "seasons": 1,
+   "freshDate": "2026-08-16",
+   "badge": null,
+   "similar": [
+    {
+     "title": "Locke & Key",
+     "slug": "locke-key",
+     "poster": "https://image.tmdb.org/t/p/w342/zuxGfRKziGHPogipnEXXykdDmyT.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Class of '09",
+     "slug": "class-of-09",
+     "poster": "https://image.tmdb.org/t/p/w342/5eCGq50CMloT2a1bMDB8JPpGuf2.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Dark Winds",
+     "slug": "dark-winds",
+     "poster": "https://image.tmdb.org/t/p/w342/kDlrMN0P9ByrEH2GoRbBFeZHbcf.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Irregulars",
+     "slug": "the-irregulars",
+     "poster": "https://image.tmdb.org/t/p/w342/qN6HCKR3ZRqbpGBWFctVlSTKR2k.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Cross",
+     "slug": "cross",
+     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "A Good Girl's Guide to Murder",
+     "slug": "a-good-girl-s-guide-to-murder",
+     "poster": "https://image.tmdb.org/t/p/w342/pVV62HbgLP7JsZv096XmjPZtjdP.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Gotham",
+     "slug": "gotham",
+     "poster": "https://image.tmdb.org/t/p/w342/zLpSNnVoL2bjQdc1PcaHUPUzttP.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Powers",
+     "slug": "powers",
+     "poster": "https://image.tmdb.org/t/p/w342/7imMR8ySLCPG3LsNlGej8GGtXBg.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Grimm",
+     "slug": "grimm",
+     "poster": "https://image.tmdb.org/t/p/w342/iOptnt1QHi6bIHmOq6adnZTV0bU.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Sleepy Hollow",
+     "slug": "sleepy-hollow",
+     "poster": "https://image.tmdb.org/t/p/w342/2RHj62XneYMCRPAyQrEIrKVij12.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Doom Patrol",
+     "slug": "doom-patrol",
+     "poster": "https://image.tmdb.org/t/p/w342/nVN7Dt0Xr78gnJepRsRLaLYklbY.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Marvel's Agents of S.H.I.E.L.D.",
+     "slug": "marvel-s-agents-of-s-h-i-e-l-d",
+     "poster": "https://image.tmdb.org/t/p/w342/gHUCCMy1vvj58tzE3dZqeC9SXus.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/wJjnJbVUwPz0GADAgpFt9nWtzUu.jpg",
+   "backdropPath": "/wJjnJbVUwPz0GADAgpFt9nWtzUu.jpg",
+   "posterPath": "/gpC7h43xPMEV3goYMQShfJbTtLq.jpg",
+   "fullReview": "Two intergalactic cops, new recruit John Stewart and Lantern legend Hal Jordan, are drawn into a dark, Earth-based mystery as they investigate a murder in the American heartland.",
+   "castPics": [
+    {
+     "name": "Kyle Chandler",
+     "character": "Hal Jordan",
+     "photo": "https://image.tmdb.org/t/p/w185/66n7XNj1dyYkzCBWR3Lq8Vz4PJ1.jpg"
+    },
+    {
+     "name": "Aaron Pierre",
+     "character": "John Stewart",
+     "photo": "https://image.tmdb.org/t/p/w185/hNwZWdT2KxKj1YLbipvtUhNjfAp.jpg"
+    },
+    {
+     "name": "Kelly Macdonald",
+     "character": "Sheriff Kerry Kane",
+     "photo": "https://image.tmdb.org/t/p/w185/k0yVocTnTMWlNdaeOO7YRViCdhO.jpg"
+    }
+   ],
+   "platform": "HBO Max Amazon Channel",
+   "ottSince": "2026-08-19",
+   "ottFreshDate": "2026-08-16",
+   "stillGood": true,
+   "slug": "lanterns",
+   "wikiWeeklyViews": 503654,
+   "trending": true,
+   "trailerViews": 35198599,
+   "take": "Critics liked it: the performances and lead chemistry won praise, though the themes drew some flak.",
+   "takeSrc": "wiki",
+   "takeAspects": [
+    "performances",
+    "lead chemistry"
+   ],
+   "takeArticle": "Lanterns (TV series)"
+  }
+ ],
+ "comingSoon": [
+  {
+   "title": "Digger",
+   "released": "2026-10-02",
+   "genre": "Drama / Comedy",
+   "language": "English",
+   "review": "The most powerful man in the world embarks on a frantic mission to prove he is humanity's savior before the disaster…",
+   "poster": "https://image.tmdb.org/t/p/w342/1ATXKrIPJyKNwnJ6lcG088Sa6zi.jpg",
+   "kind": "movie",
+   "tmdbId": 1248832,
+   "popularity": 44.4196,
+   "cert": "R",
+   "trailer": "https://www.youtube.com/watch?v=job8V254NAE",
+   "providers": [],
+   "cast": [
+    "Tom Cruise",
+    "Riz Ahmed",
+    "John Goodman",
+    "Sandra Hüller"
+   ],
+   "director": "Alejandro G. Iñárritu",
+   "runtime": 129,
+   "imdbScore": null,
+   "imdbVotes": null,
+   "imdbId": "tt31450459",
+   "seasons": null,
+   "freshDate": "2026-09-30",
+   "badge": null,
+   "isRecent": false,
+   "similar": [
+    {
+     "title": "Ricky Gervais: Armageddon",
+     "slug": "ricky-gervais-armageddon",
+     "poster": "https://image.tmdb.org/t/p/w342/rnT1Aq92RdhlYMIikuwnwNMaOGu.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Uncorked",
+     "slug": "uncorked",
+     "poster": "https://image.tmdb.org/t/p/w342/neUgCuBhafxYQyXTKxwjQejqqa7.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "¿Y cómo es él?",
+     "slug": "y-c-mo-es-l",
+     "poster": "https://image.tmdb.org/t/p/w342/n5nH4IcSmlYgAil6NOVvn6d35BH.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Not Without Hope",
+     "slug": "not-without-hope",
+     "poster": "https://image.tmdb.org/t/p/w342/w5WJMJ6DWPFK0Gx0Ongh0FZBAlK.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Middle Man",
+     "slug": "the-middle-man",
+     "poster": "https://image.tmdb.org/t/p/w342/lp0wpfAih1g4yUB78x0fVvzAJzu.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Somewhere in Queens",
+     "slug": "somewhere-in-queens",
+     "poster": "https://image.tmdb.org/t/p/w342/zXr6AziPii0NFpbTANNpLrOPxRP.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Juniper",
+     "slug": "juniper",
+     "poster": "https://image.tmdb.org/t/p/w342/ziDXGs2Up7o51Lp55zAeyrQo6JH.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Almost Friends",
+     "slug": "almost-friends",
+     "poster": "https://image.tmdb.org/t/p/w342/uJMknKxZagbhAYiiMjEaFnsZzRR.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Family Weekend",
+     "slug": "family-weekend",
+     "poster": "https://image.tmdb.org/t/p/w342/RiUNV96HPP14OfB7ILEOe2Vj26.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Landline",
+     "slug": "landline",
+     "poster": "https://image.tmdb.org/t/p/w342/p7RVsyi67S95RyNJjX99E1MaOsA.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Looking for Eric",
+     "slug": "looking-for-eric",
+     "poster": "https://image.tmdb.org/t/p/w342/fTHUY0E1FYMFKiQ8UDKx793LtW0.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Panic",
+     "slug": "panic",
+     "poster": "https://image.tmdb.org/t/p/w342/gCaWBW6qQ0otWliRi0Gs4bAzgDX.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/u3EtxdmZeiliW98c5Oegk5LIGZa.jpg",
+   "backdropPath": "/u3EtxdmZeiliW98c5Oegk5LIGZa.jpg",
+   "posterPath": "/1ATXKrIPJyKNwnJ6lcG088Sa6zi.jpg",
+   "fullReview": "The most powerful man in the world embarks on a frantic mission to prove he is humanity's savior before the disaster he's unleashed destroys everything.",
+   "castPics": [
+    {
+     "name": "Tom Cruise",
+     "character": "Digger Rockwell",
+     "photo": "https://image.tmdb.org/t/p/w185/maf8PhSvDCdEwjEMbYfGpojR5RP.jpg"
+    },
+    {
+     "name": "Riz Ahmed",
+     "character": "Ganesh",
+     "photo": "https://image.tmdb.org/t/p/w185/1uP9RaX7BGVx7XGTEmwObBJJzsC.jpg"
+    },
+    {
+     "name": "John Goodman",
+     "character": "President Compson",
+     "photo": "https://image.tmdb.org/t/p/w185/yyYqoyKHO7hE1zpgEV2XlqYWcNV.jpg"
+    },
+    {
+     "name": "Sandra Hüller",
+     "character": "Emma",
+     "photo": "https://image.tmdb.org/t/p/w185/jQfKXVCPTH9KEnzHHU4QemCnlMe.jpg"
+    },
+    {
+     "name": "Michael Stuhlbarg",
+     "character": "Vice President",
+     "photo": "https://image.tmdb.org/t/p/w185/aYB3SQm3h6ZyAdlbGyiNfakjx56.jpg"
+    },
+    {
+     "name": "Jesse Plemons",
+     "character": "Kenny",
+     "photo": "https://image.tmdb.org/t/p/w185/og4I51GsuwohdPgoELOHVMMqMre.jpg"
+    }
+   ],
+   "slug": "digger",
+   "trailerViews": 4007047
+  },
+  {
+   "title": "Verity",
+   "released": "2026-10-02",
+   "genre": "Mystery / Thriller",
+   "language": "English",
+   "review": "Lowen Ashleigh is hired by Jeremy Crawford to ghostwrite novels for his bestselling author wife Verity, who is unable…",
+   "poster": "https://image.tmdb.org/t/p/w342/e2t7NjahJTgz2PMx2BW4ZRgHR6Z.jpg",
+   "kind": "movie",
+   "tmdbId": 1283515,
+   "popularity": 20.8096,
+   "cert": "R",
+   "trailer": "https://www.youtube.com/watch?v=xdPMKhjMSFs",
+   "providers": [],
+   "cast": [
+    "Anne Hathaway",
+    "Dakota Johnson",
+    "Josh Hartnett",
+    "Brady Wagner"
+   ],
+   "director": "Michael Showalter",
+   "runtime": 117,
+   "imdbScore": null,
+   "imdbVotes": null,
+   "imdbId": "tt32261958",
+   "seasons": null,
+   "freshDate": "2026-09-30",
+   "badge": null,
+   "isRecent": false,
+   "similar": [
+    {
+     "title": "The Infernal Machine",
+     "slug": "the-infernal-machine",
+     "poster": "https://image.tmdb.org/t/p/w342/bSqpOGzaKBdGkBLmcm1JJIVryYy.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Invisible Man",
+     "slug": "the-invisible-man",
+     "poster": "https://image.tmdb.org/t/p/w342/5EufsDwXdY2CVttYOk2WtYhgKpa.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Force of Nature: The Dry 2",
+     "slug": "force-of-nature-the-dry-2",
+     "poster": "https://image.tmdb.org/t/p/w342/sw4M0jLT04FM1p3C2XQ3il50wgV.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Pale Blue Eye",
+     "slug": "the-pale-blue-eye",
+     "poster": "https://image.tmdb.org/t/p/w342/9xkGlFRqrN8btTLU0KQvOfn2PHr.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Blackwater Lane",
+     "slug": "blackwater-lane",
+     "poster": "https://image.tmdb.org/t/p/w342/tdUFd56CFC0o6XoAkn4WRNHwqod.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Mindcage",
+     "slug": "mindcage",
+     "poster": "https://image.tmdb.org/t/p/w342/fUi9vNYQaB8QtrbEyS9J6vbKJJt.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The 9th Life of Louis Drax",
+     "slug": "the-9th-life-of-louis-drax",
+     "poster": "https://image.tmdb.org/t/p/w342/jCM4BpOoCAjs6lKHDCm66kE2XR1.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Spider",
+     "slug": "spider",
+     "poster": "https://image.tmdb.org/t/p/w342/zvm4WuYxTiGkRagRqHUey0meRQL.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "I Still See You",
+     "slug": "i-still-see-you",
+     "poster": "https://image.tmdb.org/t/p/w342/9fqzZs922V8OmwgO11Eqclof2mQ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Mr. Arkadin",
+     "slug": "mr-arkadin",
+     "poster": "https://image.tmdb.org/t/p/w342/hoBfh3jmA3XDDx9tGgMwdGd37GE.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Awakening",
+     "slug": "the-awakening",
+     "poster": "https://image.tmdb.org/t/p/w342/txmiJkl8su0jkEABLIHZBqVHrTj.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Haunted",
+     "slug": "haunted",
+     "poster": "https://image.tmdb.org/t/p/w342/5sJyBJafGtBuvHv6zkXsTFtA3vu.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/9qxyrJfjk577ym5WD6HCDmunoyO.jpg",
+   "backdropPath": "/9qxyrJfjk577ym5WD6HCDmunoyO.jpg",
+   "posterPath": "/e2t7NjahJTgz2PMx2BW4ZRgHR6Z.jpg",
+   "fullReview": "Lowen Ashleigh is hired by Jeremy Crawford to ghostwrite novels for his bestselling author wife Verity, who is unable to finish following an accident. Lowen gradually uncovers Verity's disturbing truths while residing at the Crawfords' home to work.",
+   "castPics": [
+    {
+     "name": "Anne Hathaway",
+     "character": "Verity Crawford",
+     "photo": "https://image.tmdb.org/t/p/w185/nbccV2pMoyLTCeg5DQip24Eq0Jp.jpg"
+    },
+    {
+     "name": "Dakota Johnson",
+     "character": "Lowen Ashleigh",
+     "photo": "https://image.tmdb.org/t/p/w185/qFek0KqpaPV5mVyHHNfAapDE9Tj.jpg"
+    },
+    {
+     "name": "Josh Hartnett",
+     "character": "Jeremy Crawford",
+     "photo": "https://image.tmdb.org/t/p/w185/5eMo8D7h1XrSu6ZN4UXhPcS6YNG.jpg"
+    },
+    {
+     "name": "Brady Wagner",
+     "character": "Crew Crawford",
+     "photo": "https://image.tmdb.org/t/p/w185/tAzT9FRrs7Zb3qlhNBHk2a7Z2Mx.jpg"
+    },
+    {
+     "name": "Ismael Cruz Cordova",
+     "character": "Corey",
+     "photo": "https://image.tmdb.org/t/p/w185/oXcrsQGndk60iFkNB8qFnMHlNzL.jpg"
+    },
+    {
+     "name": "Irina Dvorovenko",
+     "character": "Anna",
+     "photo": "https://image.tmdb.org/t/p/w185/f0XyxPtobP1MkwByneD3zAi0YNj.jpg"
+    }
+   ],
+   "slug": "verity",
+   "trailerViews": 14868896
+  },
+  {
+   "title": "Ghost in the Cell",
+   "released": "2026-10-02",
+   "genre": "Horror / Comedy",
+   "language": "Indonesian",
+   "review": "In a notorious prison, an invisible force begins killing inmates brutally, compelling enemy gangs and corrupt guards…",
+   "poster": "https://image.tmdb.org/t/p/w342/zxcMdx0w5Zmg8yZuuiS7CJ8vOea.jpg",
+   "kind": "movie",
+   "tmdbId": 1393326,
+   "popularity": 70.9935,
+   "cert": "R",
+   "trailer": "https://www.youtube.com/watch?v=otL78_pk_A0",
+   "providers": [],
+   "cast": [
+    "Abimana Aryasatya",
+    "Bront Palarae",
+    "Dimas Danang",
+    "Endy Arfian"
+   ],
+   "director": "Joko Anwar",
+   "runtime": 106,
+   "imdbScore": null,
+   "imdbVotes": null,
+   "imdbId": "tt9000310",
+   "seasons": null,
+   "freshDate": "2026-04-16",
+   "badge": null,
+   "isRecent": false,
+   "similar": [
+    {
+     "title": "The Hunt",
+     "slug": "the-hunt",
+     "poster": "https://image.tmdb.org/t/p/w342/wxPhn4ef1EAo5njxwBkAEVrlJJG.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Jester 2",
+     "slug": "the-jester-2",
+     "poster": "https://image.tmdb.org/t/p/w342/47dsw1jSOV0Be5zmy7CtLhYpqU.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Barbarian",
+     "slug": "barbarian",
+     "poster": "https://image.tmdb.org/t/p/w342/idT5mnqPcJgSkvpDX7pJffBzdVH.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Blackening",
+     "slug": "the-blackening",
+     "poster": "https://image.tmdb.org/t/p/w342/n2aS9FE0C3VUHtSb3Ak41aU9K3y.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Renfield",
+     "slug": "renfield",
+     "poster": "https://image.tmdb.org/t/p/w342/p6yUjhvNGQpFZilKwOKbxQ1eHlo.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "They Will Kill You",
+     "slug": "they-will-kill-you",
+     "poster": "https://image.tmdb.org/t/p/w342/6oI4oQKTWMVUlr8Ivqydp28Ruu6.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Scream VI",
+     "slug": "scream-vi",
+     "poster": "https://image.tmdb.org/t/p/w342/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Abigail",
+     "slug": "abigail",
+     "poster": "https://image.tmdb.org/t/p/w342/5gKKSoD3iezjoL7YqZONjmyAiRA.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Strange Darling",
+     "slug": "strange-darling",
+     "poster": "https://image.tmdb.org/t/p/w342/kWNCRgt3ocv19bYO0sk7TRuZuFY.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "#AMFAD: All My Friends Are Dead",
+     "slug": "amfad-all-my-friends-are-dead",
+     "poster": "https://image.tmdb.org/t/p/w342/7QyJll2kuqlQgvT2Z08iYmeUKe1.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Dare",
+     "slug": "the-dare",
+     "poster": "https://image.tmdb.org/t/p/w342/iJYPBa2EA6UIsXdrlOXkpnqbeQW.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Beyond Re-Animator",
+     "slug": "beyond-re-animator",
+     "poster": "https://image.tmdb.org/t/p/w342/iS4oB4nQEdO86Fvszqf6P2ejK44.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/tK3QdOOrX4qEkmSlvrmc8cK7iOU.jpg",
+   "backdropPath": "/tK3QdOOrX4qEkmSlvrmc8cK7iOU.jpg",
+   "posterPath": "/zxcMdx0w5Zmg8yZuuiS7CJ8vOea.jpg",
+   "fullReview": "In a notorious prison, an invisible force begins killing inmates brutally, compelling enemy gangs and corrupt guards to work together as they try to survive the mounting bloodshed.",
+   "castPics": [
+    {
+     "name": "Abimana Aryasatya",
+     "character": "Anggoro Ramadhani",
+     "photo": "https://image.tmdb.org/t/p/w185/b4ncXBTGaiPS6cof11vKeh3DuFj.jpg"
+    },
+    {
+     "name": "Bront Palarae",
+     "character": "Jefry Hutama",
+     "photo": "https://image.tmdb.org/t/p/w185/mk7v78F2QPV1jmwjjo19PONugkR.jpg"
+    },
+    {
+     "name": "Dimas Danang",
+     "character": "Irfan Hamdani",
+     "photo": "https://image.tmdb.org/t/p/w185/tDdRwEk68lL3WMKt8iymNrdCgeH.jpg"
+    },
+    {
+     "name": "Endy Arfian",
+     "character": "Dimas Kurnia",
+     "photo": "https://image.tmdb.org/t/p/w185/v9yWVWqD5SeDuU8l8rb71BYmlvI.jpg"
+    },
+    {
+     "name": "Lukman Sardi",
+     "character": "Pendi Mulia",
+     "photo": "https://image.tmdb.org/t/p/w185/pMZiVVu8k5MzGteRgpNVzMybxLm.jpg"
+    },
+    {
+     "name": "Mike Lucock",
+     "character": "Wildan Arifin",
+     "photo": "https://image.tmdb.org/t/p/w185/LtCJOYBn9p8TG6gOHh4GxvKiHi.jpg"
+    }
+   ],
+   "slug": "ghost-in-the-cell",
+   "trailerViews": 1294809
+  },
+  {
+   "title": "Other Mommy",
+   "released": "2026-10-09",
+   "genre": "Horror",
+   "language": "English",
+   "review": "A young girl, Bela, forms a relationship with a sinister entity in her home who looks uncannily like her own mother.",
+   "poster": "https://image.tmdb.org/t/p/w342/fGRNCssTRrhYZxNzykGGCoMsAVq.jpg",
+   "kind": "movie",
+   "tmdbId": 1400837,
+   "popularity": 22.4386,
+   "cert": "R",
+   "trailer": "https://www.youtube.com/watch?v=-mnTITqqiT0",
+   "providers": [],
+   "cast": [
+    "Jessica Chastain",
+    "Arabella Olivia Clark",
+    "Jay Duplass",
+    "Dichen Lachman"
+   ],
+   "director": "Rob Savage",
+   "runtime": 93,
+   "imdbScore": null,
+   "imdbVotes": null,
+   "imdbId": "tt36586020",
+   "seasons": null,
+   "freshDate": "2026-10-07",
+   "badge": null,
+   "isRecent": false,
+   "similar": [
+    {
+     "title": "Never Let Go",
+     "slug": "never-let-go",
+     "poster": "https://image.tmdb.org/t/p/w342/3EpZ2ksjijmdr8BhISP03PYzNFW.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Exorcist: Believer",
+     "slug": "the-exorcist-believer",
+     "poster": "https://image.tmdb.org/t/p/w342/fFXkAlMH2iQrNknv4eq7LGTkcti.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Insidious: Out of the Further",
+     "slug": "insidious-out-of-the-further",
+     "poster": "https://image.tmdb.org/t/p/w342/4tTrW9dXCByS5wt2pXVWb58zNjz.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Daddy's Head",
+     "slug": "daddy-s-head",
+     "poster": "https://image.tmdb.org/t/p/w342/nEWbEBs8BalwasA4Un8rll3kauT.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Boogeyman",
+     "slug": "the-boogeyman",
+     "poster": "https://image.tmdb.org/t/p/w342/pYwZdnXVnVxAr7dx4MEK7tTK9gI.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Bring Her Back",
+     "slug": "bring-her-back",
+     "poster": "https://image.tmdb.org/t/p/w342/1Q3GlCXGYWELifxANYZ5OVMRVZl.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Cobweb",
+     "slug": "cobweb",
+     "poster": "https://image.tmdb.org/t/p/w342/cGXFosYUHYjjdKrOmA0bbjvzhKz.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "No One Will Save You",
+     "slug": "no-one-will-save-you",
+     "poster": "https://image.tmdb.org/t/p/w342/ehGIDAMaYy6Eg0o8ga0oqflDjqW.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Kindred",
+     "slug": "the-kindred",
+     "poster": "https://image.tmdb.org/t/p/w342/jDXAaMLk7NNXdXZkeTMtr4xo6f5.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Two Witches",
+     "slug": "two-witches",
+     "poster": "https://image.tmdb.org/t/p/w342/a6JHz23BOfbzWxL5JsrBWQHqMuh.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "You're Not Alone",
+     "slug": "you-re-not-alone",
+     "poster": "https://image.tmdb.org/t/p/w342/3aBF1D5CXnYZ4eWLHHP3HtKCFph.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Poltergeist",
+     "slug": "poltergeist",
+     "poster": "https://image.tmdb.org/t/p/w342/4eMN3GANH5GG4kXdHkrTZEUuQ9M.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/wpx3J1ZuIZgWc9rzdfcj7fDru58.jpg",
+   "backdropPath": "/wpx3J1ZuIZgWc9rzdfcj7fDru58.jpg",
+   "posterPath": "/fGRNCssTRrhYZxNzykGGCoMsAVq.jpg",
+   "fullReview": "A young girl, Bela, forms a relationship with a sinister entity in her home who looks uncannily like her own mother.",
+   "castPics": [
+    {
+     "name": "Jessica Chastain",
+     "character": "Ursula / Other Mommy",
+     "photo": "https://image.tmdb.org/t/p/w185/eQKnihReJeB9vQEa5gySzAlKfZt.jpg"
+    },
+    {
+     "name": "Arabella Olivia Clark",
+     "character": "Bela",
+     "photo": "https://image.tmdb.org/t/p/w185/bwTovaznMIXo9Je01soHBCzmFxn.jpg"
+    },
+    {
+     "name": "Jay Duplass",
+     "character": "Daddo / Russ",
+     "photo": "https://image.tmdb.org/t/p/w185/eUY0JDlqzf5pE9pmdvv4IPU3NYn.jpg"
+    },
+    {
+     "name": "Dichen Lachman",
+     "character": null,
+     "photo": "https://image.tmdb.org/t/p/w185/yLrpMHBNtuUAu3M9EjaYHnn5EEY.jpg"
+    },
+    {
+     "name": "Arian Moayed",
+     "character": "Uncle Frank",
+     "photo": "https://image.tmdb.org/t/p/w185/hYBqwt0HelUqgKSd1VDUAyvfDME.jpg"
+    },
+    {
+     "name": "Karen Allen",
+     "character": "Grandma Ruth",
+     "photo": "https://image.tmdb.org/t/p/w185/eJszpndpRzrXbSlz7RUlApoTykn.jpg"
+    }
+   ],
+   "slug": "other-mommy",
+   "trailerViews": 13550602
+  },
+  {
+   "title": "La bola negra",
+   "released": "2026-10-16",
+   "genre": "Drama / War",
+   "language": "Spanish",
+   "review": "The intertwined lives of three men in three different eras, three lives intimately linked by sexuality and desire…",
+   "poster": "https://image.tmdb.org/t/p/w342/jT5SR5qc9KvVg7HUEmjMWEUYMce.jpg",
+   "kind": "movie",
+   "tmdbId": 1422041,
+   "popularity": 10.218,
+   "cert": "R",
+   "trailer": "https://www.youtube.com/watch?v=IRHtqjHYPew",
+   "providers": [],
+   "cast": [
+    "Guitarricadelafuente",
+    "Miguel Bernardeau",
+    "Carlos González",
+    "Milo Quifes"
+   ],
+   "director": "Javier Ambrossi",
+   "runtime": 155,
+   "imdbScore": null,
+   "imdbVotes": null,
+   "imdbId": "tt35511966",
+   "seasons": null,
+   "freshDate": "2026-09-25",
+   "badge": "New release",
+   "isRecent": true,
+   "similar": [
+    {
+     "title": "Dance of the Forty One",
+     "slug": "dance-of-the-forty-one",
+     "poster": "https://image.tmdb.org/t/p/w342/jcSqwsEtT7wKfQ8oKaaulMMGUdS.jpg",
+     "language": "Spanish",
+     "kind": "movie"
+    },
+    {
+     "title": "The Endless Trench",
+     "slug": "the-endless-trench",
+     "poster": "https://image.tmdb.org/t/p/w342/rgS3e3sTUHeVgKzKmFhIJcl9tVA.jpg",
+     "language": "Spanish",
+     "kind": "movie"
+    },
+    {
+     "title": "Zama",
+     "slug": "zama",
+     "poster": "https://image.tmdb.org/t/p/w342/kpp9R6iYKSIXxfyW0feVYrk0jsg.jpg",
+     "language": "Spanish",
+     "kind": "movie"
+    },
+    {
+     "title": "A Twelve-Year Night",
+     "slug": "a-twelve-year-night",
+     "poster": "https://image.tmdb.org/t/p/w342/k1SEABHjk34flsBQigm9ygMuUM4.jpg",
+     "language": "Spanish",
+     "kind": "movie"
+    },
+    {
+     "title": "Firebrand",
+     "slug": "firebrand",
+     "poster": "https://image.tmdb.org/t/p/w342/kXAc1LaxL64udWr9SOAHQwOBEG0.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The World Will Tremble",
+     "slug": "the-world-will-tremble",
+     "poster": "https://image.tmdb.org/t/p/w342/31CKSlZdsvdY8bysV5WeR2YvTim.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Jacknife",
+     "slug": "jacknife",
+     "poster": "https://image.tmdb.org/t/p/w342/i3tnWvBTV6d0YOldO3guhpLS8WT.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Outlaws - For Greater Glory",
+     "slug": "outlaws-for-greater-glory",
+     "poster": "https://image.tmdb.org/t/p/w342/7jgh0ej04j98q2NFpSZLlpDazUo.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Catcher Was a Spy",
+     "slug": "the-catcher-was-a-spy",
+     "poster": "https://image.tmdb.org/t/p/w342/3aBv9Oln0aoBrEbkMabHIVat6CY.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Beasts of No Nation",
+     "slug": "beasts-of-no-nation",
+     "poster": "https://image.tmdb.org/t/p/w342/1D4vcJmJc58WXarpRtwgd2do9Rg.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Last of the Mohicans",
+     "slug": "the-last-of-the-mohicans",
+     "poster": "https://image.tmdb.org/t/p/w342/qzJMPWRtZveBkxXOv3ucWhoJuyj.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Kill Team",
+     "slug": "the-kill-team",
+     "poster": "https://image.tmdb.org/t/p/w342/wLRZbtrbV51oQuvqNeK6vhb6btV.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/bDsmYvrzto7xrEwqDpLC3SPhn9A.jpg",
+   "backdropPath": "/bDsmYvrzto7xrEwqDpLC3SPhn9A.jpg",
+   "posterPath": "/jT5SR5qc9KvVg7HUEmjMWEUYMce.jpg",
+   "fullReview": "The intertwined lives of three men in three different eras, three lives intimately linked by sexuality and desire, pain, and legacy.",
+   "castPics": [
+    {
+     "name": "Guitarricadelafuente",
+     "character": "Sebastián",
+     "photo": "https://image.tmdb.org/t/p/w185/A2Jfhf7lRBmMlQPGFZwEddT8MdS.jpg"
+    },
+    {
+     "name": "Miguel Bernardeau",
+     "character": "Rafael",
+     "photo": "https://image.tmdb.org/t/p/w185/aPyvMBnGaTeWkMStdHvdiiWxpBQ.jpg"
+    },
+    {
+     "name": "Carlos González",
+     "character": "Alberto",
+     "photo": "https://image.tmdb.org/t/p/w185/bPag2U3ei3Wb2KfSXEQGDY5a8pi.jpg"
+    },
+    {
+     "name": "Milo Quifes",
+     "character": "Carlos",
+     "photo": "https://image.tmdb.org/t/p/w185/vniYP6wozDkntBQImES2kJrBSOW.jpg"
+    },
+    {
+     "name": "Lola Dueñas",
+     "character": "Teresa",
+     "photo": "https://image.tmdb.org/t/p/w185/bZgXKlGkLgjvL3qU2Iq2l2zsKo7.jpg"
+    },
+    {
+     "name": "Penélope Cruz",
+     "character": "Nené Romero",
+     "photo": "https://image.tmdb.org/t/p/w185/n5SFgmvJSENQt8poE4qYacUnKOi.jpg"
+    }
+   ],
+   "slug": "la-bola-negra",
+   "trailerViews": 1930265
+  },
+  {
+   "title": "Street Fighter",
+   "released": "2026-10-16",
+   "genre": "Action / Fantasy",
+   "language": "English",
+   "review": "In 1993, estranged Street Fighters Ryu and Ken Masters are thrown back into combat when the mysterious Chun-Li recruits…",
+   "poster": "https://image.tmdb.org/t/p/w342/utKzCSCz2HtXwcDGfWLj2IHhSob.jpg",
+   "kind": "movie",
+   "tmdbId": 1153576,
+   "popularity": 19.3309,
+   "cert": "PG-13",
+   "trailer": "https://www.youtube.com/watch?v=U6sbm1OaJb8",
+   "providers": [],
+   "cast": [
+    "Andrew Koji",
+    "Noah Centineo",
+    "Callina Liang",
+    "Joe Anoa'i"
+   ],
+   "director": "Kitao Sakurai",
+   "runtime": 119,
+   "imdbScore": null,
+   "imdbVotes": null,
+   "imdbId": "tt27419420",
+   "seasons": null,
+   "freshDate": "2026-10-13",
+   "badge": null,
+   "isRecent": false,
+   "similar": [
+    {
+     "title": "Shang-Chi and the Legend of the Ten Rings",
+     "slug": "shang-chi-and-the-legend-of-the-ten-rings",
+     "poster": "https://image.tmdb.org/t/p/w342/9f2Q0U3IOsLgrI2HkvldwSABZy5.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Hunger Games: The Ballad of Songbirds & Snakes",
+     "slug": "the-hunger-games-the-ballad-of-songbirds-snakes",
+     "poster": "https://image.tmdb.org/t/p/w342/mBaXZ95R2OxueZhvQbcEWy2DqyO.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Avatar Aang: The Last Airbender",
+     "slug": "avatar-aang-the-last-airbender",
+     "poster": "https://image.tmdb.org/t/p/w342/3sgnSfNT27Bx5O5ukr7B26mhEQq.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Wonder Woman 1984",
+     "slug": "wonder-woman-1984",
+     "poster": "https://image.tmdb.org/t/p/w342/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Mulan",
+     "slug": "mulan",
+     "poster": "https://image.tmdb.org/t/p/w342/aKx1ARwG55zZ0GpRvU2WrGrCG9o.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Gladiator Underground",
+     "slug": "gladiator-underground",
+     "poster": "https://image.tmdb.org/t/p/w342/qLN16AeIjS5P5Kk5B6pBi1Mh1mi.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Forbidden Kingdom",
+     "slug": "the-forbidden-kingdom",
+     "poster": "https://image.tmdb.org/t/p/w342/z8chF1Z7hyuSVqLYTgElkQZh2VB.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Crouching Tiger, Hidden Dragon: Sword of Destiny",
+     "slug": "crouching-tiger-hidden-dragon-sword-of-destiny",
+     "poster": "https://image.tmdb.org/t/p/w342/te3aeAyhkfqgpa5BSTq3oNxGqQD.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Yu-Gi-Oh! The Movie",
+     "slug": "yu-gi-oh-the-movie",
+     "poster": "https://image.tmdb.org/t/p/w342/3VD5QDTu0rQgRvERBMXtAvg0oIC.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Krull",
+     "slug": "krull",
+     "poster": "https://image.tmdb.org/t/p/w342/izDbySIrTmID0Nh6UqcWrUvOMjU.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Alita: Battle Angel",
+     "slug": "alita-battle-angel",
+     "poster": "https://image.tmdb.org/t/p/w342/xRWht48C2V8XNfzvPehyClOvDni.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Halo: Nightfall",
+     "slug": "halo-nightfall",
+     "poster": "https://image.tmdb.org/t/p/w342/liLQ8EFzHN06eFZ9KQMDK6cmGaK.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/5H5YphHsQmkQhrw13Wv1whCZKtN.jpg",
+   "backdropPath": "/5H5YphHsQmkQhrw13Wv1whCZKtN.jpg",
+   "posterPath": "/utKzCSCz2HtXwcDGfWLj2IHhSob.jpg",
+   "fullReview": "In 1993, estranged Street Fighters Ryu and Ken Masters are thrown back into combat when the mysterious Chun-Li recruits them for the next World Warrior Tournament: a brutal clash of fists, fate, and fury. But behind this battle royale lies a deadly conspiracy that forces them to face off against each other and the demons of their past. And if they don't, it's GAME OVER!",
+   "castPics": [
+    {
+     "name": "Andrew Koji",
+     "character": "Ryu",
+     "photo": "https://image.tmdb.org/t/p/w185/oU53nWLQ6wFHzERwSi1fD53LxZB.jpg"
+    },
+    {
+     "name": "Noah Centineo",
+     "character": "Ken Masters",
+     "photo": "https://image.tmdb.org/t/p/w185/p1bcst401RyxfDGykx2iQLI7CV5.jpg"
+    },
+    {
+     "name": "Callina Liang",
+     "character": "Chun-Li",
+     "photo": "https://image.tmdb.org/t/p/w185/yiajT9WAsvuxF9uNJrkSuzVv3On.jpg"
+    },
+    {
+     "name": "Joe Anoa'i",
+     "character": "Akuma",
+     "photo": "https://image.tmdb.org/t/p/w185/6BKc77eAUBQdL9MmgBorBc4SMdE.jpg"
+    },
+    {
+     "name": "David Dastmalchian",
+     "character": "M. Bison",
+     "photo": "https://image.tmdb.org/t/p/w185/nER1Vzhk51pGHb60KBF1Ja5tEXA.jpg"
+    },
+    {
+     "name": "Cody Rhodes",
+     "character": "Guile",
+     "photo": "https://image.tmdb.org/t/p/w185/m9hfLcsQuESprcb7dJUj5lQLWCv.jpg"
+    }
+   ],
+   "slug": "street-fighter",
+   "trailerViews": 24971380
+  },
+  {
+   "title": "The Mongoose",
+   "released": "2026-10-30",
+   "genre": "Action / Thriller",
+   "language": "English",
+   "review": "A falsely accused war hero with nothing to lose leads police on an epic televised cross-country car chase, helped…",
+   "poster": "https://image.tmdb.org/t/p/w342/eSS5mvSG84UUuvtbHel5Yu3Wik4.jpg",
+   "kind": "movie",
+   "tmdbId": 1294189,
+   "popularity": 249.4488,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=aHrMFtt40_Q",
+   "providers": [],
+   "cast": [
+    "Liam Neeson",
+    "Marisa Tomei",
+    "Ving Rhames",
+    "Michael Chiklis"
+   ],
+   "director": "Mark Vanselow",
+   "runtime": 99,
+   "imdbScore": null,
+   "imdbVotes": null,
+   "imdbId": "tt13611778",
+   "seasons": null,
+   "freshDate": "2026-10-29",
+   "badge": null,
+   "isRecent": false,
+   "similar": [
+    {
+     "title": "The Desperate Hour",
+     "slug": "the-desperate-hour",
+     "poster": "https://image.tmdb.org/t/p/w342/u6Pg9eTklhg6Aa7kXaxrfdE1Chi.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Indemnity",
+     "slug": "indemnity",
+     "poster": "https://image.tmdb.org/t/p/w342/8y1rfKHot8DF0cQhGvKXtYsMjNx.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Apology",
+     "slug": "the-apology",
+     "poster": "https://image.tmdb.org/t/p/w342/gUFHThondPpmjqeh3XI1yXnCRDa.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Fast Five",
+     "slug": "fast-five",
+     "poster": "https://image.tmdb.org/t/p/w342/gEfQjjQwY7fh5bI4GlG0RrBu7Pz.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Overdrive",
+     "slug": "overdrive",
+     "poster": "https://image.tmdb.org/t/p/w342/a0hTRjis1cxwmjOuBaS7WdDG3dj.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Furious 7",
+     "slug": "furious-7",
+     "poster": "https://image.tmdb.org/t/p/w342/ktofZ9Htrjiy0P6LEowsDaxd3Ri.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Tourist",
+     "slug": "the-tourist",
+     "poster": "https://image.tmdb.org/t/p/w342/vVmek9VTnsfpQTIFWtL9h4HhOIP.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Battleground",
+     "slug": "battleground",
+     "poster": "https://image.tmdb.org/t/p/w342/qSrcs7zmF61aRtzmOVPxeBBowap.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Dirty Mary Crazy Larry",
+     "slug": "dirty-mary-crazy-larry",
+     "poster": "https://image.tmdb.org/t/p/w342/8hLvJUBEFFQHgiJIPXywRD9KZft.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Hatari!",
+     "slug": "hatari",
+     "poster": "https://image.tmdb.org/t/p/w342/fT1Ht8PSM5cFKmejrnufWvpXAPk.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Patriots Day",
+     "slug": "patriots-day",
+     "poster": "https://image.tmdb.org/t/p/w342/mIDxsJTrOC7NhgOo3GziiHyKfsQ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Excess Baggage",
+     "slug": "excess-baggage",
+     "poster": "https://image.tmdb.org/t/p/w342/dfKaCA32iSkEQiu37drvIAZWZFz.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/iRIhPqqoUHiFBxn8oYf3gCQnaKk.jpg",
+   "backdropPath": "/iRIhPqqoUHiFBxn8oYf3gCQnaKk.jpg",
+   "posterPath": "/eSS5mvSG84UUuvtbHel5Yu3Wik4.jpg",
+   "fullReview": "A falsely accused war hero with nothing to lose leads police on an epic televised cross-country car chase, helped by members of his former Special Forces Army battalion and closely monitored by a fascinated public rooting for his safe getaway.",
+   "castPics": [
+    {
+     "name": "Liam Neeson",
+     "character": "Ryan 'Fang' Flanagan",
+     "photo": "https://image.tmdb.org/t/p/w185/sRLev3wJioBgun3ZoeAUFpkLy0D.jpg"
+    },
+    {
+     "name": "Marisa Tomei",
+     "character": "Tara",
+     "photo": "https://image.tmdb.org/t/p/w185/5NCCKQooVCQD36R6JL3a1hOeBVn.jpg"
+    },
+    {
+     "name": "Ving Rhames",
+     "character": "Tanker",
+     "photo": "https://image.tmdb.org/t/p/w185/tOVDvu1EQP78AwaUw6uh1wN818E.jpg"
+    },
+    {
+     "name": "Michael Chiklis",
+     "character": "Major Walter Pope",
+     "photo": "https://image.tmdb.org/t/p/w185/pAkKjbzxP6Z6Y5zAGpwmWQo1iji.jpg"
+    },
+    {
+     "name": "Brett Tucker",
+     "character": "Todd",
+     "photo": "https://image.tmdb.org/t/p/w185/6IUQyy2pA8PRXX1MEx088JH6pcu.jpg"
+    },
+    {
+     "name": "Stella Stocker",
+     "character": "Helene (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/ilRVeYRcQrAeHYLMOPPzLzZMJcC.jpg"
+    }
+   ],
+   "slug": "the-mongoose",
+   "trailerViews": 456453
+  },
+  {
+   "title": "Avengers: Doomsday",
+   "released": "2026-12-18",
+   "genre": "Science Fiction / Action",
+   "language": "English",
+   "review": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike…",
+   "poster": "https://image.tmdb.org/t/p/w342/7MTPIArEuZyD5hqJJL29qi3Wj62.jpg",
+   "kind": "movie",
+   "tmdbId": 1003596,
+   "popularity": 59.8434,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
+   "providers": [],
+   "cast": [
+    "Robert Downey Jr.",
+    "Chris Evans",
+    "Chris Hemsworth",
+    "Pedro Pascal"
+   ],
+   "director": "Joe Russo",
+   "runtime": 165,
+   "imdbScore": null,
+   "imdbVotes": null,
+   "imdbId": "tt21357150",
+   "seasons": null,
+   "freshDate": "2026-12-16",
+   "badge": null,
+   "isRecent": false,
+   "similar": [
+    {
+     "title": "Guardians of the Galaxy Vol. 3",
+     "slug": "guardians-of-the-galaxy-vol-3",
+     "poster": "https://image.tmdb.org/t/p/w342/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Ant-Man and the Wasp: Quantumania",
+     "slug": "ant-man-and-the-wasp-quantumania",
+     "poster": "https://image.tmdb.org/t/p/w342/qnqGbB22YJ7dSs4o6M7exTpNxPz.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Zack Snyder's Justice League",
+     "slug": "zack-snyder-s-justice-league",
+     "poster": "https://image.tmdb.org/t/p/w342/tnAuB8q5vv7Ax9UAEje5Xi4BXik.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Justice League: Crisis on Infinite Earths Part One",
+     "slug": "justice-league-crisis-on-infinite-earths-part-one",
+     "poster": "https://image.tmdb.org/t/p/w342/mcRVsjMbhFstRK9z2oGRHiIvulr.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Venom: The Last Dance",
+     "slug": "venom-the-last-dance",
+     "poster": "https://image.tmdb.org/t/p/w342/vGXptEdgZIhPg3cGlc7e8sNPC2e.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Doctor Strange in the Multiverse of Madness",
+     "slug": "doctor-strange-in-the-multiverse-of-madness",
+     "poster": "https://image.tmdb.org/t/p/w342/ddJcSKbcp4rKZTmuyWaMhuwcfMz.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Spider-Man: No Way Home",
+     "slug": "spider-man-no-way-home",
+     "poster": "https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Teen Titans Go! vs. Teen Titans",
+     "slug": "teen-titans-go-vs-teen-titans",
+     "poster": "https://image.tmdb.org/t/p/w342/GWJEdzVC9aOBSOMF9NHodYxSsE.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Iron Man & Captain America: Heroes United",
+     "slug": "iron-man-captain-america-heroes-united",
+     "poster": "https://image.tmdb.org/t/p/w342/CX7eRlaxFXiW3UGQBdQUoSVZRi.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Justice League",
+     "slug": "justice-league",
+     "poster": "https://image.tmdb.org/t/p/w342/eifGNCSDuxJeS1loAXil5bIGgvC.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Captain America: Civil War",
+     "slug": "captain-america-civil-war",
+     "poster": "https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Avengers: Infinity War",
+     "slug": "avengers-infinity-war",
+     "poster": "https://image.tmdb.org/t/p/w342/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/s4v0UX1anfXm0UvloLsTTJ4v222.jpg",
+   "backdropPath": "/s4v0UX1anfXm0UvloLsTTJ4v222.jpg",
+   "posterPath": "/jzPwsojjFStf5lR5Nm07w2hH56G.jpg",
+   "fullReview": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
+   "castPics": [
+    {
+     "name": "Robert Downey Jr.",
+     "character": "Victor von Doom  / Doctor Doom",
+     "photo": "https://image.tmdb.org/t/p/w185/5qHNjhtjMD4YWH3UP0rm4tKwxCL.jpg"
+    },
+    {
+     "name": "Chris Evans",
+     "character": "Steve Rogers",
+     "photo": "https://image.tmdb.org/t/p/w185/3bOGNsHlrswhyW79uvIHH1V43JI.jpg"
+    },
+    {
+     "name": "Chris Hemsworth",
+     "character": "Thor",
+     "photo": "https://image.tmdb.org/t/p/w185/piQGdoIQOF3C1EI5cbYZLAW1gfj.jpg"
+    },
+    {
+     "name": "Pedro Pascal",
+     "character": "Reed Richards / Mister Fantastic",
+     "photo": "https://image.tmdb.org/t/p/w185/oKcMbVn0NJTNzQt0ClKKvVXkm60.jpg"
+    },
+    {
+     "name": "Paul Rudd",
+     "character": "Scott Lang / Ant-Man",
+     "photo": "https://image.tmdb.org/t/p/w185/6jtwNOLKy0LdsRAKwZqgYMAfd5n.jpg"
+    },
+    {
+     "name": "Anthony Mackie",
+     "character": "Sam Wilson / Captain America",
+     "photo": "https://image.tmdb.org/t/p/w185/vecvTm7SimizluJkyIwBxeLbvRm.jpg"
+    }
+   ],
+   "slug": "avengers-doomsday",
+   "trailerViews": 43875731
+  }
+ ],
+ "langPools": {
+  "Hindi": {
+   "theatres": [
+    {
+     "title": "Hanuman Ansh",
+     "genre": "Family / Drama",
+     "language": "Hindi",
+     "released": "2026-09-11",
+     "review": "A grieving boy seeks God to meet his departed mother, and in finding the divine, learns to serve humanity with miracles of love, food and silent blessings…",
+     "rating": 8,
+     "scores": [
+      {
+       "source": "TMDB",
+       "score": "8.0/10"
+      }
+     ],
+     "votes": 11,
+     "verdict": "Must watch",
+     "poster": "https://image.tmdb.org/t/p/w342/as2Y3zGUa2IUS3uAx2sh6Ano3es.jpg",
+     "isRecent": false,
+     "isFresh": false,
+     "kind": "movie",
+     "tmdbId": 1709391,
+     "popularity": 19.7171,
+     "platform": "Theatres",
+     "cert": "NR",
+     "trailer": "https://www.youtube.com/watch?v=YpGhCA2X3gU",
+     "providers": [],
+     "cast": [
+      "Chandan Anand",
+      "Shobhinaw Satyaa",
+      "Purnima Tiwari",
+      "Vihaan Shedge"
+     ],
+     "director": "Vishal Chaturvedi",
+     "runtime": 150,
+     "imdbVotes": null,
+     "imdbId": "tt39390582",
+     "seasons": null,
+     "freshDate": "2026-08-07",
+     "badge": null,
+     "similar": [
+      {
+       "title": "Skater Girl",
+       "slug": "skater-girl",
+       "poster": "https://image.tmdb.org/t/p/w342/e8yxFPOvNmhlfUXBqiNvvpMI4t5.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "The Girl Who Believes in Miracles",
+       "slug": "the-girl-who-believes-in-miracles",
+       "poster": "https://image.tmdb.org/t/p/w342/fBhM7HadGVfVyUp7UaEsutCEtYu.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "The Forge",
+       "slug": "the-forge",
+       "poster": "https://image.tmdb.org/t/p/w342/oranxontIQRmhuyQlkoAwxpeBYz.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "Light of the World",
+       "slug": "light-of-the-world",
+       "poster": "https://image.tmdb.org/t/p/w342/lngk84juVGt3BuxcNEwP74JmX7b.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "Flicka",
+       "slug": "flicka",
+       "poster": "https://image.tmdb.org/t/p/w342/nhJlXSmiHnlVxea5J5l3wfuATwY.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "Heidi",
+       "slug": "heidi",
+       "poster": "https://image.tmdb.org/t/p/w342/p2VZt4f1u2qsn2I62I4arTdlgQk.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "Little Lord Fauntleroy",
+       "slug": "little-lord-fauntleroy",
+       "poster": "https://image.tmdb.org/t/p/w342/7rLhBRseh1ZVNMQIFUxhy9IcWvi.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "Nancy Drew and the Hidden Staircase",
+       "slug": "nancy-drew-and-the-hidden-staircase",
+       "poster": "https://image.tmdb.org/t/p/w342/g805FevFI8BkmvorvyITZ1kGJcr.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "Flicka: Country Pride",
+       "slug": "flicka-country-pride",
+       "poster": "https://image.tmdb.org/t/p/w342/jJpYWz8wqXypAWhJJ0yVUtaHc79.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "Balto: Wolf Quest",
+       "slug": "balto-wolf-quest",
+       "poster": "https://image.tmdb.org/t/p/w342/dZ958HnW3JO2pEZeedjmoZCV8Rn.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "Monster High: Frights, Camera, Action!",
+       "slug": "monster-high-frights-camera-action",
+       "poster": "https://image.tmdb.org/t/p/w342/5gTNnqidaAfTHlOIB7tiMkGh3hK.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "Where the Red Fern Grows",
+       "slug": "where-the-red-fern-grows",
+       "poster": "https://image.tmdb.org/t/p/w342/zUDxfnWLq73rQaa8YSHBDGx96ZS.jpg",
+       "language": "English",
+       "kind": "movie"
+      }
+     ],
+     "backdrop": "https://image.tmdb.org/t/p/w780/tKYOK8iMxkhJhug3LJ2yvC5QY8M.jpg",
+     "backdropPath": "/tKYOK8iMxkhJhug3LJ2yvC5QY8M.jpg",
+     "posterPath": "/as2Y3zGUa2IUS3uAx2sh6Ano3es.jpg",
+     "fullReview": "A grieving boy seeks God to meet his departed mother, and in finding the divine, learns to serve humanity with miracles of love, food and silent blessings, becoming Hanuman Ansh, Neem Karoli Baba.",
+     "castPics": [
+      {
+       "name": "Chandan Anand",
+       "character": "Bhonsle",
+       "photo": "https://image.tmdb.org/t/p/w185/fyPk0OQAxPbqid2MZEOCtaFoa9Z.jpg"
+      },
+      {
+       "name": "Anil Rastogi",
+       "character": null,
+       "photo": "https://image.tmdb.org/t/p/w185/8Mte0kdmV0YKEuM3Iei3W2KUcHP.jpg"
+      },
+      {
+       "name": "Gulshan Pandey",
+       "character": null,
+       "photo": "https://image.tmdb.org/t/p/w185/60mYQLeGhhArZfspMpy7Hmhs9U4.jpg"
+      }
+     ],
+     "slug": "hanuman-ansh"
+    }
+   ],
+   "ott": []
+  }
+ },
+ "ottExtra": [
   {
    "title": "Neagley",
    "genre": "Drama / Mystery",
@@ -2149,2073 +4423,8 @@
    "platform": "Amazon Prime Video",
    "ottSince": "2026-09-18",
    "ottFreshDate": "2026-09-16",
-   "slug": "neagley",
-   "wikiWeeklyViews": 394620,
-   "trending": true,
-   "trailerViews": 7326219,
-   "take": "Most reviews land firmly on the positive side.",
-   "takeSrc": "wiki",
-   "takeArticle": "Neagley"
+   "slug": "neagley"
   },
-  {
-   "title": "The Trial",
-   "genre": "Drama",
-   "language": "Spanish",
-   "released": "2026-09-11",
-   "review": "A teenager and her father struggle for justice after she is sexually assaulted by the scion of a successful businessman.",
-   "rating": 9.1,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "9.1/10"
-    }
-   ],
-   "votes": 48,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/3k5HpocqX4grgmqCecT2OdYMyT0.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 260249,
-   "popularity": 48.347,
-   "cert": "TV-14",
-   "trailer": "https://www.youtube.com/results?search_query=The%20Trial%20official%20trailer",
-   "providers": [
-    "Amazon Prime Video"
-   ],
-   "cast": [
-    "Eugenio Derbez",
-    "Pedro Alonso",
-    "Karla Gaytán",
-    "Íker Sánchez Solano"
-   ],
-   "director": null,
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt33023009",
-   "seasons": 1,
-   "freshDate": "2026-09-11",
-   "badge": null,
-   "similar": [
-    {
-     "title": "Raising Voices",
-     "slug": "raising-voices",
-     "poster": "https://image.tmdb.org/t/p/w342/lCU77Jp0iWN2e1WuSJvR7M35ebN.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "Fake Profile",
-     "slug": "fake-profile",
-     "poster": "https://image.tmdb.org/t/p/w342/3KyyfuG5VxUmpJFnw0pa1SkTsuL.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "Her Mother's Killer",
-     "slug": "her-mother-s-killer",
-     "poster": "https://image.tmdb.org/t/p/w342/imkU3fNak8NkXyCD0RJpAtP9jeK.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "Between Father and Son",
-     "slug": "between-father-and-son",
-     "poster": "https://image.tmdb.org/t/p/w342/uOh3yStvGlWiaktHs4VFtZdquK8.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "Sisters' Feud",
-     "slug": "sisters-feud",
-     "poster": "https://image.tmdb.org/t/p/w342/uNvHCu79A4hsvX6HkRZK31nO2H8.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "Medusa",
-     "slug": "medusa",
-     "poster": "https://image.tmdb.org/t/p/w342/mFsjwJdNBKDRYLqPdBFaoVCKXLq.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "The Guest",
-     "slug": "the-guest",
-     "poster": "https://image.tmdb.org/t/p/w342/fBMRxziwviMBVLOCe1i4qtwRXKj.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "Unspeakable Sins",
-     "slug": "unspeakable-sins",
-     "poster": "https://image.tmdb.org/t/p/w342/30eSqR2XPGz53eGElt6YAvH7cPX.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "Land of Honor",
-     "slug": "land-of-honor",
-     "poster": "https://image.tmdb.org/t/p/w342/cwBNC3e86zvWrznlqrImsv1MJdB.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "Jenni Rivera: Mariposa de Barrio",
-     "slug": "jenni-rivera-mariposa-de-barrio",
-     "poster": "https://image.tmdb.org/t/p/w342/vIHwoZF3YjLkoFKJGJMIiIO4HsF.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "Rosario Tijeras (Mexico)",
-     "slug": "rosario-tijeras-mexico",
-     "poster": "https://image.tmdb.org/t/p/w342/sqe3I68PRfHig0lgiDUrWVEVlsk.jpg",
-     "language": "Spanish",
-     "kind": "tv"
-    },
-    {
-     "title": "Bel-Air",
-     "slug": "bel-air",
-     "poster": "https://image.tmdb.org/t/p/w342/j8tbXWXrL15RucA6H4khq87dEXa.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/bLcF9mcinphgFlXEfk7RkCSfqCv.jpg",
-   "backdropPath": "/bLcF9mcinphgFlXEfk7RkCSfqCv.jpg",
-   "posterPath": "/3k5HpocqX4grgmqCecT2OdYMyT0.jpg",
-   "fullReview": "A teenager and her father struggle for justice after she is sexually assaulted by the scion of a successful businessman. Not only will the father and daughter have to navigate a failed judicial system, but they must also contend with a wealthy adversary bent on using all his power to protect his son.",
-   "castPics": [
-    {
-     "name": "Eugenio Derbez",
-     "character": "Miguel",
-     "photo": "https://image.tmdb.org/t/p/w185/6o1w3mYF947N6TTakQXcs3NNy4w.jpg"
-    },
-    {
-     "name": "Pedro Alonso",
-     "character": "Huerta",
-     "photo": "https://image.tmdb.org/t/p/w185/38HeVKeOBztVYrLJOWzAtEZiB02.jpg"
-    },
-    {
-     "name": "Karla Gaytán",
-     "character": "Andrea Portillo",
-     "photo": "https://image.tmdb.org/t/p/w185/brrYnEezWDbjM4aLbRXT4iCwnd5.jpg"
-    },
-    {
-     "name": "Íker Sánchez Solano",
-     "character": "Carlos Huerta",
-     "photo": "https://image.tmdb.org/t/p/w185/eHvL807cehcshUoxwJMSCod8IjR.jpg"
-    },
-    {
-     "name": "Sergio Gava",
-     "character": "Agente MP",
-     "photo": "https://image.tmdb.org/t/p/w185/zWGEgeP8rA6vZ4toS5NmfDl5xbK.jpg"
-    },
-    {
-     "name": "Héctor Jiménez",
-     "character": "Joaquín Portillo",
-     "photo": "https://image.tmdb.org/t/p/w185/i6Q6G8HWLof7zXNbTgvpI6MuC3P.jpg"
-    }
-   ],
-   "platform": "Amazon Prime Video",
-   "ottSince": "2026-09-15",
-   "ottFreshDate": "2026-09-11",
-   "stillGood": true,
-   "slug": "the-trial"
-  },
-  {
-   "title": "Reacher",
-   "genre": "Action & Adventure / Crime",
-   "language": "English",
-   "released": "2022-02-03",
-   "review": "Jack Reacher, a veteran military police investigator, has just recently entered civilian life. Reacher is a drifter, carrying no phone and the barest…",
-   "rating": 8.1,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "8.1/10"
-    }
-   ],
-   "votes": 3398,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 108978,
-   "popularity": 743.5217,
-   "cert": "TV-MA",
-   "trailer": "https://www.youtube.com/watch?v=GSycMV-_Csw",
-   "providers": [
-    "Amazon Prime Video"
-   ],
-   "cast": [
-    "Alan Ritchson",
-    "Agnez Mo",
-    "Sydelle Noel",
-    "Anggun"
-   ],
-   "director": "Nick Santora",
-   "runtime": null,
-   "imdbVotes": null,
-   "rentBuy": [
-    "Amazon Video",
-    "Apple TV Store",
-    "Google Play Movies",
-    "Fandango At Home"
-   ],
-   "imdbId": "tt9288030",
-   "seasons": 4,
-   "freshDate": "2026-08-12",
-   "badge": null,
-   "similar": [
-    {
-     "title": "The Old Man",
-     "slug": "the-old-man",
-     "poster": "https://image.tmdb.org/t/p/w342/8Ec9zCZl2Go8WhDN1JWjjgQRlEi.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Day of the Jackal",
-     "slug": "the-day-of-the-jackal",
-     "poster": "https://image.tmdb.org/t/p/w342/tYLecM3WSEjlkKhkGiH5G68Dprm.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Cross",
-     "slug": "cross",
-     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Night Agent",
-     "slug": "the-night-agent",
-     "poster": "https://image.tmdb.org/t/p/w342/4c5yUNcaff4W4aPrkXE6zr7papX.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Legends",
-     "slug": "legends",
-     "poster": "https://image.tmdb.org/t/p/w342/eYYTgBtsvvA3fC1feyvoqv0G9Gl.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Countdown",
-     "slug": "countdown",
-     "poster": "https://image.tmdb.org/t/p/w342/gcSNS5cy1iOmYawIdJCzoc873rQ.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Gangs of London",
-     "slug": "gangs-of-london",
-     "poster": "https://image.tmdb.org/t/p/w342/fVgwa6wGw9ddGM5O7mqrrwB6gHK.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Dexter: New Blood",
-     "slug": "dexter-new-blood",
-     "poster": "https://image.tmdb.org/t/p/w342/9EBKgrFIsCFSV1RZKWhYUdbtGiv.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Citadel",
-     "slug": "citadel",
-     "poster": "https://image.tmdb.org/t/p/w342/5MHtxPEfmN4b0rHzfEZRcm6v9WI.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Nemesis",
-     "slug": "nemesis",
-     "poster": "https://image.tmdb.org/t/p/w342/NY7ZwSMw5PjoJdK2CObqiTj7Bm.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Kung Fu",
-     "slug": "kung-fu",
-     "poster": "https://image.tmdb.org/t/p/w342/qDbaafRfWkOuQAhOOeI4kcFJl3a.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Night Manager",
-     "slug": "the-night-manager",
-     "poster": "https://image.tmdb.org/t/p/w342/1MccRnw41qQjREuZkovqP2UX1i3.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/pF0qkRsrHkdYadPWY9AMeFZfcwk.jpg",
-   "backdropPath": "/pF0qkRsrHkdYadPWY9AMeFZfcwk.jpg",
-   "posterPath": "/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg",
-   "fullReview": "Jack Reacher, a veteran military police investigator, has just recently entered civilian life. Reacher is a drifter, carrying no phone and the barest of essentials as he travels the country and explores the nation he once served.",
-   "castPics": [
-    {
-     "name": "Alan Ritchson",
-     "character": "Jack Reacher",
-     "photo": "https://image.tmdb.org/t/p/w185/92YNEEpCyugkTzPprJwZpvVtvuK.jpg"
-    },
-    {
-     "name": "Agnez Mo",
-     "character": "Lila Hoth",
-     "photo": "https://image.tmdb.org/t/p/w185/7GuBJxf5szQRCKLk3iG2ztfCo39.jpg"
-    },
-    {
-     "name": "Sydelle Noel",
-     "character": "Tamara Green",
-     "photo": "https://image.tmdb.org/t/p/w185/fCOlRtkZVMOMDRPYhdRLeKqymVa.jpg"
-    },
-    {
-     "name": "Anggun",
-     "character": "Amisha Hoth",
-     "photo": "https://image.tmdb.org/t/p/w185/4WxHGTehDvZudrunxTZmnR66CBi.jpg"
-    },
-    {
-     "name": "Christopher Rodriguez Marquette",
-     "character": "Jacob Merrick",
-     "photo": "https://image.tmdb.org/t/p/w185/8AL7UPXM4sVkOMgTHIxNdRi2SXP.jpg"
-    },
-    {
-     "name": "Kevin Corrigan",
-     "character": "Shaun Docherty",
-     "photo": "https://image.tmdb.org/t/p/w185/obSUGc68mQDvFONalMg25Xw5GZM.jpg"
-    }
-   ],
-   "platform": "Amazon Prime Video",
-   "ottSince": "2026-07-26",
-   "ottFreshDate": "2026-08-12",
-   "stillGood": true,
-   "slug": "reacher",
-   "wikiWeeklyViews": 156859,
-   "trailerViews": 12335138,
-   "take": "Most critics came away happy.",
-   "takeSrc": "wiki",
-   "takeArticle": "Reacher (TV series)"
-  },
-  {
-   "title": "Drawn Together",
-   "genre": "Romance / Thriller",
-   "language": "Spanish",
-   "released": "2026-09-09",
-   "review": "Marfil, daughter of a powerful Spanish businessman, sees her life in New York turned upside down when she is kidnapped and released without explanation.",
-   "rating": 6.7,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "6.7/10"
-    }
-   ],
-   "votes": 116,
-   "verdict": "Worth a watch",
-   "poster": "https://image.tmdb.org/t/p/w342/6rpvddXbaQPOi0fB2HKWbZ3uUSg.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 1440098,
-   "popularity": 143.0148,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=WlGzP8FvsfY",
-   "providers": [
-    "Amazon Prime Video"
-   ],
-   "cast": [
-    "Ester Expósito",
-    "Hugo Diego Garcia",
-    "Pablo Molinero",
-    "Lluís Homar"
-   ],
-   "director": "Óscar Pedraza",
-   "runtime": 104,
-   "imdbVotes": null,
-   "imdbId": "tt36073210",
-   "seasons": null,
-   "freshDate": "2026-09-09",
-   "badge": null,
-   "similar": [
-    {
-     "title": "A Widow's Game",
-     "slug": "a-widow-s-game",
-     "poster": "https://image.tmdb.org/t/p/w342/yZOdrJDl2GwREoigC0y40kMosxj.jpg",
-     "language": "Spanish",
-     "kind": "movie"
-    },
-    {
-     "title": "A Working Man",
-     "slug": "a-working-man",
-     "poster": "https://image.tmdb.org/t/p/w342/6FRFIogh3zFnVWn7Z6zcYnIbRcX.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Black Book",
-     "slug": "the-black-book",
-     "poster": "https://image.tmdb.org/t/p/w342/kn28W24slBLyGr8ZIZnxNE5YZrY.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Protector",
-     "slug": "protector",
-     "poster": "https://image.tmdb.org/t/p/w342/icOZpnGuH9YrEaW3wrw5GJaXGih.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Stowaway",
-     "slug": "stowaway",
-     "poster": "https://image.tmdb.org/t/p/w342/8ZfKo5349nEssW0n2wqNf4vPtbZ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Stolen Girl",
-     "slug": "stolen-girl",
-     "poster": "https://image.tmdb.org/t/p/w342/njU663VbT88zZjsJYizfWcam6sS.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Shadow Force",
-     "slug": "shadow-force",
-     "poster": "https://image.tmdb.org/t/p/w342/9LCpHFXZgkqp2AWiYq0mGbfZauk.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Hunting Grounds",
-     "slug": "hunting-grounds",
-     "poster": "https://image.tmdb.org/t/p/w342/cgZjpqRQt9sk6XMCwZ3B1NPAaoy.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Body Brokers",
-     "slug": "body-brokers",
-     "poster": "https://image.tmdb.org/t/p/w342/fNQUUrtlN79pDIMAPigX8NUvNW2.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Girl in the Basement",
-     "slug": "girl-in-the-basement",
-     "poster": "https://image.tmdb.org/t/p/w342/tPP9n6r5QrIKPnshnJqE7klptj2.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "All the Devils Are Here",
-     "slug": "all-the-devils-are-here",
-     "poster": "https://image.tmdb.org/t/p/w342/4GJTUSjbCGynQo4PpTTNzzxYfBM.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Bad Sister",
-     "slug": "bad-sister",
-     "poster": "https://image.tmdb.org/t/p/w342/jKrIlgfJPIWNeowaOZPBZuOPmq0.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/i65y7cMae36K0giN0GRaMjAHUru.jpg",
-   "backdropPath": "/i65y7cMae36K0giN0GRaMjAHUru.jpg",
-   "posterPath": "/6rpvddXbaQPOi0fB2HKWbZ3uUSg.jpg",
-   "fullReview": "Marfil, daughter of a powerful Spanish businessman, sees her life in New York turned upside down when she is kidnapped and released without explanation. Her father hires Sebastian Moore as bodyguard and, forced to spend every minute together, an inevitable attraction ignites in a world where nothing is as it seems.",
-   "castPics": [
-    {
-     "name": "Ester Expósito",
-     "character": "Marfil",
-     "photo": "https://image.tmdb.org/t/p/w185/p6VTokjlBYQLoCaUX06ibMVsp5j.jpg"
-    },
-    {
-     "name": "Hugo Diego Garcia",
-     "character": "Sebastian",
-     "photo": "https://image.tmdb.org/t/p/w185/mC0Aly8hHgNIYvZSa1SZmYU47pn.jpg"
-    },
-    {
-     "name": "Pablo Molinero",
-     "character": "Alejandro Cortés",
-     "photo": "https://image.tmdb.org/t/p/w185/mtoRws2DEpETuGJGmvI5DALUcce.jpg"
-    },
-    {
-     "name": "Lluís Homar",
-     "character": "Logan",
-     "photo": "https://image.tmdb.org/t/p/w185/p1AFBzyZRbHzA6S8q3RWw0YXoAf.jpg"
-    },
-    {
-     "name": "Joaquín Ferreira",
-     "character": "Ray",
-     "photo": "https://image.tmdb.org/t/p/w185/dGpDGDPMtvsZpc4ZMMgjy1DOGpU.jpg"
-    },
-    {
-     "name": "Zoe Bonafonte",
-     "character": "Gabriela",
-     "photo": "https://image.tmdb.org/t/p/w185/pwjNbRQP4GXVREfB96SuzHh2hqq.jpg"
-    }
-   ],
-   "theatrical": false,
-   "platform": "Amazon Prime Video",
-   "ottSince": "2026-09-10",
-   "ottFreshDate": "2026-09-09",
-   "stillGood": true,
-   "slug": "drawn-together",
-   "wikiWeeklyViews": 31732,
-   "trailerViews": 790220
-  },
-  {
-   "title": "Lanterns",
-   "genre": "Drama / Mystery",
-   "language": "English",
-   "released": "2026-08-16",
-   "review": "Two intergalactic cops, new recruit John Stewart and Lantern legend Hal Jordan, are drawn into a dark, Earth-based mystery as they investigate a murder…",
-   "rating": 8.3,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "8.3/10"
-    }
-   ],
-   "votes": 422,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/gpC7h43xPMEV3goYMQShfJbTtLq.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 95350,
-   "popularity": 255.8752,
-   "cert": "TV-MA",
-   "trailer": "https://www.youtube.com/watch?v=7UIBOsuUwc4",
-   "providers": [
-    "HBO Max Amazon Channel",
-    "HBO Max"
-   ],
-   "cast": [
-    "Kyle Chandler",
-    "Aaron Pierre",
-    "Kelly Macdonald"
-   ],
-   "director": "Damon Lindelof",
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt26545992",
-   "seasons": 1,
-   "freshDate": "2026-08-16",
-   "badge": null,
-   "similar": [
-    {
-     "title": "Locke & Key",
-     "slug": "locke-key",
-     "poster": "https://image.tmdb.org/t/p/w342/zuxGfRKziGHPogipnEXXykdDmyT.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Irregulars",
-     "slug": "the-irregulars",
-     "poster": "https://image.tmdb.org/t/p/w342/qN6HCKR3ZRqbpGBWFctVlSTKR2k.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Class of '09",
-     "slug": "class-of-09",
-     "poster": "https://image.tmdb.org/t/p/w342/5eCGq50CMloT2a1bMDB8JPpGuf2.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Dark Winds",
-     "slug": "dark-winds",
-     "poster": "https://image.tmdb.org/t/p/w342/kDlrMN0P9ByrEH2GoRbBFeZHbcf.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Cross",
-     "slug": "cross",
-     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Gotham",
-     "slug": "gotham",
-     "poster": "https://image.tmdb.org/t/p/w342/zLpSNnVoL2bjQdc1PcaHUPUzttP.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Powers",
-     "slug": "powers",
-     "poster": "https://image.tmdb.org/t/p/w342/7imMR8ySLCPG3LsNlGej8GGtXBg.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Grimm",
-     "slug": "grimm",
-     "poster": "https://image.tmdb.org/t/p/w342/iOptnt1QHi6bIHmOq6adnZTV0bU.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Titans",
-     "slug": "titans",
-     "poster": "https://image.tmdb.org/t/p/w342/8e6QiSexmYKaiHGPvbhaFMmQEhc.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Sleepy Hollow",
-     "slug": "sleepy-hollow",
-     "poster": "https://image.tmdb.org/t/p/w342/2RHj62XneYMCRPAyQrEIrKVij12.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Doom Patrol",
-     "slug": "doom-patrol",
-     "poster": "https://image.tmdb.org/t/p/w342/nVN7Dt0Xr78gnJepRsRLaLYklbY.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Watchmen",
-     "slug": "watchmen",
-     "poster": "https://image.tmdb.org/t/p/w342/m8rWq3j73ZGhDuSCZWMMoE9ePH1.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/wJjnJbVUwPz0GADAgpFt9nWtzUu.jpg",
-   "backdropPath": "/wJjnJbVUwPz0GADAgpFt9nWtzUu.jpg",
-   "posterPath": "/gpC7h43xPMEV3goYMQShfJbTtLq.jpg",
-   "fullReview": "Two intergalactic cops, new recruit John Stewart and Lantern legend Hal Jordan, are drawn into a dark, Earth-based mystery as they investigate a murder in the American heartland.",
-   "castPics": [
-    {
-     "name": "Kyle Chandler",
-     "character": "Hal Jordan",
-     "photo": "https://image.tmdb.org/t/p/w185/66n7XNj1dyYkzCBWR3Lq8Vz4PJ1.jpg"
-    },
-    {
-     "name": "Aaron Pierre",
-     "character": "John Stewart",
-     "photo": "https://image.tmdb.org/t/p/w185/hNwZWdT2KxKj1YLbipvtUhNjfAp.jpg"
-    },
-    {
-     "name": "Kelly Macdonald",
-     "character": "Sheriff Kerry Kane",
-     "photo": "https://image.tmdb.org/t/p/w185/k0yVocTnTMWlNdaeOO7YRViCdhO.jpg"
-    }
-   ],
-   "platform": "HBO Max Amazon Channel",
-   "ottSince": "2026-08-19",
-   "ottFreshDate": "2026-08-16",
-   "stillGood": true,
-   "slug": "lanterns",
-   "wikiWeeklyViews": 503654,
-   "trending": true,
-   "trailerViews": 35189809,
-   "take": "Critics liked it: the performances and lead chemistry won praise, though the themes drew some flak.",
-   "takeSrc": "wiki",
-   "takeAspects": [
-    "performances",
-    "lead chemistry"
-   ],
-   "takeArticle": "Lanterns (TV series)"
-  }
- ],
- "comingSoon": [
-  {
-   "title": "Digger",
-   "released": "2026-10-02",
-   "genre": "Drama / Comedy",
-   "language": "English",
-   "review": "The most powerful man in the world embarks on a frantic mission to prove he is humanity's savior before the disaster…",
-   "poster": "https://image.tmdb.org/t/p/w342/1ATXKrIPJyKNwnJ6lcG088Sa6zi.jpg",
-   "kind": "movie",
-   "tmdbId": 1248832,
-   "popularity": 44.4196,
-   "cert": "R",
-   "trailer": "https://www.youtube.com/watch?v=job8V254NAE",
-   "providers": [],
-   "cast": [
-    "Tom Cruise",
-    "Riz Ahmed",
-    "John Goodman",
-    "Sandra Hüller"
-   ],
-   "director": "Alejandro G. Iñárritu",
-   "runtime": 129,
-   "imdbScore": null,
-   "imdbVotes": null,
-   "imdbId": "tt31450459",
-   "seasons": null,
-   "freshDate": "2026-09-30",
-   "badge": null,
-   "isRecent": false,
-   "similar": [
-    {
-     "title": "Ricky Gervais: Armageddon",
-     "slug": "ricky-gervais-armageddon",
-     "poster": "https://image.tmdb.org/t/p/w342/rnT1Aq92RdhlYMIikuwnwNMaOGu.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "¿Y cómo es él?",
-     "slug": "y-c-mo-es-l",
-     "poster": "https://image.tmdb.org/t/p/w342/n5nH4IcSmlYgAil6NOVvn6d35BH.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Uncorked",
-     "slug": "uncorked",
-     "poster": "https://image.tmdb.org/t/p/w342/neUgCuBhafxYQyXTKxwjQejqqa7.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Not Without Hope",
-     "slug": "not-without-hope",
-     "poster": "https://image.tmdb.org/t/p/w342/w5WJMJ6DWPFK0Gx0Ongh0FZBAlK.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Middle Man",
-     "slug": "the-middle-man",
-     "poster": "https://image.tmdb.org/t/p/w342/lp0wpfAih1g4yUB78x0fVvzAJzu.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Somewhere in Queens",
-     "slug": "somewhere-in-queens",
-     "poster": "https://image.tmdb.org/t/p/w342/zXr6AziPii0NFpbTANNpLrOPxRP.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Juniper",
-     "slug": "juniper",
-     "poster": "https://image.tmdb.org/t/p/w342/ziDXGs2Up7o51Lp55zAeyrQo6JH.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Almost Friends",
-     "slug": "almost-friends",
-     "poster": "https://image.tmdb.org/t/p/w342/uJMknKxZagbhAYiiMjEaFnsZzRR.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Family Weekend",
-     "slug": "family-weekend",
-     "poster": "https://image.tmdb.org/t/p/w342/RiUNV96HPP14OfB7ILEOe2Vj26.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Looking for Eric",
-     "slug": "looking-for-eric",
-     "poster": "https://image.tmdb.org/t/p/w342/fTHUY0E1FYMFKiQ8UDKx793LtW0.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Landline",
-     "slug": "landline",
-     "poster": "https://image.tmdb.org/t/p/w342/p7RVsyi67S95RyNJjX99E1MaOsA.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Panic",
-     "slug": "panic",
-     "poster": "https://image.tmdb.org/t/p/w342/gCaWBW6qQ0otWliRi0Gs4bAzgDX.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/u3EtxdmZeiliW98c5Oegk5LIGZa.jpg",
-   "backdropPath": "/u3EtxdmZeiliW98c5Oegk5LIGZa.jpg",
-   "posterPath": "/1ATXKrIPJyKNwnJ6lcG088Sa6zi.jpg",
-   "fullReview": "The most powerful man in the world embarks on a frantic mission to prove he is humanity's savior before the disaster he's unleashed destroys everything.",
-   "castPics": [
-    {
-     "name": "Tom Cruise",
-     "character": "Digger Rockwell",
-     "photo": "https://image.tmdb.org/t/p/w185/maf8PhSvDCdEwjEMbYfGpojR5RP.jpg"
-    },
-    {
-     "name": "Riz Ahmed",
-     "character": "Ganesh",
-     "photo": "https://image.tmdb.org/t/p/w185/1uP9RaX7BGVx7XGTEmwObBJJzsC.jpg"
-    },
-    {
-     "name": "John Goodman",
-     "character": "President Compson",
-     "photo": "https://image.tmdb.org/t/p/w185/yyYqoyKHO7hE1zpgEV2XlqYWcNV.jpg"
-    },
-    {
-     "name": "Sandra Hüller",
-     "character": "Emma",
-     "photo": "https://image.tmdb.org/t/p/w185/jQfKXVCPTH9KEnzHHU4QemCnlMe.jpg"
-    },
-    {
-     "name": "Michael Stuhlbarg",
-     "character": "Vice President",
-     "photo": "https://image.tmdb.org/t/p/w185/aYB3SQm3h6ZyAdlbGyiNfakjx56.jpg"
-    },
-    {
-     "name": "Jesse Plemons",
-     "character": "Kenny",
-     "photo": "https://image.tmdb.org/t/p/w185/og4I51GsuwohdPgoELOHVMMqMre.jpg"
-    }
-   ],
-   "slug": "digger",
-   "trailerViews": 3986656
-  },
-  {
-   "title": "Verity",
-   "released": "2026-10-02",
-   "genre": "Mystery / Thriller",
-   "language": "English",
-   "review": "Lowen Ashleigh is hired by Jeremy Crawford to ghostwrite novels for his bestselling author wife Verity, who is unable…",
-   "poster": "https://image.tmdb.org/t/p/w342/e2t7NjahJTgz2PMx2BW4ZRgHR6Z.jpg",
-   "kind": "movie",
-   "tmdbId": 1283515,
-   "popularity": 20.8096,
-   "cert": "R",
-   "trailer": "https://www.youtube.com/watch?v=xdPMKhjMSFs",
-   "providers": [],
-   "cast": [
-    "Anne Hathaway",
-    "Dakota Johnson",
-    "Josh Hartnett",
-    "Brady Wagner"
-   ],
-   "director": "Michael Showalter",
-   "runtime": 117,
-   "imdbScore": null,
-   "imdbVotes": null,
-   "imdbId": "tt32261958",
-   "seasons": null,
-   "freshDate": "2026-09-30",
-   "badge": null,
-   "isRecent": false,
-   "similar": [
-    {
-     "title": "Force of Nature: The Dry 2",
-     "slug": "force-of-nature-the-dry-2",
-     "poster": "https://image.tmdb.org/t/p/w342/sw4M0jLT04FM1p3C2XQ3il50wgV.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Pose",
-     "slug": "pose",
-     "poster": "https://image.tmdb.org/t/p/w342/qhyyyWrHUbl6QG4udAJj17CBa5.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Mean Season",
-     "slug": "the-mean-season",
-     "poster": "https://image.tmdb.org/t/p/w342/dCPzsNt2Hznkr54J6wfGzpnE1Z4.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Safe Haven",
-     "slug": "safe-haven",
-     "poster": "https://image.tmdb.org/t/p/w342/2CbJ3HTb6SFbMeguYH52UQSHOwY.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Black Widow",
-     "slug": "black-widow",
-     "poster": "https://image.tmdb.org/t/p/w342/iAlUN6XFuvSz1it58aH2cuEITrt.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Night Train to Lisbon",
-     "slug": "night-train-to-lisbon",
-     "poster": "https://image.tmdb.org/t/p/w342/eiRx3hjU2eTUQsTx8PNn6P0L2IY.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Possession",
-     "slug": "possession",
-     "poster": "https://image.tmdb.org/t/p/w342/12z5oCy4s3GBOUrNCWvcKYBK4eI.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Point Blank",
-     "slug": "point-blank",
-     "poster": "https://image.tmdb.org/t/p/w342/xvZc8EvB7tNPHM9VdmNA19EiwqU.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Sense of an Ending",
-     "slug": "the-sense-of-an-ending",
-     "poster": "https://image.tmdb.org/t/p/w342/gvW0Ki7pEv4iZYbtGwgcvqR6s1c.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Blue Gardenia",
-     "slug": "the-blue-gardenia",
-     "poster": "https://image.tmdb.org/t/p/w342/1RwM1jUx5XV4Q9DxcOVubmk5laH.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Vanishing of Sidney Hall",
-     "slug": "the-vanishing-of-sidney-hall",
-     "poster": "https://image.tmdb.org/t/p/w342/e8SJJEliAK9g0EG5agPsbxWoWoI.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Overdrive",
-     "slug": "overdrive",
-     "poster": "https://image.tmdb.org/t/p/w342/a0hTRjis1cxwmjOuBaS7WdDG3dj.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/9qxyrJfjk577ym5WD6HCDmunoyO.jpg",
-   "backdropPath": "/9qxyrJfjk577ym5WD6HCDmunoyO.jpg",
-   "posterPath": "/e2t7NjahJTgz2PMx2BW4ZRgHR6Z.jpg",
-   "fullReview": "Lowen Ashleigh is hired by Jeremy Crawford to ghostwrite novels for his bestselling author wife Verity, who is unable to finish following an accident. Lowen gradually uncovers Verity's disturbing truths while residing at the Crawfords' home to work.",
-   "castPics": [
-    {
-     "name": "Anne Hathaway",
-     "character": "Verity Crawford",
-     "photo": "https://image.tmdb.org/t/p/w185/nbccV2pMoyLTCeg5DQip24Eq0Jp.jpg"
-    },
-    {
-     "name": "Dakota Johnson",
-     "character": "Lowen Ashleigh",
-     "photo": "https://image.tmdb.org/t/p/w185/qFek0KqpaPV5mVyHHNfAapDE9Tj.jpg"
-    },
-    {
-     "name": "Josh Hartnett",
-     "character": "Jeremy Crawford",
-     "photo": "https://image.tmdb.org/t/p/w185/5eMo8D7h1XrSu6ZN4UXhPcS6YNG.jpg"
-    },
-    {
-     "name": "Brady Wagner",
-     "character": "Crew Crawford",
-     "photo": "https://image.tmdb.org/t/p/w185/tAzT9FRrs7Zb3qlhNBHk2a7Z2Mx.jpg"
-    },
-    {
-     "name": "Ismael Cruz Cordova",
-     "character": "Corey",
-     "photo": "https://image.tmdb.org/t/p/w185/oXcrsQGndk60iFkNB8qFnMHlNzL.jpg"
-    },
-    {
-     "name": "Irina Dvorovenko",
-     "character": "Anna",
-     "photo": "https://image.tmdb.org/t/p/w185/f0XyxPtobP1MkwByneD3zAi0YNj.jpg"
-    }
-   ],
-   "slug": "verity",
-   "trailerViews": 14820956
-  },
-  {
-   "title": "Ghost in the Cell",
-   "released": "2026-10-02",
-   "genre": "Horror / Comedy",
-   "language": "Indonesian",
-   "review": "In a notorious prison, an invisible force begins killing inmates brutally, compelling enemy gangs and corrupt guards…",
-   "poster": "https://image.tmdb.org/t/p/w342/zxcMdx0w5Zmg8yZuuiS7CJ8vOea.jpg",
-   "kind": "movie",
-   "tmdbId": 1393326,
-   "popularity": 70.9935,
-   "cert": "R",
-   "trailer": "https://www.youtube.com/watch?v=otL78_pk_A0",
-   "providers": [],
-   "cast": [
-    "Abimana Aryasatya",
-    "Bront Palarae",
-    "Dimas Danang",
-    "Endy Arfian"
-   ],
-   "director": "Joko Anwar",
-   "runtime": 106,
-   "imdbScore": null,
-   "imdbVotes": null,
-   "imdbId": "tt9000310",
-   "seasons": null,
-   "freshDate": "2026-04-16",
-   "badge": null,
-   "isRecent": false,
-   "similar": [
-    {
-     "title": "The Hunt",
-     "slug": "the-hunt",
-     "poster": "https://image.tmdb.org/t/p/w342/wxPhn4ef1EAo5njxwBkAEVrlJJG.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Jester 2",
-     "slug": "the-jester-2",
-     "poster": "https://image.tmdb.org/t/p/w342/47dsw1jSOV0Be5zmy7CtLhYpqU.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Barbarian",
-     "slug": "barbarian",
-     "poster": "https://image.tmdb.org/t/p/w342/idT5mnqPcJgSkvpDX7pJffBzdVH.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Blackening",
-     "slug": "the-blackening",
-     "poster": "https://image.tmdb.org/t/p/w342/n2aS9FE0C3VUHtSb3Ak41aU9K3y.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Renfield",
-     "slug": "renfield",
-     "poster": "https://image.tmdb.org/t/p/w342/p6yUjhvNGQpFZilKwOKbxQ1eHlo.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "They Will Kill You",
-     "slug": "they-will-kill-you",
-     "poster": "https://image.tmdb.org/t/p/w342/6oI4oQKTWMVUlr8Ivqydp28Ruu6.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Scream VI",
-     "slug": "scream-vi",
-     "poster": "https://image.tmdb.org/t/p/w342/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Abigail",
-     "slug": "abigail",
-     "poster": "https://image.tmdb.org/t/p/w342/5gKKSoD3iezjoL7YqZONjmyAiRA.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Strange Darling",
-     "slug": "strange-darling",
-     "poster": "https://image.tmdb.org/t/p/w342/kWNCRgt3ocv19bYO0sk7TRuZuFY.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "#AMFAD: All My Friends Are Dead",
-     "slug": "amfad-all-my-friends-are-dead",
-     "poster": "https://image.tmdb.org/t/p/w342/7QyJll2kuqlQgvT2Z08iYmeUKe1.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Dare",
-     "slug": "the-dare",
-     "poster": "https://image.tmdb.org/t/p/w342/iJYPBa2EA6UIsXdrlOXkpnqbeQW.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Beyond Re-Animator",
-     "slug": "beyond-re-animator",
-     "poster": "https://image.tmdb.org/t/p/w342/iS4oB4nQEdO86Fvszqf6P2ejK44.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/tK3QdOOrX4qEkmSlvrmc8cK7iOU.jpg",
-   "backdropPath": "/tK3QdOOrX4qEkmSlvrmc8cK7iOU.jpg",
-   "posterPath": "/zxcMdx0w5Zmg8yZuuiS7CJ8vOea.jpg",
-   "fullReview": "In a notorious prison, an invisible force begins killing inmates brutally, compelling enemy gangs and corrupt guards to work together as they try to survive the mounting bloodshed.",
-   "castPics": [
-    {
-     "name": "Abimana Aryasatya",
-     "character": "Anggoro Ramadhani",
-     "photo": "https://image.tmdb.org/t/p/w185/b4ncXBTGaiPS6cof11vKeh3DuFj.jpg"
-    },
-    {
-     "name": "Bront Palarae",
-     "character": "Jefry Hutama",
-     "photo": "https://image.tmdb.org/t/p/w185/mk7v78F2QPV1jmwjjo19PONugkR.jpg"
-    },
-    {
-     "name": "Dimas Danang",
-     "character": "Irfan Hamdani",
-     "photo": "https://image.tmdb.org/t/p/w185/tDdRwEk68lL3WMKt8iymNrdCgeH.jpg"
-    },
-    {
-     "name": "Endy Arfian",
-     "character": "Dimas Kurnia",
-     "photo": "https://image.tmdb.org/t/p/w185/v9yWVWqD5SeDuU8l8rb71BYmlvI.jpg"
-    },
-    {
-     "name": "Lukman Sardi",
-     "character": "Pendi Mulia",
-     "photo": "https://image.tmdb.org/t/p/w185/pMZiVVu8k5MzGteRgpNVzMybxLm.jpg"
-    },
-    {
-     "name": "Mike Lucock",
-     "character": "Wildan Arifin",
-     "photo": "https://image.tmdb.org/t/p/w185/LtCJOYBn9p8TG6gOHh4GxvKiHi.jpg"
-    }
-   ],
-   "slug": "ghost-in-the-cell",
-   "trailerViews": 1291362
-  },
-  {
-   "title": "Other Mommy",
-   "released": "2026-10-09",
-   "genre": "Horror",
-   "language": "English",
-   "review": "A young girl, Bela, forms a relationship with a sinister entity in her home who looks uncannily like her own mother.",
-   "poster": "https://image.tmdb.org/t/p/w342/fGRNCssTRrhYZxNzykGGCoMsAVq.jpg",
-   "kind": "movie",
-   "tmdbId": 1400837,
-   "popularity": 22.4386,
-   "cert": "R",
-   "trailer": "https://www.youtube.com/watch?v=-mnTITqqiT0",
-   "providers": [],
-   "cast": [
-    "Jessica Chastain",
-    "Arabella Olivia Clark",
-    "Jay Duplass",
-    "Dichen Lachman"
-   ],
-   "director": "Rob Savage",
-   "runtime": 93,
-   "imdbScore": null,
-   "imdbVotes": null,
-   "imdbId": "tt36586020",
-   "seasons": null,
-   "freshDate": "2026-10-07",
-   "badge": null,
-   "isRecent": false,
-   "similar": [
-    {
-     "title": "Never Let Go",
-     "slug": "never-let-go",
-     "poster": "https://image.tmdb.org/t/p/w342/3EpZ2ksjijmdr8BhISP03PYzNFW.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Exorcist: Believer",
-     "slug": "the-exorcist-believer",
-     "poster": "https://image.tmdb.org/t/p/w342/fFXkAlMH2iQrNknv4eq7LGTkcti.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Daddy's Head",
-     "slug": "daddy-s-head",
-     "poster": "https://image.tmdb.org/t/p/w342/nEWbEBs8BalwasA4Un8rll3kauT.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Boogeyman",
-     "slug": "the-boogeyman",
-     "poster": "https://image.tmdb.org/t/p/w342/pYwZdnXVnVxAr7dx4MEK7tTK9gI.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Bring Her Back",
-     "slug": "bring-her-back",
-     "poster": "https://image.tmdb.org/t/p/w342/1Q3GlCXGYWELifxANYZ5OVMRVZl.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Cobweb",
-     "slug": "cobweb",
-     "poster": "https://image.tmdb.org/t/p/w342/cGXFosYUHYjjdKrOmA0bbjvzhKz.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Two Witches",
-     "slug": "two-witches",
-     "poster": "https://image.tmdb.org/t/p/w342/a6JHz23BOfbzWxL5JsrBWQHqMuh.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "No One Will Save You",
-     "slug": "no-one-will-save-you",
-     "poster": "https://image.tmdb.org/t/p/w342/ehGIDAMaYy6Eg0o8ga0oqflDjqW.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Kindred",
-     "slug": "the-kindred",
-     "poster": "https://image.tmdb.org/t/p/w342/jDXAaMLk7NNXdXZkeTMtr4xo6f5.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Imaginary",
-     "slug": "imaginary",
-     "poster": "https://image.tmdb.org/t/p/w342/bPCxkrCEGJmaYfvdXj0x3mCLbGr.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "You're Not Alone",
-     "slug": "you-re-not-alone",
-     "poster": "https://image.tmdb.org/t/p/w342/3aBF1D5CXnYZ4eWLHHP3HtKCFph.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Abigail Haunting",
-     "slug": "abigail-haunting",
-     "poster": "https://image.tmdb.org/t/p/w342/ve3xYpDIUTLSvwcUErd82T4JSJq.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/wpx3J1ZuIZgWc9rzdfcj7fDru58.jpg",
-   "backdropPath": "/wpx3J1ZuIZgWc9rzdfcj7fDru58.jpg",
-   "posterPath": "/fGRNCssTRrhYZxNzykGGCoMsAVq.jpg",
-   "fullReview": "A young girl, Bela, forms a relationship with a sinister entity in her home who looks uncannily like her own mother.",
-   "castPics": [
-    {
-     "name": "Jessica Chastain",
-     "character": "Ursula / Other Mommy",
-     "photo": "https://image.tmdb.org/t/p/w185/eQKnihReJeB9vQEa5gySzAlKfZt.jpg"
-    },
-    {
-     "name": "Arabella Olivia Clark",
-     "character": "Bela",
-     "photo": "https://image.tmdb.org/t/p/w185/bwTovaznMIXo9Je01soHBCzmFxn.jpg"
-    },
-    {
-     "name": "Jay Duplass",
-     "character": "Daddo / Russ",
-     "photo": "https://image.tmdb.org/t/p/w185/eUY0JDlqzf5pE9pmdvv4IPU3NYn.jpg"
-    },
-    {
-     "name": "Dichen Lachman",
-     "character": null,
-     "photo": "https://image.tmdb.org/t/p/w185/yLrpMHBNtuUAu3M9EjaYHnn5EEY.jpg"
-    },
-    {
-     "name": "Arian Moayed",
-     "character": "Uncle Frank",
-     "photo": "https://image.tmdb.org/t/p/w185/hYBqwt0HelUqgKSd1VDUAyvfDME.jpg"
-    },
-    {
-     "name": "Karen Allen",
-     "character": "Grandma Ruth",
-     "photo": "https://image.tmdb.org/t/p/w185/eJszpndpRzrXbSlz7RUlApoTykn.jpg"
-    }
-   ],
-   "slug": "other-mommy",
-   "trailerViews": 13492122
-  },
-  {
-   "title": "La bola negra",
-   "released": "2026-10-16",
-   "genre": "Drama / War",
-   "language": "Spanish",
-   "review": "The intertwined lives of three men in three different eras, three lives intimately linked by sexuality and desire…",
-   "poster": "https://image.tmdb.org/t/p/w342/jT5SR5qc9KvVg7HUEmjMWEUYMce.jpg",
-   "kind": "movie",
-   "tmdbId": 1422041,
-   "popularity": 10.218,
-   "cert": "R",
-   "trailer": "https://www.youtube.com/watch?v=IRHtqjHYPew",
-   "providers": [],
-   "cast": [
-    "Guitarricadelafuente",
-    "Miguel Bernardeau",
-    "Carlos González",
-    "Milo Quifes"
-   ],
-   "director": "Javier Ambrossi",
-   "runtime": 155,
-   "imdbScore": null,
-   "imdbVotes": null,
-   "imdbId": "tt35511966",
-   "seasons": null,
-   "freshDate": "2026-09-25",
-   "badge": "New release",
-   "isRecent": true,
-   "similar": [
-    {
-     "title": "Dance of the Forty One",
-     "slug": "dance-of-the-forty-one",
-     "poster": "https://image.tmdb.org/t/p/w342/jcSqwsEtT7wKfQ8oKaaulMMGUdS.jpg",
-     "language": "Spanish",
-     "kind": "movie"
-    },
-    {
-     "title": "The Endless Trench",
-     "slug": "the-endless-trench",
-     "poster": "https://image.tmdb.org/t/p/w342/rgS3e3sTUHeVgKzKmFhIJcl9tVA.jpg",
-     "language": "Spanish",
-     "kind": "movie"
-    },
-    {
-     "title": "A Twelve-Year Night",
-     "slug": "a-twelve-year-night",
-     "poster": "https://image.tmdb.org/t/p/w342/k1SEABHjk34flsBQigm9ygMuUM4.jpg",
-     "language": "Spanish",
-     "kind": "movie"
-    },
-    {
-     "title": "Firebrand",
-     "slug": "firebrand",
-     "poster": "https://image.tmdb.org/t/p/w342/kXAc1LaxL64udWr9SOAHQwOBEG0.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The World Will Tremble",
-     "slug": "the-world-will-tremble",
-     "poster": "https://image.tmdb.org/t/p/w342/31CKSlZdsvdY8bysV5WeR2YvTim.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Jacknife",
-     "slug": "jacknife",
-     "poster": "https://image.tmdb.org/t/p/w342/i3tnWvBTV6d0YOldO3guhpLS8WT.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Outlaws - For Greater Glory",
-     "slug": "outlaws-for-greater-glory",
-     "poster": "https://image.tmdb.org/t/p/w342/7jgh0ej04j98q2NFpSZLlpDazUo.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Catcher Was a Spy",
-     "slug": "the-catcher-was-a-spy",
-     "poster": "https://image.tmdb.org/t/p/w342/3aBv9Oln0aoBrEbkMabHIVat6CY.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Beasts of No Nation",
-     "slug": "beasts-of-no-nation",
-     "poster": "https://image.tmdb.org/t/p/w342/1D4vcJmJc58WXarpRtwgd2do9Rg.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Last of the Mohicans",
-     "slug": "the-last-of-the-mohicans",
-     "poster": "https://image.tmdb.org/t/p/w342/qzJMPWRtZveBkxXOv3ucWhoJuyj.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Kill Team",
-     "slug": "the-kill-team",
-     "poster": "https://image.tmdb.org/t/p/w342/wLRZbtrbV51oQuvqNeK6vhb6btV.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Kiss of the Spider Woman",
-     "slug": "kiss-of-the-spider-woman",
-     "poster": "https://image.tmdb.org/t/p/w342/lbrn4gOjYKrLrINn3uUJRlV2NZO.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/bDsmYvrzto7xrEwqDpLC3SPhn9A.jpg",
-   "backdropPath": "/bDsmYvrzto7xrEwqDpLC3SPhn9A.jpg",
-   "posterPath": "/jT5SR5qc9KvVg7HUEmjMWEUYMce.jpg",
-   "fullReview": "The intertwined lives of three men in three different eras, three lives intimately linked by sexuality and desire, pain, and legacy.",
-   "castPics": [
-    {
-     "name": "Guitarricadelafuente",
-     "character": "Sebastián",
-     "photo": "https://image.tmdb.org/t/p/w185/A2Jfhf7lRBmMlQPGFZwEddT8MdS.jpg"
-    },
-    {
-     "name": "Miguel Bernardeau",
-     "character": "Rafael",
-     "photo": "https://image.tmdb.org/t/p/w185/aPyvMBnGaTeWkMStdHvdiiWxpBQ.jpg"
-    },
-    {
-     "name": "Carlos González",
-     "character": "Alberto",
-     "photo": "https://image.tmdb.org/t/p/w185/bPag2U3ei3Wb2KfSXEQGDY5a8pi.jpg"
-    },
-    {
-     "name": "Milo Quifes",
-     "character": "Carlos",
-     "photo": "https://image.tmdb.org/t/p/w185/vniYP6wozDkntBQImES2kJrBSOW.jpg"
-    },
-    {
-     "name": "Lola Dueñas",
-     "character": "Teresa",
-     "photo": "https://image.tmdb.org/t/p/w185/bZgXKlGkLgjvL3qU2Iq2l2zsKo7.jpg"
-    },
-    {
-     "name": "Penélope Cruz",
-     "character": "Nené Romero",
-     "photo": "https://image.tmdb.org/t/p/w185/n5SFgmvJSENQt8poE4qYacUnKOi.jpg"
-    }
-   ],
-   "slug": "la-bola-negra",
-   "trailerViews": 1920818
-  },
-  {
-   "title": "Street Fighter",
-   "released": "2026-10-16",
-   "genre": "Action / Fantasy",
-   "language": "English",
-   "review": "In 1993, estranged Street Fighters Ryu and Ken Masters are thrown back into combat when the mysterious Chun-Li recruits…",
-   "poster": "https://image.tmdb.org/t/p/w342/utKzCSCz2HtXwcDGfWLj2IHhSob.jpg",
-   "kind": "movie",
-   "tmdbId": 1153576,
-   "popularity": 19.3309,
-   "cert": "PG-13",
-   "trailer": "https://www.youtube.com/watch?v=U6sbm1OaJb8",
-   "providers": [],
-   "cast": [
-    "Andrew Koji",
-    "Noah Centineo",
-    "Callina Liang",
-    "Joe Anoa'i"
-   ],
-   "director": "Kitao Sakurai",
-   "runtime": 119,
-   "imdbScore": null,
-   "imdbVotes": null,
-   "imdbId": "tt27419420",
-   "seasons": null,
-   "freshDate": "2026-10-13",
-   "badge": null,
-   "isRecent": false,
-   "similar": [
-    {
-     "title": "Shang-Chi and the Legend of the Ten Rings",
-     "slug": "shang-chi-and-the-legend-of-the-ten-rings",
-     "poster": "https://image.tmdb.org/t/p/w342/9f2Q0U3IOsLgrI2HkvldwSABZy5.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Hunger Games: The Ballad of Songbirds & Snakes",
-     "slug": "the-hunger-games-the-ballad-of-songbirds-snakes",
-     "poster": "https://image.tmdb.org/t/p/w342/mBaXZ95R2OxueZhvQbcEWy2DqyO.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Avatar Aang: The Last Airbender",
-     "slug": "avatar-aang-the-last-airbender",
-     "poster": "https://image.tmdb.org/t/p/w342/3sgnSfNT27Bx5O5ukr7B26mhEQq.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Wonder Woman 1984",
-     "slug": "wonder-woman-1984",
-     "poster": "https://image.tmdb.org/t/p/w342/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Mulan",
-     "slug": "mulan",
-     "poster": "https://image.tmdb.org/t/p/w342/aKx1ARwG55zZ0GpRvU2WrGrCG9o.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Gladiator Underground",
-     "slug": "gladiator-underground",
-     "poster": "https://image.tmdb.org/t/p/w342/qLN16AeIjS5P5Kk5B6pBi1Mh1mi.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Forbidden Kingdom",
-     "slug": "the-forbidden-kingdom",
-     "poster": "https://image.tmdb.org/t/p/w342/z8chF1Z7hyuSVqLYTgElkQZh2VB.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Crouching Tiger, Hidden Dragon: Sword of Destiny",
-     "slug": "crouching-tiger-hidden-dragon-sword-of-destiny",
-     "poster": "https://image.tmdb.org/t/p/w342/te3aeAyhkfqgpa5BSTq3oNxGqQD.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Yu-Gi-Oh! The Movie",
-     "slug": "yu-gi-oh-the-movie",
-     "poster": "https://image.tmdb.org/t/p/w342/3VD5QDTu0rQgRvERBMXtAvg0oIC.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Krull",
-     "slug": "krull",
-     "poster": "https://image.tmdb.org/t/p/w342/izDbySIrTmID0Nh6UqcWrUvOMjU.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Alita: Battle Angel",
-     "slug": "alita-battle-angel",
-     "poster": "https://image.tmdb.org/t/p/w342/xRWht48C2V8XNfzvPehyClOvDni.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Halo: Nightfall",
-     "slug": "halo-nightfall",
-     "poster": "https://image.tmdb.org/t/p/w342/liLQ8EFzHN06eFZ9KQMDK6cmGaK.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/5H5YphHsQmkQhrw13Wv1whCZKtN.jpg",
-   "backdropPath": "/5H5YphHsQmkQhrw13Wv1whCZKtN.jpg",
-   "posterPath": "/utKzCSCz2HtXwcDGfWLj2IHhSob.jpg",
-   "fullReview": "In 1993, estranged Street Fighters Ryu and Ken Masters are thrown back into combat when the mysterious Chun-Li recruits them for the next World Warrior Tournament: a brutal clash of fists, fate, and fury. But behind this battle royale lies a deadly conspiracy that forces them to face off against each other and the demons of their past. And if they don't, it's GAME OVER!",
-   "castPics": [
-    {
-     "name": "Andrew Koji",
-     "character": "Ryu",
-     "photo": "https://image.tmdb.org/t/p/w185/oU53nWLQ6wFHzERwSi1fD53LxZB.jpg"
-    },
-    {
-     "name": "Noah Centineo",
-     "character": "Ken Masters",
-     "photo": "https://image.tmdb.org/t/p/w185/p1bcst401RyxfDGykx2iQLI7CV5.jpg"
-    },
-    {
-     "name": "Callina Liang",
-     "character": "Chun-Li",
-     "photo": "https://image.tmdb.org/t/p/w185/yiajT9WAsvuxF9uNJrkSuzVv3On.jpg"
-    },
-    {
-     "name": "Joe Anoa'i",
-     "character": "Akuma",
-     "photo": "https://image.tmdb.org/t/p/w185/6BKc77eAUBQdL9MmgBorBc4SMdE.jpg"
-    },
-    {
-     "name": "David Dastmalchian",
-     "character": "M. Bison",
-     "photo": "https://image.tmdb.org/t/p/w185/nER1Vzhk51pGHb60KBF1Ja5tEXA.jpg"
-    },
-    {
-     "name": "Cody Rhodes",
-     "character": "Guile",
-     "photo": "https://image.tmdb.org/t/p/w185/m9hfLcsQuESprcb7dJUj5lQLWCv.jpg"
-    }
-   ],
-   "slug": "street-fighter",
-   "trailerViews": 24938294
-  },
-  {
-   "title": "The Mongoose",
-   "released": "2026-10-30",
-   "genre": "Action / Thriller",
-   "language": "English",
-   "review": "A falsely accused war hero with nothing to lose leads police on an epic televised cross-country car chase, helped…",
-   "poster": "https://image.tmdb.org/t/p/w342/eSS5mvSG84UUuvtbHel5Yu3Wik4.jpg",
-   "kind": "movie",
-   "tmdbId": 1294189,
-   "popularity": 249.4488,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=aHrMFtt40_Q",
-   "providers": [],
-   "cast": [
-    "Liam Neeson",
-    "Marisa Tomei",
-    "Ving Rhames",
-    "Michael Chiklis"
-   ],
-   "director": "Mark Vanselow",
-   "runtime": 99,
-   "imdbScore": null,
-   "imdbVotes": null,
-   "imdbId": "tt13611778",
-   "seasons": null,
-   "freshDate": "2026-10-29",
-   "badge": null,
-   "isRecent": false,
-   "similar": [
-    {
-     "title": "The Desperate Hour",
-     "slug": "the-desperate-hour",
-     "poster": "https://image.tmdb.org/t/p/w342/u6Pg9eTklhg6Aa7kXaxrfdE1Chi.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Indemnity",
-     "slug": "indemnity",
-     "poster": "https://image.tmdb.org/t/p/w342/8y1rfKHot8DF0cQhGvKXtYsMjNx.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Paper Tigers",
-     "slug": "the-paper-tigers",
-     "poster": "https://image.tmdb.org/t/p/w342/x54tAgLfS51fO5EcipNJJ9tfSRK.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Transporter 3",
-     "slug": "transporter-3",
-     "poster": "https://image.tmdb.org/t/p/w342/o4w9VF3GRZuXe9NHHvZ07pJespl.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Fast Five",
-     "slug": "fast-five",
-     "poster": "https://image.tmdb.org/t/p/w342/gEfQjjQwY7fh5bI4GlG0RrBu7Pz.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Overdrive",
-     "slug": "overdrive",
-     "poster": "https://image.tmdb.org/t/p/w342/a0hTRjis1cxwmjOuBaS7WdDG3dj.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Tourist",
-     "slug": "the-tourist",
-     "poster": "https://image.tmdb.org/t/p/w342/vVmek9VTnsfpQTIFWtL9h4HhOIP.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Battleground",
-     "slug": "battleground",
-     "poster": "https://image.tmdb.org/t/p/w342/qSrcs7zmF61aRtzmOVPxeBBowap.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Gone in 60 Seconds",
-     "slug": "gone-in-60-seconds",
-     "poster": "https://image.tmdb.org/t/p/w342/qYyeAodAOe4nHuzkHdN35ValzLT.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Hatari!",
-     "slug": "hatari",
-     "poster": "https://image.tmdb.org/t/p/w342/fT1Ht8PSM5cFKmejrnufWvpXAPk.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Dirty Mary Crazy Larry",
-     "slug": "dirty-mary-crazy-larry",
-     "poster": "https://image.tmdb.org/t/p/w342/8hLvJUBEFFQHgiJIPXywRD9KZft.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Patriots Day",
-     "slug": "patriots-day",
-     "poster": "https://image.tmdb.org/t/p/w342/mIDxsJTrOC7NhgOo3GziiHyKfsQ.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/iRIhPqqoUHiFBxn8oYf3gCQnaKk.jpg",
-   "backdropPath": "/iRIhPqqoUHiFBxn8oYf3gCQnaKk.jpg",
-   "posterPath": "/eSS5mvSG84UUuvtbHel5Yu3Wik4.jpg",
-   "fullReview": "A falsely accused war hero with nothing to lose leads police on an epic televised cross-country car chase, helped by members of his former Special Forces Army battalion and closely monitored by a fascinated public rooting for his safe getaway.",
-   "castPics": [
-    {
-     "name": "Liam Neeson",
-     "character": "Ryan 'Fang' Flanagan",
-     "photo": "https://image.tmdb.org/t/p/w185/sRLev3wJioBgun3ZoeAUFpkLy0D.jpg"
-    },
-    {
-     "name": "Marisa Tomei",
-     "character": "Tara",
-     "photo": "https://image.tmdb.org/t/p/w185/5NCCKQooVCQD36R6JL3a1hOeBVn.jpg"
-    },
-    {
-     "name": "Ving Rhames",
-     "character": "Tanker",
-     "photo": "https://image.tmdb.org/t/p/w185/tOVDvu1EQP78AwaUw6uh1wN818E.jpg"
-    },
-    {
-     "name": "Michael Chiklis",
-     "character": "Major Walter Pope",
-     "photo": "https://image.tmdb.org/t/p/w185/pAkKjbzxP6Z6Y5zAGpwmWQo1iji.jpg"
-    },
-    {
-     "name": "Brett Tucker",
-     "character": "Todd",
-     "photo": "https://image.tmdb.org/t/p/w185/6IUQyy2pA8PRXX1MEx088JH6pcu.jpg"
-    },
-    {
-     "name": "Stella Stocker",
-     "character": "Helene (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/ilRVeYRcQrAeHYLMOPPzLzZMJcC.jpg"
-    }
-   ],
-   "slug": "the-mongoose",
-   "trailerViews": 453989
-  },
-  {
-   "title": "Avengers: Doomsday",
-   "released": "2026-12-18",
-   "genre": "Science Fiction / Action",
-   "language": "English",
-   "review": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike…",
-   "poster": "https://image.tmdb.org/t/p/w342/jzPwsojjFStf5lR5Nm07w2hH56G.jpg",
-   "kind": "movie",
-   "tmdbId": 1003596,
-   "popularity": 59.8434,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-   "providers": [],
-   "cast": [
-    "Robert Downey Jr.",
-    "Chris Evans",
-    "Chris Hemsworth",
-    "Pedro Pascal"
-   ],
-   "director": "Joe Russo",
-   "runtime": 165,
-   "imdbScore": null,
-   "imdbVotes": null,
-   "imdbId": "tt21357150",
-   "seasons": null,
-   "freshDate": "2026-12-16",
-   "badge": null,
-   "isRecent": false,
-   "similar": [
-    {
-     "title": "Guardians of the Galaxy Vol. 3",
-     "slug": "guardians-of-the-galaxy-vol-3",
-     "poster": "https://image.tmdb.org/t/p/w342/r2J02Z2OpNTctfOSN1Ydgii51I3.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Ant-Man and the Wasp: Quantumania",
-     "slug": "ant-man-and-the-wasp-quantumania",
-     "poster": "https://image.tmdb.org/t/p/w342/qnqGbB22YJ7dSs4o6M7exTpNxPz.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Zack Snyder's Justice League",
-     "slug": "zack-snyder-s-justice-league",
-     "poster": "https://image.tmdb.org/t/p/w342/tnAuB8q5vv7Ax9UAEje5Xi4BXik.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Justice League: Crisis on Infinite Earths Part One",
-     "slug": "justice-league-crisis-on-infinite-earths-part-one",
-     "poster": "https://image.tmdb.org/t/p/w342/mcRVsjMbhFstRK9z2oGRHiIvulr.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Venom: The Last Dance",
-     "slug": "venom-the-last-dance",
-     "poster": "https://image.tmdb.org/t/p/w342/vGXptEdgZIhPg3cGlc7e8sNPC2e.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Doctor Strange in the Multiverse of Madness",
-     "slug": "doctor-strange-in-the-multiverse-of-madness",
-     "poster": "https://image.tmdb.org/t/p/w342/ddJcSKbcp4rKZTmuyWaMhuwcfMz.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Spider-Man: No Way Home",
-     "slug": "spider-man-no-way-home",
-     "poster": "https://image.tmdb.org/t/p/w342/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Teen Titans Go! vs. Teen Titans",
-     "slug": "teen-titans-go-vs-teen-titans",
-     "poster": "https://image.tmdb.org/t/p/w342/GWJEdzVC9aOBSOMF9NHodYxSsE.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Iron Man & Captain America: Heroes United",
-     "slug": "iron-man-captain-america-heroes-united",
-     "poster": "https://image.tmdb.org/t/p/w342/CX7eRlaxFXiW3UGQBdQUoSVZRi.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Justice League",
-     "slug": "justice-league",
-     "poster": "https://image.tmdb.org/t/p/w342/eifGNCSDuxJeS1loAXil5bIGgvC.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Captain America: Civil War",
-     "slug": "captain-america-civil-war",
-     "poster": "https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Avengers: Infinity War",
-     "slug": "avengers-infinity-war",
-     "poster": "https://image.tmdb.org/t/p/w342/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/s4v0UX1anfXm0UvloLsTTJ4v222.jpg",
-   "backdropPath": "/s4v0UX1anfXm0UvloLsTTJ4v222.jpg",
-   "posterPath": "/jzPwsojjFStf5lR5Nm07w2hH56G.jpg",
-   "fullReview": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
-   "castPics": [
-    {
-     "name": "Robert Downey Jr.",
-     "character": "Victor von Doom  / Doctor Doom",
-     "photo": "https://image.tmdb.org/t/p/w185/5qHNjhtjMD4YWH3UP0rm4tKwxCL.jpg"
-    },
-    {
-     "name": "Chris Evans",
-     "character": "Steve Rogers",
-     "photo": "https://image.tmdb.org/t/p/w185/3bOGNsHlrswhyW79uvIHH1V43JI.jpg"
-    },
-    {
-     "name": "Chris Hemsworth",
-     "character": "Thor",
-     "photo": "https://image.tmdb.org/t/p/w185/piQGdoIQOF3C1EI5cbYZLAW1gfj.jpg"
-    },
-    {
-     "name": "Pedro Pascal",
-     "character": "Reed Richards / Mister Fantastic",
-     "photo": "https://image.tmdb.org/t/p/w185/oKcMbVn0NJTNzQt0ClKKvVXkm60.jpg"
-    },
-    {
-     "name": "Paul Rudd",
-     "character": "Scott Lang / Ant-Man",
-     "photo": "https://image.tmdb.org/t/p/w185/6jtwNOLKy0LdsRAKwZqgYMAfd5n.jpg"
-    },
-    {
-     "name": "Anthony Mackie",
-     "character": "Sam Wilson / Captain America",
-     "photo": "https://image.tmdb.org/t/p/w185/vecvTm7SimizluJkyIwBxeLbvRm.jpg"
-    }
-   ],
-   "slug": "avengers-doomsday",
-   "trailerViews": 43740061
-  }
- ],
- "langPools": {
-  "Hindi": {
-   "theatres": [
-    {
-     "title": "Hanuman Ansh",
-     "genre": "Family / Drama",
-     "language": "Hindi",
-     "released": "2026-09-11",
-     "review": "A grieving boy seeks God to meet his departed mother, and in finding the divine, learns to serve humanity with miracles of love, food and silent blessings…",
-     "rating": 8,
-     "scores": [
-      {
-       "source": "TMDB",
-       "score": "8.0/10"
-      }
-     ],
-     "votes": 11,
-     "verdict": "Must watch",
-     "poster": "https://image.tmdb.org/t/p/w342/as2Y3zGUa2IUS3uAx2sh6Ano3es.jpg",
-     "isRecent": false,
-     "isFresh": false,
-     "kind": "movie",
-     "tmdbId": 1709391,
-     "popularity": 19.7171,
-     "platform": "Theatres",
-     "cert": "NR",
-     "trailer": "https://www.youtube.com/watch?v=YpGhCA2X3gU",
-     "providers": [],
-     "cast": [
-      "Chandan Anand",
-      "Shobhinaw Satyaa",
-      "Purnima Tiwari",
-      "Vihaan Shedge"
-     ],
-     "director": "Vishal Chaturvedi",
-     "runtime": 150,
-     "imdbVotes": null,
-     "imdbId": "tt39390582",
-     "seasons": null,
-     "freshDate": "2026-08-07",
-     "badge": null,
-     "similar": [
-      {
-       "title": "Skater Girl",
-       "slug": "skater-girl",
-       "poster": "https://image.tmdb.org/t/p/w342/e8yxFPOvNmhlfUXBqiNvvpMI4t5.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "The Girl Who Believes in Miracles",
-       "slug": "the-girl-who-believes-in-miracles",
-       "poster": "https://image.tmdb.org/t/p/w342/fBhM7HadGVfVyUp7UaEsutCEtYu.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "The Forge",
-       "slug": "the-forge",
-       "poster": "https://image.tmdb.org/t/p/w342/oranxontIQRmhuyQlkoAwxpeBYz.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "I Believe",
-       "slug": "i-believe",
-       "poster": "https://image.tmdb.org/t/p/w342/7DVRR21ol8EojJxAlaNcLTzLBvI.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "Flicka",
-       "slug": "flicka",
-       "poster": "https://image.tmdb.org/t/p/w342/nhJlXSmiHnlVxea5J5l3wfuATwY.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "Little Lord Fauntleroy",
-       "slug": "little-lord-fauntleroy",
-       "poster": "https://image.tmdb.org/t/p/w342/7rLhBRseh1ZVNMQIFUxhy9IcWvi.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "Heidi",
-       "slug": "heidi",
-       "poster": "https://image.tmdb.org/t/p/w342/p2VZt4f1u2qsn2I62I4arTdlgQk.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "Anne of Green Gables",
-       "slug": "anne-of-green-gables",
-       "poster": "https://image.tmdb.org/t/p/w342/naohj9jmNggrodVingNs1veCwXJ.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "Nancy Drew and the Hidden Staircase",
-       "slug": "nancy-drew-and-the-hidden-staircase",
-       "poster": "https://image.tmdb.org/t/p/w342/g805FevFI8BkmvorvyITZ1kGJcr.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "Flicka: Country Pride",
-       "slug": "flicka-country-pride",
-       "poster": "https://image.tmdb.org/t/p/w342/jJpYWz8wqXypAWhJJ0yVUtaHc79.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "Monster High: Frights, Camera, Action!",
-       "slug": "monster-high-frights-camera-action",
-       "poster": "https://image.tmdb.org/t/p/w342/5gTNnqidaAfTHlOIB7tiMkGh3hK.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "Where the Red Fern Grows",
-       "slug": "where-the-red-fern-grows",
-       "poster": "https://image.tmdb.org/t/p/w342/zUDxfnWLq73rQaa8YSHBDGx96ZS.jpg",
-       "language": "English",
-       "kind": "movie"
-      }
-     ],
-     "backdrop": "https://image.tmdb.org/t/p/w780/tKYOK8iMxkhJhug3LJ2yvC5QY8M.jpg",
-     "backdropPath": "/tKYOK8iMxkhJhug3LJ2yvC5QY8M.jpg",
-     "posterPath": "/as2Y3zGUa2IUS3uAx2sh6Ano3es.jpg",
-     "fullReview": "A grieving boy seeks God to meet his departed mother, and in finding the divine, learns to serve humanity with miracles of love, food and silent blessings, becoming Hanuman Ansh, Neem Karoli Baba.",
-     "castPics": [
-      {
-       "name": "Chandan Anand",
-       "character": "Bhonsle",
-       "photo": "https://image.tmdb.org/t/p/w185/fyPk0OQAxPbqid2MZEOCtaFoa9Z.jpg"
-      },
-      {
-       "name": "Anil Rastogi",
-       "character": null,
-       "photo": "https://image.tmdb.org/t/p/w185/8Mte0kdmV0YKEuM3Iei3W2KUcHP.jpg"
-      },
-      {
-       "name": "Gulshan Pandey",
-       "character": null,
-       "photo": "https://image.tmdb.org/t/p/w185/60mYQLeGhhArZfspMpy7Hmhs9U4.jpg"
-      }
-     ],
-     "slug": "hanuman-ansh"
-    }
-   ],
-   "ott": []
-  }
- },
- "ottExtra": [
   {
    "title": "Dark Matter",
    "genre": "Sci-Fi & Fantasy / Drama",
@@ -4229,7 +4438,7 @@
      "score": "7.8/10"
     }
    ],
-   "votes": 793,
+   "votes": 795,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/2DPmTlv8F0V1TQBPmlsGOVOhtWk.jpg",
    "isRecent": false,
@@ -4280,16 +4489,16 @@
      "kind": "tv"
     },
     {
-     "title": "Wolf Pack",
-     "slug": "wolf-pack",
-     "poster": "https://image.tmdb.org/t/p/w342/rbCANmS1ogweUkIBghP03EHtdHB.jpg",
+     "title": "The Institute",
+     "slug": "the-institute",
+     "poster": "https://image.tmdb.org/t/p/w342/7JXZdWifaa6wL0XLRi0GJOlOA8y.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Institute",
-     "slug": "the-institute",
-     "poster": "https://image.tmdb.org/t/p/w342/7JXZdWifaa6wL0XLRi0GJOlOA8y.jpg",
+     "title": "Wolf Pack",
+     "slug": "wolf-pack",
+     "poster": "https://image.tmdb.org/t/p/w342/rbCANmS1ogweUkIBghP03EHtdHB.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -4304,6 +4513,13 @@
      "title": "The Stand",
      "slug": "the-stand",
      "poster": "https://image.tmdb.org/t/p/w342/w6XiuRK5QQaLNmIqDRCWOpEcHwi.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Tales from the Loop",
+     "slug": "tales-from-the-loop",
+     "poster": "https://image.tmdb.org/t/p/w342/56D0QFyLhrRp1ZTBz8Gw10qtZas.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -4332,13 +4548,6 @@
      "title": "Altered Carbon",
      "slug": "altered-carbon",
      "poster": "https://image.tmdb.org/t/p/w342/AisK4uFsnwwmMkSynFpNl0VeGR.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Touch",
-     "slug": "touch",
-     "poster": "https://image.tmdb.org/t/p/w342/4qreaxQD4azrRuZWdevyjVAKt8V.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -4390,14 +4599,14 @@
    "language": "English",
    "released": "2026-09-17",
    "review": "Trapped in a cruel Victorian-era household, Lizzie Borden kills her parents in a gory ax murder that shocks the nation.",
-   "rating": 6.8,
+   "rating": 6.9,
    "scores": [
     {
      "source": "TMDB",
-     "score": "6.8/10"
+     "score": "6.9/10"
     }
    ],
-   "votes": 95,
+   "votes": 98,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/57XScX1aYtKi1LvHYFQLPUxVhTG.jpg",
    "isRecent": true,
@@ -4428,6 +4637,13 @@
      "title": "Love & Death",
      "slug": "love-death",
      "poster": "https://image.tmdb.org/t/p/w342/8WchbT0UPQeo3PZ6G01fhccYaQB.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Furious",
+     "slug": "furious",
+     "poster": "https://image.tmdb.org/t/p/w342/xnxxrEKtBaIcI1ewq50pLkOMU6u.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -4500,13 +4716,6 @@
      "poster": "https://image.tmdb.org/t/p/w342/pN5qeqDgCG1Pij7KaEBKLkyjn4A.jpg",
      "language": "English",
      "kind": "tv"
-    },
-    {
-     "title": "Three Pines",
-     "slug": "three-pines",
-     "poster": "https://image.tmdb.org/t/p/w342/r5lbLfjfFZYhr2TfuvKpf7b0HpQ.jpg",
-     "language": "English",
-     "kind": "tv"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/gaew60NXUxok3Vmls7gkAT7lYW0.jpg",
@@ -4517,7 +4726,7 @@
     {
      "name": "Ella Beatty",
      "character": "Lizzie Borden",
-     "photo": "https://image.tmdb.org/t/p/w185/9fgrmNc5DZjQDhnST5HVmo6yrgh.jpg"
+     "photo": "https://image.tmdb.org/t/p/w185/ksWqDRv0knHs9vFffeRD0c28UKH.jpg"
     },
     {
      "name": "Vicky Krieps",
@@ -4612,16 +4821,16 @@
      "kind": "tv"
     },
     {
-     "title": "The Red Sleeve",
-     "slug": "the-red-sleeve",
-     "poster": "https://image.tmdb.org/t/p/w342/1AZK2bnsmu5PIbkfxFkKbrjf5Oo.jpg",
+     "title": "The Story of Park's Marriage Contract",
+     "slug": "the-story-of-park-s-marriage-contract",
+     "poster": "https://image.tmdb.org/t/p/w342/c3IKOXfdRVYN1BH97rWC7U0BI1L.jpg",
      "language": "Korean",
      "kind": "tv"
     },
     {
-     "title": "The Story of Park's Marriage Contract",
-     "slug": "the-story-of-park-s-marriage-contract",
-     "poster": "https://image.tmdb.org/t/p/w342/c3IKOXfdRVYN1BH97rWC7U0BI1L.jpg",
+     "title": "The Red Sleeve",
+     "slug": "the-red-sleeve",
+     "poster": "https://image.tmdb.org/t/p/w342/1AZK2bnsmu5PIbkfxFkKbrjf5Oo.jpg",
      "language": "Korean",
      "kind": "tv"
     },
@@ -4636,6 +4845,13 @@
      "title": "Captivating the King",
      "slug": "captivating-the-king",
      "poster": "https://image.tmdb.org/t/p/w342/wNdHCRkS0Xrz6niq3tpAwuLZk7c.jpg",
+     "language": "Korean",
+     "kind": "tv"
+    },
+    {
+     "title": "Scarlet Heart: Ryeo",
+     "slug": "scarlet-heart-ryeo",
+     "poster": "https://image.tmdb.org/t/p/w342/sTW7wLyD95JRCyUEdTfxCWQWsvd.jpg",
      "language": "Korean",
      "kind": "tv"
     },
@@ -4664,13 +4880,6 @@
      "title": "Rookie Historian Goo Hae-Ryung",
      "slug": "rookie-historian-goo-hae-ryung",
      "poster": "https://image.tmdb.org/t/p/w342/ijHgv6ZbvW4ZUu2QbHwOSb3YPTK.jpg",
-     "language": "Korean",
-     "kind": "tv"
-    },
-    {
-     "title": "Queen For Seven Days",
-     "slug": "queen-for-seven-days",
-     "poster": "https://image.tmdb.org/t/p/w342/S4RzpajATNmKbI76IDDUJNJdsH.jpg",
      "language": "Korean",
      "kind": "tv"
     }
@@ -4715,339 +4924,6 @@
    "ottSince": "2026-09-20",
    "ottFreshDate": "2026-09-18",
    "slug": "the-scandal"
-  },
-  {
-   "title": "Has Fallen",
-   "genre": "Action & Adventure / War & Politics",
-   "language": "French",
-   "released": "2024-09-23",
-   "review": "A protection officer and an MI6 operative team up after a terrorist attack. They suspect a mole as they race to thwart a larger conspiracy threatening Paris.",
-   "rating": 7,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "7.0/10"
-    }
-   ],
-   "votes": 124,
-   "verdict": "Worth a watch",
-   "poster": "https://image.tmdb.org/t/p/w342/eyK6fy2NWfjmyBjUvRAR14FynPK.jpg",
-   "isRecent": true,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 232018,
-   "popularity": 49.6388,
-   "cert": "TV-MA",
-   "trailer": "https://www.youtube.com/watch?v=6HZ_mInIfk4",
-   "providers": [
-    "Hulu"
-   ],
-   "cast": [
-    "Tewfik Jallab",
-    "Ritu Arya",
-    "Ross Anderson",
-    "Agung Bagus"
-   ],
-   "director": "Howard Overman",
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt33184638",
-   "seasons": 2,
-   "freshDate": "2026-09-14",
-   "badge": "New season",
-   "similar": [
-    {
-     "title": "No Man's Land",
-     "slug": "no-man-s-land",
-     "poster": "https://image.tmdb.org/t/p/w342/26LUgGpe8OBsKq6ekkz6htDGO3b.jpg",
-     "language": "French",
-     "kind": "tv"
-    },
-    {
-     "title": "The Cage",
-     "slug": "the-cage",
-     "poster": "https://image.tmdb.org/t/p/w342/4qoqqvKbugSYYE2rfpOmLb0I5kP.jpg",
-     "language": "French",
-     "kind": "tv"
-    },
-    {
-     "title": "Elite Force",
-     "slug": "elite-force",
-     "poster": "https://image.tmdb.org/t/p/w342/ymjYmuHG4Af93fcoF0NKwx9Rovb.jpg",
-     "language": "French",
-     "kind": "tv"
-    },
-    {
-     "title": "The Day of the Jackal",
-     "slug": "the-day-of-the-jackal",
-     "poster": "https://image.tmdb.org/t/p/w342/tYLecM3WSEjlkKhkGiH5G68Dprm.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Continental: From the World of John Wick",
-     "slug": "the-continental-from-the-world-of-john-wick",
-     "poster": "https://image.tmdb.org/t/p/w342/2urdwqEL9FRkGMKAkhfvWTALG00.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Kung Fu",
-     "slug": "kung-fu",
-     "poster": "https://image.tmdb.org/t/p/w342/qDbaafRfWkOuQAhOOeI4kcFJl3a.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Terminal List: Dark Wolf",
-     "slug": "the-terminal-list-dark-wolf",
-     "poster": "https://image.tmdb.org/t/p/w342/9mYeRoWguq5etbwJRdF8BXFKiF.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Marvel's Hit-Monkey",
-     "slug": "marvel-s-hit-monkey",
-     "poster": "https://image.tmdb.org/t/p/w342/1aK7hApRSDUv8xxDQXyQil7qBjN.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Night Agent",
-     "slug": "the-night-agent",
-     "poster": "https://image.tmdb.org/t/p/w342/4c5yUNcaff4W4aPrkXE6zr7papX.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Citadel",
-     "slug": "citadel",
-     "poster": "https://image.tmdb.org/t/p/w342/5MHtxPEfmN4b0rHzfEZRcm6v9WI.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Obliterated",
-     "slug": "obliterated",
-     "poster": "https://image.tmdb.org/t/p/w342/tWPAKr5RaZCQ1jaO2VRmvcIOrKh.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Ipcress File",
-     "slug": "the-ipcress-file",
-     "poster": "https://image.tmdb.org/t/p/w342/dq9ayINjdgdUGD27YL8KgX6OhrP.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/3yoTM5JtkxnPZvVzQOrL0c2ILVM.jpg",
-   "backdropPath": "/3yoTM5JtkxnPZvVzQOrL0c2ILVM.jpg",
-   "posterPath": "/eyK6fy2NWfjmyBjUvRAR14FynPK.jpg",
-   "fullReview": "A protection officer and an MI6 operative team up after a terrorist attack. They suspect a mole as they race to thwart a larger conspiracy threatening Paris.",
-   "castPics": [
-    {
-     "name": "Tewfik Jallab",
-     "character": "Vincent Taleb",
-     "photo": "https://image.tmdb.org/t/p/w185/bxQQdJtkhjHpasmd22YKSCHnM6D.jpg"
-    },
-    {
-     "name": "Ritu Arya",
-     "character": "Zara Taylor",
-     "photo": "https://image.tmdb.org/t/p/w185/bBRGCBAW0wNS7fQeGQroOeA60yw.jpg"
-    },
-    {
-     "name": "Ross Anderson",
-     "character": "Oscar",
-     "photo": "https://image.tmdb.org/t/p/w185/918MEQzDshopEdGBvotRNmp39c2.jpg"
-    },
-    {
-     "name": "Agung Bagus",
-     "character": "Kane",
-     "photo": "https://image.tmdb.org/t/p/w185/iVD3sXOTrpvH8EbajI3gPTtEAJt.jpg"
-    },
-    {
-     "name": "Ben Cura",
-     "character": "Marcos",
-     "photo": "https://image.tmdb.org/t/p/w185/zQu260CHVj1Ai507FZ3cLL4DUox.jpg"
-    },
-    {
-     "name": "Shiraz Yasin",
-     "character": "Omar",
-     "photo": "https://image.tmdb.org/t/p/w185/IvrqhY1HwBneUHqVkcT4JH00fm.jpg"
-    }
-   ],
-   "platform": "Hulu",
-   "ottSince": "2026-09-16",
-   "ottFreshDate": "2026-09-14",
-   "slug": "has-fallen"
-  },
-  {
-   "title": "You+Me - Against the World",
-   "genre": "Romance / Drama",
-   "language": "French",
-   "released": "2026-09-18",
-   "review": "Alma Lancaster, 18, appears to lead a perfect life within a wealthy family who believes she is studying law. In secret, she pursues her true dream: filmmaking.",
-   "rating": 5.7,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "5.7/10"
-    }
-   ],
-   "votes": 42,
-   "verdict": "Decent one-time watch",
-   "poster": "https://image.tmdb.org/t/p/w342/bAbBNVplg7h79sm94OyHeKk8Phz.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "movie",
-   "tmdbId": 1641629,
-   "popularity": 100.5424,
-   "cert": "R",
-   "trailer": "https://www.youtube.com/watch?v=z2Bw_nTXjG4",
-   "providers": [
-    "Amazon Prime Video"
-   ],
-   "cast": [
-    "Vittoria Di Savoia",
-    "Lucas Barski",
-    "Zoé Garcia",
-    "Léo Legrand"
-   ],
-   "director": "Manon Gaurin",
-   "runtime": 94,
-   "imdbVotes": null,
-   "imdbId": "tt43617372",
-   "seasons": null,
-   "freshDate": "2026-09-18",
-   "badge": null,
-   "similar": [
-    {
-     "title": "Beating Hearts",
-     "slug": "beating-hearts",
-     "poster": "https://image.tmdb.org/t/p/w342/yu9dRyKcUHTfKcqsomUtpord4t3.jpg",
-     "language": "French",
-     "kind": "movie"
-    },
-    {
-     "title": "Cesar and Rosalie",
-     "slug": "cesar-and-rosalie",
-     "poster": "https://image.tmdb.org/t/p/w342/nsFqp6nL4WreueDVK1EQraepWwR.jpg",
-     "language": "French",
-     "kind": "movie"
-    },
-    {
-     "title": "After Ever Happy",
-     "slug": "after-ever-happy",
-     "poster": "https://image.tmdb.org/t/p/w342/moogpu8rNkEjTgFyLXwhPghft5w.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Marked Men: Rule + Shaw",
-     "slug": "marked-men-rule-shaw",
-     "poster": "https://image.tmdb.org/t/p/w342/gZQU8BtCH2IbMZq6QETiU4HXQSR.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "After We Collided",
-     "slug": "after-we-collided",
-     "poster": "https://image.tmdb.org/t/p/w342/kiX7UYfOpYrMFSAGbI6j1pFkLzQ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Winter Spring Summer or Fall",
-     "slug": "winter-spring-summer-or-fall",
-     "poster": "https://image.tmdb.org/t/p/w342/mEPi5ISa5RmzpzeDfwkhX0CcNsf.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Love Me Love Me",
-     "slug": "love-me-love-me",
-     "poster": "https://image.tmdb.org/t/p/w342/jfwHKRHRE2X4NTexdzblaioHH51.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Your Fault: London",
-     "slug": "your-fault-london",
-     "poster": "https://image.tmdb.org/t/p/w342/nLxu237EJAisFCYKK48hN9Plobx.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "After We Fell",
-     "slug": "after-we-fell",
-     "poster": "https://image.tmdb.org/t/p/w342/dU4HfnTEJDf9KvxGS9hgO7BVeju.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Chemical Hearts",
-     "slug": "chemical-hearts",
-     "poster": "https://image.tmdb.org/t/p/w342/q1MNlZYqhoD4U7sd7pjxD6SUf4z.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Gabriel's Inferno: Part II",
-     "slug": "gabriel-s-inferno-part-ii",
-     "poster": "https://image.tmdb.org/t/p/w342/x5o8cLZfEXMoZczTYWLrUo1P7UJ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Souvenir: Part II",
-     "slug": "the-souvenir-part-ii",
-     "poster": "https://image.tmdb.org/t/p/w342/fYNvmZ1vW7bNcUhrAzYjUBgKJWP.jpg",
-     "language": "English",
-     "kind": "movie"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/nkEhDomjmPHJSA4Tx8pxv0NlKEy.jpg",
-   "backdropPath": "/nkEhDomjmPHJSA4Tx8pxv0NlKEy.jpg",
-   "posterPath": "/bAbBNVplg7h79sm94OyHeKk8Phz.jpg",
-   "fullReview": "Alma Lancaster, 18, appears to lead a perfect life within a wealthy family who believes she is studying law. In secret, she pursues her true dream: filmmaking. On campus, she meets Vadim Arcadi, 20, a magnetic and solitary rebel with a troubled past. Forced to collaborate on a student film, they clash, grow closer and fall in love — despite themselves. But someone is watching them, determined to tear them apart and expose secrets that could destroy both Alma and Vadim.",
-   "castPics": [
-    {
-     "name": "Vittoria Di Savoia",
-     "character": "Alma Lancaster",
-     "photo": "https://image.tmdb.org/t/p/w185/uxlRv4jnvzagvnTR18dnIBTvQNJ.jpg"
-    },
-    {
-     "name": "Lucas Barski",
-     "character": "Vadim Arcadi",
-     "photo": "https://image.tmdb.org/t/p/w185/bNJj7fynrB2ZMoPpDNfcVd4YBg.jpg"
-    },
-    {
-     "name": "Zoé Garcia",
-     "character": "Clémentine",
-     "photo": "https://image.tmdb.org/t/p/w185/alBs6QVCSNvnz4zoHXYRXw1GHYq.jpg"
-    },
-    {
-     "name": "Léo Legrand",
-     "character": "Timothé Vallas",
-     "photo": "https://image.tmdb.org/t/p/w185/yTdqyHFID2EvZil1PvyYEFMlsID.jpg"
-    },
-    {
-     "name": "Jean-Yves Berteloot",
-     "character": "Edward Lancaster",
-     "photo": "https://image.tmdb.org/t/p/w185/x8uFQOAsLSbWcbRMyItUj2nMZuo.jpg"
-    },
-    {
-     "name": "Suliane Brahim",
-     "character": "Marie Lancaster",
-     "photo": "https://image.tmdb.org/t/p/w185/dxUO3EA9xPuj23MWXpFd8Sknv36.jpg"
-    }
-   ],
-   "theatrical": false,
-   "platform": "Amazon Prime Video",
-   "ottSince": "2026-09-21",
-   "ottFreshDate": "2026-09-18",
-   "slug": "you-me-against-the-world"
   },
   {
    "title": "Brothers",
@@ -5105,6 +4981,13 @@
      "kind": "tv"
     },
     {
+     "title": "Breeders",
+     "slug": "breeders",
+     "poster": "https://image.tmdb.org/t/p/w342/cTz7gZuCd6wtvXWt55ALWlTqYc6.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "Harlem",
      "slug": "harlem",
      "poster": "https://image.tmdb.org/t/p/w342/hQP2zAm5L52vs7fp3JzOI5LZ4uB.jpg",
@@ -5129,13 +5012,6 @@
      "title": "The Kids in the Hall",
      "slug": "the-kids-in-the-hall",
      "poster": "https://image.tmdb.org/t/p/w342/2dNiB88EBv64V9rcicXwNGQosJW.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "It's Always Sunny in Philadelphia",
-     "slug": "it-s-always-sunny-in-philadelphia",
-     "poster": "https://image.tmdb.org/t/p/w342/o0tMMK33JqmtpcWw0H41cEr9xQB.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -5215,7 +5091,151 @@
    "ottSince": "2026-09-24",
    "ottFreshDate": "2026-09-22",
    "slug": "brothers"
+  },
+  {
+   "title": "Against the Current",
+   "genre": "Drama / Family",
+   "language": "Chinese",
+   "released": "2026-09-11",
+   "review": "Shen Jialan, once a nobleman's granddaughter, falls from grace after her family is falsely accused of treason.",
+   "rating": null,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "New release"
+    }
+   ],
+   "votes": 4,
+   "verdict": "Not enough ratings yet",
+   "poster": "https://image.tmdb.org/t/p/w342/euBlF64efQmsl2y54LeNmLQPNob.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 282326,
+   "popularity": 97.8854,
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=HXxzKhKBwAM",
+   "providers": [
+    "Rakuten Viki"
+   ],
+   "cast": [
+    "Tan Songyun",
+    "Liu Xueyi"
+   ],
+   "director": null,
+   "runtime": null,
+   "imdbVotes": null,
+   "imdbId": "tt32500958",
+   "seasons": 1,
+   "freshDate": "2026-09-11",
+   "badge": null,
+   "similar": [
+    {
+     "title": "Blossom",
+     "slug": "blossom",
+     "poster": "https://image.tmdb.org/t/p/w342/38WomXthArq5cKRfkHkxYRo6DLe.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "Fated Hearts",
+     "slug": "fated-hearts",
+     "poster": "https://image.tmdb.org/t/p/w342/9yKpGzf83t02GRWYRmyLj2VXy96.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "The Prisoner of Beauty",
+     "slug": "the-prisoner-of-beauty",
+     "poster": "https://image.tmdb.org/t/p/w342/mXbZ5aH4uhao6Dpd884USvATMfo.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "Legend of the Female General",
+     "slug": "legend-of-the-female-general",
+     "poster": "https://image.tmdb.org/t/p/w342/r1EMXYnqFDk9tzkkoxFwFjxCEvC.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "Love Between Lines",
+     "slug": "love-between-lines",
+     "poster": "https://image.tmdb.org/t/p/w342/3jlaQYWWZgmLQMIsQ7uZid99Mlo.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "Pursuit of Jade",
+     "slug": "pursuit-of-jade",
+     "poster": "https://image.tmdb.org/t/p/w342/g2CSCJuWm7IcpuRjxySQvZcJYnp.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "Moonlight Mystique",
+     "slug": "moonlight-mystique",
+     "poster": "https://image.tmdb.org/t/p/w342/4tqNdo1e3dwxPUGGidcuT9IMfJ1.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "Shine on Me",
+     "slug": "shine-on-me",
+     "poster": "https://image.tmdb.org/t/p/w342/cFBlFzOwh4C8wpuR4sYBIitvNiw.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "The Litchi Road",
+     "slug": "the-litchi-road",
+     "poster": "https://image.tmdb.org/t/p/w342/egFbeyzLU2l0quqGVaRoYRNsmET.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "Speed and Love",
+     "slug": "speed-and-love",
+     "poster": "https://image.tmdb.org/t/p/w342/x1pblSVT4xtiZMN0sjn0ql5NMuA.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "The Story of Ming Lan",
+     "slug": "the-story-of-ming-lan",
+     "poster": "https://image.tmdb.org/t/p/w342/flNWgUPwtkAGv8wyxxBlKaAwLzt.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    },
+    {
+     "title": "Eternal Love",
+     "slug": "eternal-love",
+     "poster": "https://image.tmdb.org/t/p/w342/ffXd3hwRubnBUBuaI3qbxYP091c.jpg",
+     "language": "Chinese",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/mZSewqVlY4F2F2Axm7hiG6KBOBp.jpg",
+   "backdropPath": "/mZSewqVlY4F2F2Axm7hiG6KBOBp.jpg",
+   "posterPath": "/euBlF64efQmsl2y54LeNmLQPNob.jpg",
+   "fullReview": "Shen Jialan, once a nobleman's granddaughter, falls from grace after her family is falsely accused of treason. Abandoned by her fiancé Lin Jinqi, she is forced to assume a servant's identity in his household. Despite hardships, she refuses to bow to fate. With resilience and wit, she rises above class barriers, wins Lin Jinqi's heart, earns the family's respect, and ultimately clears her family's name.",
+   "castPics": [
+    {
+     "name": "Tan Songyun",
+     "character": "Xu Lanxiang / Shen Jialan",
+     "photo": "https://image.tmdb.org/t/p/w185/4HJFzfLjIAmqLakN29AQisFyjSU.jpg"
+    },
+    {
+     "name": "Liu Xueyi",
+     "character": "Lin Jinqi",
+     "photo": "https://image.tmdb.org/t/p/w185/zJG3K9Ey4EJp9p2wu88UchkgRG0.jpg"
+    }
+   ],
+   "platform": "Rakuten Viki",
+   "ottSince": "2026-09-25",
+   "ottFreshDate": "2026-09-11",
+   "slug": "against-the-current"
   }
  ],
- "trackedFilms": 517
+ "trackedFilms": 542
 }
