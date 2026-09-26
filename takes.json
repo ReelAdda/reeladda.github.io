@@ -728,12 +728,17 @@
   "checked": "2026-07-22"
  },
  "tt9054364": {
-  "take": "Early viewer reviews on TMDB lean strongly positive.",
+  "take": "First viewer reviews on TMDB are strongly positive.",
   "src": "tmdb",
   "hook": null,
   "article": "That Time I Got Reincarnated as a Slime (TV series)",
-  "checked": "2026-07-20",
-  "v": 3
+  "ta": {
+   "lean": "strongly positive",
+   "praised": [],
+   "panned": []
+  },
+  "checked": "2026-09-26",
+  "v": 5
  },
  "tt32321803": {
   "take": "Reviews are all over the map on this one.",
@@ -5053,6 +5058,31 @@
    "score": {
     "kind": "rt",
     "value": 25
+   }
+  },
+  "checked": "2026-09-26",
+  "v": 5
+ },
+ "tt1844624": {
+  "take": "The visuals and production design won critics over; the second half drew the odd complaint.",
+  "src": "wiki",
+  "hook": null,
+  "article": "American Horror Story",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "visuals",
+    "production design"
+   ],
+   "panned": [
+    "second half"
+   ],
+   "divided": [
+    "story"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 72
    }
   },
   "checked": "2026-09-26",
