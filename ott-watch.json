@@ -20,15 +20,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1384514,
-  "title": "The Vvaan",
-  "released": "2026-09-25",
-  "language": "Hindi",
-  "genre": "Action / Adventure"
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1376856,
   "title": "The Paradise",
   "released": "2026-09-24",
@@ -61,6 +52,15 @@
   "released": "2026-09-25",
   "language": "English",
   "genre": "Action / Comedy"
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1465063,
+  "title": "Forgotten Island",
+  "released": "2026-09-25",
+  "language": "English",
+  "genre": "Animation / Adventure"
  },
  {
   "code": "in",
@@ -168,16 +168,7 @@
   "title": "Primetime",
   "released": "2026-09-25",
   "language": "English",
-  "genre": "Drama / Thriller"
- },
- {
-  "code": "us",
-  "kind": "movie",
-  "tmdbId": 1058424,
-  "title": "Hope",
-  "released": "2026-09-09",
-  "language": "Korean",
-  "genre": "Science Fiction / Mystery"
+  "genre": "Crime / Horror"
  },
  {
   "code": "us",
@@ -191,11 +182,20 @@
  {
   "code": "us",
   "kind": "movie",
-  "tmdbId": 1302904,
-  "title": "Practical Magic 2",
-  "released": "2026-09-11",
+  "tmdbId": 1058424,
+  "title": "Hope",
+  "released": "2026-09-09",
+  "language": "Korean",
+  "genre": "Science Fiction / Mystery"
+ },
+ {
+  "code": "us",
+  "kind": "movie",
+  "tmdbId": 1377237,
+  "title": "Runner",
+  "released": "2026-09-07",
   "language": "English",
-  "genre": "Romance / Fantasy"
+  "genre": "Action / Comedy"
  },
  {
   "code": "us",
@@ -695,20 +695,20 @@
  {
   "code": "ae",
   "kind": "movie",
-  "tmdbId": 1384514,
-  "title": "The Vvaan",
-  "released": "2026-09-25",
-  "language": "Hindi",
-  "genre": "Action / Adventure"
- },
- {
-  "code": "ae",
-  "kind": "movie",
   "tmdbId": 1709391,
   "title": "Hanuman Ansh",
   "released": "2026-09-10",
   "language": "Hindi",
   "genre": "Family / Drama"
+ },
+ {
+  "code": "ae",
+  "kind": "movie",
+  "tmdbId": 1378537,
+  "title": "Mirzapur: The Movie",
+  "released": "2026-09-11",
+  "language": "Hindi",
+  "genre": "Action / Crime"
  },
  {
   "code": "ae",
@@ -1226,20 +1226,20 @@
  {
   "code": "ph",
   "kind": "movie",
-  "tmdbId": 1167366,
-  "title": "Uranus 2324",
-  "released": "2026-09-23",
-  "language": "Thai",
-  "genre": "Romance / Drama"
- },
- {
-  "code": "ph",
-  "kind": "movie",
   "tmdbId": 1263337,
   "title": "Heart of the Beast",
   "released": "2026-09-23",
   "language": "English",
   "genre": "Adventure / Thriller"
+ },
+ {
+  "code": "ph",
+  "kind": "movie",
+  "tmdbId": 1167366,
+  "title": "Uranus 2324",
+  "released": "2026-09-23",
+  "language": "Thai",
+  "genre": "Romance / Drama"
  },
  {
   "code": "ph",
@@ -1284,7 +1284,7 @@
   "title": "Primetime",
   "released": "2026-09-30",
   "language": "English",
-  "genre": "Crime / Thriller"
+  "genre": "Crime / Horror"
  },
  {
   "code": "ph",
@@ -1559,15 +1559,6 @@
  {
   "code": "kr",
   "kind": "movie",
-  "tmdbId": 1083624,
-  "title": "Ugly Duckling Ms. Maeng",
-  "released": "2026-10-07",
-  "language": "Korean",
-  "genre": "Comedy"
- },
- {
-  "code": "kr",
-  "kind": "movie",
   "tmdbId": 1280738,
   "title": "The Furious",
   "released": "2026-10-07",
@@ -1591,6 +1582,15 @@
   "released": "2026-10-21",
   "language": "Korean",
   "genre": "Drama"
+ },
+ {
+  "code": "kr",
+  "kind": "movie",
+  "tmdbId": 1584855,
+  "title": "Paradise Lost",
+  "released": "2026-10-21",
+  "language": "Korean",
+  "genre": "Thriller / Drama"
  },
  {
   "code": "kr",
@@ -1668,7 +1668,7 @@
   "code": "jp",
   "kind": "movie",
   "tmdbId": 1492640,
-  "title": "UNABOMBER",
+  "title": "Unabomber",
   "released": "2026-09-25",
   "language": "English",
   "genre": "Thriller / Drama"
@@ -1767,7 +1767,7 @@
   "code": "id",
   "kind": "movie",
   "tmdbId": 1492640,
-  "title": "UNABOMBER",
+  "title": "Unabomber",
   "released": "2026-09-25",
   "language": "English",
   "genre": "Thriller / Drama"
