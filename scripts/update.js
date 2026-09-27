@@ -3008,6 +3008,8 @@ async function main() {
     // The mirror pass: recheck claims we already made (see sweepStreamingDepartures).
     // Budgeted and slow-cadence, so this adds a flat ~15 calls per country per run no
     // matter how large the archive grows.
+    try { backfillStreamClaims(pagesManifest, cfg); }
+    catch (e) { console.warn(`  stream claims [${cfg.code}] skipped: ${e.message}`); }
     try { await sweepStreamingDepartures(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
     catch (e) { console.warn(`  departure sweep [${cfg.code}] skipped: ${e.message}`); }
     // Free, local, no budget: move any page past its stamped release date (see patchDueIfPassed).
@@ -3032,6 +3034,15 @@ async function main() {
       catch (e) { console.warn(`  catalog [${cfg.code}] skipped: ${e.message}`); }
     }
     fs.writeFileSync(CATALOG_MANIFEST_FILE, JSON.stringify(catalogState, null, 1));
+  }
+
+  // "Streaming on <platform>" pages (see writeStreamingPages). After every claim for this run
+  // has been made, rechecked or retired, so the lists reflect today's verified availability.
+  for (const cfg of builtCountries) {
+    try { writeStreamingPages(dataByCode[cfg.code], cfg, pagesManifest); }
+    catch (e) { console.warn(`  streaming pages [${cfg.code}] skipped: ${e.message}`); }
+    try { writePeoplePages(dataByCode[cfg.code], cfg, pagesManifest); }
+    catch (e) { console.warn(`  people pages [${cfg.code}] skipped: ${e.message}`); }
   }
 
   // All countries are built by now, so the filesystem finally shows every cluster's true
@@ -3201,7 +3212,14 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
   const windowBasis = est && est.known ? `the usual ${item.language} window` : "the usual window for a release like this";
 
   let desc;
-  if (upcoming && item.released) {
+  if (opts.gone) {
+    // Left every subscription service we track. Say so — never "in cinemas", never a platform.
+    desc = fitDesc([
+      `${item.title}${yr} isn't on a subscription service in ${country} right now. Where it streamed before, the verdict, and whether it's worth tracking down.`,
+      `${item.title}${yr} isn't streaming in ${country} right now — where it was, and the verdict.`,
+      `${item.title} isn't streaming in ${country} right now.`,
+    ]);
+  } else if (upcoming && item.released) {
     // Pre-release: the date is the draw and it is public anyway, so lead with it. What is held
     // back is what the searcher wants next — is it any good, how long, when will it stream.
     const when = fmtDateFull(item.released, localeFor((cfg && cfg.code) || "in"));
@@ -3294,6 +3312,24 @@ function filmTitleTag(item, cfg = null) {
   const yr = year ? ` (${year})` : "";
   const providers = Array.isArray(item.providers) ? item.providers : [];
   const fitTitle = (opts) => opts.find((t) => t.length <= 60) || opts[opts.length - 1];
+  // NOT OUT YET in this country: the only thing the page can answer is when. Sept 2026 GSC:
+  // "<film> release date in <country>" drew ~1,900 impressions a month at position ~9.6 and
+  // 7 clicks, because these pages were titled "Review & Where to Watch" — two things a film
+  // that hasn't opened cannot offer — while the date the searcher wanted sat unseen in the
+  // body. Same rule as the OTT-date wording: the title promises what the page can answer.
+  // It switches back on release day (live pages regenerate; frozen ones via the due pass).
+  if (item.released && releaseState(item.released) === "upcoming" && !providers.length) {
+    const code = (cfg && cfg.code) || "in";
+    const d = fmtDateShort(item.released, Date.now(), localeFor(code));
+    return fitTitle([
+      `${item.title}${yr} — Release Date in ${country}: ${d} | FilmyChill`,
+      `${item.title}${yr} — Release Date in ${country}: ${d}`,
+      `${item.title} — Release Date in ${country}: ${d}`,
+      `${item.title}${yr} — Release Date in ${country}`,
+      `${item.title} — Release Date: ${d}`,
+      `${item.title}${yr} — Release Date`,
+    ]);
+  }
   // "OTT" is Indian-market phrasing; TV has no OTT release date to speak of; and with no
   // provider on file there is no date to report.
   const canAnswerDate = V.word === "OTT" && item.kind !== "tv" && providers.length > 0;
@@ -3388,6 +3424,11 @@ function filmHubLinks(item, cfg) {
     if (slug && fs.existsSync(hubPath(code, slug))) {
       out.push(`<a href="${escHtml(code === "in" ? `/new-on-${slug}/` : `/${code}/new-on-${slug}/`)}">Everything new on ${escHtml(name)}</a>`);
     }
+    // The evergreen page for this platform, when it exists: the crawl path back from every
+    // film to the page that lists them all.
+    if (slug && fs.existsSync(streamPagePath(code, slug))) {
+      out.push(`<a href="/${escHtml(STREAM_BASE(code))}/${escHtml(slug)}/">All ${escHtml(name)} titles in ${escHtml(countryNameFor(cfg))}</a>`);
+    }
     const arrival = arrivalDateFor(code, item.kind, item.tmdbId);
     const m = arrival ? monthKey(arrival) : null;
     if (m && fs.existsSync(ottMonthPath(code, m))) {
@@ -3454,7 +3495,10 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
     "@type": item.kind === "tv" ? "TVSeries" : "Movie",
     name: item.title,
     url,
-    image: item.poster || undefined,
+    // Google's Discover guidance asks for images at least 1200px wide; the w342 poster alone
+    // never qualified. Large poster first (it is the film's canonical image), then backdrop.
+    image: [item.posterPath ? img(item.posterPath, "w780") : item.poster, item.backdropPath ? img(item.backdropPath, "w1280") : null]
+      .filter(Boolean).length ? [item.posterPath ? img(item.posterPath, "w780") : item.poster, item.backdropPath ? img(item.backdropPath, "w1280") : null].filter(Boolean) : undefined,
     datePublished: item.released || undefined,
     dateModified: (asOf || new Date().toISOString().slice(0, 10)),
     numberOfSeasons: item.kind === "tv" && item.seasons ? item.seasons : undefined,
@@ -3737,7 +3781,12 @@ ${(() => {
   ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${goodToKnow.length ? `<h2>Good to know</h2><table class="gtk">${goodToKnow.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : ""}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
-  ${(item.castPics && item.castPics.length) ? `<h2>Cast</h2><div class="cast-strip">${item.castPics.map((c) => `<div class="cast-card"><img src="${e(c.photo)}" alt="${e(c.name)}" width="72" height="72" loading="lazy"><div class="cast-name">${e(c.name)}</div>${c.character ? `<div class="cast-role">${e(c.character)}</div>` : ""}</div>`).join("")}</div>`
+  ${(item.castPics && item.castPics.length) ? `<h2>Cast</h2><div class="cast-strip">${item.castPics.map((c) => {
+    // A name links to its people page when one exists (5+ films here) — see writePeoplePages.
+    const ps = slugify(c.name || "");
+    const nm = ps && fs.existsSync(personPagePath(code, ps)) ? `<a href="/${e(PEOPLE_BASE(code))}/${e(ps)}/">${e(c.name)}</a>` : e(c.name);
+    return `<div class="cast-card"><img src="${e(c.photo)}" alt="${e(c.name)}" width="72" height="72" loading="lazy"><div class="cast-name">${nm}</div>${c.character ? `<div class="cast-role">${e(c.character)}</div>` : ""}</div>`;
+  }).join("")}</div>`
     : cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
   ${(() => {
     // ---- "When is X coming to streaming/OTT?" ----------------------------------
@@ -3775,7 +3824,10 @@ ${(() => {
     const rb = Array.isArray(item.rentBuy) ? item.rentBuy : [];
     const rbRow = rb.length ? `<div style="margin-top:10px"><div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:5px">Rent or buy</div><div>${rb.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div></div>` : "";
     const note = `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${asOf ? e(fmtDateFull(asOf, localeFor(code))) : ""} — platforms may change over time.</p>`;
-    if (providers.length) return `<h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}${filmHubLinks(item, cfg)}`;
+    // Wrapped in SW:stream + SW:live so the departure sweep can find and rewrite it. Pages
+    // born streaming (the whole catalogue) used to carry no marker at all, so no sweep could
+    // ever touch their "you can stream it on…" claim — permanent, unchecked availability.
+    if (providers.length) return `<!--SW:stream--><!--SW:live=${e(asOf || "")}--><h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}${filmHubLinks(item, cfg)}<!--/SW:stream-->`;
     if (item.platform === "Theatres") return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>${rb.length ? rbRow + `<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>` : ""}${note}`;
     if (rb.length) return `<h2>Where to watch in ${e(country)}</h2>${rbRow}<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>${note}`;
     // Unreleased film: previously this block rendered nothing at all, so the page answered
@@ -4122,7 +4174,9 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
       const mf = (pagesManifest[code] = pagesManifest[code] || {});
       mf[slug] = { last: today, archivedOn: today, pv: ARCHIVE_PATCH_VERSION, catalog: true,
         tmdbId: item.tmdbId, released: item.released || null, lang: item.language || null,
-        kind: item.kind || "movie", title: item.title };
+        kind: item.kind || "movie", title: item.title,
+        // Born with a dated claim, so the departure sweep rechecks it like any other.
+        live: { since: today, providers: providers.slice(0, 4), lastCheck: today, misses: 0 } };
       built++;
       noteBuilt(state, code, 1);
     }
@@ -4281,6 +4335,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const regionOf = (code) => (countries.find((c) => c.code === code) || {}).region || code.toUpperCase();
   let filmCount = 0;
   const filmUrls = [];
+  const filmUrlsBy = {};
   for (const c of countries) {
     const dir = dirFor(c.code);
     if (!fs.existsSync(dir)) continue;
@@ -4293,7 +4348,14 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
             `    <xhtml:link rel="alternate" hreflang="${cc === "in" ? "en-IN" : "en-" + regionOf(cc)}" href="${filmUrlFor(cc, slug)}"/>`).join("\n")
           + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${filmUrlFor(xDefaultCode(codes), slug)}"/>`
         : "";
-      filmUrls.push(`  <url><loc>${filmUrlFor(c.code, slug)}</loc><lastmod>${filmLastmod(c.code, slug)}</lastmod><priority>0.5</priority>${alts ? alts + "\n  " : ""}</url>`);
+      // The 1200x630 share card is the one image on the page that exists nowhere else on the
+      // web (posters are TMDB's and appear on thousands of sites), so it is the one worth
+      // offering to image search.
+      const card = `cards/${c.code}/${slug}.png`;
+      const img = fs.existsSync(card) ? `\n    <image:image><image:loc>https://filmychill.com/${card}</image:loc></image:image>` : "";
+      const entry = `  <url><loc>${filmUrlFor(c.code, slug)}</loc><lastmod>${filmLastmod(c.code, slug)}</lastmod><priority>0.5</priority>${img}${alts ? alts + "\n  " : (img ? "\n  " : "")}</url>`;
+      filmUrls.push(entry);
+      (filmUrlsBy[c.code] = filmUrlsBy[c.code] || []).push(entry);
       filmCount++;
     }
   }
@@ -4386,9 +4448,55 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   // under /embed/week/ are noindex, so they're intentionally NOT listed here.
   const embedUrls = fs.existsSync("embed/index.html")
     ? [`  <url><loc>https://filmychill.com/embed/</loc><lastmod>${today}</lastmod><priority>0.4</priority></url>`] : [];
+  // Evergreen "streaming on <platform>" pages and people pages (both rebuilt every run).
+  const streamUrls = [];
+  for (const c of countries) {
+    const base = STREAM_BASE(c.code);
+    if (!fs.existsSync(base)) continue;
+    for (const d of fs.readdirSync(base).sort()) {
+      if (!fs.existsSync(`${base}/${d}/index.html`)) continue;
+      streamUrls.push(`  <url><loc>${streamPageUrl(c.code, d)}</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>`);
+      for (const l of fs.readdirSync(`${base}/${d}`).sort()) {
+        if (fs.existsSync(`${base}/${d}/${l}/index.html`)) streamUrls.push(`  <url><loc>${streamPageUrl(c.code, d, l)}</loc><lastmod>${today}</lastmod><priority>0.6</priority></url>`);
+      }
+    }
+  }
+  const peopleUrls = [];
+  for (const c of countries) {
+    const base = PEOPLE_BASE(c.code);
+    if (!fs.existsSync(base)) continue;
+    if (fs.existsSync(`${base}/index.html`)) peopleUrls.push(`  <url><loc>${peopleIndexUrl(c.code)}</loc><lastmod>${today}</lastmod><priority>0.4</priority></url>`);
+    for (const d of fs.readdirSync(base).sort()) {
+      if (fs.existsSync(`${base}/${d}/index.html`)) peopleUrls.push(`  <url><loc>${personPageUrl(c.code, d)}</loc><lastmod>${today}</lastmod><priority>0.5</priority></url>`);
+    }
+  }
+
+  // SITEMAP INDEX. One file per country's film pages plus one for everything else. At ~9,000
+  // film URLs and growing ~700 a day, the single file was heading for the 50,000 limit — and
+  // one file hides the number that matters now: Search Console reports "submitted vs indexed"
+  // PER SITEMAP, so split files show how much of each market's catalogue Google has taken.
+  const NS = `xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"`;
+  const urlset = (entries) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset ${NS}>\n${entries.join("\n")}\n</urlset>\n`;
+  const newest = (entries) => entries.reduce((mx, x) => { const d = (/<lastmod>([^<]+)<\/lastmod>/.exec(x) || [])[1] || ""; return d > mx ? d : mx; }, "") || today;
+  const children = [];
+  const pageEntries = [...countryUrls, ...langUrls, ...hubUrls, ...streamUrls, ...peopleUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...scopedMonthUrls, ...aboutUrls, ...ottUrls];
+  fs.writeFileSync("sitemap-pages.xml", urlset(pageEntries));
+  children.push({ file: "sitemap-pages.xml", lastmod: newest(pageEntries) });
+  for (const c of countries) {
+    const entries = filmUrlsBy[c.code] || [];
+    if (!entries.length) continue;
+    const file = `sitemap-films-${c.code}.xml`;
+    fs.writeFileSync(file, urlset(entries));
+    children.push({ file, lastmod: newest(entries) });
+  }
+  // A market that no longer builds must not leave its old film sitemap behind.
+  for (const f of fs.readdirSync(".").filter((x) => /^sitemap-films-[a-z]{2}\.xml$/.test(x))) {
+    if (!children.some((c) => c.file === f)) fs.rmSync(f, { force: true });
+  }
   fs.writeFileSync("sitemap.xml",
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...countryUrls, ...langUrls, ...hubUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...scopedMonthUrls, ...aboutUrls, ...ottUrls, ...filmUrls].join("\n")}\n</urlset>\n`);
-  console.log(`Sitemap: ${countries.length} country + ${langUrls.length} language + ${browseUrls.length} browse${dataUrls.length ? " + data" : ""} + ${weekUrls.length} week + ${monthUrls.length} month + ${scopedMonthUrls.length} scoped-month + ${filmCount} film pages.`);
+    `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${children.map((c) =>
+      `  <sitemap><loc>https://filmychill.com/${c.file}</loc><lastmod>${c.lastmod}</lastmod></sitemap>`).join("\n")}\n</sitemapindex>\n`);
+  console.log(`Sitemap index: ${children.length} files — ${countries.length} country + ${langUrls.length} language + ${streamUrls.length} streaming + ${peopleUrls.length} people + ${browseUrls.length} browse${dataUrls.length ? " + data" : ""} + ${weekUrls.length} week + ${monthUrls.length} month + ${scopedMonthUrls.length} scoped-month + ${filmCount} film pages.`);
 }
 
 // Manual/local regeneration from existing data.json: PAGES_ONLY=1 node scripts/update.js
@@ -4832,7 +4940,7 @@ ${alts}
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${e(url)}">
-<meta property="og:image" content="https://filmychill.com/og-image.png">
+${ogImageTag(hubOgImage(freshItems, cfg))}
 <meta name="twitter:card" content="summary">
 <meta http-equiv="Content-Security-Policy" content="${cspWith("default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'")}">${analyticsTag()}
 <script type="application/ld+json">${ldJson(ld)}</script>
@@ -4983,7 +5091,9 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 //     "on offer right now". One sweep for the ones already built; new ones are now written
 //     through the chain (see backfillCatalog). Also carries the dead-hub-link and title-ladder
 //     changes to frozen pages.
-const ARCHIVE_PATCH_VERSION = 11;
+// 12: frozen pages for films not yet released in their country get the release-date title
+//     (see filmTitleTag); the due pass switches them back on release day.
+const ARCHIVE_PATCH_VERSION = 12;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
@@ -5123,9 +5233,11 @@ function frozenFilmFacts(html) {
   const statusPill = /theatre|cinema|Theatrical run/i;
   const providers = subPills.filter((p) => !statusPill.test(p));
   const pending = /<!--SW:pending-->/.test(html);
+  const gone = /<!--SW:gone=/.test(html);
   const runEnded = /Theatrical run ended/.test(html);
   const runOpen = OPEN_PILL_RE.test(html);
   return {
+    gone,
     runEnded,
     runOpen,
     item: {
@@ -5141,7 +5253,7 @@ function frozenFilmFacts(html) {
       votes: star ? 999 : 0,
       providers,
       rentBuy,
-      platform: providers.length ? providers[0] : (pending || runEnded || runOpen ? "Theatres" : ""),
+      platform: providers.length ? providers[0] : (gone ? "" : (pending || runEnded || runOpen ? "Theatres" : "")),
     },
   };
 }
@@ -5153,7 +5265,7 @@ function rewriteMetaDescription(html, cfg = null) {
   if (!cur) return { html, changed: false };
   const facts = frozenFilmFacts(html);
   if (!facts) return { html, changed: false };
-  const next = filmMetaDescription(facts.item, cfg, { runEnded: facts.runEnded, runOpen: facts.runOpen });
+  const next = filmMetaDescription(facts.item, cfg, { runEnded: facts.runEnded, runOpen: facts.runOpen, gone: facts.gone });
   const esc = escHtml(next);
   if (!next || next.length < 20 || esc === cur[1]) return { html, changed: false };
   let out = html.replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc}$2`);
@@ -5481,7 +5593,10 @@ function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf, now
 //   which we cannot know.
 // ============================================================================
 const DEPART_RECHECK_DAYS = 30;    // how stale a live claim gets before we recheck it
-const DEPART_MAX_CHECKS = 15;      // per country per run — keeps API cost flat as the archive grows
+// 60, not 15 (Sept 2026): catalogue pages now carry live claims too, ~25 new per country per
+// run. At 15 the recheck queue could never catch up and claims would age past the window.
+// One watch/providers call each — 60 x 14 countries x 2 runs is ~1,700 light calls a day.
+const DEPART_MAX_CHECKS = 60;      // per country per run
 const DEPART_CONFIRM_MISSES = 2;   // consecutive empty checks before we touch the page
 
 // Pure: pick which live-claim pages are due a recheck. Oldest claim first, so the most
@@ -5506,6 +5621,12 @@ function applyDeparturePatch(html, { title, was, rentBuy, countryName, cfg, asOf
   const V = streamVocab(cfg);
   const e = escHtml;
   const start = "<!--SW:pending-->", end = "<!--/SW:pending-->";
+  // A page born streaming has an SW:stream block instead (see buildFilmPage). On departure it
+  // becomes an ordinary pending block, so the arrival sweep can bring it back if it returns.
+  const sa = html.indexOf("<!--SW:stream-->"), sb = html.indexOf("<!--/SW:stream-->");
+  if (html.indexOf(start) === -1 && sa !== -1 && sb > sa) {
+    html = html.slice(0, sa) + `${start}${html.slice(sa + "<!--SW:stream-->".length, sb)}${end}` + html.slice(sb + "<!--/SW:stream-->".length);
+  }
   const a = html.indexOf(start), b = html.indexOf(end);
   if (a === -1 || b === -1 || b < a) return { html, changed: false };
   const wasList = (was || []).join(", ");
@@ -5541,7 +5662,75 @@ function applyDeparturePatch(html, { title, was, rentBuy, countryName, cfg, asOf
     ? `<span class="pill">Rent or buy only</span>`
     : `<span class="pill">Not currently streaming</span>`;
   out = out.replace(`<h2>${e(heading)}</h2>`, `${pill}<h2>${e(heading)}</h2>`);
+  // The notice is right; the rest of the page still said it was streaming.
+  out = settleDepartedCopy(out, { title, was, countryName });
   return { html: out, changed: true };
+}
+
+// Every "it's streaming" sentence the builder, the arrival patch and the settle pass write,
+// turned into "it isn't streaming right now". Both escapings, same as settleReleasedCopy.
+function settleDepartedCopy(html, { title, was = [], countryName }) {
+  const A = "(?:'|&#39;)";
+  const ap = (m) => (m.includes("&#39;") ? "&#39;" : "'");
+  const esc = (m, t) => (m.includes("&#39;") || m.includes("&amp;") ? escHtml(t) : t);
+  const wasList = (was || []).slice(0, 3).join(", ");
+  const T = reEsc(escHtml(title)) + "|" + reEsc(title);
+  const C = reEsc(escHtml(countryName)) + "|" + reEsc(countryName);
+  let out = html;
+  out = out.replace(new RegExp(` In (?:${C}) you can stream it on [^.<"]+\\.`, "g"),
+    (m) => ` It isn${ap(m)}t on a subscription service in ${esc(m, countryName)} right now${wasList ? ` — it was on ${esc(m, wasList)}` : ""}.`);
+  out = out.replace(new RegExp(`You can stream (${T}) in (?:${C}) on [^.<"]+\\.`, "g"),
+    (m, t) => `${t} isn${ap(m)}t on a subscription service in ${esc(m, countryName)} right now${wasList ? ` — it was on ${esc(m, wasList)}` : ""}. This page updates if it returns.`);
+  out = out.replace(new RegExp(`, and it${A}s streaming there now — see where to watch above\\.`, "g"),
+    (m) => `. It isn${ap(m)}t streaming there right now — this page updates if it returns.`);
+  out = out.replace(new RegExp(`It${A}s streaming in (${C}) now — see where to watch above\\.`, "g"),
+    (m, c) => `It isn${ap(m)}t streaming in ${c} right now — this page updates if it returns.`);
+  out = out.replace(new RegExp(`and is streaming there now(?: — see where to watch above)?\\.`, "g"),
+    (m) => `, and isn${ap(m)}t streaming there right now.`);
+  // The streaming-date FAQ: "<film> is already streaming in <country> on X — it arrived on …".
+  out = out.replace(new RegExp(`(${T}) is already streaming in (?:${C}) on [^.<"]+?(?: — it arrived on [^.<"]+)?\\.`, "g"),
+    (m, t) => `${t} was on ${esc(m, wasList || "a subscription service")} in ${esc(m, countryName)}, but isn${ap(m)}t streaming there right now. This page updates if it returns.`);
+  return out.replace(/ ,/g, ",");
+}
+
+// ============================================================================
+// STREAM CLAIMS FOR PAGES BORN STREAMING.
+//
+// Sept 2026: 5,530 catalogue pages asserted "you can stream it on <platform>" with no
+// SW marker and no manifest claim, so the departure sweep could never recheck one of them.
+// Rights expire; some of those claims are already wrong and none would ever be corrected.
+// This gives every such page what an arrived page already has: a marked block the sweep can
+// rewrite, and a dated claim (since = the day the page was built, when TMDB last confirmed
+// it) that enters the recheck queue oldest-first. Idempotent: a page with a claim is skipped.
+// ============================================================================
+function backfillStreamClaims(manifest, cfg) {
+  const code = cfg.code;
+  const dir = code === "in" ? "movie" : `${code}/movie`;
+  const m = manifest[code] || {};
+  let n = 0;
+  for (const [slug, e] of Object.entries(m)) {
+    if (!e || e.live || !e.archivedOn || !e.tmdbId) continue;
+    const p = `${dir}/${slug}.html`;
+    let html;
+    try { html = fs.readFileSync(p, "utf8"); } catch { continue; }
+    if (html.includes("<!--SW:")) continue;               // already on a lifecycle track
+    const facts = frozenFilmFacts(html);
+    const providers = facts ? facts.item.providers : [];
+    if (!providers.length) continue;                     // no claim to check
+    const a = html.indexOf("<h2>Where to watch in ");
+    if (a === -1) continue;
+    let b = html.indexOf("<h2>", a + 5);
+    if (b === -1) b = html.indexOf("<footer", a);
+    if (b === -1) continue;
+    const since = e.archivedOn;
+    const out = html.slice(0, a) + `<!--SW:stream--><!--SW:live=${escHtml(since)}-->` + html.slice(a, b).replace(/\s+$/, "")
+      + `<!--/SW:stream-->\n  ` + html.slice(b);
+    fs.writeFileSync(p, out);
+    e.live = { since, providers, lastCheck: since, misses: 0 };
+    n++;
+  }
+  if (n) console.log(`  stream claims [${code}]: ${n} born-streaming page(s) joined the recheck queue`);
+  return n;
 }
 
 // Live pass: recheck live claims for one country. Network-bound and strictly budgeted;
@@ -5613,7 +5802,11 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
         countryName: countryNameFor(cfg), cfg, asOf,
       });
       if (changed) {
-        fs.writeFileSync(p, html);
+        // Description and title were written for a streaming page; rebuild both from what the
+        // page now says (no providers), so the search listing stops claiming a platform too.
+        let out = rewriteMetaDescription(html, cfg).html;
+        out = retitleFrozen(out, cfg).html;
+        fs.writeFileSync(p, out);
         m[c.slug].last = asOf;
         delete m[c.slug].live;      // claim retired; the page no longer asserts a platform
         confirmed++;
@@ -5783,6 +5976,8 @@ function patchDueIfPassed(html, { title, countryName, cfg, now = Date.now() }) {
                     `<span class="pill">In theatres</span>`);
   // ...and so is every other pre-release sentence on the page (see settleReleasedCopy).
   out = settleReleasedCopy(out, { countryName, cfg, now }).html;
+  // ...and the title, which promised a release date until today (see filmTitleTag).
+  out = retitleFrozen(out, cfg).html;
   return { html: out, changed: true };
 }
 
@@ -6286,10 +6481,18 @@ const PROVIDER_CANON = [
   [/^WeTV( Free)?$/i, "WeTV"],
   [/^iQIYI( Free)?$/i, "iQIYI"],
   [/^U-?NEXT$/i, "U-NEXT"],
+  // Tier and channel variants that split one service across several "streaming on" pages
+  // (Sept 2026 trial build: the US got separate Paramount Plus, Paramount Plus Premium and
+  // Paramount Plus Essential pages, and two Peacock pages).
+  [/^Paramount(?: Plus|\+)(?: Premium| Essential| with Showtime)?$/i, "Paramount+"],
+  [/^Peacock(?: Premium(?: Plus)?)?$/i, "Peacock"],
+  [/^VI movies and tv$/i, "Vi Movies & TV"],
+  // A service sold as a Prime Video / Apple TV channel is still that service.
+  [/^(.+?) (?:Amazon|Apple TV) Channel$/i, "$1"],
 ];
 function canonProvider(name) {
   const n = String(name || "").trim();
-  for (const [re, canon] of PROVIDER_CANON) if (re.test(n)) return canon;
+  for (const [re, canon] of PROVIDER_CANON) if (re.test(n)) return canon.includes("$") ? n.replace(re, canon) : canon;
   return n;
 }
 function platformSlug(name) {
@@ -6412,6 +6615,8 @@ function buildPlatformHubPage(data, cfg, hub) {
       ...(carried.length ? [{ h2: "Still worth it — from earlier weeks", items: carried }] : []),
     ],
     faqs, extraLd, homeUrl: `https://filmychill.com${m.path}`, code, altPaths,
+    // Up from "new this week" to "everything on it", when that page exists (see writeStreamingPages).
+    navLinks: fs.existsSync(streamPagePath(code, hub.slug)) ? [{ href: streamPageUrl(code, hub.slug), label: `Everything on ${hub.name} in ${countryNameFor({ code })}` }] : null,
   });
 }
 
@@ -6421,6 +6626,349 @@ function buildPlatformHubPage(data, cfg, hub) {
 // rewritten five weeks earlier. Telling a crawler a stale page changed today is worse than
 // omitting it.
 const LIVE_HUBS = new Map(); // code -> Set(slug)
+
+// ============================================================================
+// "STREAMING ON <PLATFORM>" PAGES — the evergreen answer to "movies on Netflix India".
+//
+// Two jobs. (1) They answer the year-round, high-volume query shape the weekly hubs can't:
+// not "what's new on Netflix this week" but "what's on Netflix". (2) They are the crawl path
+// into the catalogue. Sept 2026 GSC: catalogue pages had the best CTR of any film page (2.8%)
+// but only 95 of ~1,680 had appeared in search, because nothing important linked to them.
+// Each of these pages links dozens to hundreds of them from one crawlable URL.
+//
+// Honesty rule: a title is listed only if its availability was CONFIRMED recently — in this
+// run's lists, or by a live claim the departure sweep rechecked within STREAM_PAGE_MAX_AGE
+// days. Old frozen pages with an unchecked platform pill are not evidence. The lead says
+// what the page is: the titles FilmyChill covers and has checked, not the whole library.
+//
+// Gates: a platform page needs STREAM_PAGE_MIN titles, a platform x language page
+// STREAM_LANG_MIN. Below that, no page (thin pages are the scaled-content pattern).
+// URLs: /streaming/<platform>/ and /streaming/<platform>/<language>/, per country.
+// ============================================================================
+const STREAM_PAGE_MIN = 12;
+const STREAM_LANG_MIN = 6;
+const STREAM_PAGE_MAX_AGE = 45;   // days since the platform was last confirmed
+const STREAM_BASE = (code) => (code === "in" ? "streaming" : `${code}/streaming`);
+const streamPagePath = (code, pslug, lslug = null) => `${STREAM_BASE(code)}/${pslug}/${lslug ? lslug + "/" : ""}index.html`;
+const streamPageUrl = (code, pslug, lslug = null) => `https://filmychill.com/${STREAM_BASE(code)}/${pslug}/${lslug ? lslug + "/" : ""}`;
+
+// Pure: which titles are verifiably on which platform, from this run's lists plus fresh
+// manifest claims. Returns Map(platformName -> [{slug,title,language,kind,rating,votes,...}]).
+function verifiedAvailability(data, manifestForCountry, index, now = Date.now()) {
+  const byPlatform = new Map();
+  const seen = new Map();   // slug -> entry (lists win over claims: they're today's data)
+  const idx = new Map((index || []).map((x) => [x.slug, x]));
+  const add = (slug, row, providers) => {
+    if (!slug || seen.has(slug)) return;
+    const provs = [...new Set((providers || []).map(canonProvider).filter(Boolean))];
+    if (!provs.length) return;
+    const entry = { ...row, slug, providers: provs };
+    seen.set(slug, entry);
+    for (const p of provs) {
+      if (!byPlatform.has(p)) byPlatform.set(p, []);
+      byPlatform.get(p).push(entry);
+    }
+  };
+  for (const it of [...((data && data.ott) || []), ...((data && data.ottExtra) || [])]) {
+    if (!it || !it.slug) continue;
+    add(it.slug, { title: it.title, language: it.language || "", kind: it.kind || "movie", genre: it.genre || "",
+      rating: it.rating ?? null, votes: it.votes || 0, verdict: it.verdict || null, poster: it.poster || "",
+      released: it.released || null, platform: null }, it.providers);
+  }
+  for (const [slug, e] of Object.entries(manifestForCountry || {})) {
+    const live = e && e.live;
+    if (!live || !Array.isArray(live.providers) || !live.providers.length) continue;
+    const checked = Date.parse(`${live.lastCheck || live.since}T00:00:00Z`);
+    if (!Number.isFinite(checked) || (now - checked) / 864e5 > STREAM_PAGE_MAX_AGE) continue;
+    const ix = idx.get(slug) || {};
+    add(slug, { title: e.title || ix.title || slug, language: e.lang || ix.language || "", kind: e.kind || ix.kind || "movie",
+      genre: ix.genre || "", rating: null, votes: 0, verdict: null, poster: ix.poster || "", released: e.released || ix.released || null,
+      platform: null }, live.providers);
+  }
+  for (const list of byPlatform.values()) for (const x of list) x.platform = x.platform || null;
+  return byPlatform;
+}
+
+function buildStreamingPage(items, cfg, { platform, pslug, language = null, lslug = null, langLinks = [], weeklyHub = null, now = Date.now() }) {
+  const code = (cfg && cfg.code) || "in";
+  const country = countryNameFor(cfg);
+  const url = streamPageUrl(code, pslug, lslug);
+  const n = items.length;
+  const sorted = rankFilms(items);
+  const films = sorted.filter((x) => x.kind !== "tv");
+  const series = sorted.filter((x) => x.kind === "tv");
+  const subject = language ? `${language} Movies & Series` : "Movies & Series";
+  const checked = new Date(now).toLocaleDateString(localeFor(code), { day: "numeric", month: "short", year: "numeric" });
+  const sections = [];
+  if (films.length) sections.push({ h2: `${language ? language + " films" : "Films"} on ${platform}`, items: films.map((x) => ({ ...x, platform })) });
+  if (series.length) sections.push({ h2: `${language ? language + " series" : "Series"} on ${platform}`, items: series.map((x) => ({ ...x, platform })) });
+  const rated = sorted.filter((x) => x.rating != null && (x.votes || 0) >= 50);
+  const faqs = [{
+    q: `How many ${language ? language + " " : ""}titles are on ${platform} in ${country}?`,
+    a: `FilmyChill has confirmed ${n} ${language ? language + " " : ""}film${n === 1 ? "" : "s"} and series streaming on ${platform} in ${country} (${films.length} film${films.length === 1 ? "" : "s"}, ${series.length} series). That is the part of the ${platform} library FilmyChill covers, not the whole catalogue.`,
+  }];
+  if (rated.length) faqs.push({
+    q: `What's the best-rated ${language ? language + " " : ""}title on ${platform} in ${country}?`,
+    a: `${rated[0].title}${rated[0].rating != null ? ` — ${Number(rated[0].rating).toFixed(1)}/10 across ${Number(rated[0].votes).toLocaleString("en-IN")} ratings` : ""}${rated[1] ? `, then ${rated[1].title}` : ""}${rated[2] ? ` and ${rated[2].title}` : ""}.`,
+  });
+  faqs.push({
+    q: `How current is this list?`,
+    a: `Every title was confirmed on ${platform} in ${country} within the last ${STREAM_PAGE_MAX_AGE} days, and FilmyChill rechecks each one. When a title leaves, its page says so and it drops off this list.`,
+  });
+  const navLinks = [];
+  if (language) navLinks.push({ href: streamPageUrl(code, pslug), label: `Everything on ${platform} in ${country}` });
+  for (const l of langLinks) navLinks.push({ href: streamPageUrl(code, pslug, l.slug), label: `${l.name} (${l.n})` });
+  if (weeklyHub) navLinks.push({ href: weeklyHub, label: `New on ${platform} this week` });
+  const linkable = sorted.filter((x) => x.slug);
+  const extraLd = [{
+    "@context": "https://schema.org", "@type": "CollectionPage",
+    name: `${subject} on ${platform} in ${country}`, url,
+    isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+    mainEntity: { "@type": "ItemList", numberOfItems: linkable.length,
+      itemListElement: linkable.slice(0, 200).map((x, i) => ({ "@type": "ListItem", position: i + 1, name: x.title, url: filmPageUrl(code, x.slug) })) },
+  }, {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "FilmyChill", item: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/` },
+      { "@type": "ListItem", position: 2, name: `On ${platform}`, item: streamPageUrl(code, pslug) },
+      ...(language ? [{ "@type": "ListItem", position: 3, name: language, item: url }] : []),
+    ],
+  }];
+  return listingPageHtml({
+    title: fitFirst([
+      `${subject} on ${platform} in ${country} (${n}) | FilmyChill`,
+      `${subject} on ${platform} in ${country} (${n})`,
+      `${subject} on ${platform} (${country})`,
+      `${language ? language + " " : ""}Titles on ${platform} in ${country}`,
+    ], 60),
+    desc: fitFirst([
+      `All ${n} ${language ? language + " " : ""}movies and series FilmyChill has confirmed streaming on ${platform} in ${country}, rated and ranked — each one rechecked, last updated ${checked}.`,
+      `${n} ${language ? language + " " : ""}movies and series confirmed on ${platform} in ${country}, rated and ranked. Updated ${checked}.`,
+    ], 160),
+    canonical: url,
+    h1: `${subject} on ${platform} in ${country}`,
+    updLine: `${n} title${n === 1 ? "" : "s"} · availability confirmed within ${STREAM_PAGE_MAX_AGE} days · updated ${checked}`,
+    lead: `The ${language ? language + " " : ""}films and series FilmyChill covers that are streaming on ${platform} in ${country} right now, best-rated first. Not the whole ${platform} library — every title here has been checked against ${platform}'s current listing.`,
+    sections, faqs, extraLd, navLinks, code,
+    homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
+  });
+}
+
+// Writes every page that clears its gate and removes the ones that no longer do. Returns the
+// written set, so hubs, film pages and the footer can link only to pages that exist.
+function writeStreamingPages(data, cfg, manifest, index = null) {
+  const code = cfg.code;
+  const idx = index || filmIndexFor(cfg);
+  const avail = verifiedAvailability(data, (manifest || {})[code] || {}, idx);
+  const written = new Set();
+  const summary = [];
+  for (const [platform, items] of avail) {
+    if (items.length < STREAM_PAGE_MIN) continue;
+    const pslug = platformSlug(platform);
+    if (!pslug) continue;
+    const byLang = new Map();
+    for (const x of items) { if (!x.language) continue; if (!byLang.has(x.language)) byLang.set(x.language, []); byLang.get(x.language).push(x); }
+    const langs = [...byLang.entries()].filter(([, xs]) => xs.length >= STREAM_LANG_MIN)
+      .sort((a, b) => b[1].length - a[1].length).map(([name, xs]) => ({ name, slug: slugify(name), n: xs.length, xs }));
+    const weekly = fs.existsSync(hubPath(code, pslug)) ? hubUrl(code, pslug) : null;
+    const main = streamPagePath(code, pslug);
+    fs.mkdirSync(main.slice(0, main.lastIndexOf("/")), { recursive: true });
+    fs.writeFileSync(main, buildStreamingPage(items, cfg, { platform, pslug, langLinks: langs, weeklyHub: weekly }));
+    written.add(main);
+    for (const l of langs) {
+      const lp = streamPagePath(code, pslug, l.slug);
+      fs.mkdirSync(lp.slice(0, lp.lastIndexOf("/")), { recursive: true });
+      fs.writeFileSync(lp, buildStreamingPage(l.xs, cfg, { platform, pslug, language: l.name, lslug: l.slug,
+        langLinks: langs.filter((x) => x.slug !== l.slug), weeklyHub: weekly }));
+      written.add(lp);
+    }
+    summary.push(`${platform} ${items.length}${langs.length ? ` (${langs.map((l) => l.name + " " + l.n).join(", ")})` : ""}`);
+  }
+  // Prune pages that fell below their gate: a page that still exists would keep claiming
+  // titles we can no longer confirm.
+  const base = STREAM_BASE(code);
+  if (fs.existsSync(base)) {
+    for (const p of fs.readdirSync(base)) {
+      const pdir = `${base}/${p}`;
+      if (!fs.statSync(pdir).isDirectory()) continue;
+      for (const l of fs.readdirSync(pdir)) {
+        const ldir = `${pdir}/${l}`;
+        if (fs.statSync(ldir).isDirectory() && !written.has(`${ldir}/index.html`)) fs.rmSync(ldir, { recursive: true, force: true });
+      }
+      if (!written.has(`${pdir}/index.html`)) fs.rmSync(pdir, { recursive: true, force: true });
+    }
+  }
+  if (summary.length) console.log(`  streaming pages [${code}]: ${summary.join("; ")}`);
+  return written;
+}
+
+// ============================================================================
+// PEOPLE PAGES — "Fahadh Faasil: films streaming now".
+//
+// 206 actors and 31 directors already had 3+ films on the India site in Sept 2026, with no
+// page of their own. The query shape these can win is not the bare name (Wikipedia and IMDb
+// own that) but name + platform / "movies on OTT" — so the page leads with what is streaming
+// now and where, then everything else FilmyChill covers. It never claims to be a complete
+// filmography: the lead says it lists the films this site covers.
+//
+// Built from the film pages on disk (their JSON-LD names the top-billed cast and director,
+// with TMDB profile images), gated at PEOPLE_MIN films per country. Streaming status comes
+// from the same verified-availability rule as the platform pages — a recent confirmation,
+// never an old pill.
+// ============================================================================
+const PEOPLE_MIN = 5;
+const PEOPLE_BASE = (code) => (code === "in" ? "people" : `${code}/people`);
+const personPagePath = (code, slug) => `${PEOPLE_BASE(code)}/${slug}/index.html`;
+const personPageUrl = (code, slug) => `https://filmychill.com/${PEOPLE_BASE(code)}/${slug}/`;
+const peopleIndexUrl = (code) => `https://filmychill.com/${PEOPLE_BASE(code)}/`;
+
+// Reads each film page's JSON-LD once: person -> films. Top-billed only (the first four
+// actors), because a supporting role in one film is not what someone searching a name wants.
+function peopleIndexFor(cfg) {
+  const code = cfg.code;
+  const dir = code === "in" ? "movie" : `${code}/movie`;
+  const people = new Map();
+  if (!fs.existsSync(dir)) return people;
+  for (const f of fs.readdirSync(dir)) {
+    if (!f.endsWith(".html")) continue;
+    let html;
+    try { html = fs.readFileSync(`${dir}/${f}`, "utf8"); } catch { continue; }
+    if (/<meta name="robots" content="[^"]*noindex/.test(html)) continue;
+    const m = /<script type="application\/ld\+json">(\{"@context[^<]*?"@type":"(?:Movie|TVSeries)"[\s\S]*?)<\/script>/.exec(html);
+    if (!m) continue;
+    let ld; try { ld = JSON.parse(m[1]); } catch { continue; }
+    const film = { slug: f.slice(0, -5), title: ld.name, kind: ld["@type"] === "TVSeries" ? "tv" : "movie",
+      language: ld.inLanguage || "", genre: ld.genre || "", released: String(ld.datePublished || "").slice(0, 10),
+      poster: Array.isArray(ld.image) ? ld.image[0] : (ld.image || "") };
+    const roles = [];
+    for (const a of (ld.actor || []).slice(0, 4)) if (a && a.name) roles.push({ name: a.name, image: a.image || "", role: "actor" });
+    for (const d of [].concat(ld.director || [])) if (d && d.name) roles.push({ name: d.name, image: d.image || "", role: "director" });
+    for (const r of roles) {
+      const key = slugify(r.name);
+      if (!key) continue;
+      if (!people.has(key)) people.set(key, { name: r.name, slug: key, image: "", films: new Map(), roles: new Set() });
+      const p = people.get(key);
+      if (!p.image && r.image) p.image = r.image;
+      p.roles.add(r.role);
+      p.films.set(film.slug, film);
+    }
+  }
+  return people;
+}
+
+function buildPersonPage(person, cfg, { availability, now = Date.now() }) {
+  const code = (cfg && cfg.code) || "in";
+  const country = countryNameFor(cfg);
+  const url = personPageUrl(code, person.slug);
+  const films = [...person.films.values()].sort((a, b) => String(b.released).localeCompare(String(a.released)));
+  const streaming = [], elsewhere = [];
+  for (const f of films) {
+    const provs = availability.get(f.slug);
+    (provs && provs.length ? streaming : elsewhere).push({ ...f, platform: provs && provs.length ? provs[0] : null, providers: provs || [] });
+  }
+  const n = films.length;
+  const roleWord = person.roles.has("actor") ? (person.roles.has("director") ? "Films" : "Films") : "Films directed by";
+  const who = person.roles.has("actor") ? person.name : `${person.name}`;
+  const sections = [];
+  if (streaming.length) sections.push({ h2: `Streaming now in ${country}`, items: streaming });
+  if (elsewhere.length) sections.push({ h2: streaming.length ? "More of their films on FilmyChill" : `Films on FilmyChill`, items: elsewhere });
+  const platforms = [...new Set(streaming.flatMap((x) => x.providers))].slice(0, 4);
+  const faqs = [];
+  if (streaming.length) faqs.push({
+    q: `Which ${person.name} films can I stream in ${country}?`,
+    a: `${streaming.length} right now: ${streaming.slice(0, 5).map((x) => `${x.title} (${x.platform})`).join(", ")}${streaming.length > 5 ? ", and more below" : ""}.`,
+  });
+  if (films[0]) faqs.push({
+    q: `What's the latest ${person.name} ${films[0].kind === "tv" ? "title" : "film"} on FilmyChill?`,
+    a: `${films[0].title}${films[0].released ? `, released ${fmtDateFull(films[0].released, localeFor(code))}` : ""}.`,
+  });
+  const titleBits = streaming.length
+    ? [`${person.name} Movies Streaming in ${country}: ${platforms.slice(0, 2).join(", ")} | FilmyChill`,
+       `${person.name} Movies Streaming in ${country}: ${platforms.slice(0, 2).join(", ")}`,
+       `${person.name} Movies Streaming in ${country}`,
+       `${person.name} Movies on ${streamVocab(cfg).word}`]
+    : [`${person.name}: ${n} Films & Where to Watch in ${country} | FilmyChill`,
+       `${person.name}: ${n} Films & Where to Watch in ${country}`,
+       `${person.name} Films — Where to Watch`];
+  const extraLd = [{
+    "@context": "https://schema.org", "@type": "ProfilePage", url,
+    mainEntity: { "@type": "Person", name: person.name, ...(person.image ? { image: person.image } : {}) },
+    isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+  }, {
+    "@context": "https://schema.org", "@type": "ItemList", numberOfItems: n,
+    itemListElement: films.map((x, i) => ({ "@type": "ListItem", position: i + 1, name: x.title, url: filmPageUrl(code, x.slug) })),
+  }, {
+    "@context": "https://schema.org", "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "FilmyChill", item: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/` },
+      { "@type": "ListItem", position: 2, name: "People", item: peopleIndexUrl(code) },
+      { "@type": "ListItem", position: 3, name: person.name, item: url },
+    ],
+  }];
+  void roleWord; void who;
+  return listingPageHtml({
+    title: fitFirst(titleBits, 60),
+    desc: fitFirst([
+      streaming.length
+        ? `${streaming.length} ${person.name} ${streaming.length === 1 ? "title is" : "titles are"} streaming in ${country} now${platforms.length ? ` on ${platforms.join(", ")}` : ""}. Every ${person.name} film FilmyChill covers, with ratings and where to watch.`
+        : `The ${n} ${person.name} films FilmyChill covers in ${country}, with ratings, verdicts and where each one is streaming.`,
+      `${person.name}: the ${n} films FilmyChill covers in ${country}, and where to watch each.`,
+    ], 160),
+    canonical: url,
+    h1: streaming.length ? `${person.name}: films streaming in ${country}` : `${person.name} on FilmyChill`,
+    updLine: `${n} film${n === 1 ? "" : "s"} covered · ${streaming.length} streaming now in ${country}`,
+    lead: `The ${person.name} films and series FilmyChill covers — streaming ones first, with the platform each is on today. Not a complete filmography: only titles this site has a page for.`,
+    sections, faqs, extraLd, code,
+    navLinks: [{ href: peopleIndexUrl(code), label: `More people on FilmyChill ${country}` }],
+    homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
+  });
+}
+
+function writePeoplePages(data, cfg, manifest) {
+  const code = cfg.code;
+  const people = [...peopleIndexFor(cfg).values()].filter((p) => p.films.size >= PEOPLE_MIN);
+  const avail = new Map();
+  for (const [platform, items] of verifiedAvailability(data, (manifest || {})[code] || {}, filmIndexFor(cfg))) {
+    for (const x of items) { if (!avail.has(x.slug)) avail.set(x.slug, []); avail.get(x.slug).push(platform); }
+  }
+  const written = new Set();
+  for (const p of people) {
+    const path = personPagePath(code, p.slug);
+    fs.mkdirSync(path.slice(0, path.lastIndexOf("/")), { recursive: true });
+    fs.writeFileSync(path, buildPersonPage(p, cfg, { availability: avail }));
+    written.add(p.slug);
+  }
+  const base = PEOPLE_BASE(code);
+  if (fs.existsSync(base)) {
+    for (const d of fs.readdirSync(base)) {
+      if (fs.statSync(`${base}/${d}`).isDirectory() && !written.has(d)) fs.rmSync(`${base}/${d}`, { recursive: true, force: true });
+    }
+  }
+  if (people.length) {
+    // One index per country: the crawl path to every person page, alphabetical.
+    const country = countryNameFor(cfg);
+    const sorted = people.slice().sort((a, b) => a.name.localeCompare(b.name));
+    const items = sorted.map((p) => ({ title: p.name, slug: null, href: personPageUrl(code, p.slug), language: `${p.films.size} films`, kind: "movie" }));
+    const listHtml = `<ul class="people">${sorted.map((p) => `<li><a href="/${escHtml(base)}/${escHtml(p.slug)}/">${escHtml(p.name)}</a> <span style="color:var(--mute)">· ${p.films.size} films</span></li>`).join("")}</ul>`;
+    void items;
+    const page = listingPageHtml({
+      title: fitFirst([`Actors & Directors on FilmyChill ${country} | FilmyChill`, `Actors & Directors on FilmyChill ${country}`], 60),
+      desc: `Where to stream the films of ${sorted.length} actors and directors FilmyChill covers in ${country} — each page lists what is streaming now and on which platform.`,
+      canonical: peopleIndexUrl(code),
+      h1: `Actors & directors — ${country}`,
+      updLine: `${sorted.length} people with ${PEOPLE_MIN}+ films on FilmyChill`,
+      lead: `Pick a name to see which of their films are streaming in ${country} right now, and where.`,
+      sections: [], faqs: [], extraLd: [], code,
+      homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
+    }).replace(/(<p class="lead">[\s\S]*?<\/p>)/, `$1${listHtml}`);
+    fs.mkdirSync(base, { recursive: true });
+    fs.writeFileSync(`${base}/index.html`, page);
+    console.log(`  people pages [${code}]: ${people.length} (${PEOPLE_MIN}+ films each)`);
+  } else if (fs.existsSync(`${base}/index.html`)) {
+    fs.rmSync(`${base}/index.html`, { force: true });
+  }
+  return written;
+}
 
 function writePlatformHubPages(data, cfg) {
   const code = (cfg && cfg.code) || "in";
@@ -6463,7 +7011,7 @@ function fitFirst(options, max) {
   return opts.find((x) => x.length <= max) || opts.reduce((a, b) => (b.length < a.length ? b : a), opts[0] || "");
 }
 
-function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null }) {
+function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null }) {
   // ~80 hubs, month archives and week pages ran 61–72 characters; see fitSiteTitle.
   title = fitSiteTitle(title);
   const e = escHtml;
@@ -6518,7 +7066,7 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="${e(canonical)}">
-<meta property="og:image" content="https://filmychill.com/og-image.png">
+${ogImageTag(ogImage || hubOgImage((sections || []).flatMap((x) => x.items || []), { code }))}
 <meta name="twitter:card" content="summary">
 <meta http-equiv="Content-Security-Policy" content="${cspWith("default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'")}">${analyticsTag()}
 ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</script>`).join("\n")}${faqLd ? `
@@ -6742,10 +7290,11 @@ function buildWeekPage(data, slug, prevExists = false) {
       itemListElement: all.map((x, i) => ({ "@type": "ListItem", position: i + 1, name: x.title, url: filmPageUrl("in", x.slug) })) },
   }];
   return listingPageHtml({
-    title: `Movies & OTT: Week ${weekNo}, ${slug.slice(0, 4)} (${range}) in India | FilmyChill`,
+    // Nobody searches "Week 39"; they search "new OTT releases" plus a date.
+    title: fitFirst([`New Movies & OTT Releases: ${range} (India)`, `New OTT Releases: ${range} (India)`, `OTT Releases: ${range}`], 60),
     desc: `What was worth watching in India in week ${weekNo} (${range}) — theatre releases and new OTT titles with ratings and verdicts. A permanent weekly snapshot.`,
     canonical: url,
-    h1: `Week ${weekNo}: ${range}`,
+    h1: `New movies & OTT releases: ${range}`,
     updLine: `India · theatres + OTT`,
     lead: `A permanent snapshot of what was worth watching this week — every share link stays alive forever.`,
     frozenNote: `This page captures week ${weekNo} of ${slug.slice(0, 4)} and stays frozen once the week ends. For the current list, head to the homepage.`,
@@ -7042,7 +7591,25 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
     // Priority when trimming: the query phrase ("New Movies", "This Week"), the market's own
     // word (OTT / Streaming), the country, and the month. The brand goes first — it is the
     // only part a searcher already knows. "Releases" goes next, being the one redundant noun.
+    // The week's dates first: "this week (21–27 Sept)" is visibly fresher in a results page
+    // than a month, and it is how the weekly query is written. The month tiers stay as the
+    // fallback for markets whose name pushes the week form past 60 characters.
+    const wk = isoWeekOf(new Date(data.generatedAt || Date.now()));
+    const mon = isoWeekMonday(weekSlug(wk));
+    const sun = new Date(mon); sun.setUTCDate(mon.getUTCDate() + 6);
+    // In the market's own order: "21–27 Sept" day-first, "Sep 21–27" month-first (US, PH).
+    const loc = localeFor(cfg.code);
+    const dayMon = (d) => d.toLocaleDateString(loc, { day: "numeric", month: "short", timeZone: "UTC" });
+    const monthFirst = /^[A-Za-z]/.test(dayMon(mon));
+    const dd = (d) => String(d.getUTCDate());
+    const mm = (d) => dayMon(d).replace(/\d+/, "").replace(/[ ,]+/g, " ").trim();
+    const weekRange = mon.getUTCMonth() === sun.getUTCMonth()
+      ? (monthFirst ? `${mm(mon)} ${dd(mon)}–${dd(sun)}` : `${dd(mon)}–${dd(sun)} ${mm(sun)}`)
+      : `${dayMon(mon)} – ${dayMon(sun)}`;
     const homeTitleOpts = [
+      `New Movies & ${V.Releases} This Week in ${m.name} (${weekRange})`,
+      `New Movies & ${V.Word} This Week in ${m.name} (${weekRange})`,
+      `New Movies This Week in ${m.name} (${weekRange})`,
       `New Movies & ${V.Releases} This Week in ${m.name} (${monthYear}) | FilmyChill`,
       `New Movies & ${V.Releases} This Week in ${m.name} (${monthYear})`,
       `New Movies & ${V.Word} This Week in ${m.name} (${monthYear})`,
@@ -7231,9 +7798,47 @@ function buildMoreLinks(code, data = null) {
     ? `<a href="${code === "in" ? "" : "/" + code}/new-on-ott/${thisMonth}/">Everything new on ${escHtml(streamVocab({ code }).word)} this month</a>`
     : "";
   const hubs = data ? hubsFor(data).map((h) => `<a href="${code === "in" ? "" : "/" + code}/new-on-${h.slug}/">New on ${escHtml(h.name)}</a>`).join(" · ") : "";
-  if (code !== "in") return `${hubs ? hubs + " · " : ""}${monthLink ? monthLink + " · " : ""}${browse} · ${dataLink}${embed} · ${about}<br>Also on FilmyChill: ${others}`;
+  // Crawl paths into the catalogue (see writeStreamingPages / newlyAddedFor): the homepage is
+  // the most-crawled URL on the site, and before this nothing on it pointed at a catalogue page.
+  const streaming = streamingPagesFor(code).map((x) => `<a href="${x.href}">${escHtml(x.name)}</a>`).join(" · ");
+  const fresh = newlyAddedFor(code).map((x) => `<a href="${x.href}">${escHtml(x.title)}</a>`).join(" · ");
+  const extra = `${streaming ? `<br>Streaming now on: ${streaming}` : ""}${fresh ? `<br>Newly added: ${fresh}` : ""}`;
+  if (code !== "in") return `${hubs ? hubs + " · " : ""}${monthLink ? monthLink + " · " : ""}${browse} · ${dataLink}${embed} · ${about}${extra}<br>Also on FilmyChill: ${others}`;
   const langs = LANGUAGE_PAGES.map(([name, slug]) => `<a href="/${slug}/">${name}</a>`).join(" · ");
-  return `${langs}${hubs ? " · " + hubs : ""}${monthLink ? " · " + monthLink : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${dataLink}${embed} · ${about}<br>Also on FilmyChill: ${others}`;
+  return `${langs}${hubs ? " · " + hubs : ""}${monthLink ? " · " + monthLink : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${dataLink}${embed} · ${about}${extra}<br>Also on FilmyChill: ${others}`;
+}
+
+// The platform pages that exist for this country, biggest first (read from disk: they are
+// written and pruned by writeStreamingPages).
+function streamingPagesFor(code) {
+  const base = STREAM_BASE(code);
+  if (!fs.existsSync(base)) return [];
+  return fs.readdirSync(base)
+    .filter((d) => fs.existsSync(`${base}/${d}/index.html`))
+    .map((d) => {
+      const html = fs.readFileSync(`${base}/${d}/index.html`, "utf8");
+      const n = Number((/<h1>[^<]*<\/h1>[\s\S]*?(\d+) titles?/.exec(html) || [])[1] || 0);
+      const name = ((/<h1>[^<]*? on ([^<]+?) in [^<]*<\/h1>/.exec(html) || [])[1] || d).replace(/&amp;/g, "&");
+      return { href: `/${base}/${d}/`, name, n };
+    })
+    .sort((a, b) => b.n - a.n)
+    .slice(0, 6);
+}
+
+// The newest catalogue pages for this country: a fresh set of links from the homepage every
+// run, so Google meets new catalogue pages within a crawl or two instead of weeks later.
+let _manifestCache = null;
+function newlyAddedFor(code, max = 12) {
+  if (!_manifestCache) {
+    try { _manifestCache = JSON.parse(fs.readFileSync("pages-manifest.json", "utf8")); } catch { _manifestCache = {}; }
+  }
+  const m = _manifestCache[code] || {};
+  const dir = code === "in" ? "movie" : `${code}/movie`;
+  return Object.entries(m)
+    .filter(([slug, e]) => e && e.catalog && e.live && fs.existsSync(`${dir}/${slug}.html`))
+    .sort((a, b) => String(b[1].archivedOn || "").localeCompare(String(a[1].archivedOn || "")) || a[0].localeCompare(b[0]))
+    .slice(0, max)
+    .map(([slug, e]) => ({ title: e.title || slug, href: `/${dir}/${slug}.html` }));
 }
 
 // ============================================================================
@@ -7446,6 +8051,22 @@ function heroPreload(data) {
   return `<link rel="preload" as="image" href="${escHtml(heroBgUrl(pick.backdrop))}" fetchpriority="high">`;
 }
 
+// A hub's share/Discover image: the first listed title with a large image (its branded card,
+// else its w1280 backdrop — see socialImage). Every hub, homepage and week page used to share
+// one logo image, which Discover skips and which made every link preview look identical.
+function hubOgImage(items, cfg) {
+  for (const it of items || []) {
+    const src = socialImage(it, cfg);
+    if (src && !/\/w(92|154|185|342)\//.test(src)) return src;
+  }
+  return "https://filmychill.com/og-image.png";
+}
+function ogImageTag(src) {
+  const big = /\/w1280\//.test(src) ? '\n<meta property="og:image:width" content="1280">\n<meta property="og:image:height" content="720">'
+    : /\/cards\//.test(src) || /og-image\.png$/.test(src) ? '\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">' : "";
+  return `<meta property="og:image" content="${escHtml(src)}">${big}`;
+}
+
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   const V = streamVocab(cfg);
@@ -7475,6 +8096,8 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "ANALYTICS", analyticsTag());
   html = replaceBetween(html, "LASTSCAN", escHtml(ssrLastScan(data, cfg)));
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
+  // Homepage share/Discover image: the Pick of the Week, then the lists (see hubOgImage).
+  html = replaceBetween(html, "OGIMAGE", ogImageTag(hubOgImage([heroPickOf(data), ...(data.theatres || []), ...(data.ott || [])].filter(Boolean), cfg)));
   html = replaceBetween(html, "HERO", ssrHero(data));
   html = replaceBetween(html, "HEROPRELOAD", heroPreload(data));
   // The first two theatre posters sit above the fold on desktop: load them immediately.
@@ -7591,7 +8214,9 @@ module.exports = {
   buildRssFeed, archivePatchHtml, stripAggregateRating, retitleFrozen, filmTitleTag, reconcilePagesManifest,
   buildOttMonthPage, writeOttMonthPages, ottMonthPath, ottMonthUrl, backfillCatalog,
   buildScopedMonthPage, writePlatformMonthPages, writeLanguageMonthPages, monthRow,
-  fitSiteTitle, fitFirst, ssrHero, heroPreload, ssrCard, pruneDeadHubLinks, sweepDeadHubLinks, theatreRunState, visibleText, crossCountryLeak, neutralizeCrossCountry, repairLegacyPages, freshenFrozenCopy, countryNameForms, settleReleasedCopy, patchDueIfPassed, applyArrivalPatch, certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
+  hubOgImage, ogImageTag, peopleIndexFor, buildPersonPage, writePeoplePages, personPageUrl, PEOPLE_MIN,
+  verifiedAvailability, buildStreamingPage, writeStreamingPages, streamPagePath, streamPageUrl, STREAM_PAGE_MIN, STREAM_LANG_MIN,
+  backfillStreamClaims, settleDepartedCopy, fitSiteTitle, fitFirst, ssrHero, heroPreload, ssrCard, pruneDeadHubLinks, sweepDeadHubLinks, theatreRunState, visibleText, crossCountryLeak, neutralizeCrossCountry, repairLegacyPages, freshenFrozenCopy, countryNameForms, settleReleasedCopy, patchDueIfPassed, applyArrivalPatch, certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
   platformMonthPath, platformMonthUrl, languageMonthPath, languageMonthUrl, SCOPED_MONTH_MIN,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, ARRIVAL_MAX_RELEASE_AGE, SEEN_RETENTION_DAYS,
   socialImage,
