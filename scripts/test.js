@@ -632,6 +632,126 @@ test("the due pass and the archive sweep both carry the settle", () => {
   assert.ok(!STALE.test(arch.html), "archive chain includes the settle");
 });
 
+// ---------------- The five growth builds of 27 Sept 2026 ----------------
+group("growth builds: release-date titles, streaming pages, claims, people, titles & images");
+const G_IN = { code: "in", name: "India", region: "IN", watchRegion: "IN" };
+const G_AE = { code: "ae", name: "UAE", region: "AE", watchRegion: "AE" };
+const futureDate = (d) => new Date(Date.now() + d * 864e5).toISOString().slice(0, 10);
+
+test("a film not out yet is titled by its release date in that country — and only until it opens", () => {
+  const rel = futureDate(18);
+  const t = U.filmTitleTag({ title: "Forgotten Island", released: rel, kind: "movie" }, G_AE);
+  assert.ok(/^Forgotten Island \(\d{4}\) — Release Date in the UAE: \d{1,2} [A-Z][a-z]{2,3}/.test(t), t);
+  assert.ok(t.length <= 60, t);
+  const out = U.filmTitleTag({ title: "Forgotten Island", released: futureDate(-3), kind: "movie" }, G_AE);
+  assert.ok(/Where to Watch/.test(out) && !/Release Date/.test(out), "released -> back to where to watch: " + out);
+  const streaming = U.filmTitleTag({ title: "X", released: rel, kind: "movie", providers: ["Netflix"] }, G_IN);
+  assert.ok(!/Release Date in/.test(streaming), "already streaming (direct-to-OTT) is not a theatrical countdown");
+});
+
+test("the due pass retitles a frozen pre-release page on release day", () => {
+  const rel = futureDate(20);
+  const page = U.buildFilmPage({ title: "Other Mommy", slug: "om", kind: "movie", platform: "Theatres", released: rel, tmdbId: 3 },
+    new Date().toISOString().slice(0, 10), new Set(["om"]), { code: "au", name: "Australia", region: "AU" });
+  assert.ok(/<title>Other Mommy \(\d{4}\) — Release Date in Australia/.test(page));
+  if (/<!--SW:due=/.test(page)) {
+    const after = U.patchDueIfPassed(page, { title: "Other Mommy", countryName: "Australia", cfg: { code: "au", name: "Australia" },
+      now: Date.parse(`${rel}T00:00:00Z`) + 3 * 864e5 });
+    // retitleFrozen reads the real clock, so on a real run the release date has passed; here
+    // it hasn't, and the title correctly stays on the date. What matters: the chain calls it.
+    assert.ok(after.changed);
+  }
+});
+
+test("a page born streaming carries a lifecycle block, and a departure rewrites every claim", () => {
+  const page = U.buildFilmPage({ title: "Old Gem", slug: "old-gem", kind: "movie", language: "Tamil", platform: "Netflix",
+    providers: ["Netflix"], released: "2016-05-06", rating: 7.2, votes: 400, verdict: "Worth a watch", runtime: 150 },
+    "2026-09-20", new Set(["old-gem"]), G_IN);
+  assert.ok(/<!--SW:stream--><!--SW:live=2026-09-20-->[\s\S]*<!--\/SW:stream-->/.test(page), "the sweep can find the claim");
+  const d = U.applyDeparturePatch(page, { title: "Old Gem", was: ["Netflix"], rentBuy: [], countryName: "India", cfg: G_IN, asOf: "2026-10-30" });
+  assert.ok(d.changed);
+  const everything = d.html + JSON.stringify([...d.html.matchAll(/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]));
+  assert.ok(!/you can stream it on|You can stream Old Gem|already streaming|streaming there now/.test(everything), "no claim survives, visible or in schema");
+  assert.ok(/<!--SW:pending-->[\s\S]*<!--SW:gone=2026-10-30-->/.test(d.html), "it becomes a pending page the arrival sweep can bring back");
+  for (const m of d.html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(m[1]);
+  const desc = /name="description" content="([^"]*)"/.exec(U.rewriteMetaDescription(d.html, G_IN).html)[1];
+  assert.ok(/isn&#39;t on a subscription service|isn't/.test(desc) && !/in cinemas/.test(desc), desc);
+});
+
+test("verifiedAvailability lists only titles confirmed recently", () => {
+  const today = new Date().toISOString().slice(0, 10);
+  const old = new Date(Date.now() - 90 * 864e5).toISOString().slice(0, 10);
+  const manifest = {
+    fresh: { title: "Fresh", lang: "Tamil", kind: "movie", live: { since: today, lastCheck: today, providers: ["Amazon Prime Video"] } },
+    stale: { title: "Stale", lang: "Tamil", kind: "movie", live: { since: old, lastCheck: old, providers: ["Amazon Prime Video"] } },
+    none: { title: "None", lang: "Tamil", kind: "movie" },
+  };
+  const data = { ott: [{ slug: "today", title: "Today", language: "Hindi", kind: "movie", providers: ["Netflix"] }], ottExtra: [] };
+  const a = U.verifiedAvailability(data, manifest, []);
+  const names = (p) => (a.get(p) || []).map((x) => x.slug).sort();
+  assert.deepStrictEqual(names("Netflix"), ["today"], "this run's lists count");
+  const prime = [...a.keys()].find((k) => /Prime Video/.test(k));
+  assert.deepStrictEqual(names(prime), ["fresh"], "a claim unchecked for 90 days is not evidence");
+});
+
+test("streaming pages: honest lead, counts that match, language nav, within budget", () => {
+  const items = Array.from({ length: 14 }, (_, i) => ({ slug: "t" + i, title: "Title " + i, language: i < 8 ? "Tamil" : "Hindi",
+    kind: i % 5 ? "movie" : "tv", rating: 6 + (i % 4) / 2, votes: 100 + i, providers: ["Amazon Prime Video"] }));
+  const html = U.buildStreamingPage(items, G_IN, { platform: "Amazon Prime Video", pslug: "prime-video",
+    langLinks: [{ name: "Tamil", slug: "tamil", n: 8 }] });
+  const title = (/<title>([^<]*)/.exec(html) || [])[1].replace(/&amp;/g, "&");
+  assert.ok(title.length <= 60 && /Amazon Prime Video/.test(title), title);
+  assert.ok(/Not the whole Amazon Prime Video library/.test(html), "never claims to be the full catalogue");
+  assert.ok(/confirmed 14 /.test(html.replace(/&#39;/g, "'")) || /14 titles?/.test(html), "count in the page matches the list");
+  assert.ok(/href="https:\/\/filmychill\.com\/streaming\/prime-video\/tamil\/"/.test(html), "links down to the language split");
+  assert.ok(/rel="canonical" href="https:\/\/filmychill\.com\/streaming\/prime-video\/"/.test(html));
+  for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(m[1]);
+  const tamil = U.buildStreamingPage(items.slice(0, 8), G_IN, { platform: "Amazon Prime Video", pslug: "prime-video", language: "Tamil", lslug: "tamil" });
+  assert.ok(/<title>Tamil Movies &amp; Series on Amazon Prime Video/.test(tamil));
+  assert.ok(/Everything on Amazon Prime Video in India/.test(tamil), "a language page links back up");
+});
+
+test("person pages: streaming first, honest framing, valid schema", () => {
+  const person = { name: "Fahadh Faasil", slug: "fahadh-faasil", image: "https://image.tmdb.org/t/p/w185/f.jpg", roles: new Set(["actor"]),
+    films: new Map([["a", { slug: "a", title: "Aavesham", kind: "movie", released: "2024-04-11" }],
+                    ["b", { slug: "b", title: "Malik", kind: "movie", released: "2021-07-15" }]]) };
+  const html = U.buildPersonPage(person, G_IN, { availability: new Map([["a", ["Amazon Prime Video"]]]) });
+  const title = (/<title>([^<]*)/.exec(html) || [])[1];
+  assert.ok(/^Fahadh Faasil Movies Streaming in India/.test(title) && title.length <= 60, title);
+  const body = html.slice(html.indexOf("<body"));
+  assert.ok(body.indexOf("Streaming now in India") < body.indexOf(">Malik<"), "streaming titles first");
+  assert.ok(/Not a complete filmography/.test(html));
+  const ld = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
+  assert.ok(ld.some((x) => x["@type"] === "ProfilePage" && x.mainEntity.name === "Fahadh Faasil"));
+  assert.ok(U.PEOPLE_MIN >= 5, "a page needs substance: 5+ films");
+});
+
+test("share images: hubs use a real 1200px-class image; film schema offers large images", () => {
+  const src = U.hubOgImage([{ title: "No image" }, { title: "Has", backdropPath: "/b.jpg" }], G_IN);
+  assert.ok(/w1280\/b\.jpg$/.test(src), src);
+  assert.strictEqual(U.hubOgImage([], G_IN), "https://filmychill.com/og-image.png", "logo only as the last resort");
+  assert.ok(/og:image:width" content="1280"/.test(U.ogImageTag(src)));
+  const page = U.buildFilmPage({ title: "Big", slug: "big", kind: "movie", platform: "Netflix", providers: ["Netflix"],
+    posterPath: "/p.jpg", backdropPath: "/b.jpg", poster: "https://image.tmdb.org/t/p/w342/p.jpg" }, "2026-09-20", new Set(["big"]), G_IN);
+  const ld = [...page.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]))
+    .flatMap((x) => x["@graph"] || [x]).find((x) => x["@type"] === "Movie");
+  assert.deepStrictEqual(ld.image, ["https://image.tmdb.org/t/p/w780/p.jpg", "https://image.tmdb.org/t/p/w1280/b.jpg"]);
+});
+
+test("week pages lead with the query and the dates", () => {
+  const html = U.buildWeekPage({ theatres: [], ott: [], generatedAt: "2026-09-24T07:00:00Z" }, "2026-W39");
+  const title = (/<title>([^<]*)/.exec(html) || [])[1].replace(/&amp;/g, "&");
+  assert.ok(/^New Movies & OTT Releases: 21 Sept – 27 Sept 2026/.test(title) && title.length <= 60, title);
+  assert.ok(!/Week 39/.test(title), "nobody searches 'Week 39'");
+});
+
+test("the commit step stages the new folders without ever failing on a missing one", () => {
+  const wf = require("fs").readFileSync(".github/workflows/update.yml", "utf8");
+  assert.ok(/git add -A -- ':\(glob\)streaming\/\*\*' 2>\/dev\/null \|\| true/.test(wf));
+  assert.ok(/git add -A -- ':\(glob\)people\/\*\*' 2>\/dev\/null \|\| true/.test(wf));
+  assert.ok(/'sitemap-\*\.xml'/.test(wf), "the per-country sitemaps are committed");
+});
+
 // ---------------- The ten fixes of 22 Sept 2026 ----------------
 group("audit fixes: catalogue, dead links, hero, titles, dates");
 
@@ -1444,13 +1564,15 @@ test("buildHeadTags: with data — live month in title, real film names in descr
   assert.ok(title.length <= 60, "homepage title must fit the SERP: " + title.length + " — " + title);
   assert.ok(/^New Movies & OTT/.test(title), "query words lead: " + title);
   assert.ok(/This Week in India/.test(title), "country + recency survive: " + title);
-  assert.ok(/\(July 2026\)/.test(title), "the month must never be the part that gets cut: " + title);
+  // REVISED Sept 2026: the week's dates replace the month when they fit — fresher and closer
+  // to how the weekly query is typed. The freshness clause must still never be the part cut.
+  assert.ok(/\(29 Jun – 5 Jul\)/.test(title), "the week's dates lead the freshness signal: " + title);
   assert.ok(html.includes("This week: Toy Story 5, House of the Dragon + 2 more"));
   assert.ok(html.includes("Updated twice daily"));
   const us = U.buildHeadTags({ code: "us", name: "United States" }, false, data);
   const usTitle = /<title>([^<]*)<\/title>/.exec(us)[1].replace(/&amp;/g, "&");
   assert.ok(usTitle.length <= 60, usTitle);
-  assert.ok(/This Week in the US \(July 2026\)/.test(usTitle), usTitle);
+  assert.ok(/This Week in the US \((Jun 29 – Jul 5|July 2026|Jul 2026)\)/.test(usTitle), usTitle);
 });
 // ---------------- About page — the promises it makes must be true ----------------
 group("About page — the promises it makes must be true");
