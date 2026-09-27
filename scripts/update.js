@@ -1733,6 +1733,8 @@ function buildFaqs(item, countryName = "India", cfg = null) {
     const arrival = item.ottFreshDate || null;
     if (provs.length) {
       ottA = `${item.title} is already streaming in ${countryName} on ${provs.join(", ")}${arrival ? ` — it arrived on ${arrival}` : ""}.`;
+    } else if (digitalUpcoming(item)) {
+      ottA = `${digitalAnnounceText(item.title, item.digitalDate, item.digitalNote, countryName, cfg)} This page updates automatically the day it starts streaming.`;
     } else {
       const est = item.platform === "Theatres" ? streamWindowEstimate(item.released, item.language) : null;
       const hint = est && !est.passed
@@ -1925,10 +1927,29 @@ function regionalTheatricalDate(d, region) {
   return dates[0] || null;
 }
 
+// Pure: the region's ANNOUNCED digital (streaming) release — TMDB release_dates type 4.
+// Platforms publish these ahead of arrival and TMDB carries them, often with the platform in
+// the note ("ZEE5", "Netflix"). Sept 2026: a TMDB-based competitor listed Hi! on ZEE5 for
+// 25 Sept days ahead while FilmyChill said "not announced" — the data was in the same API
+// response FilmyChill already fetches. Earliest type-4 date wins; the note is kept only when
+// it names something (TMDB sometimes stores "" or a region code).
+function digitalReleaseFor(d, region) {
+  const rel = d && d.release_dates && d.release_dates.results
+    ? d.release_dates.results.find((r) => r.iso_3166_1 === region) : null;
+  const dig = ((rel && rel.release_dates) || [])
+    .filter((x) => x.type === 4 && x.release_date)
+    .map((x) => ({ date: String(x.release_date).slice(0, 10), note: String(x.note || "").trim() }))
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+  if (!dig) return null;
+  const note = /^[A-Za-z0-9+ .&'-]{2,30}$/.test(dig.note) && !/^[A-Z]{2}$/.test(dig.note) ? dig.note : "";
+  return { date: dig.date, note };
+}
+
 async function enrich(kind, id, region = "IN") {
   const extra = kind === "movie" ? "release_dates" : "content_ratings";
   const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,external_ids,recommendations,${extra}` });
 
+  const digital = kind === "movie" ? digitalReleaseFor(d, region) : null;
   const cert = certFor(kind, d, region);
 
   // Trailer — fall back to a YouTube search link if TMDB has no video yet
@@ -2016,6 +2037,9 @@ async function enrich(kind, id, region = "IN") {
     ...(regionalRelease ? { released: regionalRelease } : {}),
     ...(castPics.length ? { castPics } : {}),
     ...(theatrical === false ? { theatrical: false } : {}), // only serialized when it matters
+    // Announced streaming date (see digitalReleaseFor). Only while nothing is streaming yet:
+    // once a provider exists, "where to watch" is the answer and the date is history.
+    ...((kind === "movie" && !providers.length && digital) ? { digitalDate: digital.date, ...(digital.note ? { digitalNote: digital.note } : {}) } : {}),
   };
 }
 
@@ -3003,6 +3027,9 @@ async function main() {
   // reflect (see sweepStreamingArrivals). Runs after archiving so newly-frozen pages
   // are eligible immediately; budgeted per country.
   for (const cfg of builtCountries) {
+    // First give every frozen page an id the sweep can use (see recoverTmdbIds).
+    try { await recoverTmdbIds(cfg, pagesManifest); }
+    catch (e) { console.warn(`  id recovery [${cfg.code}] skipped: ${e.message}`); }
     try { await sweepStreamingArrivals(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
     catch (e) { console.warn(`  sweep [${cfg.code}] skipped: ${e.message}`); }
     // The mirror pass: recheck claims we already made (see sweepStreamingDepartures).
@@ -3043,6 +3070,8 @@ async function main() {
     catch (e) { console.warn(`  streaming pages [${cfg.code}] skipped: ${e.message}`); }
     try { writePeoplePages(dataByCode[cfg.code], cfg, pagesManifest); }
     catch (e) { console.warn(`  people pages [${cfg.code}] skipped: ${e.message}`); }
+    try { writeDatedOttPages(dataByCode[cfg.code], cfg, pagesManifest); }
+    catch (e) { console.warn(`  dated OTT pages [${cfg.code}] skipped: ${e.message}`); }
   }
 
   // All countries are built by now, so the filesystem finally shows every cluster's true
@@ -3212,7 +3241,15 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
   const windowBasis = est && est.known ? `the usual ${item.language} window` : "the usual window for a release like this";
 
   let desc;
-  if (opts.gone) {
+  if (item.kind !== "tv" && digitalUpcoming(item)) {
+    const when = fmtDateFull(item.digitalDate, localeFor((cfg && cfg.code) || "in"));
+    const on = item.digitalNote ? ` on ${item.digitalNote}` : "";
+    desc = fitDesc([
+      `${item.title}${yr} starts streaming${on} in ${country} on ${when}. The verdict, runtime and cast — and whether it's worth the wait.`,
+      `${item.title} streams${on} in ${country} from ${when} — verdict, runtime and cast.`,
+      `${item.title} streams${on} in ${country} from ${when}.`,
+    ]);
+  } else if (opts.gone) {
     // Left every subscription service we track. Say so — never "in cinemas", never a platform.
     desc = fitDesc([
       `${item.title}${yr} isn't on a subscription service in ${country} right now. Where it streamed before, the verdict, and whether it's worth tracking down.`,
@@ -3328,6 +3365,21 @@ function filmTitleTag(item, cfg = null) {
       `${item.title}${yr} — Release Date in ${country}`,
       `${item.title} — Release Date: ${d}`,
       `${item.title}${yr} — Release Date`,
+    ]);
+  }
+  // Announced streaming date, not arrived yet: the page CAN answer "OTT release date" now,
+  // with the date (and platform when TMDB names it). See digitalReleaseFor.
+  if (item.kind !== "tv" && digitalUpcoming(item)) {
+    const code = (cfg && cfg.code) || "in";
+    const d = fmtDateShort(item.digitalDate, Date.now(), localeFor(code));
+    const on = item.digitalNote ? ` on ${item.digitalNote}` : "";
+    const label = V.word === "OTT" ? "OTT Release Date" : "Streaming Date";
+    return fitTitle([
+      `${item.title}${yr} ${label}: ${d}${on} | FilmyChill`,
+      `${item.title}${yr} ${label}: ${d}${on}`,
+      `${item.title} ${label}: ${d}${on}`,
+      `${item.title}${yr} ${label}: ${d}`,
+      `${item.title} ${label}: ${d}`,
     ]);
   }
   // "OTT" is Indian-market phrasing; TV has no OTT release date to speak of; and with no
@@ -3809,6 +3861,11 @@ ${(() => {
         ? `${e(item.title)} opens in theatres in ${e(country)} today.`
         : `${e(item.title)} hasn't had its theatrical release yet${due ? `, and is due ${e(fmtDateFull(due, localeFor(code)))}` : ""}.`;
       return `<!--SW:pending--><!--SW:due=${e(due)}--><h2>${e(V.heading(item.title))}</h2><p>${opens} ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens — this page updates automatically the day it starts streaming.</p><!--/SW:pending-->`;
+    }
+    if (digitalUpcoming(item)) {
+      const on = item.digitalNote ? ` on ${e(item.digitalNote)}` : "";
+      return `<!--SW:pending--><!--SW:digital=${e(item.digitalDate)}|${e(item.digitalNote || "")}--><h2>${e(V.heading(item.title))}</h2>`
+        + `<p><strong>Streaming from ${e(fmtDateFull(item.digitalDate, localeFor(code)))}${on}.</strong> ${e(digitalAnnounceText(item.title, item.digitalDate, item.digitalNote, country, cfg))} This page switches to \u201cstreaming now\u201d the day it lands.</p><!--/SW:pending-->`;
     }
     const est = streamWindowEstimate(item.released, item.language);
     const body = est && !est.passed
@@ -4461,6 +4518,12 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       }
     }
   }
+  // Dated OTT pages: they change every run, so today is their honest lastmod.
+  const datedUrls = [];
+  for (const c of countries) {
+    if (fs.existsSync(comingPath(c.code))) datedUrls.push(`  <url><loc>${comingUrl(c.code)}</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>`);
+    if (fs.existsSync(todayPath(c.code))) datedUrls.push(`  <url><loc>${todayUrl(c.code)}</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>`);
+  }
   const peopleUrls = [];
   for (const c of countries) {
     const base = PEOPLE_BASE(c.code);
@@ -4479,7 +4542,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const urlset = (entries) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset ${NS}>\n${entries.join("\n")}\n</urlset>\n`;
   const newest = (entries) => entries.reduce((mx, x) => { const d = (/<lastmod>([^<]+)<\/lastmod>/.exec(x) || [])[1] || ""; return d > mx ? d : mx; }, "") || today;
   const children = [];
-  const pageEntries = [...countryUrls, ...langUrls, ...hubUrls, ...streamUrls, ...peopleUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...scopedMonthUrls, ...aboutUrls, ...ottUrls];
+  const pageEntries = [...countryUrls, ...langUrls, ...hubUrls, ...datedUrls, ...streamUrls, ...peopleUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...scopedMonthUrls, ...aboutUrls, ...ottUrls];
   fs.writeFileSync("sitemap-pages.xml", urlset(pageEntries));
   children.push({ file: "sitemap-pages.xml", lastmod: newest(pageEntries) });
   for (const c of countries) {
@@ -5234,6 +5297,7 @@ function frozenFilmFacts(html) {
   const providers = subPills.filter((p) => !statusPill.test(p));
   const pending = /<!--SW:pending-->/.test(html);
   const gone = /<!--SW:gone=/.test(html);
+  const dig = /<!--SW:digital=(\d{4}-\d{2}-\d{2})\|([^>]*?)-->/.exec(html);
   const runEnded = /Theatrical run ended/.test(html);
   const runOpen = OPEN_PILL_RE.test(html);
   return {
@@ -5252,6 +5316,7 @@ function frozenFilmFacts(html) {
       rating: star ? Number(star[1]) : null,
       votes: star ? 999 : 0,
       providers,
+      ...(dig ? { digitalDate: dig[1], ...(dig[2] ? { digitalNote: dig[2].replace(/&amp;/g, "&") } : {}) } : {}),
       rentBuy,
       platform: providers.length ? providers[0] : (gone ? "" : (pending || runEnded || runOpen ? "Theatres" : "")),
     },
@@ -5517,7 +5582,9 @@ function reconcilePagesManifest(manifest, code, currentSlugs, diskSlugs, todaySt
 // ============================================================================
 const SWEEP_MIN_WEEKS = 2;
 const SWEEP_MAX_WEEKS = 30;
-const SWEEP_MAX_CHECKS = 18;
+// 60, not 18 (Sept 2026): with 1,000+ frozen release pages the youngest 18 were rechecked
+// every run and everything older never was. Now rotated by last check (see sweepCandidates).
+const SWEEP_MAX_CHECKS = 60;
 
 // Pure: which archived slugs are worth an API call this run, newest release first.
 function sweepCandidates(entries, now = new Date(), max = SWEEP_MAX_CHECKS) {
@@ -5526,12 +5593,47 @@ function sweepCandidates(entries, now = new Date(), max = SWEEP_MAX_CHECKS) {
     .filter((x) => x.archivedOn && x.tmdbId && x.released && x.kind !== "tv")
     .map((x) => ({ ...x, ageWeeks: (now.getTime() - new Date(x.released + "T00:00:00Z").getTime()) / MS_WEEK }))
     .filter((x) => Number.isFinite(x.ageWeeks) && x.ageWeeks >= SWEEP_MIN_WEEKS && x.ageWeeks <= SWEEP_MAX_WEEKS)
-    .sort((a, b) => a.ageWeeks - b.ageWeeks)
+    // Least recently checked first (never-checked before all), youngest first within that:
+    // every eligible page gets its turn instead of the same newest pages every run.
+    .sort((a, b) => String(a.swept || "").localeCompare(String(b.swept || "")) || a.ageWeeks - b.ageWeeks)
     .slice(0, max);
 }
 
 // Pure: swap a page's pending block for a "now streaming" answer, and upgrade the
 // theatrical pill to real provider pills. Returns {html, changed} like archivePatchHtml.
+// ============================================================================
+// ANNOUNCED STREAMING DATES — one phrasing, used by the live page, the frozen-page patch, the
+// FAQ, the title and the description, so they can never disagree.
+// ============================================================================
+function digitalAnnounceText(title, date, note, country, cfg) {
+  const d = fmtDateFull(date, localeFor((cfg && cfg.code) || "in"));
+  return `${title} is scheduled to start streaming${note ? ` on ${note}` : ""} in ${country} on ${d}.`;
+}
+function digitalUpcoming(item) {
+  return !!(item && item.digitalDate && releaseState(item.digitalDate) !== "released"
+    && !(Array.isArray(item.providers) && item.providers.length));
+}
+
+// Frozen pending page -> "streaming from <date> on <platform>". Replaces the pending block's
+// body (keeps the markers, so the arrival sweep still finds and replaces it on the day) and
+// the OTT-date FAQ answer, in both escapings. Title and description are rebuilt by the caller
+// from the stamped marker (frozenFilmFacts reads it).
+function applyDigitalDatePatch(html, { title, date, note = "", countryName, cfg }) {
+  const start = "<!--SW:pending-->", end = "<!--/SW:pending-->";
+  const a = html.indexOf(start), b = html.indexOf(end);
+  if (a === -1 || b === -1 || b < a || !date) return { html, changed: false };
+  const V = streamVocab(cfg);
+  const e = escHtml;
+  const text = digitalAnnounceText(title, date, note, countryName, cfg);
+  const block = `${start}<!--SW:digital=${e(date)}|${e(note || "")}--><h2>${e(V.heading(title))}</h2>`
+    + `<p><strong>Streaming from ${e(fmtDateFull(date, localeFor((cfg && cfg.code) || "in")))}${note ? ` on ${e(note)}` : ""}.</strong> ${e(text)} This page switches to \u201cstreaming now\u201d the day it lands.</p>${end}`;
+  let out = html.slice(0, a) + block + html.slice(b + end.length);
+  const A = "(?:'|&#39;)";
+  out = out.replace(new RegExp(`\\bAn? (?:OTT|streaming|Streaming) release date for [^<"]*? hasn${A}t been officially announced yet\\.[^<"]*?This page updates automatically the day it starts streaming\\.`, "g"),
+    (m) => (m.includes("&#39;") ? e(text) : text) + " This page updates automatically the day it starts streaming.");
+  return { html: out, changed: out !== html };
+}
+
 function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf, now = Date.now() }) {
   if (!providers || !providers.length) return { html, changed: false };
   const V = streamVocab(cfg);
@@ -6020,6 +6122,68 @@ function titleFromPage(html) {
 
 // Live pass: run the sweep for one country. Network-bound, so failures are logged
 // and skipped — a page that stays pending one more day is a non-event.
+// ============================================================================
+// TMDB ID RECOVERY — the pages the arrival sweep could never see.
+//
+// Sept 2026: 1,025 of 1,678 frozen release pages had no tmdbId (and many no release date)
+// in their manifest entry, written before those fields existed. The arrival sweep skips any
+// entry without both, so these pages could never flip to "streaming now". The week this was
+// found, Hi! (the site's biggest page: 7,220 impressions a month, mostly "hi ott release
+// date") had been on ZEE5 for two days while its page said "not streaming yet" — and so did
+// Toxic, Awarapan 2 and Baby Do Die Do.
+//
+// Release date, language, kind and title come free from the page's own JSON-LD. The TMDB id
+// takes one search: title + year, and a result is accepted ONLY if its poster or backdrop is
+// an image already on the page. A title match alone is never enough (there are many films
+// called "Hi"). Two failed attempts and the page is left alone rather than retried forever.
+// ============================================================================
+const ID_RECOVERY_BUDGET = 40;   // searches per country per run; the backlog clears in ~2 runs
+
+async function recoverTmdbIds(cfg, manifest, { budget = ID_RECOVERY_BUDGET, api = { tmdb, pause: sleep } } = {}) {
+  const code = cfg.code;
+  const dir = code === "in" ? "movie" : `${code}/movie`;
+  const m = manifest[code] || {};
+  let recovered = 0, filled = 0, tried = 0;
+  // Newest releases first: those are the pages still inside the arrival window, where a
+  // recovered id pays off the same run (Hi!, 28 Aug, before a 2019 film nobody is waiting on).
+  const order = Object.entries(m).sort((a, b) =>
+    String((b[1] && (b[1].released || b[1].archivedOn)) || "").localeCompare(String((a[1] && (a[1].released || a[1].archivedOn)) || "")));
+  for (const [slug, e] of order) {
+    if (!e || !e.archivedOn || e.catalog || (e.tmdbId && e.released)) continue;
+    let html;
+    try { html = fs.readFileSync(`${dir}/${slug}.html`, "utf8"); } catch { continue; }
+    const facts = frozenFilmFacts(html);
+    if (facts) {
+      const it = facts.item;
+      if (!e.released && it.released) { e.released = it.released; filled++; }
+      if (!e.lang && it.language) e.lang = it.language;
+      if (!e.kind && it.kind) e.kind = it.kind;
+      if (!e.title && it.title) e.title = it.title;
+    }
+    if (e.tmdbId || (e.noMatch || 0) >= 2 || tried >= budget) continue;
+    const title = (facts && facts.item.title) || "";
+    if (!title) continue;
+    const kind = e.kind === "tv" ? "tv" : "movie";
+    const images = new Set([...html.matchAll(/image\.tmdb\.org\/t\/p\/w\d+(\/[A-Za-z0-9_-]+\.(?:jpg|png))/g)].map((x) => x[1]));
+    if (!images.size) continue;
+    const year = String(e.released || "").slice(0, 4);
+    tried++;
+    let hit = null;
+    try {
+      for (const q of year ? [{ [kind === "tv" ? "first_air_date_year" : "year"]: year }, {}] : [{}]) {
+        const r = await api.tmdb(`/search/${kind}`, { query: title, include_adult: "false", ...q });
+        await api.pause(120);
+        hit = (r.results || []).find((x) => images.has(x.poster_path) || images.has(x.backdrop_path)) || null;
+        if (hit) break;
+      }
+    } catch (err) { console.warn(`  id recovery ${code}/${slug}: ${err.message}`); continue; }
+    if (hit) { e.tmdbId = hit.id; e.kind = kind; recovered++; }
+    else e.noMatch = (e.noMatch || 0) + 1;
+  }
+  if (recovered || filled) console.log(`  id recovery [${code}]: ${recovered} TMDB id(s) recovered from ${tried} search(es), ${filled} release date(s) filled from the page`);
+  return recovered;
+}
+
 async function sweepStreamingArrivals(manifest, cfg, asOf) {
   const m = manifest[cfg.code] || {};
   const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
@@ -6030,12 +6194,32 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
     catch { return false; }
   });
   if (!candidates.length) return;
-  let found = 0;
+  let found = 0, announced = 0;
   for (const c of candidates) {
     try {
-      const d = await tmdb(`/movie/${c.tmdbId}/watch/providers`);
-      const provs = dedupeProviders((d?.results?.[cfg.watchRegion]?.flatrate || []).map((x) => x.provider_name)).slice(0, 4);
-      if (!provs.length) continue;
+      // One call returns both answers: is it streaming, and if not, has a date been announced.
+      const d = await tmdb(`/movie/${c.tmdbId}`, { append_to_response: "watch/providers,release_dates" });
+      m[c.slug].swept = asOf;
+      const provs = dedupeProviders((d?.["watch/providers"]?.results?.[cfg.watchRegion]?.flatrate || []).map((x) => x.provider_name)).slice(0, 4);
+      if (!provs.length) {
+        const dig = digitalReleaseFor(d, cfg.watchRegion);
+        const prev = m[c.slug].digital || {};
+        if (dig && dig.date >= asOf && (dig.date !== prev.date || dig.note !== prev.note)) {
+          const p = `${dir}/${c.slug}.html`;
+          const r = applyDigitalDatePatch(fs.readFileSync(p, "utf8"), {
+            title: c.title || c.slug, date: dig.date, note: dig.note, countryName: countryNameFor(cfg), cfg,
+          });
+          if (r.changed) {
+            let out = rewriteMetaDescription(r.html, cfg).html;
+            out = retitleFrozen(out, cfg).html;
+            fs.writeFileSync(p, out);
+            m[c.slug].digital = { date: dig.date, note: dig.note || "" };
+            m[c.slug].last = asOf;
+            announced++;
+          }
+        }
+        continue;
+      }
       const p = `${dir}/${c.slug}.html`;
       const { html, changed } = applyArrivalPatch(fs.readFileSync(p, "utf8"), {
         title: c.title || c.slug, providers: provs, countryName: countryNameFor(cfg), cfg, asOf,
@@ -6050,7 +6234,7 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
       }
     } catch (e) { console.warn(`  sweep ${c.slug}: ${e.message}`); }
   }
-  console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming`);
+  console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming, ${announced} streaming date(s) announced`);
 }
 
 function loadPagesManifest() {
@@ -6597,7 +6781,15 @@ function buildPlatformHubPage(data, cfg, hub) {
     }
   }
   return listingPageHtml({
-    title: `New on ${hub.name} ${countryName} This Week (${monthYear}) | FilmyChill`,
+    // "9 New on JioHotstar This Week (21–27 Sept)": a count and the week's dates are the two
+    // things a searcher scanning results can check at a glance (and the count is exact: it is
+    // the number of new arrivals listed on the page). Falls back to the month when nothing new.
+    title: fitFirst(fresh.length ? [
+      `${fresh.length} New on ${hub.name} in ${countryName} This Week (${weekRangeFor(gen, code)})`,
+      `${fresh.length} New on ${hub.name} This Week (${weekRangeFor(gen, code)}) — ${countryName}`,
+      `${fresh.length} New on ${hub.name} This Week (${weekRangeFor(gen, code)})`,
+      `New on ${hub.name} ${countryName} This Week (${monthYear})`,
+    ] : [`New on ${hub.name} ${countryName} This Week (${monthYear}) | FilmyChill`, `New on ${hub.name} ${countryName} This Week (${monthYear})`], 60),
     desc: `${fresh.length ? "Every movie and series newly streaming" : "What's streaming"} on ${hub.name} in ${countryName} this week — ratings, critics' verdicts, what to skip. Updated twice daily.`,
     canonical: url,
     h1: `New on ${hub.name} in ${countryName} this week`,
@@ -6968,6 +7160,155 @@ function writePeoplePages(data, cfg, manifest) {
     fs.rmSync(`${base}/index.html`, { force: true });
   }
   return written;
+}
+
+// ============================================================================
+// "COMING TO OTT" and "NEW ON OTT TODAY" — the two dated pages the field has and we didn't.
+//
+// Coming to OTT: every ANNOUNCED streaming date we hold for this country (live lists via
+// enrich, frozen pages via the arrival sweep), grouped by week. It answers "upcoming OTT
+// releases" / "OTT releases next week" with dates, which no amount of "new this week" can.
+// Only announced dates — never the pattern estimates. Gated at COMING_MIN titles.
+//
+// New on OTT today: what first appeared on a subscription service in this country today,
+// yesterday and earlier this week, from the arrival record (ott-history.jsonl) — the site's
+// own observations, not a feed. Never empty: a quiet day shows the most recent arrivals.
+// ============================================================================
+const COMING_MIN = 3;
+const comingPath = (code) => (code === "in" ? "coming-to-ott/index.html" : `${code}/coming-to-ott/index.html`);
+const comingUrl = (code) => (code === "in" ? "https://filmychill.com/coming-to-ott/" : `https://filmychill.com/${code}/coming-to-ott/`);
+const todayPath = (code) => (code === "in" ? "new-on-ott/today/index.html" : `${code}/new-on-ott/today/index.html`);
+const todayUrl = (code) => (code === "in" ? "https://filmychill.com/new-on-ott/today/" : `https://filmychill.com/${code}/new-on-ott/today/`);
+
+// Pure: announced streaming dates for one country, today or later, soonest first.
+function announcedDates(data, manifestForCountry, index = [], now = Date.now()) {
+  const today = new Date(now).toISOString().slice(0, 10);
+  const idx = new Map((index || []).map((x) => [x.slug, x]));
+  const out = new Map();
+  for (const it of [...((data && data.theatres) || []), ...((data && data.comingSoon) || []), ...((data && data.langPools) ? Object.values(data.langPools).flat() : [])]) {
+    if (!it || !it.slug || !it.digitalDate || it.digitalDate < today) continue;
+    if (Array.isArray(it.providers) && it.providers.length) continue;
+    out.set(it.slug, { slug: it.slug, title: it.title, language: it.language || "", kind: it.kind || "movie", genre: it.genre || "",
+      poster: it.poster || "", rating: it.rating ?? null, votes: it.votes || 0, verdict: it.verdict || null,
+      date: it.digitalDate, platform: it.digitalNote || null });
+  }
+  for (const [slug, e] of Object.entries(manifestForCountry || {})) {
+    const dg = e && e.digital;
+    if (!dg || !dg.date || dg.date < today || out.has(slug) || e.live) continue;
+    const ix = idx.get(slug) || {};
+    out.set(slug, { slug, title: e.title || ix.title || slug, language: e.lang || ix.language || "", kind: e.kind || "movie",
+      genre: ix.genre || "", poster: ix.poster || "", rating: null, votes: 0, verdict: null, date: dg.date, platform: dg.note || null });
+  }
+  return [...out.values()].sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
+}
+
+function buildComingPage(items, cfg, { now = Date.now(), hasToday = true } = {}) {
+  const code = (cfg && cfg.code) || "in";
+  const country = countryNameFor(cfg);
+  const V = streamVocab(cfg);
+  const loc = localeFor(code);
+  const today = new Date(now);
+  const wk = (d) => { const dt = new Date(`${d}T00:00:00Z`); const w = isoWeekOf(dt); return weekSlug(w); };
+  const thisWk = weekSlug(isoWeekOf(today));
+  const nextMon = isoWeekMonday(thisWk); nextMon.setUTCDate(nextMon.getUTCDate() + 7);
+  const nextWk = weekSlug(isoWeekOf(nextMon));
+  const groups = [["This week", []], ["Next week", []], ["Later", []]];
+  for (const x of items) {
+    const w = wk(x.date);
+    const row = { ...x, hook: `Streaming from ${fmtDateFull(x.date, loc)}${x.platform ? ` on ${x.platform}` : ""}` };
+    (w === thisWk ? groups[0] : w === nextWk ? groups[1] : groups[2])[1].push(row);
+  }
+  const sections = groups.filter(([, xs]) => xs.length).map(([h, xs]) => ({ h2: h, items: xs }));
+  const n = items.length;
+  const faqs = [{
+    q: `What's coming to ${V.word} in ${country} next?`,
+    a: items.slice(0, 5).map((x) => `${x.title} (${fmtDateShort(x.date, now, loc)}${x.platform ? `, ${x.platform}` : ""})`).join(", ") + (n > 5 ? `, and ${n - 5} more.` : "."),
+  }, {
+    q: `Are these dates confirmed?`,
+    a: `Yes — every date here was announced by the platform or studio and published on TMDB. Estimates are never listed. Each page switches to "streaming now" the day the title lands.`,
+  }];
+  const url = comingUrl(code);
+  const linkable = items.filter((x) => x.slug);
+  return listingPageHtml({
+    title: fitFirst([`Upcoming ${V.Releases} in ${country}: ${n} Dates Announced | FilmyChill`, `Upcoming ${V.Releases} in ${country}: ${n} Dates Announced`,
+      `Upcoming ${V.Releases} in ${country} (${n})`, `Coming to ${V.word} in ${country}`], 60),
+    desc: fitFirst([`${n} films with an announced ${V.word === "OTT" ? "OTT" : "streaming"} release date in ${country}, soonest first — with the platform, where it's been named. Announced dates only, never estimates.`,
+      `${n} announced ${V.word === "OTT" ? "OTT" : "streaming"} release dates in ${country}, soonest first.`], 160),
+    canonical: url,
+    h1: `Coming to ${V.word} in ${country}`,
+    updLine: `${n} announced date${n === 1 ? "" : "s"} · updated ${new Date(now).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" })}`,
+    lead: `Films with a streaming date the platform has announced, soonest first. Nothing here is a guess: when a date moves, the list moves with it.`,
+    sections, faqs, code,
+    extraLd: [{ "@context": "https://schema.org", "@type": "CollectionPage", name: `Coming to ${V.word} in ${country}`, url,
+      isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
+      mainEntity: { "@type": "ItemList", numberOfItems: linkable.length,
+        itemListElement: linkable.map((x, i) => ({ "@type": "ListItem", position: i + 1, name: x.title, url: filmPageUrl(code, x.slug) })) } }],
+    navLinks: [...(hasToday ? [{ href: todayUrl(code), label: `New on ${V.word} today` }] : []), { href: ottWeekUrl(code), label: `This week's ${V.word} releases` }],
+    homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
+  });
+}
+
+function buildTodayPage(records, cfg, { index = [], now = Date.now(), hasComing = true } = {}) {
+  const code = (cfg && cfg.code) || "in";
+  const country = countryNameFor(cfg);
+  const V = streamVocab(cfg);
+  const loc = localeFor(code);
+  const day = (offset) => new Date(now - offset * 864e5).toISOString().slice(0, 10);
+  const today = day(0), yday = day(1), weekAgo = day(7);
+  const bySlug = new Map((index || []).map((x) => [x.slug, x]));
+  const mine = (records || []).filter((r) => r && r.c === code && r.first && r.first >= weekAgo)
+    .sort((a, b) => String(b.first).localeCompare(String(a.first)) || String(a.t || "").localeCompare(String(b.t || "")));
+  const rowOf = (r) => monthRow(r, { bySlug, code, now });
+  const tod = mine.filter((r) => r.first === today).map(rowOf);
+  const yst = mine.filter((r) => r.first === yday).map(rowOf);
+  const earlier = mine.filter((r) => r.first < yday).map(rowOf);
+  const sections = [];
+  if (tod.length) sections.push({ h2: `Today, ${fmtDateShort(today, now, loc)}`, items: tod });
+  if (yst.length) sections.push({ h2: `Yesterday, ${fmtDateShort(yday, now, loc)}`, items: yst });
+  if (earlier.length) sections.push({ h2: "Earlier this week", items: earlier });
+  const d = fmtDateShort(today, now, loc);
+  return listingPageHtml({
+    title: fitFirst(tod.length
+      ? [`${tod.length} New on ${V.word} Today in ${country} (${d}) | FilmyChill`, `${tod.length} New on ${V.word} Today in ${country} (${d})`, `New on ${V.word} Today (${d})`]
+      : [`New on ${V.word} Today in ${country} (${d}) | FilmyChill`, `New on ${V.word} Today in ${country} (${d})`, `New on ${V.word} Today (${d})`], 60),
+    desc: fitFirst([tod.length
+      ? `${tod.length} title${tod.length === 1 ? "" : "s"} started streaming in ${country} today, ${d}, plus everything that arrived this week — checked twice a day.`
+      : `What started streaming in ${country} over the last week, newest first — ${d}'s arrivals appear as soon as they land. Checked twice a day.`], 160),
+    canonical: todayUrl(code),
+    h1: `New on ${V.word} today — ${country}`,
+    updLine: `Updated ${new Date(now).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" })} · checked twice a day`,
+    lead: tod.length
+      ? `What appeared on a subscription service in ${country} today, then the rest of the week. Every date is the day FilmyChill first saw it streaming.`
+      : `Nothing new has landed in ${country} yet today. Here's everything that arrived this week, newest first — today's titles appear here the moment they do.`,
+    sections, faqs: [], code, extraLd: [],
+    // Only link pages that exist this run — the coming page is gated and can be absent.
+    navLinks: [...(hasComing ? [{ href: comingUrl(code), label: `Coming to ${V.word}` }] : []), { href: ottWeekUrl(code), label: `This week's ${V.word} releases` }],
+    homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
+  });
+}
+
+function writeDatedOttPages(data, cfg, manifest, records = null) {
+  const code = cfg.code;
+  const idx = filmIndexFor(cfg);
+  const items = announcedDates(data, (manifest || {})[code] || {}, idx);
+  const recs = records || readHistory();
+  const hasWeek = recs.some((r) => r && r.c === code && r.first && r.first >= new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10));
+  const hasComing = items.length >= COMING_MIN;
+  const cp = comingPath(code);
+  if (hasComing) {
+    fs.mkdirSync(cp.slice(0, cp.lastIndexOf("/")), { recursive: true });
+    fs.writeFileSync(cp, buildComingPage(items, cfg, { hasToday: hasWeek }));
+  } else if (fs.existsSync(cp)) {
+    fs.rmSync(cp.slice(0, cp.lastIndexOf("/")), { recursive: true, force: true });
+  }
+  const tp = todayPath(code);
+  if (hasWeek) {
+    fs.mkdirSync(tp.slice(0, tp.lastIndexOf("/")), { recursive: true });
+    fs.writeFileSync(tp, buildTodayPage(recs, cfg, { index: idx, hasComing }));
+  } else if (fs.existsSync(tp)) {
+    fs.rmSync(tp.slice(0, tp.lastIndexOf("/")), { recursive: true, force: true });
+  }
+  console.log(`  dated OTT pages [${code}]: ${items.length} announced date(s)${items.length >= COMING_MIN ? "" : " (below gate — no coming page)"}${hasWeek ? ", today page written" : ""}`);
 }
 
 function writePlatformHubPages(data, cfg) {
@@ -7563,6 +7904,22 @@ function marqueePick(list, cfg) {
   return best;
 }
 
+// "21–27 Sept" (day-first markets) / "Sep 21–27" (US, Philippines): the current ISO week, in
+// the market's own order. Shared by the homepage title and the weekly hub titles.
+function weekRangeFor(when, code) {
+  const wk = isoWeekOf(new Date(when));
+  const mon = isoWeekMonday(weekSlug(wk));
+  const sun = new Date(mon); sun.setUTCDate(mon.getUTCDate() + 6);
+  const loc = localeFor(code);
+  const dayMon = (d) => d.toLocaleDateString(loc, { day: "numeric", month: "short", timeZone: "UTC" });
+  const monthFirst = /^[A-Za-z]/.test(dayMon(mon));
+  const dd = (d) => String(d.getUTCDate());
+  const mm = (d) => dayMon(d).replace(/\d+/, "").replace(/[ ,]+/g, " ").trim();
+  return mon.getUTCMonth() === sun.getUTCMonth()
+    ? (monthFirst ? `${mm(mon)} ${dd(mon)}–${dd(sun)}` : `${dd(mon)}–${dd(sun)} ${mm(sun)}`)
+    : `${dayMon(mon)} – ${dayMon(sun)}`;
+}
+
 function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name, path: `/${cfg.code}/` };
   const url = `https://filmychill.com${m.path}`;
@@ -7594,18 +7951,7 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
     // The week's dates first: "this week (21–27 Sept)" is visibly fresher in a results page
     // than a month, and it is how the weekly query is written. The month tiers stay as the
     // fallback for markets whose name pushes the week form past 60 characters.
-    const wk = isoWeekOf(new Date(data.generatedAt || Date.now()));
-    const mon = isoWeekMonday(weekSlug(wk));
-    const sun = new Date(mon); sun.setUTCDate(mon.getUTCDate() + 6);
-    // In the market's own order: "21–27 Sept" day-first, "Sep 21–27" month-first (US, PH).
-    const loc = localeFor(cfg.code);
-    const dayMon = (d) => d.toLocaleDateString(loc, { day: "numeric", month: "short", timeZone: "UTC" });
-    const monthFirst = /^[A-Za-z]/.test(dayMon(mon));
-    const dd = (d) => String(d.getUTCDate());
-    const mm = (d) => dayMon(d).replace(/\d+/, "").replace(/[ ,]+/g, " ").trim();
-    const weekRange = mon.getUTCMonth() === sun.getUTCMonth()
-      ? (monthFirst ? `${mm(mon)} ${dd(mon)}–${dd(sun)}` : `${dd(mon)}–${dd(sun)} ${mm(sun)}`)
-      : `${dayMon(mon)} – ${dayMon(sun)}`;
+    const weekRange = weekRangeFor(data.generatedAt || Date.now(), cfg.code);
     const homeTitleOpts = [
       `New Movies & ${V.Releases} This Week in ${m.name} (${weekRange})`,
       `New Movies & ${V.Word} This Week in ${m.name} (${weekRange})`,
@@ -7802,7 +8148,10 @@ function buildMoreLinks(code, data = null) {
   // the most-crawled URL on the site, and before this nothing on it pointed at a catalogue page.
   const streaming = streamingPagesFor(code).map((x) => `<a href="${x.href}">${escHtml(x.name)}</a>`).join(" · ");
   const fresh = newlyAddedFor(code).map((x) => `<a href="${x.href}">${escHtml(x.title)}</a>`).join(" · ");
-  const extra = `${streaming ? `<br>Streaming now on: ${streaming}` : ""}${fresh ? `<br>Newly added: ${fresh}` : ""}`;
+  const V0 = streamVocab({ code });
+  const dated = [fs.existsSync(todayPath(code)) ? `<a href="${todayUrl(code).replace("https://filmychill.com", "")}">New on ${escHtml(V0.word)} today</a>` : "",
+    fs.existsSync(comingPath(code)) ? `<a href="${comingUrl(code).replace("https://filmychill.com", "")}">Coming to ${escHtml(V0.word)}</a>` : ""].filter(Boolean).join(" · ");
+  const extra = `${dated ? `<br>${dated}` : ""}${streaming ? `<br>Streaming now on: ${streaming}` : ""}${fresh ? `<br>Newly added: ${fresh}` : ""}`;
   if (code !== "in") return `${hubs ? hubs + " · " : ""}${monthLink ? monthLink + " · " : ""}${browse} · ${dataLink}${embed} · ${about}${extra}<br>Also on FilmyChill: ${others}`;
   const langs = LANGUAGE_PAGES.map(([name, slug]) => `<a href="/${slug}/">${name}</a>`).join(" · ");
   return `${langs}${hubs ? " · " + hubs : ""}${monthLink ? " · " + monthLink : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${dataLink}${embed} · ${about}${extra}<br>Also on FilmyChill: ${others}`;
@@ -8214,7 +8563,8 @@ module.exports = {
   buildRssFeed, archivePatchHtml, stripAggregateRating, retitleFrozen, filmTitleTag, reconcilePagesManifest,
   buildOttMonthPage, writeOttMonthPages, ottMonthPath, ottMonthUrl, backfillCatalog,
   buildScopedMonthPage, writePlatformMonthPages, writeLanguageMonthPages, monthRow,
-  hubOgImage, ogImageTag, peopleIndexFor, buildPersonPage, writePeoplePages, personPageUrl, PEOPLE_MIN,
+  announcedDates, buildComingPage, buildTodayPage, writeDatedOttPages, weekRangeFor,
+  recoverTmdbIds, digitalReleaseFor, digitalUpcoming, applyDigitalDatePatch, sweepCandidates, hubOgImage, ogImageTag, peopleIndexFor, buildPersonPage, writePeoplePages, personPageUrl, PEOPLE_MIN,
   verifiedAvailability, buildStreamingPage, writeStreamingPages, streamPagePath, streamPageUrl, STREAM_PAGE_MIN, STREAM_LANG_MIN,
   backfillStreamClaims, settleDepartedCopy, fitSiteTitle, fitFirst, ssrHero, heroPreload, ssrCard, pruneDeadHubLinks, sweepDeadHubLinks, theatreRunState, visibleText, crossCountryLeak, neutralizeCrossCountry, repairLegacyPages, freshenFrozenCopy, countryNameForms, settleReleasedCopy, patchDueIfPassed, applyArrivalPatch, certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
   platformMonthPath, platformMonthUrl, languageMonthPath, languageMonthUrl, SCOPED_MONTH_MIN,
