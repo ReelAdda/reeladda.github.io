@@ -632,6 +632,138 @@ test("the due pass and the archive sweep both carry the settle", () => {
   assert.ok(!STALE.test(arch.html), "archive chain includes the settle");
 });
 
+// ---------------- Arrivals, announced dates, dated pages (27 Sept 2026, second batch) ----------
+group("arrivals & announced dates: the moment a film lands, and the date before it does");
+const A_IN = { code: "in", name: "India", region: "IN", watchRegion: "IN" };
+const A_UK = { code: "uk", name: "United Kingdom", region: "GB", watchRegion: "GB" };
+const inDays = (d) => new Date(Date.now() + d * 864e5).toISOString().slice(0, 10);
+
+test("digitalReleaseFor reads the region's announced streaming date, earliest first, with a usable note", () => {
+  const d = { release_dates: { results: [
+    { iso_3166_1: "US", release_dates: [{ type: 4, release_date: "2026-09-01T00:00:00Z", note: "Netflix" }] },
+    { iso_3166_1: "IN", release_dates: [
+      { type: 3, release_date: "2026-08-28T00:00:00Z", note: "" },
+      { type: 4, release_date: "2026-10-10T00:00:00Z", note: "" },
+      { type: 4, release_date: "2026-09-25T00:00:00Z", note: "ZEE5" },
+    ] },
+  ] } };
+  assert.deepStrictEqual(U.digitalReleaseFor(d, "IN"), { date: "2026-09-25", note: "ZEE5" });
+  assert.strictEqual(U.digitalReleaseFor(d, "GB"), null, "another region's date is not this region's");
+  const coded = { release_dates: { results: [{ iso_3166_1: "IN", release_dates: [{ type: 4, release_date: "2026-09-25", note: "IN" }] }] } };
+  assert.strictEqual(U.digitalReleaseFor(coded, "IN").note, "", "a region code is not a platform");
+});
+
+test("an announced date answers the OTT-date query in the title, FAQ, block and description", () => {
+  const date = inDays(6);
+  const item = { title: "Hi!", slug: "hi", kind: "movie", language: "Tamil", platform: "Theatres", released: inDays(-30),
+    digitalDate: date, digitalNote: "ZEE5", tmdbId: 1 };
+  const t = U.filmTitleTag(item, A_IN);
+  assert.ok(/^Hi! \(\d{4}\) OTT Release Date: \d{1,2} [A-Z][a-z]{2,3} on ZEE5/.test(t) && t.length <= 60, t);
+  assert.ok(/Streaming Date/.test(U.filmTitleTag(item, A_UK)), "streaming markets say 'Streaming Date'");
+  const page = U.buildFilmPage(item, new Date().toISOString().slice(0, 10), new Set(["hi"]), A_IN);
+  assert.ok(/<!--SW:digital=\d{4}-\d{2}-\d{2}\|ZEE5-->/.test(page), "stamped, so the frozen page can be rebuilt from it");
+  assert.ok(/scheduled to start streaming on ZEE5 in India on/.test(page));
+  assert.ok(!/hasn(?:'|&#39;)t been officially announced/.test(page), "no 'not announced' beside a date");
+  const desc = (/name="description" content="([^"]*)"/.exec(page) || [])[1];
+  assert.ok(/starts streaming on ZEE5 in India on|streams on ZEE5 in India from/.test(desc), desc);
+  assert.ok(!U.digitalUpcoming({ ...item, providers: ["ZEE5"] }), "once it streams, the date is history");
+});
+
+test("frozen page: announcement patch, then the arrival replaces it — no contradictions at any step", () => {
+  const frozen = U.buildFilmPage({ title: "Toxic", slug: "toxic", kind: "movie", language: "Kannada", platform: "Theatres",
+    released: inDays(-30), tmdbId: 9 }, new Date().toISOString().slice(0, 10), new Set(["toxic"]), A_IN);
+  assert.ok(/<!--SW:pending-->/.test(frozen));
+  const date = inDays(4);
+  const r = U.applyDigitalDatePatch(frozen, { title: "Toxic", date, note: "ZEE5", countryName: "India", cfg: A_IN });
+  assert.ok(r.changed);
+  let h = U.retitleFrozen(U.rewriteMetaDescription(r.html, A_IN).html, A_IN).html;
+  assert.ok(/<title>Toxic \(\d{4}\) OTT Release Date: [^<]*ZEE5/.test(h), (/<title>[^<]*/.exec(h) || [])[0]);
+  assert.ok(!/hasn(?:'|&#39;)t been officially announced/.test(h), "the FAQ now carries the date");
+  for (const m of h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(m[1]);
+  const a = U.applyArrivalPatch(h, { title: "Toxic", providers: ["ZEE5"], countryName: "India", cfg: A_IN, asOf: date });
+  assert.ok(a.changed && !/<!--SW:digital=/.test(a.html), "arrival retires the announcement block");
+  const t2 = U.retitleFrozen(a.html, A_IN).html;
+  assert.ok(!/OTT Release Date: /.test((/<title>[^<]*/.exec(t2) || [""])[0]), "title stops counting down once it streams");
+});
+
+testAsync("recoverTmdbIds: poster-verified ids only, release dates filled from the page, gives up after two misses", async () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-ids-"));
+  const cwd = process.cwd();
+  try {
+    process.chdir(tmp);
+    fsx.mkdirSync("movie", { recursive: true });
+    const mk = (title, slug, poster) => U.buildFilmPage({ title, slug, kind: "movie", platform: "Theatres", released: "2026-08-28",
+      poster: `https://image.tmdb.org/t/p/w342/${poster}.jpg` }, "2026-09-17", new Set([slug]), A_IN);
+    fsx.writeFileSync("movie/hi.html", mk("Hi!", "hi", "hi-real"));
+    fsx.writeFileSync("movie/other.html", mk("Hi!", "other", "not-on-tmdb"));
+    const manifest = { in: { hi: { archivedOn: "2026-09-18", last: "2026-09-17" }, other: { archivedOn: "2026-09-18", last: "2026-09-17" } } };
+    const api = { pause: async () => {}, tmdb: async () => ({ results: [
+      { id: 111, title: "Hi", poster_path: "/someone-else.jpg" },
+      { id: 1314279, title: "Hi!", poster_path: "/hi-real.jpg", backdrop_path: "/bd.jpg" },
+    ] }) };
+    const n = await U.recoverTmdbIds(A_IN, manifest, { api });
+    assert.strictEqual(n, 1);
+    assert.strictEqual(manifest.in.hi.tmdbId, 1314279, "matched on the page's own poster");
+    assert.strictEqual(manifest.in.hi.released, "2026-08-28", "release date filled from the page");
+    assert.ok(!manifest.in.other.tmdbId && manifest.in.other.noMatch === 1, "a title match alone is never accepted");
+    await U.recoverTmdbIds(A_IN, manifest, { api });
+    await U.recoverTmdbIds(A_IN, manifest, { api });
+    assert.strictEqual(manifest.in.other.noMatch, 2, "two misses, then it stops spending calls on it");
+    assert.ok(U.sweepCandidates([{ slug: "hi", ...manifest.in.hi, kind: "movie" }], new Date("2026-09-27T00:00:00Z")).length === 1,
+      "a recovered page becomes eligible for the arrival sweep");
+  } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
+});
+
+test("sweepCandidates rotates: never-checked pages first, so the whole archive gets its turn", () => {
+  const now = new Date("2026-09-27T00:00:00Z");
+  const e = (slug, released, swept) => ({ slug, archivedOn: "x", tmdbId: 1, released, kind: "movie", ...(swept ? { swept } : {}) });
+  const picked = U.sweepCandidates([e("young-checked", "2026-09-10", "2026-09-26"), e("old-never", "2026-06-01"), e("mid-older", "2026-08-01", "2026-09-01")], now, 2)
+    .map((x) => x.slug);
+  assert.deepStrictEqual(picked, ["old-never", "mid-older"]);
+});
+
+test("Coming to OTT: announced dates only, grouped by week, soonest first", () => {
+  const data = { theatres: [
+    { slug: "a", title: "A", digitalDate: inDays(2), digitalNote: "Netflix" },
+    { slug: "b", title: "B", digitalDate: inDays(9) },
+    { slug: "c", title: "C", digitalDate: inDays(-2) },
+    { slug: "d", title: "D", providers: ["Netflix"], digitalDate: inDays(3) },
+  ], comingSoon: [] };
+  const manifest = { e: { title: "E", digital: { date: inDays(20), note: "ZEE5" } }, f: { title: "F", digital: { date: inDays(1) }, live: { since: "x" } } };
+  const items = U.announcedDates(data, manifest, []);
+  assert.deepStrictEqual(items.map((x) => x.slug), ["a", "b", "e"], "past dates, streaming titles and live claims are excluded");
+  const html = U.buildComingPage(items, A_IN);
+  assert.ok(/Streaming from [^<]* on Netflix/.test(html));
+  assert.ok(/never estimates|Estimates are never listed/.test(html));
+  const title = (/<title>([^<]*)/.exec(html) || [])[1];
+  assert.ok(/^Upcoming OTT Releases in India/.test(title) && title.replace(/&amp;/g, "&").length <= 60, title);
+});
+
+test("New on OTT today: today first, never empty on a quiet day", () => {
+  const d = (o) => new Date(Date.now() - o * 864e5).toISOString().slice(0, 10);
+  const recs = [
+    { c: "in", k: "movie", t: "Today Film", p: "ZEE5", first: d(0), rel: "2026-08-01", lang: "Tamil" },
+    { c: "in", k: "movie", t: "Yesterday Film", p: "Netflix", first: d(1), rel: "2026-08-01", lang: "Hindi" },
+    { c: "uk", k: "movie", t: "UK Film", p: "Netflix", first: d(0), rel: "2026-08-01", lang: "English" },
+  ];
+  const html = U.buildTodayPage(recs, A_IN);
+  assert.ok(html.indexOf("Today Film") < html.indexOf("Yesterday Film") && !/UK Film/.test(html));
+  assert.ok(/<title>1 New on OTT Today in India/.test(html));
+  assert.ok(!/coming-to-ott/.test(U.buildTodayPage(recs, A_IN, { hasComing: false })), "never links a gated page that doesn't exist");
+  const quiet = U.buildTodayPage(recs.filter((r) => r.first !== d(0)), A_IN);
+  assert.ok(/Nothing new has landed/.test(quiet) && /Yesterday Film/.test(quiet), "a quiet day still shows the week");
+});
+
+test("weekly platform hubs lead with the exact count and the week's dates", () => {
+  const hub = { name: "JioHotstar", slug: "jiohotstar", items: Array.from({ length: 9 }, (_, i) => ({ title: "T" + i, slug: "t" + i, platform: "JioHotstar", kind: "movie" })) };
+  const html = U.buildPlatformHubPage({ generatedAt: "2026-09-24T07:00:00Z" }, A_IN, hub);
+  const title = (/<title>([^<]*)/.exec(html) || [])[1];
+  assert.ok(/^9 New on JioHotstar in India This Week \(21–27 Sept\)$/.test(title), title);
+  const ph = U.buildPlatformHubPage({ generatedAt: "2026-09-24T07:00:00Z" }, { code: "ph", name: "Philippines", region: "PH" }, hub);
+  assert.ok(/<title>9 New on JioHotstar in the Philippines This Week \(Sep 21–27\)/.test(ph), "reads naturally with 'the'");
+});
+
 // ---------------- The five growth builds of 27 Sept 2026 ----------------
 group("growth builds: release-date titles, streaming pages, claims, people, titles & images");
 const G_IN = { code: "in", name: "India", region: "IN", watchRegion: "IN" };
@@ -750,6 +882,7 @@ test("the commit step stages the new folders without ever failing on a missing o
   assert.ok(/git add -A -- ':\(glob\)streaming\/\*\*' 2>\/dev\/null \|\| true/.test(wf));
   assert.ok(/git add -A -- ':\(glob\)people\/\*\*' 2>\/dev\/null \|\| true/.test(wf));
   assert.ok(/'sitemap-\*\.xml'/.test(wf), "the per-country sitemaps are committed");
+  assert.ok(/git add -A -- ':\(glob\)coming-to-ott\/\*\*' 2>\/dev\/null \|\| true/.test(wf), "India's coming-to-ott folder is committed");
 });
 
 // ---------------- The ten fixes of 22 Sept 2026 ----------------
@@ -4025,7 +4158,7 @@ test("skips TV and entries with no tmdbId (nothing to re-query)", () => {
 });
 test("respects the per-run API budget", () => {
   const many = Array.from({ length: 50 }, (_, i) => ({ slug: "s" + i, archivedOn: "2026-08-01", tmdbId: i, released: "2026-07-01", kind: "movie" }));
-  assert.ok(U.sweepCandidates(many, SWEEP_NOW).length <= 18);
+  assert.ok(U.sweepCandidates(many, SWEEP_NOW).length <= 60, "budget raised to 60 (Sept 2026), still capped");
 });
 test("arrival patch flips the pending block and the stale pill", () => {
   const before = U.buildFilmPage(THEATRE, "2026-08-22", new Set(), { code: "in", name: "India", region: "IN" });
