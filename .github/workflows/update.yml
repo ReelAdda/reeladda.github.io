@@ -93,6 +93,7 @@ jobs:
           # a glob pathspec matches tracked paths that are gone from disk.
           git add -A -- ':(glob)streaming/**' 2>/dev/null || true
           git add -A -- ':(glob)people/**' 2>/dev/null || true
+          git add -A -- ':(glob)coming-to-ott/**' 2>/dev/null || true
           # Share cards are OPTIONAL: the directory only exists when the renderer AND the
           # brand fonts are both present. `git add` on a missing pathspec exits 128 and would
           # fail the commit step for a purely cosmetic feature, so it is added conditionally.
