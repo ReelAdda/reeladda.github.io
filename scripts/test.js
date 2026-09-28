@@ -1033,6 +1033,71 @@ testAsync("catalogue: a title with no provider is ruled out for good and never b
   });
 });
 
+// ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
+group("failure paths: outages, stalls, corrupt state, silent stages");
+
+test("departure sweep: a mass-empty batch is an outage, normal churn is not", () => {
+  assert.ok(U.departureOutage(60, 58), "58 of 60 titles 'leaving' at once is the provider feed failing");
+  assert.ok(U.departureOutage(20, 12), "60% of a sizeable batch trips the breaker");
+  assert.ok(!U.departureOutage(60, 5), "a handful of real departures is normal churn");
+  assert.ok(!U.departureOutage(4, 4), "a tiny batch is too small to call an outage; the 2-miss rule protects it");
+  assert.ok(!U.departureOutage(0, 0));
+});
+
+test("catalogue stall: two zero runs with open queues is an issue; exhaustion is not", () => {
+  const open = { q: { "hi:movie": { done: false }, "en:movie": { done: true } } };
+  assert.ok(U.catalogStall({ in: { ...open, recent: [5, 0, 0] } }, "in").stalled, "the 27 Sept signature");
+  assert.ok(!U.catalogStall({ in: { ...open, recent: [5, 0] } }, "in").stalled, "one quiet run is not a stall");
+  assert.ok(!U.catalogStall({ in: { ...open, recent: [0] } }, "in").stalled, "not enough history to judge");
+  const done = U.catalogStall({ uk: { q: { "en:movie": { done: true } }, recent: [0, 0] } }, "uk");
+  assert.ok(!done.stalled && done.exhausted, "every queue genuinely retired -> a note, not a red run");
+  assert.strictEqual(U.catalogStall({}, "zz").last, null);
+});
+
+test("state files: missing starts empty, corrupt stops the build instead of wiping history", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const dir = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-state-"));
+  try {
+    assert.deepStrictEqual(U.loadStateFile(path.join(dir, "nope.json"), { a: 1 }), { a: 1 }, "first run: fallback");
+    fsx.writeFileSync(path.join(dir, "ok.json"), '{"x":2}');
+    assert.deepStrictEqual(U.loadStateFile(path.join(dir, "ok.json")), { x: 2 });
+    fsx.writeFileSync(path.join(dir, "bad.json"), '{"x":2, trunc');
+    assert.throws(() => U.loadStateFile(path.join(dir, "bad.json")), /refusing to overwrite its history/);
+    fsx.writeFileSync(path.join(dir, "empty.json"), "");
+    assert.throws(() => U.loadStateFile(path.join(dir, "empty.json")), /not valid JSON/, "a truncated write is corrupt, not new");
+  } finally { fsx.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("a skipped stage is recorded as an issue; an optional one only as a note", () => {
+  const before = { i: U.RUN_HEALTH.issues.length, n: U.RUN_HEALTH.notes.length };
+  const log = console.warn; console.warn = () => {};
+  try {
+    U.stageFailed("catalog [in]", new Error("boom"));
+    U.stageFailed("share cards [in]", new Error("no fonts"), { optional: true });
+  } finally { console.warn = log; }
+  assert.strictEqual(U.RUN_HEALTH.issues.length, before.i + 1);
+  assert.ok(/catalog \[in\]: boom/.test(U.RUN_HEALTH.issues[U.RUN_HEALTH.issues.length - 1]));
+  assert.strictEqual(U.RUN_HEALTH.notes.length, before.n + 1);
+  U.RUN_HEALTH.issues.length = before.i; U.RUN_HEALTH.notes.length = before.n;
+});
+
+test("health.js: issues make the run red, notes don't, a missing report does", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path"), cp = require("child_process");
+  const dir = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-health-"));
+  const run = (obj) => {
+    const f = path.join(dir, "h.json");
+    if (obj) fsx.writeFileSync(f, JSON.stringify(obj)); else if (fsx.existsSync(f)) fsx.unlinkSync(f);
+    return cp.spawnSync(process.execPath, [path.join(__dirname, "health.js"), f], { encoding: "utf8", env: { ...process.env, GITHUB_STEP_SUMMARY: "" } });
+  };
+  try {
+    assert.strictEqual(run({ issues: [], notes: ["x"], catalog: { in: 5 } }).status, 0);
+    const bad = run({ issues: ["catalog [in]: 0 new pages two runs in a row"], notes: [], catalog: {} });
+    assert.strictEqual(bad.status, 1);
+    assert.ok(/::error title=FilmyChill build::catalog \[in\]/.test(bad.stdout));
+    assert.strictEqual(run(null).status, 1, "no report means the build never finished");
+  } finally { fsx.rmSync(dir, { recursive: true, force: true }); }
+});
+
 test("dead hub links are removed from frozen pages; live ones are kept", () => {
   const line = (a) => `<p style="color:var(--mute);font-size:12.5px;margin-top:10px">More: ${a}</p>`;
   const h = `<p>a</p>${line(`<a href="/sg/new-on-apple-tv/">Everything new on Apple TV</a> · <a href="/sg/new-on-ott/2026-09/">Everything that arrived in September 2026</a>`)}<p>b</p>`;
