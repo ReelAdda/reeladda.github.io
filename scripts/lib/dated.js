@@ -205,8 +205,14 @@ function writePlatformHubPages(data, cfg) {
   for (const slug of existing) {
     if (live.has(slug)) continue;
     const dir = `${base}/new-on-${slug}`;
-    try { fs.rmSync(dir, { recursive: true, force: true }); console.log(`  hub pruned (${code}): new-on-${slug} — no longer qualifies`); }
-    catch (e) { console.warn(`hub prune ${dir}: ${e.message}`); }
+    // Remove the hub PAGE only. Its directory also holds the platform's month archives
+    // (/new-on-<slug>/YYYY-MM/), which are permanent records; deleting the directory used to
+    // 404 them until the next run rebuilt them.
+    try {
+      fs.rmSync(`${dir}/index.html`, { force: true });
+      if (fs.existsSync(dir) && !fs.readdirSync(dir).length) fs.rmdirSync(dir);
+      console.log(`  hub pruned (${code}): new-on-${slug} — no longer qualifies`);
+    } catch (e) { console.warn(`hub prune ${dir}: ${e.message}`); }
   }
   if (hubs.length) console.log(`  platform hubs (${code}): ${hubs.map((h) => "new-on-" + h.slug).join(", ")}`);
   return hubs;

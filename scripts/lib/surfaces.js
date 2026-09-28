@@ -502,11 +502,13 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
   // the page it points at exists, so building it after the country page would delay the link
   // by a full run (and permanently, on a month's first build).
   step("month archive", () => writeOttMonthPages(cfg));
+  // Hubs before platform months: a month page links its platform's hub only if the hub
+  // exists, so the hub set must already be this run's (created and pruned) when they're built.
+  step("platform hubs", () => writePlatformHubPages(data, cfg));
   step("platform months", () => writePlatformMonthPages(cfg));
   if (cfg.code === "in") step("language months", () => writeLanguageMonthPages());
   if (template) step("country page", () => renderCountryPage(template, cfg, data));
   step("weekly page", () => writeOttWeekPage(data, cfg, allCountries));
-  step("platform hubs", () => writePlatformHubPages(data, cfg));
   step("rss feed", () => writeRssFeed(data, cfg));
   step("due-date pass", () => refreshDuePages(cfg, countryNameFor(cfg)));
   step("browse index", () => writeBrowseIndex(filmIndexFor(cfg), cfg, stamp, analyticsTag(), newlyAddedFor(cfg.code)));
