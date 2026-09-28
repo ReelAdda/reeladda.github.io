@@ -39,7 +39,13 @@ const CATALOG_MIN_VOTES = 15;
 // Bumped whenever the eligibility bar changes. A queue retired under an older bar is
 // re-opened once (see reopenForBar), because "TMDB ran out of results" at 80 votes says
 // nothing about what exists at 15.
-const CATALOG_BAR_VERSION = 2;
+// 3 (Sept 2026): not a bar change but a repair. Before this, a failed discover call was
+// recorded as "TMDB has no more pages", and one bad run on 27 Sept retired every queue in
+// India, US, UK, Germany and the UAE: those markets built nothing afterwards. Separately,
+// a run that stopped mid-page (batch reached) still advanced the page, so the unbuilt rest
+// of that page, often its most popular titles, was never built. Re-walking from page 1
+// recovers both; titles that already have a page cost nothing but the discover call.
+const CATALOG_BAR_VERSION = 3;
 const CATALOG_MIN_AGE_DAYS = 120;    // younger than this belongs to the weekly pipeline
 const CATALOG_MAX_PAGE = 20;         // discover past ~20 pages is long-tail noise, not catalogue
 const CATALOG_BATCH_DEFAULT = 25;    // pages built per country per run (each costs one enrich call)
@@ -165,6 +171,29 @@ function reopenForBar(state) {
   return reopened;
 }
 
+// Titles that can never get a page (no in-region provider on the detail call, no slug)
+// are remembered so a held page can drain instead of re-offering them every run. A
+// transient enrich failure is a strike, not a verdict: three strikes and it is skipped.
+const CATALOG_SKIP_STRIKES = 3;
+const CATALOG_SKIP_CAP = 1500;   // per country; oldest entries fall off first
+
+function skipKey(m) { return `${m.kind || "movie"}:${m.id}`; }
+
+function isSkipped(state, code, m) {
+  const s = countryState(state, code);
+  return !!(s.skip && (s.skip[skipKey(m)] || 0) >= CATALOG_SKIP_STRIKES);
+}
+
+function noteReject(state, code, m, { permanent = false } = {}) {
+  const s = countryState(state, code);
+  s.skip = s.skip || {};
+  const k = skipKey(m);
+  s.skip[k] = permanent ? CATALOG_SKIP_STRIKES : (s.skip[k] || 0) + 1;
+  const keys = Object.keys(s.skip);
+  for (let i = 0; i < keys.length - CATALOG_SKIP_CAP; i++) delete s.skip[keys[i]];
+  return s.skip[k];
+}
+
 function catalogProgress(state, code) {
   const s = countryState(state, code);
   const queues = Object.values(s.q);
@@ -174,5 +203,5 @@ function catalogProgress(state, code) {
 module.exports = {
   CATALOG_MIN_VOTES, CATALOG_MIN_AGE_DAYS, CATALOG_MAX_PAGE, CATALOG_BATCH_DEFAULT, CATALOG_BAR_VERSION, reopenForBar,
   catalogQueues, nextQueue, markQueue, noteBuilt, catalogEligible, catalogSlug,
-  catalogProgress, queueState, countryState,
+  catalogProgress, queueState, countryState, isSkipped, noteReject, CATALOG_SKIP_STRIKES,
 };
