@@ -8092,14 +8092,14 @@ function buildHomeJsonLd(data, cfg) {
 // both (no IMDb name anywhere, since IMDb data isn't used and its terms forbid using its name
 // without a current license).
 function footerAttribution(useImdb = USE_IMDB) {
+  // Required wording kept verbatim (TMDB's disclaimer; IMDb's "Used with permission" when its
+  // ratings are shown); only the layout is compact: credits on one line, the notice below.
   const tmdb = `<a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>`;
+  const jw = `<a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a>`;
   if (useImdb) {
-    return `Film data from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  ` +
-           `Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>\n  ` +
-           `Where-to-watch data provided by <a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a>.<br>\n  `;
+    return `Film data from ${tmdb} · Where-to-watch data by ${jw} · Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>This product uses the TMDB API but is not endorsed or certified by TMDB.`;
   }
-  return `Film data and ratings from ${tmdb}. This product uses the TMDB API but is not endorsed or certified by TMDB.<br>\n  ` +
-         `Where-to-watch data provided by <a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a>.<br>\n  `;
+  return `Film data and ratings from ${tmdb} · Where-to-watch data by ${jw}<br>This product uses the TMDB API but is not endorsed or certified by TMDB.`;
 }
 
 // Render one country's page from the pristine template string and write it to its path
@@ -8123,38 +8123,62 @@ function ssrOttSection(items, code) {
 // Footer cross-links, injected per country: India links its language pages and the
 // current week's snapshot; every country links About. New indexable surfaces get
 // crawl paths from every page on the site.
+// ============================================================================
+// HOMEPAGE FOOTER — four short columns and one quiet bar.
+//
+// It had grown into 60+ inline links in one centred block: every language, every hub, the
+// month archive, twelve "newly added" titles, thirteen countries and three credit lines.
+// Each link was added for a good reason (mostly crawl paths), and together they made the
+// page's last impression look like a link farm. Now:
+//   Discover · Streaming on · Languages (India only) · FilmyChill
+// and a bottom bar with the copyright and a country picker.
+//
+// Crawl paths are kept, just placed where they belong:
+//   - "Newly added" catalogue titles moved to the top of All films (see buildBrowsePage),
+//     one link away; the Streaming-on pages also link hundreds of catalogue titles.
+//   - The other countries are real <a> links inside a <details> picker: closed by default,
+//     still in the HTML, still crawlable (hreflang annotates; it is not a crawl path).
+// ============================================================================
 function buildMoreLinks(code, data = null) {
-  const about = `<a href="/about/">About FilmyChill</a>`;
-  // The browse index has to be linked from everywhere, or it becomes another orphan itself.
-  const browse = `<a href="${browsePath(code, 1)}">All films</a>`;
-  const dataLink = `<a href="/data/">Streaming-window data</a>`;
-  const embed = code === "in" ? ` · <a href="/embed/">Embed our widget</a>` : "";
-  // Crawlable links to the other markets. The country switcher is client-side, so before
-  // this the ONLY paths to /us/, /uk/ etc. were the sitemap and hreflang — meaning 958 film
-  // pages, seven browse indexes and every hub in those subtrees hung off homepages with zero
-  // inbound links. hreflang annotates a relationship; it is not a crawl path.
+  const e = escHtml;
+  const V = streamVocab({ code });
+  const base = code === "in" ? "" : `/${code}`;
+  const li = (href, label) => `<li><a href="${e(href)}">${e(label)}</a></li>`;
+  const col = (title, items) => items.length ? `<div><h3>${e(title)}</h3><ul>${items.join("")}</ul></div>` : "";
+
+  const thisMonth = monthKey(new Date().toISOString());
+  const discover = [
+    li(`${base}/new-on-ott/`, `New on ${V.word} this week`),
+    fs.existsSync(todayPath(code)) ? li(todayUrl(code).replace("https://filmychill.com", ""), `New on ${V.word} today`) : "",
+    fs.existsSync(comingPath(code)) ? li(comingUrl(code).replace("https://filmychill.com", ""), `Coming to ${V.word}`) : "",
+    fs.existsSync(ottMonthPath(code, thisMonth)) ? li(`${base}/new-on-ott/${thisMonth}/`, "This month") : "",
+    li(browsePath(code, 1), "All films"),
+  ].filter(Boolean);
+
+  // Evergreen platform pages first (they link into the catalogue); this week's platform hubs
+  // only when a country has none yet. Four is enough for a footer.
+  let platforms = streamingPagesFor(code).slice(0, 4).map((x) => li(x.href, x.name));
+  if (!platforms.length && data) platforms = hubsFor(data).slice(0, 4).map((h) => li(`${base}/new-on-${h.slug}/`, h.name));
+
+  const languages = code === "in" ? LANGUAGE_PAGES.map(([name, slug]) => li(`/${slug}/`, name)) : [];
+
+  const site = [
+    li("/about/", "About"),
+    li("/data/", "Streaming data"),
+    code === "in" ? li("/embed/", "Embed widget") : "",
+    code === "in" ? li(`/week/${weekSlug(isoWeekOf())}/`, "Weekly archive") : "",
+    li("https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j", "WhatsApp channel"),
+  ].filter(Boolean);
+
   const others = COUNTRIES.filter((c) => c.code !== code).map((c) => {
     const meta = COUNTRY_PAGE_META[c.code] || { name: c.name, path: `/${c.code}/` };
-    return `<a href="${meta.path}">${escHtml(meta.name.replace(/^the /, ""))}</a>`;
-  }).join(" · ");
-  // The month archive is a crawl path into every past month (each page links to its
-  // neighbours), so one link here reaches the whole series.
-  const thisMonth = monthKey(new Date().toISOString());
-  const monthLink = fs.existsSync(ottMonthPath(code, thisMonth))
-    ? `<a href="${code === "in" ? "" : "/" + code}/new-on-ott/${thisMonth}/">Everything new on ${escHtml(streamVocab({ code }).word)} this month</a>`
-    : "";
-  const hubs = data ? hubsFor(data).map((h) => `<a href="${code === "in" ? "" : "/" + code}/new-on-${h.slug}/">New on ${escHtml(h.name)}</a>`).join(" · ") : "";
-  // Crawl paths into the catalogue (see writeStreamingPages / newlyAddedFor): the homepage is
-  // the most-crawled URL on the site, and before this nothing on it pointed at a catalogue page.
-  const streaming = streamingPagesFor(code).map((x) => `<a href="${x.href}">${escHtml(x.name)}</a>`).join(" · ");
-  const fresh = newlyAddedFor(code).map((x) => `<a href="${x.href}">${escHtml(x.title)}</a>`).join(" · ");
-  const V0 = streamVocab({ code });
-  const dated = [fs.existsSync(todayPath(code)) ? `<a href="${todayUrl(code).replace("https://filmychill.com", "")}">New on ${escHtml(V0.word)} today</a>` : "",
-    fs.existsSync(comingPath(code)) ? `<a href="${comingUrl(code).replace("https://filmychill.com", "")}">Coming to ${escHtml(V0.word)}</a>` : ""].filter(Boolean).join(" · ");
-  const extra = `${dated ? `<br>${dated}` : ""}${streaming ? `<br>Streaming now on: ${streaming}` : ""}${fresh ? `<br>Newly added: ${fresh}` : ""}`;
-  if (code !== "in") return `${hubs ? hubs + " · " : ""}${monthLink ? monthLink + " · " : ""}${browse} · ${dataLink}${embed} · ${about}${extra}<br>Also on FilmyChill: ${others}`;
-  const langs = LANGUAGE_PAGES.map(([name, slug]) => `<a href="/${slug}/">${name}</a>`).join(" · ");
-  return `${langs}${hubs ? " · " + hubs : ""}${monthLink ? " · " + monthLink : ""} · <a href="/week/${weekSlug(isoWeekOf())}/">This week's snapshot</a> · ${browse} · ${dataLink}${embed} · ${about}${extra}<br>Also on FilmyChill: ${others}`;
+    return `<a href="${e(meta.path)}">${e(meta.name.replace(/^the /, ""))}</a>`;
+  }).join("");
+  const here = COUNTRIES.find((c) => c.code === code) || { name: "India" };
+
+  return `<nav class="foot-cols" aria-label="Site">${col("Discover", discover)}${col("Streaming on", platforms)}${col("Languages", languages)}${col("FilmyChill", site)}</nav>`
+    + `<div class="foot-bar"><span>© ${new Date().getFullYear()} FilmyChill · Vikram Sharma</span>`
+    + `<details class="foot-country"><summary>${e(COUNTRY_FLAG[code] || "")} ${e(here.name)}</summary><div class="foot-country-list">${others}</div></details></div>`;
 }
 
 // The platform pages that exist for this country, biggest first (read from disk: they are
@@ -8303,7 +8327,7 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
   step("platform hubs", () => writePlatformHubPages(data, cfg));
   step("rss feed", () => writeRssFeed(data, cfg));
   step("due-date pass", () => refreshDuePages(cfg, countryNameFor(cfg)));
-  step("browse index", () => writeBrowseIndex(filmIndexFor(cfg), cfg, stamp, analyticsTag()));
+  step("browse index", () => writeBrowseIndex(filmIndexFor(cfg), cfg, stamp, analyticsTag(), newlyAddedFor(cfg.code)));
   step("embed widget", () => writeEmbed(data, cfg, stamp)); // /embed/week/ per country + /embed/ (India)
   if (cfg.code === "in") step("data page", () => writeDataPage(stamp)); // site-wide, built once
 }
@@ -8431,7 +8455,6 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "TAGLINE", `New movies &amp; ${escHtml(V.releases)} this week`);
   html = replaceBetween(html, "MYLISTSUB", `tracked until they hit ${escHtml(V.word)}`);
   html = replaceBetween(html, "OTTLINK", `All new ${escHtml(V.releases)} this week`);
-  html = replaceBetween(html, "FOOTOTT", `${escHtml(V.newOn)} this week`);
   html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code, data));
   // The country switcher is rendered from COUNTRIES. It used to be a hardcoded <option>
   // list, which is why adding a country meant editing the same names in four places.
