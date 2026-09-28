@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-28T10:37:45.327Z",
+ "generatedAt": "2026-09-28T16:00:19.215Z",
  "country": "jp",
  "pick": "Futurama",
  "theatres": [
@@ -16,7 +16,7 @@
      "score": "8.0/10"
     }
    ],
-   "votes": 3943,
+   "votes": 3949,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
    "isRecent": false,
@@ -165,12 +165,19 @@
    ],
    "slug": "the-odyssey",
    "wikiWeeklyViews": 297031,
-   "trailerViews": 17610382,
+   "trailerViews": 17616286,
    "take": "Viewer word on TMDB runs mixed — reviews keep coming back to the performances.",
    "takeSrc": "tmdb",
    "takeAspects": [
     "performances"
-   ]
+   ],
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences love it.",
+    "audience": "Loved",
+    "critics": null,
+    "basis": "audience"
+   }
   },
   {
    "title": "Resident Evil",
@@ -185,7 +192,7 @@
      "score": "7.3/10"
     }
    ],
-   "votes": 554,
+   "votes": 564,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/i7UyjfPio0VFHB9rBUZSFyhOoM8.jpg",
    "isRecent": false,
@@ -335,14 +342,22 @@
    "slug": "resident-evil",
    "wikiWeeklyViews": 965600,
    "trending": true,
-   "trailerViews": 17965564,
+   "trailerViews": 18008113,
    "take": "Mostly good reviews — the performances and humour impressed, even if the pacing didn't.",
    "takeSrc": "wiki",
    "takeAspects": [
     "performances",
     "humour"
    ],
-   "takeArticle": "Resident Evil (2026 film)"
+   "takeArticle": "Resident Evil (2026 film)",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Critics are warmer than audiences.",
+    "audience": "Liked",
+    "critics": "positive",
+    "basis": "both"
+   }
   },
   {
    "title": "Look Back",
@@ -454,16 +469,16 @@
      "kind": "movie"
     },
     {
-     "title": "Escaflowne: The Movie",
-     "slug": "escaflowne-the-movie",
-     "poster": "https://image.tmdb.org/t/p/w342/y2McH8kPXp5otzuQNIFF50X4rOc.jpg",
+     "title": "From Up on Poppy Hill",
+     "slug": "from-up-on-poppy-hill",
+     "poster": "https://image.tmdb.org/t/p/w342/rRLYX4RZIyloHSJwvZKAhphAjiB.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "From Up on Poppy Hill",
-     "slug": "from-up-on-poppy-hill",
-     "poster": "https://image.tmdb.org/t/p/w342/rRLYX4RZIyloHSJwvZKAhphAjiB.jpg",
+     "title": "Escaflowne: The Movie",
+     "slug": "escaflowne-the-movie",
+     "poster": "https://image.tmdb.org/t/p/w342/y2McH8kPXp5otzuQNIFF50X4rOc.jpg",
      "language": "Japanese",
      "kind": "movie"
     }
@@ -506,10 +521,18 @@
    ],
    "slug": "look-back",
    "wikiWeeklyViews": 6084,
-   "trailerViews": 10379,
+   "trailerViews": 10422,
    "take": "Word from reviewers is solidly good.",
    "takeSrc": "wiki",
-   "takeArticle": "Look Back (2026 film)"
+   "takeArticle": "Look Back (2026 film)",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Critics are positive; audience ratings are still coming in.",
+    "audience": null,
+    "critics": "positive",
+    "basis": "critics"
+   }
   },
   {
    "title": "Mr. Nelson, Did You Kill People?",
@@ -565,6 +588,13 @@
      "kind": "movie"
     },
     {
+     "title": "The Windermere Children",
+     "slug": "the-windermere-children",
+     "poster": "https://image.tmdb.org/t/p/w342/4RnQMwVVxhJlZDJybptAOrrpt87.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "The Great Escaper",
      "slug": "the-great-escaper",
      "poster": "https://image.tmdb.org/t/p/w342/50rOFWgFUsCw3zfwSKXcdglh3Ji.jpg",
@@ -614,23 +644,16 @@
      "kind": "movie"
     },
     {
+     "title": "The Caine Mutiny",
+     "slug": "the-caine-mutiny",
+     "poster": "https://image.tmdb.org/t/p/w342/vuO4Z3wOWVlhq35MS9asZeT9rVp.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "The War Game",
      "slug": "the-war-game",
      "poster": "https://image.tmdb.org/t/p/w342/puJGNnrAPOv3BUMI9mKlCJp3UrQ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Monuments Men",
-     "slug": "the-monuments-men",
-     "poster": "https://image.tmdb.org/t/p/w342/wiWAg4mKV2S4vImPxsPRIdj2R2B.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Bridge on the River Kwai",
-     "slug": "the-bridge-on-the-river-kwai",
-     "poster": "https://image.tmdb.org/t/p/w342/7paXMt2e3Tr5dLmEZOGgFEn2Vo7.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -673,7 +696,7 @@
    ],
    "slug": "mr-nelson-did-you-kill-people",
    "wikiWeeklyViews": 2126,
-   "trailerViews": 13756
+   "trailerViews": 13778
   },
   {
    "title": "Heart of the Beast",
@@ -688,7 +711,7 @@
      "score": "7.7/10"
     }
    ],
-   "votes": 102,
+   "votes": 109,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/1ApfSA8JTqeha3GTFEY8syV4auq.jpg",
    "isRecent": false,
@@ -722,13 +745,6 @@
      "kind": "movie"
     },
     {
-     "title": "Dead of Winter",
-     "slug": "dead-of-winter",
-     "poster": "https://image.tmdb.org/t/p/w342/5DcrN62sGAiRJxt8rXSRlSRLwIE.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Fall",
      "slug": "fall",
      "poster": "https://image.tmdb.org/t/p/w342/spCAxD99U1A6jsiePFoqdEcY0dG.jpg",
@@ -743,16 +759,9 @@
      "kind": "movie"
     },
     {
-     "title": "The Mountain Between Us",
-     "slug": "the-mountain-between-us",
-     "poster": "https://image.tmdb.org/t/p/w342/3XNfYTW4XGscI81nXMSWGsQ8cpu.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Edge",
-     "slug": "the-edge",
-     "poster": "https://image.tmdb.org/t/p/w342/zplJqfuUyqzW0D4jX3W1afl0d7b.jpg",
+     "title": "Far from Home: The Adventures of Yellow Dog",
+     "slug": "far-from-home-the-adventures-of-yellow-dog",
+     "poster": "https://image.tmdb.org/t/p/w342/bHtNHOiSmfX1KlJwc9Jvc8sYcjB.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -797,6 +806,20 @@
      "poster": "https://image.tmdb.org/t/p/w342/bRWNxtm3q0QvIIM52uQqRIEvpl2.jpg",
      "language": "English",
      "kind": "movie"
+    },
+    {
+     "title": "Eddie the Eagle",
+     "slug": "eddie-the-eagle",
+     "poster": "https://image.tmdb.org/t/p/w342/r562gvTRVHnDSvG7MrKHEECSn1V.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Flight of the Phoenix",
+     "slug": "flight-of-the-phoenix",
+     "poster": "https://image.tmdb.org/t/p/w342/pcj6unMsKCw0ogWFlUXmbc9gKap.jpg",
+     "language": "English",
+     "kind": "movie"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/bicMU6xVD5deVyKP2azpyx7xkmH.jpg",
@@ -828,19 +851,22 @@
      "name": "Shaun DeZern",
      "character": "Military Soldier",
      "photo": "https://image.tmdb.org/t/p/w185/iORM61n9AM6ldFm7C4t8dm9pRLq.jpg"
-    },
-    {
-     "name": "Uber",
-     "character": "Odin",
-     "photo": "https://image.tmdb.org/t/p/w185/95wWWPlrsY360HiSlyTrWlEHvCk.jpg"
     }
    ],
    "slug": "heart-of-the-beast",
    "wikiWeeklyViews": 350717,
-   "trailerViews": 2873077,
+   "trailerViews": 2874430,
    "take": "The reviews lean clearly positive.",
    "takeSrc": "wiki",
-   "takeArticle": "Heart of the Beast"
+   "takeArticle": "Heart of the Beast",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
+    "basis": "both"
+   }
   },
   {
    "title": "One Last Shot",
@@ -848,14 +874,14 @@
    "language": "English",
    "released": "2026-09-22",
    "review": "Navy Seal Jake Harris must stop a team of mercenaries, led by his disillusioned former comrade, from disabling the US missile defense network.",
-   "rating": 7.7,
+   "rating": 7.6,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.7/10"
+     "score": "7.6/10"
     }
    ],
-   "votes": 60,
+   "votes": 63,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/niQ4NBh2jqAf1hDZP5m6ReWFAb7.jpg",
    "isRecent": true,
@@ -924,16 +950,16 @@
      "kind": "movie"
     },
     {
-     "title": "Warfare",
-     "slug": "warfare",
-     "poster": "https://image.tmdb.org/t/p/w342/l39TlELomwysfsr37vrvCV6rmaQ.jpg",
+     "title": "Hunting Grounds",
+     "slug": "hunting-grounds",
+     "poster": "https://image.tmdb.org/t/p/w342/cgZjpqRQt9sk6XMCwZ3B1NPAaoy.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Hunting Grounds",
-     "slug": "hunting-grounds",
-     "poster": "https://image.tmdb.org/t/p/w342/cgZjpqRQt9sk6XMCwZ3B1NPAaoy.jpg",
+     "title": "Warfare",
+     "slug": "warfare",
+     "poster": "https://image.tmdb.org/t/p/w342/l39TlELomwysfsr37vrvCV6rmaQ.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -1003,7 +1029,14 @@
     }
    ],
    "slug": "one-last-shot",
-   "trailerViews": 96049
+   "trailerViews": 97140,
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences love it.",
+    "audience": "Loved",
+    "critics": null,
+    "basis": "audience"
+   }
   },
   {
    "title": "Primetime",
@@ -1011,14 +1044,14 @@
    "language": "English",
    "released": "2026-09-23",
    "review": "In 2006, To Catch a Predator host Chris Hansen sets out to make television history, turning an undercover investigation into one of the most controversial…",
-   "rating": 7.1,
+   "rating": 7.2,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.1/10"
+     "score": "7.2/10"
     }
    ],
-   "votes": 44,
+   "votes": 51,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/lmrulvLbmaejTix1YaMxo1oGhH1.jpg",
    "isRecent": true,
@@ -1052,6 +1085,13 @@
      "kind": "movie"
     },
     {
+     "title": "180",
+     "slug": "180",
+     "poster": "https://image.tmdb.org/t/p/w342/9ISjrhA38HpSSGtfiCk8lpziC3K.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Fatale",
      "slug": "fatale",
      "poster": "https://image.tmdb.org/t/p/w342/tGFXEyESXIuei5tZWXRkSRSFSxi.jpg",
@@ -1059,9 +1099,16 @@
      "kind": "movie"
     },
     {
-     "title": "Strange Darling",
-     "slug": "strange-darling",
-     "poster": "https://image.tmdb.org/t/p/w342/kWNCRgt3ocv19bYO0sk7TRuZuFY.jpg",
+     "title": "Deep Water",
+     "slug": "deep-water",
+     "poster": "https://image.tmdb.org/t/p/w342/6yRMyWwjuhKg6IU66uiZIGhaSc8.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "King Ivory",
+     "slug": "king-ivory",
+     "poster": "https://image.tmdb.org/t/p/w342/qtNdrKvD5MqvUbAQEja5WaKuVN1.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -1087,13 +1134,6 @@
      "kind": "movie"
     },
     {
-     "title": "Butcher, Baker, Nightmare Maker",
-     "slug": "butcher-baker-nightmare-maker",
-     "poster": "https://image.tmdb.org/t/p/w342/a1EpGJRGSxsM8HKOSFpSJYbbZOI.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Trust",
      "slug": "trust",
      "poster": "https://image.tmdb.org/t/p/w342/rXoZYWd2G7pBh8N8Cp5ZO5Sjzbl.jpg",
@@ -1101,9 +1141,9 @@
      "kind": "movie"
     },
     {
-     "title": "Fatal Attraction",
-     "slug": "fatal-attraction",
-     "poster": "https://image.tmdb.org/t/p/w342/vjB9XwJKnYqFKKjhWcE6WpAf5Ki.jpg",
+     "title": "Primal Fear",
+     "slug": "primal-fear",
+     "poster": "https://image.tmdb.org/t/p/w342/qJf2TzE8nRTFbFMPJNW6c8mI0KU.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -1111,13 +1151,6 @@
      "title": "Auto Focus",
      "slug": "auto-focus",
      "poster": "https://image.tmdb.org/t/p/w342/71CQUn4vtpDQtAPXtaLP7IGH0Sg.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Primal Fear",
-     "slug": "primal-fear",
-     "poster": "https://image.tmdb.org/t/p/w342/qJf2TzE8nRTFbFMPJNW6c8mI0KU.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -1168,14 +1201,22 @@
    "slug": "primetime",
    "wikiWeeklyViews": 609177,
    "trending": true,
-   "trailerViews": 6007391,
+   "trailerViews": 6009635,
    "take": "Mostly good reviews — the direction and emotional weight impressed, even if the originality didn't.",
    "takeSrc": "wiki",
    "takeAspects": [
     "direction",
     "emotional weight"
    ],
-   "takeArticle": "Primetime (film)"
+   "takeArticle": "Primetime (film)",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Critics are warmer than audiences.",
+    "audience": "Liked",
+    "critics": "positive",
+    "basis": "both"
+   }
   }
  ],
  "ott": [
@@ -1192,7 +1233,7 @@
      "score": "8.0/10"
     }
    ],
-   "votes": 11036,
+   "votes": 11037,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/uWpG7GqfKGQqX4YMAo3nv5OrglV.jpg",
    "isRecent": true,
@@ -1346,9 +1387,16 @@
    "ottFreshDate": "2026-09-27",
    "slug": "the-simpsons",
    "wikiWeeklyViews": 37836,
-   "trailerViews": 677533,
+   "trailerViews": 677632,
    "take": "Early viewer reviews on TMDB lean positive.",
-   "takeSrc": "tmdb"
+   "takeSrc": "tmdb",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences love it.",
+    "audience": "Loved",
+    "critics": null,
+    "basis": "audience"
+   }
   },
   {
    "title": "American Horror Story",
@@ -1363,7 +1411,7 @@
      "score": "8.1/10"
     }
    ],
-   "votes": 6196,
+   "votes": 6197,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/yCkPLQ10qKIUgRBXmQVVMF1h96d.jpg",
    "isRecent": true,
@@ -1411,6 +1459,13 @@
      "kind": "tv"
     },
     {
+     "title": "Them",
+     "slug": "them",
+     "poster": "https://image.tmdb.org/t/p/w342/2JIrVunDSjldv7Jv2uNKrrqwfej.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "The Haunting of Bly Manor",
      "slug": "the-haunting-of-bly-manor",
      "poster": "https://image.tmdb.org/t/p/w342/vIXQ8UymmQ7zJEPrKJP3s3fSbhR.jpg",
@@ -1428,13 +1483,6 @@
      "title": "Mayfair Witches",
      "slug": "mayfair-witches",
      "poster": "https://image.tmdb.org/t/p/w342/eDl1veju2Hf3tyFmGAedtGXb9Yv.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "FROM",
-     "slug": "from",
-     "poster": "https://image.tmdb.org/t/p/w342/pRtJagIxpfODzzb0T0NAvZSzErC.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1522,14 +1570,22 @@
    "ottFreshDate": "2026-09-24",
    "slug": "american-horror-story",
    "wikiWeeklyViews": 235606,
-   "trailerViews": 420361,
+   "trailerViews": 420586,
    "take": "The visuals and production design won critics over; the second half drew the odd complaint.",
    "takeSrc": "wiki",
    "takeAspects": [
     "visuals",
     "production design"
    ],
-   "takeArticle": "American Horror Story"
+   "takeArticle": "American Horror Story",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
+    "basis": "both"
+   }
   },
   {
    "title": "The Love Hypothesis",
@@ -1544,7 +1600,7 @@
      "score": "8.2/10"
     }
    ],
-   "votes": 322,
+   "votes": 326,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/vfZxVHextAGC70zrNhS8lsROqP1.jpg",
    "isRecent": true,
@@ -1699,11 +1755,19 @@
    "slug": "the-love-hypothesis",
    "wikiWeeklyViews": 301261,
    "trending": true,
-   "trailerViews": 15758468,
+   "trailerViews": 15783728,
    "take": "Critics are split clean down the middle on this one.",
    "takeSrc": "wiki",
    "takeArticle": "The Love Hypothesis (film)",
-   "takeCounter": "The audience isn't buying the reviews — they rate it far higher."
+   "criticsTone": "mixed",
+   "takeCounter": "The audience isn't buying the reviews — they rate it far higher.",
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Audiences love it; critics are split.",
+    "audience": "Loved",
+    "critics": "mixed",
+    "basis": "both"
+   }
   },
   {
    "title": "Futurama",
@@ -1871,13 +1935,188 @@
    "ottFreshDate": "2026-09-21",
    "slug": "futurama",
    "wikiWeeklyViews": 25061,
-   "trailerViews": 47673,
+   "trailerViews": 47678,
    "take": "Critics loved it — special praise for the animation.",
    "takeSrc": "wiki",
    "takeAspects": [
     "animation"
    ],
-   "takeArticle": "Futurama"
+   "takeArticle": "Futurama",
+   "criticsTone": "acclaim",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
+    "basis": "both"
+   }
+  },
+  {
+   "title": "Detective Conan: The Counterfeit Case of Ultra 30",
+   "genre": "Animation / Action",
+   "language": "Japanese",
+   "released": "2026-09-25",
+   "review": "As a new 10,000-yen banknote featuring the Touto Tower design is issued and the nation is swept up in excitement, Conan and the Junior Detective League…",
+   "rating": null,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "New release"
+    }
+   ],
+   "votes": 4,
+   "verdict": "Just released — verdict soon",
+   "poster": "https://image.tmdb.org/t/p/w342/pT9RIHf4K9OyOB3eqYj97E5h0YA.jpg",
+   "isRecent": true,
+   "isFresh": true,
+   "kind": "movie",
+   "tmdbId": 1777750,
+   "popularity": 5.0665,
+   "cert": null,
+   "trailer": "https://www.youtube.com/results?search_query=Detective%20Conan%3A%20The%20Counterfeit%20Case%20of%20Ultra%2030%20official%20trailer",
+   "providers": [
+    "Netflix"
+   ],
+   "cast": [
+    "Minami Takayama",
+    "Akemi Okamura",
+    "Kappei Yamaguchi",
+    "Rikiya Koyama"
+   ],
+   "director": "Nobuharu Kamanaka",
+   "runtime": 93,
+   "imdbVotes": null,
+   "imdbId": "tt46656123",
+   "seasons": null,
+   "freshDate": "2026-09-25",
+   "badge": "New release",
+   "similar": [
+    {
+     "title": "Detective Conan: The Bride of Halloween",
+     "slug": "detective-conan-the-bride-of-halloween",
+     "poster": "https://image.tmdb.org/t/p/w342/zfsLhI6yAHH9pdhY6EConmUCumX.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Detective Conan: Black Iron Submarine",
+     "slug": "detective-conan-black-iron-submarine",
+     "poster": "https://image.tmdb.org/t/p/w342/ksQ8uNgoWsVH6a0oPB6zx08pOwU.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Detective Conan: One-Eyed Flashback",
+     "slug": "detective-conan-one-eyed-flashback",
+     "poster": "https://image.tmdb.org/t/p/w342/1wl6eAHbIDSz61tGwYTOKlSRvZb.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Detective Conan: The Million-Dollar Pentagram",
+     "slug": "detective-conan-the-million-dollar-pentagram",
+     "poster": "https://image.tmdb.org/t/p/w342/ctboIRYQHYJMge6M6fgcwrhREsj.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Psycho-Pass: Providence",
+     "slug": "psycho-pass-providence",
+     "poster": "https://image.tmdb.org/t/p/w342/m6T9dPpm8P8jqHIHEnEnKYXlPbW.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Detective Conan: Full Score of Fear",
+     "slug": "detective-conan-full-score-of-fear",
+     "poster": "https://image.tmdb.org/t/p/w342/qxq2TfGy1Vfh9miCjKPo0nNxmW6.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Detective Conan: Sunflowers of Inferno",
+     "slug": "detective-conan-sunflowers-of-inferno",
+     "poster": "https://image.tmdb.org/t/p/w342/phTv5vD6nLCLrtUKWRHMBJGU7Bi.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Case Closed: Countdown to Heaven",
+     "slug": "case-closed-countdown-to-heaven",
+     "poster": "https://image.tmdb.org/t/p/w342/1giFCODG6Bnik84NsyjHwvuX9Da.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Detective Conan: Dimensional Sniper",
+     "slug": "detective-conan-dimensional-sniper",
+     "poster": "https://image.tmdb.org/t/p/w342/d08RKnmdcoCwlHOezazli8hmJH6.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Detective Conan: Captured in Her Eyes",
+     "slug": "detective-conan-captured-in-her-eyes",
+     "poster": "https://image.tmdb.org/t/p/w342/o0ta1yBaKQRjEWLhOU8jmE9TdGa.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Detective Conan: The Time Bombed Skyscraper",
+     "slug": "detective-conan-the-time-bombed-skyscraper",
+     "poster": "https://image.tmdb.org/t/p/w342/h6xyd2XwrriAhkYpXpbfffWq09N.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Detective Conan: The Darkest Nightmare",
+     "slug": "detective-conan-the-darkest-nightmare",
+     "poster": "https://image.tmdb.org/t/p/w342/pXYeXuomi8EpXsXO4cvt5mdfSCD.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/v0T74v8LPZBSL247oGeTOp06tnm.jpg",
+   "backdropPath": "/v0T74v8LPZBSL247oGeTOp06tnm.jpg",
+   "posterPath": "/pT9RIHf4K9OyOB3eqYj97E5h0YA.jpg",
+   "fullReview": "As a new 10,000-yen banknote featuring the Touto Tower design is issued and the nation is swept up in excitement, Conan and the Junior Detective League, accompanied by Professor Agasa, Ran, and Sonoko, visit the Nagano factory of the Japan Banknote Printing Bureau. Meanwhile, counterfeit money is discovered at the scene of a murder in Tokyo, prompting the Metropolitan Police Department to establish an investigation headquarters.",
+   "castPics": [
+    {
+     "name": "Minami Takayama",
+     "character": "Conan Edogawa (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/4Gunxt2UWnAX74ZoXKtqK2rI0e.jpg"
+    },
+    {
+     "name": "Akemi Okamura",
+     "character": "Ran Mouri (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/qEwVfsrA23SCzRZMSlghw2sHctQ.jpg"
+    },
+    {
+     "name": "Kappei Yamaguchi",
+     "character": "Shinichi Kudo (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/mJyxKRZxLv9D7LH5KcNSkjSKYOB.jpg"
+    },
+    {
+     "name": "Rikiya Koyama",
+     "character": "Kogoro Mouri (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/hsZm87BORLpzhaycBaWOD5xpjVC.jpg"
+    },
+    {
+     "name": "Elaiza Ikeda",
+     "character": "Toko Satomi (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/9O5oVUq06ao6MXbYxQ93y8MwTMP.jpg"
+    },
+    {
+     "name": "Kenichi Ogata",
+     "character": "Hiroshi Agasa (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/iQLEawIP2593yrGy22GzLSpnfgl.jpg"
+    }
+   ],
+   "theatrical": false,
+   "platform": "Netflix",
+   "ottSince": "2026-09-28",
+   "ottFreshDate": "2026-09-25",
+   "slug": "detective-conan-the-counterfeit-case-of-ultra-30"
   },
   {
    "title": "Plastic Beauty",
@@ -1997,9 +2236,9 @@
      "kind": "tv"
     },
     {
-     "title": "The Newsreader",
-     "slug": "the-newsreader",
-     "poster": "https://image.tmdb.org/t/p/w342/aHl6HgHcFLfe68E7uiq8NRDCXOv.jpg",
+     "title": "Tyler Perry's Ruthless",
+     "slug": "tyler-perry-s-ruthless",
+     "poster": "https://image.tmdb.org/t/p/w342/c2sBZga1A6cQnKfsDjSXddhmkad.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -2045,176 +2284,7 @@
    "ottFreshDate": "2026-09-17",
    "stillGood": true,
    "slug": "plastic-beauty",
-   "trailerViews": 919593
-  },
-  {
-   "title": "Kamen Rider MY-TH",
-   "genre": "Action & Adventure / Sci-Fi & Fantasy",
-   "language": "Japanese",
-   "released": "2026-09-06",
-   "review": "The cynical butler, Sora Otosumi lives alone in a mansion with the innocent and carefree young lady, Yuna Mizuki.",
-   "rating": null,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "New release"
-    }
-   ],
-   "votes": 2,
-   "verdict": "Not enough ratings yet",
-   "poster": "https://image.tmdb.org/t/p/w342/rP5msGG1CTXsbqDhKt9pxF0V7qV.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 318445,
-   "popularity": 6.695,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=1MmeiWOtUuc",
-   "providers": [
-    "Amazon Prime Video",
-    "U-NEXT"
-   ],
-   "cast": [
-    "Ikuho Akiya",
-    "Hayate Ataka",
-    "Riko Horikawa",
-    "Keisuke Higashi"
-   ],
-   "director": null,
-   "runtime": null,
-   "imdbVotes": null,
-   "imdbId": "tt41416782",
-   "seasons": 1,
-   "freshDate": "2026-09-06",
-   "badge": null,
-   "similar": [
-    {
-     "title": "KILL BLUE",
-     "slug": "kill-blue",
-     "poster": "https://image.tmdb.org/t/p/w342/lqly2Kha1aFu2lJ3e82ZxllEjBj.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Choujuu Sentai Liveman",
-     "slug": "choujuu-sentai-liveman",
-     "poster": "https://image.tmdb.org/t/p/w342/hbMV06yJ6nHWj0LweEQCDXWhXcq.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Ranma ½",
-     "slug": "ranma",
-     "poster": "https://image.tmdb.org/t/p/w342/qb1R5iLZcjIgdDIfXFQXmJadQPI.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Ultraseven",
-     "slug": "ultraseven",
-     "poster": "https://image.tmdb.org/t/p/w342/4HEtZZY4OISae6vpMCzREyzXFQi.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Bakugan Battle Brawlers",
-     "slug": "bakugan-battle-brawlers",
-     "poster": "https://image.tmdb.org/t/p/w342/tYSZCSW6wbHoS9aEijTv4xHgGbZ.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Hyakujuu Sentai Gaoranger",
-     "slug": "hyakujuu-sentai-gaoranger",
-     "poster": "https://image.tmdb.org/t/p/w342/yrErA1GiQcZikGG3c0bITFlCO6f.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Madan Senki Ryukendo",
-     "slug": "madan-senki-ryukendo",
-     "poster": "https://image.tmdb.org/t/p/w342/k2Zu19nKv7bT2TBw8mpYaqhUEYy.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Dengeki Sentai Changeman",
-     "slug": "dengeki-sentai-changeman",
-     "poster": "https://image.tmdb.org/t/p/w342/oPo6IR0N7mAFke7VqCS8deaz2y8.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Glitter Force",
-     "slug": "glitter-force",
-     "poster": "https://image.tmdb.org/t/p/w342/f05I50C9GwA6FbxMNna3FnTube0.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "MegaMan NT Warrior",
-     "slug": "megaman-nt-warrior",
-     "poster": "https://image.tmdb.org/t/p/w342/roZllkX4mOoDAKljFtpYJzD41Kn.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "The Heroic Legend of Arslan",
-     "slug": "the-heroic-legend-of-arslan",
-     "poster": "https://image.tmdb.org/t/p/w342/p6F6pGoNNtIViDxHkU4wDeseiyJ.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Monster Hunter Stories: Ride On",
-     "slug": "monster-hunter-stories-ride-on",
-     "poster": "https://image.tmdb.org/t/p/w342/8WVq0KdNn6IT5Z6mgttKL5ja9JG.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/k1EZdHo4OmHymK69vmN1SVNIKcA.jpg",
-   "backdropPath": "/k1EZdHo4OmHymK69vmN1SVNIKcA.jpg",
-   "posterPath": "/rP5msGG1CTXsbqDhKt9pxF0V7qV.jpg",
-   "fullReview": "The cynical butler, Sora Otosumi lives alone in a mansion with the innocent and carefree young lady, Yuna Mizuki. The two lead elegant lives, but they harbor a secret. Otosumi transforms into Kamen Rider MY-TH to fight mysterious monsters known as Fukashigi, and effortlessly defeats these creatures like a mouse.  Around the same time, the Zyunishi Doumei (The Twelve Animal Signs Alliance), who also fight the Fukashigi, awaken from their 100-year slumber. Their leader is none other than a cat?! The alliance has begun to realize that their prey is being stolen.",
-   "castPics": [
-    {
-     "name": "Ikuho Akiya",
-     "character": "Sora Otosumi / Kamen Rider MY-TH",
-     "photo": "https://image.tmdb.org/t/p/w185/8wppjTlJkwqi2YUvj1DPcrqMYMo.jpg"
-    },
-    {
-     "name": "Hayate Ataka",
-     "character": "Tatsuomi Asao / Kamen Rider RID",
-     "photo": "https://image.tmdb.org/t/p/w185/qVleoulsIt1E9X9I6chxIsn8ces.jpg"
-    },
-    {
-     "name": "Riko Horikawa",
-     "character": "Yuna Mizuki",
-     "photo": "https://image.tmdb.org/t/p/w185/bRUKQZ1G97B0XpmL9gh6NjiUDzH.jpg"
-    },
-    {
-     "name": "Keisuke Higashi",
-     "character": "Kamuri Minetaka / Kamen Rider MAOU",
-     "photo": "https://image.tmdb.org/t/p/w185/6FFHre4YtnxzbE5a1kLWhk5miS1.jpg"
-    },
-    {
-     "name": "Shunya Kaneko",
-     "character": "Tigre / Kamen Rider TIGRE",
-     "photo": "https://image.tmdb.org/t/p/w185/cOr00obR8Sr4QbyLWpCuTFVdlpN.jpg"
-    },
-    {
-     "name": "Nanako Ando",
-     "character": "Datt / Kamen Rider DATT",
-     "photo": "https://image.tmdb.org/t/p/w185/X5Yu7LYDx3rltWlbQt5i3NnbCB.jpg"
-    }
-   ],
-   "platform": "Amazon Prime Video",
-   "ottSince": "2026-09-06",
-   "ottFreshDate": "2026-09-06",
-   "stillGood": true,
-   "slug": "kamen-rider-my-th",
-   "trailerViews": 625979
+   "trailerViews": 921948
   },
   {
    "title": "MobLand",
@@ -2229,7 +2299,7 @@
      "score": "8.4/10"
     }
    ],
-   "votes": 918,
+   "votes": 920,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/5Xc7WpWsgflfgEMoBlf9TmWhfbH.jpg",
    "isRecent": true,
@@ -2299,9 +2369,9 @@
      "kind": "tv"
     },
     {
-     "title": "Power Book IV: Force",
-     "slug": "power-book-iv-force",
-     "poster": "https://image.tmdb.org/t/p/w342/yzL4Tqbw2JA9MCsHJWFC4xV1IYU.jpg",
+     "title": "This City Is Ours",
+     "slug": "this-city-is-ours",
+     "poster": "https://image.tmdb.org/t/p/w342/fQpJFVWX8MCdOkwoutDw7tjhvgp.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2309,13 +2379,6 @@
      "title": "Kin",
      "slug": "kin",
      "poster": "https://image.tmdb.org/t/p/w342/2wTsgQQBruGQcjM0PjFr5l5MjEw.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "This City Is Ours",
-     "slug": "this-city-is-ours",
-     "poster": "https://image.tmdb.org/t/p/w342/fQpJFVWX8MCdOkwoutDw7tjhvgp.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2337,6 +2400,13 @@
      "title": "Narcos",
      "slug": "narcos",
      "poster": "https://image.tmdb.org/t/p/w342/rTmal9fDbwh5F0waol2hq35U4ah.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Shield",
+     "slug": "the-shield",
+     "poster": "https://image.tmdb.org/t/p/w342/AfdZXqqlFsPUEfi6kWWWthxw7Nz.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -2383,11 +2453,19 @@
    "stillGood": true,
    "slug": "mobland",
    "wikiWeeklyViews": 220417,
-   "trailerViews": 11802326,
+   "trailerViews": 11806134,
    "take": "A love-it-or-hate-it reception, right down the middle.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
-   "takeCounter": "The audience isn't buying the reviews — they rate it far higher."
+   "criticsTone": "mixed",
+   "takeCounter": "The audience isn't buying the reviews — they rate it far higher.",
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Audiences love it; critics are split.",
+    "audience": "Loved",
+    "critics": "mixed",
+    "basis": "both"
+   }
   },
   {
    "title": "Slow Horses",
@@ -2402,7 +2480,7 @@
      "score": "8.0/10"
     }
    ],
-   "votes": 1001,
+   "votes": 1002,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
    "isRecent": true,
@@ -2445,13 +2523,6 @@
      "kind": "tv"
     },
     {
-     "title": "Cross",
-     "slug": "cross",
-     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "The Veil",
      "slug": "the-veil",
      "poster": "https://image.tmdb.org/t/p/w342/6aM5Lyp3zUtPyc0WVofES6UrV06.jpg",
@@ -2459,9 +2530,23 @@
      "kind": "tv"
     },
     {
+     "title": "Cross",
+     "slug": "cross",
+     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "Down Cemetery Road",
      "slug": "down-cemetery-road",
      "poster": "https://image.tmdb.org/t/p/w342/pjmQbrJ3FesJobbqCnUwBCtfcvH.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Black Doves",
+     "slug": "black-doves",
+     "poster": "https://image.tmdb.org/t/p/w342/uoXtkm2P4HPPL8T3IBJ02G3hCC4.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2504,13 +2589,6 @@
      "title": "The Night Manager",
      "slug": "the-night-manager",
      "poster": "https://image.tmdb.org/t/p/w342/1MccRnw41qQjREuZkovqP2UX1i3.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Capture",
-     "slug": "the-capture",
-     "poster": "https://image.tmdb.org/t/p/w342/6keUrgntgKt299a39UJCDYldb8b.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -2557,17 +2635,25 @@
    "stillGood": true,
    "slug": "slow-horses",
    "wikiWeeklyViews": 266451,
-   "trailerViews": 5720823,
+   "trailerViews": 5721629,
    "take": "Critics loved this one; reception has been close to universal acclaim.",
    "takeSrc": "wiki",
-   "takeArticle": "Slow Horses"
+   "takeArticle": "Slow Horses",
+   "criticsTone": "acclaim",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
+    "basis": "both"
+   }
   },
   {
-   "title": "How Do We Relationship?",
-   "genre": "Drama",
+   "title": "Kamen Rider MY-TH",
+   "genre": "Action & Adventure / Sci-Fi & Fantasy",
    "language": "Japanese",
-   "released": "2026-09-11",
-   "review": "College student Miwa Inuzuka has always longed for romance, yet she has never had a relationship that truly worked out.",
+   "released": "2026-09-06",
+   "review": "The cynical butler, Sora Otosumi lives alone in a mansion with the innocent and carefree young lady, Yuna Mizuki.",
    "rating": null,
    "scores": [
     {
@@ -2575,160 +2661,161 @@
      "score": "New release"
     }
    ],
-   "votes": 1,
+   "votes": 2,
    "verdict": "Not enough ratings yet",
-   "poster": "https://image.tmdb.org/t/p/w342/b7przbAbUlccoLi9cPi3NgnDSwF.jpg",
+   "poster": "https://image.tmdb.org/t/p/w342/rP5msGG1CTXsbqDhKt9pxF0V7qV.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
-   "tmdbId": 327493,
-   "popularity": 3.5787,
+   "tmdbId": 318445,
+   "popularity": 6.695,
    "cert": null,
-   "trailer": "https://www.youtube.com/results?search_query=How%20Do%20We%20Relationship%3F%20official%20trailer",
+   "trailer": "https://www.youtube.com/watch?v=1MmeiWOtUuc",
    "providers": [
-    "FOD Channel Amazon Channel",
-    "FOD"
+    "Amazon Prime Video",
+    "U-NEXT"
    ],
    "cast": [
-    "Riho Sayashi",
-    "Sakurako Konishi",
-    "Ayaka Konno",
-    "Eiku Yamashita"
+    "Ikuho Akiya",
+    "Hayate Ataka",
+    "Riko Horikawa",
+    "Keisuke Higashi"
    ],
    "director": null,
-   "runtime": 24,
+   "runtime": null,
    "imdbVotes": null,
-   "imdbId": "tt43687425",
+   "imdbId": "tt41416782",
    "seasons": 1,
-   "freshDate": "2026-09-11",
+   "freshDate": "2026-09-06",
    "badge": null,
    "similar": [
     {
-     "title": "A Sign of Affection",
-     "slug": "a-sign-of-affection",
-     "poster": "https://image.tmdb.org/t/p/w342/ntgph4kCtxzDsVQIK2gJfrG3PyM.jpg",
+     "title": "Sailor Moon",
+     "slug": "sailor-moon",
+     "poster": "https://image.tmdb.org/t/p/w342/m0e8QxAM0n3XK9GPvkxzRB0YL4k.jpg",
      "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "SING \"YESTERDAY\" FOR ME",
-     "slug": "sing-yesterday-for-me",
-     "poster": "https://image.tmdb.org/t/p/w342/w8PSu4Mdqihe9gYjfqKDya0krhh.jpg",
+     "title": "Choujuu Sentai Liveman",
+     "slug": "choujuu-sentai-liveman",
+     "poster": "https://image.tmdb.org/t/p/w342/hbMV06yJ6nHWj0LweEQCDXWhXcq.jpg",
      "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "Senpai Is an Otokonoko",
-     "slug": "senpai-is-an-otokonoko",
-     "poster": "https://image.tmdb.org/t/p/w342/7ZHylyosB06pSmBNCwY4lhFAjFq.jpg",
+     "title": "Ranma ½",
+     "slug": "ranma",
+     "poster": "https://image.tmdb.org/t/p/w342/qb1R5iLZcjIgdDIfXFQXmJadQPI.jpg",
      "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "The Ramparts of Ice",
-     "slug": "the-ramparts-of-ice",
-     "poster": "https://image.tmdb.org/t/p/w342/rke9UC2QrogvxiQD9TGpbvqDosi.jpg",
+     "title": "Ultraseven",
+     "slug": "ultraseven",
+     "poster": "https://image.tmdb.org/t/p/w342/4HEtZZY4OISae6vpMCzREyzXFQi.jpg",
      "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "Hero",
-     "slug": "hero",
-     "poster": "https://image.tmdb.org/t/p/w342/y5GNX1FGJ59ID8HU0RuGYLOLDzN.jpg",
+     "title": "Bakugan Battle Brawlers",
+     "slug": "bakugan-battle-brawlers",
+     "poster": "https://image.tmdb.org/t/p/w342/tYSZCSW6wbHoS9aEijTv4xHgGbZ.jpg",
      "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "The Fruit of Grisaia",
-     "slug": "the-fruit-of-grisaia",
-     "poster": "https://image.tmdb.org/t/p/w342/pzkneUGKQ6gW0Rgh43Olj6ibIcQ.jpg",
+     "title": "Tokyo Mew Mew",
+     "slug": "tokyo-mew-mew",
+     "poster": "https://image.tmdb.org/t/p/w342/vEBuze5ULPfMYfMX8BYuVa2moRs.jpg",
      "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "Tsubasa RESERVoir CHRoNiCLE",
-     "slug": "tsubasa-reservoir-chronicle",
-     "poster": "https://image.tmdb.org/t/p/w342/lU2oU80UhGREf1dJBRb756KWEWJ.jpg",
+     "title": "Hyakujuu Sentai Gaoranger",
+     "slug": "hyakujuu-sentai-gaoranger",
+     "poster": "https://image.tmdb.org/t/p/w342/yrErA1GiQcZikGG3c0bITFlCO6f.jpg",
      "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "Bel-Air",
-     "slug": "bel-air",
-     "poster": "https://image.tmdb.org/t/p/w342/j8tbXWXrL15RucA6H4khq87dEXa.jpg",
-     "language": "English",
+     "title": "Madan Senki Ryukendo",
+     "slug": "madan-senki-ryukendo",
+     "poster": "https://image.tmdb.org/t/p/w342/k2Zu19nKv7bT2TBw8mpYaqhUEYy.jpg",
+     "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "The Newsreader",
-     "slug": "the-newsreader",
-     "poster": "https://image.tmdb.org/t/p/w342/aHl6HgHcFLfe68E7uiq8NRDCXOv.jpg",
-     "language": "English",
+     "title": "Dengeki Sentai Changeman",
+     "slug": "dengeki-sentai-changeman",
+     "poster": "https://image.tmdb.org/t/p/w342/oPo6IR0N7mAFke7VqCS8deaz2y8.jpg",
+     "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "Unchosen",
-     "slug": "unchosen",
-     "poster": "https://image.tmdb.org/t/p/w342/oVl01a7R8rfmWrolWtrlPXYQqzj.jpg",
-     "language": "English",
+     "title": "Glitter Force",
+     "slug": "glitter-force",
+     "poster": "https://image.tmdb.org/t/p/w342/f05I50C9GwA6FbxMNna3FnTube0.jpg",
+     "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "Tyler Perry's Ruthless",
-     "slug": "tyler-perry-s-ruthless",
-     "poster": "https://image.tmdb.org/t/p/w342/c2sBZga1A6cQnKfsDjSXddhmkad.jpg",
-     "language": "English",
+     "title": "MegaMan NT Warrior",
+     "slug": "megaman-nt-warrior",
+     "poster": "https://image.tmdb.org/t/p/w342/roZllkX4mOoDAKljFtpYJzD41Kn.jpg",
+     "language": "Japanese",
      "kind": "tv"
     },
     {
-     "title": "Sullivan's Crossing",
-     "slug": "sullivan-s-crossing",
-     "poster": "https://image.tmdb.org/t/p/w342/nYRnuQNR13nEYaXkOZaY0qIWl2K.jpg",
-     "language": "English",
+     "title": "The Heroic Legend of Arslan",
+     "slug": "the-heroic-legend-of-arslan",
+     "poster": "https://image.tmdb.org/t/p/w342/p6F6pGoNNtIViDxHkU4wDeseiyJ.jpg",
+     "language": "Japanese",
      "kind": "tv"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/w0LM1HrterurSRf9YEIblNB2g9a.jpg",
-   "backdropPath": "/w0LM1HrterurSRf9YEIblNB2g9a.jpg",
-   "posterPath": "/b7przbAbUlccoLi9cPi3NgnDSwF.jpg",
-   "fullReview": "College student Miwa Inuzuka has always longed for romance, yet she has never had a relationship that truly worked out. After starting university, she meets the bright and outgoing Saeko Sawatari and despite their completely opposite personalities, the two unexpectedly discover that they both like women. Can two girls who are both bad at love find their own happiness?",
+   "backdrop": "https://image.tmdb.org/t/p/w780/k1EZdHo4OmHymK69vmN1SVNIKcA.jpg",
+   "backdropPath": "/k1EZdHo4OmHymK69vmN1SVNIKcA.jpg",
+   "posterPath": "/rP5msGG1CTXsbqDhKt9pxF0V7qV.jpg",
+   "fullReview": "The cynical butler, Sora Otosumi lives alone in a mansion with the innocent and carefree young lady, Yuna Mizuki. The two lead elegant lives, but they harbor a secret. Otosumi transforms into Kamen Rider MY-TH to fight mysterious monsters known as Fukashigi, and effortlessly defeats these creatures like a mouse.  Around the same time, the Zyunishi Doumei (The Twelve Animal Signs Alliance), who also fight the Fukashigi, awaken from their 100-year slumber. Their leader is none other than a cat?! The alliance has begun to realize that their prey is being stolen.",
    "castPics": [
     {
-     "name": "Riho Sayashi",
-     "character": "Saeko Sawatari",
-     "photo": "https://image.tmdb.org/t/p/w185/wxGHVwUZhqAF7sEkkeF2kf0YZia.jpg"
+     "name": "Ikuho Akiya",
+     "character": "Sora Otosumi / Kamen Rider MY-TH",
+     "photo": "https://image.tmdb.org/t/p/w185/8wppjTlJkwqi2YUvj1DPcrqMYMo.jpg"
     },
     {
-     "name": "Sakurako Konishi",
-     "character": "Miwa Inuzuka",
-     "photo": "https://image.tmdb.org/t/p/w185/zmAtfFk66IfmRzQUKtECdHumRKY.jpg"
+     "name": "Hayate Ataka",
+     "character": "Tatsuomi Asao / Kamen Rider RID",
+     "photo": "https://image.tmdb.org/t/p/w185/qVleoulsIt1E9X9I6chxIsn8ces.jpg"
     },
     {
-     "name": "Ayaka Konno",
-     "character": "Yuria Washio",
-     "photo": "https://image.tmdb.org/t/p/w185/2JwLIGRv16O7v1sh0GIqOdff77P.jpg"
+     "name": "Riko Horikawa",
+     "character": "Yuna Mizuki",
+     "photo": "https://image.tmdb.org/t/p/w185/bRUKQZ1G97B0XpmL9gh6NjiUDzH.jpg"
     },
     {
-     "name": "Eiku Yamashita",
-     "character": "Mikkun",
-     "photo": "https://image.tmdb.org/t/p/w185/2QzqiMnzn3JksjdqalXXKMRf798.jpg"
+     "name": "Keisuke Higashi",
+     "character": "Kamuri Minetaka / Kamen Rider MAOU",
+     "photo": "https://image.tmdb.org/t/p/w185/6FFHre4YtnxzbE5a1kLWhk5miS1.jpg"
     },
     {
-     "name": "Kasumi Yamaya",
-     "character": "Shiho Kumagai",
-     "photo": "https://image.tmdb.org/t/p/w185/lZXK0zeiNQfggKBx0kwBKPe4QQ4.jpg"
+     "name": "Shunya Kaneko",
+     "character": "Tigre / Kamen Rider TIGRE",
+     "photo": "https://image.tmdb.org/t/p/w185/cOr00obR8Sr4QbyLWpCuTFVdlpN.jpg"
     },
     {
-     "name": "Reina Kurosaki",
-     "character": "Rika-chan",
-     "photo": "https://image.tmdb.org/t/p/w185/aTHEjOmyjlAYSxsxGuverHQINLT.jpg"
+     "name": "Nanako Ando",
+     "character": "Datt / Kamen Rider DATT",
+     "photo": "https://image.tmdb.org/t/p/w185/X5Yu7LYDx3rltWlbQt5i3NnbCB.jpg"
     }
    ],
-   "platform": "FOD Channel Amazon Channel",
-   "ottSince": "2026-09-11",
-   "ottFreshDate": "2026-09-11",
+   "platform": "Amazon Prime Video",
+   "ottSince": "2026-09-06",
+   "ottFreshDate": "2026-09-06",
    "stillGood": true,
-   "slug": "how-do-we-relationship"
+   "slug": "kamen-rider-my-th",
+   "trailerViews": 626248
   },
   {
    "title": "Lanterns",
@@ -2743,7 +2830,7 @@
      "score": "8.3/10"
     }
    ],
-   "votes": 448,
+   "votes": 450,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/gpC7h43xPMEV3goYMQShfJbTtLq.jpg",
    "isRecent": false,
@@ -2778,16 +2865,9 @@
      "kind": "tv"
     },
     {
-     "title": "A Good Girl's Guide to Murder",
-     "slug": "a-good-girl-s-guide-to-murder",
-     "poster": "https://image.tmdb.org/t/p/w342/pVV62HbgLP7JsZv096XmjPZtjdP.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Irregulars",
-     "slug": "the-irregulars",
-     "poster": "https://image.tmdb.org/t/p/w342/qN6HCKR3ZRqbpGBWFctVlSTKR2k.jpg",
+     "title": "Dark Winds",
+     "slug": "dark-winds",
+     "poster": "https://image.tmdb.org/t/p/w342/kDlrMN0P9ByrEH2GoRbBFeZHbcf.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2799,9 +2879,16 @@
      "kind": "tv"
     },
     {
-     "title": "Class of '09",
-     "slug": "class-of-09",
-     "poster": "https://image.tmdb.org/t/p/w342/5eCGq50CMloT2a1bMDB8JPpGuf2.jpg",
+     "title": "A Good Girl's Guide to Murder",
+     "slug": "a-good-girl-s-guide-to-murder",
+     "poster": "https://image.tmdb.org/t/p/w342/pVV62HbgLP7JsZv096XmjPZtjdP.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Revival",
+     "slug": "revival",
+     "poster": "https://image.tmdb.org/t/p/w342/xf2u02mLodDN2ujMSfLFDkPVFac.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2883,14 +2970,22 @@
    "slug": "lanterns",
    "wikiWeeklyViews": 489435,
    "trending": true,
-   "trailerViews": 35260738,
+   "trailerViews": 35269433,
    "take": "Critics liked it: the performances and lead chemistry won praise, though the themes drew some flak.",
    "takeSrc": "wiki",
    "takeAspects": [
     "performances",
     "lead chemistry"
    ],
-   "takeArticle": "Lanterns (TV series)"
+   "takeArticle": "Lanterns (TV series)",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
+    "basis": "both"
+   }
   }
  ],
  "comingSoon": [
@@ -2931,16 +3026,9 @@
      "kind": "movie"
     },
     {
-     "title": "2073",
-     "slug": "2073",
-     "poster": "https://image.tmdb.org/t/p/w342/l67ir3kU53FYd6Vjwhqrkih1H1P.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Occupation: Rainfall",
-     "slug": "occupation-rainfall",
-     "poster": "https://image.tmdb.org/t/p/w342/vpq8XjZ3ZalcbqWOYIdqcV7FbIJ.jpg",
+     "title": "The Astronaut",
+     "slug": "the-astronaut",
+     "poster": "https://image.tmdb.org/t/p/w342/souvvkJHYhztC1UqZ8lEVUiJa3J.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -2959,16 +3047,16 @@
      "kind": "movie"
     },
     {
-     "title": "Three Days of the Condor",
-     "slug": "three-days-of-the-condor",
-     "poster": "https://image.tmdb.org/t/p/w342/zinwtZqdb7gnc4zMu8dfkK1fMN3.jpg",
+     "title": "The Andromeda Strain",
+     "slug": "the-andromeda-strain",
+     "poster": "https://image.tmdb.org/t/p/w342/4FBSFz8wLpxd4o6hnvKOJJ8WSIz.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Andromeda Strain",
-     "slug": "the-andromeda-strain",
-     "poster": "https://image.tmdb.org/t/p/w342/4FBSFz8wLpxd4o6hnvKOJJ8WSIz.jpg",
+     "title": "Impostor",
+     "slug": "impostor",
+     "poster": "https://image.tmdb.org/t/p/w342/7Uy4JbalP0mEyKnFW2IorQDmbBa.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3004,6 +3092,13 @@
      "title": "The Sum of All Fears",
      "slug": "the-sum-of-all-fears",
      "poster": "https://image.tmdb.org/t/p/w342/3E4LW4bjRhEMDeeXeIsmkJ94v8K.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Invasion",
+     "slug": "the-invasion",
+     "poster": "https://image.tmdb.org/t/p/w342/oS5rMuJXwNZZPx0ojhvjgduglD2.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -3045,7 +3140,7 @@
     }
    ],
    "slug": "disclosure-day",
-   "trailerViews": 19506143
+   "trailerViews": 19506697
   },
   {
    "title": "You, Like a Star",
@@ -3077,16 +3172,37 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "Drawing Closer",
-     "slug": "drawing-closer",
-     "poster": "https://image.tmdb.org/t/p/w342/173FD4a0rpSF30z4CoWx6qdx8Ry.jpg",
+     "title": "The Last 10 Years",
+     "slug": "the-last-10-years",
+     "poster": "https://image.tmdb.org/t/p/w342/3TTSYnXJyDXEadiG1BMangdq3XV.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Close Range Love",
-     "slug": "close-range-love",
-     "poster": "https://image.tmdb.org/t/p/w342/qsbziRvCvhpw57W7LrsK4Tat47A.jpg",
+     "title": "Even If This Love Disappears Tonight",
+     "slug": "even-if-this-love-disappears-tonight",
+     "poster": "https://image.tmdb.org/t/p/w342/ndNdvlPN434L5GPhTtJdMFfvcgm.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "My Tomorrow, Your Yesterday",
+     "slug": "my-tomorrow-your-yesterday",
+     "poster": "https://image.tmdb.org/t/p/w342/wtRJKkspD4pv3fd2lO2cT93dpzq.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Radiance",
+     "slug": "radiance",
+     "poster": "https://image.tmdb.org/t/p/w342/l7fR2WW7mnXl0nrZSHeCBxbljeH.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Blue Spring Ride",
+     "slug": "blue-spring-ride",
+     "poster": "https://image.tmdb.org/t/p/w342/8ic3JNoQVPTGtOwgUeTWu09mmNl.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
@@ -3098,6 +3214,20 @@
      "kind": "movie"
     },
     {
+     "title": "The Secret: Dare to Dream",
+     "slug": "the-secret-dare-to-dream",
+     "poster": "https://image.tmdb.org/t/p/w342/5mCqEeBA0MW7H6akFrFQXJu68rU.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Lost Husband",
+     "slug": "the-lost-husband",
+     "poster": "https://image.tmdb.org/t/p/w342/ouwKjq9SshrAzb2KIwa057O2I6N.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Life in a Year",
      "slug": "life-in-a-year",
      "poster": "https://image.tmdb.org/t/p/w342/bP7u19opmHXYeTCUwGjlLldmUMc.jpg",
@@ -3105,9 +3235,16 @@
      "kind": "movie"
     },
     {
-     "title": "Really Love",
-     "slug": "really-love",
-     "poster": "https://image.tmdb.org/t/p/w342/hqqEHkLUdOyoDYcvXi0lUEeQ748.jpg",
+     "title": "Nobody Has to Know",
+     "slug": "nobody-has-to-know",
+     "poster": "https://image.tmdb.org/t/p/w342/47q3c4Srk0QB1BclgbKBlznvUYO.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Pride and Prejudice",
+     "slug": "pride-and-prejudice",
+     "poster": "https://image.tmdb.org/t/p/w342/yoWwsLkuY5tMxUqkKMOHAJlImTs.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3115,48 +3252,6 @@
      "title": "Love Everlasting",
      "slug": "love-everlasting",
      "poster": "https://image.tmdb.org/t/p/w342/fQeaB97z2g0vdu0tvu0T9me1aJF.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Winter's Tale",
-     "slug": "winter-s-tale",
-     "poster": "https://image.tmdb.org/t/p/w342/sdmHGy9c92SjAhz1h05TSLfnnAj.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Endless Love",
-     "slug": "endless-love",
-     "poster": "https://image.tmdb.org/t/p/w342/7WDqvNmy4p6IJx8JjvzOtaV2IRr.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Blind",
-     "slug": "blind",
-     "poster": "https://image.tmdb.org/t/p/w342/cXyObe5aB63ueOndEXxXabgAvIi.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Possession",
-     "slug": "possession",
-     "poster": "https://image.tmdb.org/t/p/w342/12z5oCy4s3GBOUrNCWvcKYBK4eI.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Breathe",
-     "slug": "breathe",
-     "poster": "https://image.tmdb.org/t/p/w342/wLu2N0QVfSpk10RJ17HLHyRUmww.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Best of Me",
-     "slug": "the-best-of-me",
-     "poster": "https://image.tmdb.org/t/p/w342/gSr79jDrR073FmLjIrZWar1lFD2.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -3350,7 +3445,7 @@
     }
    ],
    "slug": "resident-evil",
-   "trailerViews": 17965564
+   "trailerViews": 18008113
   },
   {
    "title": "Rascal Does Not Dream of a Dear Friend",
@@ -3503,7 +3598,7 @@
     }
    ],
    "slug": "rascal-does-not-dream-of-a-dear-friend",
-   "trailerViews": 245514
+   "trailerViews": 245687
   },
   {
    "title": "Bad Lieutenant: Tokyo",
@@ -3542,6 +3637,13 @@
      "kind": "movie"
     },
     {
+     "title": "Baby Assassins",
+     "slug": "baby-assassins",
+     "poster": "https://image.tmdb.org/t/p/w342/4A3hk4sT4EETeu7XqbLKFDFtFFu.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
      "title": "Detective Conan: The Million-Dollar Pentagram",
      "slug": "detective-conan-the-million-dollar-pentagram",
      "poster": "https://image.tmdb.org/t/p/w342/ctboIRYQHYJMge6M6fgcwrhREsj.jpg",
@@ -3556,13 +3658,6 @@
      "kind": "movie"
     },
     {
-     "title": "Lupin the Third vs. Detective Conan: The Movie",
-     "slug": "lupin-the-third-vs-detective-conan-the-movie",
-     "poster": "https://image.tmdb.org/t/p/w342/hyLW346kEV7E8GgibUGeG7pNSFO.jpg",
-     "language": "Japanese",
-     "kind": "movie"
-    },
-    {
      "title": "Lupin the 3rd",
      "slug": "lupin-the-3rd",
      "poster": "https://image.tmdb.org/t/p/w342/2xgRjTYDVFEVQeRUrsbQQtKA6I5.jpg",
@@ -3570,16 +3665,23 @@
      "kind": "movie"
     },
     {
-     "title": "Detective Conan: The Darkest Nightmare",
-     "slug": "detective-conan-the-darkest-nightmare",
-     "poster": "https://image.tmdb.org/t/p/w342/pXYeXuomi8EpXsXO4cvt5mdfSCD.jpg",
+     "title": "Lupin the Third vs. Detective Conan: The Movie",
+     "slug": "lupin-the-third-vs-detective-conan-the-movie",
+     "poster": "https://image.tmdb.org/t/p/w342/hyLW346kEV7E8GgibUGeG7pNSFO.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "High and Low",
-     "slug": "high-and-low",
-     "poster": "https://image.tmdb.org/t/p/w342/tgNjemQPG96uIezpiUiXFcer5ga.jpg",
+     "title": "Lady Snowblood 2: Love Song of Vengeance",
+     "slug": "lady-snowblood-2-love-song-of-vengeance",
+     "poster": "https://image.tmdb.org/t/p/w342/tyn32kFaYJzOtfszozlKWCpOd9c.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Detective Conan: The Darkest Nightmare",
+     "slug": "detective-conan-the-darkest-nightmare",
+     "poster": "https://image.tmdb.org/t/p/w342/pXYeXuomi8EpXsXO4cvt5mdfSCD.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
@@ -3608,13 +3710,6 @@
      "title": "Snake Eyes",
      "slug": "snake-eyes",
      "poster": "https://image.tmdb.org/t/p/w342/gsh9mQKRrr4M90XC9Rr0wxefc9u.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Prince of the City",
-     "slug": "prince-of-the-city",
-     "poster": "https://image.tmdb.org/t/p/w342/511ulkuQ46NYiwAc39rXMBIB34r.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -3656,7 +3751,7 @@
     }
    ],
    "slug": "bad-lieutenant-tokyo",
-   "trailerViews": 148855
+   "trailerViews": 149172
   },
   {
    "title": "The Mongoose",
@@ -3688,6 +3783,13 @@
    "isRecent": false,
    "similar": [
     {
+     "title": "Chief of Station",
+     "slug": "chief-of-station",
+     "poster": "https://image.tmdb.org/t/p/w342/vwRpODBF9Pwt56C7fhaKfGTV2XS.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "The Desperate Hour",
      "slug": "the-desperate-hour",
      "poster": "https://image.tmdb.org/t/p/w342/u6Pg9eTklhg6Aa7kXaxrfdE1Chi.jpg",
@@ -3702,9 +3804,9 @@
      "kind": "movie"
     },
     {
-     "title": "Transporter 3",
-     "slug": "transporter-3",
-     "poster": "https://image.tmdb.org/t/p/w342/o4w9VF3GRZuXe9NHHvZ07pJespl.jpg",
+     "title": "The Paper Tigers",
+     "slug": "the-paper-tigers",
+     "poster": "https://image.tmdb.org/t/p/w342/x54tAgLfS51fO5EcipNJJ9tfSRK.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3726,13 +3828,6 @@
      "title": "Overdrive",
      "slug": "overdrive",
      "poster": "https://image.tmdb.org/t/p/w342/a0hTRjis1cxwmjOuBaS7WdDG3dj.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Furious 7",
-     "slug": "furious-7",
-     "poster": "https://image.tmdb.org/t/p/w342/ktofZ9Htrjiy0P6LEowsDaxd3Ri.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3809,7 +3904,7 @@
     }
    ],
    "slug": "the-mongoose",
-   "trailerViews": 476363
+   "trailerViews": 477648
   },
   {
    "title": "Godzilla Minus Zero",
@@ -3841,87 +3936,87 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "Kaiju No. 8: Mission Recon",
-     "slug": "kaiju-no-8-mission-recon",
-     "poster": "https://image.tmdb.org/t/p/w342/kx9mF5Yma1da1ELjbyWSVWJednM.jpg",
+     "title": "Invasion of Astro-Monster",
+     "slug": "invasion-of-astro-monster",
+     "poster": "https://image.tmdb.org/t/p/w342/70gwaushxXcpGRvadHtLD0YLHC1.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Shin Ultraman",
-     "slug": "shin-ultraman",
-     "poster": "https://image.tmdb.org/t/p/w342/8e4WjXrOY7WH94jlhBeoYCYUVwj.jpg",
+     "title": "Godzilla vs. Megaguirus",
+     "slug": "godzilla-vs-megaguirus",
+     "poster": "https://image.tmdb.org/t/p/w342/jWOLrfoVmYCogt0FUsQuXSThi1s.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Batman Ninja vs. Yakuza League",
-     "slug": "batman-ninja-vs-yakuza-league",
-     "poster": "https://image.tmdb.org/t/p/w342/sVVT6GYFErVv0Lcc9NvqCu0iOxO.jpg",
+     "title": "Godzilla 1985",
+     "slug": "godzilla-1985",
+     "poster": "https://image.tmdb.org/t/p/w342/blKtf1L6LA3mFW8aVJzxnaI8CLn.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Attack on Titan",
-     "slug": "attack-on-titan",
-     "poster": "https://image.tmdb.org/t/p/w342/ihK3jUDlcQBMEObbLwSswqpiy3Z.jpg",
+     "title": "Godzilla vs. Mechagodzilla",
+     "slug": "godzilla-vs-mechagodzilla",
+     "poster": "https://image.tmdb.org/t/p/w342/ai92jga3nzkeWdPIeZBo6vyhUj5.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Resident Evil: Vendetta",
-     "slug": "resident-evil-vendetta",
-     "poster": "https://image.tmdb.org/t/p/w342/kdiMtgjWXEH9QZ85hgmWaSwshjf.jpg",
+     "title": "Godzilla 2000: Millennium",
+     "slug": "godzilla-2000-millennium",
+     "poster": "https://image.tmdb.org/t/p/w342/7BrjFxV0j5VzZRfVYeYbFXMUweB.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Gantz",
-     "slug": "gantz",
-     "poster": "https://image.tmdb.org/t/p/w342/vScJdcqXHyupdeO3wkTqT92ew85.jpg",
+     "title": "Godzilla, Mothra and King Ghidorah: Giant Monsters All-Out Attack",
+     "slug": "godzilla-mothra-and-king-ghidorah-giant-monsters-all-out-attack",
+     "poster": "https://image.tmdb.org/t/p/w342/d3lMCQJfjCBlGFy5sWpsEaBnEPl.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Resident Evil: Damnation",
-     "slug": "resident-evil-damnation",
-     "poster": "https://image.tmdb.org/t/p/w342/zkHSURVCrt7rpvDDgUXO75CV1v4.jpg",
+     "title": "Godzilla vs. Biollante",
+     "slug": "godzilla-vs-biollante",
+     "poster": "https://image.tmdb.org/t/p/w342/dAr3SzPTfKP23uILP4BBiML8MVG.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Dororo",
-     "slug": "dororo",
-     "poster": "https://image.tmdb.org/t/p/w342/vEM9WY9ufaIeX8xHdHyJ8H2udNz.jpg",
+     "title": "The Return of Godzilla",
+     "slug": "the-return-of-godzilla",
+     "poster": "https://image.tmdb.org/t/p/w342/j6jPBig1P30VZmFTZJdLzFk3hrL.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Samurai Reincarnation",
-     "slug": "samurai-reincarnation",
-     "poster": "https://image.tmdb.org/t/p/w342/1RREOQRTYdjkzNxMv37winNPXFt.jpg",
+     "title": "Godzilla vs. Destoroyah",
+     "slug": "godzilla-vs-destoroyah",
+     "poster": "https://image.tmdb.org/t/p/w342/csebMf1IWokaWOughl5s3uX8p44.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "X",
-     "slug": "x",
-     "poster": "https://image.tmdb.org/t/p/w342/irv0rrd34VGdxHRjI3AiJiXnAdo.jpg",
+     "title": "Godzilla: The Planet Eater",
+     "slug": "godzilla-the-planet-eater",
+     "poster": "https://image.tmdb.org/t/p/w342/fOA44BITFth0u4hMSOUgpK0kM6t.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Mobile Suit Gundam III: Encounters in Space",
-     "slug": "mobile-suit-gundam-iii-encounters-in-space",
-     "poster": "https://image.tmdb.org/t/p/w342/lXeLWEuUV5dVIhHmQt5z5RyawT4.jpg",
+     "title": "Godzilla: Planet of the Monsters",
+     "slug": "godzilla-planet-of-the-monsters",
+     "poster": "https://image.tmdb.org/t/p/w342/hAuZ7g6TqDLv5fOqXIPgYRguOkm.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Werewolf by Night",
-     "slug": "werewolf-by-night",
-     "poster": "https://image.tmdb.org/t/p/w342/mvIvNKRIJPPS7WSFarFhOAGIVnU.jpg",
-     "language": "English",
+     "title": "Godzilla vs. SpaceGodzilla",
+     "slug": "godzilla-vs-spacegodzilla",
+     "poster": "https://image.tmdb.org/t/p/w342/9qL56FqqVmavTBWZNw6cetJyevP.jpg",
+     "language": "Japanese",
      "kind": "movie"
     }
    ],
@@ -3962,7 +4057,7 @@
     }
    ],
    "slug": "godzilla-minus-zero",
-   "trailerViews": 11305
+   "trailerViews": 11327
   },
   {
    "title": "Avengers: Doomsday",
@@ -4043,6 +4138,13 @@
      "kind": "movie"
     },
     {
+     "title": "Spider-Man: Brand New Day",
+     "slug": "spider-man-brand-new-day",
+     "poster": "https://image.tmdb.org/t/p/w342/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Teen Titans Go! vs. Teen Titans",
      "slug": "teen-titans-go-vs-teen-titans",
      "poster": "https://image.tmdb.org/t/p/w342/GWJEdzVC9aOBSOMF9NHodYxSsE.jpg",
@@ -4067,13 +4169,6 @@
      "title": "Captain America: Civil War",
      "slug": "captain-america-civil-war",
      "poster": "https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Avengers: Infinity War",
-     "slug": "avengers-infinity-war",
-     "poster": "https://image.tmdb.org/t/p/w342/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -4115,7 +4210,7 @@
     }
    ],
    "slug": "avengers-doomsday",
-   "trailerViews": 44777634
+   "trailerViews": 44840819
   }
  ],
  "langPools": {},
@@ -4133,7 +4228,7 @@
      "score": "7.0/10"
     }
    ],
-   "votes": 149,
+   "votes": 155,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/39aMkR8Y5vhCG9dTkjiqRl8AVqp.jpg",
    "isRecent": true,
@@ -4189,9 +4284,9 @@
      "kind": "movie"
     },
     {
-     "title": "Body Brokers",
-     "slug": "body-brokers",
-     "poster": "https://image.tmdb.org/t/p/w342/fNQUUrtlN79pDIMAPigX8NUvNW2.jpg",
+     "title": "The Locksmith",
+     "slug": "the-locksmith",
+     "poster": "https://image.tmdb.org/t/p/w342/kNQ9Z3TQ5vU5fvwuHqZvLooFcCI.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -4300,7 +4395,7 @@
      "score": "8.1/10"
     }
    ],
-   "votes": 149,
+   "votes": 150,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/tEPDFIa21VK0Q2YLuzhTt2xrw5W.jpg",
    "isRecent": true,
@@ -4363,6 +4458,13 @@
      "kind": "tv"
     },
     {
+     "title": "Sugar",
+     "slug": "sugar",
+     "poster": "https://image.tmdb.org/t/p/w342/tLmwLYiI7EpPbhgmdeivNGY0xw7.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "A Good Girl's Guide to Murder",
      "slug": "a-good-girl-s-guide-to-murder",
      "poster": "https://image.tmdb.org/t/p/w342/pVV62HbgLP7JsZv096XmjPZtjdP.jpg",
@@ -4373,13 +4475,6 @@
      "title": "Fool Me Once",
      "slug": "fool-me-once",
      "poster": "https://image.tmdb.org/t/p/w342/Ertv4WLEyHgi8zN4ldOKgPcGAZ.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Missing You",
-     "slug": "missing-you",
-     "poster": "https://image.tmdb.org/t/p/w342/aEiqusZEqOrqHmRtOninChmcOG0.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -4398,16 +4493,16 @@
      "kind": "tv"
     },
     {
-     "title": "Chicago Justice",
-     "slug": "chicago-justice",
-     "poster": "https://image.tmdb.org/t/p/w342/hZ76A8l1JoONy2NoL0BF4AU2g3c.jpg",
+     "title": "Chicago P.D.",
+     "slug": "chicago-p-d",
+     "poster": "https://image.tmdb.org/t/p/w342/bez40PgT36RUu4gstD2A6GSM0tP.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "24: Legacy",
-     "slug": "24-legacy",
-     "poster": "https://image.tmdb.org/t/p/w342/2eoCEa9myi32C3QC7VYEu4y1f6D.jpg",
+     "title": "Chicago Justice",
+     "slug": "chicago-justice",
+     "poster": "https://image.tmdb.org/t/p/w342/hZ76A8l1JoONy2NoL0BF4AU2g3c.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -4466,7 +4561,7 @@
      "score": "7.1/10"
     }
    ],
-   "votes": 124,
+   "votes": 126,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/57XScX1aYtKi1LvHYFQLPUxVhTG.jpg",
    "isRecent": true,
@@ -4494,16 +4589,16 @@
    "badge": "New show",
    "similar": [
     {
-     "title": "Furious",
-     "slug": "furious",
-     "poster": "https://image.tmdb.org/t/p/w342/xnxxrEKtBaIcI1ewq50pLkOMU6u.jpg",
+     "title": "Love & Death",
+     "slug": "love-death",
+     "poster": "https://image.tmdb.org/t/p/w342/8WchbT0UPQeo3PZ6G01fhccYaQB.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Love & Death",
-     "slug": "love-death",
-     "poster": "https://image.tmdb.org/t/p/w342/8WchbT0UPQeo3PZ6G01fhccYaQB.jpg",
+     "title": "Furious",
+     "slug": "furious",
+     "poster": "https://image.tmdb.org/t/p/w342/xnxxrEKtBaIcI1ewq50pLkOMU6u.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -4515,6 +4610,13 @@
      "kind": "tv"
     },
     {
+     "title": "Monster: The Ed Gein Story",
+     "slug": "monster-the-ed-gein-story",
+     "poster": "https://image.tmdb.org/t/p/w342/iDHzRALtZCzHVmx7uyjTTKvMAPB.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "Fool Me Once",
      "slug": "fool-me-once",
      "poster": "https://image.tmdb.org/t/p/w342/Ertv4WLEyHgi8zN4ldOKgPcGAZ.jpg",
@@ -4522,16 +4624,16 @@
      "kind": "tv"
     },
     {
-     "title": "Candy",
-     "slug": "candy",
-     "poster": "https://image.tmdb.org/t/p/w342/8vlxmTkiF2rzpvrWoN4mOoeVg1z.jpg",
+     "title": "Hightown",
+     "slug": "hightown",
+     "poster": "https://image.tmdb.org/t/p/w342/69hornrvpKWIzBMCNzsVTZOggOw.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Hightown",
-     "slug": "hightown",
-     "poster": "https://image.tmdb.org/t/p/w342/69hornrvpKWIzBMCNzsVTZOggOw.jpg",
+     "title": "Candy",
+     "slug": "candy",
+     "poster": "https://image.tmdb.org/t/p/w342/8vlxmTkiF2rzpvrWoN4mOoeVg1z.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -4567,13 +4669,6 @@
      "title": "Manhunt",
      "slug": "manhunt",
      "poster": "https://image.tmdb.org/t/p/w342/pN5qeqDgCG1Pij7KaEBKLkyjn4A.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "A Friend of the Family",
-     "slug": "a-friend-of-the-family",
-     "poster": "https://image.tmdb.org/t/p/w342/bmJkzDE6s0QYBGtpA4i2JLBco0j.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -4625,14 +4720,14 @@
    "language": "Korean",
    "released": "2026-09-18",
    "review": "In Joseon, a secret proposal ignites hidden desires in a gifted noblewoman, a famed lover and an unsuspecting lady caught in their dangerous game.",
-   "rating": 7.3,
+   "rating": 7.2,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.3/10"
+     "score": "7.2/10"
     }
    ],
-   "votes": 17,
+   "votes": 18,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/4TU0PcHBIl0wPW5B6aVRGExOnHE.jpg",
    "isRecent": true,
@@ -4896,16 +4991,16 @@
      "kind": "tv"
     },
     {
-     "title": "Dexter: Original Sin",
-     "slug": "dexter-original-sin",
-     "poster": "https://image.tmdb.org/t/p/w342/j5bP7spdfS0NpDLKDlqJYyJPi1j.jpg",
+     "title": "The Survivors",
+     "slug": "the-survivors",
+     "poster": "https://image.tmdb.org/t/p/w342/y0izOA23nYoCtR1Ft08GLi6lOQX.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Survivors",
-     "slug": "the-survivors",
-     "poster": "https://image.tmdb.org/t/p/w342/y0izOA23nYoCtR1Ft08GLi6lOQX.jpg",
+     "title": "Dexter: Original Sin",
+     "slug": "dexter-original-sin",
+     "poster": "https://image.tmdb.org/t/p/w342/j5bP7spdfS0NpDLKDlqJYyJPi1j.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -4964,7 +5059,7 @@
      "score": "New release"
     }
    ],
-   "votes": 8,
+   "votes": 9,
    "verdict": "Just released — verdict soon",
    "poster": "https://image.tmdb.org/t/p/w342/jD7ZQpDEZzAVReJzkOtmuFoIl2m.jpg",
    "isRecent": true,
@@ -5119,5 +5214,5 @@
    "slug": "brothers"
   }
  ],
- "trackedFilms": 529
+ "trackedFilms": 534
 }
