@@ -954,6 +954,85 @@ testAsync("catalogue pages are written in past tense, and thin-vote pages carry 
   } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
 });
 
+// ---- Which titles a batch picks (Sept 2026 repair: held pages, rotation, error-safe queues) ----
+async function _catRun(fn) {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-cat2-"));
+  const cwd = process.cwd();
+  try { process.chdir(tmp); return await fn(fsx); }
+  finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
+}
+const _catOld = new Date(Date.now() - 900 * 864e5).toISOString().slice(0, 10);
+const _catM = (id, title, pop) => ({ id, title, popularity: pop, release_date: _catOld, vote_average: 7.5, vote_count: 400,
+  poster_path: "/p.jpg", overview: "Synopsis.", genre_ids: [18], original_language: "en" });
+const _catBase = (m, kind) => ({ title: m.title, released: m.release_date, kind, tmdbId: m.id, language: "English", genre: "Drama",
+  poster: `https://image.tmdb.org/t/p/w342${m.poster_path}`, rating: m.vote_average, votes: m.vote_count,
+  verdict: U.verdict(m.vote_average, m.vote_count), review: m.overview });
+// pagesByKey: { "en:movie": [[page1 titles], [page2 titles]] }; any other queue is empty.
+const _catApi = (pagesByKey, { enrich } = {}) => {
+  const calls = { discover: [], enrich: [] };
+  return { calls, pause: async () => {},
+    tmdb: async (p, q) => {
+      const key = `${q.with_original_language}:${p.endsWith("/tv") ? "tv" : "movie"}`;
+      calls.discover.push(`${key}#${q.page}`);
+      return { results: ((pagesByKey[key] || [])[Number(q.page) - 1]) || [] };
+    },
+    enrich: async (kind, id) => { calls.enrich.push(id); return enrich ? enrich(id) : { providers: ["Netflix"], runtime: 100 }; } };
+};
+const _catCfg = (langs = []) => ({ code: "sg", name: "Singapore", region: "SG", watchRegion: "SG", ottRegionalLangs: langs, priorityLangs: [] });
+
+testAsync("catalogue: a failed TMDB call never retires a queue", async () => {
+  await _catRun(async () => {
+    const state = {};
+    const api = { pause: async () => {}, tmdb: async () => { throw new Error("TMDB /discover/movie failed: 503"); }, enrich: async () => ({}) };
+    const n = await U.backfillCatalog(_catCfg(), {}, { state, baseItem: _catBase, withImdb: (x) => x, batch: 5, api });
+    assert.strictEqual(n, 0);
+    for (const q of Object.values(state.sg.q)) assert.ok(!q.done && q.page === 1, "an outage must not look like the end of the catalogue");
+  });
+});
+
+testAsync("catalogue: a batch that stops mid-page keeps the rest of that page, most popular first", async () => {
+  await _catRun(async (fsx) => {
+    const state = {};
+    const api = _catApi({ "en:movie": [[_catM(1, "Alpha", 90), _catM(2, "Bravo", 70), _catM(3, "Charlie", 50), _catM(4, "Delta", 30)], [_catM(5, "Echo", 20)]] });
+    const run = () => U.backfillCatalog(_catCfg(), {}, { state, baseItem: _catBase, withImdb: (x) => x, batch: 2, api });
+    assert.strictEqual(await run(), 2);
+    assert.ok(fsx.existsSync("sg/movie/alpha.html") && fsx.existsSync("sg/movie/bravo.html"));
+    assert.strictEqual(state.sg.q["en:movie"].page, 1, "page held: Charlie and Delta are still on it");
+    assert.strictEqual(await run(), 2);
+    assert.ok(fsx.existsSync("sg/movie/charlie.html") && fsx.existsSync("sg/movie/delta.html"), "nothing on page 1 was skipped");
+    assert.strictEqual(state.sg.q["en:movie"].page, 2, "drained page is left behind");
+    assert.strictEqual(await run(), 1);
+    assert.ok(fsx.existsSync("sg/movie/echo.html"));
+  });
+});
+
+testAsync("catalogue: languages take turns so regional titles are in every batch", async () => {
+  await _catRun(async (fsx) => {
+    const state = {};
+    const api = _catApi({ "ta:movie": [[_catM(1, "Vikram Vedha", 12), _catM(2, "Asuran", 9)]],
+      "en:movie": [[_catM(3, "Big Hollywood", 400), _catM(4, "Bigger Hollywood", 300)]] });
+    const n = await U.backfillCatalog(_catCfg(["ta"]), {}, { state, baseItem: _catBase, withImdb: (x) => x, batch: 2, api });
+    assert.strictEqual(n, 2);
+    assert.ok(fsx.existsSync("sg/movie/vikram-vedha.html"), "the top Tamil title gets a slot despite far lower worldwide popularity");
+    assert.ok(fsx.existsSync("sg/movie/big-hollywood.html"), "…alongside the top English one");
+  });
+});
+
+testAsync("catalogue: a title with no provider is ruled out for good and never blocks its page", async () => {
+  await _catRun(async (fsx) => {
+    const state = {};
+    const api = _catApi({ "en:movie": [[_catM(1, "Gone Elsewhere", 90), _catM(2, "Still Here", 80)]] },
+      { enrich: (id) => (id === 1 ? { providers: [] } : { providers: ["Netflix"] }) });
+    const run = () => U.backfillCatalog(_catCfg(), {}, { state, baseItem: _catBase, withImdb: (x) => x, batch: 1, api });
+    assert.strictEqual(await run(), 1);
+    assert.ok(fsx.existsSync("sg/movie/still-here.html") && !fsx.existsSync("sg/movie/gone-elsewhere.html"));
+    const before = api.calls.enrich.length;
+    await run();
+    assert.ok(!api.calls.enrich.slice(before).includes(1), "no enrich call is spent on it again");
+  });
+});
+
 test("dead hub links are removed from frozen pages; live ones are kept", () => {
   const line = (a) => `<p style="color:var(--mute);font-size:12.5px;margin-top:10px">More: ${a}</p>`;
   const h = `<p>a</p>${line(`<a href="/sg/new-on-apple-tv/">Everything new on Apple TV</a> · <a href="/sg/new-on-ott/2026-09/">Everything that arrived in September 2026</a>`)}<p>b</p>`;
