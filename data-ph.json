@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-28T10:36:52.158Z",
+ "generatedAt": "2026-09-28T15:59:22.971Z",
  "country": "ph",
  "pick": "JoJo's Bizarre Adventure",
  "theatres": [
@@ -16,7 +16,7 @@
      "score": "7.3/10"
     }
    ],
-   "votes": 556,
+   "votes": 559,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/i7UyjfPio0VFHB9rBUZSFyhOoM8.jpg",
    "isRecent": false,
@@ -166,14 +166,22 @@
    "slug": "resident-evil",
    "wikiWeeklyViews": 965600,
    "trending": true,
-   "trailerViews": 17965564,
+   "trailerViews": 18008113,
    "take": "Mostly good reviews — the performances and humour impressed, even if the pacing didn't.",
    "takeSrc": "wiki",
    "takeAspects": [
     "performances",
     "humour"
    ],
-   "takeArticle": "Resident Evil (2026 film)"
+   "takeArticle": "Resident Evil (2026 film)",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Critics are warmer than audiences.",
+    "audience": "Liked",
+    "critics": "positive",
+    "basis": "both"
+   }
   },
   {
    "title": "Heart of the Beast",
@@ -188,7 +196,7 @@
      "score": "7.7/10"
     }
    ],
-   "votes": 105,
+   "votes": 111,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/1ApfSA8JTqeha3GTFEY8syV4auq.jpg",
    "isRecent": false,
@@ -222,13 +230,6 @@
      "kind": "movie"
     },
     {
-     "title": "Dead of Winter",
-     "slug": "dead-of-winter",
-     "poster": "https://image.tmdb.org/t/p/w342/5DcrN62sGAiRJxt8rXSRlSRLwIE.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Fall",
      "slug": "fall",
      "poster": "https://image.tmdb.org/t/p/w342/spCAxD99U1A6jsiePFoqdEcY0dG.jpg",
@@ -243,16 +244,9 @@
      "kind": "movie"
     },
     {
-     "title": "The Mountain Between Us",
-     "slug": "the-mountain-between-us",
-     "poster": "https://image.tmdb.org/t/p/w342/3XNfYTW4XGscI81nXMSWGsQ8cpu.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Edge",
-     "slug": "the-edge",
-     "poster": "https://image.tmdb.org/t/p/w342/zplJqfuUyqzW0D4jX3W1afl0d7b.jpg",
+     "title": "Far from Home: The Adventures of Yellow Dog",
+     "slug": "far-from-home-the-adventures-of-yellow-dog",
+     "poster": "https://image.tmdb.org/t/p/w342/bHtNHOiSmfX1KlJwc9Jvc8sYcjB.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -297,6 +291,20 @@
      "poster": "https://image.tmdb.org/t/p/w342/bRWNxtm3q0QvIIM52uQqRIEvpl2.jpg",
      "language": "English",
      "kind": "movie"
+    },
+    {
+     "title": "Eddie the Eagle",
+     "slug": "eddie-the-eagle",
+     "poster": "https://image.tmdb.org/t/p/w342/r562gvTRVHnDSvG7MrKHEECSn1V.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Flight of the Phoenix",
+     "slug": "flight-of-the-phoenix",
+     "poster": "https://image.tmdb.org/t/p/w342/pcj6unMsKCw0ogWFlUXmbc9gKap.jpg",
+     "language": "English",
+     "kind": "movie"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/bicMU6xVD5deVyKP2azpyx7xkmH.jpg",
@@ -328,20 +336,23 @@
      "name": "Shaun DeZern",
      "character": "Military Soldier",
      "photo": "https://image.tmdb.org/t/p/w185/iORM61n9AM6ldFm7C4t8dm9pRLq.jpg"
-    },
-    {
-     "name": "Uber",
-     "character": "Odin",
-     "photo": "https://image.tmdb.org/t/p/w185/95wWWPlrsY360HiSlyTrWlEHvCk.jpg"
     }
    ],
    "slug": "heart-of-the-beast",
    "wikiWeeklyViews": 350717,
    "trending": true,
-   "trailerViews": 2873077,
+   "trailerViews": 2874430,
    "take": "The reviews lean clearly positive.",
    "takeSrc": "wiki",
-   "takeArticle": "Heart of the Beast"
+   "takeArticle": "Heart of the Beast",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
+    "basis": "both"
+   }
   },
   {
    "title": "Uranus 2324",
@@ -505,10 +516,17 @@
      "photo": "https://image.tmdb.org/t/p/w185/fcQRJxJ2gtxwLQqMN5kzCcQpt6z.jpg"
     }
    ],
-   "slug": "uranus-2324"
+   "slug": "uranus-2324",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences love it.",
+    "audience": "Loved",
+    "critics": null,
+    "basis": "audience"
+   }
   },
   {
-   "title": "Multwoh (Patay Na Patay Sa'yo)",
+   "title": "Multwoh (Patay na Patay Sa'yo)",
    "genre": "Horror / Comedy",
    "language": "Filipino",
    "released": "2026-09-23",
@@ -589,9 +607,23 @@
      "kind": "movie"
     },
     {
+     "title": "Love Potion No. 9",
+     "slug": "love-potion-no-9",
+     "poster": "https://image.tmdb.org/t/p/w342/n0DYahGGueR96mhajPGGgZpFL4k.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Dave Made a Maze",
      "slug": "dave-made-a-maze",
      "poster": "https://image.tmdb.org/t/p/w342/f2sMi0iBt44E0M5jmSCaOAnGVZp.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Death Becomes Her",
+     "slug": "death-becomes-her",
+     "poster": "https://image.tmdb.org/t/p/w342/kkWxyyyWFK5KNk9WVwQuGEC9H9H.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -613,20 +645,6 @@
      "title": "Teen Witch",
      "slug": "teen-witch",
      "poster": "https://image.tmdb.org/t/p/w342/8UNA7PZ9gpoIgELB13bKCwOuICp.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Carmilla Movie",
-     "slug": "the-carmilla-movie",
-     "poster": "https://image.tmdb.org/t/p/w342/jL8FaFdMLoxCaXhZfPY4tFbXwe7.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Memoirs of an Invisible Man",
-     "slug": "memoirs-of-an-invisible-man",
-     "poster": "https://image.tmdb.org/t/p/w342/zSy5SyhacsgqRfuJToU6jXFZ1DD.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -668,7 +686,7 @@
     }
    ],
    "slug": "multwoh-patay-na-patay-sa-yo",
-   "trailerViews": 10932
+   "trailerViews": 10985
   },
   {
    "title": "One Last Shot",
@@ -676,14 +694,14 @@
    "language": "English",
    "released": "2026-09-22",
    "review": "Navy Seal Jake Harris must stop a team of mercenaries, led by his disillusioned former comrade, from disabling the US missile defense network.",
-   "rating": 7.7,
+   "rating": 7.6,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.7/10"
+     "score": "7.6/10"
     }
    ],
-   "votes": 60,
+   "votes": 63,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/niQ4NBh2jqAf1hDZP5m6ReWFAb7.jpg",
    "isRecent": true,
@@ -752,16 +770,16 @@
      "kind": "movie"
     },
     {
-     "title": "Warfare",
-     "slug": "warfare",
-     "poster": "https://image.tmdb.org/t/p/w342/l39TlELomwysfsr37vrvCV6rmaQ.jpg",
+     "title": "Hunting Grounds",
+     "slug": "hunting-grounds",
+     "poster": "https://image.tmdb.org/t/p/w342/cgZjpqRQt9sk6XMCwZ3B1NPAaoy.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Hunting Grounds",
-     "slug": "hunting-grounds",
-     "poster": "https://image.tmdb.org/t/p/w342/cgZjpqRQt9sk6XMCwZ3B1NPAaoy.jpg",
+     "title": "Warfare",
+     "slug": "warfare",
+     "poster": "https://image.tmdb.org/t/p/w342/l39TlELomwysfsr37vrvCV6rmaQ.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -831,7 +849,14 @@
     }
    ],
    "slug": "one-last-shot",
-   "trailerViews": 96049
+   "trailerViews": 97140,
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences love it.",
+    "audience": "Loved",
+    "critics": null,
+    "basis": "audience"
+   }
   },
   {
    "title": "Runner",
@@ -839,14 +864,14 @@
    "language": "English",
    "released": "2026-09-16",
    "review": "A former soldier is thrown into a brutal race against time when a critical medical delivery makes him and his unlikely partner the targets of a ruthless cartel.",
-   "rating": 7.6,
+   "rating": 7.7,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.6/10"
+     "score": "7.7/10"
     }
    ],
-   "votes": 51,
+   "votes": 56,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/yBKMAIj7clP42UkFejhGDBBoTpb.jpg",
    "isRecent": false,
@@ -873,30 +898,44 @@
    "badge": null,
    "similar": [
     {
-     "title": "Sheroes",
-     "slug": "sheroes",
-     "poster": "https://image.tmdb.org/t/p/w342/itUAkQmihFmRxMYTa3AkvIzMCV4.jpg",
+     "title": "Trap House",
+     "slug": "trap-house",
+     "poster": "https://image.tmdb.org/t/p/w342/6tpAPeuuqbVnYWWPoOLEDLSBU7a.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Fight or Flight",
-     "slug": "fight-or-flight",
-     "poster": "https://image.tmdb.org/t/p/w342/dNyzZaMDS5hmOzWHFgNlgRRPDB0.jpg",
+     "title": "Hounds of War",
+     "slug": "hounds-of-war",
+     "poster": "https://image.tmdb.org/t/p/w342/tLdUPi2h6LGmF5foza0a5PXtQRr.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The 355",
-     "slug": "the-355",
-     "poster": "https://image.tmdb.org/t/p/w342/xef9Ht77B2igqZv754HNdW8qZCk.jpg",
+     "title": "Hunting Grounds",
+     "slug": "hunting-grounds",
+     "poster": "https://image.tmdb.org/t/p/w342/cgZjpqRQt9sk6XMCwZ3B1NPAaoy.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Seized",
-     "slug": "seized",
-     "poster": "https://image.tmdb.org/t/p/w342/5YtWsBAv3HvdeTXidyvAsiP4sVu.jpg",
+     "title": "Wire Room",
+     "slug": "wire-room",
+     "poster": "https://image.tmdb.org/t/p/w342/b9ykj4v8ykjRoGB7SpI1OuxblNU.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Absolution",
+     "slug": "absolution",
+     "poster": "https://image.tmdb.org/t/p/w342/gt70JOD9xsPlpJnuBJAWdOT4yRg.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Best Man",
+     "slug": "the-best-man",
+     "poster": "https://image.tmdb.org/t/p/w342/c9f6mFZqkyz4AD0sxGmynE1pe0v.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -908,51 +947,37 @@
      "kind": "movie"
     },
     {
-     "title": "Stolen Girl",
-     "slug": "stolen-girl",
-     "poster": "https://image.tmdb.org/t/p/w342/njU663VbT88zZjsJYizfWcam6sS.jpg",
+     "title": "The Get Out",
+     "slug": "the-get-out",
+     "poster": "https://image.tmdb.org/t/p/w342/55DIb4KFbP1sxthytmWbVESs8Hg.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Bulletproof 2",
-     "slug": "bulletproof-2",
-     "poster": "https://image.tmdb.org/t/p/w342/uGILkFnRrpdiNtDaHeekGZSn5o5.jpg",
+     "title": "Get Fast",
+     "slug": "get-fast",
+     "poster": "https://image.tmdb.org/t/p/w342/tDpTR7xhHu9cz1X4JAIRFwXyf6U.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Gold",
-     "slug": "gold",
-     "poster": "https://image.tmdb.org/t/p/w342/c0r75XaNHA4QMlDcitEscQW2Fn6.jpg",
+     "title": "Night Train",
+     "slug": "night-train",
+     "poster": "https://image.tmdb.org/t/p/w342/gZFSc3BqUyAvuakHSs7qaWJZnGN.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Balls Up",
-     "slug": "balls-up",
-     "poster": "https://image.tmdb.org/t/p/w342/xwvJ3WzdJ1OCuDoY8LAxBUlQyig.jpg",
+     "title": "Take Back",
+     "slug": "take-back",
+     "poster": "https://image.tmdb.org/t/p/w342/16JXKkATNiSKouOhxyg9lkHBag9.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "The Gentlemen",
-     "slug": "the-gentlemen",
-     "poster": "https://image.tmdb.org/t/p/w342/jtrhTYB7xSrJxR1vusu99nvnZ1g.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Mike & Nick & Nick & Alice",
-     "slug": "mike-nick-nick-alice",
-     "poster": "https://image.tmdb.org/t/p/w342/7F0jc75HrSkLVcvOXR2FXAIwuEv.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Afterburn",
-     "slug": "afterburn",
-     "poster": "https://image.tmdb.org/t/p/w342/fSXZFZVfJmC2v0TkW711QD5o76N.jpg",
+     "title": "Death Race: Beyond Anarchy",
+     "slug": "death-race-beyond-anarchy",
+     "poster": "https://image.tmdb.org/t/p/w342/1PrlKvPUbDQAqFQBCyyt68hLLl.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -995,11 +1020,19 @@
    ],
    "slug": "runner",
    "wikiWeeklyViews": 54299,
-   "trailerViews": 1662865,
+   "trailerViews": 1665634,
    "take": "Truly divisive — for every critic who bought in, one checked out.",
    "takeSrc": "wiki",
    "takeArticle": "Runner (2026 American film)",
-   "takeCounter": "Audiences disagree — viewers rate it far higher."
+   "criticsTone": "mixed",
+   "takeCounter": "Audiences disagree — viewers rate it far higher.",
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Audiences love it; critics are split.",
+    "audience": "Loved",
+    "critics": "mixed",
+    "basis": "both"
+   }
   },
   {
    "title": "Forgotten Island",
@@ -1163,14 +1196,22 @@
    ],
    "slug": "forgotten-island",
    "wikiWeeklyViews": 323820,
-   "trailerViews": 2417558,
+   "trailerViews": 2417856,
    "take": "Critics were won over, largely on the strength of the animation and ambition.",
    "takeSrc": "wiki",
    "takeAspects": [
     "animation",
     "ambition"
    ],
-   "takeArticle": "Forgotten Island"
+   "takeArticle": "Forgotten Island",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Critics are positive; audience ratings are still coming in.",
+    "audience": null,
+    "critics": "positive",
+    "basis": "critics"
+   }
   }
  ],
  "ott": [
@@ -1187,7 +1228,7 @@
      "score": "8.2/10"
     }
    ],
-   "votes": 322,
+   "votes": 326,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/vfZxVHextAGC70zrNhS8lsROqP1.jpg",
    "isRecent": true,
@@ -1342,11 +1383,19 @@
    "slug": "the-love-hypothesis",
    "wikiWeeklyViews": 301261,
    "trending": true,
-   "trailerViews": 15758468,
+   "trailerViews": 15783728,
    "take": "Critics are split clean down the middle on this one.",
    "takeSrc": "wiki",
    "takeArticle": "The Love Hypothesis (film)",
-   "takeCounter": "The audience isn't buying the reviews — they rate it far higher."
+   "criticsTone": "mixed",
+   "takeCounter": "The audience isn't buying the reviews — they rate it far higher.",
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Audiences love it; critics are split.",
+    "audience": "Loved",
+    "critics": "mixed",
+    "basis": "both"
+   }
   },
   {
    "title": "JoJo's Bizarre Adventure",
@@ -1510,7 +1559,14 @@
    "ottFreshDate": "2026-09-25",
    "slug": "jojo-s-bizarre-adventure",
    "wikiWeeklyViews": 7120,
-   "trailerViews": 27196
+   "trailerViews": 27209,
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences love it.",
+    "audience": "Loved",
+    "critics": null,
+    "basis": "audience"
+   }
   },
   {
    "title": "Mushoku Tensei: Jobless Reincarnation",
@@ -1525,7 +1581,7 @@
      "score": "8.4/10"
     }
    ],
-   "votes": 1741,
+   "votes": 1743,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/1mFnzilCyj9Coa9jbN8vFYLEZdW.jpg",
    "isRecent": true,
@@ -1575,13 +1631,6 @@
      "kind": "tv"
     },
     {
-     "title": "The Greatest Demon Lord Is Reborn as a Typical Nobody",
-     "slug": "the-greatest-demon-lord-is-reborn-as-a-typical-nobody",
-     "poster": "https://image.tmdb.org/t/p/w342/dtULGP3qRi932NzYGsp7u6q6zAS.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
      "title": "The Eminence in Shadow",
      "slug": "the-eminence-in-shadow",
      "poster": "https://image.tmdb.org/t/p/w342/7JKYmtLydAwo9ZsEmAknZiO4U8g.jpg",
@@ -1596,6 +1645,13 @@
      "kind": "tv"
     },
     {
+     "title": "The World's Finest Assassin Gets Reincarnated in Another World as an Aristocrat",
+     "slug": "the-world-s-finest-assassin-gets-reincarnated-in-another-world-as-an-aristocrat",
+     "poster": "https://image.tmdb.org/t/p/w342/iusQCT2pje1Mc8A8LKnW1uZ5BOO.jpg",
+     "language": "Japanese",
+     "kind": "tv"
+    },
+    {
      "title": "Redo of Healer",
      "slug": "redo-of-healer",
      "poster": "https://image.tmdb.org/t/p/w342/9T7TT0w92RbeRP5QSnNq81HHxde.jpg",
@@ -1603,9 +1659,9 @@
      "kind": "tv"
     },
     {
-     "title": "The World's Finest Assassin Gets Reincarnated in Another World as an Aristocrat",
-     "slug": "the-world-s-finest-assassin-gets-reincarnated-in-another-world-as-an-aristocrat",
-     "poster": "https://image.tmdb.org/t/p/w342/iusQCT2pje1Mc8A8LKnW1uZ5BOO.jpg",
+     "title": "Trapped in a Dating Sim: The World of Otome Games Is Tough for Mobs",
+     "slug": "trapped-in-a-dating-sim-the-world-of-otome-games-is-tough-for-mobs",
+     "poster": "https://image.tmdb.org/t/p/w342/r8BjELAxhiddM0xc3tdj3ID8VMO.jpg",
      "language": "Japanese",
      "kind": "tv"
     },
@@ -1674,10 +1730,18 @@
    "ottFreshDate": "2026-09-20",
    "slug": "mushoku-tensei-jobless-reincarnation",
    "wikiWeeklyViews": 14553,
-   "trailerViews": 1829378,
+   "trailerViews": 1829736,
    "take": "Critics have been largely positive on this one.",
    "takeSrc": "wiki",
-   "takeArticle": "Mushoku Tensei (TV series)"
+   "takeArticle": "Mushoku Tensei (TV series)",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
+    "basis": "both"
+   }
   },
   {
    "title": "The Scandal",
@@ -1685,14 +1749,14 @@
    "language": "Korean",
    "released": "2026-09-18",
    "review": "In Joseon, a secret proposal ignites hidden desires in a gifted noblewoman, a famed lover and an unsuspecting lady caught in their dangerous game.",
-   "rating": 7.3,
+   "rating": 7.2,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.3/10"
+     "score": "7.2/10"
     }
    ],
-   "votes": 17,
+   "votes": 18,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/4TU0PcHBIl0wPW5B6aVRGExOnHE.jpg",
    "isRecent": true,
@@ -1846,7 +1910,7 @@
    "stillGood": true,
    "slug": "the-scandal",
    "wikiWeeklyViews": 126529,
-   "trailerViews": 686587
+   "trailerViews": 688698
   },
   {
    "title": "Four Hands, Two Sonatas",
@@ -1931,6 +1995,13 @@
      "kind": "tv"
     },
     {
+     "title": "Weak Hero",
+     "slug": "weak-hero",
+     "poster": "https://image.tmdb.org/t/p/w342/hS9VVF5ffTVWNoC9B48QNsZFGy9.jpg",
+     "language": "Korean",
+     "kind": "tv"
+    },
+    {
      "title": "Dear.M",
      "slug": "dear-m",
      "poster": "https://image.tmdb.org/t/p/w342/ikfRBUtlq5Zf38Qseyk4VxkLNsg.jpg",
@@ -1962,13 +2033,6 @@
      "title": "Blood & Water",
      "slug": "blood-water",
      "poster": "https://image.tmdb.org/t/p/w342/NFHy3z1taQ8nzudDHeVIJnih3J.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Gossip Girl",
-     "slug": "gossip-girl",
-     "poster": "https://image.tmdb.org/t/p/w342/4XmRg3iF1drIikTzRLUfn7cJDio.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -2015,7 +2079,7 @@
    "stillGood": true,
    "slug": "four-hands-two-sonatas",
    "wikiWeeklyViews": 33798,
-   "trailerViews": 315918
+   "trailerViews": 316506
   },
   {
    "title": "A Love Other Than Yours",
@@ -2184,7 +2248,7 @@
    "stillGood": true,
    "slug": "a-love-other-than-yours",
    "wikiWeeklyViews": 33599,
-   "trailerViews": 655221
+   "trailerViews": 656864
   },
   {
    "title": "MobLand",
@@ -2199,7 +2263,7 @@
      "score": "8.4/10"
     }
    ],
-   "votes": 918,
+   "votes": 920,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/5Xc7WpWsgflfgEMoBlf9TmWhfbH.jpg",
    "isRecent": true,
@@ -2269,9 +2333,9 @@
      "kind": "tv"
     },
     {
-     "title": "Power Book IV: Force",
-     "slug": "power-book-iv-force",
-     "poster": "https://image.tmdb.org/t/p/w342/yzL4Tqbw2JA9MCsHJWFC4xV1IYU.jpg",
+     "title": "This City Is Ours",
+     "slug": "this-city-is-ours",
+     "poster": "https://image.tmdb.org/t/p/w342/fQpJFVWX8MCdOkwoutDw7tjhvgp.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2279,13 +2343,6 @@
      "title": "Kin",
      "slug": "kin",
      "poster": "https://image.tmdb.org/t/p/w342/2wTsgQQBruGQcjM0PjFr5l5MjEw.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "This City Is Ours",
-     "slug": "this-city-is-ours",
-     "poster": "https://image.tmdb.org/t/p/w342/fQpJFVWX8MCdOkwoutDw7tjhvgp.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2307,6 +2364,13 @@
      "title": "Narcos",
      "slug": "narcos",
      "poster": "https://image.tmdb.org/t/p/w342/rTmal9fDbwh5F0waol2hq35U4ah.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Shield",
+     "slug": "the-shield",
+     "poster": "https://image.tmdb.org/t/p/w342/AfdZXqqlFsPUEfi6kWWWthxw7Nz.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -2353,11 +2417,19 @@
    "stillGood": true,
    "slug": "mobland",
    "wikiWeeklyViews": 220417,
-   "trailerViews": 11802326,
+   "trailerViews": 11806134,
    "take": "A love-it-or-hate-it reception, right down the middle.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
-   "takeCounter": "The audience isn't buying the reviews — they rate it far higher."
+   "criticsTone": "mixed",
+   "takeCounter": "The audience isn't buying the reviews — they rate it far higher.",
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Audiences love it; critics are split.",
+    "audience": "Loved",
+    "critics": "mixed",
+    "basis": "both"
+   }
   },
   {
    "title": "Honor Thy Mother",
@@ -2526,7 +2598,7 @@
    "stillGood": true,
    "slug": "honor-thy-mother",
    "wikiWeeklyViews": 4931,
-   "trailerViews": 167635
+   "trailerViews": 167945
   },
   {
    "title": "Slow Horses",
@@ -2541,7 +2613,7 @@
      "score": "8.0/10"
     }
    ],
-   "votes": 1001,
+   "votes": 1002,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
    "isRecent": true,
@@ -2583,13 +2655,6 @@
      "kind": "tv"
     },
     {
-     "title": "Cross",
-     "slug": "cross",
-     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "The Veil",
      "slug": "the-veil",
      "poster": "https://image.tmdb.org/t/p/w342/6aM5Lyp3zUtPyc0WVofES6UrV06.jpg",
@@ -2597,9 +2662,23 @@
      "kind": "tv"
     },
     {
+     "title": "Cross",
+     "slug": "cross",
+     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "Down Cemetery Road",
      "slug": "down-cemetery-road",
      "poster": "https://image.tmdb.org/t/p/w342/pjmQbrJ3FesJobbqCnUwBCtfcvH.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Black Doves",
+     "slug": "black-doves",
+     "poster": "https://image.tmdb.org/t/p/w342/uoXtkm2P4HPPL8T3IBJ02G3hCC4.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2642,13 +2721,6 @@
      "title": "The Night Manager",
      "slug": "the-night-manager",
      "poster": "https://image.tmdb.org/t/p/w342/1MccRnw41qQjREuZkovqP2UX1i3.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Capture",
-     "slug": "the-capture",
-     "poster": "https://image.tmdb.org/t/p/w342/6keUrgntgKt299a39UJCDYldb8b.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -2695,10 +2767,18 @@
    "stillGood": true,
    "slug": "slow-horses",
    "wikiWeeklyViews": 266451,
-   "trailerViews": 5720823,
+   "trailerViews": 5721629,
    "take": "Critics loved this one; reception has been close to universal acclaim.",
    "takeSrc": "wiki",
-   "takeArticle": "Slow Horses"
+   "takeArticle": "Slow Horses",
+   "criticsTone": "acclaim",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
+    "basis": "both"
+   }
   },
   {
    "title": "Lanterns",
@@ -2713,7 +2793,7 @@
      "score": "8.3/10"
     }
    ],
-   "votes": 448,
+   "votes": 450,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/gpC7h43xPMEV3goYMQShfJbTtLq.jpg",
    "isRecent": false,
@@ -2747,16 +2827,9 @@
      "kind": "tv"
     },
     {
-     "title": "A Good Girl's Guide to Murder",
-     "slug": "a-good-girl-s-guide-to-murder",
-     "poster": "https://image.tmdb.org/t/p/w342/pVV62HbgLP7JsZv096XmjPZtjdP.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Irregulars",
-     "slug": "the-irregulars",
-     "poster": "https://image.tmdb.org/t/p/w342/qN6HCKR3ZRqbpGBWFctVlSTKR2k.jpg",
+     "title": "Dark Winds",
+     "slug": "dark-winds",
+     "poster": "https://image.tmdb.org/t/p/w342/kDlrMN0P9ByrEH2GoRbBFeZHbcf.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2768,9 +2841,16 @@
      "kind": "tv"
     },
     {
-     "title": "Class of '09",
-     "slug": "class-of-09",
-     "poster": "https://image.tmdb.org/t/p/w342/5eCGq50CMloT2a1bMDB8JPpGuf2.jpg",
+     "title": "A Good Girl's Guide to Murder",
+     "slug": "a-good-girl-s-guide-to-murder",
+     "poster": "https://image.tmdb.org/t/p/w342/pVV62HbgLP7JsZv096XmjPZtjdP.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Revival",
+     "slug": "revival",
+     "poster": "https://image.tmdb.org/t/p/w342/xf2u02mLodDN2ujMSfLFDkPVFac.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -2852,14 +2932,22 @@
    "slug": "lanterns",
    "wikiWeeklyViews": 489435,
    "trending": true,
-   "trailerViews": 35260738,
+   "trailerViews": 35269433,
    "take": "Critics liked it: the performances and lead chemistry won praise, though the themes drew some flak.",
    "takeSrc": "wiki",
    "takeAspects": [
     "performances",
     "lead chemistry"
    ],
-   "takeArticle": "Lanterns (TV series)"
+   "takeArticle": "Lanterns (TV series)",
+   "criticsTone": "positive",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
+    "basis": "both"
+   }
   }
  ],
  "comingSoon": [
@@ -2900,6 +2988,13 @@
      "kind": "movie"
     },
     {
+     "title": "180",
+     "slug": "180",
+     "poster": "https://image.tmdb.org/t/p/w342/9ISjrhA38HpSSGtfiCk8lpziC3K.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Fatale",
      "slug": "fatale",
      "poster": "https://image.tmdb.org/t/p/w342/tGFXEyESXIuei5tZWXRkSRSFSxi.jpg",
@@ -2907,9 +3002,16 @@
      "kind": "movie"
     },
     {
-     "title": "Strange Darling",
-     "slug": "strange-darling",
-     "poster": "https://image.tmdb.org/t/p/w342/kWNCRgt3ocv19bYO0sk7TRuZuFY.jpg",
+     "title": "Deep Water",
+     "slug": "deep-water",
+     "poster": "https://image.tmdb.org/t/p/w342/6yRMyWwjuhKg6IU66uiZIGhaSc8.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "King Ivory",
+     "slug": "king-ivory",
+     "poster": "https://image.tmdb.org/t/p/w342/qtNdrKvD5MqvUbAQEja5WaKuVN1.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -2935,13 +3037,6 @@
      "kind": "movie"
     },
     {
-     "title": "Butcher, Baker, Nightmare Maker",
-     "slug": "butcher-baker-nightmare-maker",
-     "poster": "https://image.tmdb.org/t/p/w342/a1EpGJRGSxsM8HKOSFpSJYbbZOI.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Trust",
      "slug": "trust",
      "poster": "https://image.tmdb.org/t/p/w342/rXoZYWd2G7pBh8N8Cp5ZO5Sjzbl.jpg",
@@ -2949,9 +3044,9 @@
      "kind": "movie"
     },
     {
-     "title": "Fatal Attraction",
-     "slug": "fatal-attraction",
-     "poster": "https://image.tmdb.org/t/p/w342/vjB9XwJKnYqFKKjhWcE6WpAf5Ki.jpg",
+     "title": "Primal Fear",
+     "slug": "primal-fear",
+     "poster": "https://image.tmdb.org/t/p/w342/qJf2TzE8nRTFbFMPJNW6c8mI0KU.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -2959,13 +3054,6 @@
      "title": "Auto Focus",
      "slug": "auto-focus",
      "poster": "https://image.tmdb.org/t/p/w342/71CQUn4vtpDQtAPXtaLP7IGH0Sg.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Primal Fear",
-     "slug": "primal-fear",
-     "poster": "https://image.tmdb.org/t/p/w342/qJf2TzE8nRTFbFMPJNW6c8mI0KU.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3014,7 +3102,7 @@
     }
    ],
    "slug": "primetime",
-   "trailerViews": 6007391
+   "trailerViews": 6009635
   },
   {
    "title": "Digger",
@@ -3046,6 +3134,13 @@
    "isRecent": false,
    "similar": [
     {
+     "title": "Ricky Gervais: Mortality",
+     "slug": "ricky-gervais-mortality",
+     "poster": "https://image.tmdb.org/t/p/w342/u54OhdSaaLBh02Y4Nf5cETkh8Ku.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Ricky Gervais: Armageddon",
      "slug": "ricky-gervais-armageddon",
      "poster": "https://image.tmdb.org/t/p/w342/i4fbnHXE7qW6AT41xv9XLekvJeZ.jpg",
@@ -3053,9 +3148,9 @@
      "kind": "movie"
     },
     {
-     "title": "Ricky Gervais: Mortality",
-     "slug": "ricky-gervais-mortality",
-     "poster": "https://image.tmdb.org/t/p/w342/u54OhdSaaLBh02Y4Nf5cETkh8Ku.jpg",
+     "title": "Ricky Gervais: SuperNature",
+     "slug": "ricky-gervais-supernature",
+     "poster": "https://image.tmdb.org/t/p/w342/ry2HDP5KyEV3R7htXlFAeQbbXgf.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3067,9 +3162,9 @@
      "kind": "movie"
     },
     {
-     "title": "Ricky Gervais: SuperNature",
-     "slug": "ricky-gervais-supernature",
-     "poster": "https://image.tmdb.org/t/p/w342/ry2HDP5KyEV3R7htXlFAeQbbXgf.jpg",
+     "title": "Shane Gillis: Beautiful Dogs",
+     "slug": "shane-gillis-beautiful-dogs",
+     "poster": "https://image.tmdb.org/t/p/w342/8SYsQOur3wAfh1LJf6rvTFpIPHy.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3088,13 +3183,6 @@
      "kind": "movie"
     },
     {
-     "title": "Shane Gillis: Beautiful Dogs",
-     "slug": "shane-gillis-beautiful-dogs",
-     "poster": "https://image.tmdb.org/t/p/w342/8SYsQOur3wAfh1LJf6rvTFpIPHy.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "I Love My Dad",
      "slug": "i-love-my-dad",
      "poster": "https://image.tmdb.org/t/p/w342/fTP28OF0SlRRyng0QX3ekzCPFgW.jpg",
@@ -3109,23 +3197,23 @@
      "kind": "movie"
     },
     {
-     "title": "The Onion Movie",
-     "slug": "the-onion-movie",
-     "poster": "https://image.tmdb.org/t/p/w342/AikMOGbaKpCzHnupsdBzyacsKC2.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Bill Burr: Paper Tiger",
-     "slug": "bill-burr-paper-tiger",
-     "poster": "https://image.tmdb.org/t/p/w342/zho1ypBSxia3bHCSeB4Znpzh7nM.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Dave Chappelle: Sticks & Stones",
      "slug": "dave-chappelle-sticks-stones",
      "poster": "https://image.tmdb.org/t/p/w342/hsyPTPoFDhUw5aGcj7dxAx3i1Qp.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Ricky Gervais: Humanity",
+     "slug": "ricky-gervais-humanity",
+     "poster": "https://image.tmdb.org/t/p/w342/mTGuQL74RnxHvTUmBTIAR4h2xmL.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Onion Movie",
+     "slug": "the-onion-movie",
+     "poster": "https://image.tmdb.org/t/p/w342/AikMOGbaKpCzHnupsdBzyacsKC2.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -3167,7 +3255,7 @@
     }
    ],
    "slug": "digger",
-   "trailerViews": 4133668
+   "trailerViews": 4136983
   },
   {
    "title": "Verity",
@@ -3320,7 +3408,7 @@
     }
    ],
    "slug": "verity",
-   "trailerViews": 15171451
+   "trailerViews": 15189159
   },
   {
    "title": "Other Mommy",
@@ -3473,7 +3561,7 @@
     }
    ],
    "slug": "other-mommy",
-   "trailerViews": 13757407
+   "trailerViews": 13766310
   },
   {
    "title": "Pee Mak",
@@ -3508,6 +3596,13 @@
      "title": "Dinner in America",
      "slug": "dinner-in-america",
      "poster": "https://image.tmdb.org/t/p/w342/t63UhnHaWQGcuE3pViuW3LSjBJj.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Meet Cute",
+     "slug": "meet-cute",
+     "poster": "https://image.tmdb.org/t/p/w342/9rp4nj7L3V5tPm2pWks4sX8NVKY.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3580,13 +3675,6 @@
      "poster": "https://image.tmdb.org/t/p/w342/g9CjIIyZdCybuCRkn4Ad8uWBclu.jpg",
      "language": "English",
      "kind": "movie"
-    },
-    {
-     "title": "Dave Made a Maze",
-     "slug": "dave-made-a-maze",
-     "poster": "https://image.tmdb.org/t/p/w342/f2sMi0iBt44E0M5jmSCaOAnGVZp.jpg",
-     "language": "English",
-     "kind": "movie"
     }
    ],
    "backdrop": null,
@@ -3625,7 +3713,7 @@
     }
    ],
    "slug": "pee-mak",
-   "trailerViews": 1546
+   "trailerViews": 1548
   },
   {
    "title": "The Intern",
@@ -3657,16 +3745,16 @@
    "isRecent": false,
    "similar": [
     {
-     "title": "Pilot",
-     "slug": "pilot",
-     "poster": "https://image.tmdb.org/t/p/w342/qxlazL0DPUWoTwP8CYVvYLj76H6.jpg",
+     "title": "Samjin Company English Class",
+     "slug": "samjin-company-english-class",
+     "poster": "https://image.tmdb.org/t/p/w342/mruYaS9DXIhWfybp3WcpelW2lcJ.jpg",
      "language": "Korean",
      "kind": "movie"
     },
     {
-     "title": "Samjin Company English Class",
-     "slug": "samjin-company-english-class",
-     "poster": "https://image.tmdb.org/t/p/w342/mruYaS9DXIhWfybp3WcpelW2lcJ.jpg",
+     "title": "Pilot",
+     "slug": "pilot",
+     "poster": "https://image.tmdb.org/t/p/w342/qxlazL0DPUWoTwP8CYVvYLj76H6.jpg",
      "language": "Korean",
      "kind": "movie"
     },
@@ -3706,9 +3794,9 @@
      "kind": "movie"
     },
     {
-     "title": "Code 3",
-     "slug": "code-3",
-     "poster": "https://image.tmdb.org/t/p/w342/gIAYMDb5mIAeCAj76q1sRsKjkzo.jpg",
+     "title": "Nine to Five",
+     "slug": "nine-to-five",
+     "poster": "https://image.tmdb.org/t/p/w342/wndwKY8WnSfhCUn7iSXI37dE7yo.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3778,7 +3866,7 @@
     }
    ],
    "slug": "the-intern",
-   "trailerViews": 147920
+   "trailerViews": 156718
   },
   {
    "title": "The Mongoose",
@@ -3810,6 +3898,13 @@
    "isRecent": false,
    "similar": [
     {
+     "title": "Chief of Station",
+     "slug": "chief-of-station",
+     "poster": "https://image.tmdb.org/t/p/w342/vwRpODBF9Pwt56C7fhaKfGTV2XS.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "The Desperate Hour",
      "slug": "the-desperate-hour",
      "poster": "https://image.tmdb.org/t/p/w342/u6Pg9eTklhg6Aa7kXaxrfdE1Chi.jpg",
@@ -3824,9 +3919,9 @@
      "kind": "movie"
     },
     {
-     "title": "Transporter 3",
-     "slug": "transporter-3",
-     "poster": "https://image.tmdb.org/t/p/w342/o4w9VF3GRZuXe9NHHvZ07pJespl.jpg",
+     "title": "The Paper Tigers",
+     "slug": "the-paper-tigers",
+     "poster": "https://image.tmdb.org/t/p/w342/x54tAgLfS51fO5EcipNJJ9tfSRK.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3848,13 +3943,6 @@
      "title": "Overdrive",
      "slug": "overdrive",
      "poster": "https://image.tmdb.org/t/p/w342/a0hTRjis1cxwmjOuBaS7WdDG3dj.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Furious 7",
-     "slug": "furious-7",
-     "poster": "https://image.tmdb.org/t/p/w342/ktofZ9Htrjiy0P6LEowsDaxd3Ri.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3931,7 +4019,7 @@
     }
    ],
    "slug": "the-mongoose",
-   "trailerViews": 476363
+   "trailerViews": 477648
   },
   {
    "title": "Avengers: Doomsday",
@@ -4012,6 +4100,13 @@
      "kind": "movie"
     },
     {
+     "title": "Spider-Man: Brand New Day",
+     "slug": "spider-man-brand-new-day",
+     "poster": "https://image.tmdb.org/t/p/w342/bjiS5ipwxb9JFy3XRRN4OAilSeX.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Teen Titans Go! vs. Teen Titans",
      "slug": "teen-titans-go-vs-teen-titans",
      "poster": "https://image.tmdb.org/t/p/w342/GWJEdzVC9aOBSOMF9NHodYxSsE.jpg",
@@ -4036,13 +4131,6 @@
      "title": "Captain America: Civil War",
      "slug": "captain-america-civil-war",
      "poster": "https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Avengers: Infinity War",
-     "slug": "avengers-infinity-war",
-     "poster": "https://image.tmdb.org/t/p/w342/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -4084,7 +4172,7 @@
     }
    ],
    "slug": "avengers-doomsday",
-   "trailerViews": 44777634
+   "trailerViews": 44840819
   }
  ],
  "langPools": {},
@@ -4102,7 +4190,7 @@
      "score": "7.0/10"
     }
    ],
-   "votes": 149,
+   "votes": 155,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/39aMkR8Y5vhCG9dTkjiqRl8AVqp.jpg",
    "isRecent": true,
@@ -4158,9 +4246,9 @@
      "kind": "movie"
     },
     {
-     "title": "Body Brokers",
-     "slug": "body-brokers",
-     "poster": "https://image.tmdb.org/t/p/w342/fNQUUrtlN79pDIMAPigX8NUvNW2.jpg",
+     "title": "The Locksmith",
+     "slug": "the-locksmith",
+     "poster": "https://image.tmdb.org/t/p/w342/kNQ9Z3TQ5vU5fvwuHqZvLooFcCI.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -4269,7 +4357,7 @@
      "score": "8.1/10"
     }
    ],
-   "votes": 149,
+   "votes": 150,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/tEPDFIa21VK0Q2YLuzhTt2xrw5W.jpg",
    "isRecent": true,
@@ -4332,6 +4420,13 @@
      "kind": "tv"
     },
     {
+     "title": "Sugar",
+     "slug": "sugar",
+     "poster": "https://image.tmdb.org/t/p/w342/tLmwLYiI7EpPbhgmdeivNGY0xw7.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "A Good Girl's Guide to Murder",
      "slug": "a-good-girl-s-guide-to-murder",
      "poster": "https://image.tmdb.org/t/p/w342/pVV62HbgLP7JsZv096XmjPZtjdP.jpg",
@@ -4342,13 +4437,6 @@
      "title": "Fool Me Once",
      "slug": "fool-me-once",
      "poster": "https://image.tmdb.org/t/p/w342/Ertv4WLEyHgi8zN4ldOKgPcGAZ.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Missing You",
-     "slug": "missing-you",
-     "poster": "https://image.tmdb.org/t/p/w342/aEiqusZEqOrqHmRtOninChmcOG0.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -4367,16 +4455,16 @@
      "kind": "tv"
     },
     {
-     "title": "Chicago Justice",
-     "slug": "chicago-justice",
-     "poster": "https://image.tmdb.org/t/p/w342/hZ76A8l1JoONy2NoL0BF4AU2g3c.jpg",
+     "title": "Chicago P.D.",
+     "slug": "chicago-p-d",
+     "poster": "https://image.tmdb.org/t/p/w342/bez40PgT36RUu4gstD2A6GSM0tP.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "24: Legacy",
-     "slug": "24-legacy",
-     "poster": "https://image.tmdb.org/t/p/w342/2eoCEa9myi32C3QC7VYEu4y1f6D.jpg",
+     "title": "Chicago Justice",
+     "slug": "chicago-justice",
+     "poster": "https://image.tmdb.org/t/p/w342/hZ76A8l1JoONy2NoL0BF4AU2g3c.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -4533,16 +4621,16 @@
      "kind": "tv"
     },
     {
-     "title": "Dexter: Original Sin",
-     "slug": "dexter-original-sin",
-     "poster": "https://image.tmdb.org/t/p/w342/j5bP7spdfS0NpDLKDlqJYyJPi1j.jpg",
+     "title": "The Survivors",
+     "slug": "the-survivors",
+     "poster": "https://image.tmdb.org/t/p/w342/y0izOA23nYoCtR1Ft08GLi6lOQX.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Survivors",
-     "slug": "the-survivors",
-     "poster": "https://image.tmdb.org/t/p/w342/y0izOA23nYoCtR1Ft08GLi6lOQX.jpg",
+     "title": "Dexter: Original Sin",
+     "slug": "dexter-original-sin",
+     "poster": "https://image.tmdb.org/t/p/w342/j5bP7spdfS0NpDLKDlqJYyJPi1j.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -4601,7 +4689,7 @@
      "score": "7.1/10"
     }
    ],
-   "votes": 124,
+   "votes": 126,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/57XScX1aYtKi1LvHYFQLPUxVhTG.jpg",
    "isRecent": true,
@@ -4629,16 +4717,16 @@
    "badge": "New show",
    "similar": [
     {
-     "title": "Furious",
-     "slug": "furious",
-     "poster": "https://image.tmdb.org/t/p/w342/xnxxrEKtBaIcI1ewq50pLkOMU6u.jpg",
+     "title": "Love & Death",
+     "slug": "love-death",
+     "poster": "https://image.tmdb.org/t/p/w342/8WchbT0UPQeo3PZ6G01fhccYaQB.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Love & Death",
-     "slug": "love-death",
-     "poster": "https://image.tmdb.org/t/p/w342/8WchbT0UPQeo3PZ6G01fhccYaQB.jpg",
+     "title": "Furious",
+     "slug": "furious",
+     "poster": "https://image.tmdb.org/t/p/w342/xnxxrEKtBaIcI1ewq50pLkOMU6u.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -4650,6 +4738,13 @@
      "kind": "tv"
     },
     {
+     "title": "Monster: The Ed Gein Story",
+     "slug": "monster-the-ed-gein-story",
+     "poster": "https://image.tmdb.org/t/p/w342/iDHzRALtZCzHVmx7uyjTTKvMAPB.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "Fool Me Once",
      "slug": "fool-me-once",
      "poster": "https://image.tmdb.org/t/p/w342/Ertv4WLEyHgi8zN4ldOKgPcGAZ.jpg",
@@ -4657,16 +4752,16 @@
      "kind": "tv"
     },
     {
-     "title": "Candy",
-     "slug": "candy",
-     "poster": "https://image.tmdb.org/t/p/w342/8vlxmTkiF2rzpvrWoN4mOoeVg1z.jpg",
+     "title": "Hightown",
+     "slug": "hightown",
+     "poster": "https://image.tmdb.org/t/p/w342/69hornrvpKWIzBMCNzsVTZOggOw.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Hightown",
-     "slug": "hightown",
-     "poster": "https://image.tmdb.org/t/p/w342/69hornrvpKWIzBMCNzsVTZOggOw.jpg",
+     "title": "Candy",
+     "slug": "candy",
+     "poster": "https://image.tmdb.org/t/p/w342/8vlxmTkiF2rzpvrWoN4mOoeVg1z.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -4702,13 +4797,6 @@
      "title": "Manhunt",
      "slug": "manhunt",
      "poster": "https://image.tmdb.org/t/p/w342/pN5qeqDgCG1Pij7KaEBKLkyjn4A.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "A Friend of the Family",
-     "slug": "a-friend-of-the-family",
-     "poster": "https://image.tmdb.org/t/p/w342/bmJkzDE6s0QYBGtpA4i2JLBco0j.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -4767,7 +4855,7 @@
      "score": "New release"
     }
    ],
-   "votes": 8,
+   "votes": 9,
    "verdict": "Just released — verdict soon",
    "poster": "https://image.tmdb.org/t/p/w342/jD7ZQpDEZzAVReJzkOtmuFoIl2m.jpg",
    "isRecent": true,
@@ -4921,5 +5009,5 @@
    "slug": "brothers"
   }
  ],
- "trackedFilms": 533
+ "trackedFilms": 538
 }

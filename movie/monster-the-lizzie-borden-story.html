@@ -54,6 +54,22 @@
   .rating-early .cdot, .rating-early .cbar i { background:#E39A1C; } .rating-early .ctag { background:rgba(227,154,28,.15); color:#B87910; }
   .rating-few { color:var(--mute); font-weight:600; font-size:15px; } .rating-few .cdot, .rating-few .cbar i { background:#C4BEDA; } .rating-few .ctag { display:none; }
   .verdict { display:inline-block; background:rgba(64,56,199,.08); color:var(--indigo); font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; margin-top:8px; }
+  /* FilmyChill Score (lib/fcscore.js) */
+  @font-face { font-family:'Anton'; src:url('/fonts/anton-latin.woff2') format('woff2'); font-display:swap; }
+  .fcsb { margin:18px 0 6px; padding:18px; background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(64,56,199,.08); }
+  .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }
+  .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+  .fcsb-stamp { display:inline-block; margin-top:12px; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; }
+  .fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }
+  .fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }
+  .fcsb-early { background:#F4F1EA; color:var(--mute); }
+  .fcsb-why { font-size:15.5px; line-height:1.55; margin:12px 0 0; }
+  .fcsb-rows { margin-top:14px; padding-top:12px; border-top:1px solid #EFE6D6; display:grid; gap:10px; }
+  .fcsb-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
+  .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
+  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
+  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
   .fit dt { font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--indigo); margin-top:12px; }
@@ -120,20 +136,26 @@
     <div>
       <h1>Monster: The Lizzie Borden Story (2026)</h1>
       <div class="meta">English · Drama / Crime · A</div>
-      <div class="rating rating-early"><span class="cdot"></span>★ 7.1 <span class="ctag">Early — still settling</span> <span class="cvotes">124 ratings</span><span class="cbar"><i style="width:41%"></i></span></div>
-      <div class="verdict">▸ Worth a watch</div>
+      <div class="rating rating-early"><span class="cdot"></span>★ 7.1 <span class="ctag">Early — still settling</span> <span class="cvotes">126 ratings</span><span class="cbar"><i style="width:42%"></i></span></div>
       <div class="meta" style="margin-top:8px">Released 17 Sept 2026</div>
       <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 28 Sept 2026</div>
     </div>
   </div>
+  <section class="fcsb" id="filmychill-score">
+    <div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-stamp fcsb-early">Too early</div>
+    <p class="fcsb-why">Not enough ratings or reviews yet. The score appears once there are.</p>
+    <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 7.1 from 126 ratings — counts from 50</small></div><span class="fcsb-tag none">Too few ratings</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
+  </section>
+  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
   <p class="answer"><b>Monster: The Lizzie Borden Story</b> is streaming in India on Netflix.</p>
-  <h2>The verdict</h2><p class="vprose">Monster: The Lizzie Borden Story earns its keep as a steady English series that knows its audience. It carries a 7.1/10 on TMDB across 124 ratings — comfortably clear of the pack. In India you can stream it on Netflix.</p>
+  <h2>What the audience says</h2><p class="vprose">Monster: The Lizzie Borden Story earns its keep as a steady English series that knows its audience. It carries a 7.1/10 on TMDB across 126 ratings — comfortably clear of the pack. In India you can stream it on Netflix.</p>
   
   
   <p class="fcdata"><b>FilmyChill data:</b> reached streaming in India 2 days after its theatrical release, on Netflix.</p>
   <h2>Is it worth starting?</h2><p class="whywatch">This is a first season — English drama with crime threaded through, adults only.</p>
   
-  <div class="fit"><dl><dt>Why</dt><dd>7.1/10 from 124 ratings — well received so far, on a modest sample.</dd><dt class="skip">Skip if</dt><dd>you want plot momentum over character work</dd><dt>Best for</dt><dd>An episode-a-night rhythm</dd></dl></div>
+  <div class="fit"><dl><dt>Why</dt><dd>7.1/10 from 126 ratings — well received so far, on a modest sample.</dd><dt class="skip">Skip if</dt><dd>you want plot momentum over character work</dd><dt>Best for</dt><dd>An episode-a-night rhythm</dd></dl></div>
   <h2>Story</h2><p>Trapped in a cruel Victorian-era household, Lizzie Borden kills her parents in a gory ax murder that shocks the nation.</p>
   <h2>Good to know</h2><table class="gtk"><tr><td>Watch with family?</td><td>A · Adults only</td></tr><tr><td>Genre</td><td>Drama / Crime</td></tr><tr><td>Language</td><td>English</td></tr><tr><td>Best screen</td><td>Stream at home</td></tr></table>
   <h2>Director</h2><p>Ian Brennan</p>
@@ -141,7 +163,7 @@
   
   <!--SW:stream--><!--SW:live=2026-09-28--><h2>Where to watch in India</h2><div><span class="pill">Netflix</span></div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of 28 Sept 2026 — platforms may change over time.</p><p style="color:var(--mute);font-size:12.5px;margin-top:10px">More: <a href="/new-on-netflix/">Everything new on Netflix</a> · <a href="/streaming/netflix/">All Netflix titles in India</a> · <a href="/new-on-ott/2026-09/">Everything that arrived in September 2026</a></p><!--/SW:stream-->
   <h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/gYTzF1vna40?rel=0" title="Monster: The Lizzie Borden Story trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
-  <h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/movie/arrow.html"><img src="https://image.tmdb.org/t/p/w342/u8ZHFj1jC384JEkTt3vNg1DfWEb.jpg" alt="Arrow poster" loading="lazy"><div class="st">Arrow</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/blue-bloods.html"><img src="https://image.tmdb.org/t/p/w342/q1WlrxnCvNhBjJ4N7V0JQXjnIBN.jpg" alt="Blue Bloods poster" loading="lazy"><div class="st">Blue Bloods</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/bones.html"><img src="https://image.tmdb.org/t/p/w342/eyTu5c8LniVciRZIOSHTvvkkgJa.jpg" alt="Bones poster" loading="lazy"><div class="st">Bones</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/breaking-bad.html"><img src="https://image.tmdb.org/t/p/w342/anFx9aTOOYqgS3v7x3R84Kz67ly.jpg" alt="Breaking Bad poster" loading="lazy"><div class="st">Breaking Bad</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/chicago-p-d.html"><img src="https://image.tmdb.org/t/p/w342/bez40PgT36RUu4gstD2A6GSM0tP.jpg" alt="Chicago P.D. poster" loading="lazy"><div class="st">Chicago P.D.</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/dexter.html"><img src="https://image.tmdb.org/t/p/w342/q8dWfc4JwQuv3HayIZeO84jAXED.jpg" alt="Dexter poster" loading="lazy"><div class="st">Dexter</div><div class="sm">English · Series</div></a></div>
+  <h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/movie/9-1-1.html"><img src="https://image.tmdb.org/t/p/w342/6njUqsd3By2mJsdZm1P0moPLzs3.jpg" alt="9-1-1 poster" loading="lazy"><div class="st">9-1-1</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/arrow.html"><img src="https://image.tmdb.org/t/p/w342/u8ZHFj1jC384JEkTt3vNg1DfWEb.jpg" alt="Arrow poster" loading="lazy"><div class="st">Arrow</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/blue-bloods.html"><img src="https://image.tmdb.org/t/p/w342/q1WlrxnCvNhBjJ4N7V0JQXjnIBN.jpg" alt="Blue Bloods poster" loading="lazy"><div class="st">Blue Bloods</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/bones.html"><img src="https://image.tmdb.org/t/p/w342/eyTu5c8LniVciRZIOSHTvvkkgJa.jpg" alt="Bones poster" loading="lazy"><div class="st">Bones</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/breaking-bad.html"><img src="https://image.tmdb.org/t/p/w342/anFx9aTOOYqgS3v7x3R84Kz67ly.jpg" alt="Breaking Bad poster" loading="lazy"><div class="st">Breaking Bad</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/chicago-p-d.html"><img src="https://image.tmdb.org/t/p/w342/bez40PgT36RUu4gstD2A6GSM0tP.jpg" alt="Chicago P.D. poster" loading="lazy"><div class="st">Chicago P.D.</div><div class="sm">English · Series</div></a></div>
   <h2>Frequently asked</h2><div class="faq"><details><summary>Is Monster: The Lizzie Borden Story worth watching?</summary><div class="fa">Worth a watch. It rates 7.1/10 on audience ratings. This is a first season — English drama with crime threaded through, adults only.</div></details><details><summary>Where can I watch Monster: The Lizzie Borden Story?</summary><div class="fa">You can stream Monster: The Lizzie Borden Story in India on Netflix.</div></details><details><summary>Is Monster: The Lizzie Borden Story family friendly?</summary><div class="fa">Monster: The Lizzie Borden Story is rated A — aimed at adult audiences.</div></details><details><summary>What language is Monster: The Lizzie Borden Story in?</summary><div class="fa">Monster: The Lizzie Borden Story is an English series (Drama / Crime).</div></details></div>
   <a class="btn" href="https://filmychill.com/#monster-the-lizzie-borden-story">See this week's top picks on FilmyChill →</a>
   <a class="btn" href="/films/">Browse every film we've covered →</a>

@@ -54,6 +54,22 @@
   .rating-early .cdot, .rating-early .cbar i { background:#E39A1C; } .rating-early .ctag { background:rgba(227,154,28,.15); color:#B87910; }
   .rating-few { color:var(--mute); font-weight:600; font-size:15px; } .rating-few .cdot, .rating-few .cbar i { background:#C4BEDA; } .rating-few .ctag { display:none; }
   .verdict { display:inline-block; background:rgba(64,56,199,.08); color:var(--indigo); font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; margin-top:8px; }
+  /* FilmyChill Score (lib/fcscore.js) */
+  @font-face { font-family:'Anton'; src:url('/fonts/anton-latin.woff2') format('woff2'); font-display:swap; }
+  .fcsb { margin:18px 0 6px; padding:18px; background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(64,56,199,.08); }
+  .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }
+  .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+  .fcsb-stamp { display:inline-block; margin-top:12px; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; }
+  .fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }
+  .fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }
+  .fcsb-early { background:#F4F1EA; color:var(--mute); }
+  .fcsb-why { font-size:15.5px; line-height:1.55; margin:12px 0 0; }
+  .fcsb-rows { margin-top:14px; padding-top:12px; border-top:1px solid #EFE6D6; display:grid; gap:10px; }
+  .fcsb-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
+  .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
+  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
+  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
   .fit dt { font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--indigo); margin-top:12px; }
@@ -121,13 +137,19 @@
       <h1>Avengers: Doomsday (2026)</h1>
       <div class="meta">English · Science Fiction / Action · 165 min</div>
       <div class="rating rating-few"><span class="cdot"></span>Rating still forming <span class="cvotes">— too few ratings yet</span></div>
-      
       <div class="meta" style="margin-top:8px">Releases 16 Dec 2026</div>
       <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 28 Sept 2026</div>
     </div>
   </div>
+  <section class="fcsb" id="filmychill-score">
+    <div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-stamp fcsb-early">Too early</div>
+    <p class="fcsb-why">Not enough ratings or reviews yet. The score appears once there are.</p>
+    <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>No audience ratings yet</small></div><span class="fcsb-tag none">Not rated yet</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
+  </section>
+  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
   <p class="answer"><b>Avengers: Doomsday</b> releases in Germany on 16 Dec 2026. A streaming release date will be listed here as soon as it's announced.</p>
-  <h2>The verdict</h2><p class="vprose">Avengers: Doomsday is one of the more anticipated English releases on the calendar. At 165 minutes it&#39;s a long sit, so save it for when you&#39;ve got the evening. It releases on 16 Dec 2026; mark your calendar if it&#39;s on your list.</p>
+  <h2>What the audience says</h2><p class="vprose">Avengers: Doomsday is one of the more anticipated English releases on the calendar. At 165 minutes it&#39;s a long sit, so save it for when you&#39;ve got the evening. It releases on 16 Dec 2026; mark your calendar if it&#39;s on your list.</p>
   
   
   
