@@ -1106,6 +1106,14 @@ test("health.js: issues make the run red, notes don't, a missing report does", (
     assert.strictEqual(bad.status, 1);
     assert.ok(/::error title=FilmyChill build::catalog \[in\]/.test(bad.stdout));
     assert.strictEqual(run(null).status, 1, "no report means the build never finished");
+    // Broken internal links are reported as a note (run stays green).
+    const site = path.join(dir, "site"); fsx.mkdirSync(path.join(site, "movie"), { recursive: true });
+    fsx.writeFileSync(path.join(site, "index.html"), '<a href="/movie/a.html">a</a><a href="/gone/">x</a><a href="https://example.com/">ext</a>');
+    fsx.writeFileSync(path.join(site, "movie", "a.html"), '<a href="https://filmychill.com/">home</a>');
+    const f = path.join(dir, "h2.json"); fsx.writeFileSync(f, JSON.stringify({ issues: [], notes: [], catalog: {} }));
+    const lc = cp.spawnSync(process.execPath, [path.join(__dirname, "health.js"), f], { encoding: "utf8", env: { ...process.env, GITHUB_STEP_SUMMARY: "", HEALTH_SITE_ROOT: site } });
+    assert.strictEqual(lc.status, 0, "a dead link is a note, not a red run");
+    assert.ok(/1 broken internal link\(s\)[^\n]*index\.html → \/gone\/index\.html/.test(lc.stdout), lc.stdout);
   } finally { fsx.rmSync(dir, { recursive: true, force: true }); }
 });
 
@@ -1415,6 +1423,41 @@ test("buildScopedMonthPage (platform): groups by language, links back up both ax
   assert.ok(/← August 2026/.test(html), "previous month in the same scope");
   assert.ok(/Everything new in September 2026/.test(html), "up to the whole month");
   assert.ok(/Netflix this week/.test(html), "up to the platform's weekly hub");
+});
+
+test("platform month page links its hub only when the hub exists (no 404s)", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-hub-")); const cwd = process.cwd();
+  const build = () => U.buildScopedMonthPage(SCOPE_RECS, { code: "in", name: "India", region: "IN", streamWord: "OTT" }, {
+    scope: { kind: "platform", name: "Netflix", slug: "netflix" }, month: "2026-09", months: ["2026-09"],
+    index: [], now: Date.parse("2026-09-25T00:00:00Z") });
+  try {
+    process.chdir(tmp);
+    const none = build();
+    assert.ok(!/href="https:\/\/filmychill\.com\/new-on-netflix\/"/.test(none) && !/Netflix this week/.test(none), "no link to a hub that isn't there");
+    assert.ok(/"item":"https:\/\/filmychill\.com\/new-on-ott\/"/.test(none), "breadcrumb falls back to the weekly OTT page");
+    fsx.mkdirSync("new-on-netflix", { recursive: true }); fsx.writeFileSync("new-on-netflix/index.html", "hub");
+    const withHub = build();
+    assert.ok(/Netflix this week/.test(withHub) && /"item":"https:\/\/filmychill\.com\/new-on-netflix\/"/.test(withHub), "hub linked once it exists");
+  } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
+});
+
+test("pruning a hub removes the hub page but keeps its month archives", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const D = require("./lib/dated.js");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-prune-")); const cwd = process.cwd();
+  const log = console.log; console.log = () => {};
+  try {
+    process.chdir(tmp);
+    fsx.mkdirSync("new-on-foo/2026-08", { recursive: true });
+    fsx.writeFileSync("new-on-foo/index.html", "hub");
+    fsx.writeFileSync("new-on-foo/2026-08/index.html", "august record");
+    fsx.mkdirSync("new-on-bar", { recursive: true }); fsx.writeFileSync("new-on-bar/index.html", "hub");
+    D.writePlatformHubPages({ theatres: [], ott: [] }, { code: "in", name: "India", region: "IN" });
+    assert.ok(!fsx.existsSync("new-on-foo/index.html"), "the hub page itself is pruned");
+    assert.strictEqual(fsx.readFileSync("new-on-foo/2026-08/index.html", "utf8"), "august record", "the month archive survives");
+    assert.ok(!fsx.existsSync("new-on-bar"), "a hub with nothing else in it leaves no empty directory");
+  } finally { console.log = log; process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
 });
 
 test("buildScopedMonthPage (language): groups by platform and names the language", () => {

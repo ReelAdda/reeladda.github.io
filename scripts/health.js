@@ -20,6 +20,14 @@ catch (e) {
 }
 const issues = Array.isArray(h.issues) ? h.issues : [];
 const notes = Array.isArray(h.notes) ? h.notes : [];
+
+// Broken internal links across the built site. Found 30 by hand on 28 Sept 2026 (month
+// archives linking hubs that didn't exist); this makes the next one show up on its own.
+// A note, not an issue: a dead link is worth fixing, not worth a red run.
+const broken = brokenInternalLinks(process.env.HEALTH_SITE_ROOT || ".");
+if (broken.count) {
+  notes.push(`${broken.count} broken internal link(s) on the site, e.g. ${broken.examples.map((x) => `${x.from} → /${x.to}`).join("; ")}`);
+}
 const catalog = h.catalog || {};
 
 // GitHub annotations must be single-line.
@@ -42,3 +50,34 @@ if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_S
 console.log(md);
 
 process.exit(issues.length ? 1 : 0);
+
+function brokenInternalLinks(root) {
+  const path = require("path");
+  const SKIP = new Set([".git", ".github", "scripts", "node_modules", "zz", "cloudflare", "_site"]);
+  const files = [];
+  (function walk(dir) {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (SKIP.has(e.name)) continue;
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) walk(p); else if (e.name.endsWith(".html")) files.push(p);
+    }
+  })(root);
+  const exists = new Map();
+  const has = (p) => { if (!exists.has(p)) exists.set(p, fs.existsSync(path.join(root, p))); return exists.get(p); };
+  let count = 0; const examples = []; const seen = new Set();
+  for (const f of files) {
+    const html = fs.readFileSync(f, "utf8");
+    for (const m of html.matchAll(/href="([^"]+)"/g)) {
+      let href = m[1].split("#")[0].split("?")[0];
+      if (href.startsWith("https://filmychill.com")) href = href.slice("https://filmychill.com".length);
+      if (!href.startsWith("/") || href.startsWith("//")) continue;
+      let p = href.slice(1);
+      if (p === "" || p.endsWith("/")) p += "index.html";
+      if (has(p) || seen.has(p)) continue;
+      seen.add(p); count++;
+      if (examples.length < 5) examples.push({ from: path.relative(root, f), to: p });
+    }
+  }
+  return { count, examples };
+}
+
