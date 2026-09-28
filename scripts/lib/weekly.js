@@ -29,6 +29,21 @@ const {
 } = require("./pagekit.js");
 const { streamVocab } = require("./rules.js");
 
+// FilmyChill Score panel (lib/fcscore.js) — the card's verdict. Mirrors fcScoreHtml() in
+// index.html so SSR and hydrated cards match; keep the two in step. No score = "too early"
+// (the gate held it back), never a guess; the audience rating stays visible either way.
+function fcScorePanel(item) {
+  const e = escHtml;
+  const s = item.fcScore;
+  const bits = [];
+  if (item.rating != null && item.votes) bits.push(`Audience ★ ${Number(item.rating).toFixed(1)} (${Number(item.votes).toLocaleString()} ratings)`);
+  if (s && s.critics) bits.push(`Critics: ${s.critics}`);
+  if (!s) { const b = trailerViewsLabel(item.trailerViews); if (b) bits.push(b); }
+  const sig = bits.length ? `<div class="fcs-sig">${e(bits.join(" · "))}</div>` : "";
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-label">FilmyChill score</div><div class="fcs-v">Too early</div><div class="fcs-why">Not enough ratings or reviews yet. The score appears once there are.</div></div>${sig}`;
+  return `<div class="fcs"><div class="fcs-label"><svg class="fcs-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>FilmyChill score</div><div class="fcs-v">${e(s.verdict)}</div><div class="fcs-why">${e(s.reason)}</div></div>${sig}`;
+}
+
 function ssrCard(item, i, code, { eager = false } = {}) {
   const e = escHtml;
   // Badge text comes from the data (freshBadge). Fallback to the old isRecent flag so a
@@ -46,16 +61,8 @@ function ssrCard(item, i, code, { eager = false } = {}) {
     <div>
       <div class="title-row"><h3>${e(item.title)}</h3>${item.platform && item.platform !== "Theatres" ? `<span class="platform">${e(item.platform)}</span>` : ""}${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}${item.trending ? '<span class="fresh-badge trend"><svg class="ic" aria-hidden="true"><use href="#icTrend"/></svg> Trending</span>' : ""}</div>
       <div class="meta">${bits}</div>
-      ${item.rating != null ? `<div class="meta">★ ${Number(item.rating).toFixed(1)}${item.verdict ? " · " + e(item.verdict) : ""}</div>`
-        // No rating = the confidence gate held it back (too new / too few votes). Saying
-        // so ("verdict soon" / "not enough ratings yet") turns a silent gap into a
-        // visible editorial decision — we don't print numbers we don't trust. Mirrors
-        // what the client's bottom-row already shows post-hydration, so SSR and
-        // hydrated cards finally match.
-        : item.verdict ? `<div class="meta">☆ ${e(item.verdict)}</div>` : ""}
       ${item.hook ? `<div class="meta hook">${e(item.hook)}</div>` : ""}
-      ${item.review ? `<p class="review">${e(trim(item.review, 150))}</p>` : ""}
-      ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}</p>` : ""}
+      ${fcScorePanel(item)}
     </div>`;
   // Every country now has its own per-film pages, so always link to this country's page.
   // (`code` defaults to India for safety if a caller omits it.)
@@ -362,7 +369,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
       <div>
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
-        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}${trailerViewsLabel(it.trailerViews) ? " · " + trailerViewsLabel(it.trailerViews) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
+        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.fcScore ? " · " + e(it.fcScore.verdict) : ""}${trailerViewsLabel(it.trailerViews) ? " · " + trailerViewsLabel(it.trailerViews) : ""}</div>` : (it.fcScore ? `<div class="rm">${e(it.fcScore.verdict)}</div>` : it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
       </div>`;
     return it.slug
       ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>`
