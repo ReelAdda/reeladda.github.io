@@ -49,7 +49,12 @@ jobs:
           # log, then raise it. Set CATALOG to "0" to pause the backfill without losing the
           # queue cursor in catalog-manifest.json.
           CATALOG: "1"
-          CATALOG_BATCH: "25"
+          # 5 per country per run (Sept 2026): ~140 new pages a day across 14 markets, down
+          # from ~700. Google had indexed only ~1 in 8 pages, so adding more mostly grew the
+          # unindexed backlog — and at 700/day the site would reach GitHub Pages' 1 GB cap in
+          # ~2 months (~9 months at this rate). Raise again once Search Console's Sitemaps
+          # screen shows the film sitemaps' indexed share climbing, or after moving to R2.
+          CATALOG_BATCH: "5"
         run: node scripts/update.js
 
       # Smoke test validates the SHAPE + freshness of EVERY country's data file.
