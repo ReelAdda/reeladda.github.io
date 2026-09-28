@@ -11,6 +11,11 @@ on:
   workflow_dispatch: {}   # also lets you run it manually anytime with one click
 permissions:
   contents: write
+# Same group as probe.yml: a build and a probe never push to main at the same moment.
+# (A probe that pushed mid-build used to make this run's final push fail, losing the update.)
+concurrency:
+  group: filmychill-writes
+  cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -61,7 +66,9 @@ jobs:
       # Fails the build (before commit) if any file is missing, empty, stale, or malformed —
       # so a bad/partial build never ships.
       - name: Smoke-test generated data
-        run: node scripts/smoke.js us uk au de
+        # Every market, not just the first four: a market added later is exactly the one
+        # nobody is watching.
+        run: node scripts/smoke.js in us uk au de ae ca sg my ph nz kr jp id
 
       - name: Verify film pages exist
         run: |
@@ -145,3 +152,9 @@ jobs:
           curl -s -X POST "https://api.indexnow.org/indexnow" \
             -H "Content-Type: application/json; charset=utf-8" \
             -d @indexnow-payload.json || true
+
+      # LAST on purpose: the site has already been committed and deployed. Any stage that
+      # failed and was skipped during the build (see RUN HEALTH in update.js) turns this run
+      # red, which makes GitHub email you, and the run page's Summary tab says what broke.
+      - name: Build health check
+        run: node scripts/health.js
