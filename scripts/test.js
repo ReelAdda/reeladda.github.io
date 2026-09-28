@@ -1033,6 +1033,17 @@ testAsync("catalogue: a title with no provider is ruled out for good and never b
   });
 });
 
+test("every scripts/lib module loads on its own, and none requires update.js", () => {
+  const fsx = require("fs"), path = require("path"), cp = require("child_process");
+  const dir = path.join(__dirname, "lib");
+  for (const f of fsx.readdirSync(dir).filter((x) => x.endsWith(".js"))) {
+    const src = fsx.readFileSync(path.join(dir, f), "utf8");
+    assert.ok(!/require\(["']\.\.\/update(\.js)?["']\)/.test(src), `${f} must not require update.js (it would be circular)`);
+    const r = cp.spawnSync(process.execPath, ["-e", `require(${JSON.stringify(path.join(dir, f))})`], { encoding: "utf8" });
+    assert.strictEqual(r.status, 0, `${f} fails to load on its own: ${r.stderr.split("\n").slice(0, 3).join(" ")}`);
+  }
+});
+
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
 group("failure paths: outages, stalls, corrupt state, silent stages");
 
@@ -1592,6 +1603,27 @@ test("archivePatchHtml + generator SYNC GUARD: a real theatrical page gets hones
   assert.ok(html.includes("had its theatrical run in India"));
   assert.ok(html.includes("finished its theatrical run in India"));
   assert.ok(!html.includes('<span class="pill">In theatres</span>'));
+});
+test("archive pass: an honesty-patched frozen page gets a fresh lastmod (shadowed todayStr bug)", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const LC = require("./lib/lifecycle.js");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-arch-"));
+  const cwd = process.cwd();
+  const warns = []; const log = console.warn, info = console.log;
+  try {
+    process.chdir(tmp);
+    fsx.mkdirSync("movie");
+    const item = { title: "T", slug: "t", kind: "movie", language: "Hindi", platform: "Theatres",
+      released: "2026-06-01", rating: 7.0, votes: 500, verdict: "Worth a watch", runtime: 120 };
+    fsx.writeFileSync("movie/t.html", U.buildFilmPage(item, "2026-06-17", new Set(["t"]), { code: "in", name: "India", region: "IN" }));
+    const manifest = { in: { t: { last: "2026-06-17", archivedOn: "2026-06-20", pv: 0 } } };
+    console.warn = (m) => warns.push(String(m)); console.log = () => {};
+    LC.archiveDepartedPages(manifest, { code: "in", name: "India", region: "IN" }, new Set());
+    console.warn = log; console.log = info;
+    assert.deepStrictEqual(warns.filter((w) => /skipped/.test(w)), [], "the archive pass must not throw on a patched page");
+    assert.ok(!fsx.readFileSync("movie/t.html", "utf8").includes("in theatres in India now"), "precondition: the page was patched");
+    assert.strictEqual(manifest.in.t.last, new Date().toISOString().slice(0, 10), "a corrected page advertises a fresh lastmod");
+  } finally { console.warn = log; console.log = info; process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
 });
 test("archive patch v6: frozen JSON-LD loses aggregateRating, stays valid JSON, idempotent", () => {
   const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj)}</script>`;
