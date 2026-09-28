@@ -32,6 +32,7 @@ const {
   platformSlug,
   streamPagePath,
   weekRangeFor,
+  hubPath,
 } = require("./pagekit.js");
 const { countryNameFor, streamVocab } = require("./rules.js");
 const { buildOttWeekPage, ottWeekPath, ottWeekUrl } = require("./weekly.js");
@@ -244,7 +245,13 @@ function buildScopedMonthPage(recs, cfg, { scope, month, months = [], index = []
   if (i > 0) navLinks.push({ href: urlFor(have[i - 1]), label: `← ${monthLabel(have[i - 1], localeFor(code))}` });
   if (i >= 0 && i < have.length - 1) navLinks.push({ href: urlFor(have[i + 1]), label: `${monthLabel(have[i + 1], localeFor(code))} →` });
   navLinks.push({ href: ottMonthUrl(code, month), label: `Everything new in ${label}` });
-  navLinks.push({ href: isPlatform ? hubUrl(code, scope.slug) : `https://filmychill.com/${scope.slug}/`, label: `${scope.name} this week` });
+  // A platform's month page can qualify while its weekly hub doesn't (different thresholds),
+  // and linking a hub that isn't there is a 404 — 30 of them in Sept 2026. Past months are
+  // frozen, so a bad link written now would stay forever. Link the hub only when it exists.
+  const hubLive = !isPlatform || fs.existsSync(hubPath(code, scope.slug));
+  const parentUrl = !isPlatform ? `https://filmychill.com/${scope.slug}/` : hubLive ? hubUrl(code, scope.slug) : ottWeekUrl(code);
+  const parentName = !isPlatform ? scope.name : hubLive ? `New on ${scope.name}` : "New this week";
+  if (hubLive) navLinks.push({ href: parentUrl, label: `${scope.name} this week` });
   const linkable = rows.filter((x) => x.slug);
   const isCurrent = month === monthKey(new Date(now).toISOString());
   const extraLd = [{
@@ -257,8 +264,7 @@ function buildScopedMonthPage(recs, cfg, { scope, month, months = [], index = []
     "@context": "https://schema.org", "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "FilmyChill", item: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/` },
-      { "@type": "ListItem", position: 2, name: isPlatform ? `New on ${scope.name}` : scope.name,
-        item: isPlatform ? hubUrl(code, scope.slug) : `https://filmychill.com/${scope.slug}/` },
+      { "@type": "ListItem", position: 2, name: parentName, item: parentUrl },
       { "@type": "ListItem", position: 3, name: label, item: url },
     ],
   }];
