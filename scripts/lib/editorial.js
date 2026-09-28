@@ -808,6 +808,9 @@ async function attachTakes(dataByCode) {
             it.takeSrc = entry.src;
             if (takeAspects) it.takeAspects = takeAspects; // feeds the editor's note flourish
             if (entry.src === "wiki" && entry.article) it.takeArticle = entry.article; // provenance -> JSON-LD citation
+            // The critics half of the FilmyChill Score (lib/fcscore.js): only published
+            // critics count, so only a Wikipedia reception tone — never TMDB viewer reviews.
+            if (entry.src === "wiki" && entry.a && entry.a.tone) it.criticsTone = entry.a.tone;
             // Disagreement is computed FRESH each run — ratings move, cached text doesn't.
             const counter = audienceCounterpoint(it);
             if (counter) it.takeCounter = counter;

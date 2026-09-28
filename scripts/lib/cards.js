@@ -92,7 +92,10 @@ function shareCardSvg(item, cfg) {
   // Never print a score the data doesn't support — the card is the most-copied surface on
   // the site, so an unearned number travels furthest.
   const showScore = rating != null && votes && votes >= 10;
-  const verdict = (item.verdict || "").toUpperCase();
+  // The FilmyChill Score (lib/fcscore.js) is the card's verdict when there is one — the
+  // site's own call travels with the share. The score block on the right stays the audience's.
+  const fcs = item.fcScore || null;
+  const verdict = ((fcs && fcs.verdict) || item.verdict || "").toUpperCase();
   const fit = whyWatch(item);
   const blurb = item.take || (fit ? fit.text : "");
   const status = cardStatus(item, cfg);
@@ -125,8 +128,9 @@ ${scoreStr
   : `<text x="992" y="272" text-anchor="middle" font-family="Anton" font-size="104" fill="#FFAD1F">NEW</text>
 <text x="992" y="322" text-anchor="middle" font-family="Inter" font-size="26" fill="#8F8BB8">too early to rate</text>`}
 <rect x="864" y="378" width="256" height="4" fill="#FFAD1F" fill-opacity="0.5"/>
+${fcs ? `<text x="992" y="416" text-anchor="middle" font-family="Inter" font-size="19" font-weight="700" fill="#FFAD1F" letter-spacing="2">FILMYCHILL SCORE</text>` : ""}
 ${wrapForCard(verdict || "FRESH RELEASE", 44, 360, 2, "anton").map((l, i) =>
-  `<text x="992" y="${446 + i * 52}" text-anchor="middle" font-family="Anton" font-size="44" fill="#FFF7EC">${e(l)}</text>`).join("\n")}
+  `<text x="992" y="${(fcs ? 466 : 446) + i * 52}" text-anchor="middle" font-family="Anton" font-size="44" fill="#FFF7EC">${e(l)}</text>`).join("\n")}
 </svg>`;
 }
 

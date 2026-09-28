@@ -325,7 +325,7 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
       <div>
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
-        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.verdict ? " · " + e(it.verdict) : ""}</div>` : (it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
+        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.fcScore ? " · " + e(it.fcScore.verdict) : ""}</div>` : (it.fcScore ? `<div class="rm">${e(it.fcScore.verdict)}</div>` : it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
         ${it.hook ? `<div class="rm hk">${e(it.hook)}</div>` : ""}
         ${it.take ? `<div class="rm tk">${e(it.take)}</div>` : ""}
       </div>`;

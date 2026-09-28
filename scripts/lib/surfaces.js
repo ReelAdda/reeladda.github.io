@@ -596,7 +596,7 @@ function ssrHero(data) {
       <span class="hero-eyebrow"><svg class="ic" aria-hidden="true"><use href="#icTrophy"/></svg> Pick of the Week</span>
       <div class="hero-title" id="heroTitle">${e(pick.title)}</div>
       <div class="hero-meta" id="heroMeta">${e(meta)}</div>
-      <div class="hero-verdict" id="heroVerdict">▸ ${e(pick.verdict || "")}</div>
+      <div class="hero-verdict" id="heroVerdict">▸ ${e((pick.fcScore && pick.fcScore.verdict) || pick.verdict || "")}</div>
     </div>
   </div>
 </div>`;
