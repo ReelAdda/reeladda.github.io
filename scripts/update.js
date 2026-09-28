@@ -24,6 +24,7 @@
 //   surfaces   homepage, head tags, hero, /data/, About, writeCountrySurfaces()
 //   sitemap    dead hub links, multi-country sitemap
 //   llms       llms.txt / llms-full.txt
+//   fcscore    the FilmyChill Score: audiences + critics, one automated verdict
 // A lib module may only require modules above it in this list (tests enforce no cycles).
 
 const fs = require("fs");
@@ -297,6 +298,7 @@ const {
   RUN_HEALTH_FILE,
   stageFailed,
 } = require("./lib/runhealth.js");
+const { attachFcScores } = require("./lib/fcscore.js");
 const { pruneDeadHubLinks, sweepDeadHubLinks, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 const {
   ABOUT_LASTMOD,
@@ -1273,6 +1275,12 @@ async function main() {
   // Critics' takes attach last but still BEFORE data files are written, so
   // client-rendered cards (which read data.json) show the same line the SSR cards do.
   await attachTakes(dataByCode);
+  // FilmyChill Score (lib/fcscore.js): audiences + critics, after the takes attach the critics
+  // tone and before the data files are written, so cards, film pages and share cards agree.
+  {
+    const { scored, total } = attachFcScores(dataByCode);
+    console.log(`FilmyChill Score: ${scored}/${total} listed titles scored (the rest: too early)`);
+  }
 
   // Product stats, BEFORE data files are written so the client can render the
   // confidence strip ("N picks · M+ films tracked") from data alone.
