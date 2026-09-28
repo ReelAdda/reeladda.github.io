@@ -11,3 +11,6 @@ zz/
 # Cloudflare deploy staging folder (built from git archive in CI). Never committed.
 _site/
 .wrangler/
+
+# Per-run build report read by scripts/health.js. Never committed.
+run-health.json
