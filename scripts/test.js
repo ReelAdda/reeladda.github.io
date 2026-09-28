@@ -3492,6 +3492,38 @@ test("a failing step is contained, not fatal", () => {
   assert.doesNotThrow(() => U.writeCountrySurfaces({ code: "zz", name: "Nowhere" }, {}));
 });
 
+group("homepage footer — minimal, structured, still crawlable");
+test("four short columns, no inline link wall, no newly-added list", () => {
+  const f = U.buildMoreLinks("in", null);
+  for (const h of ["Discover", "Languages", "FilmyChill"]) assert.ok(f.includes(`<h3>${h}</h3>`), h);
+  assert.ok(!/Newly added/.test(f), "catalogue titles live on All films now, not in the footer");
+  assert.ok(!/Also on FilmyChill:/.test(f), "no 13-country inline row");
+  for (const m of f.matchAll(/<ul>([\s\S]*?)<\/ul>/g)) {
+    assert.ok((m[1].match(/<li>/g) || []).length <= 6, "a footer column stays short");
+  }
+  const us = U.buildMoreLinks("us", null);
+  assert.ok(!us.includes("<h3>Languages</h3>"), "the Languages column is India-only");
+  assert.ok(/New on streaming this week/.test(us), "each market's own vocabulary");
+});
+test("other countries sit in a closed <details> picker — out of sight, still real links", () => {
+  const f = U.buildMoreLinks("in", null);
+  assert.ok(/<details class="foot-country"><summary>[^<]*India<\/summary>/.test(f));
+  const list = (/<div class="foot-country-list">([\s\S]*?)<\/div><\/details>/.exec(f) || [])[1] || "";
+  assert.strictEqual((list.match(/<a href=/g) || []).length, require("./lib/core.js").COUNTRIES.length - 1);
+});
+test("the template has the new footer and no stale markers", () => {
+  const src = require("fs").readFileSync("index.html", "utf8");
+  assert.ok(!/SSR:FOOTOTT/.test(src), "FOOTOTT retired");
+  assert.ok(/<footer>[\s\S]*class="foot-brand"[\s\S]*<!--SSR:MORELINKS-->[\s\S]*<!--SSR:ATTRIBUTION-->/.test(src));
+});
+test("All films page 1 carries the newly added titles; later pages don't", () => {
+  const G = require("./lib/graph.js");
+  const idx = Array.from({ length: 300 }, (_, i) => ({ slug: "f" + i, title: "F" + i }));
+  const fresh = [{ title: "Dune", href: "/movie/dune.html" }];
+  assert.ok(/<h2[^>]*>Newly added<\/h2>[\s\S]*href="\/movie\/dune.html"/.test(G.buildBrowsePage(idx, { code: "in" }, 1, 3, "x", "", fresh)));
+  assert.ok(!/Newly added/.test(G.buildBrowsePage(idx, { code: "in" }, 2, 3, "x", "", fresh)));
+});
+
 group("crawl paths — every subtree reachable by a crawler");
 test("footer links to the other country homepages", () => {
   const more = U.buildMoreLinks("in", null);
