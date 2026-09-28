@@ -1,0 +1,19 @@
+{
+  // FilmyChill on Cloudflare Workers Static Assets.
+  // Deployed by .github/workflows/update.yml after each build commit.
+  "name": "filmychill",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  "assets": {
+    // Built in CI from `git archive HEAD` = exactly the committed site, like GitHub Pages.
+    "directory": "./_site",
+    "binding": "ASSETS",
+    // "none" keeps /movie/<slug>.html served as-is. The default (auto-trailing-slash)
+    // would 307-redirect every film page to an extensionless URL, breaking the .html
+    // canonicals and sitemap URLs Google has indexed. Folder URLs (/hindi/) and the
+    // 404 page are handled by cloudflare/worker.js instead.
+    "html_handling": "none",
+    "not_found_handling": "none"
+  }
+}

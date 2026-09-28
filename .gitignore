@@ -7,3 +7,7 @@ package-lock.json
 # The test suite's sandbox country (code "zz"). Tests write real files under it; they
 # must never be committed — the workflow's '*/films/' glob once published them.
 zz/
+
+# Cloudflare deploy staging folder (built from git archive in CI). Never committed.
+_site/
+.wrangler/
