@@ -1,0 +1,13 @@
+# Files in the repo that are NOT part of the website (never uploaded to Cloudflare).
+.github
+.gitignore
+.assetsignore
+scripts
+cloudflare
+wrangler.jsonc
+package.json
+package-lock.json
+node_modules
+MIGRATION-STEPS.md
+CNAME
+zz
