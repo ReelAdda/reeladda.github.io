@@ -112,6 +112,26 @@ jobs:
             echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # Cloudflare Workers Static Assets deploy. Dormant until the CLOUDFLARE_API_TOKEN secret
+      # exists, so this file can be committed before the migration without breaking any run.
+      # Deploys exactly what is COMMITTED (git archive), never the working tree: the build
+      # leaves node_modules/, zz/ (test sandbox) and indexnow-payload.json on disk, none of
+      # which GitHub Pages ever served. Same files, same URLs, so Google sees no change.
+      - name: Check Cloudflare credentials
+        id: cf
+        run: echo "enabled=${{ secrets.CLOUDFLARE_API_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to Cloudflare
+        if: steps.cf.outputs.enabled == 'true' && (steps.commit.outputs.pushed == 'true' || github.event_name == 'workflow_dispatch')
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          rm -rf _site && mkdir _site
+          git archive HEAD | tar -x -C _site
+          echo "files to upload: $(find _site -type f | wc -l)  (free plan cap 20,000 / paid 100,000)"
+          npx --yes wrangler@4 deploy
+
       # IndexNow: tell Bing/DuckDuckGo/Yandex INSTANTLY that today's pages changed, instead
       # of waiting for a crawl — exactly the freshness race a daily site wants to win.
       # (Google doesn't use IndexNow; it relies on the sitemap lastmod + normal crawling.)
