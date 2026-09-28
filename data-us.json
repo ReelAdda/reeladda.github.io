@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-28T09:17:45.276Z",
+ "generatedAt": "2026-09-28T09:54:19.561Z",
  "country": "us",
  "pick": "Physical 100: Mexico",
  "theatres": [
@@ -78,23 +78,16 @@
      "kind": "movie"
     },
     {
-     "title": "4 Horsemen: Apocalypse",
-     "slug": "4-horsemen-apocalypse",
-     "poster": "https://image.tmdb.org/t/p/w342/dt3mo4tArf2llDiht91cnvUtSgT.jpg",
+     "title": "Monster Hunters",
+     "slug": "monster-hunters",
+     "poster": "https://image.tmdb.org/t/p/w342/3UrOHqUlzdeXz4SLaQIETaRd2W.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Resident Evil: Extinction",
-     "slug": "resident-evil-extinction",
-     "poster": "https://image.tmdb.org/t/p/w342/6yaLr7Ymg5cvbtSVi5hHwBKx35I.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Resident Evil",
-     "slug": "resident-evil",
-     "poster": "https://image.tmdb.org/t/p/w342/1UKNef590A0ZaMnxsscIcWuK1Em.jpg",
+     "title": "Primitive War",
+     "slug": "primitive-war",
+     "poster": "https://image.tmdb.org/t/p/w342/noujgznyJIaurEinZhcSVzTmkLo.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -106,6 +99,13 @@
      "kind": "movie"
     },
     {
+     "title": "Re-Kill",
+     "slug": "re-kill",
+     "poster": "https://image.tmdb.org/t/p/w342/iPunx6eRmwxCDuDGB0N0o1jqADP.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Land of the Dead",
      "slug": "land-of-the-dead",
      "poster": "https://image.tmdb.org/t/p/w342/xxp0qcZ3n2YA53SIzWilDSfIaA4.jpg",
@@ -113,16 +113,16 @@
      "kind": "movie"
     },
     {
-     "title": "Resident Evil: Apocalypse",
-     "slug": "resident-evil-apocalypse",
-     "poster": "https://image.tmdb.org/t/p/w342/yzNQSLlZb7NAkA4C5uADfNDJ7hm.jpg",
+     "title": "Dawn of the Dead",
+     "slug": "dawn-of-the-dead",
+     "poster": "https://image.tmdb.org/t/p/w342/ttquyxStEEctzghtA2f4PUGprDr.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Re-Kill",
-     "slug": "re-kill",
-     "poster": "https://image.tmdb.org/t/p/w342/iPunx6eRmwxCDuDGB0N0o1jqADP.jpg",
+     "title": "Mad Max: Fury Road",
+     "slug": "mad-max-fury-road",
+     "poster": "https://image.tmdb.org/t/p/w342/ulcAi4dKpAjHwYGS08vNyx9H6I9.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -166,7 +166,7 @@
    "slug": "resident-evil",
    "wikiWeeklyViews": 965600,
    "trending": true,
-   "trailerViews": 17954833,
+   "trailerViews": 17961152,
    "take": "Mostly good reviews — the performances and humour impressed, even if the pacing didn't.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -340,7 +340,7 @@
    ],
    "slug": "heart-of-the-beast",
    "wikiWeeklyViews": 350717,
-   "trailerViews": 2872724,
+   "trailerViews": 2872989,
    "take": "The reviews lean clearly positive.",
    "takeSrc": "wiki",
    "takeArticle": "Heart of the Beast"
@@ -682,7 +682,7 @@
    "slug": "primetime",
    "wikiWeeklyViews": 609177,
    "trending": true,
-   "trailerViews": 6006794,
+   "trailerViews": 6007182,
    "take": "Mostly good reviews — the direction and emotional weight impressed, even if the originality didn't.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -853,7 +853,7 @@
    ],
    "slug": "the-fix",
    "wikiWeeklyViews": 34833,
-   "trailerViews": 1532596,
+   "trailerViews": 1532868,
    "take": "Critics largely gave this one a pass.",
    "takeSrc": "wiki",
    "takeArticle": "The Fix (2026 film)"
@@ -1021,7 +1021,7 @@
    "digitalDate": "2026-10-13",
    "slug": "hope",
    "wikiWeeklyViews": 98511,
-   "trailerViews": 117684,
+   "trailerViews": 117817,
    "take": "Critics have been largely positive on this one.",
    "takeSrc": "wiki",
    "takeArticle": "Hope (2026 film)"
@@ -1189,7 +1189,7 @@
    "digitalDate": "2026-10-13",
    "slug": "practical-magic-2",
    "wikiWeeklyViews": 118787,
-   "trailerViews": 23529948,
+   "trailerViews": 23530595,
    "take": "Genuinely divisive — critics can't settle this one.",
    "takeSrc": "wiki",
    "takeArticle": "Practical Magic 2",
@@ -1365,7 +1365,7 @@
    "slug": "the-love-hypothesis",
    "wikiWeeklyViews": 301261,
    "trending": true,
-   "trailerViews": 15751629,
+   "trailerViews": 15755719,
    "take": "Critics are split clean down the middle on this one.",
    "takeSrc": "wiki",
    "takeArticle": "The Love Hypothesis (film)",
@@ -1540,7 +1540,7 @@
    "ottFreshDate": "2026-09-25",
    "slug": "jojo-s-bizarre-adventure",
    "wikiWeeklyViews": 7120,
-   "trailerViews": 27179
+   "trailerViews": 27196
   },
   {
    "title": "American Horror Story",
@@ -1893,7 +1893,7 @@
    "ottFreshDate": "2026-09-25",
    "slug": "unabomber",
    "wikiWeeklyViews": 210792,
-   "trailerViews": 5052610,
+   "trailerViews": 5054677,
    "take": "Genuinely divisive — critics can't settle this one.",
    "takeSrc": "wiki",
    "takeArticle": "Unabomber (film)"
@@ -2064,7 +2064,7 @@
    "ottFreshDate": "2026-09-16",
    "stillGood": true,
    "slug": "physical-100-mexico",
-   "trailerViews": 349850
+   "trailerViews": 349983
   },
   {
    "title": "MobLand",
@@ -2158,6 +2158,13 @@
      "kind": "tv"
     },
     {
+     "title": "Power Book IV: Force",
+     "slug": "power-book-iv-force",
+     "poster": "https://image.tmdb.org/t/p/w342/yzL4Tqbw2JA9MCsHJWFC4xV1IYU.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
      "title": "Kin",
      "slug": "kin",
      "poster": "https://image.tmdb.org/t/p/w342/2wTsgQQBruGQcjM0PjFr5l5MjEw.jpg",
@@ -2189,13 +2196,6 @@
      "title": "Narcos",
      "slug": "narcos",
      "poster": "https://image.tmdb.org/t/p/w342/rTmal9fDbwh5F0waol2hq35U4ah.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Shield",
-     "slug": "the-shield",
-     "poster": "https://image.tmdb.org/t/p/w342/AfdZXqqlFsPUEfi6kWWWthxw7Nz.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -2242,7 +2242,7 @@
    "stillGood": true,
    "slug": "mobland",
    "wikiWeeklyViews": 220417,
-   "trailerViews": 11801336,
+   "trailerViews": 11802001,
    "take": "A love-it-or-hate-it reception, right down the middle.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
@@ -2416,7 +2416,7 @@
    "stillGood": true,
    "slug": "drawn-together",
    "wikiWeeklyViews": 27387,
-   "trailerViews": 833046
+   "trailerViews": 833440
   },
   {
    "title": "Slow Horses",
@@ -2586,7 +2586,7 @@
    "stillGood": true,
    "slug": "slow-horses",
    "wikiWeeklyViews": 266451,
-   "trailerViews": 5720647,
+   "trailerViews": 5720743,
    "take": "Critics loved this one; reception has been close to universal acclaim.",
    "takeSrc": "wiki",
    "takeArticle": "Slow Horses"
@@ -2890,7 +2890,7 @@
    "castPics": [
     {
      "name": "Kyle Chandler",
-     "character": "Hal Jordan",
+     "character": "Hal Jordan / Halogram",
      "photo": "https://image.tmdb.org/t/p/w185/66n7XNj1dyYkzCBWR3Lq8Vz4PJ1.jpg"
     },
     {
@@ -2911,7 +2911,7 @@
    "slug": "lanterns",
    "wikiWeeklyViews": 489435,
    "trending": true,
-   "trailerViews": 35258405,
+   "trailerViews": 35259790,
    "take": "Critics liked it: the performances and lead chemistry won praise, though the themes drew some flak.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -3073,7 +3073,7 @@
     }
    ],
    "slug": "digger",
-   "trailerViews": 4132391
+   "trailerViews": 4133201
   },
   {
    "title": "Verity",
@@ -3119,13 +3119,6 @@
      "kind": "movie"
     },
     {
-     "title": "Force of Nature: The Dry 2",
-     "slug": "force-of-nature-the-dry-2",
-     "poster": "https://image.tmdb.org/t/p/w342/sw4M0jLT04FM1p3C2XQ3il50wgV.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "The Pale Blue Eye",
      "slug": "the-pale-blue-eye",
      "poster": "https://image.tmdb.org/t/p/w342/9xkGlFRqrN8btTLU0KQvOfn2PHr.jpg",
@@ -3143,6 +3136,13 @@
      "title": "Mindcage",
      "slug": "mindcage",
      "poster": "https://image.tmdb.org/t/p/w342/fUi9vNYQaB8QtrbEyS9J6vbKJJt.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Ritual Killer",
+     "slug": "the-ritual-killer",
+     "poster": "https://image.tmdb.org/t/p/w342/1VtHaELqLMovl8EueBWHDtihhzF.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3168,9 +3168,9 @@
      "kind": "movie"
     },
     {
-     "title": "I Still See You",
-     "slug": "i-still-see-you",
-     "poster": "https://image.tmdb.org/t/p/w342/9fqzZs922V8OmwgO11Eqclof2mQ.jpg",
+     "title": "The Mean Season",
+     "slug": "the-mean-season",
+     "poster": "https://image.tmdb.org/t/p/w342/dCPzsNt2Hznkr54J6wfGzpnE1Z4.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3182,9 +3182,9 @@
      "kind": "movie"
     },
     {
-     "title": "Murder!",
-     "slug": "murder",
-     "poster": "https://image.tmdb.org/t/p/w342/iu8mee9GciHFgfqG5ifdDOTLw4F.jpg",
+     "title": "I Still See You",
+     "slug": "i-still-see-you",
+     "poster": "https://image.tmdb.org/t/p/w342/9fqzZs922V8OmwgO11Eqclof2mQ.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -3226,7 +3226,7 @@
     }
    ],
    "slug": "verity",
-   "trailerViews": 15167492
+   "trailerViews": 15169873
   },
   {
    "title": "Ghost in the Cell",
@@ -3286,16 +3286,16 @@
      "kind": "movie"
     },
     {
-     "title": "The Blackening",
-     "slug": "the-blackening",
-     "poster": "https://image.tmdb.org/t/p/w342/n2aS9FE0C3VUHtSb3Ak41aU9K3y.jpg",
+     "title": "Renfield",
+     "slug": "renfield",
+     "poster": "https://image.tmdb.org/t/p/w342/p6yUjhvNGQpFZilKwOKbxQ1eHlo.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Renfield",
-     "slug": "renfield",
-     "poster": "https://image.tmdb.org/t/p/w342/p6yUjhvNGQpFZilKwOKbxQ1eHlo.jpg",
+     "title": "The Blackening",
+     "slug": "the-blackening",
+     "poster": "https://image.tmdb.org/t/p/w342/n2aS9FE0C3VUHtSb3Ak41aU9K3y.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3310,13 +3310,6 @@
      "title": "Scream VI",
      "slug": "scream-vi",
      "poster": "https://image.tmdb.org/t/p/w342/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Abigail",
-     "slug": "abigail",
-     "poster": "https://image.tmdb.org/t/p/w342/5gKKSoD3iezjoL7YqZONjmyAiRA.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3338,6 +3331,13 @@
      "title": "Beyond Re-Animator",
      "slug": "beyond-re-animator",
      "poster": "https://image.tmdb.org/t/p/w342/iS4oB4nQEdO86Fvszqf6P2ejK44.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Fright Night",
+     "slug": "fright-night",
+     "poster": "https://image.tmdb.org/t/p/w342/euIh75MwNDrYkTEVSkw7VXWGXoE.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -3379,7 +3379,7 @@
     }
    ],
    "slug": "ghost-in-the-cell",
-   "trailerViews": 1309660
+   "trailerViews": 1309805
   },
   {
    "title": "Other Mommy",
@@ -3532,7 +3532,7 @@
     }
    ],
    "slug": "other-mommy",
-   "trailerViews": 13755553
+   "trailerViews": 13756566
   },
   {
    "title": "La bola negra",
@@ -3687,7 +3687,7 @@
    "digitalDate": "2026-12-02",
    "digitalNote": "Netflix",
    "slug": "la-bola-negra",
-   "trailerViews": 2033038
+   "trailerViews": 2034135
   },
   {
    "title": "Clayface",
@@ -3840,7 +3840,7 @@
     }
    ],
    "slug": "clayface",
-   "trailerViews": 12794636
+   "trailerViews": 12800204
   },
   {
    "title": "The Mongoose",
@@ -3993,7 +3993,7 @@
     }
    ],
    "slug": "the-mongoose",
-   "trailerViews": 476098
+   "trailerViews": 476290
   },
   {
    "title": "Avengers: Doomsday",
@@ -4146,7 +4146,7 @@
     }
    ],
    "slug": "avengers-doomsday",
-   "trailerViews": 44763341
+   "trailerViews": 44771222
   }
  ],
  "langPools": {
@@ -5308,5 +5308,5 @@
    "slug": "brothers"
   }
  ],
- "trackedFilms": 653
+ "trackedFilms": 658
 }
