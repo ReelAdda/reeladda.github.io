@@ -489,11 +489,44 @@ function pruneOttSeen(seenAll, now = Date.now()) {
   return seenAll || {};
 }
 
+// ============================================================================
+// RUN HEALTH — so a failure is never silent again.
+//
+// Every stage below runs inside its own try/catch so one broken stage can't take the whole
+// site down. The cost of that design was that a broken stage only ever left a log line
+// nobody reads: on 27 Sept 2026 the back-catalogue died in five markets and nothing said so.
+// Now every swallowed failure is recorded here, written to run-health.json at the end of the
+// build, and scripts/health.js turns it into a red run (GitHub emails you) plus a summary.
+//   issues -> something is broken; the run goes red AFTER the site is committed and deployed
+//   notes  -> worth knowing, handled safely; shown in the run summary, run stays green
+// ============================================================================
+const RUN_HEALTH_FILE = "run-health.json";
+const RUN_HEALTH = { issues: [], notes: [], catalog: {} };
+function stageFailed(label, e, { optional = false } = {}) {
+  const msg = `${label}: ${(e && e.message) || e}`;
+  console.warn(`  ${label} skipped: ${(e && e.message) || e}`);
+  (optional ? RUN_HEALTH.notes : RUN_HEALTH.issues).push(msg);
+}
+function healthNote(msg) { RUN_HEALTH.notes.push(msg); }
+function healthIssue(msg) { RUN_HEALTH.issues.push(msg); }
+
+// State files carry history the site cannot rebuild (first-seen dates, every page's live
+// claim, the catalogue cursor). Missing = first run, start empty. PRESENT BUT UNREADABLE =
+// stop the build: silently starting from {} would overwrite months of history with nothing
+// on the very next commit, and every OTT title would "arrive" again the same day.
+function loadStateFile(file, fallback = {}) {
+  let raw;
+  try { raw = fs.readFileSync(file, "utf8"); }
+  catch (e) { if (e.code === "ENOENT") return fallback; throw e; }
+  try { return JSON.parse(raw); }
+  catch (e) { throw new Error(`${file} exists but is not valid JSON (${e.message}) — refusing to overwrite its history`); }
+}
+
 let OTT_SEEN = null; // loaded once per process, written once after all countries build
 function loadOttSeen() {
   if (OTT_SEEN) return OTT_SEEN;
-  try { OTT_SEEN = pruneOttSeen(JSON.parse(fs.readFileSync(OTT_SEEN_FILE, "utf8"))); }
-  catch { OTT_SEEN = {}; } // first ever run -> cold start for every country
+  // Missing -> cold start for every country (first ever run). Corrupt -> the build stops.
+  OTT_SEEN = pruneOttSeen(loadStateFile(OTT_SEEN_FILE, {}));
   return OTT_SEEN;
 }
 
@@ -2964,7 +2997,7 @@ async function main() {
     }
     fs.writeFileSync("ott-watch.json", JSON.stringify(watch, null, 1));
     console.log(`  probe watchlist: ${watch.length} title(s) awaiting a streaming sighting`);
-  } catch (e) { console.warn(`  watchlist skipped: ${e.message}`); }
+  } catch (e) { stageFailed(`watchlist`, e); }
 
   // Persist first-seen tracking (see ott-seen.json docs) — every country has now recorded
   // today's sightings; the workflow commits this file so tomorrow's run remembers them.
@@ -2996,7 +3029,7 @@ async function main() {
     // Cards BEFORE pages: socialImage() checks the card file on disk, so the render order
     // decides whether a page points at its branded card or falls back to the backdrop.
     try { writeShareCards(dataByCode[cfg.code], cfg); }
-    catch (e) { console.warn(`  share cards [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`share cards [${cfg.code}]`, e, { optional: true }); }
     generatePages(dataByCode[cfg.code], cfg, allSlugSets);
     // Everything local for this country, in one place (see writeCountrySurfaces). Runs after
     // generatePages so this run's films are already in the browse listing and card lookups.
@@ -3013,7 +3046,7 @@ async function main() {
   writeLlmsTxt(dataByCode); // AI-answer-engine site map with this week's actual picks
   // Keep the About page's country sentence in step with the config (see patchAboutPage).
   // Non-fatal: a broken marker should surface loudly in the log, not kill a good build.
-  try { patchAboutPage(); } catch (e) { console.warn(`  about page skipped: ${e.message}`); }
+  try { patchAboutPage(); } catch (e) { stageFailed(`about page`, e); }
 
   // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
   // and the manifest records real lastmod dates for the sitemap (see module-scope docs).
@@ -3033,25 +3066,25 @@ async function main() {
   for (const cfg of builtCountries) {
     // First give every frozen page an id the sweep can use (see recoverTmdbIds).
     try { await recoverTmdbIds(cfg, pagesManifest); }
-    catch (e) { console.warn(`  id recovery [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`id recovery [${cfg.code}]`, e); }
     try { await sweepStreamingArrivals(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
-    catch (e) { console.warn(`  sweep [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`sweep [${cfg.code}]`, e); }
     // The mirror pass: recheck claims we already made (see sweepStreamingDepartures).
     // Budgeted and slow-cadence, so this adds a flat ~15 calls per country per run no
     // matter how large the archive grows.
     try { backfillStreamClaims(pagesManifest, cfg); }
-    catch (e) { console.warn(`  stream claims [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`stream claims [${cfg.code}]`, e); }
     try { await sweepStreamingDepartures(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
-    catch (e) { console.warn(`  departure sweep [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`departure sweep [${cfg.code}]`, e); }
     // Free, local, no budget: move any page past its stamped release date (see patchDueIfPassed).
     try { refreshDuePages(cfg, countryNameFor(cfg), pagesManifest); }
-    catch (e) { console.warn(`  due pass [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`due pass [${cfg.code}]`, e); }
   }
   // Wrong-market legacy pages (see repairLegacyPages). Before hreflang sync so rebuilt pages
   // rejoin their clusters in the same run.
   for (const cfg of builtCountries) {
     try { await repairLegacyPages(cfg, pagesManifest, { baseItem, withImdb }); }
-    catch (e) { console.warn(`  legacy repair [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`legacy repair [${cfg.code}]`, e); }
   }
   // Back-catalogue backfill (see backfillCatalog). Runs after the weekly pipeline has taken
   // every slug it wants and before the hreflang + sitemap passes, so new catalogue pages join
@@ -3062,20 +3095,26 @@ async function main() {
     if (reopened) console.log(`  catalog: eligibility bar changed — ${reopened} retired queue(s) re-opened`);
     for (const cfg of builtCountries) {
       try { await backfillCatalog(cfg, pagesManifest, { state: catalogState, baseItem, withImdb, batch: CATALOG_BATCH }); }
-      catch (e) { console.warn(`  catalog [${cfg.code}] skipped: ${e.message}`); }
+      catch (e) { stageFailed(`catalog [${cfg.code}]`, e); }
     }
     fs.writeFileSync(CATALOG_MANIFEST_FILE, JSON.stringify(catalogState, null, 1));
+    for (const cfg of builtCountries) {
+      const v = catalogStall(catalogState, cfg.code);
+      RUN_HEALTH.catalog[cfg.code] = v.last;
+      if (v.stalled) healthIssue(`catalog [${cfg.code}]: 0 new pages two runs in a row while ${v.live} queue(s) are still open — check the "catalog" lines in the build log`);
+      else if (v.exhausted) healthNote(`catalog [${cfg.code}]: every queue retired — no more back-catalogue titles from this source`);
+    }
   }
 
   // "Streaming on <platform>" pages (see writeStreamingPages). After every claim for this run
   // has been made, rechecked or retired, so the lists reflect today's verified availability.
   for (const cfg of builtCountries) {
     try { writeStreamingPages(dataByCode[cfg.code], cfg, pagesManifest); }
-    catch (e) { console.warn(`  streaming pages [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`streaming pages [${cfg.code}]`, e); }
     try { writePeoplePages(dataByCode[cfg.code], cfg, pagesManifest); }
-    catch (e) { console.warn(`  people pages [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`people pages [${cfg.code}]`, e); }
     try { writeDatedOttPages(dataByCode[cfg.code], cfg, pagesManifest); }
-    catch (e) { console.warn(`  dated OTT pages [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`dated OTT pages [${cfg.code}]`, e); }
   }
 
   // All countries are built by now, so the filesystem finally shows every cluster's true
@@ -3087,7 +3126,7 @@ async function main() {
     syncHreflangClusters((code, slug) => {
       if (pagesManifest[code] && pagesManifest[code][slug]) pagesManifest[code][slug].last = todayStr();
     });
-  } catch (e) { console.warn(`  hreflang sync skipped: ${e.message}`); }
+  } catch (e) { stageFailed(`hreflang sync`, e); }
   fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
 
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
@@ -3096,10 +3135,12 @@ async function main() {
   repairXDefaults(builtCountries);
 
   // Every hub for this run has been written or pruned by now, so disk is the truth.
-  try { sweepDeadHubLinks(COUNTRIES); } catch (e) { console.warn(`  dead hub links skipped: ${e.message}`); }
+  try { sweepDeadHubLinks(COUNTRIES); } catch (e) { stageFailed(`dead hub links`, e); }
 
   writeMultiCountrySitemap(builtCountries, pagesManifest);
-  console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.`);
+  fs.writeFileSync(RUN_HEALTH_FILE, JSON.stringify(RUN_HEALTH, null, 1));
+  console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.` +
+    ` Health: ${RUN_HEALTH.issues.length} issue(s), ${RUN_HEALTH.notes.length} note(s).`);
 }
 
 // Run the build only when executed directly (not when required by tests/tools).
@@ -4144,9 +4185,20 @@ const CATALOG_RATING_MIN_VOTES = 50;
 const CATALOG_ENABLED = process.env.CATALOG === "1";
 const CATALOG_BATCH = Math.max(1, Number(process.env.CATALOG_BATCH || CATALOG_BATCH_DEFAULT));
 
+// Pure: is this country's backfill stalled? Two consecutive runs with zero new pages while
+// queues are still open is the signature of the 27 Sept failure — never a normal state.
+function catalogStall(state, code) {
+  const s = (state && state[code]) || {};
+  const recent = Array.isArray(s.recent) ? s.recent : [];
+  const qs = Object.values(s.q || {});
+  const live = qs.filter((q) => !q.done).length;
+  const last = recent.length ? recent[recent.length - 1] : null;
+  const stalled = recent.length >= 2 && recent.slice(-2).every((n) => n === 0) && live > 0;
+  return { stalled, exhausted: qs.length > 0 && live === 0, live, last };
+}
+
 function loadCatalogManifest() {
-  try { return JSON.parse(fs.readFileSync(CATALOG_MANIFEST_FILE, "utf8")); }
-  catch { return {}; }
+  return loadStateFile(CATALOG_MANIFEST_FILE, {});
 }
 
 // `api` is injectable for tests (same pattern as repairLegacyPages).
@@ -4311,6 +4363,9 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
     if (idle >= queues.length) break;
   }
   if (errors >= 3) console.warn(`  catalog [${code}]: TMDB kept failing — stopped early; every queue kept its place`);
+  // The last few runs' output, so the health check can tell "one quiet run" from "stalled".
+  const cs = state[code];
+  cs.recent = [...(Array.isArray(cs.recent) ? cs.recent : []), built].slice(-4);
   const prog = catalogProgress(state, code);
   console.log(`  catalog [${code}]: +${built} pages this run (${discoverCalls} discover + ${enrichCalls} enrich calls, ` +
     `${prog.built} total, ${prog.done}/${prog.queues} queues retired)${picks.length ? " — " + picks.join(", ") : ""}`);
@@ -5775,6 +5830,15 @@ const DEPART_RECHECK_DAYS = 30;    // how stale a live claim gets before we rech
 const DEPART_MAX_CHECKS = 60;      // per country per run
 const DEPART_CONFIRM_MISSES = 2;   // consecutive empty checks before we touch the page
 
+// Pure: does a recheck batch look like an upstream outage rather than real departures?
+// Normal churn is a small share of any batch; most of a sizeable batch vanishing at once is
+// the provider feed failing, not the catalogue emptying.
+const DEPART_OUTAGE_MIN_CHECKS = 15;
+const DEPART_OUTAGE_SHARE = 0.6;
+function departureOutage(checked, empty) {
+  return checked >= DEPART_OUTAGE_MIN_CHECKS && empty / checked >= DEPART_OUTAGE_SHARE;
+}
+
 // Pure: pick which live-claim pages are due a recheck. Oldest claim first, so the most
 // likely to be wrong is always checked before the budget runs out.
 function departureCandidates(entries, now = new Date(), max = DEPART_MAX_CHECKS) {
@@ -5951,14 +6015,30 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
     catch { return false; }
   });
   if (!candidates.length) return;
-  let confirmed = 0, stillThere = 0, pending = 0;
+  // Phase 1: ask TMDB about every candidate before touching anything. TMDB's provider data
+  // comes from JustWatch, and when that feed breaks every title comes back empty at once —
+  // which, checked one at a time, looks exactly like hundreds of films leaving streaming.
+  const checks = [];
   for (const c of candidates) {
     try {
       const kind = c.kind === "tv" ? "tv" : "movie";
       const d = await tmdb(`/${kind}/${c.tmdbId}/watch/providers`);
       const region = d?.results?.[cfg.watchRegion] || {};
-      const provs = dedupeProviders((region.flatrate || []).map((x) => x.provider_name)).slice(0, 4);
-      const rentBuy = dedupeProviders([...(region.rent || []), ...(region.buy || [])].map((x) => x.provider_name)).slice(0, 3);
+      checks.push({ c,
+        provs: dedupeProviders((region.flatrate || []).map((x) => x.provider_name)).slice(0, 4),
+        rentBuy: dedupeProviders([...(region.rent || []), ...(region.buy || [])].map((x) => x.provider_name)).slice(0, 3) });
+    } catch (e) { console.warn(`  departure ${c.slug}: ${e.message}`); }
+  }
+  const empties = checks.filter((x) => !x.provs.length).length;
+  const outage = departureOutage(checks.length, empties);
+  if (outage) {
+    console.warn(`  departure sweep [${cfg.code}]: ${empties}/${checks.length} came back empty — treating as a provider-data outage; no page touched, no miss counted`);
+    healthNote(`departure sweep [${cfg.code}]: ${empties}/${checks.length} rechecks empty — looked like a TMDB/JustWatch outage, so nothing was retired`);
+  }
+  // Phase 2: apply.
+  let confirmed = 0, stillThere = 0, pending = 0;
+  for (const { c, provs, rentBuy } of checks) {
+    try {
       const live = m[c.slug].live || {};
 
       if (provs.length) {
@@ -5967,6 +6047,7 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
         stillThere++;
         continue;
       }
+      if (outage) { pending++; continue; }   // not evidence of anything; recheck next run
       // Empty result. One miss is noise — count it and wait for the next pass.
       const misses = (live.misses || 0) + 1;
       m[c.slug].live = { ...live, lastCheck: asOf, misses, rentBuy };
@@ -6312,7 +6393,7 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
 }
 
 function loadPagesManifest() {
-  try { return JSON.parse(fs.readFileSync(PAGES_MANIFEST_FILE, "utf8")); } catch { return {}; }
+  return loadStateFile(PAGES_MANIFEST_FILE, {});
 }
 
 // Run the archive pass for one country: patch newly-departed pages in place.
@@ -8388,7 +8469,7 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
     .toLocaleDateString(localeFor(cfg.code), { day: "numeric", month: "long", year: "numeric" });
   const step = (name, fn) => {
     try { fn(); }
-    catch (e) { console.warn(`  ${name} [${cfg.code}] skipped: ${e.message}`); }
+    catch (e) { stageFailed(`${name} [${cfg.code}]`, e); }
   };
   // Month archive FIRST: the footer's "everything new this month" link is only written when
   // the page it points at exists, so building it after the country page would delay the link
@@ -8616,7 +8697,7 @@ if (process.env.PAGES_ONLY && require.main === module) {
   assignSlugs(d);
   const all = [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || [])];
   const slugSets = { in: new Set(all.map((x) => x.slug).filter(Boolean)) };
-  try { writeShareCards(d, inCfg); } catch (e) { console.warn(`  share cards skipped: ${e.message}`); }
+  try { writeShareCards(d, inCfg); } catch (e) { stageFailed(`share cards`, e, { optional: true }); }
   generatePages(d, inCfg, slugSets); // India only in local regen
   prerenderIndex(d);
   writeOttWeekPage(d, inCfg, [inCfg]);
@@ -8684,6 +8765,7 @@ module.exports = {
   capTrending, buildEditorNote, ssrEditorNote,
   platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls, poolItems,
   shortenTitleTag, departureCandidates, applyDeparturePatch, backfillLiveClaims,
+  departureOutage, catalogStall, loadStateFile, stageFailed, RUN_HEALTH,
   buildLlmsFullTxt, llmsMachineSection,
   llmsRatingConfident, LLMS_MIN_VOTES, LLMS_EARLY_DAYS, LLMS_EARLY_MIN_VOTES,
 };
