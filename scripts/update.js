@@ -25,6 +25,7 @@
 //   sitemap    dead hub links, multi-country sitemap
 //   llms       llms.txt / llms-full.txt
 //   fcscore    the FilmyChill Score: audiences + critics, one automated verdict
+//   scoresweep adds/refreshes the score on frozen and back-catalogue pages, a batch per run
 // A lib module may only require modules above it in this list (tests enforce no cycles).
 
 const fs = require("fs");
@@ -299,6 +300,7 @@ const {
   stageFailed,
 } = require("./lib/runhealth.js");
 const { attachFcScores } = require("./lib/fcscore.js");
+const { sweepScores } = require("./lib/scoresweep.js");
 const { pruneDeadHubLinks, sweepDeadHubLinks, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 const {
   ABOUT_LASTMOD,
@@ -1384,6 +1386,16 @@ async function main() {
       if (v.stalled) healthIssue(`catalog [${cfg.code}]: 0 new pages two runs in a row while ${v.live} queue(s) are still open — check the "catalog" lines in the build log`);
       else if (v.exhausted) healthNote(`catalog [${cfg.code}]: every queue retired — no more back-catalogue titles from this source`);
     }
+  }
+
+  // FilmyChill Score on pages that are never rebuilt (frozen + back-catalogue): a budgeted
+  // sweep each run, never-scored first (lib/scoresweep.js).
+  {
+    try {
+      const r = await sweepScores(pagesManifest, { today: todayStr() });
+      console.log(`FilmyChill Score sweep: ${r.checked} checked, ${r.updated} pages updated${r.errors ? `, ${r.errors} TMDB errors` : ""}`);
+      if (r.errors >= 5) healthNote(`score sweep stopped early after ${r.errors} TMDB errors — it resumes next run`);
+    } catch (e) { stageFailed("score sweep", e); }
   }
 
   // "Streaming on <platform>" pages (see writeStreamingPages). After every claim for this run

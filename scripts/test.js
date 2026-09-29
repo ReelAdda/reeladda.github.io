@@ -1195,6 +1195,89 @@ test("phones: headings wrap cleanly, chips scroll in one row, badges share a lin
   assert.ok(/<span class="fol">Follow<\/span><span class="hide-sm"> Channel<\/span>/.test(src));
 });
 
+// ---- FilmyChill Score on pages that are never rebuilt (lib/scoresweep.js) ----
+group("score sweep: frozen and back-catalogue pages get the score too");
+
+test("injectScoreSection: before the answer line, else before the first heading; replaces, never duplicates", () => {
+  const W = require("./lib/scoresweep.js"), F = require("./lib/filmpage.js");
+  const sec = F.fcScoreSection({ rating: 7.6, votes: 9523, fcScore: { verdict: "Must watch", reason: "Audiences love it.", audience: "Loved", critics: null } });
+  const withAnswer = '<html><style>a{}</style><div class="head">H</div>\n  <p class="answer">A</p><h2>X</h2></html>';
+  const out = W.injectScoreSection(withAnswer, sec);
+  assert.ok(out.indexOf('id="filmychill-score"') < out.indexOf('class="answer"'));
+  assert.ok(out.includes(".fcsb {") && out.indexOf(".fcsb {") < out.indexOf("</style>"), "CSS added to the page");
+  const old = '<html><style>a{}</style><div class="head">H <h2>no</h2></div><div class="meta">m</div><h2>The verdict</h2></html>';
+  const o2 = W.injectScoreSection(old, sec);
+  assert.ok(o2.indexOf('id="filmychill-score"') > o2.indexOf('<div class="head">') && o2.indexOf('id="filmychill-score"') < o2.indexOf("<h2>The verdict"), "older pages: after the header, before the first section");
+  const sec2 = F.fcScoreSection({ rating: 5, votes: 900, fcScore: { verdict: "Skip", reason: "Audiences are lukewarm on it.", audience: "Lukewarm", critics: null } });
+  const o3 = W.injectScoreSection(out, sec2);
+  assert.strictEqual((o3.match(/id="filmychill-score"/g) || []).length, 1, "replaced, not added twice");
+  assert.strictEqual((o3.match(/\.fcsb \{/g) || []).length, 1, "CSS added once");
+  assert.ok(/fcsb-stamp fcsb-skip">Skip</.test(o3));
+  assert.strictEqual(W.injectScoreSection("<html>no anchors</html>", sec), "<html>no anchors</html>", "no safe anchor: page untouched");
+});
+
+test("refreshHead: today's rating in the header, and no second verdict", () => {
+  const W = require("./lib/scoresweep.js");
+  const tiered = '<style>.cbar{}</style><div class="head"><h1>T</h1><div class="rating rating-solid"><span class="cdot"></span>★ 7.4 <span class="ctag">Solid</span> <span class="cvotes">535 ratings</span><span class="cbar"><i style="width:60%"></i></span></div>\n      <div class="verdict">▸ Worth a watch</div></div><section class="fcsb" id="filmychill-score"></section>';
+  const o = W.refreshHead(tiered, { rating: 7.9, votes: 640 });
+  assert.ok(/★ 7\.9 <span class="ctag">/.test(o) && /640 ratings/.test(o) && !/7\.4/.test(o));
+  assert.ok(!/class="verdict"/.test(o), "the old audience verdict pill goes");
+  const oldest = '<style></style><div class="head"><div class="rating">★ 7.4 <span style="color:var(--mute)">(535 votes)</span></div><div class="verdict">▸ Worth a watch</div></div><h2>The verdict</h2>';
+  const o2 = W.refreshHead(oldest, { rating: 7.9, votes: 1640 });
+  assert.ok(/<div class="rating">★ 7\.9 <span style="color:var\(--mute\)">\(1,640 votes\)<\/span><\/div>/.test(o2), "oldest format: numbers updated in place");
+  assert.ok(/<h2>The verdict<\/h2>/.test(o2), "nothing after the header is touched");
+});
+
+test("sweepCandidates: frozen/catalogue only, never-scored first, then the stalest; fresh ones wait", () => {
+  const W = require("./lib/scoresweep.js");
+  const man = { in: {
+    weekly: { tmdbId: 1, kind: "movie" },
+    notid: { catalog: true },
+    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20" } },
+    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01" } },
+    never: { tmdbId: 4, catalog: true } } };
+  assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug), ["never", "old"]);
+  assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 1).map((x) => x.slug), ["never"], "budget respected");
+});
+
+testAsync("sweepScores: writes the score into the page, records it, stops on repeated TMDB errors", async () => {
+  const W = require("./lib/scoresweep.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-sweep-")); const cwd = process.cwd();
+  try {
+    process.chdir(tmp); fsx.mkdirSync("movie");
+    fsx.writeFileSync("movie/deadpool.html", '<html><style>a{}</style><div class="head">H</div>\n  <p class="answer">A</p></html>');
+    const man = { in: { deadpool: { tmdbId: 533535, kind: "movie", catalog: true, last: "2026-09-01" } } };
+    const api = { pause: async () => {}, tmdb: async () => ({ vote_average: 7.63, vote_count: 9523, external_ids: { imdb_id: "tt0" } }) };
+    const r = await W.sweepScores(man, { today: "2026-09-29", batch: 5, api });
+    assert.deepStrictEqual(r, { checked: 1, updated: 1, errors: 0 });
+    const html = fsx.readFileSync("movie/deadpool.html", "utf8");
+    assert.ok(/fcsb-stamp fcsb-must">Must watch</.test(html) && /★ 7\.6 from 9,523 ratings on TMDB/.test(html), "9,523 ratings is not 'Too early'");
+    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29" });
+    assert.strictEqual(man.in.deadpool.last, "2026-09-29", "sitemap lastmod follows the change");
+    fsx.writeFileSync("movie/dated.html", '<html><style>a{}</style><div class="head"><div class="meta">Page updated 18 Aug 2026</div></div>\n  <p class="answer">A</p></html>');
+    const man3 = { in: { dated: { tmdbId: 9, kind: "movie", catalog: true } } };
+    await W.sweepScores(man3, { today: "2026-09-29", batch: 1, api });
+    assert.ok(/Page updated 29 Sept 2026/.test(fsx.readFileSync("movie/dated.html", "utf8")), "the visible update date moves with the change");
+    const bad = { pause: async () => {}, tmdb: async () => { throw new Error("503"); } };
+    const man2 = { in: Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`f${i}`, { tmdbId: i + 1, catalog: true }])) };
+    for (const k of Object.keys(man2.in)) fsx.writeFileSync(`movie/${k}.html`, "<html></html>");
+    const r2 = await W.sweepScores(man2, { today: "2026-09-29", batch: 8, api: bad });
+    assert.strictEqual(r2.errors, 5, "gives up after 5 errors and retries next run");
+    assert.ok(Object.values(man2.in).every((e) => !e.fcs), "an error never records a score");
+  } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
+});
+
+testAsync("back-catalogue pages are born with a real FilmyChill Score, not 'Too early'", async () => {
+  await _catRun(async (fsx) => {
+    const state = {};
+    const api = _catApi({ "en:movie": [[_catM(1, "Well Rated", 90)]] });
+    await U.backfillCatalog(_catCfg(), {}, { state, baseItem: _catBase, withImdb: (x) => x, batch: 1, api });
+    const html = fsx.readFileSync("sg/movie/well-rated.html", "utf8");
+    assert.ok(/fcsb-stamp fcsb-must">Must watch</.test(html), "7.5 from 400 ratings is a Must watch");
+  });
+});
+
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
 group("failure paths: outages, stalls, corrupt state, silent stages");
 
