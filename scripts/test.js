@@ -948,7 +948,8 @@ testAsync("catalogue pages are written in past tense, and thin-vote pages carry 
     const loved = fsx.readFileSync("sg/movie/well-loved.html", "utf8");
     assert.ok(!/on offer right now|right now\./.test(loved), "born through the archive chain");
     const thin = fsx.readFileSync("sg/movie/barely-rated.html", "utf8");
-    assert.ok(/Rating still forming/.test(thin) && !/Must watch/.test(thin), "20 votes never earns 'Must watch'");
+    // 20 ratings on an older film: an early read, clearly labelled — never "Must watch".
+    assert.ok(/fcsb-conf">Early read · 20 ratings/.test(thin) && !/Must watch/.test(thin), "20 votes never earns 'Must watch'");
     assert.ok(/Netflix/.test(thin), "…but the page still answers where to watch");
     assert.strictEqual(manifest.sg["barely-rated"].catalog, true);
   } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
@@ -1107,7 +1108,7 @@ test("film page leads with the score and shows both signals behind it", () => {
   assert.ok(!/<div class="verdict">/.test(html), "one verdict on the page, not two");
   assert.ok(/class="take"/.test(html), "the critics' take stays on the film page");
   assert.ok(html.indexOf('id="filmychill-score"') < html.indexOf('class="answer"'));
-  const early = U.buildFilmPage({ ...FCS_ITEM, rating: null, votes: 5, fcScore: undefined }, "2026-09-28", new Set(), { code: "in" });
+  const early = U.buildFilmPage({ ...FCS_ITEM, released: new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10), rating: null, votes: 5, fcScore: undefined }, "2026-09-28", new Set(), { code: "in" });
   assert.ok(/fcsb-stamp fcsb-early">Too early</.test(early) && /Not rated yet|Too few ratings/.test(early));
 });
 
@@ -1238,6 +1239,10 @@ test("sweepCandidates: frozen/catalogue only, never-scored first, then the stale
     never: { tmdbId: 4, catalog: true } } };
   assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug), ["never", "old"]);
   assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 1).map((x) => x.slug), ["never"], "budget respected");
+  man.in.oldWording = { tmdbId: 5, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29" } };
+  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 3 } };
+  const c = W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug);
+  assert.ok(c.includes("oldWording") && !c.includes("newWording"), "pages that said 'Too early' under the old wording are redone now");
 });
 
 testAsync("sweepScores: writes the score into the page, records it, stops on repeated TMDB errors", async () => {
@@ -1253,7 +1258,7 @@ testAsync("sweepScores: writes the score into the page, records it, stops on rep
     assert.deepStrictEqual(r, { checked: 1, updated: 1, errors: 0 });
     const html = fsx.readFileSync("movie/deadpool.html", "utf8");
     assert.ok(/fcsb-stamp fcsb-must">Must watch</.test(html) && /★ 7\.6 from 9,523 ratings on TMDB/.test(html), "9,523 ratings is not 'Too early'");
-    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29" });
+    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 3 });
     assert.strictEqual(man.in.deadpool.last, "2026-09-29", "sitemap lastmod follows the change");
     fsx.writeFileSync("movie/dated.html", '<html><style>a{}</style><div class="head"><div class="meta">Page updated 18 Aug 2026</div></div>\n  <p class="answer">A</p></html>');
     const man3 = { in: { dated: { tmdbId: 9, kind: "movie", catalog: true } } };
@@ -3803,10 +3808,53 @@ test("TV runtime (per-episode) stays off the card meta", () => {
   const html = U.ssrCard({ title: "T", language: "English", genre: "Drama", kind: "tv", runtime: 45, rating: 8.0, verdict: "Must watch", slug: "t" }, 0, "in");
   assert.ok(!html.includes("45m"), "per-episode runtime leaked onto card");
 });
-test("unscored card says 'too early' instead of a silent gap", () => {
-  const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: null, isFresh: true, verdict: "Just released — verdict soon", slug: "t" }, 0, "in");
-  assert.ok(/fcs fcs-early/.test(html) && html.includes("Too early"), "too-early panel not rendered in SSR");
-  assert.ok(html.includes("Not enough ratings or reviews yet"));
+test("unscored card: 'Too early' only when it's just out; otherwise says what's missing", () => {
+  const recent = new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10);
+  const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: null, votes: 3, released: recent, verdict: "Just released — verdict soon", slug: "t" }, 0, "in");
+  assert.ok(/fcs fcs-early/.test(html) && html.includes("Too early") && html.includes("Just released"));
+  const old = U.ssrCard({ title: "Old", language: "Hindi", genre: "Drama", kind: "movie", rating: 5.7, votes: 9, released: "2026-03-10", slug: "old" }, 0, "in");
+  assert.ok(!old.includes("Too early"), "a March release is not 'too early'");
+  assert.ok(old.includes("Not enough ratings") && old.includes("Only 9 people have rated it so far — the score needs at least 15."), "older films need 15 (early read)");
+});
+
+test("early reads: older films score from 15 ratings — shrunk toward average, never Must watch, always labelled", () => {
+  const F = require("./lib/fcscore.js");
+  const now = Date.parse("2026-09-29T00:00:00Z");
+  const ikka = F.fcScore({ rating: 5.7, votes: 21, released: "2026-07-10" }, now);
+  assert.deepStrictEqual(ikka, { verdict: "Skip", reason: "Early audiences are lukewarm on it.", audience: "Lukewarm", critics: null, basis: "audience", early: true, votes: 21 });
+  assert.strictEqual(F.earlyReadLabel(ikka), "Early read · 21 ratings");
+  assert.ok(Math.abs(F.shrunkRating(5.7, 21) - 6.26) < 0.01, "21 ratings of 5.7 read as ~6.3");
+  const gem = F.fcScore({ rating: 9.4, votes: 45, released: "2026-01-01", criticsTone: "positive" }, now);
+  assert.strictEqual(gem.verdict, "Worth a watch", "even loved by audiences and critics: no Must watch on thin data");
+  assert.strictEqual(F.fcScore({ rating: 8.1, votes: 29, released: "2026-09-10" }, now), null, "under two months old: wait for 50");
+  assert.strictEqual(F.fcScore({ rating: 8.1, votes: 12, released: "2025-01-01" }, now), null, "under 15 ratings: nothing to judge");
+  assert.ok(!F.fcScore({ rating: 8.1, votes: 60, released: "2025-01-01" }, now).early, "50+ ratings: a full score");
+});
+
+test("early reads show their label on cards and film pages, and never win Pick of the Week", () => {
+  const W = require("./lib/weekly.js"), S = require("./lib/surfaces.js");
+  const s = { verdict: "Skip", reason: "Early audiences are lukewarm on it.", audience: "Lukewarm", critics: null, basis: "audience", early: true, votes: 21 };
+  const card = W.ssrCard({ title: "Ikka", slug: "ikka", kind: "movie", rating: 5.7, votes: 21, released: "2026-07-10", fcScore: s }, 0, "in");
+  assert.ok(/<span class="fcs-tag">Early read · 21 ratings<\/span>/.test(card));
+  const page = U.buildFilmPage({ title: "Ikka", slug: "ikka", kind: "movie", language: "Hindi", rating: 5.7, votes: 21, released: "2026-07-10", fcScore: s }, "2026-09-29", new Set(["ikka"]), { code: "in", name: "India" });
+  assert.ok(/fcsb-stamp fcsb-skip">Skip<\/span><span class="fcsb-conf">Early read · 21 ratings<\/span>/.test(page));
+  assert.ok(/early read, weighted toward an average film/.test(page) && /\(an early read from 21 ratings\)/.test(page), "audience row and FAQ say so too");
+  const now = new Date().toISOString();
+  const recent = new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10);
+  assert.strictEqual(S.choosePick([{ title: "E", released: recent, fcScore: { ...s, verdict: "Worth a watch" } }], { code: "in" }, now), null);
+});
+
+test("noScoreText: early only within 4 weeks; exact counts; split critics named", () => {
+  const F = require("./lib/fcscore.js");
+  const now = Date.parse("2026-09-29T00:00:00Z");
+  assert.strictEqual(F.noScoreText({ released: "2026-09-20", votes: 2 }, now).label, "Too early");
+  assert.strictEqual(F.noScoreText({ released: "2026-10-15" }, now).label, "Too early", "unreleased counts as early");
+  const thin = F.noScoreText({ released: "2026-07-10", votes: 9 }, now);
+  assert.deepStrictEqual(thin, { label: "Not enough ratings", why: "Only 9 people have rated it so far — the score needs at least 15." });
+  assert.ok(/needs at least 50\.$/.test(F.noScoreText({ released: "2026-08-20", votes: 30 }, now).why), "under two months old: still 50");
+  assert.ok(/^Critics are split, and only 1 person has rated it/.test(F.noScoreText({ released: "2026-05-01", votes: 1, criticsTone: "mixed" }, now).why));
+  assert.ok(/^Nobody has rated it yet/.test(F.noScoreText({ released: "2020-01-01", votes: 0 }, now).why));
+  assert.strictEqual(F.noScoreText({ votes: 0 }, now).label, "Not enough ratings", "no date: never claim 'early'");
 });
 test("scored card: FilmyChill verdict, its reason, and the audience rating it came from", () => {
   const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: 7.9, votes: 900, verdict: "Must watch", slug: "t",
