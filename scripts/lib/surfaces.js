@@ -119,6 +119,31 @@ function marqueePick(list, cfg) {
   return best;
 }
 
+// PICK OF THE WEEK (Sept 2026). The old rule — highest raw rating among "recent" titles —
+// crowned the same anime in 11 of 14 markets: "recent" meant newly ADDED to a platform (a
+// March season listed in September counted), and enthusiast fan bases top TMDB's ratings.
+// Now: (1) actually new — released or premiered within PICK_FRESH_DAYS; (2) ranked by the
+// FilmyChill Score, so the hero always agrees with the score boxes below it; (3) ties go to
+// what THIS market recognises (marqueeScore: its own languages, Wikipedia lookups,
+// trending); then rating. Returns null when nothing qualifies — the caller keeps the old
+// pick as the fallback, so there is always a Pick of the Week.
+const PICK_FRESH_DAYS = 21;
+const PICK_LEVEL = { "Must watch": 2, "Worth a watch": 1 };
+function choosePick(items, cfg, nowIso) {
+  const now = Date.parse(nowIso || new Date().toISOString());
+  const cutoff = new Date(now - PICK_FRESH_DAYS * 864e5).toISOString().slice(0, 10);
+  const today = new Date(now).toISOString().slice(0, 10);
+  const pool = (items || []).filter((x) => {
+    if (!x || !x.fcScore || !PICK_LEVEL[x.fcScore.verdict]) return false;
+    const d = String(x.freshDate || x.released || "").slice(0, 10);
+    return d >= cutoff && d <= today;
+  });
+  pool.sort((a, b) => PICK_LEVEL[b.fcScore.verdict] - PICK_LEVEL[a.fcScore.verdict]
+    || marqueeScore(b, cfg) - marqueeScore(a, cfg)
+    || (b.rating || 0) - (a.rating || 0));
+  return pool[0] || null;
+}
+
 function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
   const m = COUNTRY_PAGE_META[cfg.code] || { name: cfg.name, path: `/${cfg.code}/` };
   const url = `https://filmychill.com${m.path}`;
@@ -684,6 +709,8 @@ function prerenderIndex(data) {
 }
 
 module.exports = {
+  choosePick,
+  PICK_FRESH_DAYS,
   ABOUT_LASTMOD,
   buildDataPage,
   buildHeadTags,
