@@ -178,6 +178,7 @@
   .fcs-early .fcs-v { color: #6B6890; }
   .fcs-why { font-size: 12.5px; line-height: 1.45; margin-top: 3px; color: var(--ink); }
   .fcs-sig { font-size: 12px; color: #6B6890; margin-top: 6px; }
+  .fcs-tag { display: inline-block; font-size: 11px; font-weight: 700; color: #5A5470; background: rgba(36,29,82,.07); border-radius: 999px; padding: 1px 8px; margin-left: 2px; white-space: nowrap; }
   .modal .fcs { margin-top: 12px; } .modal .fcs-v { font-size: 18px; gap: 7px; } .modal .fcm { width: 26px; height: 16px; } .modal .fcs-why { font-size: 14px; }
   .meta.hook { font-style: italic; margin-top: 6px; }
   .tcounter { color: var(--marigold-dk); font-weight: 800; }
@@ -787,6 +788,18 @@ function trackStatus(saved) {
 // FilmyChill Score (scripts/lib/fcscore.js): FilmyChill's own verdict from audiences +
 // critics, computed every build. No score = "too early", never a guess. Mirrors the SSR
 // panel in scripts/lib/weekly.js — keep the two in step.
+// Mirrors noScoreText() in scripts/lib/fcscore.js: "Too early" only for something just out;
+// otherwise say what's missing, with the real vote count.
+function noScoreText(item) {
+  const d = String(item.freshDate || item.released || '').slice(0, 10);
+  const recent = /^\d{4}-\d{2}-\d{2}$/.test(d) && Date.parse(d) > Date.now() - 28 * 864e5;
+  if (recent) return { label: 'Too early', why: 'Just released — not enough ratings or reviews yet.' };
+  const votes = Number(item.votes || 0), who = votes === 1 ? '1 person has' : votes.toLocaleString('en-IN') + ' people have';
+  const need = /^\d{4}-\d{2}-\d{2}$/.test(d) && Date.parse(d) <= Date.now() - 60 * 864e5 ? 15 : 50; // older films: early read from 15
+  if (item.criticsTone === 'mixed') return { label: 'Not enough ratings', why: 'Critics are split, and ' + (votes ? 'only ' + who : 'nobody has') + ' rated it — the score needs ' + need + ' ratings to decide.' };
+  if (votes > 0) return { label: 'Not enough ratings', why: 'Only ' + who + ' rated it so far — the score needs at least ' + need + '.' };
+  return { label: 'Not enough ratings', why: "Nobody has rated it yet, and there's no settled critics' reception." };
+}
 function fcSignals(item) {
   const s = item.fcScore, bits = [];
   if (item.rating != null && item.votes) bits.push('Audience ★ ' + Number(item.rating).toFixed(1) + ' (' + Number(item.votes).toLocaleString() + ' ratings)');
@@ -796,9 +809,10 @@ function fcSignals(item) {
 }
 function fcScoreHtml(item) {
   const s = item.fcScore;
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>Too early</span></div><div class="fcs-why">Not enough ratings or reviews yet. The score appears once there are.</div></div>` + fcSignals(item);
+  const none = noScoreText(item);
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>${esc(none.label)}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
   const lvl = /^must/i.test(s.verdict) ? 'must' : /^skip/i.test(s.verdict) ? 'skip' : 'worth';
-  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${lvl}"/></svg>${esc(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}</div></div>` + fcSignals(item);
+  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${lvl}"/></svg>${esc(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Early read · ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
 }
 
 function card(item, i, listKey) {
