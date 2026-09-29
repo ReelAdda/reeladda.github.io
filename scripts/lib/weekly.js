@@ -19,6 +19,7 @@ const { rankValue } = require("./score.js");
 const { releaseState } = require("./release.js");
 const { trailerViewsLabel } = require("./editorial.js");
 const { meterLevel } = require("./meter.js");
+const { earlyReadLabel, noScoreText } = require("./fcscore.js");
 const { freshLabel } = require("./freshness.js");
 const {
   analyticsTag,
@@ -41,8 +42,9 @@ function fcScorePanel(item) {
   if (s && s.critics) bits.push(`Critics: ${s.critics}`);
   if (!s) { const b = trailerViewsLabel(item.trailerViews); if (b) bits.push(b); }
   const sig = bits.length ? `<div class="fcs-sig">${e(bits.join(" · "))}</div>` : "";
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>Too early</span></div><div class="fcs-why">Not enough ratings or reviews yet. The score appears once there are.</div></div>${sig}`;
-  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${meterLevel(s.verdict)}"/></svg>${e(s.verdict)}</span></div><div class="fcs-why">${e(s.reason)}</div></div>${sig}`;
+  const none = noScoreText(item);
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>${e(none.label)}</span></div><div class="fcs-why">${e(none.why)}</div></div>${sig}`;
+  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${meterLevel(s.verdict)}"/></svg>${e(s.verdict)}</span></div><div class="fcs-why">${e(s.reason)}${s.early ? ` <span class="fcs-tag">${e(earlyReadLabel(s))}</span>` : ""}</div></div>${sig}`;
 }
 
 function ssrCard(item, i, code, { eager = false } = {}) {

@@ -181,17 +181,22 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
       // rates — not so that 20 votes can earn "Must watch". Under CATALOG_RATING_MIN_VOTES the
       // page withholds the number and the verdict ("Rating still forming") and keeps every
       // other answer: platform, cast, runtime, certificate, synopsis.
-      if ((item.votes || 0) < CATALOG_RATING_MIN_VOTES) {
+      // FilmyChill Score first, on the real rating: catalogue items never pass through the
+      // weekly scoring step (without this every catalogue page read "Too early", even with
+      // thousands of ratings), and an older title with 15–49 ratings earns an early read.
+      item.criticsTone = cachedCriticsTone(item.imdbId);
+      const score = fcScore(item);
+      if (score) item.fcScore = score;
+      // Thin data: the page's audience wording must not outrun the early read (an 8.9 from
+      // 20 votes would otherwise still say "Must watch" in the audience prose).
+      if (score && score.early) item.verdict = score.verdict;
+      // An early read keeps its number visible (the page says why it's tentative); otherwise
+      // the thin-vote rule still withholds it.
+      if ((item.votes || 0) < CATALOG_RATING_MIN_VOTES && !(score && score.early)) {
         item.rating = null;
         item.scores = [];
         item.verdict = verdict(null, 0);
       }
-      // FilmyChill Score: catalogue items never pass through the weekly scoring step, so score
-      // them here. Without this every back-catalogue page read "Too early" — even titles with
-      // thousands of ratings (fixed Sept 2026).
-      item.criticsTone = cachedCriticsTone(item.imdbId);
-      const score = fcScore(item);
-      if (score) item.fcScore = score;
       item.slug = slug;
       item.platform = providers[0];
       have.add(slug);

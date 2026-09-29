@@ -23,6 +23,9 @@ const { sleep, tmdb } = require("./tmdb.js");
 
 const SCORE_SWEEP_BATCH = Math.max(0, Number(process.env.SCORE_SWEEP_BATCH || 300)); // ~9,000 pages ≈ 15 days
 const RESCORE_DAYS = 30;
+// Bumped when the no-score wording changes: pages swept under an older wording with no score
+// are redone at once rather than waiting 30 days. 2 = "Too early" only for recent releases.
+const SWEEP_WORDING = 3; // 3 = early reads: older films with 15–49 ratings now get a score
 
 // Pure: put (or replace) the score section in an existing film page. Returns the new HTML.
 function injectScoreSection(html, section) {
@@ -39,7 +42,10 @@ function injectScoreSection(html, section) {
     if (at < 0) return html; // no safe anchor: leave the page alone
     out = out.slice(0, at) + section.trim() + "\n  " + out.slice(at);
   }
-  if (!out.includes(".fcsb {")) {
+  // Styles: add them, or bring an earlier copy up to date (new rules, e.g. the early-read label).
+  const cssRe = /  \/\* FilmyChill Score \(lib\/fcscore\.js\) \*\/[\s\S]*?\.fcsb-note \{[^\n]*\}(\n  \.fcsb-conf \{[^\n]*\})?/;
+  if (cssRe.test(out)) out = out.replace(cssRe, FCSB_CSS);
+  else if (!out.includes(".fcsb {")) {
     const st = out.indexOf("</style>");
     if (st < 0) return html;
     out = out.slice(0, st) + FCSB_CSS + "\n" + out.slice(st);
@@ -78,8 +84,9 @@ function sweepCandidates(pagesManifest, today, limit) {
     for (const [slug, e] of Object.entries(m || {})) {
       if (!e || !e.tmdbId || !(e.catalog || e.archivedOn)) continue; // weekly pages rebuild themselves
       const at = e.fcs && e.fcs.at;
-      if (at && at > stale) continue;
-      all.push({ code, slug, e, at: at || "" });
+      const outdated = e.fcs && e.fcs.v === "early" && (e.fcs.w || 1) < SWEEP_WORDING;
+      if (at && at > stale && !outdated) continue;
+      all.push({ code, slug, e, at: outdated ? "" : at || "" });
     }
   }
   all.sort((a, b) => (a.at === b.at ? 0 : a.at < b.at ? -1 : 1)); // never-scored ("") first
@@ -107,6 +114,8 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
     const item = {
       rating: d.vote_average > 0 ? Number(Number(d.vote_average).toFixed(1)) : null,
       votes,
+      // For the no-score wording: "Too early" only if it's actually just out.
+      released: e.released || d.release_date || d.first_air_date || null,
       criticsTone: cachedCriticsTone((d.external_ids && d.external_ids.imdb_id) || d.imdb_id || null),
     };
     const s = fcScore(item);
@@ -114,7 +123,7 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
     let next = refreshHead(injectScoreSection(html, fcScoreSection(item)), item);
     // The page changed, so its "Page updated" line should say so.
     if (next !== html) next = next.replace(/(>Page updated )[^<]+/, (m, a) => `${a}${fmtDateFull(today, localeFor(code))}`);
-    e.fcs = { v: s ? s.verdict : "early", at: today };
+    e.fcs = { v: s ? s.verdict : "early", at: today, w: SWEEP_WORDING };
     if (next !== html) {
       fs.writeFileSync(file, next);
       e.last = today; // the page changed: let the sitemap say so
