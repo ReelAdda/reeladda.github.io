@@ -307,6 +307,7 @@ const {
   buildHomeJsonLd,
   buildMoreLinks,
   buildWindowsCsv,
+  choosePick,
   heroPreload,
   marqueePick,
   marqueeScore,
@@ -1280,6 +1281,14 @@ async function main() {
   {
     const { scored, total } = attachFcScores(dataByCode);
     console.log(`FilmyChill Score: ${scored}/${total} listed titles scored (the rest: too early)`);
+    // Pick of the Week is re-chosen now that scores exist (see choosePick in lib/surfaces.js).
+    // The pick made in buildCountry stays as the fallback when nothing new qualifies.
+    for (const [code, d] of Object.entries(dataByCode)) {
+      if (!d) continue;
+      const cfg = COUNTRIES.find((c) => c.code === code) || { code };
+      const p = choosePick([...(d.theatres || []), ...(d.ott || [])], cfg, d.generatedAt);
+      if (p && p.title !== d.pick) { console.log(`  pick [${code}]: ${d.pick || "—"} → ${p.title} (${p.fcScore.verdict})`); d.pick = p.title; }
+    }
   }
 
   // Product stats, BEFORE data files are written so the client can render the

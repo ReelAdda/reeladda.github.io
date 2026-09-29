@@ -1163,6 +1163,38 @@ test("SSR card, film page and share card all carry the meter for the score's ver
   assert.ok(/<svg x="852" y="396" width="44" height="28" viewBox="2\.5 7 27 17">/.test(svg) && /stroke="#FFF7EC"/.test(svg));
 });
 
+// ---- Pick of the Week + phone layout (Sept 2026 homepage review) ----
+group("Pick of the Week: new, scored, recognised");
+
+test("pick: actually new, FilmyChill Score first, market recognition breaks ties", () => {
+  const S = require("./lib/surfaces.js");
+  const sc = (v) => ({ verdict: v, reason: "x" });
+  const now = "2026-09-29T07:00:00Z";
+  const items = [
+    { title: "JoJo", language: "Japanese", rating: 8.5, votes: 1664, freshDate: "2026-03-19", fcScore: sc("Must watch") },
+    { title: "Heart of the Beast", language: "English", rating: 7.7, votes: 119, freshDate: "2026-09-19", trending: true, wikiWeeklyViews: 40000, fcScore: sc("Must watch") },
+    { title: "Slow Horses", language: "English", rating: 8.0, votes: 1003, freshDate: "2026-09-16", fcScore: sc("Must watch") },
+    { title: "Love Hypothesis", language: "English", rating: 8.1, votes: 353, freshDate: "2026-09-23", fcScore: sc("Worth a watch") },
+    { title: "Paradise", language: "Telugu", rating: null, votes: 5, freshDate: "2026-09-23" },
+  ];
+  assert.strictEqual(S.choosePick(items, { code: "in" }, now).title, "Heart of the Beast", "March season excluded; Must watch beats Worth; recognition breaks the tie");
+  const hindi = { title: "Big Hindi Hit", language: "Hindi", rating: 7.6, votes: 400, freshDate: "2026-09-26", wikiWeeklyViews: 20000, fcScore: sc("Must watch") };
+  assert.strictEqual(S.choosePick([...items, hindi], { code: "in" }, now).title, "Big Hindi Hit", "a scored release in the market's own language wins at home");
+  assert.strictEqual(S.choosePick([...items, hindi], { code: "us" }, now).title, "Heart of the Beast", "…but not in a market where it isn't local");
+  assert.strictEqual(S.choosePick([items[0], items[4]], { code: "in" }, now), null, "nothing new and scored → caller keeps its fallback pick");
+  assert.strictEqual(S.choosePick([{ ...items[1], freshDate: "2026-10-05" }], { code: "in" }, now), null, "a future date is not new");
+});
+
+test("phones: headings wrap cleanly, chips scroll in one row, badges share a line, note clamps", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  assert.ok(/\.section-head \{ display: flex; align-items: baseline; flex-wrap: wrap;/.test(src));
+  assert.ok(/\.section-head h2, \.section-head \.count \{ white-space: nowrap; \}/.test(src));
+  const m = src.slice(src.indexOf("---- Phones: films within the first screen"));
+  assert.ok(/\.chips \{ flex-wrap: nowrap; overflow-x: auto;/.test(m) && /\.title-row h3 \{ flex-basis: 100%;/.test(m));
+  assert.ok(/-webkit-line-clamp: 3/.test(m) && /className = 'ednote-more'/.test(src));
+  assert.ok(/<span class="fol">Follow<\/span><span class="hide-sm"> Channel<\/span>/.test(src));
+});
+
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
 group("failure paths: outages, stalls, corrupt state, silent stages");
 
