@@ -40,8 +40,8 @@ function fcScorePanel(item) {
   if (s && s.critics) bits.push(`Critics: ${s.critics}`);
   if (!s) { const b = trailerViewsLabel(item.trailerViews); if (b) bits.push(b); }
   const sig = bits.length ? `<div class="fcs-sig">${e(bits.join(" · "))}</div>` : "";
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-label">FilmyChill score</div><div class="fcs-v">Too early</div><div class="fcs-why">Not enough ratings or reviews yet. The score appears once there are.</div></div>${sig}`;
-  return `<div class="fcs"><div class="fcs-label"><svg class="fcs-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>FilmyChill score</div><div class="fcs-v">${e(s.verdict)}</div><div class="fcs-why">${e(s.reason)}</div></div>${sig}`;
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">Too early</span></div><div class="fcs-why">Not enough ratings or reviews yet. The score appears once there are.</div></div>${sig}`;
+  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label"><svg class="fcs-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>FilmyChill score</span><span class="fcs-v">${e(s.verdict)}</span></div><div class="fcs-why">${e(s.reason)}</div></div>${sig}`;
 }
 
 function ssrCard(item, i, code, { eager = false } = {}) {
