@@ -1131,6 +1131,38 @@ test("About page explains the score at the anchor film pages link to", () => {
   assert.ok(/<h2 id="score">The FilmyChill Score<\/h2>/.test(about) && /50 or more people/.test(about));
 });
 
+// ---- Chill-o-meter (lib/meter.js): the score's visual mark ----
+group("Chill-o-meter: one mark on cards, film pages and share cards");
+
+test("meter: Indigo sunset zones, needle per verdict, grey dial for too early", () => {
+  const M = require("./lib/meter.js");
+  assert.deepStrictEqual(M.METER_ZONES, ["#4038C7", "#7B4FC4", "#C4589E", "#F2855A", "#FFAD1F"]);
+  assert.deepStrictEqual(["Must watch", "Worth a watch", "Skip", null, "odd"].map(M.meterLevel), ["must", "worth", "skip", "early", "early"]);
+  const needleX = (l) => Number(M.meterInner(l).match(/<line x1="16" y1="21" x2="([\d.]+)"/)[1]);
+  assert.ok(needleX("must") > needleX("worth") && needleX("worth") > 16 && needleX("skip") < 16, "hot right, cold left");
+  assert.ok(!/<line/.test(M.meterInner("early")) && !/#4038C7/.test(M.meterInner("early")), "too early: no needle, no colour");
+  assert.ok(/stroke="#FFF7EC"/.test(M.meterInner("must", { ink: "#FFF7EC" })), "needle colour is configurable for dark surfaces");
+  assert.ok(/viewBox="2\.5 7 27 17"/.test(M.meterSvg("must")), "cropped to the dial so it centres against text");
+});
+
+test("homepage sprite is exactly meterSymbols(), so cards and film pages can't drift", () => {
+  const M = require("./lib/meter.js");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  assert.ok(src.includes(M.meterSymbols()), "regenerate the fcm-* symbols in index.html from meterSymbols()");
+  assert.ok(/<svg class="fcm" aria-hidden="true"><use href="#fcm-\$\{lvl\}"\/><\/svg>/.test(src), "client card uses the sprite");
+});
+
+test("SSR card, film page and share card all carry the meter for the score's verdict", () => {
+  const W = require("./lib/weekly.js"), C = require("./lib/cards.js");
+  const it = { ...FCS_ITEM };
+  assert.ok(/<use href="#fcm-worth"\/>/.test(W.ssrCard(it, 0, "in")));
+  assert.ok(/<use href="#fcm-early"\/>/.test(W.ssrCard({ ...it, fcScore: undefined }, 0, "in")));
+  const page = U.buildFilmPage(it, "2026-09-28", new Set(["the-love-hypothesis"]), { code: "in", name: "India" });
+  assert.ok(/<div class="fcsb-verdict"><svg class="fcsb-m" width="56" height="35" viewBox="2\.5 7 27 17"/.test(page));
+  const svg = C.shareCardSvg(it, { code: "in", name: "India" });
+  assert.ok(/<svg x="852" y="396" width="44" height="28" viewBox="2\.5 7 27 17">/.test(svg) && /stroke="#FFF7EC"/.test(svg));
+});
+
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
 group("failure paths: outages, stalls, corrupt state, silent stages");
 
@@ -3664,7 +3696,7 @@ test("unscored card says 'too early' instead of a silent gap", () => {
 test("scored card: FilmyChill verdict, its reason, and the audience rating it came from", () => {
   const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: 7.9, votes: 900, verdict: "Must watch", slug: "t",
     fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" } }, 0, "in");
-  assert.ok(/<span class="fcs-v">Must watch<\/span><\/div><div class="fcs-why">Audiences and critics agree\.<\/div>/.test(html));
+  assert.ok(/<span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-must"\/><\/svg>Must watch<\/span><\/div><div class="fcs-why">Audiences and critics agree\.<\/div>/.test(html));
   assert.ok(html.includes("Audience \u2605 7.9 (900 ratings) \u00b7 Critics: positive"), "signals line broken");
 });
 
