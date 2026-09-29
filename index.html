@@ -163,16 +163,19 @@
   .review { margin-top: 9px; font-size: 13.5px; line-height: 1.6; color: #4A4366; }
   .take { margin-top: 8px; font-size: 12.5px; font-weight: 500; color: var(--indigo); line-height: 1.55; padding-left: 10px; border-left: 2px solid var(--marigold); }
   /* FilmyChill Score (scripts/lib/fcscore.js): audiences + critics, computed every build */
-  .fcs { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #FFF3DC; border: 1px solid #F5D9A0; }
+  /* Compact: the panel hugs its content (inline-block) instead of spanning the card, and the
+     label + verdict share one line. */
+  .fcs { display: inline-block; max-width: 100%; box-sizing: border-box; margin-top: 8px; padding: 6px 11px 7px; border-radius: 10px; background: #FFF3DC; border: 1px solid #F5D9A0; }
   .fcs-early { background: #F4F1EA; border-color: #E6E0D2; }
-  .fcs-label { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #8A5800; }
+  .fcs-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 9px; }
+  .fcs-label { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; line-height: 1.2; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: #8A5800; white-space: nowrap; }
   .fcs-early .fcs-label { color: #6B6890; }
-  .fcs-tick { width: 13px; height: 13px; flex-shrink: 0; fill: none; stroke: #A66B00; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-  .fcs-v { font-family: 'Anton', sans-serif; font-size: 21px; line-height: 1.1; margin-top: 5px; color: var(--ink); letter-spacing: .3px; text-transform: uppercase; }
+  .fcs-tick { width: 12px; height: 12px; flex-shrink: 0; margin-top: -1px; fill: none; stroke: #A66B00; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .fcs-v { font-family: 'Anton', sans-serif; font-size: 16px; line-height: 1.1; color: var(--ink); letter-spacing: .3px; text-transform: uppercase; white-space: nowrap; }
   .fcs-early .fcs-v { color: #6B6890; }
-  .fcs-why { font-size: 13px; line-height: 1.45; margin-top: 4px; color: var(--ink); }
-  .fcs-sig { font-size: 12px; color: #6B6890; margin-top: 7px; }
-  .modal .fcs { margin-top: 14px; } .modal .fcs-why { font-size: 14.5px; }
+  .fcs-why { font-size: 12.5px; line-height: 1.45; margin-top: 3px; color: var(--ink); }
+  .fcs-sig { font-size: 12px; color: #6B6890; margin-top: 6px; }
+  .modal .fcs { margin-top: 12px; } .modal .fcs-v { font-size: 18px; } .modal .fcs-why { font-size: 14px; }
   .meta.hook { font-style: italic; margin-top: 6px; }
   .tcounter { color: var(--marigold-dk); font-weight: 800; }
   .conf-strip { margin-top: 10px; font-size: 12px; color: var(--mute); letter-spacing: 0.3px; }
@@ -748,8 +751,8 @@ function fcSignals(item) {
 }
 function fcScoreHtml(item) {
   const s = item.fcScore;
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-label">FilmyChill score</div><div class="fcs-v">Too early</div><div class="fcs-why">Not enough ratings or reviews yet. The score appears once there are.</div></div>` + fcSignals(item);
-  return `<div class="fcs"><div class="fcs-label"><svg class="fcs-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>FilmyChill score</div><div class="fcs-v">${esc(s.verdict)}</div><div class="fcs-why">${esc(s.reason)}</div></div>` + fcSignals(item);
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">Too early</span></div><div class="fcs-why">Not enough ratings or reviews yet. The score appears once there are.</div></div>` + fcSignals(item);
+  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label"><svg class="fcs-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>FilmyChill score</span><span class="fcs-v">${esc(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}</div></div>` + fcSignals(item);
 }
 
 function card(item, i, listKey) {
