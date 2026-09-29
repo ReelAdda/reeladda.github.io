@@ -24,6 +24,8 @@ const { filmIndexFor } = require("./graph.js");
 const { todayStr } = require("./release.js");
 const { ARCHIVE_PATCH_VERSION, archivePatchHtml } = require("./archive.js");
 const { enrich } = require("./enrich.js");
+const { cachedCriticsTone } = require("./editorial.js");
+const { fcScore } = require("./fcscore.js");
 const { buildFilmPage } = require("./filmpage.js");
 const { countryNameFor, EXCLUDE_IDS, verdict } = require("./rules.js");
 const { loadStateFile } = require("./runhealth.js");
@@ -184,6 +186,12 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
         item.scores = [];
         item.verdict = verdict(null, 0);
       }
+      // FilmyChill Score: catalogue items never pass through the weekly scoring step, so score
+      // them here. Without this every back-catalogue page read "Too early" — even titles with
+      // thousands of ratings (fixed Sept 2026).
+      item.criticsTone = cachedCriticsTone(item.imdbId);
+      const score = fcScore(item);
+      if (score) item.fcScore = score;
       item.slug = slug;
       item.platform = providers[0];
       have.add(slug);

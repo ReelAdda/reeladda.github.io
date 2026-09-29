@@ -390,6 +390,74 @@ function filmHubLinks(item, cfg) {
     : "";
 }
 
+const FCSB_CSS = [
+  "  /* FilmyChill Score (lib/fcscore.js) */",
+  "  @font-face { font-family:'Anton'; src:url('/fonts/anton-latin.woff2') format('woff2'); font-display:swap; }",
+  "  .fcsb { margin:18px 0 6px; padding:18px; background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(64,56,199,.08); }",
+  "  .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }",
+  "  .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }",
+  "  .fcsb-verdict { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; margin-top:12px; }",
+  "  .fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }",
+  "  .fcsb-stamp { display:inline-block; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }",
+  "  @media (max-width: 420px) { .fcsb-m { width:48px; height:30px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }",
+  "  .fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }",
+  "  .fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }",
+  "  .fcsb-early { background:#F4F1EA; color:var(--mute); }",
+  "  .fcsb-why { font-size:15.5px; line-height:1.55; margin:12px 0 0; }",
+  "  .fcsb-rows { margin-top:14px; padding-top:12px; border-top:1px solid #EFE6D6; display:grid; gap:10px; }",
+  "  .fcsb-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }",
+  "  .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }",
+  "  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }",
+  "  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }",
+  "  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }",
+].join("\n");
+
+// The header's confidence-tiered audience rating. Exported so the score sweep can refresh it on
+// frozen and back-catalogue pages at the same time as the score, keeping the two in agreement.
+function headRatingHtml(item) {
+  const e = escHtml;
+        // Confidence-tiered rating (see lib/score.js). The number stays TMDB's own; what we
+        // add is how much to trust it, from the vote count — so an 8.0 on 13 votes reads
+        // differently from an 8.2 on 1,200. Colour is backed by a text label, never alone.
+        const sc = filmScore(item);
+        if (sc.displayRating == null) {
+          return `<div class="rating rating-few"><span class="cdot"></span>Rating still forming <span class="cvotes">— too few ratings yet</span></div>`;
+        }
+        return `<div class="rating rating-${sc.tier}"><span class="cdot"></span>★ ${sc.displayRating}`
+          + ` <span class="ctag">${e(sc.tierLabel)}</span>`
+          + ` <span class="cvotes">${e(sc.votes.toLocaleString("en-IN"))} ratings</span>`
+          + `<span class="cbar"><i style="width:${Math.round(sc.confidencePct * 100)}%"></i></span></div>`;
+}
+
+// The FilmyChill Score section of a film page (block + note). Exported so the score sweep
+// (lib/scoresweep.js) can add the exact same section to frozen and back-catalogue pages,
+// which are never rebuilt. Needs FCSB_CSS in the page's <style>.
+function fcScoreSection(item) {
+  const e = escHtml;
+    // FilmyChill Score (lib/fcscore.js): the site's own verdict, audiences + critics. It
+    // replaces the header's audience-only verdict pill; the audience rating itself stays in
+    // the header and again in the breakdown, labelled as the audience's.
+    const s = item.fcScore || null;
+    const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
+    const aud = s && s.audience
+      ? { tag: s.audience, sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB` }
+      : item.rating != null && item.votes
+        ? { tag: "Too few ratings", sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — counts from 50`, none: true }
+        : { tag: "Not rated yet", sub: "No audience ratings yet", none: true };
+    const cri = s && s.critics
+      ? { tag: s.critics.charAt(0).toUpperCase() + s.critics.slice(1), sub: "From published reviews" }
+      : { tag: "No verdict", sub: "No settled critics' reception on record", none: true };
+    const row = (label, x) => `<div class="fcsb-row"><div><b>${label}</b><small>${e(x.sub)}</small></div><span class="fcsb-tag${x.none ? " none" : ""}">${e(x.tag)}</span></div>`;
+    const lvl = !s ? "early" : /^must/i.test(s.verdict) ? "must" : /^skip/i.test(s.verdict) ? "skip" : "worth";
+    return `<section class="fcsb" id="filmychill-score">
+    <div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-verdict">${meterSvg(s ? meterLevel(s.verdict) : "early", { size: 56, cls: "fcsb-m" })}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : "Too early")}</span></div>
+    <p class="fcsb-why">${e(s ? s.reason : "Not enough ratings or reviews yet. The score appears once there are.")}</p>
+    <div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>
+  </section>
+  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>`;
+}
+
 function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const e = escHtml;
   const code = (cfg && cfg.code) || "in";
@@ -577,25 +645,7 @@ ${(() => {
   .rating-early .cdot, .rating-early .cbar i { background:#E39A1C; } .rating-early .ctag { background:rgba(227,154,28,.15); color:#B87910; }
   .rating-few { color:var(--mute); font-weight:600; font-size:15px; } .rating-few .cdot, .rating-few .cbar i { background:#C4BEDA; } .rating-few .ctag { display:none; }
   .verdict { display:inline-block; background:rgba(64,56,199,.08); color:var(--indigo); font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; margin-top:8px; }
-  /* FilmyChill Score (lib/fcscore.js) */
-  @font-face { font-family:'Anton'; src:url('/fonts/anton-latin.woff2') format('woff2'); font-display:swap; }
-  .fcsb { margin:18px 0 6px; padding:18px; background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(64,56,199,.08); }
-  .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }
-  .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
-  .fcsb-verdict { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; margin-top:12px; }
-  .fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }
-  .fcsb-stamp { display:inline-block; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }
-  @media (max-width: 420px) { .fcsb-m { width:48px; height:30px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }
-  .fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }
-  .fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }
-  .fcsb-early { background:#F4F1EA; color:var(--mute); }
-  .fcsb-why { font-size:15.5px; line-height:1.55; margin:12px 0 0; }
-  .fcsb-rows { margin-top:14px; padding-top:12px; border-top:1px solid #EFE6D6; display:grid; gap:10px; }
-  .fcsb-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
-  .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
-  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
-  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
-  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
+${FCSB_CSS}
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
   .fit dt { font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--indigo); margin-top:12px; }
@@ -662,47 +712,12 @@ ${(() => {
     <div>
       <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
       <div class="meta">${[item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert].filter(Boolean).map(e).join(" · ")}</div>
-      ${(() => {
-        // Confidence-tiered rating (see lib/score.js). The number stays TMDB's own; what we
-        // add is how much to trust it, from the vote count — so an 8.0 on 13 votes reads
-        // differently from an 8.2 on 1,200. Colour is backed by a text label, never alone.
-        const sc = filmScore(item);
-        if (sc.displayRating == null) {
-          return `<div class="rating rating-few"><span class="cdot"></span>Rating still forming <span class="cvotes">— too few ratings yet</span></div>`;
-        }
-        return `<div class="rating rating-${sc.tier}"><span class="cdot"></span>★ ${sc.displayRating}`
-          + ` <span class="ctag">${e(sc.tierLabel)}</span>`
-          + ` <span class="cvotes">${e(sc.votes.toLocaleString("en-IN"))} ratings</span>`
-          + `<span class="cbar"><i style="width:${Math.round(sc.confidencePct * 100)}%"></i></span></div>`;
-      })()}
+      ${headRatingHtml(item)}
       ${item.released ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
     </div>
   </div>
-  ${(() => {
-    // FilmyChill Score (lib/fcscore.js): the site's own verdict, audiences + critics. It
-    // replaces the header's audience-only verdict pill; the audience rating itself stays in
-    // the header and again in the breakdown, labelled as the audience's.
-    const s = item.fcScore || null;
-    const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
-    const aud = s && s.audience
-      ? { tag: s.audience, sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB` }
-      : item.rating != null && item.votes
-        ? { tag: "Too few ratings", sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — counts from 50`, none: true }
-        : { tag: "Not rated yet", sub: "No audience ratings yet", none: true };
-    const cri = s && s.critics
-      ? { tag: s.critics.charAt(0).toUpperCase() + s.critics.slice(1), sub: "From published reviews" }
-      : { tag: "No verdict", sub: "No settled critics' reception on record", none: true };
-    const row = (label, x) => `<div class="fcsb-row"><div><b>${label}</b><small>${e(x.sub)}</small></div><span class="fcsb-tag${x.none ? " none" : ""}">${e(x.tag)}</span></div>`;
-    const lvl = !s ? "early" : /^must/i.test(s.verdict) ? "must" : /^skip/i.test(s.verdict) ? "skip" : "worth";
-    return `<section class="fcsb" id="filmychill-score">
-    <div class="fcsb-label">FilmyChill score</div>
-    <div class="fcsb-verdict">${meterSvg(s ? meterLevel(s.verdict) : "early", { size: 56, cls: "fcsb-m" })}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : "Too early")}</span></div>
-    <p class="fcsb-why">${e(s ? s.reason : "Not enough ratings or reviews yet. The score appears once there are.")}</p>
-    <div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>
-  </section>
-  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>`;
-  })()}
+  ${fcScoreSection(item)}
   ${(() => {
     // Lead answer line. The GSC data showed pages ranking on page 1 for "where to watch [film]"
     // and "[film] ott release date" but pulling <1% CTR, and answer engines had nothing at the
@@ -908,6 +923,9 @@ function generatePages(data, cfg, allSlugSets) {
 }
 
 module.exports = {
+  headRatingHtml,
+  FCSB_CSS,
+  fcScoreSection,
   assignSlugs,
   buildFilmPage,
   filmHubLinks,

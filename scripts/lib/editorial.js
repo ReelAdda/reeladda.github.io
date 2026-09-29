@@ -160,6 +160,15 @@ function loadTakes() {
   return TAKES;
 }
 
+// The critics half of the FilmyChill Score for a title NOT on this week's lists (back-catalogue
+// and frozen pages): whatever reception tone the takes cache already holds. Cache only — no
+// network — and published critics only (Wikipedia), never TMDB viewer reviews.
+function cachedCriticsTone(imdbId) {
+  if (!imdbId) return null;
+  const e = loadTakes()[imdbId];
+  return e && e.src === "wiki" && e.a && e.a.tone ? e.a.tone : null;
+}
+
 // Aspect vocabulary: pattern found in reception prose -> the plain noun we print.
 // Order matters only for readability; matches are deduped by printed noun.
 const TAKE_ASPECTS = [
@@ -859,6 +868,7 @@ async function attachTrailerStats(dataByCode) {
 }
 
 module.exports = {
+  cachedCriticsTone,
   analyzeReception,
   attachBuzz,
   attachTakes,
