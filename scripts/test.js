@@ -3664,7 +3664,7 @@ test("unscored card says 'too early' instead of a silent gap", () => {
 test("scored card: FilmyChill verdict, its reason, and the audience rating it came from", () => {
   const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: 7.9, votes: 900, verdict: "Must watch", slug: "t",
     fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" } }, 0, "in");
-  assert.ok(/<div class="fcs-v">Must watch<\/div><div class="fcs-why">Audiences and critics agree\.<\/div>/.test(html));
+  assert.ok(/<span class="fcs-v">Must watch<\/span><\/div><div class="fcs-why">Audiences and critics agree\.<\/div>/.test(html));
   assert.ok(html.includes("Audience \u2605 7.9 (900 ratings) \u00b7 Critics: positive"), "signals line broken");
 });
 
