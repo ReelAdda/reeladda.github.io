@@ -4,6 +4,7 @@
 // ============================================================================
 "use strict";
 
+const { meterLevel, meterSvg } = require("./meter.js");
 const fs = require("fs");
 const {
   COUNTRIES,
@@ -581,7 +582,10 @@ ${(() => {
   .fcsb { margin:18px 0 6px; padding:18px; background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(64,56,199,.08); }
   .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }
   .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
-  .fcsb-stamp { display:inline-block; margin-top:12px; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; }
+  .fcsb-verdict { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; margin-top:12px; }
+  .fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }
+  .fcsb-stamp { display:inline-block; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }
+  @media (max-width: 420px) { .fcsb-m { width:48px; height:30px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }
   .fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }
   .fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }
   .fcsb-early { background:#F4F1EA; color:var(--mute); }
@@ -680,7 +684,6 @@ ${(() => {
     // replaces the header's audience-only verdict pill; the audience rating itself stays in
     // the header and again in the breakdown, labelled as the audience's.
     const s = item.fcScore || null;
-    const tick = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
     const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
     const aud = s && s.audience
       ? { tag: s.audience, sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB` }
@@ -693,8 +696,8 @@ ${(() => {
     const row = (label, x) => `<div class="fcsb-row"><div><b>${label}</b><small>${e(x.sub)}</small></div><span class="fcsb-tag${x.none ? " none" : ""}">${e(x.tag)}</span></div>`;
     const lvl = !s ? "early" : /^must/i.test(s.verdict) ? "must" : /^skip/i.test(s.verdict) ? "skip" : "worth";
     return `<section class="fcsb" id="filmychill-score">
-    <div class="fcsb-label">${s ? tick : ""}FilmyChill score</div>
-    <div class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : "Too early")}</div>
+    <div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-verdict">${meterSvg(s ? meterLevel(s.verdict) : "early", { size: 56, cls: "fcsb-m" })}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : "Too early")}</span></div>
     <p class="fcsb-why">${e(s ? s.reason : "Not enough ratings or reviews yet. The score appears once there are.")}</p>
     <div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>
   </section>

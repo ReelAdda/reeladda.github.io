@@ -1,5 +1,6 @@
 "use strict";
 
+const { meterInner, meterLevel } = require("./meter.js");
 const fs = require("fs");
 const { escHtml, fmtDateShort, fmtRuntime, localeFor } = require("./core.js");
 const { releaseState, normalizeUpcoming } = require("./release.js");
@@ -128,7 +129,7 @@ ${scoreStr
   : `<text x="992" y="272" text-anchor="middle" font-family="Anton" font-size="104" fill="#FFAD1F">NEW</text>
 <text x="992" y="322" text-anchor="middle" font-family="Inter" font-size="26" fill="#8F8BB8">too early to rate</text>`}
 <rect x="864" y="378" width="256" height="4" fill="#FFAD1F" fill-opacity="0.5"/>
-${fcs ? `<text x="992" y="416" text-anchor="middle" font-family="Inter" font-size="19" font-weight="700" fill="#FFAD1F" letter-spacing="2">FILMYCHILL SCORE</text>` : ""}
+${fcs ? `<svg x="852" y="396" width="44" height="28" viewBox="2.5 7 27 17">${meterInner(meterLevel(fcs.verdict), { ink: "#FFF7EC" })}</svg><text x="906" y="417" font-family="Inter" font-size="19" font-weight="700" fill="#FFAD1F" letter-spacing="2">FILMYCHILL SCORE</text>` : ""}
 ${wrapForCard(verdict || "FRESH RELEASE", 44, 360, 2, "anton").map((l, i) =>
   `<text x="992" y="${(fcs ? 466 : 446) + i * 52}" text-anchor="middle" font-family="Anton" font-size="44" fill="#FFF7EC">${e(l)}</text>`).join("\n")}
 </svg>`;
