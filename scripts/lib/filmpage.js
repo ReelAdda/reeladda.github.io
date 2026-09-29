@@ -4,6 +4,7 @@
 // ============================================================================
 "use strict";
 
+const { earlyReadLabel, noScoreText } = require("./fcscore.js");
 const { meterLevel, meterSvg } = require("./meter.js");
 const fs = require("fs");
 const {
@@ -410,6 +411,7 @@ const FCSB_CSS = [
   "  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }",
   "  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }",
   "  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }",
+  "  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }",
 ].join("\n");
 
 // The header's confidence-tiered audience rating. Exported so the score sweep can refresh it on
@@ -434,13 +436,16 @@ function headRatingHtml(item) {
 // which are never rebuilt. Needs FCSB_CSS in the page's <style>.
 function fcScoreSection(item) {
   const e = escHtml;
+  const none = noScoreText(item);
     // FilmyChill Score (lib/fcscore.js): the site's own verdict, audiences + critics. It
     // replaces the header's audience-only verdict pill; the audience rating itself stays in
     // the header and again in the breakdown, labelled as the audience's.
     const s = item.fcScore || null;
     const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
     const aud = s && s.audience
-      ? { tag: s.audience, sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB` }
+      ? { tag: s.audience, sub: s.early
+        ? `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — early read, weighted toward an average film`
+        : `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB` }
       : item.rating != null && item.votes
         ? { tag: "Too few ratings", sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — counts from 50`, none: true }
         : { tag: "Not rated yet", sub: "No audience ratings yet", none: true };
@@ -451,8 +456,8 @@ function fcScoreSection(item) {
     const lvl = !s ? "early" : /^must/i.test(s.verdict) ? "must" : /^skip/i.test(s.verdict) ? "skip" : "worth";
     return `<section class="fcsb" id="filmychill-score">
     <div class="fcsb-label">FilmyChill score</div>
-    <div class="fcsb-verdict">${meterSvg(s ? meterLevel(s.verdict) : "early", { size: 56, cls: "fcsb-m" })}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : "Too early")}</span></div>
-    <p class="fcsb-why">${e(s ? s.reason : "Not enough ratings or reviews yet. The score appears once there are.")}</p>
+    <div class="fcsb-verdict">${meterSvg(s ? meterLevel(s.verdict) : "early", { size: 56, cls: "fcsb-m" })}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? `<span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
+    <p class="fcsb-why">${e(s ? s.reason : none.why)}</p>
     <div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>`;

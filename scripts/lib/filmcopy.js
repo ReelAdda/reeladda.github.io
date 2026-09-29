@@ -206,7 +206,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   const provs = Array.isArray(item.providers) ? item.providers : [];
   // The FilmyChill Score (lib/fcscore.js) is the page's verdict when there is one, so the
   // FAQ answer agrees with the stamp at the top; the audience verdict is the fallback.
-  const verdictLabel = item.fcScore ? `FilmyChill Score: ${item.fcScore.verdict} — ${item.fcScore.reason.replace(/\.$/, "")}` : (item.verdict || "");
+  const verdictLabel = item.fcScore ? `FilmyChill Score: ${item.fcScore.verdict} — ${item.fcScore.reason.replace(/\.$/, "")}${item.fcScore.early ? ` (an early read from ${Number(item.fcScore.votes).toLocaleString("en-IN")} ratings)` : ""}` : (item.verdict || "");
 
   // Q1: worth watching. Verdict + reception + the fit line (see whyWatch) — the last part
   // is what stops this answer reading like every other page's answer, and it's the bit an

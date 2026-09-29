@@ -118,7 +118,7 @@ function buildLlmsFullTxt(dataByCode) {
           it.verdict || null,
         ].filter(Boolean).join(" · ");
         lines.push(`${i + 1}. ${it.title} — ${facts}`);
-        if (it.fcScore) lines.push(`   FilmyChill Score: ${it.fcScore.verdict} — ${it.fcScore.reason} (combines audience ratings and critics' reception)`);
+        if (it.fcScore) lines.push(`   FilmyChill Score: ${it.fcScore.verdict} — ${it.fcScore.reason} (${it.fcScore.early ? `early read from ${it.fcScore.votes} ratings` : "combines audience ratings and critics' reception"})`);
         if (it.take) lines.push(`   Critics: ${it.take}${it.takeArticle ? ` [source: en.wikipedia.org/wiki/${String(it.takeArticle).replace(/ /g, "_")}]` : ""}`);
         if (it.hook) lines.push(`   Context: ${it.hook}`);
         if (it.director) lines.push(`   Director: ${it.director}`);

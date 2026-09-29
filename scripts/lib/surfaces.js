@@ -134,7 +134,7 @@ function choosePick(items, cfg, nowIso) {
   const cutoff = new Date(now - PICK_FRESH_DAYS * 864e5).toISOString().slice(0, 10);
   const today = new Date(now).toISOString().slice(0, 10);
   const pool = (items || []).filter((x) => {
-    if (!x || !x.fcScore || !PICK_LEVEL[x.fcScore.verdict]) return false;
+    if (!x || !x.fcScore || !PICK_LEVEL[x.fcScore.verdict] || x.fcScore.early) return false; // no crowns on early reads
     const d = String(x.freshDate || x.released || "").slice(0, 10);
     return d >= cutoff && d <= today;
   });
