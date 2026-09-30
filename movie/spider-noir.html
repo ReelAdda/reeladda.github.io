@@ -17,7 +17,7 @@
 <meta property="og:url" content="https://filmychill.com/movie/spider-noir.html">
 <meta property="og:image" content="https://image.tmdb.org/t/p/w342/oD8WSVqz84ZRfelkr7JPeJwR9Iv.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TVSeries","name":"Spider-Noir","url":"https://filmychill.com/movie/spider-noir.html","image":"https://image.tmdb.org/t/p/w342/oD8WSVqz84ZRfelkr7JPeJwR9Iv.jpg","datePublished":"2026-05-25","genre":"Drama / Mystery","inLanguage":"English","director":{"@type":"Person","name":"Oren Uziel"},"actor":[{"@type":"Person","name":"Nicolas Cage"},{"@type":"Person","name":"Lamorne Morris"},{"@type":"Person","name":"Li Jun Li"},{"@type":"Person","name":"Karen Rodriguez"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/"},{"@type":"ListItem","position":2,"name":"Spider-Noir","item":"https://filmychill.com/movie/spider-noir.html"}]}</script>
 <style>
@@ -56,8 +56,15 @@
   .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
   .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
   .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
-  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
 </style>
 </head>
 <body>
@@ -79,11 +86,18 @@
     <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 8.3 from 868 ratings on TMDB</small></div><span class="fcsb-tag">Loved</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="tv-220102" data-c="in" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <h2>Story</h2><p>Ben Reilly, an aging and down on his luck private investigator in 1930s New York, is forced to grapple with his past life as the city&#39;s one and only superhero.</p>
   <h2>Director</h2><p>Oren Uziel</p>
   <h2>Cast</h2><div><span class="pill">Nicolas Cage</span><span class="pill">Lamorne Morris</span><span class="pill">Li Jun Li</span><span class="pill">Karen Rodriguez</span></div>
   <!--SW:stream--><!--SW:live=2026-07-04--><h2>Where to watch in India</h2><div><span class="pill">Amazon Prime Video</span><span class="pill">Amazon Prime Video with Ads</span></div><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of 15 Jun 2026 — platforms may change over time.</p><!--/SW:stream-->
   <h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/e5QW457407U?rel=0" title="Spider-Noir trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+  <h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/movie/american-horror-story.html"><img src="https://image.tmdb.org/t/p/w780/yCkPLQ10qKIUgRBXmQVVMF1h96d.jpg,https://image.tmdb.org/t/p/w1280/5G4Bnc4Q0YUK1bwLEUYmIsmm2Ib.jpg" alt="American Horror Story poster" loading="lazy"><div class="st">American Horror Story</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/supernatural.html"><img src="https://image.tmdb.org/t/p/w342/8iixmfGx5EIFPdpNvB2JvI3VIqX.jpg" alt="Supernatural poster" loading="lazy"><div class="st">Supernatural</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/twin-peaks.html"><img src="https://image.tmdb.org/t/p/w780/lA9CNSdo50iQPZ8A2fyVpMvJZAf.jpg,https://image.tmdb.org/t/p/w1280/dZklTql88IDOmkC3JAYQSTgyK6f.jpg" alt="Twin Peaks poster" loading="lazy"><div class="st">Twin Peaks</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/crew-girl.html"><img src="https://image.tmdb.org/t/p/w342/jkPZW1iHNvlI6077NxSxwITa1tj.jpg" alt="Crew Girl poster" loading="lazy"><div class="st">Crew Girl</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/every-year-after.html"><img src="https://image.tmdb.org/t/p/w342/nZGf0jnSJNXLf8o7iSzzX8qxHX9.jpg" alt="Every Year After poster" loading="lazy"><div class="st">Every Year After</div><div class="sm">English · Series</div></a><a class="simcard" href="/movie/off-campus.html"><img src="https://image.tmdb.org/t/p/w342/cbODFqkcmRgrYH8NkG4Q4Hcg8Z1.jpg" alt="Off Campus poster" loading="lazy"><div class="st">Off Campus</div><div class="sm">English · Series</div></a></div>
   <a class="btn" href="https://filmychill.com/#spider-noir">🎬 See this week's top picks on FilmyChill →</a>
 </div>
 <footer>

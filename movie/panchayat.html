@@ -16,7 +16,7 @@
 <meta property="og:url" content="https://filmychill.com/movie/panchayat.html">
 <meta property="og:image" content="https://image.tmdb.org/t/p/w342/xrfvAhrMdT6Uwg5fyTyQAZBYyiu.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TVSeries","name":"Panchayat","url":"https://filmychill.com/movie/panchayat.html","image":"https://image.tmdb.org/t/p/w342/xrfvAhrMdT6Uwg5fyTyQAZBYyiu.jpg","datePublished":"2020-03-05","genre":"Comedy / Drama","inLanguage":"Hindi","director":{"@type":"Person","name":"Chandan Kumar"},"actor":[{"@type":"Person","name":"Jitendra Kumar"},{"@type":"Person","name":"Raghubir Yadav"},{"@type":"Person","name":"Neena Gupta"},{"@type":"Person","name":"Chandan Roy"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/"},{"@type":"ListItem","position":2,"name":"Panchayat","item":"https://filmychill.com/movie/panchayat.html"}]}</script>
 <style>
@@ -55,8 +55,15 @@
   .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
   .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
   .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
-  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
 </style>
 </head>
 <body>
@@ -78,11 +85,18 @@
     <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 8.2 from 152 ratings on TMDB</small></div><span class="fcsb-tag">Loved</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="tv-101352" data-c="in" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <h2>Story</h2><p>Panchayat is a comedy-drama, which captures the journey of an engineering graduate Abhishek, who for lack of a better job option joins as secretary of a panchayat office in a remote village of Uttar Pradesh. Stuck between crazy villagers and a difficult village lifestyle Abhishek starts his job with the sole motivation of getting out of there as soon as possible, for which he even prepares for CAT.</p>
   <h2>Director</h2><p>Chandan Kumar</p>
   <h2>Cast</h2><div><span class="pill">Jitendra Kumar</span><span class="pill">Raghubir Yadav</span><span class="pill">Neena Gupta</span><span class="pill">Chandan Roy</span></div>
   <!--SW:stream--><!--SW:live=2026-07-04--><h2>Where to watch in India</h2><div><span class="pill">Amazon Prime Video</span><span class="pill">Amazon Prime Video with Ads</span></div><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of 13 Jun 2026 — platforms may change over time.</p><!--/SW:stream-->
   <h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/AHMEtNAZTP4?rel=0" title="Panchayat trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+  <h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/movie/gullak.html"><img src="https://image.tmdb.org/t/p/w342/arn3mvRYSrEqO7vaKbH8QxM8EEK.jpg" alt="Gullak poster" loading="lazy"><div class="st">Gullak</div><div class="sm">Hindi · Series</div></a><a class="simcard" href="/movie/wagle-ki-duniya.html"><img src="https://image.tmdb.org/t/p/w342/jKonm6Q3vw51Ytd4y7bJ70xJT7l.jpg" alt="Wagle Ki Duniya poster" loading="lazy"><div class="st">Wagle Ki Duniya</div><div class="sm">Hindi · Series</div></a><a class="simcard" href="/movie/college-romance.html"><img src="https://image.tmdb.org/t/p/w780/lCvYGef9G5aj3jeoLW79f79O5I4.jpg,https://image.tmdb.org/t/p/w1280/wcG3zqTmzvrKaiFDs7GU3j3s01S.jpg" alt="College Romance poster" loading="lazy"><div class="st">College Romance</div><div class="sm">Hindi · Series</div></a><a class="simcard" href="/movie/kota-factory.html"><img src="https://image.tmdb.org/t/p/w342/fMBookmwL6HjIgIVTjQ6EMr3pCH.jpg" alt="Kota Factory poster" loading="lazy"><div class="st">Kota Factory</div><div class="sm">Hindi · Series</div></a><a class="simcard" href="/movie/mismatched.html"><img src="https://image.tmdb.org/t/p/w342/l65kfL6qhTWd858OqGTr3RWwAUj.jpg" alt="Mismatched poster" loading="lazy"><div class="st">Mismatched</div><div class="sm">Hindi · Series</div></a><a class="simcard" href="/movie/cubicles.html"><img src="https://image.tmdb.org/t/p/w342/vfjIBMXJK8rmvJ3SrAInlhM7v5e.jpg" alt="Cubicles poster" loading="lazy"><div class="st">Cubicles</div><div class="sm">Hindi · Series</div></a></div>
   <a class="btn" href="https://filmychill.com/#panchayat">🎬 See this week's top picks on FilmyChill →</a>
 </div>
 <footer>

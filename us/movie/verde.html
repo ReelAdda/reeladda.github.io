@@ -13,7 +13,7 @@
 <meta property="og:url" content="https://filmychill.com/us/movie/verde.html">
 <meta property="og:image" content="https://image.tmdb.org/t/p/w342/lOlU0FOCctc5PwZbKjRCvRjtMnT.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"VERDE","url":"https://filmychill.com/us/movie/verde.html","image":"https://image.tmdb.org/t/p/w342/lOlU0FOCctc5PwZbKjRCvRjtMnT.jpg","datePublished":"2026-09-05","genre":"Drama","inLanguage":"Spanish","director":{"@type":"Person","name":"Juan José Antuna Ortiz"},"actor":[{"@type":"Person","name":"Luisa Lerma"},{"@type":"Person","name":"Omar Nubez"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/us/"},{"@type":"ListItem","position":2,"name":"VERDE","item":"https://filmychill.com/us/movie/verde.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Where can I watch VERDE?","acceptedAnswer":{"@type":"Answer","text":"VERDE opened in theatres in the US on Sep 5 2026 and may still be showing — check local cinema listings. It isn't streaming yet — this page updates the day it is."}},{"@type":"Question","name":"When is VERDE coming to streaming?","acceptedAnswer":{"@type":"Answer","text":"A streaming release date for VERDE hasn't been officially announced yet. This page updates automatically the day it starts streaming."}},{"@type":"Question","name":"What language is VERDE in?","acceptedAnswer":{"@type":"Answer","text":"VERDE is a Spanish film (Drama)."}}]}</script>
@@ -79,8 +79,15 @@
   .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
   .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
   .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
-  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
 </style>
 </head>
 <body>
@@ -103,7 +110,13 @@
     <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>No audience ratings yet</small></div><span class="fcsb-tag none">Not rated yet</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
-  <h2>The verdict</h2><p class="vprose">VERDE was one of the more anticipated Spanish releases while it was on our radar. It opened in theatres in the US on Sep 5 2026.</p>
+  <div class="fcvote" data-film="movie-1723434" data-c="us" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
+  <h2>What the audience says</h2><p class="vprose">VERDE is a fresh Spanish film that&#39;s only just landed, so ratings are still settling.</p>
   
   
   <h2>Story</h2><p>Memories are often raindrops we hear in our minds but do not see...</p>
@@ -112,7 +125,7 @@
   <h2>Cast</h2><div><span class="pill">Luisa Lerma</span><span class="pill">Omar Nubez</span></div>
   
   <h2>Trailer</h2><p><a href="https://www.youtube.com/results?search_query=VERDE%20official%20trailer" rel="noopener">Find the trailer on YouTube →</a></p>
-  <h2>If you liked this</h2><div class="simgrid"><div class="simcard" style="cursor:default"><img src="https://image.tmdb.org/t/p/w342/eMs20iUQyZVs05Ck7Q0LNnRsstr.jpg" alt="Erin Brockovich poster" loading="lazy"><div class="st">Erin Brockovich</div><div class="sm">English · Film</div></div><div class="simcard" style="cursor:default"><img src="https://image.tmdb.org/t/p/w342/zVvOHOz5848dZ5x7mGqxBWzsPmS.jpg" alt="The Girl in the Book poster" loading="lazy"><div class="st">The Girl in the Book</div><div class="sm">English · Film</div></div><div class="simcard" style="cursor:default"><img src="https://image.tmdb.org/t/p/w342/kVcDZluWy2vBxi1rTfZ3OOxmXLg.jpg" alt="Call Me Crazy: A Five Film poster" loading="lazy"><div class="st">Call Me Crazy: A Five Film</div><div class="sm">English · Film</div></div></div>
+  <h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/us/movie/lucca-s-world.html"><img src="https://image.tmdb.org/t/p/w342/fX3Q5hxUAUs1k8JQkNTwFpBd6BC.jpg" alt="Lucca&#39;s World poster" loading="lazy"><div class="st">Lucca&#39;s World</div><div class="sm">Spanish · Film</div></a><a class="simcard" href="/us/movie/romer-a.html"><img src="https://image.tmdb.org/t/p/w342/6Wo9z9dvy0ns1Q84OLEHXemRpeh.jpg" alt="Romería poster" loading="lazy"><div class="st">Romería</div><div class="sm">Spanish · Film</div></a><a class="simcard" href="/us/movie/green.html"><img src="https://image.tmdb.org/t/p/w342/lOlU0FOCctc5PwZbKjRCvRjtMnT.jpg" alt="GREEN poster" loading="lazy"><div class="st">GREEN</div><div class="sm">Spanish · Film</div></a><a class="simcard" href="/us/movie/cuatro.html"><img src="https://image.tmdb.org/t/p/w342/2Hx1B8xU5u8T9l69C2dAqX0R2gQ.jpg" alt="CUATRO poster" loading="lazy"><div class="st">CUATRO</div><div class="sm">Spanish · Film</div></a><a class="simcard" href="/us/movie/manual-wind.html"><img src="https://image.tmdb.org/t/p/w342/59BiWjVJg6d85TeaIvgY2eHlSJZ.jpg" alt="Manual Wind poster" loading="lazy"><div class="st">Manual Wind</div><div class="sm">Spanish · Film</div></a><a class="simcard" href="/us/movie/a-father-s-miracle.html"><img src="https://image.tmdb.org/t/p/w780/heC13pt4SV7y3HF5lWNzf0u729j.jpg,https://image.tmdb.org/t/p/w1280/fIuuYkIjF9Q7W26YbIeKX5OWwiL.jpg" alt="A Father&#39;s Miracle poster" loading="lazy"><div class="st">A Father&#39;s Miracle</div><div class="sm">Spanish · Film</div></a></div>
   <h2>Frequently asked</h2><div class="faq"><details><summary>Where can I watch VERDE?</summary><div class="fa">VERDE opened in theatres in the US on Sep 5 2026 and may still be showing — check local cinema listings. It isn&#39;t streaming yet — this page updates the day it is.</div></details><details><summary>When is VERDE coming to streaming?</summary><div class="fa">A streaming release date for VERDE hasn&#39;t been officially announced yet. This page updates automatically the day it starts streaming.</div></details><details><summary>What language is VERDE in?</summary><div class="fa">VERDE is a Spanish film (Drama).</div></details></div>
   <a class="btn" href="https://filmychill.com/us/#verde">🎬 See this week's top picks on FilmyChill →</a>
 </div>
