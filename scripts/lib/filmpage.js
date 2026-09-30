@@ -425,7 +425,7 @@ function headRatingHtml(item) {
         if (sc.displayRating == null) {
           return `<div class="rating rating-few"><span class="cdot"></span>Rating still forming <span class="cvotes">— too few ratings yet</span></div>`;
         }
-        return `<div class="rating rating-${sc.tier}"><span class="cdot"></span>★ ${sc.displayRating}`
+        return `<div class="rating rating-${sc.tier}"><span class="cdot"></span>★ ${Number(sc.displayRating).toFixed(1)}`
           + ` <span class="ctag">${e(sc.tierLabel)}</span>`
           + ` <span class="cvotes">${e(sc.votes.toLocaleString("en-IN"))} ratings</span>`
           + `<span class="cbar"><i style="width:${Math.round(sc.confidencePct * 100)}%"></i></span></div>`;

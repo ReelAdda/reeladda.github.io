@@ -21,11 +21,15 @@ const { FCSB_CSS, fcScoreSection, headRatingHtml } = require("./filmpage.js");
 const { cachedCriticsTone } = require("./editorial.js");
 const { sleep, tmdb } = require("./tmdb.js");
 
-const SCORE_SWEEP_BATCH = Math.max(0, Number(process.env.SCORE_SWEEP_BATCH || 300)); // ~9,000 pages ≈ 15 days
+// 1,500 a run clears the ~8,000-page backlog in about three runs; after that each run only has
+// the 30-day re-checks (~300 a day), so the cap rarely binds.
+const SCORE_SWEEP_BATCH = Math.max(0, Number(process.env.SCORE_SWEEP_BATCH || 1500));
 const RESCORE_DAYS = 30;
 // Bumped when the no-score wording changes: pages swept under an older wording with no score
 // are redone at once rather than waiting 30 days. 2 = "Too early" only for recent releases.
-const SWEEP_WORDING = 3; // 3 = early reads: older films with 15–49 ratings now get a score
+// 3 = early reads; 4 = header rating shown with one decimal like the score box, and every
+// page swept under an older version is redone (not only the unscored ones).
+const SWEEP_WORDING = 4;
 
 // Pure: put (or replace) the score section in an existing film page. Returns the new HTML.
 function injectScoreSection(html, section) {
@@ -69,8 +73,10 @@ function refreshHead(html, item) {
   } else if (item.rating != null && item.votes) {
     // The oldest pages ("★ 7.4 (535 votes)") have no styles for the tiered format: update the
     // numbers in place instead.
-    head = head.replace(/(<div class="rating">★ )[\d.]+(\s*<span[^>]*>\()[\d,]+( votes\))/,
-      (m, a, b, c) => `${a}${Number(item.rating).toFixed(1)}${b}${Number(item.votes).toLocaleString("en-IN")}${c}`);
+    // (Some carry a vote count in brackets, the very first ones only the number.)
+    head = head.replace(/(<div class="rating">★ )[\d.]+/, (m, a) => `${a}${Number(item.rating).toFixed(1)}`);
+    head = head.replace(/(<div class="rating">★ [\d.]+\s*<span[^>]*>\()[\d,]+( votes\))/,
+      (m, a, c) => `${a}${Number(item.votes).toLocaleString("en-IN")}${c}`);
   }
   head = head.replace(/\s*<div class="verdict">[^<]*<\/div>/, "");
   return html.slice(0, h0) + head + html.slice(h1);
@@ -82,9 +88,10 @@ function sweepCandidates(pagesManifest, today, limit) {
   const all = [];
   for (const [code, m] of Object.entries(pagesManifest || {})) {
     for (const [slug, e] of Object.entries(m || {})) {
-      if (!e || !e.tmdbId || !(e.catalog || e.archivedOn)) continue; // weekly pages rebuild themselves
+      if (!e || !(e.catalog || e.archivedOn)) continue; // weekly pages rebuild themselves
+      if (!e.tmdbId && e.idLookup === "none") continue;  // tried before: no provable match
       const at = e.fcs && e.fcs.at;
-      const outdated = e.fcs && e.fcs.v === "early" && (e.fcs.w || 1) < SWEEP_WORDING;
+      const outdated = e.fcs && (e.fcs.w || 1) < SWEEP_WORDING;
       if (at && at > stale && !outdated) continue;
       all.push({ code, slug, e, at: outdated ? "" : at || "" });
     }
@@ -93,12 +100,36 @@ function sweepCandidates(pagesManifest, today, limit) {
   return all.slice(0, limit);
 }
 
+// Pure-ish: identify a page's film on TMDB from its own HTML. Returns { id, kind } or null.
+async function resolveTmdbId(html, e, api) {
+  const kind = e.kind === "tv" || /"@type":"TVSeries"/.test(html) ? "tv" : "movie";
+  const poster = (html.match(/image\.tmdb\.org\/t\/p\/w\d+(\/[A-Za-z0-9_-]+\.(?:jpg|png))/) || [])[1] || null;
+  const h1 = (html.match(/<h1[^>]*>([^<]+)<\/h1>/) || [])[1] || "";
+  const title = (e.title || h1.replace(/\s*\((\d{4})\)\s*$/, "")).replace(/&amp;/g, "&").replace(/&#39;/g, "'").trim();
+  const year = (h1.match(/\((\d{4})\)\s*$/) || [])[1] || String(e.released || "").slice(0, 4);
+  if (!poster || !title) return null;
+  const q = { query: title, include_adult: "false" };
+  if (/^\d{4}$/.test(year)) q[kind === "tv" ? "first_air_date_year" : "year"] = year;
+  const r = await api.tmdb(`/search/${kind}`, q);
+  await api.pause(120);
+  const hit = (r.results || []).find((x) => x.poster_path === poster);
+  return hit ? { id: hit.id, kind } : null;
+}
+
 async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, api = { tmdb, pause: sleep } } = {}) {
   const res = { checked: 0, updated: 0, errors: 0 };
   for (const { code, slug, e } of sweepCandidates(pagesManifest, today, batch)) {
     const file = filmPagePath(code, slug).replace(/^\//, "");
     let html;
     try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
+    // A few old pages were saved without their TMDB id. Find it the way the legacy repair does:
+    // title (+ year) search, accepted only when the poster on the page matches exactly.
+    if (!e.tmdbId) {
+      const found = await resolveTmdbId(html, e, api).catch(() => null);
+      if (!found) { e.idLookup = "none"; continue; }
+      e.tmdbId = found.id;
+      if (!e.kind) e.kind = found.kind;
+    }
     let d;
     try {
       const kind = e.kind === "tv" ? "tv" : "movie";
@@ -138,6 +169,7 @@ module.exports = {
   SCORE_SWEEP_BATCH,
   injectScoreSection,
   refreshHead,
+  resolveTmdbId,
   sweepCandidates,
   sweepScores,
 };
