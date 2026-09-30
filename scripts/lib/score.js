@@ -38,9 +38,12 @@ function ratingOf(item) {
 
 // Confidence tier. Returns { key, label, pct } — pct drives the little confidence bar (0..1).
 // label is mandatory and carries the meaning so we never rely on colour alone.
-function confidenceTier(votes) {
-  if (!votes || votes < MIN_VOTES) return { key: "few", label: "Too few to call", pct: 0.06 };
-  if (votes < SOLID_VOTES) return { key: "early", label: "Early — still settling", pct: Math.max(0.18, Math.min(0.55, votes / SOLID_VOTES)) };
+// `recent`: is the film actually new? Only then may the label talk about time ("early", "still
+// settling"); an older film with few votes is labelled by the count instead (see isRecent in
+// lib/fcscore.js — the site-wide wording rule).
+function confidenceTier(votes, { recent = true } = {}) {
+  if (!votes || votes < MIN_VOTES) return { key: "few", label: recent ? "Too few to call" : "Too few ratings", pct: 0.06 };
+  if (votes < SOLID_VOTES) return { key: "early", label: recent ? "Early — still settling" : "Few ratings", pct: Math.max(0.18, Math.min(0.55, votes / SOLID_VOTES)) };
   // Solid: scale the bar with a log so 300 and 3,000 don't look identical, capped at ~0.97.
   const pct = 0.6 + 0.37 * Math.min(1, Math.log10(votes / SOLID_VOTES) / Math.log10(30));
   return { key: "solid", label: "Solid", pct: Math.min(0.97, pct) };
@@ -55,9 +58,9 @@ function rankValue(item) {
 
 // The full signal for a film. displayRating is TMDB's own number (or null); tier is the
 // trust flag; provisional marks a shown-but-thin score so the UI can append a caveat.
-function filmScore(item) {
+function filmScore(item, { recent = true } = {}) {
   const { rating, votes } = ratingOf(item);
-  const tier = confidenceTier(votes);
+  const tier = confidenceTier(votes, { recent });
   const show = rating != null && votes >= MIN_VOTES;
   return {
     displayRating: show ? Number(rating.toFixed(1)) : null,

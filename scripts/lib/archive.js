@@ -249,6 +249,13 @@ const ARCHIVE_LEAD_SWAPS = [
    "stayed short of the ratings needed to call this $1 either way."],
   [/are still too thin to say where this ([^<]{0,60}?) lands\./g,
    "stayed too thin to say where this $1 lands."],
+  // unrated, count-worded (Sept 2026 wording) — true when written, so frozen as "at the time"
+  [/has too few ratings for a firm read on this ([^<]{0,60}?)\./g,
+   "had too few ratings for a firm read on this $1 when this page was last updated."],
+  [/There aren&#39;t enough ratings on ([^<]{0,80}?) to call this ([^<]{0,60}?) either way\./g,
+   "There weren&#39;t enough ratings on $1 to call this $2 either way when this page was last updated."],
+  [/are too thin to say where this ([^<]{0,60}?) lands\./g,
+   "were too thin to say where this $1 landed when this page was last updated."],
   // upcoming that never arrived (or left before release)
   [/is one of the more anticipated ((?:[^<]{0,30}? )?)releases on the calendar\./g,
    "was one of the more anticipated $1releases while it was on our radar."],

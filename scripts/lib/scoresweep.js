@@ -19,6 +19,10 @@ const { filmPagePath, fmtDateFull, localeFor } = require("./core.js");
 const { fcScore } = require("./fcscore.js");
 const { FCSB_CSS, fcScoreSection, headRatingHtml } = require("./filmpage.js");
 const { cachedCriticsTone } = require("./editorial.js");
+const { escHtml } = require("./core.js");
+const { buildVerdictProse } = require("./filmcopy.js");
+const { isRecent } = require("./fcscore.js");
+const { COUNT_REASONS } = require("./skipif.js");
 const { sleep, tmdb } = require("./tmdb.js");
 
 // 1,500 a run clears the ~8,000-page backlog in about three runs; after that each run only has
@@ -29,7 +33,9 @@ const RESCORE_DAYS = 30;
 // are redone at once rather than waiting 30 days. 2 = "Too early" only for recent releases.
 // 3 = early reads; 4 = header rating shown with one decimal like the score box, and every
 // page swept under an older version is redone (not only the unscored ones).
-const SWEEP_WORDING = 4;
+// 5 = one wording rule everywhere (time words only for new films; header tier, prose and the
+// "worth watching?" answer all rewritten to match the score).
+const SWEEP_WORDING = 5;
 
 // Pure: put (or replace) the score section in an existing film page. Returns the new HTML.
 function injectScoreSection(html, section) {
@@ -70,6 +76,13 @@ function refreshHead(html, item) {
   let head = html.slice(h0, h1);
   if (html.includes(".cbar")) {
     head = head.replace(/<div class="rating[^"]*">[\s\S]*?<\/div>/, headRatingHtml(item));
+  } else if (item.rating == null || Number(item.votes || 0) < 10) {
+    // Too few ratings for the site to show a number at all (MIN_VOTES): the header says so,
+    // in the same words weekly pages use — never a bare "★ 6.4 (4 votes)".
+    const n = Number(item.votes || 0);
+    const text = isRecent(item) ? "Rating still forming — too few ratings yet"
+      : n > 0 ? `Too few ratings to rate — only ${n.toLocaleString("en-IN")}` : "Not rated on TMDB";
+    head = head.replace(/<div class="rating">[\s\S]*?<\/div>/, `<div class="rating">${escHtml(text)}</div>`);
   } else if (item.rating != null && item.votes) {
     // The oldest pages ("★ 7.4 (535 votes)") have no styles for the tiered format: update the
     // numbers in place instead.
@@ -80,6 +93,73 @@ function refreshHead(html, item) {
   }
   head = head.replace(/\s*<div class="verdict">[^<]*<\/div>/, "");
   return html.slice(0, h0) + head + html.slice(h1);
+}
+
+// Pure: bring the page's words in line with the score, for a film that ISN'T new (a new film's
+// time words — "just landed", "too early" — are true, so its copy is left alone):
+//   - the "What the audience says" paragraph is rewritten from today's rating and count;
+//   - the "Is it worth watching?" answer (visible and in the FAQ schema) opens with today's
+//     FilmyChill Score — or, with no score, says plainly there aren't enough ratings.
+// Only openings this site itself wrote are replaced; anything unrecognised is left as it is.
+const FAQ_LEADS = [
+  /^It's too early for a verdict — .+? doesn't have enough ratings yet\./,
+  /^There aren't enough ratings for a verdict on .+?\./,
+  /^FilmyChill Score: [^.]*\.(?: It rates \d+(?:\.\d)?\/10 on audience ratings\.)?/,
+  /^(?:Must watch|Worth a watch|Decent one-time watch|Skip unless curious)\.(?: It rates \d+(?:\.\d)?\/10 on audience ratings\.)?/,
+];
+function faqLead(item, s) {
+  if (!s) return isRecent(item) ? null : `There aren't enough ratings for a verdict on ${item.title}.`; // new + unscored: "too early" is true
+  const reason = s.reason.replace(/\.$/, "");
+  const few = s.early ? ` (based on only ${Number(s.votes).toLocaleString("en-IN")} ratings)` : "";
+  const rates = item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10 on audience ratings.` : "";
+  return `FilmyChill Score: ${s.verdict} — ${reason}${few}.${rates}`;
+}
+function relead(text, lead) {
+  if (lead == null) return null;
+  for (const re of FAQ_LEADS) if (re.test(text)) return text.replace(re, lead);
+  return null;
+}
+const unesc = (t) => t.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+// The four time-worded "Don't watch this if…" lines (lib/skipif.js), as they appear on a page.
+const SKIP_TIME_LINES = [
+  /you want a safe bet — that rating is resting on [\d,]+ votes so far/,
+  /you&#39;d rather wait for a consensus\. Only [\d,]+ ratings in so far/,
+  /you take the score at face value — it&#39;s early, and [\d,]+ votes can still move it/,
+  /you want a number you can lean on\. This one is still settling/,
+];
+function refreshCopy(html, item, s) {
+  if (!item.title) return html;
+  const recent = isRecent(item);
+  let out = html;
+  if (!recent) {
+    // "Don't watch this if…": swap a time-worded thin-rating line for its count-worded twin —
+    // or drop it once the film has 100+ ratings, when the worry no longer applies.
+    const votes = Number(item.votes || 0);
+    SKIP_TIME_LINES.forEach((re, i) => {
+      out = out.replace(new RegExp(`<li>${re.source}</li>`), votes >= 100 || !votes ? "" : `<li>${escHtml(COUNT_REASONS(votes)[i])}</li>`);
+    });
+    // Fewer than two reasons left: the block no longer earns its place (skipif.js MIN_REASONS).
+    out = out.replace(/<div class="skipif"><h3>[^<]*<\/h3><ul>((?:<li>[^<]*<\/li>)?)<\/ul><\/div>/, "");
+  }
+  const prose = buildVerdictProse({ title: item.title, tmdbId: item.tmdbId, kind: item.kind, language: item.language,
+    rating: item.rating, votes: item.votes, released: item.released });
+  if (prose) {
+    out = out.replace(/<h2>(?:The verdict|What the audience says)<\/h2><p class="vprose">[\s\S]*?<\/p>/,
+      `<h2>What the audience says</h2><p class="vprose">${escHtml(prose)}</p>`);
+  }
+  const lead = faqLead(item, s);
+  // Visible FAQ
+  out = out.replace(/(<summary>Is [^<]*? worth watching\?<\/summary><div class="fa">)([^<]*)(<\/div>)/, (m, a, t, b) => {
+    const next = relead(unesc(t), lead);
+    return next == null ? m : a + escHtml(next) + b;
+  });
+  // FAQ schema (JSON-LD)
+  out = out.replace(/("name":"Is (?:[^"\\]|\\.)*? worth watching\?","acceptedAnswer":\{"@type":"Answer","text":")((?:[^"\\]|\\.)*)(")/, (m, a, t, b) => {
+    let plain; try { plain = JSON.parse(`"${t}"`); } catch { return m; }
+    const next = relead(plain, lead);
+    return next == null ? m : a + JSON.stringify(next).slice(1, -1) + b;
+  });
+  return out;
 }
 
 // Pure: which manifest entries to (re)score this run.
@@ -151,7 +231,8 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
     };
     const s = fcScore(item);
     if (s) item.fcScore = s;
-    let next = refreshHead(injectScoreSection(html, fcScoreSection(item)), item);
+    Object.assign(item, { title: e.title || d.title || d.name, tmdbId: e.tmdbId, kind: e.kind === "tv" ? "tv" : "movie", language: e.lang || null });
+    let next = refreshCopy(refreshHead(injectScoreSection(html, fcScoreSection(item)), item), item, s);
     // The page changed, so its "Page updated" line should say so.
     if (next !== html) next = next.replace(/(>Page updated )[^<]+/, (m, a) => `${a}${fmtDateFull(today, localeFor(code))}`);
     e.fcs = { v: s ? s.verdict : "early", at: today, w: SWEEP_WORDING };
@@ -168,6 +249,7 @@ module.exports = {
   RESCORE_DAYS,
   SCORE_SWEEP_BATCH,
   injectScoreSection,
+  refreshCopy,
   refreshHead,
   resolveTmdbId,
   sweepCandidates,

@@ -11,6 +11,7 @@ const {
   trim,
   localeFor,
 } = require("./core.js");
+const { isRecent } = require("./fcscore.js");
 const { whyWatch } = require("./whywatch.js");
 const { certAudience } = require("./enrich.js");
 const { digitalAnnounceText, digitalUpcoming } = require("./pagekit.js");
@@ -32,6 +33,7 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
   const nounPl = isTv ? "series" : "films"; // "series" is its own plural — never "seriess"
   const today = new Date().toISOString().slice(0, 10);
   const upcoming = item.released && item.released > today;
+  const recent = isRecent(item, Date.parse(today)); // time words ("right now", "new releases") only when true
   // Seeded variety: opening, rating commentary, and runtime aside are each picked from a
   // small pool keyed to the film (tmdbId, falling back to a title hash), so two pages in
   // the same rating band don't open with the same sentence. Index 0 of every pool keeps
@@ -56,21 +58,35 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
           `${item.title} is the kind of ${lang}release people circle on the calendar`,
         ])
       : (() => {
-          const days = item.released ? Math.floor((Date.parse(today) - Date.parse(item.released)) / 86400000) : null;
-          // "just landed" is only true for ~3 weeks; past that (or with no release date
-          // to judge by), say what's actually true: the ratings never showed up.
-          return days != null && days <= 21
+          // "just landed" is only true while the film is new (isRecent — the site-wide rule);
+          // past that, or with no release date to judge by, say what's true about the count.
+          return isRecent(item, Date.parse(today))
             ? pick([
                 `${item.title} is a fresh ${lang}${noun} that's only just landed, so ratings are still settling`,
                 `${item.title} has only just arrived, so ratings for the ${lang}${noun} are still finding their level`,
                 `${item.title} is brand new to the list — too early for the numbers on this ${lang}${noun} to mean much yet`,
               ])
             : pick([
-                `${item.title} hasn't gathered enough ratings yet for a firm read on this ${lang}${noun}`,
-                `${item.title} is still short of the ratings needed to call this ${lang}${noun} either way`,
-                `Ratings on ${item.title} are still too thin to say where this ${lang}${noun} lands`,
+                `${item.title} has too few ratings for a firm read on this ${lang}${noun}`,
+                `There aren't enough ratings on ${item.title} to call this ${lang}${noun} either way`,
+                `Ratings on ${item.title} are too thin to say where this ${lang}${noun} lands`,
               ]);
         })();
+  } else if (votes < 50) {
+    // Few ratings (10–49): a strong-sounding lead would outrun the FilmyChill Score, which
+    // treats this as a small sample. Say who rated it and how, and nothing more.
+    lead = r >= 7.5 ? `The few people who have rated ${item.title} rate this ${lang}${noun} highly`
+      : r >= 6.5 ? `The few people who have rated ${item.title} mostly like this ${lang}${noun}`
+        : r >= 5.5 ? `The few people who have rated ${item.title} are lukewarm on this ${lang}${noun}`
+          : `The few people who have rated ${item.title} don't rate this ${lang}${noun} well`;
+  } else if (r >= 7.5 && !recent) {
+    // An older film: no "right now" / "current crop" — it isn't new.
+    lead = pick([
+      `${item.title} is one of the better-rated ${lang}${nounPl} out there`,
+      `${item.title} rates well above most ${lang}${nounPl}`,
+      `${item.title} has pulled the kind of numbers most ${lang}${nounPl} never see`,
+      `${item.title} sits near the top of ${lang}${nounPl} on audience ratings`,
+    ]);
   } else if (r >= 7.5) {
     lead = pick([
       `${item.title} lands among the stronger ${lang}${nounPl} on offer right now`,
@@ -114,8 +130,10 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
       ` It holds ${an} ${x}/10 on ${src} from ${n} ratings`,
       ` It's sitting at ${x}/10 on ${src} across ${n} ratings`,
     ], 1);
-    const tail = r >= 7
-      ? pick([`, which puts it comfortably above average.`, ` — comfortably clear of the pack.`, `, well above the typical run of new releases.`], 2)
+    const tail = votes < 50
+      ? ` — a small sample, so treat it with caution.`
+      : r >= 7
+      ? pick([`, which puts it comfortably above average.`, ` — comfortably clear of the pack.`, recent ? `, well above the typical run of new releases.` : `, well above what most films manage.`], 2)
       : r >= 6
         ? pick([`, which puts it around the middle of the pack.`, ` — squarely mid-table.`, `, right around average territory.`], 2)
         : pick([`, which puts it below the bar for most viewers.`, ` — under the line most people draw.`, `, short of where most viewers set the bar.`], 2);
@@ -206,7 +224,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   const provs = Array.isArray(item.providers) ? item.providers : [];
   // The FilmyChill Score (lib/fcscore.js) is the page's verdict when there is one, so the
   // FAQ answer agrees with the stamp at the top; the audience verdict is the fallback.
-  const verdictLabel = item.fcScore ? `FilmyChill Score: ${item.fcScore.verdict} — ${item.fcScore.reason.replace(/\.$/, "")}${item.fcScore.early ? ` (an early read from ${Number(item.fcScore.votes).toLocaleString("en-IN")} ratings)` : ""}` : (item.verdict || "");
+  const verdictLabel = item.fcScore ? `FilmyChill Score: ${item.fcScore.verdict} — ${item.fcScore.reason.replace(/\.$/, "")}${item.fcScore.early ? ` (based on only ${Number(item.fcScore.votes).toLocaleString("en-IN")} ratings)` : ""}` : (item.verdict || "");
 
   // Q1: worth watching. Verdict + reception + the fit line (see whyWatch) — the last part
   // is what stops this answer reading like every other page's answer, and it's the bit an
@@ -224,7 +242,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
     // We still won't invent a verdict — we answer with what we can defend.
     faqs.push({
       q: `Is ${item.title} worth watching?`,
-      a: trim(`It's too early for a verdict — ${item.title} doesn't have enough ratings yet. ${fit.text}`, 420),
+      a: trim(`${isRecent(item, Date.parse(today)) ? `It's too early for a verdict — ${item.title} doesn't have enough ratings yet.` : `There aren't enough ratings for a verdict on ${item.title}.`} ${fit.text}`, 420),
     });
   }
   // Q2: where to watch
