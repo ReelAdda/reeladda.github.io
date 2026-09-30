@@ -153,14 +153,31 @@ function noScoreText(item, nowMs = Date.now()) {
 }
 
 // Attach item.fcScore to every listed title in every market (theatres + streaming).
-function attachFcScores(dataByCode) {
+// Every list in a market's data that gets film pages: the homepage lists AND the extra pools
+// (ottExtra, per-language pools) that generatePages also writes pages for. Scoring only the
+// homepage lists left pool pages unscored — one with 3,492 ratings was told it "needs at
+// least 15" (Sept 2026).
+function itemLists(data) {
+  if (!data) return [];
+  const out = [data.theatres, data.ott, data.ottExtra, data.comingSoon];
+  for (const p of Object.values(data.langPools || {})) if (p) out.push(p.theatres, p.ott);
+  return out.filter(Array.isArray);
+}
+
+// Attach item.fcScore to every title that gets a film page, in every market. `toneFor(imdbId)`
+// fills the critics tone from the takes cache for pool titles the weekly takes step skips.
+function attachFcScores(dataByCode, { toneFor = null, nowMs = Date.now() } = {}) {
   let scored = 0, total = 0;
   for (const data of Object.values(dataByCode || {})) {
-    for (const list of [data && data.theatres, data && data.ott]) {
-      for (const item of list || []) {
+    for (const list of itemLists(data)) {
+      for (const item of list) {
         if (!item) continue;
         total++;
-        const s = fcScore(item);
+        if (!item.criticsTone && toneFor && item.imdbId) {
+          const t = toneFor(item.imdbId);
+          if (t) item.criticsTone = t;
+        }
+        const s = fcScore(item, nowMs);
         if (s) { item.fcScore = s; scored++; } else delete item.fcScore;
         // Early read: every other verdict on the page follows it (see backfill.js).
         if (s && s.early) item.verdict = s.verdict;
@@ -171,6 +188,7 @@ function attachFcScores(dataByCode) {
 }
 
 module.exports = {
+  itemLists,
   EARLY_READ_AGE_DAYS,
   EARLY_READ_MIN_VOTES,
   earlyReadLabel,
