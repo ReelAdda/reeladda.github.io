@@ -4,7 +4,7 @@
 // ============================================================================
 "use strict";
 
-const { earlyReadLabel, noScoreText } = require("./fcscore.js");
+const { earlyReadLabel, isRecent, noScoreText, scoreNeed } = require("./fcscore.js");
 const { meterLevel, meterSvg } = require("./meter.js");
 const fs = require("fs");
 const {
@@ -414,6 +414,19 @@ const FCSB_CSS = [
   "  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }",
 ].join("\n");
 
+// "If you liked this" — exported so the related-films refresh (lib/relrefresh.js) writes the
+// exact same markup into pages that are never rebuilt.
+function simGridHtml(similar, code, linkable = () => true) {
+  const e = escHtml;
+  return similar.length ? `<h2>If you liked this</h2><div class="simgrid">${similar.map((s) => {
+    const exists = linkable(s);
+    const inner = `${s.poster ? `<img src="${e(s.poster)}" alt="${e(s.title)} poster" loading="lazy">` : ""}<div class="st">${e(s.title)}</div><div class="sm">${[s.language, s.kind === "tv" ? "Series" : "Film"].filter(Boolean).map(e).join(" · ")}</div>`;
+    return exists
+      ? `<a class="simcard" href="${e(filmPagePath(code, s.slug))}">${inner}</a>`
+      : `<div class="simcard" style="cursor:default">${inner}</div>`;
+  }).join("")}</div>` : "";
+}
+
 // The header's confidence-tiered audience rating. Exported so the score sweep can refresh it on
 // frozen and back-catalogue pages at the same time as the score, keeping the two in agreement.
 function headRatingHtml(item) {
@@ -421,9 +434,14 @@ function headRatingHtml(item) {
         // Confidence-tiered rating (see lib/score.js). The number stays TMDB's own; what we
         // add is how much to trust it, from the vote count — so an 8.0 on 13 votes reads
         // differently from an 8.2 on 1,200. Colour is backed by a text label, never alone.
-        const sc = filmScore(item);
+        const recent = isRecent(item);
+        const sc = filmScore(item, { recent });
         if (sc.displayRating == null) {
-          return `<div class="rating rating-few"><span class="cdot"></span>Rating still forming <span class="cvotes">— too few ratings yet</span></div>`;
+          if (recent) return `<div class="rating rating-few"><span class="cdot"></span>Rating still forming <span class="cvotes">— too few ratings yet</span></div>`;
+          const n = Number(item.votes || 0);
+          return n > 0
+            ? `<div class="rating rating-few"><span class="cdot"></span>Too few ratings to rate <span class="cvotes">— only ${e(n.toLocaleString("en-IN"))}</span></div>`
+            : `<div class="rating rating-few"><span class="cdot"></span>Not rated on TMDB</div>`;
         }
         return `<div class="rating rating-${sc.tier}"><span class="cdot"></span>★ ${Number(sc.displayRating).toFixed(1)}`
           + ` <span class="ctag">${e(sc.tierLabel)}</span>`
@@ -444,11 +462,13 @@ function fcScoreSection(item) {
     const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
     const aud = s && s.audience
       ? { tag: s.audience, sub: s.early
-        ? `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — early read, weighted toward an average film`
+        ? `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — few ratings, so weighted toward an average film`
         : `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB` }
       : item.rating != null && item.votes
-        ? { tag: "Too few ratings", sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — counts from 50`, none: true }
-        : { tag: "Not rated yet", sub: "No audience ratings yet", none: true };
+        ? { tag: "Too few ratings", sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — counts from ${scoreNeed(item)}`, none: true }
+        : isRecent(item)
+          ? { tag: "Not rated yet", sub: "No audience ratings yet", none: true }
+          : { tag: "Not rated", sub: "No audience ratings on TMDB", none: true };
     const cri = s && s.critics
       ? { tag: s.critics.charAt(0).toUpperCase() + s.critics.slice(1), sub: "From published reviews" }
       : { tag: "No verdict", sub: "No settled critics' reception on record", none: true };
@@ -856,13 +876,7 @@ ${FCSB_CSS}
     return "";
   })()}
   ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
-  ${similar.length ? `<h2>If you liked this</h2><div class="simgrid">${similar.map((s) => {
-    const exists = linkable(s);
-    const inner = `${s.poster ? `<img src="${e(s.poster)}" alt="${e(s.title)} poster" loading="lazy">` : ""}<div class="st">${e(s.title)}</div><div class="sm">${[s.language, s.kind === "tv" ? "Series" : "Film"].filter(Boolean).map(e).join(" · ")}</div>`;
-    return exists
-      ? `<a class="simcard" href="${e(filmPagePath(code, s.slug))}">${inner}</a>`
-      : `<div class="simcard" style="cursor:default">${inner}</div>`;
-  }).join("")}</div>` : ""}
+  ${simGridHtml(similar, code, linkable)}
   ${faqs.length ? `<h2>Frequently asked</h2><div class="faq">${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("")}</div>` : ""}
   <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">See this week's top picks on FilmyChill →</a>
   <a class="btn" href="${e(browsePath(code, 1))}">Browse every film we've covered →</a>
@@ -928,6 +942,7 @@ function generatePages(data, cfg, allSlugSets) {
 }
 
 module.exports = {
+  simGridHtml,
   headRatingHtml,
   FCSB_CSS,
   fcScoreSection,

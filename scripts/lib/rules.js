@@ -207,7 +207,7 @@ function takeConfident(item) {
 }
 
 function verdict(rating, votes) {
-  if (!votes || votes < 10) return "Not enough ratings yet";
+  if (!votes || votes < 10) return "Not enough ratings"; // age-neutral: also used for old films
   if (rating >= 7.5) return "Must watch";
   if (rating >= 6.5) return "Worth a watch";
   if (rating >= 5.5) return "Decent one-time watch";

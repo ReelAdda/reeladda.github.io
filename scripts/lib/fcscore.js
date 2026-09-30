@@ -100,10 +100,11 @@ function criticsTier(item) {
 }
 
 // Early reads, audience only: same tiers, softer wording, never "Must watch".
+// Worded by COUNT, not time: these films are months old, so "early" would be false.
 const EARLY_AUDIENCE_ONLY = {
-  Loved: ["Worth a watch", "Early audiences love it."],
-  Liked: ["Worth a watch", "Early audiences like it."],
-  Lukewarm: ["Skip", "Early audiences are lukewarm on it."],
+  Loved: ["Worth a watch", "The few who rated it love it."],
+  Liked: ["Worth a watch", "The few who rated it like it."],
+  Lukewarm: ["Skip", "The few who rated it are lukewarm on it."],
 };
 
 // Pure: the score for one item, or null when there isn't enough to say.
@@ -125,9 +126,25 @@ function fcScore(item, nowMs = Date.now()) {
   return out;
 }
 
-// "Early read · 21 ratings" — the label every surface shows next to an early read.
+// The label every surface shows next to a few-ratings score: "Based on 21 ratings".
+// (Internally still called an "early read"; readers never see the word "early" on a film
+// that isn't new.)
 function earlyReadLabel(s) {
-  return s && s.early ? `Early read · ${Number(s.votes || 0).toLocaleString("en-IN")} ratings` : "";
+  return s && s.early ? `Based on ${Number(s.votes || 0).toLocaleString("en-IN")} ratings` : "";
+}
+
+// THE RULE FOR ALL RATING WORDING (Sept 2026): words about TIME — "too early", "just
+// released", "still settling", "yet", "NEW" — only for a film that is actually new (out
+// within EARLY_DAYS, or not out). For anything older, say what's true about the COUNT
+// ("few ratings", "only 21 ratings"). isRecent() is the one test every surface uses.
+function isRecent(item, nowMs = Date.now()) {
+  const age = releasedDaysAgo(item, nowMs);
+  return age != null && age < EARLY_DAYS;
+}
+// How many ratings this film needs before it can be scored at all.
+function scoreNeed(item, nowMs = Date.now()) {
+  const age = releasedDaysAgo(item, nowMs);
+  return age != null && age >= EARLY_READ_AGE_DAYS ? EARLY_READ_MIN_VOTES : SCORE_MIN_VOTES;
 }
 
 // What to say when there is NO score. "Too early" is only true for something that has just
@@ -136,19 +153,18 @@ function earlyReadLabel(s) {
 // plainly what's missing, with the real vote count.
 const EARLY_DAYS = 28;
 function noScoreText(item, nowMs = Date.now()) {
-  const d = String((item && (item.freshDate || item.released)) || "").slice(0, 10);
-  const recent = /^\d{4}-\d{2}-\d{2}$/.test(d) && Date.parse(d) > nowMs - EARLY_DAYS * 864e5;
+  const recent = isRecent(item, nowMs);
   if (recent) return { label: "Too early", why: "Just released — not enough ratings or reviews yet." };
   const votes = Number((item && item.votes) || 0);
   const n = votes.toLocaleString("en-IN");
   const who = votes === 1 ? "1 person has" : `${n} people have`;
-  // Older films can score from 15 ratings (an early read); newer ones need 50.
-  const age = releasedDaysAgo(item, nowMs);
-  const need = age != null && age >= EARLY_READ_AGE_DAYS ? EARLY_READ_MIN_VOTES : SCORE_MIN_VOTES;
+  // Older films can score from 15 ratings; newer ones need 50.
+  const need = scoreNeed(item, nowMs);
   if (criticsTier(item) === "mixed") {
     return { label: "Not enough ratings", why: `Critics are split, and ${votes ? `only ${who}` : "nobody has"} rated it — the score needs ${need} ratings to decide.` };
   }
-  if (votes > 0) return { label: "Not enough ratings", why: `Only ${who} rated it so far — the score needs at least ${need}.` };
+  // (No "so far" here: this film isn't new, so don't imply more ratings are on the way.)
+  if (votes > 0) return { label: "Not enough ratings", why: `Only ${who} rated it — the score needs at least ${need}.` };
   return { label: "Not enough ratings", why: "Nobody has rated it yet, and there's no settled critics' reception." };
 }
 
@@ -188,6 +204,8 @@ function attachFcScores(dataByCode, { toneFor = null, nowMs = Date.now() } = {})
 }
 
 module.exports = {
+  isRecent,
+  scoreNeed,
   itemLists,
   EARLY_READ_AGE_DAYS,
   EARLY_READ_MIN_VOTES,

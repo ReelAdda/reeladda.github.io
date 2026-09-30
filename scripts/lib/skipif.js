@@ -1,6 +1,7 @@
 "use strict";
 
 const { fmtRuntime } = require("./core.js");
+const { isRecent } = require("./fcscore.js");
 
 // ============================================================================
 // "DON'T WATCH THIS IF…" — the skip line.
@@ -101,6 +102,9 @@ function confidenceReason(item) {
   // few votes to lean on. Without the vote-count guard this line would land on nearly every
   // film — it is a this-week site, almost everything is new — and a reason that appears
   // everywhere stops being read. Wide variant set for the same reason.
+  // Time words ("so far", "it's early", "still settling") only for a film that is new; an
+  // older film's thin rating is described by its count (the site-wide rule, lib/fcscore.js).
+  if (!isRecent(item)) return countReason(item, votes);
   return pickVariant(item, [
     `you want a safe bet — that rating is resting on ${votes} votes so far`,
     `you'd rather wait for a consensus. Only ${votes} ratings in so far`,
@@ -108,6 +112,16 @@ function confidenceReason(item) {
     `you want a number you can lean on. This one is still settling`,
   ]);
 }
+// Same four ideas, worded by count. Exported: the score sweep swaps these in on old pages.
+function countReason(item, votes) {
+  return pickVariant(item, COUNT_REASONS(votes));
+}
+const COUNT_REASONS = (votes) => [
+  `you want a safe bet — that rating rests on only ${votes} votes`,
+  `you'd rather go with a consensus. Only ${votes} people have rated it`,
+  `you take the score at face value — ${votes} votes is a thin sample`,
+  `you want a number you can lean on. ${votes} ratings isn't much to go on`,
+];
 
 // --- critical split -----------------------------------------------------------
 // Only fires when the take we already generated says critics are divided. Reuses that
@@ -192,4 +206,4 @@ function skipIf(item) {
   return out.length >= MIN_REASONS ? out : null;   // rule 4
 }
 
-module.exports = { skipIf, MIN_REASONS, MAX_REASONS };
+module.exports = { skipIf, MIN_REASONS, MAX_REASONS, COUNT_REASONS };

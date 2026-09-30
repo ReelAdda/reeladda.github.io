@@ -37,14 +37,63 @@ function filmIndexFor(cfg) {
       released: (ld.datePublished || "").slice(0, 10),
       poster: ld.image || "",
       kind: ld["@type"] === "TVSeries" ? "tv" : "movie",
+      // People, for "same actor / same director" neighbours (already in the page's JSON-LD).
+      cast: personNames(ld.actor).slice(0, 8),
+      director: personNames(ld.director || ld.creator).slice(0, 3),
     });
   }
   return out;
 }
 
-// Score a candidate as a neighbour of `item`. Same language is the strongest signal on a
-// site this Indian-language-heavy; a shared genre next; closeness in time last, because a
-// 2026 release recommending a 2019 one reads like filler.
+function personNames(v) {
+  const arr = Array.isArray(v) ? v : v ? [v] : [];
+  return arr.map((p) => (typeof p === "string" ? p : p && p.name) || "").map((n) => String(n).trim()).filter(Boolean);
+}
+
+// LANGUAGE AFFINITY (Sept 2026). "Same language or nothing" sent a Spanish crime film's page to
+// Tamil action films: with no other Spanish titles, every other language counted as equally
+// foreign. Audiences cross languages along real lines — Indian languages into each other
+// (south Indian films especially, via dubbing), European languages into each other,
+// East Asian ones likewise, and English as the international bridge for all non-Indian
+// cinema. The score follows those lines.
+const LANG_GROUPS = {
+  indic: ["hindi", "tamil", "telugu", "malayalam", "kannada", "bengali", "marathi", "punjabi", "gujarati", "odia", "assamese", "urdu", "bhojpuri", "tulu", "konkani"],
+  european: ["spanish", "portuguese", "french", "italian", "catalan", "german", "dutch", "swedish", "danish", "norwegian", "finnish", "polish", "russian", "ukrainian", "greek", "romanian", "czech", "hungarian", "turkish"],
+  eastasian: ["japanese", "korean", "chinese", "mandarin", "cantonese", "thai", "vietnamese", "indonesian", "malay", "tagalog", "filipino"],
+};
+const SOUTH_INDIAN = ["tamil", "telugu", "malayalam", "kannada"];
+const groupOf = (l) => Object.keys(LANG_GROUPS).find((g) => LANG_GROUPS[g].includes(l)) || null;
+function languageAffinity(a, b) {
+  const x = String(a || "").toLowerCase().trim(), y = String(b || "").toLowerCase().trim();
+  if (!x || !y) return 0;
+  if (x === y) return 55;
+  const gx = groupOf(x), gy = groupOf(y);
+  if (gx && gx === gy) return gx === "indic" && SOUTH_INDIAN.includes(x) && SOUTH_INDIAN.includes(y) ? 35 : 30;
+  // English bridges to world cinema; less so to Indian-language cinema.
+  if ((x === "english" && gy !== "indic") || (y === "english" && gx !== "indic")) return 20;
+  if (x === "english" || y === "english") return 10;
+  return 0;
+}
+// "Close" = a neighbour a reader of THIS film would plausibly want: a related language, or a
+// shared actor/director. Anything else is only used when there aren't three close ones.
+const CLOSE_AFFINITY = 20;
+
+const lowerSet = (xs) => new Set((xs || []).map((n) => String(n).toLowerCase()));
+function peopleOverlap(item, cand) {
+  const castA = lowerSet(item.cast), castB = lowerSet(cand.cast);
+  const dirA = lowerSet(personNames(item.director)), dirB = lowerSet(personNames(cand.director));
+  let actors = 0, directors = 0;
+  for (const n of castA) if (castB.has(n)) actors++;
+  for (const n of dirA) if (dirB.has(n)) directors++;
+  return { actors, directors };
+}
+
+// Genres that define what a title IS: a documentary or an animation should be matched with
+// its own kind, and never offered to a reader of the other kind.
+const DEFINING = ["documentary", "animation"];
+
+// Score a candidate as a neighbour of `item`: genre gates, then language affinity, people,
+// genre closeness, format and era order what's left.
 function relatedScore(item, cand) {
   if (!cand.slug || cand.slug === item.slug) return -1;
   const genres = (x) => String(x.genre || "").split("/").map((g) => g.trim().toLowerCase()).filter(Boolean);
@@ -57,17 +106,23 @@ function relatedScore(item, cand) {
   // language alone and outrank a real genre match (measured: one such film took the top
   // slot on the Backrooms page at 75 points against 38 for an actual horror neighbour).
   if (mine.length && shared === 0) return -1;
-  let score = 0;
-  const lang = (x) => String(x.language || "").toLowerCase();
-  // Language still outweighs a full genre match, but now only WITHIN the genre-compatible
-  // set: a reader on a Tamil thriller page wants another Tamil thriller ahead of an
-  // English one, which is the original intent. It can no longer buy a cartoon a place.
-  if (lang(item) && lang(item) === lang(cand)) score += 55;
-  score += Math.min(shared, 2) * 18;
-  if (item.kind === cand.kind) score += 8;
+  for (const d of DEFINING) if (mine.includes(d) !== theirs.includes(d)) return -1;
+  let score = languageAffinity(item.language, cand.language);
+  const { actors, directors } = peopleOverlap(item, cand);
+  score += Math.min(actors, 2) * 22 + Math.min(directors, 1) * 18;
+  // Genre closeness: how much of the two genre sets overlap, plus the lead genre matching.
+  const union = new Set([...mine, ...theirs]).size || 1;
+  score += Math.round((shared / union) * 36);
+  if (mine[0] && mine[0] === theirs[0]) score += 22; // same lead genre: a horror page shows horror first
+  if (item.kind === cand.kind) score += 10;
   const y = (x) => Number(String(x.released || "").slice(0, 4)) || 0;
-  if (y(item) && y(cand)) score += Math.max(0, 12 - Math.abs(y(item) - y(cand)) * 3);
+  if (y(item) && y(cand)) score += Math.max(0, 12 - Math.abs(y(item) - y(cand)) * 2);
   return score;
+}
+function isClose(item, cand) {
+  if (languageAffinity(item.language, cand.language) >= CLOSE_AFFINITY) return true;
+  const { actors, directors } = peopleOverlap(item, cand);
+  return actors + directors > 0;
 }
 
 // Pick N neighbours that ALL have real pages. Deliberately not "the N best": the top of the
@@ -75,10 +130,15 @@ function relatedScore(item, cand) {
 // link into a dozen pages and leave the rest orphaned exactly as they are now. Candidates are
 // taken from a wider band and rotated per source film, so links spread across the archive.
 function relatedFilms(item, index, n = 6) {
-  const ranked = (index || [])
+  const all = (index || [])
     .map((c) => ({ c, s: relatedScore(item, c) }))
     .filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s || (a.c.slug < b.c.slug ? -1 : 1));
+  // Close neighbours only (related language or shared people). Distant ones are used only
+  // when fewer than three close ones exist — and then they're still ranked by the score.
+  // Three right answers beat six with three wrong ones.
+  const close = all.filter((x) => isClose(item, x.c));
+  const ranked = close.length >= 3 ? close : all;
   if (ranked.length <= n) return ranked.map((x) => x.c);
   // The band used to be `max(n*4, min(40, len))`, i.e. up to 40 candidates. On a catalogue
   // of ~40 films that IS the whole list, so the rotation below drew from everything and the
@@ -99,7 +159,7 @@ function relatedFilms(item, index, n = 6) {
 
 // One shared genre (18) plus a year of drift is inside the window; a language switch (55)
 // or a genre-count drop of two is not. Tuned so the band holds real alternatives only.
-const QUALITY_WINDOW = 30;
+const QUALITY_WINDOW = 22;
 
 function hashKey(key) {
   let h = 0;
@@ -289,6 +349,8 @@ function syncHreflangClusters(onChange = null) {
 // needed to protect those — 45d keeps the list genuinely current. Revert knob: set 75.
 
 module.exports = {
+  languageAffinity,
+  isClose,
   BROWSE_PER_PAGE,
   browsePath,
   buildBrowsePage,
