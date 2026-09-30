@@ -1285,15 +1285,15 @@ test("sweepCandidates: frozen/catalogue only, never-scored first, then the stale
   const man = { in: {
     weekly: { tmdbId: 1, kind: "movie" },
     notid: { catalog: true },
-    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20", w: 5 } },
-    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01", w: 5 } },
+    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20", w: 6 } },
+    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01", w: 6 } },
     never: { tmdbId: 4, catalog: true } } };
   assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug), ["notid", "never", "old"], "a page missing its id is tried (the sweep looks the id up)");
   assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 1).map((x) => x.slug), ["notid"], "budget respected");
   man.in.notid.idLookup = "none";
   assert.ok(!W.sweepCandidates(man, "2026-09-29", 10).some((x) => x.slug === "notid"), "…but not retried once no match was provable");
   man.in.oldWording = { tmdbId: 5, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29" } };
-  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 5 } };
+  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 6 } };
   man.in.scoredOld = { tmdbId: 7, archivedOn: "2026-08-10", fcs: { v: "Skip", at: "2026-09-29", w: 3 } };
   const c = W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug);
   assert.ok(c.includes("oldWording") && c.includes("scoredOld") && !c.includes("newWording"), "anything swept under an older version is redone now");
@@ -1312,7 +1312,7 @@ testAsync("sweepScores: writes the score into the page, records it, stops on rep
     assert.deepStrictEqual(r, { checked: 1, updated: 1, errors: 0 });
     const html = fsx.readFileSync("movie/deadpool.html", "utf8");
     assert.ok(/fcsb-stamp fcsb-must">Must watch</.test(html) && /★ 7\.6 from 9,523 ratings on TMDB/.test(html), "9,523 ratings is not 'Too early'");
-    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 5 });
+    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 6 });
     assert.strictEqual(man.in.deadpool.last, "2026-09-29", "sitemap lastmod follows the change");
     fsx.writeFileSync("movie/dated.html", '<html><style>a{}</style><div class="head"><div class="meta">Page updated 18 Aug 2026</div></div>\n  <p class="answer">A</p></html>');
     const man3 = { in: { dated: { tmdbId: 9, kind: "movie", catalog: true } } };
@@ -1335,6 +1335,94 @@ testAsync("back-catalogue pages are born with a real FilmyChill Score, not 'Too 
     const html = fsx.readFileSync("sg/movie/well-rated.html", "utf8");
     assert.ok(/fcsb-stamp fcsb-must">Must watch</.test(html), "7.5 from 400 ratings is a Must watch");
   });
+});
+
+// ---- Visitor votes (lib/vote.js, js/vote.js, lib/votes.js, firestore.rules) ----
+group("visitor votes: button, rules, and the build's vote reader");
+
+test("vote button: only for released films with a TMDB id, hidden until the script runs", () => {
+  const V = require("./lib/vote.js");
+  const h = V.voteWidgetHtml({ kind: "movie", tmdbId: 123, released: "2026-01-01" }, "in", "2026-09-30");
+  assert.ok(/class="fcvote" data-film="movie-123" data-c="in" hidden/.test(h) && /<script src="\/js\/vote\.js" defer><\/script>/.test(h));
+  assert.strictEqual(V.voteWidgetHtml({ kind: "movie", tmdbId: 123, released: "2026-12-01" }, "in", "2026-09-30"), "", "not out yet: nothing to vote on");
+  assert.strictEqual(V.voteWidgetHtml({ kind: "tv", title: "no id" }, "in"), "");
+  assert.strictEqual(V.voteKey({ kind: "tv", tmdbId: 9 }), "tv-9");
+});
+
+test("film pages carry the button and allow exactly the vote endpoints", () => {
+  const html = U.buildFilmPage({ title: "X", slug: "x", kind: "movie", tmdbId: 5, language: "Hindi", released: "2026-01-01", rating: 7, votes: 100 }, "2026-09-30", new Set(["x"]), { code: "in", name: "India" });
+  const csp = html.match(/Content-Security-Policy" content="([^"]*)/)[1];
+  assert.ok(/connect-src 'self' https:\/\/identitytoolkit\.googleapis\.com https:\/\/securetoken\.googleapis\.com https:\/\/firestore\.googleapis\.com/.test(csp));
+  assert.ok(/script-src 'self'/.test(csp) && !/gstatic/.test(csp), "no Firebase SDK is loaded");
+  assert.ok(html.indexOf('class="fcsb-note"') < html.indexOf('class="fcvote"'), "under the score box");
+});
+
+test("old pages: the sweep adds the button once and opens the policy for it", () => {
+  const W = require("./lib/scoresweep.js"), V = require("./lib/vote.js");
+  const page = `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self'">`
+    + `<section class="fcsb" id="filmychill-score"></section>\n  <p class="fcsb-note">note</p><h2>X</h2>`;
+  const once = W.injectVote(page, { kind: "movie", tmdbId: 7, released: "2020-01-01" }, "us");
+  assert.ok(/<p class="fcsb-note">note<\/p>\n  <div class="fcvote" data-film="movie-7" data-c="us"/.test(once));
+  assert.ok(/connect-src 'self' https:\/\/filmychill\.goatcounter\.com https:\/\/identitytoolkit/.test(once));
+  assert.strictEqual(W.injectVote(once, { kind: "movie", tmdbId: 7 }, "us"), once, "idempotent");
+  assert.strictEqual(V.cspAllowVotes(once), once);
+});
+
+test("browser script: REST only, own vote only, remembers the choice", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "vote.js"), "utf8");
+  assert.ok(/identitytoolkit\.googleapis\.com\/v1\/accounts:signUp/.test(src) && /securetoken\.googleapis\.com\/v1\/token/.test(src));
+  assert.ok(/documents:commit/.test(src) && /setToServerValue: "REQUEST_TIME"/.test(src));
+  assert.ok(/\/documents\/votes\/" \+ film \+ "__" \+ a\.uid/.test(src), "document id = film__uid, matching the rules");
+  assert.ok(!/import\(|gstatic/.test(src), "no SDK download");
+  assert.ok(/PROJECT = "filmychill-ca2b3"/.test(src));
+});
+
+test("rules: only your own well-formed vote can be written; nothing can be read from a browser", () => {
+  const r = require("fs").readFileSync(require("path").join(__dirname, "..", "firestore.rules"), "utf8");
+  assert.ok(/allow read, delete: if false;/.test(r));
+  assert.ok(/voteId == request\.resource\.data\.film \+ '__' \+ request\.auth\.uid/.test(r));
+  assert.ok(/request\.resource\.data\.v in \[1, -1\]/.test(r) && /hasOnly\(\['film', 'v', 'c', 't'\]\)/.test(r) && /data\.t == request\.time/.test(r));
+  assert.ok(/match \/\{document=\*\*\} \{\s*allow read, write: if false;/.test(r), "everything else closed");
+});
+
+test("vote reader: floods and agreement are judged sensibly", () => {
+  const V = require("./lib/votes.js");
+  assert.deepStrictEqual(V.floodedFilms({ "movie-1": 120, "movie-2": 60, "movie-3": 20 }, { "movie-2": { up: 40, down: 10 } }).map((f) => f.film), ["movie-1"]);
+  const ag = V.agreement({ "movie-1": { up: 18, down: 2 }, "movie-2": { up: 2, down: 18 }, "movie-3": { up: 10, down: 10 }, "movie-4": { up: 3, down: 1 } },
+    { "movie-1": "Must watch", "movie-2": "Worth a watch", "movie-3": "Skip", "movie-4": "Skip" });
+  assert.deepStrictEqual(ag, { judged: 2, agreed: 1 }, "split votes and under-10 films aren't judged");
+});
+
+testAsync("vote reader: fetches new votes, re-counts touched films, writes totals, and stays dormant without the secret", async () => {
+  const V = require("./lib/votes.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-votes-")); const cwd = process.cwd();
+  try {
+    process.chdir(tmp);
+    assert.deepStrictEqual(await V.syncVotes({ env: {} }), { enabled: false, fetched: 0, films: 0, touched: 0 });
+    const ts = (ms) => ({ ms, toMillis: () => ms });
+    const docs = [
+      { film: "movie-1", v: 1, t: ts(1000) }, { film: "movie-1", v: -1, t: ts(2000) }, { film: "tv-2", v: 1, t: ts(3000) },
+    ];
+    const query = (filters = [], lim = Infinity) => ({
+      where: (f, op, val) => query([...filters, [f, op, val]], lim),
+      orderBy: () => query(filters, lim),
+      limit: (n) => query(filters, n),
+      get: async () => { const rows = docs.filter((d) => filters.every(([f, op, val]) => op === "==" ? d[f] === val : d[f].ms > val.ms)).slice(0, lim);
+        return { empty: !rows.length, size: rows.length, docs: rows.map((d) => ({ data: () => d })) }; },
+      count: () => ({ get: async () => ({ data: () => ({ count: docs.filter((d) => filters.every(([f, op, val]) => op === "==" ? d[f] === val : true)).length }) }) }),
+    });
+    const admin = { connect: () => ({ collection: () => query() }), Timestamp: { fromMillis: (ms) => ts(ms) } };
+    const notes = [];
+    const r = await V.syncVotes({ env: { FIREBASE_SERVICE_ACCOUNT: "{}" }, admin, note: (n) => notes.push(n),
+      dataByCode: { in: { ott: [{ kind: "movie", tmdbId: 1, fcScore: { verdict: "Worth a watch" } }] } } });
+    assert.deepStrictEqual(r, { enabled: true, fetched: 3, films: 2, touched: 2 });
+    assert.deepStrictEqual(JSON.parse(fsx.readFileSync("votes-agg.json", "utf8"))["movie-1"].up, 1);
+    assert.strictEqual(JSON.parse(fsx.readFileSync("votes-state.json", "utf8")).lastT, new Date(3000).toISOString(), "bookmark moves to the newest vote");
+    assert.ok(notes.some((n) => /3 new this run · 3 total across 2 films/.test(n)));
+    const r2 = await V.syncVotes({ env: { FIREBASE_SERVICE_ACCOUNT: "{}" }, admin, note: () => {} });
+    assert.strictEqual(r2.fetched, 0, "nothing re-read next run");
+  } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
 });
 
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
@@ -3927,6 +4015,7 @@ test("noScoreText: early only within 4 weeks; exact counts; split critics named"
   assert.ok(/^Critics are split, and only 1 person has rated it/.test(F.noScoreText({ released: "2026-05-01", votes: 1, criticsTone: "mixed" }, now).why));
   assert.ok(/^Nobody has rated it yet/.test(F.noScoreText({ released: "2020-01-01", votes: 0 }, now).why));
   assert.strictEqual(F.noScoreText({ votes: 0 }, now).label, "Not enough ratings", "no date: never claim 'early'");
+  assert.ok(!/Only 111/.test(F.noScoreText({ released: "2026-01-01", votes: 111 }, now).why), "never 'only 111 … needs 15'");
 });
 test("scored card: FilmyChill verdict, its reason, and the audience rating it came from", () => {
   const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: 7.9, votes: 900, verdict: "Must watch", slug: "t",

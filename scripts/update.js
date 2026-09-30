@@ -27,6 +27,8 @@
 //   fcscore    the FilmyChill Score: audiences + critics, one automated verdict
 //   scoresweep adds/refreshes the score on frozen and back-catalogue pages, a batch per run
 //   relrefresh re-picks "If you liked this" on those pages when the rules change
+//   vote       the "Watched it? Was it worth it?" button (browser half: /js/vote.js)
+//   votes      reads visitors' votes from Firestore into votes-agg.json (build half)
 // A lib module may only require modules above it in this list (tests enforce no cycles).
 
 const fs = require("fs");
@@ -304,6 +306,7 @@ const { attachFcScores } = require("./lib/fcscore.js");
 const { cachedCriticsTone } = require("./lib/editorial.js");
 const { sweepScores } = require("./lib/scoresweep.js");
 const { refreshRelated } = require("./lib/relrefresh.js");
+const { syncVotes } = require("./lib/votes.js");
 const { pruneDeadHubLinks, sweepDeadHubLinks, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 const {
   ABOUT_LASTMOD,
@@ -1410,6 +1413,12 @@ async function main() {
       const r = refreshRelated(pagesManifest, COUNTRIES);
       if (r.checked) console.log(`Related-films refresh: ${r.checked} old pages checked, ${r.updated} updated`);
     } catch (e) { stageFailed("related-films refresh", e); }
+    // Visitors' votes (lib/votes.js): read new ones, keep per-film totals, report privately.
+    // Dormant until the FIREBASE_SERVICE_ACCOUNT secret exists.
+    try {
+      const v = await syncVotes({ dataByCode, note: healthNote });
+      if (v.enabled) console.log(`Votes: ${v.fetched} new, ${v.touched} films re-counted, ${v.films} films with votes`);
+    } catch (e) { stageFailed("votes", e); }
   }
 
   // "Streaming on <platform>" pages (see writeStreamingPages). After every claim for this run
