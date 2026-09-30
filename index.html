@@ -97,6 +97,10 @@
   /* ---- Toolbar ---- */
   .toolbar { max-width: 1100px; margin: 26px auto 0; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  /* Personal notes sit on their own line under the controls; empty, they take no space (not
+     even a flex gap between the language and sort dropdowns). */
+  #personalBar { flex-basis: 100%; order: 10; } #personalBar:empty { display: none; }
+  #langSel { font-weight: 600; }
   .chip { background: var(--card); border: 1px solid var(--line); color: var(--mute); border-radius: 999px;
     padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; transition: all .15s; }
   .chip:hover { border-color: var(--indigo); color: var(--indigo); }
@@ -321,11 +325,12 @@
     .section-head .sub { flex-basis: 100%; margin-left: 0; }
     .section-head h2, .section-head .count { font-size: 22px; }
     .toolbar { margin-top: 16px; gap: 8px; }
-    .chips { flex-wrap: nowrap; overflow-x: auto; width: 100%; padding-bottom: 2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-    .chips::-webkit-scrollbar { display: none; }
-    .chip { flex-shrink: 0; padding: 7px 14px; }
-    #sortSel { flex: 1 1 0; min-width: 0; font-size: 13px; }
-    .share-btn { padding: 8px 12px; gap: 6px; }
+    /* Three tidy rows: tonight + My List · language + sort · share + follow, each pair
+       splitting the width evenly so edges line up. */
+    #langSel, #sortSel { flex: 1 1 calc(50% - 4px); min-width: 0; font-size: 13px; }
+    .tonight-btn, .mylist-btn { flex: 1 1 auto; justify-content: center; }
+    .share-btn { flex: 1 1 calc(50% - 4px); justify-content: center; padding: 8px 12px; gap: 6px; margin-left: 0; }
+    .share-btn .hide-sm { display: inline; }
     main { padding: 6px 16px 60px; }
     .toolbar { padding: 0 16px; }
     .hide-sm { display: none; }
@@ -350,7 +355,7 @@
     .updated { margin-top: 10px; padding: 6px 12px; font-size: 12px; gap: 6px; }
     .tonight-btn { padding: 8px 13px; font-size: 12.5px; }
     .mylist-btn { padding: 7px 12px; font-size: 12.5px; }
-    #sortSel { padding: 7px 10px; font-size: 12.5px; }
+    #sortSel, #langSel { padding: 7px 10px; font-size: 12.5px; }
     .share-btn { padding: 7px 10px; }
   }
   @media (max-width: 340px) { #channelBtn .fol { display: none; } }
@@ -398,7 +403,7 @@
 <div class="toolbar">
   <button class="tonight-btn" onclick="openMood()"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> What to watch tonight?</button>
   <button class="mylist-btn" id="mylistBtn" onclick="toggleMyList()"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List (<span id="wlCount">0</span>)</button>
-  <div class="chips" id="chips"></div>
+  <select id="langSel" aria-label="Filter by language" onchange="setLang(this.value)"><option value="All">All languages</option></select>
   <div id="personalBar"></div>
   <select id="sortSel" aria-label="Sort by">
     <option value="default">Sort: Trending</option>
@@ -1128,11 +1133,13 @@ document.getElementById('overlay').addEventListener('click', e => { if (e.target
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
 document.getElementById('sortSel').addEventListener('change', e => { sortMode = e.target.value; render(); });
 
-function setLang(l, el) {
-  activeLang = l;
-  try { localStorage.setItem('filmychill-lang', l); } catch {}
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
-  el.classList.add('on');
+// Language filter: one dropdown (Sept 2026) — the row of chips crowded the toolbar, most of
+// all on phones. Same filter, same remembered choice.
+function setLang(l) {
+  activeLang = l || 'All';
+  try { localStorage.setItem('filmychill-lang', activeLang); } catch {}
+  const sel = document.getElementById('langSel');
+  if (sel && sel.value !== activeLang) sel.value = activeLang;
   render();
 }
 
@@ -1346,7 +1353,7 @@ fetch('/data-' + code + '.json?v=' + Date.now())
       };
     }
 
-    // Language chips: counts shown, ordered by this week's volume, choice remembered
+    // Language dropdown: counts shown, ordered by this week's volume, choice remembered
     const allCS = [...all, ...(data.comingSoon || [])];
     const counts = {};
     allCS.forEach(x => { if (x.language) counts[x.language] = (counts[x.language] || 0) + 1; });
@@ -1354,8 +1361,11 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     let savedLang = 'All';
     try { savedLang = localStorage.getItem('filmychill-lang') || 'All'; } catch {}
     activeLang = langs.includes(savedLang) ? savedLang : 'All';
-    document.getElementById('chips').innerHTML = ['All', ...langs].map(l =>
-      `<button class="chip${l === activeLang ? ' on' : ''}" onclick="setLang('${esc(l)}', this)">${esc(l)}${l === 'All' ? '' : ` <span style="opacity:.65">${counts[l]}</span>`}</button>`).join('');
+    const total = allCS.length;
+    const langSel = document.getElementById('langSel');
+    langSel.innerHTML = [`<option value="All">All languages (${total})</option>`,
+      ...langs.map(l => `<option value="${esc(l)}">${esc(l)} (${counts[l]})</option>`)].join('');
+    langSel.value = activeLang;
 
     computePersonal();
     render();
