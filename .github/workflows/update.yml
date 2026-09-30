@@ -43,6 +43,8 @@ jobs:
       - name: Fetch latest releases
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          # Visitors' votes (scripts/lib/votes.js). Optional: without it, votes aren't read.
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           # Optional: enables "trailer views" social proof on cards. Create a free key in
           # Google Cloud Console (YouTube Data API v3) and add it as a repo secret named
           # YT_API_KEY. If absent, the build simply skips trailer stats — nothing breaks.
@@ -105,6 +107,8 @@ jobs:
           # a glob pathspec matches tracked paths that are gone from disk.
           git add -A -- ':(glob)streaming/**' 2>/dev/null || true
           git add -A -- ':(glob)people/**' 2>/dev/null || true
+          # Vote totals exist only once the Firebase secret is set.
+          git add -A -- votes-agg.json votes-state.json 2>/dev/null || true
           git add -A -- ':(glob)coming-to-ott/**' 2>/dev/null || true
           # Share cards are OPTIONAL: the directory only exists when the renderer AND the
           # brand fonts are both present. `git add` on a missing pathspec exits 128 and would
