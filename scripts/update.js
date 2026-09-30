@@ -26,6 +26,7 @@
 //   llms       llms.txt / llms-full.txt
 //   fcscore    the FilmyChill Score: audiences + critics, one automated verdict
 //   scoresweep adds/refreshes the score on frozen and back-catalogue pages, a batch per run
+//   relrefresh re-picks "If you liked this" on those pages when the rules change
 // A lib module may only require modules above it in this list (tests enforce no cycles).
 
 const fs = require("fs");
@@ -302,6 +303,7 @@ const {
 const { attachFcScores } = require("./lib/fcscore.js");
 const { cachedCriticsTone } = require("./lib/editorial.js");
 const { sweepScores } = require("./lib/scoresweep.js");
+const { refreshRelated } = require("./lib/relrefresh.js");
 const { pruneDeadHubLinks, sweepDeadHubLinks, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 const {
   ABOUT_LASTMOD,
@@ -1402,6 +1404,12 @@ async function main() {
       for (const m of Object.values(pagesManifest)) for (const e of Object.values(m || {})) if (e && !e.tmdbId && e.idLookup === "none") unidentified++;
       if (unidentified) healthNote(`${unidentified} old film page(s) have no FilmyChill Score: their film couldn't be matched on TMDB`);
     } catch (e) { stageFailed("score sweep", e); }
+    // "If you liked this" on frozen/back-catalogue pages, redone once per rules version
+    // (lib/relrefresh.js). Local only — no API calls.
+    try {
+      const r = refreshRelated(pagesManifest, COUNTRIES);
+      if (r.checked) console.log(`Related-films refresh: ${r.checked} old pages checked, ${r.updated} updated`);
+    } catch (e) { stageFailed("related-films refresh", e); }
   }
 
   // "Streaming on <platform>" pages (see writeStreamingPages). After every claim for this run

@@ -31,12 +31,12 @@ test("low-mid rating -> Decent one-time watch", () => {
 test("low rating -> Skip unless curious", () => {
   assert.strictEqual(U.verdict(4.0, 5000), "Skip unless curious");
 });
-test("too few votes -> Not enough ratings yet (regardless of rating)", () => {
-  assert.strictEqual(U.verdict(9.9, 3), "Not enough ratings yet");
+test("too few votes -> Not enough ratings (regardless of rating; no 'yet' — old films use it too)", () => {
+  assert.strictEqual(U.verdict(9.9, 3), "Not enough ratings");
 });
-test("zero/undefined votes -> Not enough ratings yet", () => {
-  assert.strictEqual(U.verdict(8.0, 0), "Not enough ratings yet");
-  assert.strictEqual(U.verdict(8.0, undefined), "Not enough ratings yet");
+test("zero/undefined votes -> Not enough ratings", () => {
+  assert.strictEqual(U.verdict(8.0, 0), "Not enough ratings");
+  assert.strictEqual(U.verdict(8.0, undefined), "Not enough ratings");
 });
 test("boundary: exactly 7.5 -> Must watch", () => {
   assert.strictEqual(U.verdict(7.5, 100), "Must watch");
@@ -949,7 +949,8 @@ testAsync("catalogue pages are written in past tense, and thin-vote pages carry 
     assert.ok(!/on offer right now|right now\./.test(loved), "born through the archive chain");
     const thin = fsx.readFileSync("sg/movie/barely-rated.html", "utf8");
     // 20 ratings on an older film: an early read, clearly labelled — never "Must watch".
-    assert.ok(/fcsb-conf">Early read · 20 ratings/.test(thin) && !/Must watch/.test(thin), "20 votes never earns 'Must watch'");
+    assert.ok(/fcsb-conf">Based on 20 ratings/.test(thin) && !/Must watch/.test(thin), "20 votes never earns 'Must watch'");
+    assert.ok(!/Early — still settling|too early|Early read/i.test(thin), "an old catalogue film never gets time words");
     assert.ok(/Netflix/.test(thin), "…but the page still answers where to watch");
     assert.strictEqual(manifest.sg["barely-rated"].catalog, true);
   } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
@@ -1229,6 +1230,8 @@ test("refreshHead: today's rating in the header, and no second verdict", () => {
   assert.ok(/<h2>The verdict<\/h2>/.test(o2), "nothing after the header is touched");
   const first = W.refreshHead('<style></style><div class="head"><div class="rating">★ 9.8</div></div><h2>X</h2>', { rating: 6.9, votes: 36 });
   assert.ok(/<div class="rating">★ 6\.9<\/div>/.test(first), "the very first format (number only) is updated too");
+  const thin = W.refreshHead('<style></style><div class="head"><div class="rating">★ 6.4 <span style="color:var(--mute)">(4 votes)</span></div></div><h2>X</h2>', { rating: 6.4, votes: 4, released: "2026-07-10" });
+  assert.ok(/<div class="rating">Too few ratings to rate — only 4<\/div>/.test(thin), "4 votes: no number, same words as weekly pages");
 });
 
 testAsync("resolveTmdbId: accepts a search hit only when the page's own poster matches", async () => {
@@ -1254,20 +1257,43 @@ test("every title that gets a film page is scored — including the extra OTT an
   assert.strictEqual(d.ca.langPools.Hindi.ott[0].fcScore.reason, "Audiences and critics agree.", "critics tone from the cache");
 });
 
+test("refreshCopy: old pages' prose and 'worth watching?' answer follow today's score; new films are left alone", () => {
+  const W = require("./lib/scoresweep.js");
+  const page = '<h2>The verdict</h2><p class="vprose">Arjun Reddy hasn&#39;t gathered enough ratings yet for a firm read on this Telugu film.</p>'
+    + '<details><summary>Is Arjun Reddy worth watching?</summary><div class="fa">It&#39;s too early for a verdict — Arjun Reddy doesn&#39;t have enough ratings yet. 3h of Telugu drama.</div></details>'
+    + '<script type="application/ld+json">{"@type":"Question","name":"Is Arjun Reddy worth watching?","acceptedAnswer":{"@type":"Answer","text":"It\'s too early for a verdict — Arjun Reddy doesn\'t have enough ratings yet. 3h of Telugu drama."}}</script>';
+  const item = { title: "Arjun Reddy", tmdbId: 1, kind: "movie", language: "Telugu", rating: 8.7, votes: 38, released: "2017-08-25" };
+  const s = { verdict: "Worth a watch", reason: "The few who rated it like it.", early: true, votes: 38 };
+  const out = W.refreshCopy(page, item, s);
+  assert.ok(/<h2>What the audience says<\/h2><p class="vprose">[^<]*8\.7\/10[^<]*38 ratings/.test(out), "prose rebuilt from today's numbers");
+  assert.ok(!/too early|yet\b|still/.test(out.replace(/<script[\s\S]*<\/script>/, "")), "no time words left on a 2017 film");
+  assert.ok(/<div class="fa">FilmyChill Score: Worth a watch — The few who rated it like it \(based on only 38 ratings\)\. It rates 8\.7\/10 on audience ratings\. 3h of Telugu drama\.<\/div>/.test(out), "visible answer: new lead, original detail kept");
+  const ld = JSON.parse(out.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+  assert.ok(/^FilmyChill Score: Worth a watch/.test(ld.acceptedAnswer.text) && /3h of Telugu drama\.$/.test(ld.acceptedAnswer.text), "schema answer matches");
+  const noScore = W.refreshCopy(page, { ...item, rating: null, votes: 4 }, null);
+  assert.ok(/<div class="fa">There aren&#39;t enough ratings for a verdict on Arjun Reddy\. 3h of Telugu drama\.<\/div>/.test(noScore));
+  const recent = new Date(Date.now() - 4 * 864e5).toISOString().slice(0, 10);
+  assert.strictEqual(W.refreshCopy(page.replace(/<h2>The verdict[\s\S]*?<\/p>/, ""), { ...item, released: recent, rating: null, votes: 3 }, null),
+    page.replace(/<h2>The verdict[\s\S]*?<\/p>/, ""), "a new film with no score: its 'too early' is true, so the answer is left alone");
+  assert.ok(/<div class="fa">FilmyChill Score: Worth a watch/.test(W.refreshCopy(page, { ...item, released: recent }, s)), "a new film WITH a score says so");
+  const odd = page.replace("It&#39;s too early for a verdict — Arjun Reddy doesn&#39;t have enough ratings yet.", "A cult favourite.");
+  assert.ok(/A cult favourite\./.test(W.refreshCopy(odd, item, s)), "text this site didn't write is never replaced");
+});
+
 test("sweepCandidates: frozen/catalogue only, never-scored first, then the stalest; fresh ones wait", () => {
   const W = require("./lib/scoresweep.js");
   const man = { in: {
     weekly: { tmdbId: 1, kind: "movie" },
     notid: { catalog: true },
-    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20", w: 4 } },
-    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01", w: 4 } },
+    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20", w: 5 } },
+    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01", w: 5 } },
     never: { tmdbId: 4, catalog: true } } };
   assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug), ["notid", "never", "old"], "a page missing its id is tried (the sweep looks the id up)");
   assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 1).map((x) => x.slug), ["notid"], "budget respected");
   man.in.notid.idLookup = "none";
   assert.ok(!W.sweepCandidates(man, "2026-09-29", 10).some((x) => x.slug === "notid"), "…but not retried once no match was provable");
   man.in.oldWording = { tmdbId: 5, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29" } };
-  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 4 } };
+  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 5 } };
   man.in.scoredOld = { tmdbId: 7, archivedOn: "2026-08-10", fcs: { v: "Skip", at: "2026-09-29", w: 3 } };
   const c = W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug);
   assert.ok(c.includes("oldWording") && c.includes("scoredOld") && !c.includes("newWording"), "anything swept under an older version is redone now");
@@ -1286,7 +1312,7 @@ testAsync("sweepScores: writes the score into the page, records it, stops on rep
     assert.deepStrictEqual(r, { checked: 1, updated: 1, errors: 0 });
     const html = fsx.readFileSync("movie/deadpool.html", "utf8");
     assert.ok(/fcsb-stamp fcsb-must">Must watch</.test(html) && /★ 7\.6 from 9,523 ratings on TMDB/.test(html), "9,523 ratings is not 'Too early'");
-    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 4 });
+    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 5 });
     assert.strictEqual(man.in.deadpool.last, "2026-09-29", "sitemap lastmod follows the change");
     fsx.writeFileSync("movie/dated.html", '<html><style>a{}</style><div class="head"><div class="meta">Page updated 18 Aug 2026</div></div>\n  <p class="answer">A</p></html>');
     const man3 = { in: { dated: { tmdbId: 9, kind: "movie", catalog: true } } };
@@ -1968,7 +1994,9 @@ test("archivePatchHtml: OTT availability lines stay untouched; only time-relativ
   assert.ok(!U.archivePatchHtml(midPage, "India").changed, "nothing to patch on a mid-band streaming page");
   // Top-band lead says "right now" -> patched even on an OTT page, but the streaming
   // availability sentence must survive verbatim (it stays true after archiving).
-  const top = { ...mid, rating: 8.0, verdict: "Must watch" };
+  // (A NEW film's top-band lead may say "right now"; an older film's never does — see below.)
+  const recentIso = new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10);
+  const top = { ...mid, rating: 8.0, verdict: "Must watch", released: recentIso, freshDate: recentIso };
   const topPage = U.buildFilmPage(top, "2026-06-25", new Set(["s"]), { code: "in", name: "India", region: "IN" });
   const before = /In India you can stream it on [^<]+/.exec(topPage);
   const out = U.archivePatchHtml(topPage, "India");
@@ -2491,18 +2519,33 @@ test("archive lead patch keeps facts, grammar, and is idempotent", () => {
   const twice = U.archivePatchHtml(once.html, "India");
   assert.strictEqual(twice.html, once.html, "patch must be idempotent");
   // top band: rating fact survives, tense flips
-  const top = U.escHtml(U.buildVerdictProse({ title: "Y", tmdbId: 1, kind: "tv", language: "Hindi", rating: 8.1, votes: 900, providers: ["Netflix"] }));
+  const top = U.escHtml(U.buildVerdictProse({ title: "Y", tmdbId: 1, kind: "tv", language: "Hindi", rating: 8.1, votes: 900, providers: ["Netflix"], released: freshIso }));
   const p = U.archivePatchHtml(top, "India").html;
   assert.ok(/8\.1\/10 on TMDB/.test(p), p);
   assert.ok(/landed among|stood out|ranked near|numbers most/.test(p), p);
+  // An older (or undated) film is never described with "right now" / "current" in the first place.
+  for (let id = 1; id <= 8; id++) {
+    const old = U.buildVerdictProse({ title: "Z", tmdbId: id, kind: "movie", language: "Hindi", rating: 8.1, votes: 900, released: "2017-08-25" });
+    assert.ok(!/right now|at the moment|current|new releases/.test(old), old);
+  }
 });
+test("few ratings (10–49): prose stays cautious and says it's a small sample", () => {
+  for (let id = 1; id <= 6; id++) {
+    const p = U.buildVerdictProse({ title: "Arjun Reddy", tmdbId: id, kind: "movie", language: "Telugu", rating: 8.7, votes: 38, released: "2017-08-25" });
+    assert.ok(/^The few people who have rated Arjun Reddy rate this Telugu film highly\./.test(p), p);
+    assert.ok(/across 38 ratings|from 38 ratings/.test(p) && /small sample/.test(p), p);
+    assert.ok(!/clear of the pack|never see|top of/.test(p), "no big claims on 38 ratings: " + p);
+  }
+});
+
 test("unrated leads are age-aware: recency claims only within ~3 weeks of release", () => {
   const iso = (daysAgo) => new Date(Date.now() - daysAgo * 86400000).toISOString().slice(0, 10);
   for (let id = 1; id <= 6; id++) {
     const oldFilm = { title: "T", tmdbId: id, kind: "movie", language: "English", rating: null, votes: 0, released: iso(60), platform: "Theatres" };
     const p = U.buildVerdictProse(oldFilm);
     assert.ok(!/brand new|only just|is a fresh/.test(p), "recency claim on a 60-day-old film: " + p);
-    assert.ok(/enough ratings|too thin|short of the ratings/.test(p), p);
+    assert.ok(/enough ratings|too thin|too few ratings/.test(p), p);
+    assert.ok(!/\byet\b|still /.test(p), "no time words on a 60-day-old film: " + p);
     const fresh = { ...oldFilm, released: iso(5) };
     assert.ok(/brand new|only just/.test(U.buildVerdictProse(fresh)), "a 5-day-old film may say it's new");
     // no release date to judge by -> never claim recency
@@ -2515,8 +2558,8 @@ test("aged-unrated leads freeze to past tense like every other time-relative lea
   for (let id = 1; id <= 6; id++) {
     const page = U.escHtml(U.buildVerdictProse({ title: "T&x", tmdbId: id, kind: "tv", language: "Hindi", rating: null, votes: 0, released: iso(90), platform: "Theatres" }));
     const { html } = U.archivePatchHtml(page, "India");
-    assert.ok(!/yet for a firm read|still short of|still too thin/.test(html), html);
-    assert.ok(/never gathered|stayed short|stayed too thin/.test(html), html);
+    assert.ok(!/yet for a firm read|still short of|still too thin|has too few ratings for|aren&#39;t enough ratings on|are too thin/.test(html), html);
+    assert.ok(/had too few ratings|weren&#39;t enough ratings|were too thin/.test(html), html);
   }
 });
 test("no seriess: series pluralizes as series in every band", () => {
@@ -3842,15 +3885,15 @@ test("unscored card: 'Too early' only when it's just out; otherwise says what's 
   assert.ok(/fcs fcs-early/.test(html) && html.includes("Too early") && html.includes("Just released"));
   const old = U.ssrCard({ title: "Old", language: "Hindi", genre: "Drama", kind: "movie", rating: 5.7, votes: 9, released: "2026-03-10", slug: "old" }, 0, "in");
   assert.ok(!old.includes("Too early"), "a March release is not 'too early'");
-  assert.ok(old.includes("Not enough ratings") && old.includes("Only 9 people have rated it so far — the score needs at least 15."), "older films need 15 (early read)");
+  assert.ok(old.includes("Not enough ratings") && old.includes("Only 9 people have rated it — the score needs at least 15."), "older films need 15 (early read)");
 });
 
 test("early reads: older films score from 15 ratings — shrunk toward average, never Must watch, always labelled", () => {
   const F = require("./lib/fcscore.js");
   const now = Date.parse("2026-09-29T00:00:00Z");
   const ikka = F.fcScore({ rating: 5.7, votes: 21, released: "2026-07-10" }, now);
-  assert.deepStrictEqual(ikka, { verdict: "Skip", reason: "Early audiences are lukewarm on it.", audience: "Lukewarm", critics: null, basis: "audience", early: true, votes: 21 });
-  assert.strictEqual(F.earlyReadLabel(ikka), "Early read · 21 ratings");
+  assert.deepStrictEqual(ikka, { verdict: "Skip", reason: "The few who rated it are lukewarm on it.", audience: "Lukewarm", critics: null, basis: "audience", early: true, votes: 21 });
+  assert.strictEqual(F.earlyReadLabel(ikka), "Based on 21 ratings");
   assert.ok(Math.abs(F.shrunkRating(5.7, 21) - 6.26) < 0.01, "21 ratings of 5.7 read as ~6.3");
   const gem = F.fcScore({ rating: 9.4, votes: 45, released: "2026-01-01", criticsTone: "positive" }, now);
   assert.strictEqual(gem.verdict, "Worth a watch", "even loved by audiences and critics: no Must watch on thin data");
@@ -3861,12 +3904,13 @@ test("early reads: older films score from 15 ratings — shrunk toward average, 
 
 test("early reads show their label on cards and film pages, and never win Pick of the Week", () => {
   const W = require("./lib/weekly.js"), S = require("./lib/surfaces.js");
-  const s = { verdict: "Skip", reason: "Early audiences are lukewarm on it.", audience: "Lukewarm", critics: null, basis: "audience", early: true, votes: 21 };
+  const s = { verdict: "Skip", reason: "The few who rated it are lukewarm on it.", audience: "Lukewarm", critics: null, basis: "audience", early: true, votes: 21 };
   const card = W.ssrCard({ title: "Ikka", slug: "ikka", kind: "movie", rating: 5.7, votes: 21, released: "2026-07-10", fcScore: s }, 0, "in");
-  assert.ok(/<span class="fcs-tag">Early read · 21 ratings<\/span>/.test(card));
+  assert.ok(/<span class="fcs-tag">Based on 21 ratings<\/span>/.test(card));
   const page = U.buildFilmPage({ title: "Ikka", slug: "ikka", kind: "movie", language: "Hindi", rating: 5.7, votes: 21, released: "2026-07-10", fcScore: s }, "2026-09-29", new Set(["ikka"]), { code: "in", name: "India" });
-  assert.ok(/fcsb-stamp fcsb-skip">Skip<\/span><span class="fcsb-conf">Early read · 21 ratings<\/span>/.test(page));
-  assert.ok(/early read, weighted toward an average film/.test(page) && /\(an early read from 21 ratings\)/.test(page), "audience row and FAQ say so too");
+  assert.ok(/fcsb-stamp fcsb-skip">Skip<\/span><span class="fcsb-conf">Based on 21 ratings<\/span>/.test(page));
+  assert.ok(/few ratings, so weighted toward an average film/.test(page) && /\(based on only 21 ratings\)/.test(page), "audience row and FAQ say so too");
+  assert.ok(!/Early — still settling|still settling|too early|Early read/i.test(page), "a July film's page has no time words anywhere");
   const now = new Date().toISOString();
   const recent = new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10);
   assert.strictEqual(S.choosePick([{ title: "E", released: recent, fcScore: { ...s, verdict: "Worth a watch" } }], { code: "in" }, now), null);
@@ -3878,7 +3922,7 @@ test("noScoreText: early only within 4 weeks; exact counts; split critics named"
   assert.strictEqual(F.noScoreText({ released: "2026-09-20", votes: 2 }, now).label, "Too early");
   assert.strictEqual(F.noScoreText({ released: "2026-10-15" }, now).label, "Too early", "unreleased counts as early");
   const thin = F.noScoreText({ released: "2026-07-10", votes: 9 }, now);
-  assert.deepStrictEqual(thin, { label: "Not enough ratings", why: "Only 9 people have rated it so far — the score needs at least 15." });
+  assert.deepStrictEqual(thin, { label: "Not enough ratings", why: "Only 9 people have rated it — the score needs at least 15." });
   assert.ok(/needs at least 50\.$/.test(F.noScoreText({ released: "2026-08-20", votes: 30 }, now).why), "under two months old: still 50");
   assert.ok(/^Critics are split, and only 1 person has rated it/.test(F.noScoreText({ released: "2026-05-01", votes: 1, criticsTone: "mixed" }, now).why));
   assert.ok(/^Nobody has rated it yet/.test(F.noScoreText({ released: "2020-01-01", votes: 0 }, now).why));
@@ -4186,6 +4230,88 @@ test("links spread across the archive instead of funnelling into a few pages", (
   for (const seed of idx.slice(0, 40)) for (const r of U.relatedFilms(seed, idx, 6)) hit.add(r.slug);
   assert.ok(hit.size > 30, `40 pages should reach many distinct targets, reached ${hit.size}`);
 });
+test("language affinity follows how audiences actually cross languages", () => {
+  const G = require("./lib/graph.js");
+  assert.strictEqual(G.languageAffinity("Spanish", "Spanish"), 55);
+  assert.ok(G.languageAffinity("Tamil", "Telugu") > G.languageAffinity("Tamil", "Hindi"), "south Indian languages sit closest (dubbing)");
+  assert.ok(G.languageAffinity("Hindi", "Marathi") >= 30, "Indian languages cross");
+  assert.ok(G.languageAffinity("Spanish", "Portuguese") >= 25 && G.languageAffinity("Korean", "Japanese") >= 25);
+  assert.ok(G.languageAffinity("Spanish", "English") >= 20, "English bridges world cinema");
+  assert.strictEqual(G.languageAffinity("Spanish", "Tamil"), 0, "a Spanish film and a Tamil film share no audience by default");
+  assert.ok(G.languageAffinity("Hindi", "English") < G.languageAffinity("Hindi", "Kannada"));
+});
+
+test("a Spanish crime film recommends Spanish, then English/European crime — never Indian films when better exist", () => {
+  const G = require("./lib/graph.js");
+  const seed = { slug: "facing-el-chapo", title: "Facing El Chapo", language: "Spanish", genre: "Crime / Action", released: "2026-08-21", kind: "movie", cast: ["Alfonso Herrera"], director: ["Chava Cartas"] };
+  const idx = [
+    ...["a", "b", "c", "d", "e", "f"].map((x) => ({ slug: `tamil-${x}`, title: x, language: "Tamil", genre: "Action / Crime", released: "2026-08-01", kind: "movie" })),
+    ...["a", "b", "c", "d"].map((x) => ({ slug: `eng-${x}`, title: x, language: "English", genre: "Crime / Thriller", released: "2025-05-01", kind: "movie" })),
+    { slug: "final-problem", title: "The Final Problem", language: "Spanish", genre: "Crime / Mystery", released: "2026-06-01", kind: "movie" },
+    { slug: "fr", title: "French", language: "French", genre: "Crime / Drama", released: "2024-01-01", kind: "movie" },
+  ];
+  const picks = G.relatedFilms(seed, idx, 6).map((x) => x.slug);
+  assert.strictEqual(picks.length, 6);
+  assert.ok(!picks.some((x) => x.startsWith("tamil")), picks.join(","));
+  const ranked = [...idx].sort((a, b) => G.relatedScore(seed, b) - G.relatedScore(seed, a));
+  assert.strictEqual(ranked[0].slug, "final-problem", "same language ranks first");
+});
+
+test("shared actors and directors make a neighbour — and can cross languages", () => {
+  const G = require("./lib/graph.js");
+  const ddlj = { slug: "ddlj", language: "Hindi", genre: "Romance / Drama", released: "1995-10-20", kind: "movie", cast: ["Shah Rukh Khan", "Kajol"], director: "Aditya Chopra" };
+  const kkhh = { slug: "kkhh", language: "Hindi", genre: "Romance / Drama", released: "1998-10-16", kind: "movie", cast: ["Shah Rukh Khan", "Kajol", "Rani Mukerji"], director: ["Karan Johar"] };
+  const other = { slug: "x", language: "Hindi", genre: "Romance / Drama", released: "1998-01-01", kind: "movie", cast: ["Someone"], director: ["Someone Else"] };
+  assert.ok(G.relatedScore(ddlj, kkhh) >= G.relatedScore(ddlj, other) + 40, "two shared leads outrank a same-genre stranger");
+  const dubbed = { slug: "y", language: "Spanish", genre: "Romance", released: "1999-01-01", kind: "movie", cast: ["Shah Rukh Khan"] };
+  assert.ok(G.isClose(ddlj, dubbed), "a shared star is reason enough, whatever the language");
+});
+
+test("documentaries and animation only recommend their own kind", () => {
+  const G = require("./lib/graph.js");
+  const doc = { slug: "d", language: "English", genre: "Documentary / Crime", kind: "movie" };
+  const crime = { slug: "c", language: "English", genre: "Crime / Drama", kind: "movie" };
+  const doc2 = { slug: "d2", language: "English", genre: "Documentary / History", kind: "movie" };
+  assert.strictEqual(G.relatedScore(doc, crime), -1);
+  assert.strictEqual(G.relatedScore(crime, doc), -1, "and a crime drama page doesn't offer a documentary");
+  assert.strictEqual(G.relatedScore({ ...doc, genre: "Documentary" }, doc2) > 0, true);
+  assert.strictEqual(G.relatedScore({ slug: "f", language: "English", genre: "Family / Comedy", kind: "movie" }, { slug: "a", language: "English", genre: "Animation / Family", kind: "movie" }), -1);
+});
+
+test("film index carries cast and director for people-based matching", () => {
+  const idx = U.filmIndexFor({ code: "in" });
+  const withCast = idx.filter((f) => f.cast && f.cast.length);
+  assert.ok(withCast.length > idx.length * 0.5, `only ${withCast.length}/${idx.length} carry cast`);
+  assert.ok(idx.some((f) => f.director && f.director.length));
+});
+
+test("related-films refresh rewrites old pages' section once, removing picks the rules now reject", () => {
+  const R = require("./lib/relrefresh.js");
+  const sec = '<h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/movie/tamil.html"><div class="st">T</div><div class="sm">Tamil · Film</div></a></div>';
+  const page = `<div class="wrap">${sec}\n  <h2>Frequently asked</h2></div>`;
+  const next = '<h2>If you liked this</h2><div class="simgrid">NEW</div>';
+  assert.strictEqual(R.replaceRelated(page, next), `<div class="wrap">${next}\n  <h2>Frequently asked</h2></div>`);
+  const none = '<div class="wrap">\n  <h2>Frequently asked</h2></div>';
+  assert.ok(R.replaceRelated(none, next).indexOf(next) < R.replaceRelated(none, next).indexOf("Frequently asked"), "added where the builder puts it");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-rel-")); const cwd = process.cwd();
+  try {
+    process.chdir(tmp); fsx.mkdirSync("movie");
+    const ld = (o) => `<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "Movie", ...o })}</script>`;
+    fsx.writeFileSync("movie/chapo.html", ld({ name: "Chapo", genre: "Crime / Action", inLanguage: "Spanish", datePublished: "2026-08-21" }) + page);
+    for (const [slug, lang] of [["tamil", "Tamil"], ["sp1", "Spanish"], ["sp2", "Spanish"], ["en1", "English"]]) {
+      fsx.writeFileSync(`movie/${slug}.html`, ld({ name: slug, genre: "Crime / Action", inLanguage: lang, datePublished: "2026-01-01" }));
+    }
+    const man = { in: { chapo: { catalog: true } } };
+    const r = R.refreshRelated(man, [{ code: "in" }]);
+    assert.deepStrictEqual(r, { checked: 1, updated: 1 });
+    const out = fsx.readFileSync("movie/chapo.html", "utf8");
+    assert.ok(/sp1\.html/.test(out) && /en1\.html/.test(out) && !/tamil\.html/.test(out), "Spanish and English in, Tamil out");
+    assert.strictEqual(man.in.chapo.rel, R.REL_VERSION);
+    assert.deepStrictEqual(R.refreshRelated(man, [{ code: "in" }]), { checked: 0, updated: 0 }, "done once per rules version");
+  } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
+});
+
 test("browse index paginates and links every page to every other page", () => {
   const idx = Array.from({ length: 300 }, (_, i) => ({ slug: `f${i}`, title: `Film ${i}`, language: "Hindi", released: "2026-01-01", kind: "movie" }));
   const html = U.buildBrowsePage(idx, { code: "in", name: "India" }, 2, 3, "26 August 2026");
@@ -4210,9 +4336,12 @@ test("card carries verdict, score, title and brand", () => {
   assert.ok(/1200/.test(svg) && /630/.test(svg), "og-standard dimensions");
 });
 test("never prints a score the data can't support", () => {
-  const svg = U.shareCardSvg({ slug: "x", title: "X", rating: 9.4, votes: 3, verdict: "Not enough ratings yet" }, { code: "in" });
+  const recent = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
+  const svg = U.shareCardSvg({ slug: "x", title: "X", rating: 9.4, votes: 3, released: recent, verdict: "Not enough ratings" }, { code: "in" });
   assert.ok(!/9\.4/.test(svg), "3 votes must not become a headline score");
-  assert.ok(/NEW/.test(svg) && /too early to rate/.test(svg));
+  assert.ok(/NEW/.test(svg) && /too early to rate/.test(svg), "a new film may say it's early");
+  const old = U.shareCardSvg({ slug: "x", title: "X", rating: 9.4, votes: 3, released: "2017-08-25", verdict: "Not enough ratings" }, { code: "in" });
+  assert.ok(!/NEW|too early/.test(old) && /too few ratings/.test(old), "an old film is never 'NEW' or 'too early'");
 });
 test("titles and blurbs are escaped, not injected", () => {
   const svg = U.shareCardSvg({ slug: "x", title: 'Q&A: <script>alert(1)</script> "Hi"', rating: 7, votes: 500, verdict: "Worth a watch" }, { code: "in" });
@@ -5033,8 +5162,15 @@ test("never restates the verdict the page already shows", () => {
   assert.ok(!r.some((x) => /too new|consensus|still settling|votes so far/i.test(x)));
 });
 test("low-vote confidence fires only when a rating is actually displayed", () => {
-  const r = skipIf(_sf({ rating: 8.1, votes: 20, runtime: 160 })) || [];
+  const recent = new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10);
+  const r = skipIf(_sf({ rating: 8.1, votes: 20, runtime: 160, released: recent })) || [];
   assert.ok(r.some((x) => /20 votes|still settling|consensus/i.test(x)));
+  // An old film: same worry, worded by count — never "so far", "early" or "still settling".
+  for (let id = 1; id <= 8; id++) {
+    const old = skipIf(_sf({ tmdbId: id, rating: 8.1, votes: 20, runtime: 160, released: "2017-08-25" })) || [];
+    const line = old.find((x) => /20 (votes|ratings|people)/.test(x));
+    assert.ok(line && !/so far|early|still/.test(line), String(line));
+  }
 });
 test("genre alone is never a reason (rule 2)", () => {
   const r = skipIf(_sf({ genre: "Horror / Thriller", cert: "U/A 13+", runtime: 95 }));
