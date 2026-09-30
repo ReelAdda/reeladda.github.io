@@ -1,0 +1,31 @@
+rules_version = '2';
+
+// FilmyChill — Firestore security rules.
+// Paste into Firebase console → Firestore Database → Rules → Publish.
+//
+// Visitors (anonymous Firebase identities) may only write THEIR OWN vote on a film:
+//   votes/<film>__<uid>   film = "movie-123" | "tv-456", v = 1 | -1, c = country code,
+//                          t = the server's time of the write (set by the request, not the client)
+// Nobody can read votes from a browser; the build reads them with its service account,
+// which bypasses these rules. Everything else in the database is closed.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /votes/{voteId} {
+      allow read, delete: if false;
+      allow create, update: if request.auth != null
+        && voteId == request.resource.data.film + '__' + request.auth.uid
+        && request.resource.data.keys().hasOnly(['film', 'v', 'c', 't'])
+        && request.resource.data.film is string
+        && request.resource.data.film.matches('^(movie|tv)-[0-9]{1,9}$')
+        && request.resource.data.v in [1, -1]
+        && request.resource.data.c is string
+        && request.resource.data.c.matches('^[a-z]{2}$')
+        && request.resource.data.t == request.time;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
