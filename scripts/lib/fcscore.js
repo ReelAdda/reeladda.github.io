@@ -163,6 +163,9 @@ function noScoreText(item, nowMs = Date.now()) {
   if (criticsTier(item) === "mixed") {
     return { label: "Not enough ratings", why: `Critics are split, and ${votes ? `only ${who}` : "nobody has"} rated it — the score needs ${need} ratings to decide.` };
   }
+  // Enough votes but no usable rating (TMDB sometimes has a count and no average): never
+  // claim "only 111 people … needs 15".
+  if (votes >= need) return { label: "Not enough ratings", why: "There's no usable audience rating for it on TMDB yet, and no settled critics' reception." };
   // (No "so far" here: this film isn't new, so don't imply more ratings are on the way.)
   if (votes > 0) return { label: "Not enough ratings", why: `Only ${who} rated it — the score needs at least ${need}.` };
   return { label: "Not enough ratings", why: "Nobody has rated it yet, and there's no settled critics' reception." };

@@ -5,6 +5,7 @@
 "use strict";
 
 const { earlyReadLabel, isRecent, noScoreText, scoreNeed } = require("./fcscore.js");
+const { VOTE_CONNECT, VOTE_CSS, voteWidgetHtml } = require("./vote.js");
 const { meterLevel, meterSvg } = require("./meter.js");
 const fs = require("fs");
 const {
@@ -410,8 +411,9 @@ const FCSB_CSS = [
   "  .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }",
   "  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }",
   "  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }",
-  "  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }",
   "  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }",
+  ...VOTE_CSS,
+  "  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }",
 ].join("\n");
 
 // "If you liked this" — exported so the related-films refresh (lib/relrefresh.js) writes the
@@ -647,7 +649,7 @@ ${(() => {
   return `<meta property="og:image" content="${e(src)}">${dims}${alt}`;
 })()}
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="${cspWith("default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'")}">${analyticsTag()}
+<meta http-equiv="Content-Security-Policy" content="${cspWith(`default-src 'self'; connect-src 'self' ${VOTE_CONNECT.join(" ")}; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'`)}">${analyticsTag()}
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 <script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>${faqLd ? `
 <script type="application/ld+json">${JSON.stringify(faqLd)}</script>` : ""}
@@ -743,6 +745,7 @@ ${FCSB_CSS}
     </div>
   </div>
   ${fcScoreSection(item)}
+  ${voteWidgetHtml(item, code)}
   ${(() => {
     // Lead answer line. The GSC data showed pages ranking on page 1 for "where to watch [film]"
     // and "[film] ott release date" but pulling <1% CTR, and answer engines had nothing at the

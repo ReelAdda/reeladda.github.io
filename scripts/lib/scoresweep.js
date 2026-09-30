@@ -23,6 +23,7 @@ const { escHtml } = require("./core.js");
 const { buildVerdictProse } = require("./filmcopy.js");
 const { isRecent } = require("./fcscore.js");
 const { COUNT_REASONS } = require("./skipif.js");
+const { cspAllowVotes, voteWidgetHtml } = require("./vote.js");
 const { sleep, tmdb } = require("./tmdb.js");
 
 // 1,500 a run clears the ~8,000-page backlog in about three runs; after that each run only has
@@ -35,7 +36,8 @@ const RESCORE_DAYS = 30;
 // page swept under an older version is redone (not only the unscored ones).
 // 5 = one wording rule everywhere (time words only for new films; header tier, prose and the
 // "worth watching?" answer all rewritten to match the score).
-const SWEEP_WORDING = 5;
+// 6 = the "Watched it? Was it worth it?" vote button (lib/vote.js) added to every old page.
+const SWEEP_WORDING = 6;
 
 // Pure: put (or replace) the score section in an existing film page. Returns the new HTML.
 function injectScoreSection(html, section) {
@@ -162,6 +164,18 @@ function refreshCopy(html, item, s) {
   return out;
 }
 
+// Pure: add the vote button right after the score note (where weekly pages have it), and
+// allow its endpoints in the page's security policy. Idempotent.
+function injectVote(html, item, code) {
+  if (html.includes('class="fcvote"')) return html;
+  const widget = voteWidgetHtml(item, code);
+  if (!widget) return html;
+  const m = html.match(/<p class="fcsb-note">[\s\S]*?<\/p>/);
+  if (!m) return html;
+  const at = m.index + m[0].length;
+  return cspAllowVotes(html.slice(0, at) + "\n  " + widget + html.slice(at));
+}
+
 // Pure: which manifest entries to (re)score this run.
 function sweepCandidates(pagesManifest, today, limit) {
   const stale = new Date(Date.parse(today) - RESCORE_DAYS * 864e5).toISOString().slice(0, 10);
@@ -232,7 +246,7 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
     const s = fcScore(item);
     if (s) item.fcScore = s;
     Object.assign(item, { title: e.title || d.title || d.name, tmdbId: e.tmdbId, kind: e.kind === "tv" ? "tv" : "movie", language: e.lang || null });
-    let next = refreshCopy(refreshHead(injectScoreSection(html, fcScoreSection(item)), item), item, s);
+    let next = injectVote(refreshCopy(refreshHead(injectScoreSection(html, fcScoreSection(item)), item), item, s), item, code);
     // The page changed, so its "Page updated" line should say so.
     if (next !== html) next = next.replace(/(>Page updated )[^<]+/, (m, a) => `${a}${fmtDateFull(today, localeFor(code))}`);
     e.fcs = { v: s ? s.verdict : "early", at: today, w: SWEEP_WORDING };
@@ -249,6 +263,7 @@ module.exports = {
   RESCORE_DAYS,
   SCORE_SWEEP_BATCH,
   injectScoreSection,
+  injectVote,
   refreshCopy,
   refreshHead,
   resolveTmdbId,
