@@ -1187,12 +1187,12 @@ test("pick: actually new, FilmyChill Score first, market recognition breaks ties
   assert.strictEqual(S.choosePick([{ ...items[1], freshDate: "2026-10-05" }], { code: "in" }, now), null, "a future date is not new");
 });
 
-test("phones: headings wrap cleanly, chips scroll in one row, badges share a line, note clamps", () => {
+test("phones: headings wrap cleanly, language is one dropdown, badges share a line, note clamps", () => {
   const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
   assert.ok(/\.section-head \{ display: flex; align-items: baseline; flex-wrap: wrap;/.test(src));
   assert.ok(/\.section-head h2, \.section-head \.count \{ white-space: nowrap; \}/.test(src));
   const m = src.slice(src.indexOf("---- Phones: films within the first screen"));
-  assert.ok(/\.chips \{ flex-wrap: nowrap; overflow-x: auto;/.test(m) && /\.title-row h3 \{ flex-basis: 100%;/.test(m));
+  assert.ok(/#langSel, #sortSel \{ flex: 1 1 calc\(50% - 4px\)/.test(m) && /\.title-row h3 \{ flex-basis: 100%;/.test(m));
   assert.ok(/-webkit-line-clamp: 3/.test(m) && /className = 'ednote-more'/.test(src));
   assert.ok(/<span class="fol">Follow<\/span><span class="hide-sm"> Channel<\/span>/.test(src));
 });
@@ -1423,6 +1423,15 @@ testAsync("vote reader: fetches new votes, re-counts touched films, writes total
     const r2 = await V.syncVotes({ env: { FIREBASE_SERVICE_ACCOUNT: "{}" }, admin, note: () => {} });
     assert.strictEqual(r2.fetched, 0, "nothing re-read next run");
   } finally { process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
+});
+
+test("homepage: one language dropdown instead of a row of chips, choice remembered", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  assert.ok(/<select id="langSel" aria-label="Filter by language" onchange="setLang\(this\.value\)">/.test(src));
+  assert.ok(!/id="chips"/.test(src), "the chip row is gone");
+  assert.ok(/`<option value="All">All languages \(\$\{total\}\)<\/option>`/.test(src) && /\$\{esc\(l\)\} \(\$\{counts\[l\]\}\)<\/option>/.test(src), "options carry counts");
+  assert.ok(/localStorage\.setItem\('filmychill-lang', activeLang\)/.test(src) && /langSel\.value = activeLang;/.test(src));
+  assert.ok(/#langSel, #sortSel \{ flex: 1 1 calc\(50% - 4px\)/.test(src), "on phones language and sort share a row evenly");
 });
 
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
