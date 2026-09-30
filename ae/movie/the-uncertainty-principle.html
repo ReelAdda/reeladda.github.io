@@ -14,7 +14,7 @@
 <meta property="og:locale" content="en_AE">
 <meta property="og:image" content="https://image.tmdb.org/t/p/w780/eRyrjh3tzq5vxXhC0uxIX1iLOtj.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"The Uncertainty Principle","url":"https://filmychill.com/ae/movie/the-uncertainty-principle.html","image":["https://image.tmdb.org/t/p/w780/eRyrjh3tzq5vxXhC0uxIX1iLOtj.jpg"],"datePublished":"2026-09-23","dateModified":"2026-09-29","genre":"Drama / Comedy","inLanguage":"Malayalam","director":{"@type":"Person","name":"Don Palathara"},"actor":[{"@type":"Person","name":"Roshan Mathew","image":"https://image.tmdb.org/t/p/w185/9BzqaEdErGxF1EDELQEXpnRsqQu.jpg"},{"@type":"Person","name":"Divya Prabha","image":"https://image.tmdb.org/t/p/w185/cbOuWRUiSNYKE7oayfVxyQyGtZi.jpg"},{"@type":"Person","name":"Arsha Baiju","image":"https://image.tmdb.org/t/p/w185/aWAg939Hs1dDxDxSaq67gnqhvE6.jpg"},{"@type":"Person","name":"Jitin Puthanchery","image":"https://image.tmdb.org/t/p/w185/pWuP8zXu4554yLpryGE6DPIr6ev.jpg"},{"@type":"Person","name":"Vinay Forrt","image":"https://image.tmdb.org/t/p/w185/26P7CfxRs6Hay7xAkHAghDtvGzO.jpg"},{"@type":"Person","name":"Santhy Balachandran","image":"https://image.tmdb.org/t/p/w185/gLpx6IM3Ifs6m1tytsc3yc4Lw90.jpg"}],"duration":"PT121M"}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/ae/"},{"@type":"ListItem","position":2,"name":"The Uncertainty Principle","item":"https://filmychill.com/ae/movie/the-uncertainty-principle.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is The Uncertainty Principle worth watching?","acceptedAnswer":{"@type":"Answer","text":"It's too early for a verdict — The Uncertainty Principle doesn't have enough ratings yet. 2h 1m of Malayalam drama, leaning comedy. Standard length — a normal evening's watch, nothing to plan around."}},{"@type":"Question","name":"Where can I watch The Uncertainty Principle?","acceptedAnswer":{"@type":"Answer","text":"The Uncertainty Principle opened in theatres in the UAE on 23 Sep 2026 and may still be showing — check local cinema listings. Its OTT release hasn't been announced yet — check back soon."}},{"@type":"Question","name":"When is The Uncertainty Principle releasing on OTT? (OTT release date)","acceptedAnswer":{"@type":"Answer","text":"An OTT release date for The Uncertainty Principle hasn't been officially announced yet. Malayalam releases typically reach streaming about 3–6 weeks after their theatrical run, which would put it around October 2026 and November 2026 — that's a pattern, not a confirmed date. This page updates automatically the day it starts streaming."}},{"@type":"Question","name":"What language is The Uncertainty Principle in?","acceptedAnswer":{"@type":"Answer","text":"The Uncertainty Principle is a Malayalam film (Drama / Comedy)."}}]}</script>
@@ -55,8 +55,15 @@
   .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
   .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
   .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
-  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
   .fit dt { font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--indigo); margin-top:12px; }
@@ -125,7 +132,7 @@
       <div class="meta">Malayalam · Drama / Comedy · 121 min</div>
       <div class="rating rating-few"><span class="cdot"></span>Rating still forming <span class="cvotes">— too few ratings yet</span></div>
       <div class="meta" style="margin-top:8px">Released 23 Sep 2026</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 29 Sep 2026</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 30 Sep 2026</div>
     </div>
   </div>
   <section class="fcsb" id="filmychill-score">
@@ -135,8 +142,14 @@
     <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>No audience ratings yet</small></div><span class="fcsb-tag none">Not rated yet</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="movie-1764113" data-c="ae" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <p class="answer"><b>The Uncertainty Principle</b> is in cinemas in the UAE now. Its OTT release date hasn't been announced — this page updates the day it lands on streaming.</p>
-  <h2>What the audience says</h2><p class="vprose">The Uncertainty Principle left our list before the numbers on this Malayalam film settled — too few votes for a firm verdict. It clocks in at a standard 121 minutes. It opened in theatres in the UAE on 23 Sep 2026 — check back here for its OTT arrival.</p>
+  <h2>What the audience says</h2><p class="vprose">The Uncertainty Principle is brand new to the list — too early for the numbers on this Malayalam film to mean much yet.</p>
   
   
   

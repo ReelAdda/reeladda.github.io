@@ -16,10 +16,10 @@
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TVSeries","name":"Murder by the Lake","url":"https://filmychill.com/de/movie/murder-by-the-lake.html","image":"https://image.tmdb.org/t/p/w342/jlpWx4vqnu4wI0wONU6YnZm0naT.jpg","datePublished":"2014-10-11","dateModified":"2026-09-23","numberOfSeasons":1,"genre":"Crime","inLanguage":"German","actor":[{"@type":"Person","name":"Matthias Koeberlin","image":"https://image.tmdb.org/t/p/w185/c8NeOISGKyT3cmk16qOZWPvbZ8R.jpg"},{"@type":"Person","name":"Hary Prinz","image":"https://image.tmdb.org/t/p/w185/yLDofvYPBAg7ZN81ne5Xn1FMwN.jpg"},{"@type":"Person","name":"Stefan Pohl","image":"https://image.tmdb.org/t/p/w185/qpmxafiNAgY38IFpH705zrFub8H.jpg"}],"contentRating":"12","trailer":{"@type":"VideoObject","name":"Murder by the Lake — Official Trailer","description":"Official trailer for Murder by the Lake (German).","thumbnailUrl":"https://img.youtube.com/vi/ti6HtZO30sQ/hqdefault.jpg","uploadDate":"2014-10-11T00:00:00+05:30","contentUrl":"https://www.youtube.com/watch?v=ti6HtZO30sQ","embedUrl":"https://www.youtube-nocookie.com/embed/ti6HtZO30sQ"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/de/"},{"@type":"ListItem","position":2,"name":"Murder by the Lake","item":"https://filmychill.com/de/movie/murder-by-the-lake.html"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Murder by the Lake worth watching?","acceptedAnswer":{"@type":"Answer","text":"It's too early for a verdict — Murder by the Lake doesn't have enough ratings yet. This is a first season — German crime, not one for younger kids. Under the two-hour mark — an easy weeknight watch."}},{"@type":"Question","name":"Where can I watch Murder by the Lake?","acceptedAnswer":{"@type":"Answer","text":"You can stream Murder by the Lake in Germany on Magenta TV+."}},{"@type":"Question","name":"Is Murder by the Lake family friendly?","acceptedAnswer":{"@type":"Answer","text":"Murder by the Lake is rated 12. Fine for older kids with guidance."}},{"@type":"Question","name":"What language is Murder by the Lake in?","acceptedAnswer":{"@type":"Answer","text":"Murder by the Lake is a German series (Crime)."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Murder by the Lake worth watching?","acceptedAnswer":{"@type":"Answer","text":"FilmyChill Score: Worth a watch — The few who rated it like it (based on only 30 ratings). It rates 6.8/10 on audience ratings. This is a first season — German crime, not one for younger kids. Under the two-hour mark — an easy weeknight watch."}},{"@type":"Question","name":"Where can I watch Murder by the Lake?","acceptedAnswer":{"@type":"Answer","text":"You can stream Murder by the Lake in Germany on Magenta TV+."}},{"@type":"Question","name":"Is Murder by the Lake family friendly?","acceptedAnswer":{"@type":"Answer","text":"Murder by the Lake is rated 12. Fine for older kids with guidance."}},{"@type":"Question","name":"What language is Murder by the Lake in?","acceptedAnswer":{"@type":"Answer","text":"Murder by the Lake is a German series (Crime)."}}]}</script>
 <style>
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
@@ -95,6 +95,33 @@
   .faq details[open] summary::after { content:"–"; }
   .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
   @media (max-width:420px){ .head { grid-template-columns:110px 1fr; } .poster { width:110px; } h1 { font-size:20px; } }
+  /* FilmyChill Score (lib/fcscore.js) */
+  @font-face { font-family:'Anton'; src:url('/fonts/anton-latin.woff2') format('woff2'); font-display:swap; }
+  .fcsb { margin:18px 0 6px; padding:18px; background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(64,56,199,.08); }
+  .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }
+  .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+  .fcsb-verdict { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; margin-top:12px; }
+  .fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }
+  .fcsb-stamp { display:inline-block; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }
+  @media (max-width: 420px) { .fcsb-m { width:48px; height:30px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }
+  .fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }
+  .fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }
+  .fcsb-early { background:#F4F1EA; color:var(--mute); }
+  .fcsb-why { font-size:15.5px; line-height:1.55; margin:12px 0 0; }
+  .fcsb-rows { margin-top:14px; padding-top:12px; border-top:1px solid #EFE6D6; display:grid; gap:10px; }
+  .fcsb-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
+  .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
+  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
+  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
+  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
 </style>
 </head>
 <body>
@@ -105,14 +132,26 @@
     <div>
       <h1>Murder by the Lake (2014)</h1>
       <div class="meta">German · Crime · 90 min · 12</div>
-      <div class="rating rating-few"><span class="cdot"></span>Rating still forming <span class="cvotes">— too few ratings yet</span></div>
-      <div class="verdict">▸ Not enough ratings yet</div>
+      <div class="rating rating-early"><span class="cdot"></span>★ 6.8 <span class="ctag">Few ratings</span> <span class="cvotes">30 ratings</span><span class="cbar"><i style="width:18%"></i></span></div>
       <div class="meta" style="margin-top:8px">Released 11 Oct 2014</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 23 Sept 2026</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 30 Sept 2026</div>
     </div>
   </div>
+  <section class="fcsb" id="filmychill-score">
+    <div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-verdict"><svg class="fcsb-m" width="56" height="35" viewBox="2.5 7 27 17" aria-hidden="true"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="19.56" y2="12.19" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></svg><span class="fcsb-stamp fcsb-worth">Worth a watch</span><span class="fcsb-conf">Based on 30 ratings</span></div>
+    <p class="fcsb-why">The few who rated it like it.</p>
+    <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 6.8 from 30 ratings — few ratings, so weighted toward an average film</small></div><span class="fcsb-tag">Liked</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
+  </section>
+  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="tv-81238" data-c="de" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <p class="answer"><b>Murder by the Lake</b> is streaming in Germany on Magenta TV+.</p>
-  <h2>The verdict</h2><p class="vprose">Murder by the Lake stayed short of the ratings needed to call this German series either way. Episode length hovers around 90 minutes. In Germany you can stream it on Magenta TV+.</p>
+  <h2>What the audience says</h2><p class="vprose">The few people who have rated Murder by the Lake mostly like this German series. It&#39;s sitting at 6.8/10 on TMDB across 30 ratings — a small sample, so treat it with caution.</p>
   
   
   
@@ -127,7 +166,7 @@
   <!--SW:stream--><!--SW:live=2026-09-23--><h2>Where to watch in Germany</h2><div><span class="pill">Magenta TV+</span></div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p><div style="margin-top:10px"><div style="font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-bottom:5px">Rent or buy</div><div><span class="pill">Apple TV Store</span><span class="pill">Amazon Video</span></div></div><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of 23 Sept 2026 — platforms may change over time.</p><!--/SW:stream-->
   <h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/ti6HtZO30sQ?rel=0" title="Murder by the Lake trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
   <h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/de/movie/wilder.html"><img src="https://image.tmdb.org/t/p/w342/iGAEXPdj0HDNkuIMej9QlUyF7Ev.jpg" alt="Wilder poster" loading="lazy"><div class="st">Wilder</div><div class="sm">German · Series</div></a><a class="simcard" href="/de/movie/der-letzte-bulle.html"><img src="https://image.tmdb.org/t/p/w342/m1kz5RdlPun8QIpWmy7ZHtd7HmF.jpg" alt="Der letzte Bulle poster" loading="lazy"><div class="st">Der letzte Bulle</div><div class="sm">German · Series</div></a><a class="simcard" href="/de/movie/perfume.html"><img src="https://image.tmdb.org/t/p/w342/oT7Zodol33x7Z1McBXs9tyYNcxO.jpg" alt="Perfume poster" loading="lazy"><div class="st">Perfume</div><div class="sm">German · Series</div></a><a class="simcard" href="/de/movie/german-crime-story-gefesselt.html"><img src="https://image.tmdb.org/t/p/w342/iGMfDx1XUJBuH35on0tEO2v7p6g.jpg" alt="German Crime Story: Gefesselt poster" loading="lazy"><div class="st">German Crime Story: Gefesselt</div><div class="sm">German · Series</div></a><a class="simcard" href="/de/movie/polizeiruf-110.html"><img src="https://image.tmdb.org/t/p/w342/6ZZadTzWhvC6msfEm5G4F4IFgBY.jpg" alt="Polizeiruf 110 poster" loading="lazy"><div class="st">Polizeiruf 110</div><div class="sm">German · Series</div></a><a class="simcard" href="/de/movie/shades-of-guilt.html"><img src="https://image.tmdb.org/t/p/w342/zf4w9At9R60sK5mdkrZJ5DBwga7.jpg" alt="Shades of Guilt poster" loading="lazy"><div class="st">Shades of Guilt</div><div class="sm">German · Series</div></a></div>
-  <h2>Frequently asked</h2><div class="faq"><details><summary>Is Murder by the Lake worth watching?</summary><div class="fa">It&#39;s too early for a verdict — Murder by the Lake doesn&#39;t have enough ratings yet. This is a first season — German crime, not one for younger kids. Under the two-hour mark — an easy weeknight watch.</div></details><details><summary>Where can I watch Murder by the Lake?</summary><div class="fa">You can stream Murder by the Lake in Germany on Magenta TV+.</div></details><details><summary>Is Murder by the Lake family friendly?</summary><div class="fa">Murder by the Lake is rated 12. Fine for older kids with guidance.</div></details><details><summary>What language is Murder by the Lake in?</summary><div class="fa">Murder by the Lake is a German series (Crime).</div></details></div>
+  <h2>Frequently asked</h2><div class="faq"><details><summary>Is Murder by the Lake worth watching?</summary><div class="fa">FilmyChill Score: Worth a watch — The few who rated it like it (based on only 30 ratings). It rates 6.8/10 on audience ratings. This is a first season — German crime, not one for younger kids. Under the two-hour mark — an easy weeknight watch.</div></details><details><summary>Where can I watch Murder by the Lake?</summary><div class="fa">You can stream Murder by the Lake in Germany on Magenta TV+.</div></details><details><summary>Is Murder by the Lake family friendly?</summary><div class="fa">Murder by the Lake is rated 12. Fine for older kids with guidance.</div></details><details><summary>What language is Murder by the Lake in?</summary><div class="fa">Murder by the Lake is a German series (Crime).</div></details></div>
   <a class="btn" href="https://filmychill.com/de/#murder-by-the-lake">See this week's top picks on FilmyChill →</a>
   <a class="btn" href="/de/films/">Browse every film we've covered →</a>
 </div>

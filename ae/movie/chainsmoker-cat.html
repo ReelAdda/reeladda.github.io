@@ -27,10 +27,10 @@
 <meta property="og:url" content="https://filmychill.com/ae/movie/chainsmoker-cat.html">
 <meta property="og:image" content="https://image.tmdb.org/t/p/w780/4ei68OmZr0XHnN82OjiV8GBqfyN.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TVSeries","name":"Chainsmoker Cat","url":"https://filmychill.com/ae/movie/chainsmoker-cat.html","image":"https://image.tmdb.org/t/p/w342/kqeKlSd7o9BCbTraZsDnksRSfxm.jpg","datePublished":"2026-07-03","genre":"Animation / Comedy","inLanguage":"Japanese","actor":[{"@type":"Person","name":"Yuko Natsuyoshi","image":"https://image.tmdb.org/t/p/w185/62JhZDG70JAzht71e1B0Y7Ny14r.jpg"},{"@type":"Person","name":"Misato Matsuoka","image":"https://image.tmdb.org/t/p/w185/zSB8zgGwFGFq2EL3cWobQifsIXt.jpg"},{"@type":"Person","name":"Yurie Funato","image":"https://image.tmdb.org/t/p/w185/4BLM2Ke95n83NEDtIBu0Nrv515S.jpg"},{"@type":"Person","name":"Ayaka Shimizu","image":"https://image.tmdb.org/t/p/w185/wuowat2waVkQOm14oO0gjx7QJt9.jpg"},{"@type":"Person","name":"Shiori Izawa","image":"https://image.tmdb.org/t/p/w185/f9V38OeDvRGevWuKc4dN6LB62TH.jpg"},{"@type":"Person","name":"Riko Akechi","image":"https://image.tmdb.org/t/p/w185/kKRgzjXnlY0OzcqIW1mv71syCiq.jpg"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/ae/"},{"@type":"ListItem","position":2,"name":"Chainsmoker Cat","item":"https://filmychill.com/ae/movie/chainsmoker-cat.html"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Chainsmoker Cat worth watching?","acceptedAnswer":{"@type":"Answer","text":"Must watch. It rates 8.4/10. See FilmyChill's full take above."}},{"@type":"Question","name":"Where can I watch Chainsmoker Cat?","acceptedAnswer":{"@type":"Answer","text":"You can stream Chainsmoker Cat in the UAE on Netflix."}},{"@type":"Question","name":"What language is Chainsmoker Cat in?","acceptedAnswer":{"@type":"Answer","text":"Chainsmoker Cat is a Japanese series (Animation / Comedy)."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Chainsmoker Cat worth watching?","acceptedAnswer":{"@type":"Answer","text":"FilmyChill Score: Must watch — Audiences love it. It rates 8.3/10 on audience ratings. It rates 8.4/10. See FilmyChill's full take above."}},{"@type":"Question","name":"Where can I watch Chainsmoker Cat?","acceptedAnswer":{"@type":"Answer","text":"You can stream Chainsmoker Cat in the UAE on Netflix."}},{"@type":"Question","name":"What language is Chainsmoker Cat in?","acceptedAnswer":{"@type":"Answer","text":"Chainsmoker Cat is a Japanese series (Animation / Comedy)."}}]}</script>
 <style>
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
@@ -75,6 +75,33 @@
   .faq details[open] summary::after { content:"–"; }
   .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
   @media (max-width:420px){ .head { grid-template-columns:110px 1fr; } .poster { width:110px; } h1 { font-size:20px; } }
+  /* FilmyChill Score (lib/fcscore.js) */
+  @font-face { font-family:'Anton'; src:url('/fonts/anton-latin.woff2') format('woff2'); font-display:swap; }
+  .fcsb { margin:18px 0 6px; padding:18px; background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(64,56,199,.08); }
+  .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }
+  .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+  .fcsb-verdict { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; margin-top:12px; }
+  .fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }
+  .fcsb-stamp { display:inline-block; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }
+  @media (max-width: 420px) { .fcsb-m { width:48px; height:30px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }
+  .fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }
+  .fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }
+  .fcsb-early { background:#F4F1EA; color:var(--mute); }
+  .fcsb-why { font-size:15.5px; line-height:1.55; margin:12px 0 0; }
+  .fcsb-rows { margin-top:14px; padding-top:12px; border-top:1px solid #EFE6D6; display:grid; gap:10px; }
+  .fcsb-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
+  .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
+  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
+  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
+  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
 </style>
 </head>
 <body>
@@ -85,12 +112,24 @@
     <div>
       <h1>Chainsmoker Cat (2026)</h1>
       <div class="meta">Japanese · Animation / Comedy · 24 min</div>
-      <div class="rating">★ 8.4 <span style="color:var(--mute);font-weight:400;font-size:13px">(33 votes)</span></div>
-      <div class="verdict">▸ Must watch</div>
+      <div class="rating">★ 8.3 <span style="color:var(--mute);font-weight:400;font-size:13px">(79 votes)</span></div>
       <div class="meta" style="margin-top:8px">Released 3 Jul 2026</div>
     </div>
   </div>
-  <h2>The verdict</h2><p class="vprose">Chainsmoker Cat landed among the stronger Japanese seriess of its release window. It carries a 8.4/10 on TMDB across 33 ratings, which puts it comfortably above average. Episodes run about 24 minutes. In the UAE you can stream it on Netflix.</p>
+  <section class="fcsb" id="filmychill-score">
+    <div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-verdict"><svg class="fcsb-m" width="56" height="35" viewBox="2.5 7 27 17" aria-hidden="true"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="25.18" y2="18.54" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></svg><span class="fcsb-stamp fcsb-must">Must watch</span></div>
+    <p class="fcsb-why">Audiences love it.</p>
+    <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 8.3 from 79 ratings on TMDB</small></div><span class="fcsb-tag">Loved</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
+  </section>
+  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="tv-312949" data-c="ae" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
+  <h2>What the audience says</h2><p class="vprose">Chainsmoker Cat rates well above most Japanese series. It&#39;s sitting at 8.3/10 on TMDB across 79 ratings, which puts it comfortably above average.</p>
   
   
   <h2>Story</h2><p>Catgirl Yani struggles to pay her rent and keep a job while feeding her smoking habit. As her loved ones&#39; concerns grow, she must rethink her future.</p>
@@ -100,7 +139,7 @@
   <!--SW:stream--><!--SW:live=2026-07-22--><h2>Where to watch in the UAE</h2><div><span class="pill">Netflix</span></div><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of 22 Jul 2026 — platforms may change over time.</p><!--/SW:stream-->
   <h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/KYGgyQtSAdI?rel=0" title="Chainsmoker Cat trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
   <h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/ae/movie/grand-blue-dreaming.html"><img src="https://image.tmdb.org/t/p/w342/ii1yrluzWisy1rygSKz8lJkAkil.jpg" alt="Grand Blue Dreaming poster" loading="lazy"><div class="st">Grand Blue Dreaming</div><div class="sm">Japanese · Series</div></a><a class="simcard" href="/ae/movie/the-ghost-in-the-shell.html"><img src="https://image.tmdb.org/t/p/w342/uEfNGaxbKI1xWmUy3DIndlaxUkz.jpg" alt="THE GHOST IN THE SHELL poster" loading="lazy"><div class="st">THE GHOST IN THE SHELL</div><div class="sm">Japanese · Series</div></a><a class="simcard" href="/ae/movie/detective-conan-fallen-angel-of-the-highway.html"><img src="https://image.tmdb.org/t/p/w342/vvOk7a7k7Sp6UdHcqV4baRlK6CC.jpg" alt="Detective Conan: Fallen Angel of the Highway poster" loading="lazy"><div class="st">Detective Conan: Fallen Angel of the Highway</div><div class="sm">Japanese · Film</div></a><a class="simcard" href="/ae/movie/jojo-s-bizarre-adventure.html"><img src="https://image.tmdb.org/t/p/w780/ogAWwbh3frWtiTyyXrZaVFtqCgp.jpg,https://image.tmdb.org/t/p/w1280/5mUYDoFjDlPmDvnUWSknhYjGBBh.jpg" alt="JoJo&#39;s Bizarre Adventure poster" loading="lazy"><div class="st">JoJo&#39;s Bizarre Adventure</div><div class="sm">Japanese · Series</div></a><a class="simcard" href="/ae/movie/re-zero-starting-life-in-another-world.html"><img src="https://image.tmdb.org/t/p/w342/oHqYrPAsIiTD5m4DuxumV4er8BU.jpg" alt="Re:ZERO -Starting Life in Another World- poster" loading="lazy"><div class="st">Re:ZERO -Starting Life in Another World-</div><div class="sm">Japanese · Series</div></a><a class="simcard" href="/ae/movie/smoking-behind-the-supermarket-with-you.html"><img src="https://image.tmdb.org/t/p/w342/vQ8v5bMQtEdmEvVwNos5dkKxyK7.jpg" alt="Smoking Behind the Supermarket with You poster" loading="lazy"><div class="st">Smoking Behind the Supermarket with You</div><div class="sm">Japanese · Series</div></a></div>
-  <h2>Frequently asked</h2><div class="faq"><details><summary>Is Chainsmoker Cat worth watching?</summary><div class="fa">Must watch. It rates 8.4/10. See FilmyChill&#39;s full take above.</div></details><details><summary>Where can I watch Chainsmoker Cat?</summary><div class="fa">You can stream Chainsmoker Cat in the UAE on Netflix.</div></details><details><summary>What language is Chainsmoker Cat in?</summary><div class="fa">Chainsmoker Cat is a Japanese series (Animation / Comedy).</div></details></div>
+  <h2>Frequently asked</h2><div class="faq"><details><summary>Is Chainsmoker Cat worth watching?</summary><div class="fa">FilmyChill Score: Must watch — Audiences love it. It rates 8.3/10 on audience ratings. It rates 8.4/10. See FilmyChill&#39;s full take above.</div></details><details><summary>Where can I watch Chainsmoker Cat?</summary><div class="fa">You can stream Chainsmoker Cat in the UAE on Netflix.</div></details><details><summary>What language is Chainsmoker Cat in?</summary><div class="fa">Chainsmoker Cat is a Japanese series (Animation / Comedy).</div></details></div>
   <a class="btn" href="https://filmychill.com/ae/#chainsmoker-cat">🎬 See this week's top picks on FilmyChill →</a>
 </div>
 <footer>

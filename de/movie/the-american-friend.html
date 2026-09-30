@@ -16,7 +16,7 @@
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"The American Friend","url":"https://filmychill.com/de/movie/the-american-friend.html","image":["https://image.tmdb.org/t/p/w780/pBi7QjQJbyEKK7Y5B1vHaEaO3BS.jpg","https://image.tmdb.org/t/p/w1280/h59F8NcFSlucTK7fUcndD9TB9jg.jpg"],"datePublished":"1977-06-24","dateModified":"2026-09-29","genre":"Drama / Thriller","inLanguage":"German","director":{"@type":"Person","name":"Wim Wenders"},"actor":[{"@type":"Person","name":"Dennis Hopper","image":"https://image.tmdb.org/t/p/w185/hfrzsJhkX7Vphe3pVYk8lA9BNfg.jpg"},{"@type":"Person","name":"Bruno Ganz","image":"https://image.tmdb.org/t/p/w185/8bhS1PObqe8OOVcyIRxV5Rcdufd.jpg"},{"@type":"Person","name":"Lisa Kreuzer","image":"https://image.tmdb.org/t/p/w185/iDlFoZkpOL856wiEDlJT3ksfzP.jpg"},{"@type":"Person","name":"Gérard Blain","image":"https://image.tmdb.org/t/p/w185/pPYuPqx8NrieLkNpZhUKej5s3tx.jpg"},{"@type":"Person","name":"Nicholas Ray","image":"https://image.tmdb.org/t/p/w185/xnbQQUI6pwelsfHGnw5A9yGu5tK.jpg"},{"@type":"Person","name":"Samuel Fuller","image":"https://image.tmdb.org/t/p/w185/11kfnmIhc44ea1uFk74FQIEBgDz.jpg"}],"duration":"PT125M","contentRating":"16","trailer":{"@type":"VideoObject","name":"The American Friend — Official Trailer","description":"Official trailer for The American Friend (German).","thumbnailUrl":"https://img.youtube.com/vi/7XwSfIuM2kU/hqdefault.jpg","uploadDate":"1977-06-24T00:00:00+05:30","contentUrl":"https://www.youtube.com/watch?v=7XwSfIuM2kU","embedUrl":"https://www.youtube-nocookie.com/embed/7XwSfIuM2kU"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/de/"},{"@type":"ListItem","position":2,"name":"The American Friend","item":"https://filmychill.com/de/movie/the-american-friend.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is The American Friend worth watching?","acceptedAnswer":{"@type":"Answer","text":"FilmyChill Score: Worth a watch — Audiences like it. It rates 7.1/10 on audience ratings. 2h 5m of German drama with thriller threaded through. Standard length — a normal evening's watch, nothing to plan around."}},{"@type":"Question","name":"Where can I watch The American Friend?","acceptedAnswer":{"@type":"Answer","text":"You can stream The American Friend in Germany on Amazon Arthaus Channel, Arthaus+ Apple TV channel, Arthaus+."}},{"@type":"Question","name":"When is The American Friend coming to streaming?","acceptedAnswer":{"@type":"Answer","text":"The American Friend is already streaming in Germany on Amazon Arthaus Channel, Arthaus+ Apple TV channel, Arthaus+."}},{"@type":"Question","name":"Is The American Friend family friendly?","acceptedAnswer":{"@type":"Answer","text":"The American Friend is rated 16. Fine for older kids with guidance."}},{"@type":"Question","name":"What language is The American Friend in?","acceptedAnswer":{"@type":"Answer","text":"The American Friend is a German film (Drama / Thriller)."}}]}</script>
@@ -57,8 +57,15 @@
   .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
   .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
   .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
-  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
   .fit dt { font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--indigo); margin-top:12px; }
@@ -127,7 +134,7 @@
       <div class="meta">German · Drama / Thriller · 125 min · 16</div>
       <div class="rating rating-solid"><span class="cdot"></span>★ 7.1 <span class="ctag">Solid</span> <span class="cvotes">461 ratings</span><span class="cbar"><i style="width:65%"></i></span></div>
       <div class="meta" style="margin-top:8px">Released 24 Jun 1977</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 29 Sept 2026</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 30 Sept 2026</div>
     </div>
   </div>
   <section class="fcsb" id="filmychill-score">
@@ -137,8 +144,14 @@
     <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 7.1 from 461 ratings on TMDB</small></div><span class="fcsb-tag">Liked</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="movie-11222" data-c="de" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <p class="answer"><b>The American Friend</b> is streaming in Germany on Amazon Arthaus Channel, Arthaus+ Apple TV channel, Arthaus+.</p>
-  <h2>What the audience says</h2><p class="vprose">The American Friend holds up as a perfectly decent German film, if not a remarkable one. It carries a 7.1/10 on TMDB across 461 ratings — comfortably clear of the pack. It clocks in at a standard 125 minutes. In Germany you can stream it on Amazon Arthaus Channel, Arthaus+ Apple TV channel, Arthaus+.</p>
+  <h2>What the audience says</h2><p class="vprose">The American Friend holds up as a perfectly decent German film, if not a remarkable one. It carries a 7.1/10 on TMDB across 461 ratings — comfortably clear of the pack.</p>
   
   
   
