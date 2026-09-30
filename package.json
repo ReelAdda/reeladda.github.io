@@ -1,13 +1,14 @@
 {
   "name": "filmychill",
   "private": true,
-  "description": "Static build for filmychill.com. The site builds with zero required dependencies; the one entry below is OPTIONAL and only powers branded share cards.",
+  "description": "Static build for filmychill.com. The site builds with zero required dependencies; everything below is OPTIONAL: resvg powers branded share cards, firebase-admin reads visitors' votes.",
   "scripts": {
     "test": "node scripts/test.js",
     "build": "node scripts/update.js",
     "pages": "PAGES_ONLY=all node scripts/update.js"
   },
   "optionalDependencies": {
-    "@resvg/resvg-js": "^2.6.2"
+    "@resvg/resvg-js": "^2.6.2",
+    "firebase-admin": "^14.0.0"
   }
 }
