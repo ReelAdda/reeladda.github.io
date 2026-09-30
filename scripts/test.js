@@ -1227,6 +1227,31 @@ test("refreshHead: today's rating in the header, and no second verdict", () => {
   const o2 = W.refreshHead(oldest, { rating: 7.9, votes: 1640 });
   assert.ok(/<div class="rating">★ 7\.9 <span style="color:var\(--mute\)">\(1,640 votes\)<\/span><\/div>/.test(o2), "oldest format: numbers updated in place");
   assert.ok(/<h2>The verdict<\/h2>/.test(o2), "nothing after the header is touched");
+  const first = W.refreshHead('<style></style><div class="head"><div class="rating">★ 9.8</div></div><h2>X</h2>', { rating: 6.9, votes: 36 });
+  assert.ok(/<div class="rating">★ 6\.9<\/div>/.test(first), "the very first format (number only) is updated too");
+});
+
+testAsync("resolveTmdbId: accepts a search hit only when the page's own poster matches", async () => {
+  const W = require("./lib/scoresweep.js");
+  const html = '<h1>Old Film (2019)</h1><img src="https://image.tmdb.org/t/p/w342/abcDEF.jpg">';
+  const api = (results) => ({ pause: async () => {}, tmdb: async (p, q) => { api.last = { p, q }; return { results }; } });
+  const a = api([{ id: 1, poster_path: "/other.jpg" }, { id: 77, poster_path: "/abcDEF.jpg" }]);
+  assert.deepStrictEqual(await W.resolveTmdbId(html, {}, a), { id: 77, kind: "movie" });
+  assert.strictEqual(api.last.q.year, "2019");
+  assert.strictEqual(await W.resolveTmdbId(html, {}, api([{ id: 1, poster_path: "/other.jpg" }])), null, "same title, different poster: not proven");
+  assert.strictEqual(await W.resolveTmdbId("<h1>No poster</h1>", {}, api([])), null);
+});
+
+test("every title that gets a film page is scored — including the extra OTT and language pools", () => {
+  const F = require("./lib/fcscore.js");
+  const now = Date.parse("2026-09-29");
+  const d = { ca: { theatres: [], ott: [], ottExtra: [{ rating: 7.0, votes: 3492, released: "2026-05-28" }],
+    langPools: { Hindi: { theatres: [{ rating: 5.7, votes: 21, released: "2026-07-10" }], ott: [{ rating: 8.0, votes: 900, released: "2025-01-01", imdbId: "tt1" }] } } } };
+  const r = F.attachFcScores(d, { toneFor: (id) => (id === "tt1" ? "positive" : null), nowMs: now });
+  assert.deepStrictEqual(r, { scored: 3, total: 3 });
+  assert.strictEqual(d.ca.ottExtra[0].fcScore.verdict, "Worth a watch", "3,492 ratings is never 'not enough'");
+  assert.ok(d.ca.langPools.Hindi.theatres[0].fcScore.early, "pool titles get early reads too");
+  assert.strictEqual(d.ca.langPools.Hindi.ott[0].fcScore.reason, "Audiences and critics agree.", "critics tone from the cache");
 });
 
 test("sweepCandidates: frozen/catalogue only, never-scored first, then the stalest; fresh ones wait", () => {
@@ -1234,15 +1259,18 @@ test("sweepCandidates: frozen/catalogue only, never-scored first, then the stale
   const man = { in: {
     weekly: { tmdbId: 1, kind: "movie" },
     notid: { catalog: true },
-    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20" } },
-    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01" } },
+    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20", w: 4 } },
+    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01", w: 4 } },
     never: { tmdbId: 4, catalog: true } } };
-  assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug), ["never", "old"]);
-  assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 1).map((x) => x.slug), ["never"], "budget respected");
+  assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug), ["notid", "never", "old"], "a page missing its id is tried (the sweep looks the id up)");
+  assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 1).map((x) => x.slug), ["notid"], "budget respected");
+  man.in.notid.idLookup = "none";
+  assert.ok(!W.sweepCandidates(man, "2026-09-29", 10).some((x) => x.slug === "notid"), "…but not retried once no match was provable");
   man.in.oldWording = { tmdbId: 5, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29" } };
-  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 3 } };
+  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 4 } };
+  man.in.scoredOld = { tmdbId: 7, archivedOn: "2026-08-10", fcs: { v: "Skip", at: "2026-09-29", w: 3 } };
   const c = W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug);
-  assert.ok(c.includes("oldWording") && !c.includes("newWording"), "pages that said 'Too early' under the old wording are redone now");
+  assert.ok(c.includes("oldWording") && c.includes("scoredOld") && !c.includes("newWording"), "anything swept under an older version is redone now");
 });
 
 testAsync("sweepScores: writes the score into the page, records it, stops on repeated TMDB errors", async () => {
@@ -1258,7 +1286,7 @@ testAsync("sweepScores: writes the score into the page, records it, stops on rep
     assert.deepStrictEqual(r, { checked: 1, updated: 1, errors: 0 });
     const html = fsx.readFileSync("movie/deadpool.html", "utf8");
     assert.ok(/fcsb-stamp fcsb-must">Must watch</.test(html) && /★ 7\.6 from 9,523 ratings on TMDB/.test(html), "9,523 ratings is not 'Too early'");
-    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 3 });
+    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 4 });
     assert.strictEqual(man.in.deadpool.last, "2026-09-29", "sitemap lastmod follows the change");
     fsx.writeFileSync("movie/dated.html", '<html><style>a{}</style><div class="head"><div class="meta">Page updated 18 Aug 2026</div></div>\n  <p class="answer">A</p></html>');
     const man3 = { in: { dated: { tmdbId: 9, kind: "movie", catalog: true } } };
