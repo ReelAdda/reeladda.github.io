@@ -19,7 +19,7 @@
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"La La Land","url":"https://filmychill.com/uk/movie/la-la-land.html","image":["https://image.tmdb.org/t/p/w780/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg","https://image.tmdb.org/t/p/w1280/nlPCdZlHtRNcF6C9hzUH4ebmV1w.jpg"],"datePublished":"2017-01-13","dateModified":"2026-09-29","genre":"Comedy / Drama","inLanguage":"English","director":{"@type":"Person","name":"Damien Chazelle"},"actor":[{"@type":"Person","name":"Ryan Gosling","image":"https://image.tmdb.org/t/p/w185/lyUyVARQKhGxaxy0FbPJCQRpiaW.jpg"},{"@type":"Person","name":"Emma Stone","image":"https://image.tmdb.org/t/p/w185/cZ8a3QvAnj2cgcgVL6g4XaqPzpL.jpg"},{"@type":"Person","name":"John Legend","image":"https://image.tmdb.org/t/p/w185/cCv0YBy2YFFWp9h3kvNPmwWwrCD.jpg"},{"@type":"Person","name":"Rosemarie DeWitt","image":"https://image.tmdb.org/t/p/w185/44sxIdGtYN24R14OmnZbCpcd8J8.jpg"},{"@type":"Person","name":"Finn Wittrock","image":"https://image.tmdb.org/t/p/w185/gwGMGTmli0uBF7eAhhXePWhYNFJ.jpg"},{"@type":"Person","name":"Callie Hernandez","image":"https://image.tmdb.org/t/p/w185/doMXlhTAYCy8gH43yYA6m9ymxhd.jpg"}],"duration":"PT129M","contentRating":"12A","trailer":{"@type":"VideoObject","name":"La La Land — Official Trailer","description":"Official trailer for La La Land (English).","thumbnailUrl":"https://img.youtube.com/vi/_oBwwSXdO_E/hqdefault.jpg","uploadDate":"2016-12-01T00:00:00+05:30","contentUrl":"https://www.youtube.com/watch?v=_oBwwSXdO_E","embedUrl":"https://www.youtube-nocookie.com/embed/_oBwwSXdO_E"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/uk/"},{"@type":"ListItem","position":2,"name":"La La Land","item":"https://filmychill.com/uk/movie/la-la-land.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is La La Land worth watching?","acceptedAnswer":{"@type":"Answer","text":"FilmyChill Score: Must watch — Audiences love it. It rates 7.9/10 on audience ratings. 2h 9m of English comedy, leaning drama, not one for younger kids. That score holds across 18,528 ratings, so it's about as safe as this week's list gets."}},{"@type":"Question","name":"Where can I watch La La Land?","acceptedAnswer":{"@type":"Answer","text":"You can stream La La Land in the UK on Netflix, Lionsgate+ Amazon Channels."}},{"@type":"Question","name":"When is La La Land coming to streaming?","acceptedAnswer":{"@type":"Answer","text":"La La Land is already streaming in the UK on Netflix, Lionsgate+ Amazon Channels."}},{"@type":"Question","name":"Is La La Land family friendly?","acceptedAnswer":{"@type":"Answer","text":"La La Land is rated 12A. Fine for older kids with guidance."}},{"@type":"Question","name":"What language is La La Land in?","acceptedAnswer":{"@type":"Answer","text":"La La Land is an English film (Comedy / Drama)."}}]}</script>
@@ -60,6 +60,14 @@
   .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
   .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
   .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
+  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
   .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
@@ -127,20 +135,26 @@
     <div>
       <h1>La La Land (2017)</h1>
       <div class="meta">English · Comedy / Drama · 129 min · 12A</div>
-      <div class="rating rating-solid"><span class="cdot"></span>★ 7.9 <span class="ctag">Solid</span> <span class="cvotes">18,528 ratings</span><span class="cbar"><i style="width:97%"></i></span></div>
+      <div class="rating rating-solid"><span class="cdot"></span>★ 7.9 <span class="ctag">Solid</span> <span class="cvotes">18,534 ratings</span><span class="cbar"><i style="width:97%"></i></span></div>
       <div class="meta" style="margin-top:8px">Released 13 Jan 2017</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 29 Sept 2026</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 30 Sept 2026</div>
     </div>
   </div>
   <section class="fcsb" id="filmychill-score">
     <div class="fcsb-label">FilmyChill score</div>
     <div class="fcsb-verdict"><svg class="fcsb-m" width="56" height="35" viewBox="2.5 7 27 17" aria-hidden="true"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="25.18" y2="18.54" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></svg><span class="fcsb-stamp fcsb-must">Must watch</span></div>
     <p class="fcsb-why">Audiences love it.</p>
-    <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 7.9 from 18,528 ratings on TMDB</small></div><span class="fcsb-tag">Loved</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
+    <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 7.9 from 18,534 ratings on TMDB</small></div><span class="fcsb-tag">Loved</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="movie-313369" data-c="uk" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <p class="answer"><b>La La Land</b> is streaming in the UK on Netflix, Lionsgate+ Amazon Channels.</p>
-  <h2>What the audience says</h2><p class="vprose">La La Land stood out as one of the better-rated English films of its release window. It&#39;s sitting at 7.9/10 on TMDB across 18,528 ratings, which puts it comfortably above average. The 129-minute runtime sits in the comfortable middle. In the UK you can stream it on Netflix, Lionsgate+ Amazon Channels.</p>
+  <h2>What the audience says</h2><p class="vprose">La La Land rates well above most English films. It&#39;s sitting at 7.9/10 on TMDB across 18,534 ratings, which puts it comfortably above average.</p>
   
   
   

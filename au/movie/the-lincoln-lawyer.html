@@ -19,10 +19,10 @@
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TVSeries","name":"The Lincoln Lawyer","url":"https://filmychill.com/au/movie/the-lincoln-lawyer.html","image":["https://image.tmdb.org/t/p/w780/4jSaIqEU8CPBBNn4iVCK6wzPjSx.jpg","https://image.tmdb.org/t/p/w1280/jBFOVEE5sMIyT141YIqIwyU8Y1D.jpg"],"datePublished":"2022-05-13","dateModified":"2026-09-27","numberOfSeasons":4,"genre":"Drama / Crime","inLanguage":"English","director":{"@type":"Person","name":"David E. Kelley"},"actor":[{"@type":"Person","name":"Manuel Garcia-Rulfo","image":"https://image.tmdb.org/t/p/w185/54Rk1hKfNdNKGHQMnONDGmNtUv3.jpg"},{"@type":"Person","name":"Neve Campbell","image":"https://image.tmdb.org/t/p/w185/zQzNg6Kiufj2VCltprI6jilNtl3.jpg"},{"@type":"Person","name":"Becki Newton","image":"https://image.tmdb.org/t/p/w185/odBWAdgZNksWDyjw4WJOMsEr36c.jpg"},{"@type":"Person","name":"Angus Sampson","image":"https://image.tmdb.org/t/p/w185/8EX6ul2zyVUg91oDvI3RpYS5szV.jpg"},{"@type":"Person","name":"Jazz Raycole","image":"https://image.tmdb.org/t/p/w185/dZ3Yajxg6Ga7ca8acHLvSA5HT9Y.jpg"}],"contentRating":"M","trailer":{"@type":"VideoObject","name":"The Lincoln Lawyer — Official Trailer","description":"Official trailer for The Lincoln Lawyer (English).","thumbnailUrl":"https://img.youtube.com/vi/u-sLh8-ohzc/hqdefault.jpg","uploadDate":"2026-02-05T00:00:00+05:30","contentUrl":"https://www.youtube.com/watch?v=u-sLh8-ohzc","embedUrl":"https://www.youtube-nocookie.com/embed/u-sLh8-ohzc"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/au/"},{"@type":"ListItem","position":2,"name":"The Lincoln Lawyer","item":"https://filmychill.com/au/movie/the-lincoln-lawyer.html"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is The Lincoln Lawyer worth watching?","acceptedAnswer":{"@type":"Answer","text":"Must watch. It rates 7.7/10 on audience ratings. This is 4 seasons deep — English drama with crime threaded through. Starting now means a backlog — worth knowing before you press play."}},{"@type":"Question","name":"Where can I watch The Lincoln Lawyer?","acceptedAnswer":{"@type":"Answer","text":"You can stream The Lincoln Lawyer in Australia on Netflix."}},{"@type":"Question","name":"Is The Lincoln Lawyer family friendly?","acceptedAnswer":{"@type":"Answer","text":"The Lincoln Lawyer is rated M. Fine for older kids with guidance."}},{"@type":"Question","name":"What language is The Lincoln Lawyer in?","acceptedAnswer":{"@type":"Answer","text":"The Lincoln Lawyer is an English series (Drama / Crime)."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is The Lincoln Lawyer worth watching?","acceptedAnswer":{"@type":"Answer","text":"FilmyChill Score: Must watch — Audiences love it. It rates 7.7/10 on audience ratings. This is 4 seasons deep — English drama with crime threaded through. Starting now means a backlog — worth knowing before you press play."}},{"@type":"Question","name":"Where can I watch The Lincoln Lawyer?","acceptedAnswer":{"@type":"Answer","text":"You can stream The Lincoln Lawyer in Australia on Netflix."}},{"@type":"Question","name":"Is The Lincoln Lawyer family friendly?","acceptedAnswer":{"@type":"Answer","text":"The Lincoln Lawyer is rated M. Fine for older kids with guidance."}},{"@type":"Question","name":"What language is The Lincoln Lawyer in?","acceptedAnswer":{"@type":"Answer","text":"The Lincoln Lawyer is an English series (Drama / Crime)."}}]}</script>
 <style>
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
@@ -98,6 +98,33 @@
   .faq details[open] summary::after { content:"–"; }
   .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
   @media (max-width:420px){ .head { grid-template-columns:110px 1fr; } .poster { width:110px; } h1 { font-size:20px; } }
+  /* FilmyChill Score (lib/fcscore.js) */
+  @font-face { font-family:'Anton'; src:url('/fonts/anton-latin.woff2') format('woff2'); font-display:swap; }
+  .fcsb { margin:18px 0 6px; padding:18px; background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(64,56,199,.08); }
+  .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }
+  .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+  .fcsb-verdict { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; margin-top:12px; }
+  .fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }
+  .fcsb-stamp { display:inline-block; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }
+  @media (max-width: 420px) { .fcsb-m { width:48px; height:30px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }
+  .fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }
+  .fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }
+  .fcsb-early { background:#F4F1EA; color:var(--mute); }
+  .fcsb-why { font-size:15.5px; line-height:1.55; margin:12px 0 0; }
+  .fcsb-rows { margin-top:14px; padding-top:12px; border-top:1px solid #EFE6D6; display:grid; gap:10px; }
+  .fcsb-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
+  .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
+  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
+  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
+  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
 </style>
 </head>
 <body>
@@ -108,14 +135,26 @@
     <div>
       <h1>The Lincoln Lawyer (2022)</h1>
       <div class="meta">English · Drama / Crime · M</div>
-      <div class="rating rating-solid"><span class="cdot"></span>★ 7.7 <span class="ctag">Solid</span> <span class="cvotes">568 ratings</span><span class="cbar"><i style="width:67%"></i></span></div>
-      <div class="verdict">▸ Must watch</div>
+      <div class="rating rating-solid"><span class="cdot"></span>★ 7.7 <span class="ctag">Solid</span> <span class="cvotes">569 ratings</span><span class="cbar"><i style="width:67%"></i></span></div>
       <div class="meta" style="margin-top:8px">Released 13 May 2022</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 27 Sept 2026</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 30 Sept 2026</div>
     </div>
   </div>
+  <section class="fcsb" id="filmychill-score">
+    <div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-verdict"><svg class="fcsb-m" width="56" height="35" viewBox="2.5 7 27 17" aria-hidden="true"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="25.18" y2="18.54" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></svg><span class="fcsb-stamp fcsb-must">Must watch</span></div>
+    <p class="fcsb-why">Audiences love it.</p>
+    <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 7.7 from 569 ratings on TMDB</small></div><span class="fcsb-tag">Loved</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
+  </section>
+  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="tv-116799" data-c="au" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <p class="answer"><b>The Lincoln Lawyer</b> is streaming in Australia on Netflix.</p>
-  <h2>The verdict</h2><p class="vprose">The Lincoln Lawyer ranked near the top of that week&#39;s English series crop. It holds a 7.7/10 on TMDB from 568 ratings, well above the typical run of new releases. In Australia you can stream it on Netflix.</p>
+  <h2>What the audience says</h2><p class="vprose">The Lincoln Lawyer sits near the top of English series on audience ratings. It holds a 7.7/10 on TMDB from 569 ratings, well above what most films manage.</p>
   
   
   
@@ -130,7 +169,7 @@
   <!--SW:stream--><!--SW:live=2026-09-27--><h2>Where to watch in Australia</h2><div><span class="pill">Netflix</span></div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of 27 Sept 2026 — platforms may change over time.</p><p style="color:var(--mute);font-size:12.5px;margin-top:10px">More: <a href="/au/streaming/netflix/">All Netflix titles in Australia</a></p><!--/SW:stream-->
   <h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/u-sLh8-ohzc?rel=0" title="The Lincoln Lawyer trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
   <h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/au/movie/tracker.html"><img src="https://image.tmdb.org/t/p/w342/otula4h1ITZ0eV84eg7Lb8u614C.jpg" alt="Tracker poster" loading="lazy"><div class="st">Tracker</div><div class="sm">English · Series</div></a><a class="simcard" href="/au/movie/9-1-1.html"><img src="https://image.tmdb.org/t/p/w342/6njUqsd3By2mJsdZm1P0moPLzs3.jpg" alt="9-1-1 poster" loading="lazy"><div class="st">9-1-1</div><div class="sm">English · Series</div></a><a class="simcard" href="/au/movie/cape-fear.html"><img src="https://image.tmdb.org/t/p/w342/wlwyFRwz2GXFZzaeMjKKNhhjrKG.jpg" alt="Cape Fear poster" loading="lazy"><div class="st">Cape Fear</div><div class="sm">English · Series</div></a><a class="simcard" href="/au/movie/furious.html"><img src="https://image.tmdb.org/t/p/w342/xnxxrEKtBaIcI1ewq50pLkOMU6u.jpg" alt="Furious poster" loading="lazy"><div class="st">Furious</div><div class="sm">English · Series</div></a><a class="simcard" href="/au/movie/lucky.html"><img src="https://image.tmdb.org/t/p/w342/xsrkiXg8EuNNtbPtbmvCxg95gK7.jpg" alt="Lucky poster" loading="lazy"><div class="st">Lucky</div><div class="sm">English · Series</div></a><a class="simcard" href="/au/movie/monster-the-lizzie-borden-story.html"><img src="https://image.tmdb.org/t/p/w780/57XScX1aYtKi1LvHYFQLPUxVhTG.jpg,https://image.tmdb.org/t/p/w1280/gaew60NXUxok3Vmls7gkAT7lYW0.jpg" alt="Monster: The Lizzie Borden Story poster" loading="lazy"><div class="st">Monster: The Lizzie Borden Story</div><div class="sm">English · Series</div></a></div>
-  <h2>Frequently asked</h2><div class="faq"><details><summary>Is The Lincoln Lawyer worth watching?</summary><div class="fa">Must watch. It rates 7.7/10 on audience ratings. This is 4 seasons deep — English drama with crime threaded through. Starting now means a backlog — worth knowing before you press play.</div></details><details><summary>Where can I watch The Lincoln Lawyer?</summary><div class="fa">You can stream The Lincoln Lawyer in Australia on Netflix.</div></details><details><summary>Is The Lincoln Lawyer family friendly?</summary><div class="fa">The Lincoln Lawyer is rated M. Fine for older kids with guidance.</div></details><details><summary>What language is The Lincoln Lawyer in?</summary><div class="fa">The Lincoln Lawyer is an English series (Drama / Crime).</div></details></div>
+  <h2>Frequently asked</h2><div class="faq"><details><summary>Is The Lincoln Lawyer worth watching?</summary><div class="fa">FilmyChill Score: Must watch — Audiences love it. It rates 7.7/10 on audience ratings. This is 4 seasons deep — English drama with crime threaded through. Starting now means a backlog — worth knowing before you press play.</div></details><details><summary>Where can I watch The Lincoln Lawyer?</summary><div class="fa">You can stream The Lincoln Lawyer in Australia on Netflix.</div></details><details><summary>Is The Lincoln Lawyer family friendly?</summary><div class="fa">The Lincoln Lawyer is rated M. Fine for older kids with guidance.</div></details><details><summary>What language is The Lincoln Lawyer in?</summary><div class="fa">The Lincoln Lawyer is an English series (Drama / Crime).</div></details></div>
   <a class="btn" href="https://filmychill.com/au/#the-lincoln-lawyer">See this week's top picks on FilmyChill →</a>
   <a class="btn" href="/au/films/">Browse every film we've covered →</a>
 </div>

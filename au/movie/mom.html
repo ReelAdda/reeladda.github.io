@@ -21,7 +21,7 @@
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TVSeries","name":"Mom","url":"https://filmychill.com/au/movie/mom.html","image":["https://image.tmdb.org/t/p/w780/kIi3T7X0kmiV9vGDme146P2d979.jpg","https://image.tmdb.org/t/p/w1280/evJaCkNlgUt55dcOaAJqxD90FWs.jpg"],"datePublished":"2013-09-23","dateModified":"2026-09-29","numberOfSeasons":8,"genre":"Comedy / Drama","inLanguage":"English","director":{"@type":"Person","name":"Eddie Gorodetsky"},"actor":[{"@type":"Person","name":"Allison Janney","image":"https://image.tmdb.org/t/p/w185/kSaSnQ9xU8eVNL0mTppab95dZA8.jpg"},{"@type":"Person","name":"Jaime Pressly","image":"https://image.tmdb.org/t/p/w185/sST9yap7qQXr6Us9rg6w9GwaFDH.jpg"},{"@type":"Person","name":"Mimi Kennedy","image":"https://image.tmdb.org/t/p/w185/7Nsu0AngAeUEawRUm72Qgg8RUL6.jpg"},{"@type":"Person","name":"Kristen Johnston","image":"https://image.tmdb.org/t/p/w185/am4NUVEhhaIVjaojq8XXBmtVWkz.jpg"},{"@type":"Person","name":"Beth Hall","image":"https://image.tmdb.org/t/p/w185/q9XNvUgVwEsgZq6YUArmoQ2FBXM.jpg"},{"@type":"Person","name":"William Fichtner","image":"https://image.tmdb.org/t/p/w185/wWtJOoaNAwPparpzMNuRBjvxwEf.jpg"}],"contentRating":"M","trailer":{"@type":"VideoObject","name":"Mom — Official Trailer","description":"Official trailer for Mom (English).","thumbnailUrl":"https://img.youtube.com/vi/tSKzFgS07dI/hqdefault.jpg","uploadDate":"2020-11-05T00:00:00+05:30","contentUrl":"https://www.youtube.com/watch?v=tSKzFgS07dI","embedUrl":"https://www.youtube-nocookie.com/embed/tSKzFgS07dI"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/au/"},{"@type":"ListItem","position":2,"name":"Mom","item":"https://filmychill.com/au/movie/mom.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Mom worth watching?","acceptedAnswer":{"@type":"Answer","text":"FilmyChill Score: Worth a watch — Audiences like it. It rates 7.3/10 on audience ratings. This is 8 seasons deep — English comedy with a drama streak. Several seasons in, so it's a commitment to start rather than a one-night sampler."}},{"@type":"Question","name":"Where can I watch Mom?","acceptedAnswer":{"@type":"Answer","text":"You can stream Mom in Australia on HBO Max, HBO Max Amazon Channel."}},{"@type":"Question","name":"Is Mom family friendly?","acceptedAnswer":{"@type":"Answer","text":"Mom is rated M. Fine for older kids with guidance."}},{"@type":"Question","name":"What language is Mom in?","acceptedAnswer":{"@type":"Answer","text":"Mom is an English series (Comedy / Drama)."}}]}</script>
@@ -62,6 +62,14 @@
   .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
   .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
   .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
+  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
   .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
@@ -131,7 +139,7 @@
       <div class="meta">English · Comedy / Drama · 23 min · M</div>
       <div class="rating rating-solid"><span class="cdot"></span>★ 7.3 <span class="ctag">Solid</span> <span class="cvotes">651 ratings</span><span class="cbar"><i style="width:68%"></i></span></div>
       <div class="meta" style="margin-top:8px">Released 23 Sept 2013</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 29 Sept 2026</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 30 Sept 2026</div>
     </div>
   </div>
   <section class="fcsb" id="filmychill-score">
@@ -141,8 +149,14 @@
     <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 7.3 from 651 ratings on TMDB</small></div><span class="fcsb-tag">Liked</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="tv-49011" data-c="au" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <p class="answer"><b>Mom</b> is streaming in Australia on HBO Max, HBO Max Amazon Channel.</p>
-  <h2>What the audience says</h2><p class="vprose">Mom earns its keep as a steady English series that knows its audience. It holds a 7.3/10 on TMDB from 651 ratings, well above the typical run of new releases. Episodes run about 23 minutes. In Australia you can stream it on HBO Max, HBO Max Amazon Channel.</p>
+  <h2>What the audience says</h2><p class="vprose">Mom earns its keep as a steady English series that knows its audience. It holds a 7.3/10 on TMDB from 651 ratings, well above what most films manage.</p>
   
   
   
