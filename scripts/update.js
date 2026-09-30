@@ -300,6 +300,7 @@ const {
   stageFailed,
 } = require("./lib/runhealth.js");
 const { attachFcScores } = require("./lib/fcscore.js");
+const { cachedCriticsTone } = require("./lib/editorial.js");
 const { sweepScores } = require("./lib/scoresweep.js");
 const { pruneDeadHubLinks, sweepDeadHubLinks, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 const {
@@ -1281,7 +1282,7 @@ async function main() {
   // FilmyChill Score (lib/fcscore.js): audiences + critics, after the takes attach the critics
   // tone and before the data files are written, so cards, film pages and share cards agree.
   {
-    const { scored, total } = attachFcScores(dataByCode);
+    const { scored, total } = attachFcScores(dataByCode, { toneFor: cachedCriticsTone });
     console.log(`FilmyChill Score: ${scored}/${total} listed titles scored (the rest: too early)`);
     // Pick of the Week is re-chosen now that scores exist (see choosePick in lib/surfaces.js).
     // The pick made in buildCountry stays as the fallback when nothing new qualifies.
@@ -1395,6 +1396,11 @@ async function main() {
       const r = await sweepScores(pagesManifest, { today: todayStr() });
       console.log(`FilmyChill Score sweep: ${r.checked} checked, ${r.updated} pages updated${r.errors ? `, ${r.errors} TMDB errors` : ""}`);
       if (r.errors >= 5) healthNote(`score sweep stopped early after ${r.errors} TMDB errors — it resumes next run`);
+      // Pages whose film couldn't be identified on TMDB (no id saved, no poster match) can't be
+      // scored honestly, so they get no score box. Surface the count so it never goes unnoticed.
+      let unidentified = 0;
+      for (const m of Object.values(pagesManifest)) for (const e of Object.values(m || {})) if (e && !e.tmdbId && e.idLookup === "none") unidentified++;
+      if (unidentified) healthNote(`${unidentified} old film page(s) have no FilmyChill Score: their film couldn't be matched on TMDB`);
     } catch (e) { stageFailed("score sweep", e); }
   }
 
