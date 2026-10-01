@@ -20,7 +20,7 @@
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TVSeries","name":"The Good Bad Mother","url":"https://filmychill.com/ph/movie/the-good-bad-mother.html","image":["https://image.tmdb.org/t/p/w780/vtDLhvpTk1xcaBCKubSH0if575G.jpg","https://image.tmdb.org/t/p/w1280/zOZqdv7UTc2sP2Tu5Cxj8j1M2r8.jpg"],"datePublished":"2023-04-26","dateModified":"2026-09-29","numberOfSeasons":1,"genre":"Drama / Comedy","inLanguage":"Korean","director":{"@type":"Person","name":"Sim Na-yeon"},"actor":[{"@type":"Person","name":"Ra Mi-ran","image":"https://image.tmdb.org/t/p/w185/45jkWK6vQpQo32FsbGMSDrZig62.jpg"},{"@type":"Person","name":"Lee Do-hyun","image":"https://image.tmdb.org/t/p/w185/8LhhJWLGCoOPt5ygpDlrmfr1VOm.jpg"},{"@type":"Person","name":"Ahn Eun-jin","image":"https://image.tmdb.org/t/p/w185/cZDp8Qim5tmUN9gQxPkBOE5MS8w.jpg"},{"@type":"Person","name":"Yoo In-soo","image":"https://image.tmdb.org/t/p/w185/9acPcttWXPT2UwTjlxv5lHVscU3.jpg"},{"@type":"Person","name":"Choi Mu-sung","image":"https://image.tmdb.org/t/p/w185/gMhYRcJ9HMVcGUWwOGRTAcbDo9y.jpg"},{"@type":"Person","name":"Jung Woong-in","image":"https://image.tmdb.org/t/p/w185/8chD5NkFYH5glIqBt6zyevoQRhK.jpg"}],"trailer":{"@type":"VideoObject","name":"The Good Bad Mother — Official Trailer","description":"Official trailer for The Good Bad Mother (Korean).","thumbnailUrl":"https://img.youtube.com/vi/wyk2FtMAXfY/hqdefault.jpg","uploadDate":"2023-04-26T00:00:00+05:30","contentUrl":"https://www.youtube.com/watch?v=wyk2FtMAXfY","embedUrl":"https://www.youtube-nocookie.com/embed/wyk2FtMAXfY"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/ph/"},{"@type":"ListItem","position":2,"name":"The Good Bad Mother","item":"https://filmychill.com/ph/movie/the-good-bad-mother.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is The Good Bad Mother worth watching?","acceptedAnswer":{"@type":"Answer","text":"FilmyChill Score: Must watch — Audiences love it. It rates 8.9/10 on audience ratings. This is a first season — Korean drama with a comedy streak. Short enough to finish on a weeknight without losing the next morning."}},{"@type":"Question","name":"Where can I watch The Good Bad Mother?","acceptedAnswer":{"@type":"Answer","text":"You can stream The Good Bad Mother in the Philippines on Netflix."}},{"@type":"Question","name":"What language is The Good Bad Mother in?","acceptedAnswer":{"@type":"Answer","text":"The Good Bad Mother is a Korean series (Drama / Comedy)."}}]}</script>
@@ -61,8 +61,15 @@
   .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
   .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
   .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
-  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
   .fit dt { font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--indigo); margin-top:12px; }
@@ -129,9 +136,9 @@
     <div>
       <h1>The Good Bad Mother (2023)</h1>
       <div class="meta">Korean · Drama / Comedy · 68 min</div>
-      <div class="rating rating-early"><span class="cdot"></span>★ 8.9 <span class="ctag">Early — still settling</span> <span class="cvotes">200 ratings</span><span class="cbar"><i style="width:55%"></i></span></div>
+      <div class="rating rating-early"><span class="cdot"></span>★ 8.9 <span class="ctag">Few ratings</span> <span class="cvotes">200 ratings</span><span class="cbar"><i style="width:55%"></i></span></div>
       <div class="meta" style="margin-top:8px">Released Apr 26, 2023</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated Sep 29, 2026</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated Oct 1, 2026</div>
     </div>
   </div>
   <section class="fcsb" id="filmychill-score">
@@ -141,8 +148,14 @@
     <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 8.9 from 200 ratings on TMDB</small></div><span class="fcsb-tag">Loved</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="tv-214999" data-c="ph" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <p class="answer"><b>The Good Bad Mother</b> is streaming in the Philippines on Netflix.</p>
-  <h2>What the audience says</h2><p class="vprose">The Good Bad Mother ranked near the top of that week&#39;s Korean series crop. It&#39;s sitting at 8.9/10 on TMDB across 200 ratings, which puts it comfortably above average. Episode length hovers around 68 minutes. In the Philippines you can stream it on Netflix.</p>
+  <h2>What the audience says</h2><p class="vprose">The Good Bad Mother sits near the top of Korean series on audience ratings. It&#39;s sitting at 8.9/10 on TMDB across 200 ratings, which puts it comfortably above average.</p>
   
   
   

@@ -19,10 +19,10 @@
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Us and Them","url":"https://filmychill.com/my/movie/us-and-them.html","image":"https://image.tmdb.org/t/p/w342/45tKwttzp8Ac47DbjtA6NV12F1r.jpg","datePublished":"2018-04-28","dateModified":"2026-09-23","genre":"Drama / Romance","inLanguage":"Chinese","director":{"@type":"Person","name":"René Liu"},"actor":[{"@type":"Person","name":"Jing Boran","image":"https://image.tmdb.org/t/p/w185/vsXA4vbmlYDUmAAUuLBYQUUcMcF.jpg"},{"@type":"Person","name":"Zhou Dongyu","image":"https://image.tmdb.org/t/p/w185/vD2vVvIIx8ygzkhUQZJLkvYT1jr.jpg"},{"@type":"Person","name":"Tian Zhuangzhuang","image":"https://image.tmdb.org/t/p/w185/kwTTmbFJT5fQaQC3Gsxd5QOxshe.jpg"},{"@type":"Person","name":"Qu Zheming","image":"https://image.tmdb.org/t/p/w185/mWO8KXccv9cXnxybtuso9QmFWZ1.jpg"},{"@type":"Person","name":"Zhang Zixian","image":"https://image.tmdb.org/t/p/w185/wpdP6QISUphKA7Xh1aZRKXUUub2.jpg"},{"@type":"Person","name":"Liu Qiheng","image":"https://image.tmdb.org/t/p/w185/eigd6hSe24GRpg1mfR0g7WuMce.jpg"}],"duration":"PT120M","contentRating":"P13","trailer":{"@type":"VideoObject","name":"Us and Them — Official Trailer","description":"Official trailer for Us and Them (Chinese).","thumbnailUrl":"https://img.youtube.com/vi/-xSs_xsf5sI/hqdefault.jpg","uploadDate":"2018-04-28T00:00:00+05:30","contentUrl":"https://www.youtube.com/watch?v=-xSs_xsf5sI","embedUrl":"https://www.youtube-nocookie.com/embed/-xSs_xsf5sI"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/my/"},{"@type":"ListItem","position":2,"name":"Us and Them","item":"https://filmychill.com/my/movie/us-and-them.html"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Us and Them worth watching?","acceptedAnswer":{"@type":"Answer","text":"Must watch. It rates 7.5/10 on audience ratings. 2h of Chinese drama with a romance streak. Standard length — a normal evening's watch, nothing to plan around."}},{"@type":"Question","name":"Where can I watch Us and Them?","acceptedAnswer":{"@type":"Answer","text":"You can stream Us and Them in Malaysia on Netflix."}},{"@type":"Question","name":"When is Us and Them coming to streaming?","acceptedAnswer":{"@type":"Answer","text":"Us and Them is already streaming in Malaysia on Netflix."}},{"@type":"Question","name":"Is Us and Them family friendly?","acceptedAnswer":{"@type":"Answer","text":"Us and Them is rated P13. Fine for older kids with guidance."}},{"@type":"Question","name":"What language is Us and Them in?","acceptedAnswer":{"@type":"Answer","text":"Us and Them is a Chinese film (Drama / Romance)."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Us and Them worth watching?","acceptedAnswer":{"@type":"Answer","text":"FilmyChill Score: Must watch — Audiences love it. It rates 7.6/10 on audience ratings. 2h of Chinese drama with a romance streak. Standard length — a normal evening's watch, nothing to plan around."}},{"@type":"Question","name":"Where can I watch Us and Them?","acceptedAnswer":{"@type":"Answer","text":"You can stream Us and Them in Malaysia on Netflix."}},{"@type":"Question","name":"When is Us and Them coming to streaming?","acceptedAnswer":{"@type":"Answer","text":"Us and Them is already streaming in Malaysia on Netflix."}},{"@type":"Question","name":"Is Us and Them family friendly?","acceptedAnswer":{"@type":"Answer","text":"Us and Them is rated P13. Fine for older kids with guidance."}},{"@type":"Question","name":"What language is Us and Them in?","acceptedAnswer":{"@type":"Answer","text":"Us and Them is a Chinese film (Drama / Romance)."}}]}</script>
 <style>
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
@@ -98,6 +98,33 @@
   .faq details[open] summary::after { content:"–"; }
   .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
   @media (max-width:420px){ .head { grid-template-columns:110px 1fr; } .poster { width:110px; } h1 { font-size:20px; } }
+  /* FilmyChill Score (lib/fcscore.js) */
+  @font-face { font-family:'Anton'; src:url('/fonts/anton-latin.woff2') format('woff2'); font-display:swap; }
+  .fcsb { margin:18px 0 6px; padding:18px; background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(64,56,199,.08); }
+  .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }
+  .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+  .fcsb-verdict { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; margin-top:12px; }
+  .fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }
+  .fcsb-stamp { display:inline-block; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }
+  @media (max-width: 420px) { .fcsb-m { width:48px; height:30px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }
+  .fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }
+  .fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }
+  .fcsb-early { background:#F4F1EA; color:var(--mute); }
+  .fcsb-why { font-size:15.5px; line-height:1.55; margin:12px 0 0; }
+  .fcsb-rows { margin-top:14px; padding-top:12px; border-top:1px solid #EFE6D6; display:grid; gap:10px; }
+  .fcsb-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
+  .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
+  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
+  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
+  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
 </style>
 </head>
 <body>
@@ -108,14 +135,26 @@
     <div>
       <h1>Us and Them (2018)</h1>
       <div class="meta">Chinese · Drama / Romance · 120 min · P13</div>
-      <div class="rating rating-early"><span class="cdot"></span>★ 7.5 <span class="ctag">Early — still settling</span> <span class="cvotes">177 ratings</span><span class="cbar"><i style="width:55%"></i></span></div>
-      <div class="verdict">▸ Must watch</div>
+      <div class="rating rating-early"><span class="cdot"></span>★ 7.6 <span class="ctag">Few ratings</span> <span class="cvotes">180 ratings</span><span class="cbar"><i style="width:55%"></i></span></div>
       <div class="meta" style="margin-top:8px">Released 28 Apr 2018</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 23 Sept 2026</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 1 Oct 2026</div>
     </div>
   </div>
+  <section class="fcsb" id="filmychill-score">
+    <div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-verdict"><svg class="fcsb-m" width="56" height="35" viewBox="2.5 7 27 17" aria-hidden="true"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="25.18" y2="18.54" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></svg><span class="fcsb-stamp fcsb-must">Must watch</span></div>
+    <p class="fcsb-why">Audiences love it.</p>
+    <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 7.6 from 180 ratings on TMDB</small></div><span class="fcsb-tag">Loved</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
+  </section>
+  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="movie-508747" data-c="my" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <p class="answer"><b>Us and Them</b> is streaming in Malaysia on Netflix.</p>
-  <h2>The verdict</h2><p class="vprose">Us and Them ranked near the top of that week&#39;s Chinese film crop. It&#39;s sitting at 7.5/10 on TMDB across 177 ratings, which puts it comfortably above average. The 120-minute runtime sits in the comfortable middle. In Malaysia you can stream it on Netflix.</p>
+  <h2>What the audience says</h2><p class="vprose">Us and Them sits near the top of Chinese films on audience ratings. It&#39;s sitting at 7.6/10 on TMDB across 180 ratings, which puts it comfortably above average.</p>
   
   
   
@@ -130,7 +169,7 @@
   <!--SW:stream--><!--SW:live=2026-09-23--><h2>Where to watch in Malaysia</h2><div><span class="pill">Netflix</span></div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of 23 Sept 2026 — platforms may change over time.</p><p style="color:var(--mute);font-size:12.5px;margin-top:10px">More: <a href="/my/new-on-netflix/">Everything new on Netflix</a></p><!--/SW:stream-->
   <h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/-xSs_xsf5sI?rel=0" title="Us and Them trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
   <h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/my/movie/a-sun.html"><img src="https://image.tmdb.org/t/p/w342/oMdGYF0IBSJKgiNOuDoagmnOstu.jpg" alt="A Sun poster" loading="lazy"><div class="st">A Sun</div><div class="sm">Chinese · Film</div></a><a class="simcard" href="/my/movie/lighting-up-the-stars.html"><img src="https://image.tmdb.org/t/p/w342/xHTGLYpZKfwGJ0lM2NEAmb6DdYi.jpg" alt="Lighting Up the Stars poster" loading="lazy"><div class="st">Lighting Up the Stars</div><div class="sm">Chinese · Film</div></a><a class="simcard" href="/my/movie/the-bravest.html"><img src="https://image.tmdb.org/t/p/w342/wuFHsaAyTxbCBXDDXuvbaUqFxwz.jpg" alt="The Bravest poster" loading="lazy"><div class="st">The Bravest</div><div class="sm">Chinese · Film</div></a><a class="simcard" href="/my/movie/your-name-engraved-herein.html"><img src="https://image.tmdb.org/t/p/w342/ynNO5FhArEz68wRKOn4NgqVntmS.jpg" alt="Your Name Engraved Herein poster" loading="lazy"><div class="st">Your Name Engraved Herein</div><div class="sm">Chinese · Film</div></a><a class="simcard" href="/my/movie/american-dreams-in-china.html"><img src="https://image.tmdb.org/t/p/w342/n0kzXrad3qqNcz6L0G2DP6M7NVX.jpg" alt="American Dreams in China poster" loading="lazy"><div class="st">American Dreams in China</div><div class="sm">Chinese · Film</div></a><a class="simcard" href="/my/movie/eye-of-the-storm.html"><img src="https://image.tmdb.org/t/p/w780/1GHzOzeljHDGxE2okVnouNuFvCs.jpg,https://image.tmdb.org/t/p/w1280/deJbfvpt9zHyTkanKta3Q0LDEV8.jpg" alt="Eye of the Storm poster" loading="lazy"><div class="st">Eye of the Storm</div><div class="sm">Chinese · Film</div></a></div>
-  <h2>Frequently asked</h2><div class="faq"><details><summary>Is Us and Them worth watching?</summary><div class="fa">Must watch. It rates 7.5/10 on audience ratings. 2h of Chinese drama with a romance streak. Standard length — a normal evening&#39;s watch, nothing to plan around.</div></details><details><summary>Where can I watch Us and Them?</summary><div class="fa">You can stream Us and Them in Malaysia on Netflix.</div></details><details><summary>When is Us and Them coming to streaming?</summary><div class="fa">Us and Them is already streaming in Malaysia on Netflix.</div></details><details><summary>Is Us and Them family friendly?</summary><div class="fa">Us and Them is rated P13. Fine for older kids with guidance.</div></details><details><summary>What language is Us and Them in?</summary><div class="fa">Us and Them is a Chinese film (Drama / Romance).</div></details></div>
+  <h2>Frequently asked</h2><div class="faq"><details><summary>Is Us and Them worth watching?</summary><div class="fa">FilmyChill Score: Must watch — Audiences love it. It rates 7.6/10 on audience ratings. 2h of Chinese drama with a romance streak. Standard length — a normal evening&#39;s watch, nothing to plan around.</div></details><details><summary>Where can I watch Us and Them?</summary><div class="fa">You can stream Us and Them in Malaysia on Netflix.</div></details><details><summary>When is Us and Them coming to streaming?</summary><div class="fa">Us and Them is already streaming in Malaysia on Netflix.</div></details><details><summary>Is Us and Them family friendly?</summary><div class="fa">Us and Them is rated P13. Fine for older kids with guidance.</div></details><details><summary>What language is Us and Them in?</summary><div class="fa">Us and Them is a Chinese film (Drama / Romance).</div></details></div>
   <a class="btn" href="https://filmychill.com/my/#us-and-them">See this week's top picks on FilmyChill →</a>
   <a class="btn" href="/my/films/">Browse every film we've covered →</a>
 </div>

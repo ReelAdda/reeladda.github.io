@@ -23,10 +23,10 @@
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TVSeries","name":"The Voice","url":"https://filmychill.com/ph/movie/the-voice.html","image":"https://image.tmdb.org/t/p/w342/7ah1WExcMkzbq7sARCTmcC23tBr.jpg","datePublished":"2011-04-26","dateModified":"2026-09-26","numberOfSeasons":30,"genre":"Reality","inLanguage":"English","director":{"@type":"Person","name":"John de Mol"},"actor":[{"@type":"Person","name":"Carson Daly","image":"https://image.tmdb.org/t/p/w185/loxq4ARBpzTPpkUpbZYFPGQ87eG.jpg"},{"@type":"Person","name":"Adam Levine","image":"https://image.tmdb.org/t/p/w185/ucSpYIUJ0gKkHlPhQrHEs2HdFxZ.jpg"},{"@type":"Person","name":"Kelly Clarkson","image":"https://image.tmdb.org/t/p/w185/mfqjGz99cMbZLLg1eHwU2OUsOjK.jpg"},{"@type":"Person","name":"Queen Latifah","image":"https://image.tmdb.org/t/p/w185/zKJ0fZ7ne57fTWWd3WP1OVvoLS6.jpg"},{"@type":"Person","name":"Riley Green","image":"https://image.tmdb.org/t/p/w185/pcNKk1FMyEsdHFipfLfEmhXQhZy.jpg"}],"contentRating":"G","trailer":{"@type":"VideoObject","name":"The Voice — Official Trailer","description":"Official trailer for The Voice (English).","thumbnailUrl":"https://img.youtube.com/vi/fBh1SHLs02Q/hqdefault.jpg","uploadDate":"2026-09-21T00:00:00+05:30","contentUrl":"https://www.youtube.com/watch?v=fBh1SHLs02Q","embedUrl":"https://www.youtube-nocookie.com/embed/fBh1SHLs02Q"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/ph/"},{"@type":"ListItem","position":2,"name":"The Voice","item":"https://filmychill.com/ph/movie/the-voice.html"}]}</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is The Voice worth watching?","acceptedAnswer":{"@type":"Answer","text":"Decent one-time watch. It rates 5.9/10 on audience ratings. This is 30 seasons deep — English reality, fine for the whole family. Starting now means a backlog — worth knowing before you press play."}},{"@type":"Question","name":"Where can I watch The Voice?","acceptedAnswer":{"@type":"Answer","text":"You can stream The Voice in the Philippines on Netflix."}},{"@type":"Question","name":"Is The Voice family friendly?","acceptedAnswer":{"@type":"Answer","text":"The Voice is rated G, suitable for family viewing."}},{"@type":"Question","name":"What language is The Voice in?","acceptedAnswer":{"@type":"Answer","text":"The Voice is an English series (Reality)."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is The Voice worth watching?","acceptedAnswer":{"@type":"Answer","text":"FilmyChill Score: Skip — Audiences are lukewarm on it. It rates 5.9/10 on audience ratings. This is 30 seasons deep — English reality, fine for the whole family. Starting now means a backlog — worth knowing before you press play."}},{"@type":"Question","name":"Where can I watch The Voice?","acceptedAnswer":{"@type":"Answer","text":"You can stream The Voice in the Philippines on Netflix."}},{"@type":"Question","name":"Is The Voice family friendly?","acceptedAnswer":{"@type":"Answer","text":"The Voice is rated G, suitable for family viewing."}},{"@type":"Question","name":"What language is The Voice in?","acceptedAnswer":{"@type":"Answer","text":"The Voice is an English series (Reality)."}}]}</script>
 <style>
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
@@ -102,6 +102,33 @@
   .faq details[open] summary::after { content:"–"; }
   .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
   @media (max-width:420px){ .head { grid-template-columns:110px 1fr; } .poster { width:110px; } h1 { font-size:20px; } }
+  /* FilmyChill Score (lib/fcscore.js) */
+  @font-face { font-family:'Anton'; src:url('/fonts/anton-latin.woff2') format('woff2'); font-display:swap; }
+  .fcsb { margin:18px 0 6px; padding:18px; background:#fff; border-radius:18px; box-shadow:0 4px 18px rgba(64,56,199,.08); }
+  .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }
+  .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+  .fcsb-verdict { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; margin-top:12px; }
+  .fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }
+  .fcsb-stamp { display:inline-block; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }
+  @media (max-width: 420px) { .fcsb-m { width:48px; height:30px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }
+  .fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }
+  .fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }
+  .fcsb-early { background:#F4F1EA; color:var(--mute); }
+  .fcsb-why { font-size:15.5px; line-height:1.55; margin:12px 0 0; }
+  .fcsb-rows { margin-top:14px; padding-top:12px; border-top:1px solid #EFE6D6; display:grid; gap:10px; }
+  .fcsb-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
+  .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
+  .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
+  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
+  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
+  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
 </style>
 </head>
 <body>
@@ -112,14 +139,26 @@
     <div>
       <h1>The Voice (2011)</h1>
       <div class="meta">English · Reality · G</div>
-      <div class="rating rating-early"><span class="cdot"></span>★ 5.9 <span class="ctag">Early — still settling</span> <span class="cvotes">228 ratings</span><span class="cbar"><i style="width:55%"></i></span></div>
-      <div class="verdict">▸ Decent one-time watch</div>
+      <div class="rating rating-early"><span class="cdot"></span>★ 5.9 <span class="ctag">Few ratings</span> <span class="cvotes">229 ratings</span><span class="cbar"><i style="width:55%"></i></span></div>
       <div class="meta" style="margin-top:8px">Released Apr 26, 2011</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated Sep 26, 2026</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated Oct 1, 2026</div>
     </div>
   </div>
+  <section class="fcsb" id="filmychill-score">
+    <div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-verdict"><svg class="fcsb-m" width="56" height="35" viewBox="2.5 7 27 17" aria-hidden="true"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="6.96" y2="18.06" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></svg><span class="fcsb-stamp fcsb-skip">Skip</span></div>
+    <p class="fcsb-why">Audiences are lukewarm on it.</p>
+    <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 5.9 from 229 ratings on TMDB</small></div><span class="fcsb-tag">Lukewarm</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
+  </section>
+  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="tv-37678" data-c="ph" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <p class="answer"><b>The Voice</b> is streaming in the Philippines on Netflix.</p>
-  <h2>The verdict</h2><p class="vprose">The Voice is an average English series; it passes the time without demanding more of you. It&#39;s sitting at 5.9/10 on TMDB across 228 ratings, which puts it below the bar for most viewers. In the Philippines you can stream it on Netflix.</p>
+  <h2>What the audience says</h2><p class="vprose">The Voice is an average English series; it passes the time without demanding more of you. It&#39;s sitting at 5.9/10 on TMDB across 229 ratings, which puts it below the bar for most viewers.</p>
   
   
   
@@ -134,7 +173,7 @@
   <!--SW:stream--><!--SW:live=2026-09-26--><h2>Where to watch in the Philippines</h2><div><span class="pill">Netflix</span></div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p><p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of Sep 26, 2026 — platforms may change over time.</p><p style="color:var(--mute);font-size:12.5px;margin-top:10px">More: <a href="/ph/new-on-netflix/">Everything new on Netflix</a></p><!--/SW:stream-->
   <h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/fBh1SHLs02Q?rel=0" title="The Voice trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
   <h2>If you liked this</h2><div class="simgrid"><a class="simcard" href="/ph/movie/home-alone.html"><img src="https://image.tmdb.org/t/p/w342/1hqGagr94soBq70Lq7tPHvNmmxy.jpg" alt="Home Alone poster" loading="lazy"><div class="st">Home Alone</div><div class="sm">Korean · Series</div></a><a class="simcard" href="/ph/movie/culinary-class-wars.html"><img src="https://image.tmdb.org/t/p/w780/dYMFQfzIJwCYAHwf3ZjiL2iVFIy.jpg,https://image.tmdb.org/t/p/w1280/p63GY5JaHX4fine4fgQkhSoqc6r.jpg" alt="Culinary Class Wars poster" loading="lazy"><div class="st">Culinary Class Wars</div><div class="sm">Korean · Series</div></a><a class="simcard" href="/ph/movie/rupaul-s-drag-race.html"><img src="https://image.tmdb.org/t/p/w342/ySs9xkTfPgQCUNB2ctOzcMWP14n.jpg" alt="RuPaul&#39;s Drag Race poster" loading="lazy"><div class="st">RuPaul&#39;s Drag Race</div><div class="sm">English · Series</div></a><a class="simcard" href="/ph/movie/keeping-up-with-the-kardashians.html"><img src="https://image.tmdb.org/t/p/w780/nddXOC8wYpIDv7giLzjjqIg8WDA.jpg,https://image.tmdb.org/t/p/w1280/qnTBxxv7q4xVwgZBLb0vtILLelh.jpg" alt="Keeping Up with the Kardashians poster" loading="lazy"><div class="st">Keeping Up with the Kardashians</div><div class="sm">English · Series</div></a><a class="simcard" href="/ph/movie/raw.html"><img src="https://image.tmdb.org/t/p/w342/fstEe6RsyNyPUnMwNcL20iNl0nE.jpg" alt="Raw poster" loading="lazy"><div class="st">Raw</div><div class="sm">English · Series</div></a><a class="simcard" href="/ph/movie/wwe-friday-night-smackdown.html"><img src="https://image.tmdb.org/t/p/w780/bMVJAnEqBs7AScz4kJSnCTkhHdN.jpg,https://image.tmdb.org/t/p/w1280/A8pQdnIkBG9LGkwGCZOciOM20r.jpg" alt="WWE Friday Night SmackDown poster" loading="lazy"><div class="st">WWE Friday Night SmackDown</div><div class="sm">English · Series</div></a></div>
-  <h2>Frequently asked</h2><div class="faq"><details><summary>Is The Voice worth watching?</summary><div class="fa">Decent one-time watch. It rates 5.9/10 on audience ratings. This is 30 seasons deep — English reality, fine for the whole family. Starting now means a backlog — worth knowing before you press play.</div></details><details><summary>Where can I watch The Voice?</summary><div class="fa">You can stream The Voice in the Philippines on Netflix.</div></details><details><summary>Is The Voice family friendly?</summary><div class="fa">The Voice is rated G, suitable for family viewing.</div></details><details><summary>What language is The Voice in?</summary><div class="fa">The Voice is an English series (Reality).</div></details></div>
+  <h2>Frequently asked</h2><div class="faq"><details><summary>Is The Voice worth watching?</summary><div class="fa">FilmyChill Score: Skip — Audiences are lukewarm on it. It rates 5.9/10 on audience ratings. This is 30 seasons deep — English reality, fine for the whole family. Starting now means a backlog — worth knowing before you press play.</div></details><details><summary>Where can I watch The Voice?</summary><div class="fa">You can stream The Voice in the Philippines on Netflix.</div></details><details><summary>Is The Voice family friendly?</summary><div class="fa">The Voice is rated G, suitable for family viewing.</div></details><details><summary>What language is The Voice in?</summary><div class="fa">The Voice is an English series (Reality).</div></details></div>
   <a class="btn" href="https://filmychill.com/ph/#the-voice">See this week's top picks on FilmyChill →</a>
   <a class="btn" href="/ph/films/">Browse every film we've covered →</a>
 </div>

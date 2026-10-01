@@ -267,7 +267,6 @@
   <url><loc>https://filmychill.com/nz/new-on-disney-plus/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/kr/new-on-netflix/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/kr/new-on-disney-plus/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://filmychill.com/kr/new-on-tving/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/jp/new-on-netflix/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/id/new-on-netflix/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://filmychill.com/new-on-ott/today/</loc><lastmod>2026-10-01</lastmod><priority>0.7</priority></url>
@@ -406,8 +405,6 @@
   <url><loc>https://filmychill.com/au/streaming/stan/english/</loc><lastmod>2026-10-01</lastmod><priority>0.6</priority></url>
   <url><loc>https://filmychill.com/de/streaming/amazon-arthaus-channel/</loc><lastmod>2026-10-01</lastmod><priority>0.7</priority></url>
   <url><loc>https://filmychill.com/de/streaming/amazon-arthaus-channel/german/</loc><lastmod>2026-10-01</lastmod><priority>0.6</priority></url>
-  <url><loc>https://filmychill.com/de/streaming/apple-tv/</loc><lastmod>2026-10-01</lastmod><priority>0.7</priority></url>
-  <url><loc>https://filmychill.com/de/streaming/apple-tv/english/</loc><lastmod>2026-10-01</lastmod><priority>0.6</priority></url>
   <url><loc>https://filmychill.com/de/streaming/ard-plus/</loc><lastmod>2026-10-01</lastmod><priority>0.7</priority></url>
   <url><loc>https://filmychill.com/de/streaming/ard-plus/german/</loc><lastmod>2026-10-01</lastmod><priority>0.6</priority></url>
   <url><loc>https://filmychill.com/de/streaming/arthaus-plus/</loc><lastmod>2026-10-01</lastmod><priority>0.7</priority></url>
@@ -798,6 +795,7 @@
   <url><loc>https://filmychill.com/uk/people/jason-statham/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/uk/people/johnny-depp/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/uk/people/josh-brolin/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/uk/people/joss-whedon/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/uk/people/keanu-reeves/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/uk/people/leonardo-dicaprio/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/uk/people/liam-neeson/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
@@ -1119,6 +1117,7 @@
   <url><loc>https://filmychill.com/ca/people/taapsee-pannu/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ca/people/tabu/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ca/people/tahir-raj-bhasin/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/ca/people/tim-allen/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ca/people/tom-hanks/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ca/people/tom-hardy/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ca/people/triptii-dimri/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
@@ -1188,6 +1187,7 @@
   <url><loc>https://filmychill.com/my/people/edison-wang/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/my/people/emma-watson/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/my/people/gingle-wang/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/my/people/jc-lin/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/my/people/joseph-chang-hsiao-chuan/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/my/people/kamal-haasan/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/my/people/karthi/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
@@ -1224,12 +1224,15 @@
   <url><loc>https://filmychill.com/ph/people/christopher-nolan/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/daniel-padilla/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/daniel-radcliffe/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/ph/people/dick-wolf/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/don-lee/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/emma-watson/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/han-hyo-joo/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/ph/people/hyun-bin/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/iu/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/ji-chang-wook/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/jung-hae-in/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/ph/people/kang-eun-kyung/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/kathryn-bernardo/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/kim-go-eun/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/kim-tae-ri/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
@@ -1244,6 +1247,7 @@
   <url><loc>https://filmychill.com/ph/people/oh-jung-se/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/park-bo-gum/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/park-eun-bin/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/ph/people/park-jeong-min/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/park-min-young/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/park-seo-jun/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/ph/people/park-shin-hye/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
@@ -1339,8 +1343,10 @@
   <url><loc>https://filmychill.com/kr/people/yoo-hai-jin/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/kr/people/yoona/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/jp/people/</loc><lastmod>2026-10-01</lastmod><priority>0.4</priority></url>
+  <url><loc>https://filmychill.com/jp/people/akari-kito/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/jp/people/akemi-okamura/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/jp/people/akira-kurosawa/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/jp/people/anne-hathaway/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/jp/people/asami-seto/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/jp/people/brad-pitt/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/jp/people/chie-nakamura/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
@@ -1408,6 +1414,7 @@
   <url><loc>https://filmychill.com/id/people/ernest-prakasa/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/ha-jung-woo/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/hanung-bramantyo/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/id/people/hwang-jung-min/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/hyun-bin/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/iqbaal-ramadhan/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/iu/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
@@ -1419,12 +1426,14 @@
   <url><loc>https://filmychill.com/id/people/kim-nam-gil/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/kim-tae-ri/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/kim-you-jung/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/id/people/koo-kyo-hwan/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/lee-byung-hun/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/lee-jun-hyuk/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/lee-jun-young/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/lee-min-ho/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/mark-ruffalo/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/marsha-timothy/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/id/people/oh-jung-se/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/park-bo-gum/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/park-eun-bin/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/park-hae-joon/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
@@ -1434,6 +1443,7 @@
   <url><loc>https://filmychill.com/id/people/rupert-grint/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/ryu-jun-yeol/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/seo-hyun-woo/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
+  <url><loc>https://filmychill.com/id/people/song-joong-ki/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/sul-kyung-gu/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/timo-tjahjanto/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
   <url><loc>https://filmychill.com/id/people/yoo-hai-jin/</loc><lastmod>2026-10-01</lastmod><priority>0.5</priority></url>
@@ -1480,6 +1490,7 @@
   <url><loc>https://filmychill.com/ae/films/5/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>
   <url><loc>https://filmychill.com/ae/films/6/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>
   <url><loc>https://filmychill.com/ae/films/7/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://filmychill.com/ae/films/8/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>
   <url><loc>https://filmychill.com/ca/films/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://filmychill.com/ca/films/2/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>
   <url><loc>https://filmychill.com/ca/films/3/</loc><lastmod>2026-10-01</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>
