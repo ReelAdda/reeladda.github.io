@@ -20,7 +20,7 @@
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://filmychill.goatcounter.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; script-src 'self' https://gc.zgo.at; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"TVSeries","name":"Gyeongseong Creature","url":"https://filmychill.com/id/movie/gyeongseong-creature.html","image":["https://image.tmdb.org/t/p/w780/5wliFAD8Pjjj0YYSmupqjOldnWt.jpg","https://image.tmdb.org/t/p/w1280/peVe0NQNdZMXwtTohnv8iwJQb2d.jpg"],"datePublished":"2023-12-22","dateModified":"2026-09-29","numberOfSeasons":2,"genre":"Sci-Fi & Fantasy / Mystery","inLanguage":"Korean","director":{"@type":"Person","name":"Kang Eun-kyung"},"actor":[{"@type":"Person","name":"Park Seo-jun","image":"https://image.tmdb.org/t/p/w185/k1ALgZkOApYt7PIUBkUitmknXQC.jpg"},{"@type":"Person","name":"Han So-hee","image":"https://image.tmdb.org/t/p/w185/8IvEOnqMjqJWcci3z44haH38Ee8.jpg"}],"contentRating":"R","trailer":{"@type":"VideoObject","name":"Gyeongseong Creature — Official Trailer","description":"Official trailer for Gyeongseong Creature (Korean).","thumbnailUrl":"https://img.youtube.com/vi/V5YbzU3aGDE/hqdefault.jpg","uploadDate":"2024-09-27T00:00:00+05:30","contentUrl":"https://www.youtube.com/watch?v=V5YbzU3aGDE","embedUrl":"https://www.youtube-nocookie.com/embed/V5YbzU3aGDE"}}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/id/"},{"@type":"ListItem","position":2,"name":"Gyeongseong Creature","item":"https://filmychill.com/id/movie/gyeongseong-creature.html"}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Gyeongseong Creature worth watching?","acceptedAnswer":{"@type":"Answer","text":"FilmyChill Score: Must watch — Audiences love it. It rates 7.9/10 on audience ratings. This is 2 seasons deep — Korean sci-fi & fantasy with a mystery streak, adults only."}},{"@type":"Question","name":"Where can I watch Gyeongseong Creature?","acceptedAnswer":{"@type":"Answer","text":"You can stream Gyeongseong Creature in Indonesia on Netflix."}},{"@type":"Question","name":"Is Gyeongseong Creature family friendly?","acceptedAnswer":{"@type":"Answer","text":"Gyeongseong Creature is rated R — aimed at adult audiences."}},{"@type":"Question","name":"What language is Gyeongseong Creature in?","acceptedAnswer":{"@type":"Answer","text":"Gyeongseong Creature is a Korean series (Sci-Fi & Fantasy / Mystery)."}}]}</script>
@@ -61,6 +61,14 @@
   .fcsb-row small { display:block; color:var(--mute); font-size:12px; margin-top:2px; }
   .fcsb-tag { font-size:12px; font-weight:700; padding:4px 10px; border-radius:999px; background:#EAE8FA; color:var(--indigo); white-space:nowrap; }
   .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }
+  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }
+  .fcvote { margin:12px 0 4px; background:#fff; border:1px solid #E6E0D2; border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .fcvote-q { font-size:14px; font-weight:600; } .fcvote-q small { display:block; font-weight:400; font-size:12px; color:var(--mute); margin-top:2px; }
+  .fcvote-b { display:flex; gap:8px; flex-wrap:wrap; }
+  .fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter,system-ui,sans-serif; border:1.5px solid #D9D4F2; background:#fff; color:var(--ink); cursor:pointer; }
+  .fcvote-b button svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .fcvote-b button.on { background:var(--indigo); border-color:var(--indigo); color:#fff; } .fcvote-b button[disabled] { opacity:.6; cursor:wait; }
+  .fcvote-done { flex-basis:100%; font-size:13px; color:var(--ink); }
   .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
@@ -130,7 +138,7 @@
       <div class="meta">Korean · Sci-Fi &amp; Fantasy / Mystery · R</div>
       <div class="rating rating-solid"><span class="cdot"></span>★ 7.9 <span class="ctag">Solid</span> <span class="cvotes">334 ratings</span><span class="cbar"><i style="width:61%"></i></span></div>
       <div class="meta" style="margin-top:8px">Released 22 Dec 2023</div>
-      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 29 Sept 2026</div>
+      <div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 2 Oct 2026</div>
     </div>
   </div>
   <section class="fcsb" id="filmychill-score">
@@ -140,8 +148,14 @@
     <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 7.9 from 334 ratings on TMDB</small></div><span class="fcsb-tag">Loved</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>
+  <div class="fcvote" data-film="tv-135238" data-c="id" hidden>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-b"><button type="button" data-v="1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Worth it</button><button type="button" data-v="-1"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(180deg)"><path d="M7 11v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3a4 4 0 0 0 4-4V6a2 2 0 0 1 4 0v5h3a2 2 0 0 1 2 2l-1 5a2 3 0 0 1-2 2h-7a3 3 0 0 1-3-3"/></svg>Not worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>
   <p class="answer"><b>Gyeongseong Creature</b> is streaming in Indonesia on Netflix.</p>
-  <h2>What the audience says</h2><p class="vprose">Gyeongseong Creature has pulled the kind of numbers most Korean series never see. It&#39;s sitting at 7.9/10 on TMDB across 334 ratings, which puts it comfortably above average. In Indonesia you can stream it on Netflix.</p>
+  <h2>What the audience says</h2><p class="vprose">Gyeongseong Creature has pulled the kind of numbers most Korean series never see. It&#39;s sitting at 7.9/10 on TMDB across 334 ratings, which puts it comfortably above average.</p>
   
   
   
