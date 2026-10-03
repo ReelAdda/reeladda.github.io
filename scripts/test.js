@@ -776,7 +776,8 @@ test("a film not out yet is titled by its release date in that country — and o
   assert.ok(/^Forgotten Island \(\d{4}\) — Release Date in the UAE: \d{1,2} [A-Z][a-z]{2,3}/.test(t), t);
   assert.ok(t.length <= 60, t);
   const out = U.filmTitleTag({ title: "Forgotten Island", released: futureDate(-3), kind: "movie" }, G_AE);
-  assert.ok(/Where to Watch/.test(out) && !/Release Date/.test(out), "released -> back to where to watch: " + out);
+  // Out in cinemas, not streaming: the title answers the streaming question honestly.
+  assert.ok(/(OTT Release Date|Streaming Date)/.test(out) && /Expected|Not Announced/.test(out) && !/Release Date in the UAE: \d/.test(out), "released -> streaming-date wording: " + out);
   const streaming = U.filmTitleTag({ title: "X", released: rel, kind: "movie", providers: ["Netflix"] }, G_IN);
   assert.ok(!/Release Date in/.test(streaming), "already streaming (direct-to-OTT) is not a theatrical countdown");
 });
@@ -2109,8 +2110,9 @@ test("archive patch v7: frozen titles stop promising a date the page cannot give
     "2026-06-17", new Set(["dastaar"]), IN);
   const frozen = U.archivePatchHtml(theatrical, "India", IN).html;
   const titleOf = (h) => /<title>([^<]*)<\/title>/.exec(h)[1];
-  assert.ok(!/OTT Release Date/.test(titleOf(frozen)), "no provider on the page -> no date promise: " + titleOf(frozen));
-  assert.ok(/Where to Watch/.test(titleOf(frozen)));
+  // Oct 2026: no provider -> the title may name the question but never a date it can't give.
+  assert.ok(/OTT Release Date: (Not Announced Yet|Expected [A-Z][a-z]{2}(\u2013[A-Z][a-z]{2})?)/.test(titleOf(frozen)), titleOf(frozen));
+  assert.ok(!/\d{1,2} [A-Z][a-z]{2}/.test(titleOf(frozen)), "never a specific day without an announcement: " + titleOf(frozen));
   assert.ok(!U.retitleFrozen(frozen, IN).changed, "idempotent");
 
   // The inverse: a streaming page CAN answer it, so the query words belong there.
@@ -2121,8 +2123,8 @@ test("archive patch v7: frozen titles stop promising a date the page cannot give
   // Simulate a page frozen under the OLD rule (date title, no providers) and re-sweep it.
   const stale = frozen.replace(/<title>[^<]*<\/title>/, "<title>Dastaar (2026) OTT Release Date, Review &amp; Where to Watch</title>");
   const swept = U.retitleFrozen(stale, IN);
-  assert.ok(swept.changed && !/OTT Release Date/.test(titleOf(swept.html)), "the stale promise is rewritten");
-  assert.ok(/&amp;|Where to Watch/.test(titleOf(swept.html)) && !/<title>[^<]*<script/.test(swept.html));
+  assert.ok(swept.changed && !/Review/.test(titleOf(swept.html)), "the stale title is rewritten");
+  assert.ok(/Not Announced Yet|Expected/.test(titleOf(swept.html)) && !/<title>[^<]*<script/.test(swept.html));
 
   // A page whose JSON-LD can't be read is left exactly alone.
   assert.ok(!U.retitleFrozen("<html><head><title>Whatever</title></head></html>", IN).changed);
@@ -2667,6 +2669,24 @@ test("no seriess: series pluralizes as series in every band", () => {
 });
 group("audit fixes: titles, descriptions, inlinks, freshness, schema");
 const AUDIT_CFG = { code: "in", name: "India", region: "IN" };
+test("released, not streaming: the title answers 'OTT release date' honestly — window or 'not announced'", () => {
+  const IN = { code: "in", name: "India", region: "IN" }, AU = { code: "au", name: "Australia", region: "AU" };
+  const ago = (d) => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
+  const fresh = U.filmTitleTag({ title: "Hi!", kind: "movie", language: "Tamil", released: ago(20) }, IN);
+  assert.ok(/^Hi!( \(\d{4}\))? OTT Release Date: Expected [A-Z][a-z]{2}(\u2013[A-Z][a-z]{2})?(, Not Yet Confirmed| \(Unconfirmed\))?$/.test(fresh) && fresh.length <= 60, fresh);
+  const lapsed = U.filmTitleTag({ title: "Old", kind: "movie", language: "Tamil", released: ago(120) }, IN);
+  assert.ok(/OTT Release Date: Not Announced Yet$/.test(lapsed), lapsed);
+  const au = U.filmTitleTag({ title: "Insidious", kind: "movie", language: "English", released: ago(20) }, AU);
+  assert.ok(/^Insidious( \(\d{4}\))? Streaming Date in Australia: Expected /.test(au) && au.length <= 60, au);
+  assert.ok(!/OTT/.test(au), "outside India it's a streaming date");
+  const tv = U.filmTitleTag({ title: "Show", kind: "tv", language: "Tamil", released: ago(20) }, IN);
+  assert.ok(!/Release Date/.test(tv), "series have no OTT release date");
+  const d = U.filmMetaDescription({ title: "Hi!", kind: "movie", language: "Tamil", released: ago(20), platform: "Theatres" }, IN);
+  assert.ok(/^Not announced yet\. Tamil films usually reach OTT 4\u20137 weeks after theatres, so /.test(d) && /We update this page the day it streams\.$/.test(d) && d.length <= 155, d);
+  const dl = U.filmMetaDescription({ title: "Old", kind: "movie", language: "Tamil", released: ago(120), platform: "Theatres" }, IN);
+  assert.ok(/^Not (on any OTT platform|streaming) in India yet/.test(dl) && /no date has been announced/.test(dl), dl);
+});
+
 test("film title tags fit 60 chars, keeping the query words", () => {
   // REWRITTEN Sept 2026 with the availability rule (see filmTitleTag). The date wording is
   // reserved for pages that can answer it; a page with no provider targets "where to watch".
@@ -2675,7 +2695,7 @@ test("film title tags fit 60 chars, keeping the query words", () => {
   const long = { title: "Teenage Sex and Death at Camp Miasma", slug: "x", kind: "movie", tmdbId: 9, released: "2026-06-06", platform: "Theatres" };
   const t = titleOf(long);
   assert.ok(t.length <= 62, t + " (" + t.length + ")");
-  assert.ok(/Where to Watch/.test(t), "query words survive trimming: " + t);
+  assert.ok(/OTT Release Date/.test(t), "query words survive trimming: " + t);
   const streamingLong = { ...long, platform: "Netflix", providers: ["Netflix"] };
   const t2 = titleOf(streamingLong);
   assert.ok(t2.length <= 62, t2 + " (" + t2.length + ")");
@@ -2700,8 +2720,8 @@ test("descriptions: never empty, never a complete answer, always a reason to cli
   const th = { title: "T", slug: "t", kind: "movie", tmdbId: 4, platform: "Theatres", released: "2026-08-21",
     language: "English", runtime: 106, rating: 7.9, votes: 500, verdict: "Must watch" };
   const d2 = desc(th);
-  assert.ok(/OTT release expected around \w{3}/.test(d2), "the window estimate reaches the snippet: " + d2);
-  assert.ok(/not a confirmed date|a pattern/.test(d2), "an estimate is labelled, never promised: " + d2);
+  assert.ok(/usually reach OTT \d+\u2013\d+ weeks after theatres/.test(d2) || /^Not on any OTT platform/.test(d2), "the window reaches the snippet: " + d2);
+  assert.ok(/^Not (announced yet|on any OTT platform)/.test(d2), "it opens by saying nothing is announced: " + d2);
   assert.ok(!/coming soon/.test(d2), "the dead-end phrasing must never come back: " + d2);
 
   // Theatrical with NO usable window: nothing may be promised about the date, so the payoff
@@ -2761,13 +2781,15 @@ test("frozen archive pages get the new description, and stop contradicting their
   // Simulate the archive patch having already ended the theatrical run in the body. The
   // description must follow it — the live site shipped a page whose body said "Theatrical run
   // ended" while its description still said "is in cinemas in India".
+  // (Its description is also stale: written when the film was still in cinemas.)
   const ended = live.replace(/<span class="pill">In theatres<\/span>/,
-    '<span class="pill">Theatrical run ended — OTT arrival pending</span>');
+    '<span class="pill">Theatrical run ended — OTT arrival pending</span>')
+    .replace(/(<meta name="description" content=")[^"]*(")/, '$1Insidious: Out of the Further is in cinemas in India now — verdict inside.$2');
   const out = U.rewriteMetaDescription(ended, IN);
   assert.ok(out.changed, "a frozen page with a stale description must be rewritten");
   const d = /name="description" content="([^"]*)"/.exec(out.html)[1];
   assert.ok(!/in cinemas/.test(d), "must not claim a theatrical run that has ended: " + d);
-  assert.ok(/OTT release expected around|finished its theatrical run/.test(d), d);
+  assert.ok(/Not announced yet|Not on any OTT platform|Not streaming in India yet|finished its theatrical run/.test(d), d);
   assert.ok(out.html.includes(`og:description" content="${d}"`), "og twin follows the description");
   // Idempotent: a second pass over an already-correct page changes nothing.
   assert.ok(!U.rewriteMetaDescription(out.html, IN).changed, "patcher must not thrash on re-run");
@@ -2866,7 +2888,7 @@ test("buildFilmPage: US page has US canonical, title, and where-to-watch", () =>
   assert.ok(/rel="canonical" href="https:\/\/filmychill.com\/us\/movie\/the-furious.html"/.test(html));
   // Display name comes from COUNTRY_PAGE_META ("the US"), not the config's "United States" —
   // "in the US" is how people actually search and speak.
-  assert.ok(/Where to Watch in the US/.test(html));
+  assert.ok(/<title>The Furious \(2026\) Streaming Date in the US: Not Announced/.test(html), "the country stays in the title");
   assert.ok(/<h2>Where to watch in the US<\/h2>/.test(html));
 });
 // Guards the fix for India references leaking onto other countries' film pages ("It's in
