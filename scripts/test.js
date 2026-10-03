@@ -1116,8 +1116,10 @@ test("film page leads with the score and shows both signals behind it", () => {
 
 test("homepage template renders the score panel client-side, like the SSR card", () => {
   const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
-  assert.ok(/function fcScoreHtml\(item\)/.test(src) && /function fcSignals\(item\)/.test(src));
-  assert.ok((src.match(/\$\{fcScoreHtml\(item\)\}/g) || []).length === 2, "card and detail view");
+  // Cards: the one-line score (cardScore). The detail view keeps the full panel (fcScoreHtml).
+  assert.ok(/function cardScore\(item\)/.test(src) && /\$\{cardScore\(item\)\}/.test(src), "card");
+  assert.ok(/function fcScoreHtml\(item\)/.test(src) && (src.match(/\$\{fcScoreHtml\(item\)\}/g) || []).length === 1, "detail view");
+  assert.ok(/<symbol id="icHourglass"/.test(src) && /<symbol id="icBars"/.test(src), "icons for the no-score line");
 });
 
 test("share card and llms.txt carry the FilmyChill Score", () => {
@@ -1159,7 +1161,7 @@ test("SSR card, film page and share card all carry the meter for the score's ver
   const W = require("./lib/weekly.js"), C = require("./lib/cards.js");
   const it = { ...FCS_ITEM };
   assert.ok(/<use href="#fcm-worth"\/>/.test(W.ssrCard(it, 0, "in")));
-  assert.ok(/<use href="#fcm-early"\/>/.test(W.ssrCard({ ...it, fcScore: undefined }, 0, "in")));
+  assert.ok(/class="snone"/.test(W.ssrCard({ ...it, fcScore: undefined }, 0, "in")), "no score: the quiet line, no dial");
   const page = U.buildFilmPage(it, "2026-09-28", new Set(["the-love-hypothesis"]), { code: "in", name: "India" });
   assert.ok(/<div class="fcsb-verdict"><svg class="fcsb-m" width="56" height="35" viewBox="2\.5 7 27 17"/.test(page));
   const svg = C.shareCardSvg(it, { code: "in", name: "India" });
@@ -2302,17 +2304,18 @@ test("trailerViewsLabel: null below 1M (anti-proof guard), label at 52M", () => 
   assert.strictEqual(U.trailerViewsLabel(52123456), "▶ 52M trailer views");
 });
 test("ssrCard: trending badge + trailer views render from data fields", () => {
+  const recent = new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10);
   const html = U.ssrCard({ title: "HotD", platform: "JioHotstar", language: "English", genre: "Fantasy / Drama",
     rating: 8.2, verdict: "Must watch", kind: "tv", slug: "hotd", trending: true, trailerViews: 52123456,
-    badge: "New season", freshDate: "2026-06-21" }, 0, "in");
-  assert.ok(html.includes("Trending") && !html.includes("🔥")); // icon badge, not emoji
-  // No FilmyChill Score (no vote count, no critics) -> "too early", and the one real signal
-  // there is, trailer buzz, is shown instead. A scored card never shows it (next test).
-  assert.ok(/fcs-early/.test(html) && html.includes("52M trailer views"));
+    badge: "New season", freshDate: recent }, 0, "in");
+  assert.ok(/<span class="cchip trend">Trending<\/span>/.test(html) && !html.includes("🔥"));
+  // No score yet: one quiet line, carrying the one real signal there is — trailer buzz.
+  assert.ok(/class="snone"/.test(html) && /Too early to score · 52M trailer views/.test(html), html);
   const scored = U.ssrCard({ title: "HotD", platform: "JioHotstar", rating: 8.2, votes: 900, verdict: "Must watch", kind: "tv",
     slug: "hotd", trailerViews: 52123456, fcScore: { verdict: "Must watch", reason: "Audiences love it.", audience: "Loved", critics: null, basis: "audience" } }, 0, "in");
-  assert.ok(!scored.includes("trailer views"), "a scored card keeps to the score and its signals");
-  assert.ok(html.includes("New season"));
+  assert.ok(!scored.includes("trailer views"), "a scored card keeps to the score");
+  assert.ok(!html.includes("New season"), "one status chip at most: Trending wins over New season");
+  assert.ok(/<span class="cchip new">New season<\/span>/.test(U.ssrCard({ title: "X", kind: "tv", slug: "x", badge: "New season" }, 0, "in")));
 });
 test("ssrCard: no buzz fields -> no trending badge, no views label (graceful absence)", () => {
   const html = U.ssrCard({ title: "Plain", platform: "Netflix", language: "Hindi", rating: 7.0,
@@ -3073,7 +3076,7 @@ test("nothing extractable -> null (line is omitted, never hollow)", () => {
 group("take rendering");
 test("ssrCard: the FilmyChill Score replaces the take on the card (the take stays on the film page)", () => {
   const withTake = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix", take: "Critics liked it, especially the performances." }, 0, "in");
-  assert.ok(!/class="take"/.test(withTake) && /class="fcs/.test(withTake), "card shows the score panel, not the take");
+  assert.ok(!/class="take"/.test(withTake) && /class="snone"|class="sline"/.test(withTake), "card shows the score line, not the take");
 });
 test("ssrCard escapes HTML inside the take", () => {
   const card = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix", take: `<script>alert(1)</script>` }, 0, "in");
@@ -3339,15 +3342,11 @@ test("uses IMDb votes when IMDb ratings are the source", () => {
 
 // ---------------- editorial: rendering ----------------
 group("hook + counterpoint rendering");
-test("ssrCard renders hook and counterpoint; omits both when absent", () => {
+test("ssrCard keeps to essentials: no hook or counterpoint on the card (both live on the film page)", () => {
   const withBoth = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix",
     hook: "The follow-up to \u2018X\u2019.", take: "Critics are split on this one.",
     takeCounter: "Audiences disagree \u2014 \u2605 8.1 from viewers." }, 0, "in");
-  assert.ok(/class="meta hook"/.test(withBoth) && /follow-up/.test(withBoth));
-  // The counterpoint belongs to the take, which now lives on the film page, not the card.
-  assert.ok(!/class="tcounter"/.test(withBoth));
-  const bare = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix" }, 0, "in");
-  assert.ok(!/hook/.test(bare) && !/tcounter/.test(bare));
+  assert.ok(!/class="meta hook"/.test(withBoth) && !/tcounter/.test(withBoth));
 });
 test("buildFilmPage renders hook and counterpoint", () => {
   const html = U.buildFilmPage({ title: "Main", slug: "main", kind: "movie", platform: "Theatres",
@@ -3807,11 +3806,11 @@ test("capTrending: only top 2 by weekly views keep the badge, per section", () =
   U.capTrending(data);
   assert.deepStrictEqual(data.in.theatres.filter((x) => x.trending).map((x) => x.title).sort(), ["b", "d"]);
 });
-test("ssrCard: trend badge is an icon, no emoji; Theatres pill dropped in its own section", () => {
+test("ssrCard: platform chip only on streaming titles; never an emoji badge", () => {
   const t1 = U.ssrCard({ title: "A", platform: "Theatres", language: "Hindi", kind: "movie", slug: "a", trending: true }, 0, "in");
-  assert.ok(t1.includes("icTrend") && !t1.includes("🔥") && !t1.includes('<span class="platform">'));
+  assert.ok(!t1.includes("🔥") && !/>Theatres</.test(t1), t1);
   const t2 = U.ssrCard({ title: "B", platform: "Netflix", language: "Hindi", kind: "movie", slug: "b" }, 0, "in");
-  assert.ok(t2.includes('<span class="platform">Netflix</span>'));
+  assert.ok(t2.includes('<span class="cchip">Netflix</span>'));
 });
 
 // ---------------- editor's note ----------------
@@ -4018,10 +4017,10 @@ test("TV runtime (per-episode) stays off the card meta", () => {
 test("unscored card: 'Too early' only when it's just out; otherwise says what's missing", () => {
   const recent = new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10);
   const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: null, votes: 3, released: recent, verdict: "Just released — verdict soon", slug: "t" }, 0, "in");
-  assert.ok(/fcs fcs-early/.test(html) && html.includes("Too early") && html.includes("Just released"));
+  assert.ok(/class="snone"/.test(html) && html.includes("Too early to score"), html);
   const old = U.ssrCard({ title: "Old", language: "Hindi", genre: "Drama", kind: "movie", rating: 5.7, votes: 9, released: "2026-03-10", slug: "old" }, 0, "in");
   assert.ok(!old.includes("Too early"), "a March release is not 'too early'");
-  assert.ok(old.includes("Not enough ratings") && old.includes("Only 9 people have rated it — the score needs at least 15."), "older films need 15 (early read)");
+  assert.ok(old.includes("Not enough ratings to score · only 9"), "older film: counted, never 'early': " + old);
 });
 
 test("early reads: older films score from 15 ratings — shrunk toward average, never Must watch, always labelled", () => {
@@ -4042,7 +4041,7 @@ test("early reads show their label on cards and film pages, and never win Pick o
   const W = require("./lib/weekly.js"), S = require("./lib/surfaces.js");
   const s = { verdict: "Skip", reason: "The few who rated it are lukewarm on it.", audience: "Lukewarm", critics: null, basis: "audience", early: true, votes: 21 };
   const card = W.ssrCard({ title: "Ikka", slug: "ikka", kind: "movie", rating: 5.7, votes: 21, released: "2026-07-10", fcScore: s }, 0, "in");
-  assert.ok(/<span class="fcs-tag">Based on 21 ratings<\/span>/.test(card));
+  assert.ok(/Based on 21 ratings<\/div>/.test(card), card);
   const page = U.buildFilmPage({ title: "Ikka", slug: "ikka", kind: "movie", language: "Hindi", rating: 5.7, votes: 21, released: "2026-07-10", fcScore: s }, "2026-09-29", new Set(["ikka"]), { code: "in", name: "India" });
   assert.ok(/fcsb-stamp fcsb-skip">Skip<\/span><span class="fcsb-conf">Based on 21 ratings<\/span>/.test(page));
   assert.ok(/few ratings, so weighted toward an average film/.test(page) && /\(based on only 21 ratings\)/.test(page), "audience row and FAQ say so too");
@@ -4065,11 +4064,12 @@ test("noScoreText: early only within 4 weeks; exact counts; split critics named"
   assert.strictEqual(F.noScoreText({ votes: 0 }, now).label, "Not enough ratings", "no date: never claim 'early'");
   assert.ok(!/Only 111/.test(F.noScoreText({ released: "2026-01-01", votes: 111 }, now).why), "never 'only 111 … needs 15'");
 });
-test("scored card: FilmyChill verdict, its reason, and the audience rating it came from", () => {
-  const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: 7.9, votes: 900, verdict: "Must watch", slug: "t",
+test("scored card: FilmyChill verdict, its reason, and the audience rating it came from — in one line", () => {
+  const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: 7.9, votes: 900, verdict: "Must watch", slug: "t", runtime: 128,
     fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" } }, 0, "in");
-  assert.ok(/<span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-must"\/><\/svg>Must watch<\/span><\/div><div class="fcs-why">Audiences and critics agree\.<\/div>/.test(html));
-  assert.ok(html.includes("Audience \u2605 7.9 (900 ratings) \u00b7 Critics: positive"), "signals line broken");
+  assert.ok(/<div class="sline" aria-label="FilmyChill Score: Must watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-must"\/><\/svg><span class="sv">Must watch<\/span><\/div><div class="sreason">Audiences and critics agree · ★ 7\.9<\/div>/.test(html), html);
+  assert.ok(/<div class="meta">Hindi · Action · 2h 8m<\/div>/.test(html), "short details line");
+  assert.ok(/<span class="rank">1<\/span>/.test(html) && !/fcs-label|fcs-sig/.test(html), "rank on the poster; no boxed panel, no second ratings line");
 });
 
 group("ssrSoonCard — poster placeholder");
