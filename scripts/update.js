@@ -146,6 +146,7 @@ const {
   enrich,
   extractCastPics,
   imdbRatings,
+  isPreListed,
   loadImdbRatings,
   regionalTheatricalDate,
   THEATRE_EXCLUDE_IDS,
@@ -764,6 +765,16 @@ async function main() {
       console.log(`  theatres: dropped ${item.title} — digital-only release, no theatrical run in ${cfg.region}`);
       continue;
     }
+    // A platform page that went up before the film opened is a placeholder: it's in cinemas,
+    // so its page must not say "streaming" (see isPreListed in lib/enrich.js).
+    if ((item.providers || []).length) {
+      const seen = (loadOttSeen()[cfg.code] || {})[`movie:${item.tmdbId}`];
+      if (isPreListed({ kind: "movie", hasProviders: true, theatricalDate: item.theatricalHere ? item.released : null,
+        theatrical: item.theatrical, language: item.language, digitalDate: item.digitalDate, firstSeen: seen && seen.first })) {
+        console.log(`  theatres: ${item.title} — ${item.providers.join(", ")} listing predates the cinema release; treated as not streaming yet`);
+        item.providers = []; delete item.rentBuy;
+      }
+    }
     theatres.push(item);
     await sleep(150);
   }
@@ -860,6 +871,13 @@ async function main() {
         first: firstSeen, theatrical: item.released, language: item.language, genre: item.genre,
       }));
     } catch (e) { /* archive is additive; never let it break a build */ }
+    // Placeholder listing (platform page up before the cinema release, still inside the usual
+    // window): not streaming yet — the film belongs under In Theatres (lib/enrich.js isPreListed).
+    if (isPreListed({ kind: item.kind, hasProviders: true, theatricalDate: item.theatricalHere ? item.released : null,
+      theatrical: item.theatrical, language: item.language, digitalDate: item.digitalDate, firstSeen })) {
+      console.log(`  ott [${cfg.code}]: skipped ${item.title} — ${item.platform} listing first seen ${firstSeen}, before its ${item.released} cinema release`);
+      return null;
+    }
     const { effective, isArrival } = ottArrival(item.freshDate, firstSeen);
     item.ottSince = firstSeen;
     item.ottFreshDate = effective;

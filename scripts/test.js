@@ -1435,6 +1435,23 @@ test("homepage: one language dropdown instead of a row of chips, choice remember
   assert.ok(/#langSel, #sortSel \{ flex: 1 1 calc\(50% - 4px\)/.test(src), "on phones language and sort share a row evenly");
 });
 
+test("a platform page put up before a theatrical film could stream is a placeholder, not 'Streaming Now'", () => {
+  const { isPreListed } = require("./lib/enrich.js");
+  const now = Date.parse("2026-10-03T08:00:00Z");
+  // Drishyam: The Conclusion — Prime's page went up in July; the film opened in cinemas on 2 Oct.
+  const drishyam = { kind: "movie", hasProviders: true, theatricalDate: "2026-10-02", theatrical: true, language: "Hindi", firstSeen: "2026-07-06", now };
+  assert.strictEqual(isPreListed(drishyam), true, "in cinemas yesterday: the listing is a placeholder");
+  assert.strictEqual(isPreListed({ ...drishyam, firstSeen: "2026-10-02" }), true, "listed on release day itself: still a placeholder");
+  // Mahendragiri Vaaraahi — in cinemas 11 Sept, turned up on Prime on 2 Oct: a real arrival.
+  assert.strictEqual(isPreListed({ ...drishyam, language: "Telugu", theatricalDate: "2026-09-11", firstSeen: "2026-10-02" }), false, "seen after the cinema run began: trust it");
+  assert.strictEqual(isPreListed({ ...drishyam, theatricalDate: "2026-06-01" }), false, "past the window: it's a real arrival by now");
+  assert.strictEqual(isPreListed({ ...drishyam, digitalDate: "2026-10-03" }), false, "an announced digital date that has arrived wins");
+  assert.strictEqual(isPreListed({ ...drishyam, theatrical: false }), false, "direct-to-OTT films stream on day one");
+  assert.strictEqual(isPreListed({ ...drishyam, kind: "tv" }), false);
+  assert.strictEqual(isPreListed({ ...drishyam, theatricalDate: null }), false, "no cinema release here: nothing to hold");
+  assert.strictEqual(isPreListed({ ...drishyam, firstSeen: undefined }), false, "no sighting record: can't call it a placeholder");
+});
+
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
 group("failure paths: outages, stalls, corrupt state, silent stages");
 
