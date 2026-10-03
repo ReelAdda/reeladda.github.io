@@ -47,31 +47,59 @@ function fcScorePanel(item) {
   return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${meterLevel(s.verdict)}"/></svg>${e(s.verdict)}</span></div><div class="fcs-why">${e(s.reason)}${s.early ? ` <span class="fcs-tag">${e(earlyReadLabel(s))}</span>` : ""}</div></div>${sig}`;
 }
 
+// CLEANER CARDS (Oct 2026) — server twin of card() in index.html; same markup, so the page
+// doesn't shift when the browser re-renders it. Poster with the rank on it, title, a short
+// details line, at most one status chip (+ platform on streaming titles), the score as one
+// line. The film page carries everything else.
+function ssrCardMeta(item) {
+  const genre = item.genre ? String(item.genre).split(" / ")[0] : "";
+  const tail = item.kind === "tv" ? (item.seasons ? `Season ${item.seasons}` : "Series") : (item.runtime ? fmtRuntime(item.runtime) : "");
+  return [item.language, genre, tail].filter(Boolean).map(escHtml).join(" · ");
+}
+function ssrCardChips(item) {
+  const e = escHtml, out = [];
+  const badge = item.badge || (item.isRecent ? "New release" : null);
+  if (item.platform && item.platform !== "Theatres") out.push(`<span class="cchip">${e(item.platform)}</span>`);
+  if (item.trending) out.push('<span class="cchip trend">Trending</span>');
+  else if (badge) out.push(`<span class="cchip new">${e(badge)}</span>`);
+  return out.length ? `<div class="cchips">${out.join("")}</div>` : "";
+}
+function ssrCardScore(item, code) {
+  const e = escHtml, s = item.fcScore;
+  if (s) {
+    const bits = [e(String(s.reason || "").replace(/\.$/, ""))];
+    if (item.rating != null && item.votes) bits.push(`★ ${Number(item.rating).toFixed(1)}`);
+    if (s.early) bits.push(e(earlyReadLabel(s)));
+    return `<div class="sline" aria-label="FilmyChill Score: ${e(s.verdict)}"><svg class="fcm" aria-hidden="true"><use href="#fcm-${meterLevel(s.verdict)}"/></svg><span class="sv">${e(s.verdict)}</span></div><div class="sreason">${bits.join(" · ")}</div>`;
+  }
+  const none = noScoreText(item);
+  if (none.label === "Too early") {
+    const tv = trailerViewsLabel(item.trailerViews);
+    const when = freshLabel(item, Date.now(), localeFor(code));
+    const extra = tv ? tv.replace(/^▶\s*/, "") : (when ? when.charAt(0).toLowerCase() + when.slice(1) : "");
+    return `<div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score${extra ? ` · ${e(extra)}` : ""}</div>`;
+  }
+  const votes = Number(item.votes || 0);
+  return `<div class="snone"><svg class="ic" aria-hidden="true"><use href="#icBars"/></svg>Not enough ratings to score${votes ? ` · only ${votes.toLocaleString("en-IN")}` : ""}</div>`;
+}
 function ssrCard(item, i, code, { eager = false } = {}) {
   const e = escHtml;
-  // Badge text comes from the data (freshBadge). Fallback to the old isRecent flag so a
-  // template regen against a pre-badge data.json still renders sensibly.
-  const badge = item.badge || (item.isRecent ? "New release" : null);
-  const when = freshLabel(item, Date.now(), localeFor(code)); // dates in the page's own locale
-  // Runtime sits between genre and date: it answers "do I have time tonight?" and
-  // grounds the mood picker's length filter (a filter on data the cards never showed
-  // read as arbitrary). TV runtimes are per-episode and would mislead here — movies only.
-  const rt = item.kind !== "tv" && item.runtime ? fmtRuntime(item.runtime) : null;
-  const bits = [item.language, item.genre ? item.genre.split(" / ")[0] : null, rt, when || null].filter(Boolean).map(e).join(" · ");
+  const art = item.poster
+    ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" ${eager ? 'loading="eager" decoding="async"' : 'loading="lazy"'}>`
+    : `<div class="poster ph" aria-hidden="true">${e((item.title || "?").charAt(0).toUpperCase())}</div>`;
   const inner = `
-    <div class="rank">${String(i + 1).padStart(2, "0")}</div>
-    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" ${eager ? 'loading="eager" decoding="async"' : 'loading="lazy"'}>` : ""}
-    <div>
-      <div class="title-row"><h3>${e(item.title)}</h3>${item.platform && item.platform !== "Theatres" ? `<span class="platform">${e(item.platform)}</span>` : ""}${badge ? `<span class="fresh-badge">${e(badge)}</span>` : ""}${item.trending ? '<span class="fresh-badge trend"><svg class="ic" aria-hidden="true"><use href="#icTrend"/></svg> Trending</span>' : ""}</div>
-      <div class="meta">${bits}</div>
-      ${item.hook ? `<div class="meta hook">${e(item.hook)}</div>` : ""}
-      ${fcScorePanel(item)}
+    <div class="pw">${art}<span class="rank">${i + 1}</span></div>
+    <div class="cb">
+      <h3>${e(item.title)}</h3>
+      <div class="meta">${ssrCardMeta(item)}</div>
+      ${ssrCardChips(item)}
+      ${ssrCardScore(item, code)}
     </div>`;
   // Every country now has its own per-film pages, so always link to this country's page.
   // (`code` defaults to India for safety if a caller omits it.)
   return item.slug
-    ? `<a class="card${item.poster ? "" : " no-poster"}" href="${e(filmPagePath(code || "in", item.slug))}" style="text-decoration:none;color:inherit">${inner}</a>`
-    : `<div class="card${item.poster ? "" : " no-poster"}" style="color:inherit">${inner}</div>`;
+    ? `<a class="card" href="${e(filmPagePath(code || "in", item.slug))}">${inner}</a>`
+    : `<div class="card">${inner}</div>`;
 }
 
 function ssrSoonCard(item, code) {
