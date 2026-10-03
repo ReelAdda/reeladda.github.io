@@ -14,6 +14,7 @@ const {
   langCode,
   langName,
   rankSimilar,
+  streamWindowEstimate,
 } = require("./rules.js");
 const { tmdb, USE_IMDB } = require("./tmdb.js");
 
@@ -177,6 +178,28 @@ function digitalReleaseFor(d, region) {
   return { date: dig.date, note };
 }
 
+// PRE-LISTED ON A PLATFORM (Oct 2026). Drishyam: The Conclusion opened in Indian cinemas on
+// 2 Oct — and TMDB/JustWatch already listed it on Prime Video, because the platform had put
+// up its page in July, three months before release. Trusting that put a film that was in
+// cinemas YESTERDAY under "Streaming Now".
+// Pure: is this provider listing a placeholder? True when ALL hold:
+//   - a film with a theatrical release in this country;
+//   - the platform listing was first seen on or before that release day (a real arrival is
+//     seen AFTER the cinema run starts — e.g. a Telugu film turning up on Prime 3 weeks in);
+//   - we're still inside the shortest usual window for its language (3 weeks if unknown);
+//   - no announced digital date for this country has arrived.
+function isPreListed({ kind, hasProviders, theatricalDate, theatrical, language, digitalDate, firstSeen, now = Date.now() }) {
+  if (kind !== "movie" || !hasProviders || !theatricalDate || theatrical === false) return false;
+  if (!firstSeen || firstSeen > theatricalDate) return false;
+  const relMs = Date.parse(`${theatricalDate}T00:00:00Z`);
+  if (!Number.isFinite(relMs)) return false;
+  const todayIso = new Date(now).toISOString().slice(0, 10);
+  if (digitalDate && digitalDate <= todayIso) return false;
+  const est = streamWindowEstimate(theatricalDate, language, new Date(now));
+  const holdDays = (est ? est.lo : 3) * 7;
+  return now < relMs + holdDays * 864e5;
+}
+
 async function enrich(kind, id, region = "IN") {
   const extra = kind === "movie" ? "release_dates" : "content_ratings";
   const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,external_ids,recommendations,${extra}` });
@@ -252,6 +275,7 @@ async function enrich(kind, id, region = "IN") {
   const regionalRelease = kind === "movie" ? regionalTheatricalDate(d, region) : null;
   const theatrical = kind === "movie" ? theatreEligible(d, region, providers) : null;
 
+
   return {
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
     ...(rentBuy.length ? { rentBuy } : {}),
@@ -269,6 +293,9 @@ async function enrich(kind, id, region = "IN") {
     ...(regionalRelease ? { released: regionalRelease } : {}),
     ...(castPics.length ? { castPics } : {}),
     ...(theatrical === false ? { theatrical: false } : {}), // only serialized when it matters
+    // Whether this country has its own theatrical date — needed to judge a provider listing
+    // that appeared before the film could have streamed (isPreListed, used in update.js).
+    ...(regionalRelease ? { theatricalHere: true } : {}),
     // Announced streaming date (see digitalReleaseFor). Only while nothing is streaming yet:
     // once a provider exists, "where to watch" is the answer and the date is history.
     ...((kind === "movie" && !providers.length && digital) ? { digitalDate: digital.date, ...(digital.note ? { digitalNote: digital.note } : {}) } : {}),
@@ -276,6 +303,7 @@ async function enrich(kind, id, region = "IN") {
 }
 
 module.exports = {
+  isPreListed,
   certAudience,
   certFor,
   digitalReleaseFor,
