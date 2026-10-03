@@ -30,6 +30,9 @@ const { sleep, tmdb } = require("./tmdb.js");
 // the 30-day re-checks (~300 a day), so the cap rarely binds.
 const SCORE_SWEEP_BATCH = Math.max(0, Number(process.env.SCORE_SWEEP_BATCH || 1500));
 const RESCORE_DAYS = 30;
+// Ages (days after release) at which a page's wording changes: "Too early" ends at 28
+// (EARLY_DAYS in lib/fcscore.js); few-ratings scores start at 60 (EARLY_READ_AGE_DAYS).
+const AGE_LINES = [28, 60];
 // Bumped when the no-score wording changes: pages swept under an older wording with no score
 // are redone at once rather than waiting 30 days. 2 = "Too early" only for recent releases.
 // 3 = early reads; 4 = header rating shown with one decimal like the score box, and every
@@ -186,8 +189,16 @@ function sweepCandidates(pagesManifest, today, limit) {
       if (!e.tmdbId && e.idLookup === "none") continue;  // tried before: no provable match
       const at = e.fcs && e.fcs.at;
       const outdated = e.fcs && (e.fcs.w || 1) < SWEEP_WORDING;
-      if (at && at > stale && !outdated) continue;
-      all.push({ code, slug, e, at: outdated ? "" : at || "" });
+      // Wording that depends on the film's age goes stale on a date, not after 30 days: a page
+      // swept at 26 days says "Too early", and at 28 days that's no longer true; at 60 days a
+      // film with 15+ ratings becomes eligible for a score. Redo the page as soon as it
+      // crosses one of those lines (found by the self-audit, Oct 2026).
+      const crossed = !!(at && e.released && AGE_LINES.some((d) => {
+        const line = new Date(Date.parse(`${e.released}T00:00:00Z`) + d * 864e5).toISOString().slice(0, 10);
+        return at < line && line <= today;
+      }));
+      if (at && at > stale && !outdated && !crossed) continue;
+      all.push({ code, slug, e, at: outdated || crossed ? "" : at || "" });
     }
   }
   all.sort((a, b) => (a.at === b.at ? 0 : a.at < b.at ? -1 : 1)); // never-scored ("") first
