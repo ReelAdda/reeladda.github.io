@@ -226,7 +226,8 @@ const PAGES_MANIFEST_FILE = "pages-manifest.json";
 //     changes to frozen pages.
 // 12: frozen pages for films not yet released in their country get the release-date title
 //     (see filmTitleTag); the due pass switches them back on release day.
-const ARCHIVE_PATCH_VERSION = 12;
+// 13 = released-but-not-streaming titles answer "OTT release date" honestly (Oct 2026).
+const ARCHIVE_PATCH_VERSION = 13;
 
 // Verdict openers keyed to list-recency ("brand new to the list", "only just landed")
 // or the future ("on the calendar") read as broken on a page someone opens years after
