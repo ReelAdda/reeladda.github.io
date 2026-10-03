@@ -3814,48 +3814,63 @@ test("ssrCard: platform chip only on streaming titles; never an emoji badge", ()
 });
 
 // ---------------- editor's note ----------------
-group("editor's note");
-test("editor's note: judgments assemble from real data, capped", () => {
-  const data = { generatedAt: "2026-07-19", theatres: [
-    { title: "The Odyssey", rating: 7.7, votes: 1200, genre: "Adventure" },
-    { title: "Moana", rating: 5.6, votes: 85, genre: "Family / Fantasy" }],
-    ott: [{ title: "Pritam and Pedro", rating: 8.6, votes: 300, platform: "JioHotstar" }] };
-  const n = U.buildEditorNote(data, { code: "in" }, 42);
-  assert.ok(/The Odyssey/.test(n) && /7\.7/.test(n));
-  assert.ok(/Moana/.test(n) && /kids-in-the-house/.test(n));
-  assert.ok(/Pritam and Pedro/.test(n));
-  assert.ok(n.split(/(?<=[.!?]) /).length <= 4 && n.length < 400, n);
+group("editor's note — a guide to the Pick, in FilmyChill Score terms");
+const _d = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+const _sc = (verdict, reason, extra = {}) => ({ verdict, reason, audience: "Loved", critics: null, basis: "audience", ...extra });
+const _noteData = () => ({ generatedAt: _d(0), pick: "Slow Horses",
+  theatres: [
+    { title: "Runner", rating: 8.3, votes: 267, released: _d(8), fcScore: _sc("Worth a watch", "Audiences love it; critics are split.") },
+    { title: "Flop", rating: 4.9, votes: 300, released: _d(8), fcScore: _sc("Skip", "Audiences and critics agree: skip it.") },
+  ],
+  ott: [
+    { title: "Slow Horses", platform: "Apple TV", kind: "tv", rating: 8.0, votes: 1013, freshDate: _d(17), fcScore: _sc("Must watch", "Audiences and critics agree.") },
+    { title: "American Horror Story", platform: "JioHotstar", kind: "tv", rating: 8.1, votes: 6207, freshDate: _d(9), fcScore: _sc("Must watch", "Audiences and critics agree.") },
+    { title: "Old Favourite", platform: "Netflix", kind: "tv", rating: 8.9, votes: 9000, freshDate: _d(200), stillGood: true, fcScore: _sc("Must watch", "Audiences love it.") },
+  ] });
+
+test("the note opens with the Pick of the Week, then a labelled alternative from the other side", () => {
+  const n = U.buildEditorNote(_noteData(), { code: "in" }, 1);
+  assert.ok(/^(This week's pick is|Our pick this week is) Slow Horses on Apple TV/.test(n), n);
+  assert.ok(/(Heading to the cinema\?|For a night out,) Runner/.test(n), "the cinema alternative is labelled as one: " + n);
+  assert.ok((n.match(/Slow Horses/g) || []).length === 1, "the pick is never recommended twice");
 });
-test("editor's note: no AI filler, no fabricated firsthand experience (40 seeds)", () => {
-  for (let seed = 0; seed < 40; seed++) {
-    const n = U.buildEditorNote({ generatedAt: "2026-07-19",
-      theatres: [{ title: "A", rating: 8.1, votes: 500, genre: "Drama" }, { title: "B", rating: 4.9, votes: 90, genre: "Action" }],
-      ott: [{ title: "C", rating: 8.2, votes: 200, platform: "Netflix" }] }, { code: "in" }, seed);
+test("the note speaks in verdicts, never raw TMDB numbers", () => {
+  for (let seed = 0; seed < 12; seed++) {
+    const n = U.buildEditorNote(_noteData(), { code: "in" }, seed);
+    assert.ok(/must-watch|worth a watch/.test(n) && !/\d\.\d/.test(n), n);
     assert.ok(!/exciting|something for everyone|lineup|!|I watched|I saw|we watched/i.test(n), n);
+    assert.ok(n.split(/(?<=[.?]) /).length <= 5 && n.length < 330, n);
   }
 });
-test("editor's note: thin data -> null; seeded phrasing is stable", () => {
+test("a Skip is called out; with none, one more title from the pick's own side", () => {
+  const n = U.buildEditorNote(_noteData(), { code: "in" }, 1);
+  assert.ok(/Flop/.test(n) && /give a miss|can wait/.test(n), n);
+  const noSkip = _noteData(); noSkip.theatres = noSkip.theatres.filter((x) => x.title !== "Flop");
+  const m = U.buildEditorNote(noSkip, { code: "in" }, 1);
+  assert.ok(/Also streaming: American Horror Story on JioHotstar, a must-watch\./.test(m), m);
+});
+test("only current, properly scored titles are recommended — never an older standout or a few-ratings score", () => {
+  const d = _noteData();
+  d.ott.push({ title: "March Season", platform: "Netflix", kind: "tv", rating: 8.5, votes: 1600, freshDate: _d(190), fcScore: _sc("Must watch", "Audiences love it.") });
+  d.theatres.push({ title: "Thin", rating: 9.1, votes: 30, released: _d(70), fcScore: _sc("Worth a watch", "The few who rated it love it.", { early: true, votes: 30 }) });
+  for (let seed = 0; seed < 8; seed++) {
+    const n = U.buildEditorNote(d, { code: "in" }, seed);
+    assert.ok(!/Old Favourite|March Season|Thin/.test(n), n);
+  }
+});
+test("editor's note: nothing trustworthy -> null; seeded phrasing is stable", () => {
   assert.strictEqual(U.buildEditorNote({ theatres: [{ title: "X", rating: 7, votes: 3 }], ott: [] }, { code: "in" }), null);
-  const d = { theatres: [{ title: "A", rating: 8.0, votes: 100, genre: "Drama" }], ott: [] };
+  const d = _noteData();
   assert.strictEqual(U.buildEditorNote(d, { code: "in" }, 7), U.buildEditorNote(d, { code: "in" }, 7));
-});
-test("editor note weaves the event film's praised aspect in as a clause", () => {
-  const data = { theatres: [{ title: "Odyssey", rating: 8.1, votes: 500, genre: "Drama", takeAspects: ["performances"] }], ott: [] };
-  const n = U.buildEditorNote(data, { code: "in" }, 42);
-  assert.ok(/performances/.test(n), n);
-  assert.ok(/talk is about|word of mouth|buzz comes down/.test(n), n);
-  // clause, not an extra sentence: appended before the full stop
-  assert.ok(!/\.\s+[a-z]/.test(n), "flourish must not start a lowercase sentence: " + n);
-  assert.strictEqual(U.buildEditorNote(data, { code: "in" }, 42), n); // deterministic
-});
-test("editor note without takeAspects is byte-identical to before (no flourish)", () => {
-  const bare = { theatres: [{ title: "Odyssey", rating: 8.1, votes: 500, genre: "Drama" }], ott: [] };
-  const n = U.buildEditorNote(bare, { code: "in" }, 42);
-  assert.ok(!/talk is about|word of mouth|buzz comes down/.test(n), n);
+  const pickInCinemas = { ..._noteData(), pick: "Runner" };
+  assert.ok(/^(This week's pick is|Our pick this week is) Runner in cinemas/.test(U.buildEditorNote(pickInCinemas, { code: "in" }, 2)));
+  assert.ok(/(Staying in\?|On the sofa instead\?)/.test(U.buildEditorNote(pickInCinemas, { code: "in" }, 2)), "pick in cinemas -> the alternative streams");
 });
 test("ssrEditorNote renders styled block and escapes (escHtml scope guard)", () => {
-  const html = U.ssrEditorNote({ generatedAt: "2026-07-19", theatres: [{ title: "A & B", rating: 8.0, votes: 200, genre: "Drama" }], ott: [] }, { code: "us" });
-  assert.ok(html.includes('class="ednote"') && html.includes("A &amp; B"));
+  const d = { ..._noteData(), pick: "A & B" };
+  d.ott[0] = { ...d.ott[0], title: "A & B" };
+  const html = U.ssrEditorNote(d, { code: "us" });
+  assert.ok(html.includes('class="ednote"') && html.includes("A &amp; B"), html);
   assert.strictEqual(U.ssrEditorNote({ theatres: [], ott: [] }, { code: "us" }), "");
 });
 
@@ -5404,29 +5419,6 @@ test("a page with no pending block is left untouched", () => {
   assert.deepStrictEqual(U.applyDeparturePatch(plain, { title: "X", was: [], rentBuy: [], countryName: "India", cfg: { code: "in" }, asOf: "2026-09-09" }), { html: plain, changed: false });
 });
 
-group("editor's note — the sleeper must actually be new");
-const _ottItem = (o) => ({ title: "X", rating: 8.0, votes: 400, platform: "Netflix", kind: "tv", ...o });
-test("an older standout is never crowned the week's winner", () => {
-  // Regression: the sleeper sorted the whole six-week OTT list by rating. The stillGood tail
-  // (long-running shows with thousands of votes) wins that sort almost by definition, so the
-  // note called a 2020 series with a 4 Aug season "the week's real winner".
-  const data = { theatres: [], ott: [
-    _ottItem({ title: "Old Favourite", rating: 8.6, votes: 5000, stillGood: true }),
-    _ottItem({ title: "This Week", rating: 8.1, votes: 400, stillGood: false }),
-  ] };
-  const note = U.buildEditorNote(data, { code: "in" }, 1) || "";
-  assert.ok(!/Old Favourite/.test(note), "a stillGood title must not be the sleeper");
-  assert.ok(/This Week/.test(note), "the current arrival should take the slot");
-});
-test("no sleeper at all rather than a stale one", () => {
-  const data = { theatres: [], ott: [_ottItem({ title: "Old Favourite", rating: 8.9, votes: 9000, stillGood: true })] };
-  const note = U.buildEditorNote(data, { code: "in" }, 1);
-  assert.ok(!note || !/Old Favourite/.test(note), "say nothing before saying something untrue");
-});
-test("a fresh title still clears the sleeper bar normally", () => {
-  const data = { theatres: [], ott: [_ottItem({ title: "Fresh Hit", rating: 8.2, votes: 500 })] };
-  assert.ok(/Fresh Hit/.test(U.buildEditorNote(data, { code: "in" }, 1) || ""));
-});
 
 group("currency claims — carried-over titles never presented as new");
 const _mkOtt = (title, o = {}) => ({ title, slug: title.toLowerCase().replace(/\W+/g, "-"), tmdbId: title.length * 7,
