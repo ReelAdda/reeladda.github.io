@@ -1260,6 +1260,37 @@ test("every title that gets a film page is scored — including the extra OTT an
   assert.strictEqual(d.ca.langPools.Hindi.ott[0].fcScore.reason, "Audiences and critics agree.", "critics tone from the cache");
 });
 
+test("sweepCandidates: a page whose 'Too early' has expired is redone at once, not in 30 days", () => {
+  const W = require("./lib/scoresweep.js");
+  const man = { in: {
+    mirzapur: { tmdbId: 1, archivedOn: "2026-09-25", released: "2026-09-04", fcs: { v: "early", at: "2026-09-30", w: 99 } },
+    young: { tmdbId: 2, archivedOn: "2026-09-25", released: "2026-09-20", fcs: { v: "early", at: "2026-09-30", w: 99 } },
+    oldFilm: { tmdbId: 3, catalog: true, released: "2020-01-01", fcs: { v: "Skip", at: "2026-09-30", w: 99 } },
+  } };
+  const c = W.sweepCandidates(man, "2026-10-03", 10).map((x) => x.slug);
+  assert.ok(c.includes("mirzapur"), "28 days passed since release after it was last swept");
+  assert.ok(!c.includes("young") && !c.includes("oldFilm"), "nothing crossed for these");
+});
+
+test("self-audit: catches the contradictions visitors noticed before", () => {
+  const A = require("./lib/audit.js");
+  const now = Date.parse("2026-10-03T08:00:00Z");
+  const page = (stamp, head = "★ 6.4", box = "6.4", faq = "") => `<div class="head"><div class="rating">${head}</div></div><section class="fcsb" id="filmychill-score"><span class="fcsb-stamp fcsb-early">${stamp}</span><b>Audience</b><small>★ ${box} from 40 ratings</small></section>${faq}`;
+  assert.deepStrictEqual(A.auditPage(page("Too early"), { released: "2026-09-04", now }).map((f) => f.check), ["too-early-on-old-film"]);
+  assert.deepStrictEqual(A.auditPage(page("Too early"), { released: "2026-09-25", now }), [], "a new film may say it");
+  assert.deepStrictEqual(A.auditPage(page("Skip", "★ 6.4", "7.1"), { released: "2026-01-01", now }).map((f) => f.check), ["header-vs-score-rating"]);
+  const faqPage = page("Skip").replace('fcsb-early">Skip', 'fcsb-skip">Skip') + '<summary>Is X worth watching?</summary><div class="fa">FilmyChill Score: Must watch — …</div>';
+  assert.ok(A.auditPage(faqPage, { released: "2026-01-01", now }).some((f) => f.check === "faq-vs-score-verdict"));
+  const data = { pick: "Old", theatres: [], ott: [
+    { title: "Old", kind: "tv", freshDate: "2026-03-19", providers: ["Netflix"] },
+    { title: "Drishyam", kind: "movie", theatricalHere: true, released: "2026-10-02", providers: ["Prime Video"] },
+  ] };
+  assert.deepStrictEqual(A.auditData("in", data, now).map((f) => f.check).sort(), ["pick-not-new", "streaming-right-after-cinema"]);
+  const notes = [];
+  A.runAudit({ dataByCode: { in: { theatres: [], ott: [] } }, pagesManifest: {}, countries: [{ code: "in" }], now, note: (n) => notes.push(n) });
+  assert.deepStrictEqual(notes, ["audit: no contradictions found"]);
+});
+
 test("refreshCopy: old pages' prose and 'worth watching?' answer follow today's score; new films are left alone", () => {
   const W = require("./lib/scoresweep.js");
   const page = '<h2>The verdict</h2><p class="vprose">Arjun Reddy hasn&#39;t gathered enough ratings yet for a firm read on this Telugu film.</p>'
