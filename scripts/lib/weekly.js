@@ -149,105 +149,86 @@ function isoWeekNum(d = new Date()) {
   t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
   return Math.ceil((((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 864e5) + 1) / 7);
 }
+// EDITOR'S NOTE (Oct 2026). It used to be written from raw TMDB ratings and to ignore Pick of
+// the Week, so the page told two stories: the hero said "Slow Horses — Must watch" while the
+// note said "Start with Runner — 8.3". Now the note is the guide TO the pick, in the site's
+// own currency, the FilmyChill Score:
+//   1. it opens with the Pick of the Week — the flagship, said plainly;
+//   2. then one labelled alternative from the other side of the page ("Heading to the
+//      cinema?" when the pick streams, "Staying in?" when it's in cinemas);
+//   3. then either a Skip worth knowing about, or one more title from the pick's own side.
+// Only scored, current titles are recommended (never an older "still worth it" standout,
+// never a few-ratings early read), and nothing is ever recommended twice. No raw numbers:
+// the verdicts are what the cards show.
 function buildEditorNote(data, cfg, seed = null) {
-  const th = (data && data.theatres) || [], ott = (data && data.ott) || [];
+  const th = ((data && data.theatres) || []).map((x) => ({ ...x, _cinema: true }));
+  const ott = ((data && data.ott) || []).filter((x) => !x.stillGood).map((x) => ({ ...x, _cinema: false }));
   const s = seed != null ? seed : isoWeekNum() * 31 + ((cfg && cfg.code) || "in").charCodeAt(0);
   const pick = (pool, i) => pool[Math.abs(s + i * 7) % pool.length];
-  const rated = (list) => list.filter((x) => x.rating != null && (x.votes || 0) >= EDNOTE_MIN_VOTES);
-  const r1 = (x) => Number(x.rating).toFixed(1);
-
-  const an = (x) => (/^8/.test(x) ? "an" : "a"); // "an 8.1 from early audiences", "a 7.7"
-  // Confidence-weighted order (see lib/score.js): a high rating on a handful of votes must
-  // not be crowned the pick over a proven one. Display still shows the true rating; only the
-  // choice of WHICH film to highlight uses the weighted value.
-  const rt = rated(th).sort((a, b) => rankValue(b) - rankValue(a));
-  const event = rt[0] && rt[0].rating >= 6.5 ? rt[0] : null;
-  const skip = rt.length > 1 && rt[rt.length - 1].rating <= 5.9 && rt[rt.length - 1] !== event ? rt[rt.length - 1] : null;
-  // The sleeper must come from THIS WEEK'S arrivals, not the whole six-week window. The
-  // OTT list deliberately carries a tail of older standouts (flagged stillGood, rendered
-  // under "Still worth it — standouts from earlier weeks"), and those are the highest-rated
-  // things on the page almost by definition — a long-running show with thousands of votes
-  // beats anything that landed on Thursday. Without this filter the note crowned Ted Lasso
-  // (season added 4 Aug, series from 2020, 8.4) "the week's real winner" five weeks running.
-  // Every sleeper phrasing below claims currency — "this week", "the week's real winner" —
-  // so the candidate set has to be current or the sentence is simply false.
-  // llms.txt already filters on !stillGood for the same reason; this brings the note in line.
-  const ro = rated(ott).filter((x) => !x.stillGood).sort((a, b) => rankValue(b) - rankValue(a));
-  const sleeper = ro[0] && ro[0].rating >= 7.8 && ro[0].platform && ro[0].platform !== "Theatres" ? ro[0] : null;
-  if (!event && !skip && !sleeper) return null; // thin data -> say nothing
-
-  const parts = [];
-  // The event film's most-praised aspect (mined from critic/viewer reception) turns
-  // "book a ticket" into "book a ticket — here's why". Clause-appended, comma-led,
-  // agreement-free, digit-free; absent data changes nothing.
-  const flair = (line, it, off) => {
-    const asp = it && Array.isArray(it.takeAspects) && it.takeAspects[0];
-    if (!asp || line.length > 170) return line;
-    return line.replace(/\.$/, pick([
-      `, and most of the talk is about the ${asp}.`,
-      `, with word of mouth centring on the ${asp}.`,
-      `, and much of the buzz comes down to the ${asp}.`,
-    ], off));
+  const LEVEL = { "Must watch": 2, "Worth a watch": 1 };
+  // Same "actually new" test as Pick of the Week (choosePick in lib/surfaces.js): a March
+  // season newly listed in September is not this week's recommendation.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const cutoff = new Date(Date.now() - 21 * 864e5).toISOString().slice(0, 10);
+  const isNew = (x) => { const d = String(x.freshDate || x.released || "").slice(0, 10); return d >= cutoff && d <= todayIso; };
+  const good = (x) => x.fcScore && LEVEL[x.fcScore.verdict] && !x.fcScore.early && isNew(x);
+  const best = (list, not) => list.filter((x) => good(x) && !not.has(x.title))
+    .sort((a, b) => LEVEL[b.fcScore.verdict] - LEVEL[a.fcScore.verdict] || rankValue(b) - rankValue(a))[0] || null;
+  const verdictWords = (x) => (x.fcScore.verdict === "Must watch" ? "a must-watch" : "worth a watch");
+  const why = (x) => {
+    const r = String(x.fcScore.reason || "").replace(/\.$/, "");
+    return r ? r.charAt(0).toLowerCase() + r.slice(1) : "";
   };
-  if (event && event.rating >= 7.5) {
-    const ev = pick([
-      `${event.title} is the obvious ticket this week, and for once the obvious call is the right one — ${an(r1(event))} ${r1(event)} from early audiences is rare air.`,
-      `The week belongs to ${event.title}. ${an(r1(event)) === "an" ? "An" : "A"} ${r1(event)} with real votes behind it means people aren't just showing up, they're coming out happy.`,
-      `Start with ${event.title} — ${r1(event)} and holding, which is about as safe as ticket money gets.`,
-      `${event.title} is the one to book; ${an(r1(event))} ${r1(event)} from early audiences doesn't happen by accident.`,
-      `${event.title} has the week to itself — early viewers have it at ${r1(event)}, which is properly rare.`,
-      `If it's one trip to the cinema this week, make it ${event.title}; ${r1(event)} is as clear a signal as ratings give.`,
-    ], 1);
-    parts.push(flair(ev, event, 8));
-  } else if (event) {
-    const ev = pick([
-      `${event.title} leads a middling week — ${r1(event)} says solid, not special.`,
-      `${event.title} is the safest ticket around, though ${r1(event)} suggests keeping expectations in check.`,
-      `Nothing unmissable in theatres; ${event.title} at ${r1(event)} is the best of it.`,
-      `${event.title} tops a quiet week; ${r1(event)} means decent, not destination viewing.`,
-      `${event.title} is the pick of an ordinary slate — ${r1(event)} says you'll leave satisfied, not stunned.`,
-      `${an(r1(event)) === "an" ? "An" : "A"} ${r1(event)} makes ${event.title} the best bet around, with expectations kept sensible.`,
-    ], 2);
-    parts.push(flair(ev, event, 8));
-  } else if (rt.length) {
-    parts.push(pick([
-      `No must-see in theatres this week — save the ticket money.`,
-      `Thin week in theatres, honestly.`,
-      `A quiet week on the big screen — nothing that demands a ticket.`,
-    ], 3));
-  }
-  if (skip) {
-    const fam = /family|animation/i.test(skip.genre || "");
-    parts.push(fam
+  const where = (x) => (x._cinema ? "in cinemas" : x.platform ? `on ${x.platform}` : "streaming");
+  const sentence = (x) => `${verdictWords(x)}${why(x) ? ` — ${why(x)}` : ""}`;
+
+  const all = [...th, ...ott];
+  const flagship = data && data.pick ? all.find((x) => x.title === data.pick) || null : null;
+  const used = new Set();
+  const parts = [];
+
+  if (flagship) {
+    used.add(flagship.title);
+    parts.push(flagship.fcScore && LEVEL[flagship.fcScore.verdict]
       ? pick([
-          `${skip.title} at ${r1(skip)} is strictly a kids-in-the-house situation.`,
-          `Unless it's a kids-in-the-house weekend, ${skip.title} at ${r1(skip)} can wait.`,
-          `${skip.title} (${r1(skip)}) is a kids-in-the-house pick and not much more.`,
-        ], 4)
+          `This week's pick is ${flagship.title} ${where(flagship)}: ${sentence(flagship)}.`,
+          `Our pick this week is ${flagship.title} ${where(flagship)}, and it's ${sentence(flagship)}.`,
+        ], 1)
+      : `This week's pick is ${flagship.title} ${where(flagship)}.`);
+  }
+
+  // The labelled alternative, from the other side of the page.
+  const otherSide = flagship ? (flagship._cinema ? ott : th) : th;
+  const alt = best(otherSide, used);
+  if (alt) {
+    used.add(alt.title);
+    parts.push(alt._cinema
+      ? pick([
+          `Heading to the cinema? ${alt.title} is the one to book: ${sentence(alt)}.`,
+          `For a night out, ${alt.title} is the ticket: ${sentence(alt)}.`,
+        ], 2)
       : pick([
-          `${skip.title} at ${r1(skip)} is a skip — the number says what the trailer won't.`,
-          `Give ${skip.title} a miss; ${r1(skip)} from the people who paid is warning enough.`,
-          `${skip.title} (${r1(skip)}) can wait for streaming, if that.`,
-          `${skip.title} sits at ${r1(skip)}, and there's no generous way to read that number.`,
-          `The audience has scored ${skip.title} a ${r1(skip)}, which settles it.`,
-          `${skip.title} at ${r1(skip)} is one to let pass; streaming will have it soon enough.`,
-        ], 4));
+          `Staying in? ${alt.title} ${where(alt)} is ${sentence(alt)}.`,
+          `On the sofa instead? Put on ${alt.title} ${where(alt)}: ${sentence(alt)}.`,
+        ], 2));
   }
-  if (sleeper) {
+
+  // A Skip worth knowing about beats a third recommendation.
+  const skip = all.find((x) => x.fcScore && x.fcScore.verdict === "Skip" && !x.fcScore.early && !used.has(x.title));
+  if (skip) {
     parts.push(pick([
-      `The sleeper is on ${sleeper.platform}: ${sleeper.title}, sitting at ${r1(sleeper)} and deserving more noise than it's getting.`,
-      `Quietly, the best-rated thing in the country is ${sleeper.title} on ${sleeper.platform} — ${r1(sleeper)} from viewers.`,
-      `Odd week when the strongest number around (${sleeper.title}, ${r1(sleeper)}) is included with a ${sleeper.platform} plan.`,
-      `Skip the queue and open ${sleeper.platform}: ${sleeper.title} at ${r1(sleeper)} is the week's real winner.`,
-      `The best number this week isn't in theatres — it's ${sleeper.title} on ${sleeper.platform}, holding ${r1(sleeper)}.`,
-      `${sleeper.title} is putting up numbers on ${sleeper.platform} most theatrical releases would envy — ${r1(sleeper)} from viewers.`,
-    ], 5));
+      `One to give a miss: ${skip.title} — ${why(skip) || "the audience verdict is in"}.`,
+      `${skip.title} can wait — ${why(skip) || "the audience verdict is in"}.`,
+    ], 3));
+  } else {
+    const sameSide = flagship ? (flagship._cinema ? th : ott) : ott;
+    const also = best(sameSide, used);
+    if (also) parts.push(also._cinema
+      ? `Also in cinemas: ${also.title}, ${verdictWords(also)}.`
+      : `Also streaming: ${also.title} ${where(also)}, ${verdictWords(also)}.`);
   }
-  if (event && event.takeCounter) parts.push(pick([
-    `Critics and audiences are pulling in opposite directions on ${event.title}; side with whichever camp you usually trust.`,
-    `On ${event.title}, the critics say one thing and the audience score says another — pick your camp.`,
-    `${event.title} has critics and viewers at odds; trust whichever side has served you better.`,
-  ], 6));
+
+  if (!parts.length || (!flagship && !alt)) return null; // nothing trustworthy to say
   return parts.slice(0, 3).join(" ");
 }
 
