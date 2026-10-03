@@ -353,6 +353,7 @@ module.exports = {
   streamVocab,
   streamWindowEstimate,
   streamWindowShort,
+  hasLanguageWindow,
   takeConfident,
   verdict,
 };

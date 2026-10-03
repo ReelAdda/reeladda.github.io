@@ -48,7 +48,7 @@ const {
   streamPagePath,
   ytIdOf,
 } = require("./pagekit.js");
-const { countryNameFor, streamVocab, streamWindowEstimate, streamWindowShort } = require("./rules.js");
+const { countryNameFor, hasLanguageWindow, streamVocab, streamWindowEstimate, streamWindowShort } = require("./rules.js");
 
 // ============================================================
 // PER-FILM STATIC PAGES — one SEO-indexable page per film,
@@ -224,6 +224,29 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
       `${item.title} in ${country}: where to rent or buy it, ${statsClause}and the verdict.`,
       `${item.title} \u2014 where to rent or buy it in ${country}, and the verdict.`,
     ]);
+  } else if (est && item.kind !== "tv") {
+    // Answers the searcher's question first ("Not announced yet"), then the honest estimate in
+    // plain words, then the payoff. Same facts as before, in the order a reader needs them.
+    const w = windowDates(item, now.getTime());
+    const nowMs = now.getTime();
+    const when = w.from.getTime() <= nowMs
+      ? `likely by ${partOfMonth(w.to)}`
+      : `expect ${partOfMonth(w.from)} to ${partOfMonth(w.to)}`;
+    const venue = V.word === "OTT" ? "theatres" : "cinemas";
+    const basis = est.known ? `${item.language} films usually reach ${V.word} ${est.lo}\u2013${est.hi} weeks after ${venue}`
+      : `Films like this usually reach ${V.word} ${est.lo}\u2013${est.hi} weeks after ${venue}`;
+    // Same sentence with short month names, for long titles ("late Oct to mid-Nov").
+    const shortWhen = when.replace(/(January|February|March|April|May|June|July|August|September|October|November|December)/g, (m) => m.slice(0, 3));
+    const statsDot = [ratingBit, runtimeBit].filter(Boolean).join(" \u00b7 ");
+    const pay = "We update this page the day it streams.";
+    desc = fitDesc([
+      `Not announced yet. ${basis}, so ${item.title} is ${when}. ${statsDot ? `${statsDot}. ` : ""}${pay}`,
+      `Not announced yet. ${basis}, so ${item.title} is ${when}. ${pay}`,
+      `Not announced yet. ${basis}, so ${item.title} is ${shortWhen}. ${pay}`,
+      `Not announced yet. ${basis}, so expect it ${when.replace(/^(likely|expect) /, "")}. ${pay}`,
+      `Not announced yet. ${basis}, so expect it ${shortWhen.replace(/^(likely|expect) /, "")}. ${pay}`,
+      `Not announced yet — ${item.title} is ${when}. ${pay}`,
+    ].map((t) => t.replace(" is expect ", " should land "))) ;
   } else if (est) {
     // The money branch. "<film> ott release date" is the highest-volume query shape these
     // pages rank for, and the snippet used to answer it with "coming soon". A dated window,
@@ -237,6 +260,18 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
   } else if (item.platform === "Theatres") {
     // No usable window (no release date on file, or the window already lapsed). There is
     // genuinely nothing to promise about the date, so the payoff clause carries the click.
+    // Released, not streaming, and past the usual window: the honest answer to "when on OTT?"
+    // is that nobody has said — so the snippet says exactly that, first.
+    const lapsed = item.kind !== "tv" && item.released && !upcoming && !providers.length && !rentBuy.length;
+    const usual = hasLanguageWindow(item.language) ? `the usual ${item.language} window` : "the usual window";
+    if (lapsed) {
+      desc = fitDesc([
+        `Not on any ${V.word === "OTT" ? "OTT platform" : "streaming service"} in ${country} yet, and later than ${usual} — no date has been announced. We check twice a day and update this page the moment it streams.`,
+        `Not streaming in ${country} yet, and no date has been announced. We check twice a day and update this page the moment it streams.`,
+        `Not streaming in ${country} yet — no date announced.`,
+      ]);
+      return desc;
+    }
     const lead = runEnded
       ? `${item.title} has finished its theatrical run in ${country}`
       : runOpen ? `${item.title} opened in cinemas in ${country}${openedOn ? ` on ${openedOn}` : ""}`
@@ -261,6 +296,30 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
     desc = trim(`${item.title}${yr}: ${[item.language, item.genre, thing].filter(Boolean).join(" ")} \u2014 review, rating and where to watch in ${country}`, 155);
   }
   return desc;
+}
+
+// The expected streaming window as it still applies today: months already gone are dropped,
+// so a Sep–Oct window read on 3 Oct says "Oct". Null once the whole window has passed.
+const MON3 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+function windowDates(item, nowMs) {
+  const est = streamWindowShort(item.released, item.language, new Date(nowMs));
+  if (!est) return null;
+  const rel = Date.parse(`${item.released}T00:00:00Z`);
+  const from = new Date(rel + est.lo * 7 * 864e5), to = new Date(rel + est.hi * 7 * 864e5);
+  return { est, from, to };
+}
+function expectedMonthsLeft(item, nowMs) {
+  const w = windowDates(item, nowMs);
+  if (!w) return null;
+  const start = w.from.getTime() > nowMs ? w.from : new Date(nowMs);
+  const a = MON3[start.getUTCMonth()], b = MON3[w.to.getUTCMonth()];
+  return a === b ? a : `${a}\u2013${b}`;
+}
+// "early/mid/late October" — how a person says when, rather than a pair of dates.
+function partOfMonth(d) {
+  const day = d.getUTCDate();
+  return `${day <= 10 ? "early" : day <= 20 ? "mid" : "late"}${day <= 10 || day > 20 ? " " : "-"}${MONTH_FULL[d.getUTCMonth()]}`;
 }
 
 // ============================================================================
@@ -319,6 +378,49 @@ function filmTitleTag(item, cfg = null) {
       `${item.title} ${label}: ${d}${on}`,
       `${item.title}${yr} ${label}: ${d}`,
       `${item.title} ${label}: ${d}`,
+    ]);
+  }
+  // OUT IN THEATRES, NOT STREAMING, NO ANNOUNCED DATE (Oct 2026). The Sept rule above moved
+  // these to "Where to Watch", and Search Console then measured it: "ott release date" searches
+  // fell from 0.43% CTR to 0.23% — the title no longer matched the question at all. The old
+  // title failed for a different reason: it promised a date and the snippet had none. This
+  // one answers the question honestly IN the title: the expected window, marked unconfirmed,
+  // or "Not Announced Yet" once the usual window has passed. Films only; TV has no such date.
+  if (item.kind !== "tv" && !providers.length && item.released && releaseState(item.released) !== "upcoming") {
+    const left = expectedMonthsLeft(item, Date.now());
+    if (V.word === "OTT") {
+      // India (and other "OTT" markets): the home edition, so no country in the title.
+      if (left) {
+        return fitTitle([
+          `${item.title}${yr} OTT Release Date: Expected ${left}, Not Yet Confirmed`,
+          `${item.title} OTT Release Date: Expected ${left}, Not Yet Confirmed`,
+          `${item.title}${yr} OTT Release Date: Expected ${left} (Unconfirmed)`,
+          `${item.title} OTT Release Date: Expected ${left} (Unconfirmed)`,
+          `${item.title} OTT Release Date: Expected ${left}`,
+        ]);
+      }
+      return fitTitle([
+        `${item.title}${yr} OTT Release Date: Not Announced Yet`,
+        `${item.title} OTT Release Date: Not Announced Yet`,
+        `${item.title} — OTT Release Date`,
+      ]);
+    }
+    // Elsewhere the country stays in the title where it fits: 14 editions of one film must not
+    // share an identical title, and the country tells a searcher the result is about them.
+    if (left) {
+      return fitTitle([
+        `${item.title}${yr} Streaming Date in ${country}: Expected ${left}`,
+        `${item.title} Streaming Date in ${country}: Expected ${left}`,
+        `${item.title}${yr} Streaming Date: Expected ${left}`,
+        `${item.title} Streaming Date: Expected ${left}`,
+      ]);
+    }
+    return fitTitle([
+      `${item.title}${yr} Streaming Date in ${country}: Not Announced`,
+      `${item.title} Streaming Date in ${country}: Not Announced`,
+      `${item.title}${yr} Streaming Date: Not Announced Yet`,
+      `${item.title} — Streaming Date in ${country}`,
+      `${item.title} — Streaming Date`,
     ]);
   }
   // "OTT" is Indian-market phrasing; TV has no OTT release date to speak of; and with no
