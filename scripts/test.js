@@ -4819,12 +4819,52 @@ test("IndexNow list stays within the per-request cap", () => {
   assert.ok(urls.length <= 900, "one IndexNow request must not exceed the cap");
   assert.strictEqual(new Set(urls).size, urls.length, "no duplicate URLs wasted in the ping");
 });
-test("syncHreflangClusters reports every page it rewrites", () => {
-  // The callback is what lets the caller bump lastmod so Google re-crawls a corrected page.
-  let calls = 0;
-  U.syncHreflangClusters(() => { calls++; });
-  assert.ok(calls >= 0, "callback wired without throwing");  // count depends on disk state
-  assert.strictEqual(typeof U.syncHreflangClusters, "function");
+test("syncHreflangClusters: links a cluster, is idempotent, and survives a CRLF checkout", () => {
+  // This used to call syncHreflangClusters() against the REAL site and assert only that a
+  // counter was >= 0 — always true. It walked every country directory on each `npm test`,
+  // and on a CRLF checkout rewrote 8,558 production pages while still catching nothing.
+  // Isolated fixture and real assertions, same pattern as the repairLegacyPages test.
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-hreflang-"));
+  const cwd = process.cwd();
+  // filmPageDir: India lives at movie/, every other country at <code>/movie/.
+  const page = (slug, country) =>
+    `<head><link rel="canonical" href="https://filmychill.com/${country === "in" ? "" : country + "/"}movie/${slug}.html"></head>`;
+  try {
+    process.chdir(tmp);
+    fsx.mkdirSync("movie", { recursive: true });
+    fsx.mkdirSync("uk/movie", { recursive: true });
+    fsx.writeFileSync("movie/shared.html", page("shared", "in"));
+    fsx.writeFileSync("uk/movie/shared.html", page("shared", "uk"));
+    fsx.writeFileSync("movie/solo.html", page("solo", "in"));   // one country: no cluster
+
+    const touched = [];
+    const n = U.syncHreflangClusters((code, slug) => touched.push(`${code}/${slug}`));
+    assert.strictEqual(n, 2, "both sides of the cluster are written");
+    assert.deepStrictEqual(touched.sort(), ["in/shared", "uk/shared"]);
+
+    const inPage = fsx.readFileSync("movie/shared.html", "utf8");
+    assert.ok(/hreflang="en-IN"/.test(inPage), "India side present");
+    assert.ok(/hreflang="x-default"/.test(inPage), "x-default present");
+    assert.ok(!/hreflang/.test(fsx.readFileSync("movie/solo.html", "utf8")),
+      "a single-country film gets no alternates");
+
+    // Idempotency: a second pass must change nothing. Without it the sync can append
+    // rather than replace, and duplicates accumulate on every build.
+    assert.strictEqual(U.syncHreflangClusters(), 0, "second pass is a no-op");
+
+    // Regression for the CRLF bug: a Windows working copy must be recognised, not
+    // appended to. Before the \r?\n fix this produced a second x-default.
+    fsx.writeFileSync("movie/shared.html",
+      fsx.readFileSync("movie/shared.html", "utf8").replace(/\n/g, "\r\n"));
+    U.syncHreflangClusters();
+    const after = fsx.readFileSync("movie/shared.html", "utf8");
+    assert.strictEqual((after.match(/hreflang="x-default"/g) || []).length, 1,
+      "CRLF page keeps exactly one x-default, not a duplicated block");
+  } finally {
+    process.chdir(cwd);
+    fsx.rmSync(tmp, { recursive: true, force: true });
+  }
 });
 
 group("section counts — headers match what is under them");

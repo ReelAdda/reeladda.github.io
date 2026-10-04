@@ -1,0 +1,27 @@
+# Line endings are pinned, not left to each machine's core.autocrlf.
+#
+# The build runs on Linux and every generator in scripts/ writes LF. On a Windows
+# clone (autocrlf=true) the pages came out CRLF, and patchHreflang's matcher — which
+# only allowed \n between <link rel="alternate"> tags — stopped matching after the
+# first line. It then appended a fresh block instead of replacing the old one, giving
+# 8,558 pages duplicate hreflang alternates the first time the build ran locally.
+# CI never saw it because CI is Linux.
+#
+# The matcher is now CRLF-tolerant as well, but the generated site is LF everywhere
+# so that a local build and a CI build produce byte-identical output.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.pdf   binary
+*.mp4   binary
+*.zip   binary
