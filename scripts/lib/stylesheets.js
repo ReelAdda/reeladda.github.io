@@ -61,7 +61,7 @@ function ensurePrivacyLink(html) {
 // page uses any more.
 function finishFilmPages(files, { root = "." } = {}) {
   const used = new Set();
-  const res = { pages: 0, externalized: 0, privacyLinked: 0, cssFiles: 0, removed: 0 };
+  const res = { pages: 0, externalized: 0, privacyLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [] };
   fs.mkdirSync(path.join(root, CSS_DIR), { recursive: true });
   for (const rel of files) {
     const file = path.join(root, rel);
@@ -78,7 +78,14 @@ function finishFilmPages(files, { root = "." } = {}) {
       res.externalized++;
     }
     const linked = LINK_RE.exec(next);
-    if (linked) used.add(linked[1]);
+    if (linked) {
+      used.add(linked[1]);
+      // A page pointing at a stylesheet that doesn't exist renders unstyled. Never silently.
+      if (!fs.existsSync(path.join(root, CSS_DIR, `${linked[1]}.css`))) {
+        res.missing++;
+        if (res.missingExamples.length < 3) res.missingExamples.push(`${rel} → /css/${linked[1]}.css`);
+      }
+    }
     if (next !== html) fs.writeFileSync(file, next);
   }
   for (const f of fs.readdirSync(path.join(root, CSS_DIR))) {

@@ -1446,6 +1446,9 @@ async function main() {
     try {
       const f = finishFilmPages(filmPageFiles());
       console.log(`Film pages finished: ${f.pages} checked, ${f.externalized} moved to shared styles, ${f.privacyLinked} privacy links added, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
+      // Oct 2026: the workflow didn't commit css/, so for a few hours every film page linked a
+      // stylesheet that wasn't on the site. A missing stylesheet is a red run, not a note.
+      if (f.missing) healthIssue(`${f.missing} film page(s) link a stylesheet that doesn't exist — they render unstyled. e.g. ${f.missingExamples.join("; ")}`);
     } catch (e) { stageFailed("film-page styles", e); }
     // Self-audit (lib/audit.js): contradictions a visitor would notice, reported in the run
     // summary before anyone else finds them. Read-only.
