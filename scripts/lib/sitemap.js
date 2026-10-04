@@ -3,7 +3,9 @@
 // ============================================================================
 "use strict";
 
+const crypto = require("crypto");
 const fs = require("fs");
+const path = require("path");
 const { LANGUAGE_PAGES, xDefaultCode } = require("./core.js");
 const { monthKey } = require("./history.js");
 const { browsePath } = require("./graph.js");
@@ -71,6 +73,64 @@ function sweepDeadHubLinks(countries) {
   }
   if (fixed) console.log(`  dead hub links: removed from ${fixed} film page(s)`);
   return fixed;
+}
+
+// ============================================================================
+// HONEST LASTMOD FOR FILM PAGES (Oct 2026).
+//
+// 11,096 of 11,143 film URLs carried a lastmod from the past five days: live pages were
+// stamped today on every rewrite (twice a day), and sweeps stamped pages for markup-only
+// edits — a vote widget, an hreflang cluster. Google learns to ignore a sitemap whose dates
+// always say "today", and then the pages that really changed (a film that just got its OTT
+// date) wait for an ordinary recrawl. Now a film's `last` moves only when its CONTENT moves:
+// the title, the meta description or the visible text. Head tags, scripts, the footer, the
+// vote widget, "Page updated" / "as of" stamps and every digit (dates, vote counts, trailer
+// views) are left out, so re-rendering the same facts never looks like news.
+// ============================================================================
+const VOTE_WIDGET_RE = /<div class="fcvote"[\s\S]*?<div class="fcvote-done"[^>]*><\/div>\s*<\/div>/g;
+
+// Pure: a short hash of what a reader (and a search engine) would call the page's content.
+function contentFingerprint(html) {
+  const s = String(html || "");
+  const title = (/<title>([\s\S]*?)<\/title>/.exec(s) || [])[1] || "";
+  const desc = (/<meta name="description" content="([^"]*)"/.exec(s) || [])[1] || "";
+  const at = s.indexOf("<body");
+  const body = (at >= 0 ? s.slice(at) : s)
+    .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g, " ")
+    .replace(/<footer[\s\S]*?<\/footer>/g, " ")
+    .replace(VOTE_WIDGET_RE, " ")
+    .replace(/Page updated [^<]*/g, " ")
+    .replace(/\bas of \d{1,2} [A-Za-z]+\.? \d{4}/g, " ")
+    .replace(/<[^>]+>/g, " ");
+  const text = `${title}\n${desc}\n${body}`.replace(/\d/g, "").replace(/\s+/g, " ").trim();
+  return crypto.createHash("sha1").update(text).digest("hex").slice(0, 12);
+}
+
+// The end-of-build pass: every film page's fingerprint against the one in its manifest
+// entry. A changed fingerprint moves `last` to today; a page seen for the first time is
+// recorded without moving its date (the first run of this pass must not stamp 11,000 pages
+// today, the exact problem it fixes). Only existing entries are touched — every film page
+// has one, and entries drive other sweeps, so this never invents them. Mutates the manifest.
+function syncFilmLastmods(pagesManifest, countries, today, { root = "." } = {}) {
+  const res = { pages: 0, changed: 0, seeded: 0 };
+  for (const c of countries || []) {
+    const dir = path.join(root, c.code === "in" ? "movie" : `${c.code}/movie`);
+    let files;
+    try { files = fs.readdirSync(dir); } catch { continue; }
+    const m = (pagesManifest && pagesManifest[c.code]) || {};
+    for (const f of files) {
+      if (!f.endsWith(".html")) continue;
+      const e = m[f.slice(0, -5)];
+      if (!e) continue;
+      let html;
+      try { html = fs.readFileSync(path.join(dir, f), "utf8"); } catch { continue; }
+      res.pages++;
+      const fp = contentFingerprint(html);
+      if (!e.fp) { e.fp = fp; res.seeded++; continue; }
+      if (e.fp !== fp) { e.fp = fp; e.last = today; res.changed++; }
+    }
+  }
+  return res;
 }
 
 function writeMultiCountrySitemap(countries, pagesManifest = null) {
@@ -306,7 +366,9 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
 }
 
 module.exports = {
+  contentFingerprint,
   pruneDeadHubLinks,
   sweepDeadHubLinks,
+  syncFilmLastmods,
   writeMultiCountrySitemap,
 };

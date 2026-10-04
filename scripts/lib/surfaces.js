@@ -12,9 +12,11 @@ const {
   LANGUAGE_PAGES,
   escHtml,
   filmPageUrl,
+  ICON_LINKS,
+  ldJson,
   localeFor,
 } = require("./core.js");
-const { readHistory, streamingWindowDays, windowStats, monthKey } = require("./history.js");
+const { readHistory, cinemaWindowDays, observationStarts, windowStats, monthKey } = require("./history.js");
 const { writeEmbed } = require("./embed.js");
 const { browsePath, filmIndexFor, writeBrowseIndex } = require("./graph.js");
 const { normalizeUpcoming } = require("./release.js");
@@ -306,7 +308,7 @@ function buildHomeJsonLd(data, cfg) {
       itemListElement: listItems,
     },
   ];
-  return JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
+  return ldJson({ "@context": "https://schema.org", "@graph": graph });
 }
 
 // Render one country's page from the pristine template string and write it to its path
@@ -441,8 +443,14 @@ function newlyAddedFor(code, max = 12) {
 // a number quotable by someone writing an article. Deliberately shows the sample size next
 // to every median: a median of three films is not a finding, and saying so is what makes
 // the rest believable.
+//
+// Oct 2026 correction: the page used to count every archived "movie" — streaming originals
+// (whose premiere date read as a cinema date), and titles stamped at a country's first build
+// with their release date as the sighting — and published "3 days" (Hindi: 1 day) while film
+// pages said 6–8 weeks. It now counts films that opened in cinemas in that country, from
+// arrivals we actually saw (windowStats / cinemaWindowDays in lib/history.js), and says so.
 // ============================================================================
-function buildDataPage(records, updatedHuman) {
+function buildDataPage(records, updatedHuman, { inCinemas = 0 } = {}) {
   const e = escHtml;
   const s = windowStats(records);
   const row = (r) => `<tr><td>${e(r.key)}</td><td class="n">${r.median}</td><td class="n">${r.n}</td></tr>`;
@@ -453,7 +461,8 @@ function buildDataPage(records, updatedHuman) {
 ${analyticsTag()}
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How long films take to reach streaming — FilmyChill data</title>
-<meta name="description" content="How many days films take to go from theatrical release to streaming, measured daily by FilmyChill across ${e(String(s.total))} titles in ${COUNTRIES.length} countries. Free to use with attribution.">
+<meta name="description" content="How many days films take to go from their cinema release to streaming, measured daily by FilmyChill across ${e(String(s.total))} cinema releases in ${COUNTRIES.length} countries. Free to use with attribution.">
+${ICON_LINKS}
 <link rel="canonical" href="https://filmychill.com/data/">
 <meta name="robots" content="max-image-preview:large">
 <meta property="og:title" content="How long films take to reach streaming — FilmyChill data">
@@ -472,10 +481,10 @@ ${analyticsTag()}
   footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #E7DFD0; font-size: 13px; color: #6B6890; }
 </style></head><body>
   <h1>How long does a film take to reach streaming?</h1>
-  <div class="sub">Measured by FilmyChill, updated ${e(updatedHuman)} · ${e(String(s.total))} titles tracked across ${COUNTRIES.length} countries</div>
+  <div class="sub">Measured by FilmyChill, updated ${e(updatedHuman)} · ${e(String(s.total))} cinema releases tracked across ${COUNTRIES.length} countries</div>
 
   ${s.overall != null ? `<div class="big">${s.overall} days</div>
-  <div class="sub">median from theatrical release to first streaming sighting, across ${e(String(s.measured))} films with both dates known</div>` :
+  <div class="sub">median from cinema release to first streaming sighting, across ${e(String(s.measured))} films we saw arrive${inCinemas ? ` · ${e(String(inCinemas))} more are in cinemas now` : ""}</div>` :
   `<p>Not enough measured films yet to publish a median. The archive is still filling.</p>`}
 
   ${table("Median window by language", s.byLanguage)}
@@ -483,10 +492,16 @@ ${analyticsTag()}
 
   <div class="method">
     <b>Method.</b> FilmyChill checks streaming availability every day in ${COUNTRIES.length} countries and records the
-    first date each film appears with a provider. The window is that date minus the film's theatrical
-    release date. Straight-to-streaming titles and gaps over two years are excluded, since neither is a
-    theatrical window. Groups with fewer than three films are not shown. This is a record of when a film
-    became <i>visible to us</i>, which is normally the day it drops but is not a studio announcement.
+    first date each title appears with a provider. Only films that opened in cinemas in that country count:
+    the window runs from that country's cinema release (TMDB's theatrical date for it) to our first sighting
+    on a streaming service. TV series and straight-to-streaming films are left out, and so are films that
+    were already streaming when we started watching a country, because we never saw them arrive. Gaps over
+    two years are excluded, and groups with fewer than three films are not shown. Films still in cinemas join
+    the figures when they reach streaming, so while the archive is young the medians lean towards faster
+    releases. This is a record of when a film became <i>visible to us</i>, which is normally the day it
+    drops but is not a studio announcement.
+    <br><br><b>Correction, 4 October 2026.</b> Earlier versions of this page also counted TV series,
+    straight-to-streaming films and titles we hadn't seen arrive, which pulled every median down to a few days.
   </div>
 
   <h2>Use the data</h2>
@@ -498,23 +513,40 @@ ${analyticsTag()}
 </body></html>`;
 }
 
+// Exactly the rows behind the published medians — same columns as before; theatrical_release
+// is now the film's cinema date in that country.
 function buildWindowsCsv(records) {
+  const starts = observationStarts(records);
   const rows = [["tmdb_id", "kind", "title", "country", "platform", "theatrical_release", "first_seen_streaming", "window_days"]];
   for (const r of records) {
-    const d = streamingWindowDays(r);
+    const d = cinemaWindowDays(r, starts);
     if (d == null) continue;
-    rows.push([r.id, r.k, `"${String(r.t || "").replace(/"/g, '""')}"`, r.c, `"${String(r.p || "").replace(/"/g, '""')}"`, r.rel, r.first, d]);
+    rows.push([r.id, r.k, `"${String(r.t || "").replace(/"/g, '""')}"`, r.c, `"${String(r.p || "").replace(/"/g, '""')}"`, r.th, r.first, d]);
   }
   return rows.map((r) => r.join(",")).join("\n") + "\n";
+}
+
+// Films on the probe's watchlist that have opened and aren't streaming yet: the ones the
+// medians are still waiting for. Read from ott-watch.json, written earlier in the same run.
+function filmsInCinemas(today = new Date().toISOString().slice(0, 10)) {
+  let watch = [];
+  try { watch = JSON.parse(fs.readFileSync("ott-watch.json", "utf8")); } catch { return 0; }
+  const seen = new Set();
+  for (const w of Array.isArray(watch) ? watch : []) {
+    if (w && w.kind !== "tv" && w.released && String(w.released).slice(0, 10) <= today) seen.add(`${w.code}:${w.tmdbId}`);
+  }
+  return seen.size;
 }
 
 function writeDataPage(updatedHuman) {
   const records = readHistory();
   fs.mkdirSync("data", { recursive: true });
-  fs.writeFileSync("data/index.html", buildDataPage(records, updatedHuman));
+  fs.writeFileSync("data/index.html", buildDataPage(records, updatedHuman, { inCinemas: filmsInCinemas() }));
   fs.writeFileSync("data/streaming-windows.csv", buildWindowsCsv(records));
   const s = windowStats(records);
-  console.log(`  /data/: ${s.measured} measured window(s), median ${s.overall == null ? "n/a" : s.overall + "d"}`);
+  const x = s.excluded;
+  console.log(`  /data/: ${s.measured} measured window(s) from ${s.total} cinema release(s), median ${s.overall == null ? "n/a" : s.overall + "d"}`
+    + ` — left out: ${x.tv} TV, ${x.streamingFirst} straight-to-streaming, ${x.unchecked} awaiting a cinema-date check`);
 }
 
 function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNTRIES } = {}) {

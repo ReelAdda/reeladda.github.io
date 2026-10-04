@@ -88,7 +88,7 @@ function buildLlmsFullTxt(dataByCode) {
     "# FilmyChill — full current picks (machine-readable companion to /llms.txt)", "",
     `Generated: ${new Date().toISOString()}. Rebuilt twice daily. No pay-for-placement.`,
     "Sources: TMDB (film data, ratings; streaming availability via JustWatch), Wikipedia (critical reception), YouTube (trailer statistics).",
-    "Fields: rating is the TMDB audience average out of 10; verdict is FilmyChill's editorial call; the critics' line is distilled from published review coverage, never quoted.", "",
+    "Fields: rating is the TMDB audience average out of 10; the verdict is the FilmyChill Score (audience ratings and critics' reception combined), the same verdict each film's page shows; the critics' line is distilled from published review coverage, never quoted.", "",
   ];
   for (const cfg of COUNTRIES) {
     const data = dataByCode[cfg.code];
@@ -115,7 +115,9 @@ function buildLlmsFullTxt(dataByCode) {
           it.released ? `released ${it.released}` : null,
           it.platform && it.platform !== "Theatres" ? `on ${it.platform}` : null,
           it.rating != null ? `rated ${Number(it.rating).toFixed(1)}/10 (${it.votes || 0} votes${llmsRatingConfident(it) ? "" : " — early, low confidence"})` : null,
-          it.verdict || null,
+          // One verdict per film: a scored film states it once, on its FilmyChill Score line
+          // below; this slot only says why there is no verdict yet.
+          it.fcScore ? null : (it.verdict || null),
         ].filter(Boolean).join(" · ");
         lines.push(`${i + 1}. ${it.title} — ${facts}`);
         if (it.fcScore) lines.push(`   FilmyChill Score: ${it.fcScore.verdict} — ${it.fcScore.reason} (${it.fcScore.early ? `based on only ${it.fcScore.votes} ratings` : "combines audience ratings and critics' reception"})`);
@@ -137,7 +139,7 @@ function llmsMachineSection() {
     `- [Full current knowledge base](https://filmychill.com/llms-full.txt): every current pick across all ${COUNTRIES.length} countries with facts, verdicts, critics' lines, and source attribution — answerable from one fetch\n` +
     `- [RSS feed](https://filmychill.com/feed.xml): newest arrivals as they enter the lists\n` +
     `${dataFiles}\n` +
-    `\nJSON fields per item: title, kind (movie|tv), language, genre, runtime, cert, released (ISO date), platform, providers, rating (TMDB /10), votes, verdict, take (critics' line), hook, director, cast, slug (page: /movie/<slug>.html), trailer.\n` +
+    `\nJSON fields per item: title, kind (movie|tv), language, genre, runtime, cert, released (ISO date), platform, providers, rating (TMDB /10), votes, verdict (the FilmyChill Score's verdict, as on the film's page), take (critics' line), hook, director, cast, slug (page: /movie/<slug>.html), trailer.\n` +
     `All files are static, CORS-open, and rebuilt twice daily. Attribution when citing: "FilmyChill (filmychill.com)".\n`;
 }
 

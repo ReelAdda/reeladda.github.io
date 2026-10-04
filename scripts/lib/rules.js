@@ -321,6 +321,25 @@ function replaceBetween(html, tag, inner) {
 // day-first order matches German convention for an English-language page.
 // Prose-ready country name ("the US", not the config's "United States") for any cfg.
 const countryNameFor = (cfg) => (COUNTRY_PAGE_META[(cfg && cfg.code) || "in"] || {}).name || (cfg && cfg.name) || "India";
+
+// Every non-India edition names its country in its <title> (Oct 2026). 1,511 country pages
+// didn't: the UAE, an "OTT" market, reused India's titles word for word, and long names fell
+// to a country-less last tier elsewhere, so 434 titles were shared by 1,186 pages and the
+// editions read as duplicates. Unescaped string in, string out; India is returned untouched.
+// The country goes after "Where to Watch" or "Release/Streaming Date"; a bare "Film (Year)"
+// gains "— Where to Watch in <country>". Past 60 characters the year goes, never the country.
+function titleWithCountry(title, cfg) {
+  const code = (cfg && cfg.code) || "in";
+  if (code === "in" || !title) return title;
+  const country = countryNameFor(cfg);
+  if (String(title).includes(`in ${country}`)) return title;
+  const t = String(title).replace(/\s+[|–—-]\s+FilmyChill$/, "");
+  let out;
+  if (/Where to Watch$/.test(t)) out = `${t} in ${country}`;
+  else if (/\b(?:Release|Streaming) Date\b/.test(t)) out = t.replace(/\b((?:Release|Streaming) Date)\b/, `$1 in ${country}`);
+  else out = `${t} — Where to Watch in ${country}`;
+  return out.length > 60 ? out.replace(/ \(\d{4}\)/, "") : out;
+}
 // "India, US, UK, Australia, Germany, UAE, Canada &amp; Singapore" — generated from the
 // config so a new country can never be missing from the fallback copy again.
 function countryListForProse() {
@@ -355,5 +374,6 @@ module.exports = {
   streamWindowShort,
   hasLanguageWindow,
   takeConfident,
+  titleWithCountry,
   verdict,
 };

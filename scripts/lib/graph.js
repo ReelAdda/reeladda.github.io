@@ -1,7 +1,7 @@
 "use strict";
 
 const fs = require("fs");
-const { COUNTRIES, COUNTRY_PAGE_META, escHtml, filmPagePath, filmPageUrl, xDefaultCode } = require("./core.js");
+const { COUNTRIES, COUNTRY_PAGE_META, escHtml, filmPagePath, filmPageUrl, ICON_LINKS, xDefaultCode } = require("./core.js");
 
 // ============================================================================
 // FILM INDEX — the fix for orphaned pages.
@@ -221,6 +221,7 @@ function buildBrowsePage(index, cfg, page, totalPages, updatedHuman, headExtra =
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${e(title)}</title>
 <meta name="description" content="${e(desc)}">
+${ICON_LINKS}
 <link rel="canonical" href="${e(url)}">
 ${page > 1 ? `<link rel="prev" href="${e(browsePath(code, page - 1))}">` : ""}
 ${page < totalPages ? `<link rel="next" href="${e(browsePath(code, page + 1))}">` : ""}

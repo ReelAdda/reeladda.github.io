@@ -22,7 +22,7 @@
 //   hubs       monthly archives and platform hubs
 //   dated      coming-to-OTT, new-today, language pages, week snapshots, IndexNow
 //   surfaces   homepage, head tags, hero, /data/, About, writeCountrySurfaces()
-//   sitemap    dead hub links, multi-country sitemap
+//   sitemap    dead hub links, multi-country sitemap, honest film lastmod (content fingerprints)
 //   llms       llms.txt / llms-full.txt
 //   fcscore    the FilmyChill Score: audiences + critics, one automated verdict
 //   scoresweep adds/refreshes the score on frozen and back-catalogue pages, a batch per run
@@ -30,7 +30,8 @@
 //   vote       the "Watched it? Was it worth it?" button (browser half: /js/vote.js)
 //   votes      reads visitors' votes from Firestore into votes-agg.json (build half)
 //   audit      the build checks its own pages for contradictions a visitor would notice
-//   stylesheets film pages load shared, cached CSS files; every footer links /privacy/
+//   stylesheets film pages load shared, cached CSS files; every footer links /privacy/; the
+//              end-of-build finish: icons on every page, country in non-India titles, window lines
 // A lib module may only require modules above it in this list (tests enforce no cycles).
 
 const fs = require("fs");
@@ -53,6 +54,12 @@ const {
   historyRecord,
   streamingWindowDays,
   windowStats,
+  observationStarts,
+  cinemaWindowDays,
+  cinemaClaim,
+  fillCinemaDates,
+  readHistoryLines,
+  writeHistoryLines,
 } = require("./lib/history.js");
 const { writeEmbed, buildEmbedPage, buildEmbedInstructions, embedItems } = require("./lib/embed.js");
 const { reopenForBar } = require("./lib/catalog.js");
@@ -311,8 +318,12 @@ const { sweepScores } = require("./lib/scoresweep.js");
 const { refreshRelated } = require("./lib/relrefresh.js");
 const { syncVotes } = require("./lib/votes.js");
 const { runAudit } = require("./lib/audit.js");
-const { filmPageFiles, finishFilmPages } = require("./lib/stylesheets.js");
-const { pruneDeadHubLinks, sweepDeadHubLinks, writeMultiCountrySitemap } = require("./lib/sitemap.js");
+const { filmPageFiles, finishFilmPages, finishSitePages, sitePageFiles } = require("./lib/stylesheets.js");
+const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
+
+// TMDB release_dates lookups per run for archived films with no cinema date yet (see the
+// cinema-date backfill in main()). One call per film; the backlog clears in a run or two.
+const CINEMA_DATE_BUDGET = Number(process.env.CINEMA_DATE_BUDGET || 150);
 const {
   ABOUT_LASTMOD,
   buildDataPage,
@@ -873,6 +884,9 @@ async function main() {
         code: cfg.code, kind: item.kind, tmdbId: item.tmdbId, title: item.title,
         platform: extra.providers && extra.providers[0], providers: extra.providers,
         first: firstSeen, theatrical: item.released, language: item.language, genre: item.genre,
+        // This country's own cinema date, or null for a film that never opened here — the
+        // difference /data/ needs (enrich sets theatricalHere only for a TMDB type 2/3 date).
+        cinema: item.kind === "tv" ? undefined : (item.theatricalHere ? item.released : null),
       }));
     } catch (e) { /* archive is additive; never let it break a build */ }
     // Placeholder listing (platform page up before the cinema release, still inside the usual
@@ -1288,12 +1302,32 @@ async function main() {
         if (!it.tmdbId || it.kind === "tv") continue;
         if (archived.has(`${code}:movie:${it.tmdbId}`)) continue;
         watch.push({ code, kind: "movie", tmdbId: it.tmdbId, title: it.title,
-          released: it.released || null, language: it.language || null, genre: it.genre || null });
+          released: it.released || null, language: it.language || null, genre: it.genre || null,
+          // Carried into the probe's archive row (scripts/probe.js) as the cinema date.
+          th: it.theatricalHere ? (it.released || null) : null });
       }
     }
     fs.writeFileSync("ott-watch.json", JSON.stringify(watch, null, 1));
     console.log(`  probe watchlist: ${watch.length} title(s) awaiting a streaming sighting`);
   } catch (e) { stageFailed(`watchlist`, e); }
+
+  // Cinema dates for archived films recorded before the archive stored them (fillCinemaDates
+  // in lib/history.js): one TMDB call per film covers every country. /data/ and the film
+  // pages' "FilmyChill data" line count only films that opened in cinemas in that country, so
+  // a film is simply left out until its date is known. Bounded per run; the backlog of a few
+  // hundred films clears in a run or two, after which new rows arrive with the date.
+  try {
+    const lines = readHistoryLines();
+    const regionOf = (code) => (COUNTRIES.find((c) => c.code === code) || {}).region || String(code).toUpperCase();
+    const r = await fillCinemaDates(lines, {
+      lookup: (id) => tmdb(`/movie/${id}/release_dates`),
+      cinemaDateFor: (body, code) => regionalTheatricalDate({ release_dates: body }, regionOf(code)),
+      budget: CINEMA_DATE_BUDGET,
+      pause: () => sleep(120),
+    });
+    if (r.filled) writeHistoryLines(lines);
+    if (r.films) console.log(`  cinema dates: ${r.filled} archive row(s) filled from ${r.calls} TMDB call(s); ${r.pending} film(s) left to check`);
+  } catch (e) { stageFailed("cinema-date backfill", e); }
 
   // Persist first-seen tracking (see ott-seen.json docs) — every country has now recorded
   // today's sightings; the workflow commits this file so tomorrow's run remembers them.
@@ -1441,15 +1475,35 @@ async function main() {
       const v = await syncVotes({ dataByCode, note: healthNote });
       if (v.enabled) console.log(`Votes: ${v.fetched} new, ${v.touched} films re-counted, ${v.films} films with votes`);
     } catch (e) { stageFailed("votes", e); }
-    // Film pages: styles into shared cached files, privacy link in every footer
-    // (lib/stylesheets.js). Runs after every page writer and patcher above.
+    // Film pages: styles into shared cached files, privacy link in every footer, browser icons,
+    // the country in every non-India title, and the "FilmyChill data" window line checked
+    // against the archive (lib/stylesheets.js). Runs after every page writer and patcher above.
     try {
-      const f = finishFilmPages(filmPageFiles());
-      console.log(`Film pages finished: ${f.pages} checked, ${f.externalized} moved to shared styles, ${f.privacyLinked} privacy links added, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
+      const records = readHistory();
+      const starts = observationStarts(records);
+      const byKey = new Map(records.map((r) => [`${r.c}:${r.k}:${r.id}`, r]));
+      const fcdataClaim = (code, slug) => {
+        const e = pagesManifest[code] && pagesManifest[code][slug];
+        if (!e || !e.tmdbId) return { action: "unknown", days: null };
+        return cinemaClaim(byKey.get(`${code}:${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`), starts);
+      };
+      const f = finishFilmPages(filmPageFiles(), { fcdataClaim });
+      console.log(`Film pages finished: ${f.pages} checked, ${f.externalized} moved to shared styles, ${f.privacyLinked} privacy links added, ${f.iconed} icon tags added, `
+        + `${f.retitled.length} titles given their country, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
+      // A new title is a real change: let the sitemap say so (syncFilmLastmods would also see
+      // it, except on its first run, when it only records fingerprints).
+      for (const k of f.retitled) {
+        const [code, slug] = k.split("/");
+        if (pagesManifest[code] && pagesManifest[code][slug]) pagesManifest[code][slug].last = todayStr();
+      }
       // Oct 2026: the workflow didn't commit css/, so for a few hours every film page linked a
       // stylesheet that wasn't on the site. A missing stylesheet is a red run, not a note.
       if (f.missing) healthIssue(`${f.missing} film page(s) link a stylesheet that doesn't exist — they render unstyled. e.g. ${f.missingExamples.join("; ")}`);
     } catch (e) { stageFailed("film-page styles", e); }
+    try {
+      const s = finishSitePages(sitePageFiles());
+      if (s.iconed) console.log(`Site pages: icon tags added to ${s.iconed} of ${s.pages}`);
+    } catch (e) { stageFailed("site-page icons", e); }
     // Self-audit (lib/audit.js): contradictions a visitor would notice, reported in the run
     // summary before anyone else finds them. Read-only.
     try {
@@ -1472,13 +1526,16 @@ async function main() {
   // All countries are built by now, so the filesystem finally shows every cluster's true
   // membership — repair them in one pass before the sitemap is written.
   try {
-    // When the sync rewrites a frozen page, bump its lastmod so the sitemap advertises a
-    // fresh date and Google re-crawls it — otherwise a corrected hreflang cluster ships
-    // with a months-old date and is never re-read.
-    syncHreflangClusters((code, slug) => {
-      if (pagesManifest[code] && pagesManifest[code][slug]) pagesManifest[code][slug].last = todayStr();
-    });
+    // No lastmod bump for this: an hreflang repair is a head-only edit, and the sitemap's own
+    // alternates (rewritten every run) already tell Google about the cluster.
+    syncHreflangClusters();
   } catch (e) { stageFailed(`hreflang sync`, e); }
+  // Honest lastmod (lib/sitemap.js): after the last page edit of the run, a film's date moves
+  // only if its content did.
+  try {
+    const l = syncFilmLastmods(pagesManifest, builtCountries, todayStr());
+    console.log(`Film lastmod: ${l.changed} of ${l.pages} pages changed content${l.seeded ? `, ${l.seeded} fingerprinted for the first time` : ""}`);
+  } catch (e) { stageFailed("film lastmod", e); }
   fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
 
   // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
@@ -1547,6 +1604,8 @@ module.exports = {
   sectionCounts,
   buildDataPage, buildWindowsCsv, writeDataPage,
   appendHistory, readHistory, historyRecord, streamingWindowDays, windowStats,
+  observationStarts, cinemaWindowDays, cinemaClaim, fillCinemaDates, readHistoryLines, writeHistoryLines,
+  contentFingerprint, syncFilmLastmods, CINEMA_DATE_BUDGET,
   writeCountrySurfaces,
   syncHreflangClusters, patchHreflang, hreflangBlockFor, filmPageExists,
   buildBrowsePage, writeBrowseIndex, browsePath, BROWSE_PER_PAGE,

@@ -17,12 +17,14 @@ const {
   fmtDateShort,
   fmtDateFull,
   fmtRuntime,
+  ICON_LINKS,
+  ldJson,
   slugify,
   trim,
   xDefaultCode,
   localeFor,
 } = require("./core.js");
-const { readHistory, streamingWindowDays, monthKey, monthLabel } = require("./history.js");
+const { readHistory, cinemaWindowDays, observationStarts, monthKey, monthLabel } = require("./history.js");
 const { filmScore } = require("./score.js");
 const { browsePath, filmIndexFor, filmPageExists, relatedFilms } = require("./graph.js");
 const { cap, whyWatch } = require("./whywatch.js");
@@ -48,7 +50,7 @@ const {
   streamPagePath,
   ytIdOf,
 } = require("./pagekit.js");
-const { countryNameFor, hasLanguageWindow, streamVocab, streamWindowEstimate, streamWindowShort } = require("./rules.js");
+const { countryNameFor, hasLanguageWindow, streamVocab, streamWindowEstimate, streamWindowShort, titleWithCountry } = require("./rules.js");
 
 // ============================================================
 // PER-FILM STATIC PAGES — one SEO-indexable page per film,
@@ -91,15 +93,19 @@ function assignSlugs(data) {
 
 
 
-let _filmHistory = null;
+let _filmHistory = null, _filmHistoryStarts = null;
 const FILM_HISTORY = {
-  get(key) {
+  load() {
     if (!_filmHistory) {
+      const all = readHistory();
       _filmHistory = new Map();
-      for (const r of readHistory()) _filmHistory.set(`${r.c}:${r.k}:${r.id}`, r);
+      for (const r of all) _filmHistory.set(`${r.c}:${r.k}:${r.id}`, r);
+      _filmHistoryStarts = observationStarts(all);
     }
-    return _filmHistory.get(key);
   },
+  get(key) { this.load(); return _filmHistory.get(key); },
+  // When the archive began watching each country (see observationStarts in lib/history.js).
+  starts() { this.load(); return _filmHistoryStarts; },
 };
 
 
@@ -338,15 +344,19 @@ function partOfMonth(d) {
 // is streaming, the date arrived, and the page can say where. Everything else targets
 // "where to watch <film>", which is what these pages can always answer truthfully.
 //
-// Google shows ~60 chars; the ladder drops decoration (brand, country) before it drops the
-// query-bearing words, so truncation never eats the part that earns the click.
+// Google shows ~60 chars; the ladder drops decoration (brand, year) before it drops the
+// query-bearing words, so truncation never eats the part that earns the click. Outside India
+// the country is never dropped (titleWithCountry): a long title beats one shared by 14 editions.
 function filmTitleTag(item, cfg = null) {
   const country = countryNameFor(cfg);
   const V = streamVocab(cfg);
   const year = (item.released || "").slice(0, 4);
   const yr = year ? ` (${year})` : "";
   const providers = Array.isArray(item.providers) ? item.providers : [];
-  const fitTitle = (opts) => opts.find((t) => t.length <= 60) || opts[opts.length - 1];
+  const fitTitle = (opts) => {
+    const pool = opts.map((t) => titleWithCountry(t, cfg));
+    return pool.find((t) => t.length <= 60) || pool[pool.length - 1];
+  };
   // NOT OUT YET in this country: the only thing the page can answer is when. Sept 2026 GSC:
   // "<film> release date in <country>" drew ~1,900 impressions a month at position ~9.6 and
   // 7 clicks, because these pages were titled "Review & Where to Watch" — two things a film
@@ -389,7 +399,7 @@ function filmTitleTag(item, cfg = null) {
   if (item.kind !== "tv" && !providers.length && item.released && releaseState(item.released) !== "upcoming") {
     const left = expectedMonthsLeft(item, Date.now());
     if (V.word === "OTT") {
-      // India (and other "OTT" markets): the home edition, so no country in the title.
+      // India is the home edition, so no country in its title; fitTitle adds it for the UAE.
       if (left) {
         return fitTitle([
           `${item.title}${yr} OTT Release Date: Expected ${left}, Not Yet Confirmed`,
@@ -587,6 +597,12 @@ function fcScoreSection(item) {
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>`;
 }
 
+// The measured window as the "FilmyChill data" line words it. Shared with the frozen-page
+// pass (lib/stylesheets.js), which corrects the number on pages written before Oct 2026.
+function fcdataWindowPhrase(days) {
+  return days === 0 ? "the same day it opened" : `${days} day${days === 1 ? "" : "s"} after its theatrical release`;
+}
+
 function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const e = escHtml;
   const code = (cfg && cfg.code) || "in";
@@ -734,6 +750,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(titleTag)}</title>
 <meta name="description" content="${e(desc)}">
+${ICON_LINKS}
 ${robotsTag}
 <link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl(xDefaultCode(alts.map((a) => a.code)), item.slug))}"/>` : ""}
 <meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">
@@ -752,9 +769,9 @@ ${(() => {
 })()}
 <meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="Content-Security-Policy" content="${cspWith(`default-src 'self'; connect-src 'self' ${VOTE_CONNECT.join(" ")}; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'`)}">${analyticsTag()}
-<script type="application/ld+json">${JSON.stringify(ld)}</script>
-<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>${faqLd ? `
-<script type="application/ld+json">${JSON.stringify(faqLd)}</script>` : ""}
+<script type="application/ld+json">${ldJson(ld)}</script>
+<script type="application/ld+json">${ldJson(breadcrumb)}</script>${faqLd ? `
+<script type="application/ld+json">${ldJson(faqLd)}</script>` : ""}
 <style>
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
@@ -877,12 +894,14 @@ ${FCSB_CSS}
   ${(() => {
     // The one fact on this page no competitor can reproduce: measured from our own archive
     // (lib/history.js), not from any API. TMDB stores no history of provider changes.
+    // Films that opened in cinemas HERE only, seen arriving while we were watching
+    // (cinemaWindowDays). Until Oct 2026 TV series and streaming originals got a "theatrical
+    // release" window they never had — 704 pages, anime series among them.
     const rec = FILM_HISTORY.get(`${code}:${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}`);
-    const days = rec ? streamingWindowDays(rec) : null;
+    const days = rec ? cinemaWindowDays(rec, FILM_HISTORY.starts()) : null;
     if (days == null) return "";
     return `<p class="fcdata"><b>FilmyChill data:</b> reached streaming in ${e(country)} `
-      + `${days === 0 ? "the same day it opened" : `${days} day${days === 1 ? "" : "s"} after its theatrical release`}`
-      + `${rec.p ? `, on ${e(rec.p)}` : ""}.</p>`;
+      + `${fcdataWindowPhrase(days)}${rec.p ? `, on ${e(rec.p)}` : ""}.</p>`;
   })()}
   ${(() => {
     // Fit line (see whyWatch). Sits after the reception blocks and before the synopsis:
@@ -1051,6 +1070,7 @@ module.exports = {
   headRatingHtml,
   FCSB_CSS,
   fcScoreSection,
+  fcdataWindowPhrase,
   assignSlugs,
   buildFilmPage,
   filmHubLinks,

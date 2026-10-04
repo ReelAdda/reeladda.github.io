@@ -13,6 +13,8 @@ const {
   filmPagePath,
   fmtDateShort,
   fmtDateFull,
+  ICON_LINKS,
+  ldJson,
   xDefaultCode,
   localeFor,
 } = require("./core.js");
@@ -315,7 +317,6 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
   // Back-link copy follows the market ("theatres + OTT" in India/UAE, "theatres +
   // streaming" everywhere else) — platform hubs exist for every country.
   const V = streamVocab({ code });
-  const ldJson = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
   const rowFor = (it) => {
     const badge = it.badge || (it.isRecent ? "New release" : null);
     const meta = [it.platform && it.platform !== "Theatres" ? it.platform : (it.platform === "Theatres" ? "In theatres" : null),
@@ -354,6 +355,7 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(title)}</title>
 <meta name="description" content="${e(desc)}">
+${ICON_LINKS}
 <meta name="robots" content="max-image-preview:large">
 <link rel="canonical" href="${e(canonical)}">${altPaths && Object.keys(altPaths).length > 1 ? "\n" + Object.keys(altPaths).map((cc) => {
   const region = (COUNTRIES.find((x) => x.code === cc) || {}).region || cc.toUpperCase();

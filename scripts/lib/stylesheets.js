@@ -15,13 +15,21 @@
 // Pages are still WRITTEN with inline styles by every builder and patcher (simplest for them);
 // this pass, run at the end of the build, moves the style block out. The one patcher that
 // edits a page's CSS (lib/scoresweep.js) puts it back inline first with inlineStyles().
+//
+// The same end-of-build walk finishes what frozen pages can't get from a rebuild (Oct 2026):
+// browser icons in the <head>, the country in every non-India title, and the "FilmyChill
+// data" window line checked against the archive. finishSitePages adds the icons to every
+// other page on the site. Each fix is idempotent: a finished page is never written again.
 // ============================================================================
 "use strict";
 
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const { COUNTRIES, escHtml, ICON_LINKS } = require("./core.js");
+const { fcdataWindowPhrase } = require("./filmpage.js");
 const { PRIVACY_LINK } = require("./pagekit.js");
+const { titleWithCountry } = require("./rules.js");
 
 const CSS_DIR = "css";
 const STYLE_RE = /<style>([\s\S]*?)<\/style>/;
@@ -57,11 +65,53 @@ function ensurePrivacyLink(html) {
   return html.replace(/(<footer>[\s\S]*?)(© 2026 FilmyChill)/, `$1${PRIVACY_LINK}$2`);
 }
 
+// Pure: declare the browser icons (core.js ICON_LINKS) on a page that has none. Only the
+// homepage did until Oct 2026; everything else 404ed on /favicon.ico. A page with no <head>
+// (Google's verification file) is left exactly as it is.
+function ensureIconLinks(html) {
+  if (/<link rel="icon"/.test(html) || !html.includes("</head>")) return html;
+  return html.replace("</head>", `${ICON_LINKS}\n</head>`);
+}
+
+// Pure: the edition's country in a non-India film title (see titleWithCountry in rules.js).
+// Titles carrying an entity the decoder doesn't know are left alone rather than re-escaped
+// into a double-encoded mess.
+function ensureCountryTitle(html, cfg) {
+  const m = /<title>([\s\S]*?)<\/title>/.exec(html);
+  if (!m) return html;
+  const cur = m[1].replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+  if (/&[#a-z0-9]+;/i.test(cur)) return html;
+  const next = titleWithCountry(cur, cfg);
+  return next === cur ? html : html.replace(m[0], `<title>${escHtml(next)}</title>`);
+}
+
+// The "FilmyChill data: reached streaming … N days after its theatrical release" line on a
+// page written before Oct 2026, checked against the archive. `claim` is cinemaClaim() from
+// lib/history.js: "drop" removes the line (TV, straight to streaming here, or a cold-start
+// sighting), "keep" corrects the number to the film's own cinema date, "unknown" leaves it.
+const FCDATA_RE = /<p class="fcdata">[\s\S]*?<\/p>/;
+function applyFcdataClaim(html, claim) {
+  if (!claim || !FCDATA_RE.test(html)) return html;
+  if (claim.action === "drop") return html.replace(FCDATA_RE, "");
+  if (claim.action !== "keep" || claim.days == null) return html;
+  return html.replace(/(<p class="fcdata"><b>FilmyChill data:<\/b> reached streaming in [^<]*? )(the same day it opened|\d+ days? after its theatrical release)/,
+    (whole, lead) => `${lead}${fcdataWindowPhrase(claim.days)}`);
+}
+
+// "ae/movie/x.html" -> { code: "ae", slug: "x" }; India's pages live in /movie/.
+function filmPageKey(rel) {
+  const m = /^(?:([a-z]{2})\/)?movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
+  return m ? { code: m[1] || "in", slug: m[2] } : null;
+}
+
 // The end-of-build pass over every film page. Returns counts; removes stylesheet files no
-// page uses any more.
-function finishFilmPages(files, { root = "." } = {}) {
+// page uses any more. `fcdataClaim(code, slug)` (optional) answers for the window line.
+// `retitled` lists "code/slug" for every page whose title changed, so the caller can tell the
+// sitemap: a new title is a change worth a recrawl.
+function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
   const used = new Set();
-  const res = { pages: 0, externalized: 0, privacyLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [] };
+  const res = { pages: 0, externalized: 0, privacyLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [],
+    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0 };
   fs.mkdirSync(path.join(root, CSS_DIR), { recursive: true });
   for (const rel of files) {
     const file = path.join(root, rel);
@@ -70,6 +120,21 @@ function finishFilmPages(files, { root = "." } = {}) {
     res.pages++;
     let next = ensurePrivacyLink(html);
     if (next !== html) res.privacyLinked++;
+    const key = filmPageKey(rel);
+    if (key) {
+      const iconed = ensureIconLinks(next);
+      if (iconed !== next) { next = iconed; res.iconed++; }
+      if (key.code !== "in") {
+        const cfg = COUNTRIES.find((c) => c.code === key.code) || { code: key.code };
+        const titled = ensureCountryTitle(next, cfg);
+        if (titled !== next) { next = titled; res.retitled.push(`${key.code}/${key.slug}`); }
+      }
+      if (fcdataClaim && FCDATA_RE.test(next)) {
+        const claim = fcdataClaim(key.code, key.slug);
+        const checked = applyFcdataClaim(next, claim);
+        if (checked !== next) { next = checked; if (claim.action === "drop") res.fcdataDropped++; else res.fcdataFixed++; }
+      }
+    }
     const ex = externalize(next);
     if (ex.css != null) {
       const cssFile = path.join(root, CSS_DIR, `${ex.name}.css`);
@@ -112,4 +177,54 @@ function filmPageFiles(root = ".") {
   return out;
 }
 
-module.exports = { externalize, ensurePrivacyLink, filmPageFiles, finishFilmPages, inlineStyles };
+// Every other HTML page on the site (film pages have their own pass above), as paths relative
+// to the site root. Folders that are not website content are skipped.
+const NOT_SITE = new Set([".git", ".github", ".wrangler", "_site", "cards", "cloudflare", "css", "fonts", "js", "node_modules", "scripts", "zz"]);
+function sitePageFiles(root = ".") {
+  const out = [];
+  const walk = (dir) => {
+    let entries;
+    try { entries = fs.readdirSync(path.join(root, dir), { withFileTypes: true }); } catch { return; }
+    for (const d of entries) {
+      const rel = dir ? `${dir}/${d.name}` : d.name;
+      if (d.isDirectory()) {
+        if (!dir && NOT_SITE.has(d.name)) continue;
+        if (/^(?:[a-z]{2}\/)?movie$/.test(rel)) continue;
+        walk(rel);
+      } else if (d.name.endsWith(".html")) out.push(rel);
+    }
+  };
+  walk("");
+  return out;
+}
+
+// Browser icons on every non-film page: hubs, people, archives, About, Privacy, 404. Pages
+// rebuilt each run already carry them; this reaches the frozen ones (past weeks and months,
+// hand-written pages). The embed widget is skipped: it renders inside other people's pages.
+function finishSitePages(files, { root = "." } = {}) {
+  const res = { pages: 0, iconed: 0 };
+  for (const rel of files) {
+    if (/(?:^|\/)embed\/week\//.test(rel)) continue;
+    const file = path.join(root, rel);
+    let html;
+    try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
+    res.pages++;
+    const next = ensureIconLinks(html);
+    if (next !== html) { fs.writeFileSync(file, next); res.iconed++; }
+  }
+  return res;
+}
+
+module.exports = {
+  applyFcdataClaim,
+  ensureCountryTitle,
+  ensureIconLinks,
+  ensurePrivacyLink,
+  externalize,
+  filmPageFiles,
+  filmPageKey,
+  finishFilmPages,
+  finishSitePages,
+  inlineStyles,
+  sitePageFiles,
+};

@@ -915,9 +915,21 @@ function daysAway(dateStr) {
   if (diff === 1) return 'Tomorrow';
   return 'In ' + diff + ' days';
 }
+// Coming-soon cards are real links (Oct 2026), like the server-rendered ones they replace:
+// crawlers and new-tab clicks reach the film's own page, which exists for every upcoming
+// title. A plain click still opens the detail sheet. A title without a slug keeps the button.
+function soonClick(ev, i) {
+  if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return true;
+  ev.preventDefault();
+  openDetail('comingSoon', i);
+  return false;
+}
 function soonCard(item, i) {
   const dd = daysAway(item.released);
-  return `<div class="soon-card" onclick="openDetail('comingSoon', ${i})" tabindex="0" role="button" aria-label="${esc(item.title)} details" onkeydown="if(event.key==='Enter')openDetail('comingSoon', ${i})">
+  const open = item.slug
+    ? `<a class="soon-card" href="${esc(filmPagePath(item.slug))}" style="text-decoration:none;color:inherit" onclick="return soonClick(event, ${i})">`
+    : `<div class="soon-card" onclick="openDetail('comingSoon', ${i})" tabindex="0" role="button" aria-label="${esc(item.title)} details" onkeydown="if(event.key==='Enter')openDetail('comingSoon', ${i})">`;
+  return `${open}
     ${item.poster ? `<img src="${esc(item.poster)}" alt="${esc(item.title)} poster" width="150" height="200" loading="lazy">` : `<div class="soon-ph" aria-hidden="true"><span class="soon-ph-letter">${esc((item.title || '?').charAt(0).toUpperCase())}</span><span class="soon-ph-note">Poster on the way</span></div>`}
     <div class="soon-body">
       <div class="soon-date">${esc(releaseState(item.released) === 'today' ? 'Today' : fmtDate(item.released))}${dd ? `<span class="soon-days">${esc(dd)}</span>` : ''}</div>
@@ -925,7 +937,7 @@ function soonCard(item, i) {
       <div class="soon-meta">${esc(item.language || '')}${item.genre ? ' · ' + esc(item.genre) : ''}</div>
       <div class="soon-hint">${item.trailer ? '▶ Trailer →' : 'Details →'}</div>
     </div>
-  </div>`;
+  </${item.slug ? 'a' : 'div'}>`;
 }
 
 function applyFilters(list) {

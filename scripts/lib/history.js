@@ -7,7 +7,8 @@
 // masquerade as new. That pruning is correct for its job and fatal for a historical record —
 // it means observations silently delete themselves every six months.
 //
-// This file is the record. Append-only, never pruned, one JSON object per line. It is the
+// This file is the record. Append-only, never pruned, one JSON object per line (one
+// exception: fillCinemaDates adds a missing field to existing lines; nothing is removed). It is the
 // only asset here that cannot be reconstructed later: TMDB stores no history of provider
 // changes and JustWatch publishes none, so a competitor starting in 2027 can never obtain
 // 2026. Every day this doesn't run is a day permanently missing.
@@ -22,14 +23,19 @@ const fs = require("fs");
 const HISTORY_FILE = "ott-history.jsonl";
 
 // One observation. `first` is the date we first saw this title carrying a provider in this
-// country; `theatrical` is its release date, so the pair yields the theatrical→streaming
-// window without a second lookup later.
-function historyRecord({ code, kind, tmdbId, title, platform, providers, first, theatrical, language, genre }) {
+// country; `theatrical` is its release date. `cinema` is the film's own cinema release IN THIS
+// COUNTRY (TMDB release types 2/3), stored as `th`: a date when it opened in cinemas here, null
+// when it did not (straight to streaming here), absent when not yet known (fillCinemaDates
+// looks it up later). `rel` alone could not tell the two apart: for a streaming original it
+// is the premiere date, which read as a one-day "theatrical window" on /data/.
+function historyRecord({ code, kind, tmdbId, title, platform, providers, first, theatrical, cinema, language, genre }) {
+  const tv = kind === "tv";
   return {
-    c: code, k: kind === "tv" ? "tv" : "movie", id: tmdbId, t: title || null,
+    c: code, k: tv ? "tv" : "movie", id: tmdbId, t: title || null,
     p: platform || null,
     ps: Array.isArray(providers) && providers.length ? providers.slice(0, 6) : undefined,
     first, rel: theatrical || null,
+    ...(tv || cinema === undefined ? {} : { th: cinema || null }),
     lang: language || null, g: genre || null,
     seen: new Date().toISOString(),
   };
@@ -70,16 +76,58 @@ function readHistory() {
   } catch { return []; }
 }
 
-// Days from theatrical release to first streaming sighting. Null when either date is
-// missing, or when the film reached streaming BEFORE its theatrical date (a straight-to-
-// streaming title, or a bad date) — those would poison a median.
+// Whole days from one ISO date to another, or null when either is missing, the gap is
+// negative (streaming before the start date: a bad date) or longer than two years (a
+// catalogue re-listing, not a release window).
+function windowBetween(from, to) {
+  if (!from || !to) return null;
+  const a = Date.parse(`${String(from).slice(0, 10)}T00:00:00Z`);
+  const b = Date.parse(`${String(to).slice(0, 10)}T00:00:00Z`);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  const d = Math.round((b - a) / 864e5);
+  return d < 0 || d > 730 ? null : d;
+}
+
+// Days from release date to first streaming sighting, whatever the title. Kept for the raw
+// arithmetic; nothing published uses it any more — see cinemaWindowDays.
 function streamingWindowDays(rec) {
-  if (!rec || !rec.rel || !rec.first) return null;
-  const rel = Date.parse(`${String(rec.rel).slice(0, 10)}T00:00:00Z`);
-  const first = Date.parse(`${String(rec.first).slice(0, 10)}T00:00:00Z`);
-  if (!Number.isFinite(rel) || !Number.isFinite(first)) return null;
-  const d = Math.round((first - rel) / 864e5);
-  return d < 0 || d > 730 ? null : d;   // negatives and multi-year gaps are not windows
+  return rec ? windowBetween(rec.rel, rec.first) : null;
+}
+
+// The day the archive began watching each country: its earliest `seen` stamp. A title already
+// streaming that day got a reconstructed `first`, not an observed one — on a country's first
+// build recordOttSeen stamps the RELEASE date as the sighting — so only sightings made after
+// this day measure a real arrival. Those cold-start rows were most of the "1 day" windows.
+function observationStarts(records) {
+  const out = {};
+  for (const r of records || []) {
+    const s = String((r && r.seen) || "").slice(0, 10);
+    if (!r || !r.c || !/^\d{4}-\d{2}-\d{2}$/.test(s)) continue;
+    if (!out[r.c] || s < out[r.c]) out[r.c] = s;
+  }
+  return out;
+}
+
+// The theatrical window /data/ publishes and film pages state: days from the film's cinema
+// release in THIS country (`th`) to the day we first saw it streaming there. Null unless all
+// of it is true — a film (not TV), that opened in cinemas here, first seen streaming after we
+// began watching this country, within 0..730 days. `starts` = observationStarts(records).
+function cinemaWindowDays(rec, starts) {
+  if (!rec || rec.k !== "movie" || !rec.th || !rec.first) return null;
+  const start = starts && starts[rec.c];
+  if (!start || String(rec.first).slice(0, 10) <= start) return null;
+  return windowBetween(rec.th, rec.first);
+}
+
+// What a film page that already states a window should do with it: "keep" (still true, and
+// `days` is the number to show), "drop" (TV, straight to streaming here, or a cold-start
+// sighting) or "unknown" (cinema date not looked up yet: leave the page as it is for now).
+function cinemaClaim(rec, starts) {
+  if (!rec) return { action: "unknown", days: null };
+  if (rec.k === "tv") return { action: "drop", days: null };
+  if (rec.th === undefined) return { action: "unknown", days: null };
+  const days = cinemaWindowDays(rec, starts);
+  return days == null ? { action: "drop", days: null } : { action: "keep", days };
 }
 
 function median(nums) {
@@ -89,10 +137,16 @@ function median(nums) {
   return a.length % 2 ? a[m] : Math.round((a[m - 1] + a[m]) / 2);
 }
 
-// Aggregate the archive into the numbers the /data/ page publishes.
+// Aggregate the archive into the numbers the /data/ page publishes. Films with a cinema
+// release in that country only (`th`), measured by cinemaWindowDays. Until Oct 2026 every
+// archived "movie" counted — streaming originals and cold-start rows among them — and the page
+// said Hindi films reach streaming 1 day after release while film pages said 6–8 weeks.
 function windowStats(records, { code = null } = {}) {
-  const rows = (records || []).filter((r) => r.k === "movie" && (!code || r.c === code));
-  const withWindow = rows.map((r) => ({ r, d: streamingWindowDays(r) })).filter((x) => x.d != null);
+  const starts = observationStarts(records);
+  const inScope = (records || []).filter((r) => r && (!code || r.c === code));
+  const films = inScope.filter((r) => r.k === "movie");
+  const rows = films.filter((r) => r.th);
+  const withWindow = rows.map((r) => ({ r, d: cinemaWindowDays(r, starts) })).filter((x) => x.d != null);
   const by = (keyFn) => {
     const m = new Map();
     for (const { r, d } of withWindow) {
@@ -107,12 +161,69 @@ function windowStats(records, { code = null } = {}) {
       .sort((a, b) => a.median - b.median);
   };
   return {
-    total: rows.length,
-    measured: withWindow.length,
+    total: rows.length,                       // films that opened in cinemas, tracked
+    measured: withWindow.length,              // ...whose arrival we actually observed
     overall: median(withWindow.map((x) => x.d)),
     byLanguage: by((r) => r.lang),
     byPlatform: by((r) => r.p),
+    excluded: {
+      tv: inScope.filter((r) => r.k === "tv").length,
+      streamingFirst: films.filter((r) => r.th === null).length,   // no cinema release here
+      unchecked: films.filter((r) => r.th === undefined).length,   // cinema date not looked up yet
+    },
   };
+}
+
+// ---------------------------------------------------------------------------
+// CINEMA-DATE BACKFILL. Films archived before `th` existed (and probe sightings whose
+// watchlist entry predates it) have no cinema date, so /data/ can't count them yet. One TMDB
+// release_dates call per film covers every country at once, so the backlog costs one call per
+// title, once. `lookup(id)` returns TMDB's /movie/{id}/release_dates body; `cinemaDateFor(body,
+// code)` returns that country's cinema date or null. Fills `th` in place and marks the line.
+// ---------------------------------------------------------------------------
+async function fillCinemaDates(lines, { lookup, cinemaDateFor, budget = 150, pause = async () => {} } = {}) {
+  const need = new Map();
+  for (const l of lines || []) {
+    const r = l && l.rec;
+    if (!r || r.k !== "movie" || r.th !== undefined || !r.id) continue;
+    if (!need.has(r.id)) need.set(r.id, []);
+    need.get(r.id).push(l);
+  }
+  const res = { films: need.size, calls: 0, filled: 0, errors: 0, pending: 0 };
+  for (const [id, group] of need) {
+    if (res.calls >= budget) break;
+    res.calls++;
+    let body;
+    try { body = await lookup(id); }
+    catch (e) {
+      // A film TMDB no longer has can never be checked: settle it as "no cinema date" so it
+      // can't block the queue on every run. Anything else (rate limit, outage): retry later.
+      if (/failed: 404\b/.test(String(e && e.message))) body = null;
+      else { res.errors++; if (res.errors >= 5) break; continue; }
+    }
+    for (const l of group) { l.rec.th = (body && cinemaDateFor(body, l.rec.c)) || null; l.dirty = true; res.filled++; }
+    await pause();
+  }
+  res.pending = [...need.values()].filter((g) => g[0].rec.th === undefined).length;
+  return res;
+}
+
+// The archive as raw lines, each with its parsed record (null when a line won't parse).
+function readHistoryLines(file = HISTORY_FILE) {
+  try {
+    return fs.readFileSync(file, "utf8").split("\n").filter((l) => l.trim())
+      .map((raw) => { try { return { raw, rec: JSON.parse(raw) }; } catch { return { raw, rec: null }; } });
+  } catch { return []; }
+}
+
+// The one exception to append-only: fillCinemaDates adds a field to existing observations.
+// Untouched lines are written back byte for byte (unparseable ones included), nothing is
+// removed or reordered, and the write goes to a temp file first, so an interrupted run can
+// never truncate the record.
+function writeHistoryLines(lines, file = HISTORY_FILE) {
+  const tmp = `${file}.tmp`;
+  fs.writeFileSync(tmp, lines.map((l) => (l.dirty && l.rec ? JSON.stringify(l.rec) : l.raw)).join("\n") + (lines.length ? "\n" : ""));
+  fs.renameSync(tmp, file);
 }
 
 // ---------------------------------------------------------------------------
@@ -157,5 +268,7 @@ function historyForMonth(records, code, month) {
 module.exports = {
   HISTORY_FILE, appendHistory, readHistory, loadHistoryIndex,
   historyRecord, streamingWindowDays, windowStats, median,
+  observationStarts, cinemaWindowDays, cinemaClaim,
+  fillCinemaDates, readHistoryLines, writeHistoryLines,
   monthKey, monthLabel, historyMonths, historyForMonth,
 };

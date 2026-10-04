@@ -11,6 +11,7 @@ const {
   COUNTRY_PAGE_META,
   escHtml,
   fmtDateFull,
+  ldJson,
   localeFor,
 } = require("./core.js");
 const { filmIndexFor } = require("./graph.js");
@@ -24,7 +25,7 @@ const {
   OPEN_PILL_RE,
   settleReleasedCopy,
 } = require("./pagekit.js");
-const { countryNameFor, streamVocab } = require("./rules.js");
+const { countryNameFor, streamVocab, titleWithCountry } = require("./rules.js");
 const { sleep, tmdb } = require("./tmdb.js");
 
 // ============================================================================
@@ -99,7 +100,7 @@ function neutralizeCrossCountry(html, cfg, title) {
       try {
         const d = JSON.parse(json);
         d.mainEntity = (d.mainEntity || []).filter((q) => !(/family friendly\?$/.test(q.name) && / is rated (?:A|UA|U\/A)\b/.test((q.acceptedAnswer || {}).text || "")));
-        return `<script type="application/ld+json">${JSON.stringify(d).replace(/</g, "\\u003c")}</script>`;
+        return `<script type="application/ld+json">${ldJson(d)}</script>`;
       } catch { return m; }
     });
   }
@@ -315,7 +316,9 @@ function shortenTitleTag(html, countryName, cfg = null) {
 
   const V = streamVocab(cfg);
   const wasOtt = /(?:OTT|Streaming) Release Date/.test(current);
-  const opts = wasOtt
+  // Outside India every option keeps the country (titleWithCountry): the old last tier,
+  // "— Where to Watch", gave all 14 editions of a long-named film the same title.
+  const opts = (wasOtt
     ? [`${stem} ${V.titleFragment}, Review & Where to Watch | FilmyChill`,
        `${stem} ${V.titleFragment}, Review & Where to Watch`,
        `${stem} ${V.titleFragment} & Review`,
@@ -324,7 +327,8 @@ function shortenTitleTag(html, countryName, cfg = null) {
        `${stem} — Review, Rating & Where to Watch in ${countryName}`,
        `${stem} — Review & Where to Watch in ${countryName}`,
        `${stem} — Where to Watch in ${countryName}`,
-       `${stem} — Where to Watch`];
+       `${stem.replace(/ \(\d{4}\)$/, "")} — Where to Watch in ${countryName}`])
+    .map((t) => titleWithCountry(t, cfg));
   const next = opts.find((t) => t.length <= TITLE_BUDGET) || opts[opts.length - 1];
   // Never lengthen. When the film's own name already exceeds the budget there is nothing
   // left to trim, and the shortest cascade option can still come out longer than whatever
@@ -606,15 +610,17 @@ function archivePatchHtml(html, countryName, cfg = null) {
   return { html: out, changed };
 }
 
-// Pure-ish: reconcile one country's manifest with today's reality. Bumps `last` for
-// current slugs (clearing any archive mark — the page was just regenerated fresh),
-// and returns the slugs that need the one-time archive patch (on disk, not current,
-// not yet archived). Mutates manifest[code]; caller persists.
+// Pure-ish: reconcile one country's manifest with today's reality. Clears any archive mark
+// on current slugs (the page was just regenerated) and returns the slugs that need the
+// one-time archive patch (on disk, not current, not yet archived). Mutates manifest[code];
+// caller persists. `last` is set only for a brand-new entry: a current page is rewritten
+// twice a day whether or not anything on it changed, so stamping it here put today's date
+// on every live page — syncFilmLastmods (lib/sitemap.js) moves it when the content moves.
 function reconcilePagesManifest(manifest, code, currentSlugs, diskSlugs, todayStr, meta = null) {
   const m = (manifest[code] = manifest[code] || {});
   for (const slug of currentSlugs) {
     const entry = (m[slug] = m[slug] || {});
-    entry.last = todayStr;
+    if (!entry.last) entry.last = todayStr;
     // Stamp what the refresh sweep will need once this page freezes: TMDB id to
     // re-query providers, release date + language to decide whether it's still
     // inside a plausible streaming window. Recorded while current, kept after.
