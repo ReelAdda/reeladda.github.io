@@ -24,6 +24,7 @@ const { buildVerdictProse } = require("./filmcopy.js");
 const { isRecent } = require("./fcscore.js");
 const { COUNT_REASONS } = require("./skipif.js");
 const { cspAllowVotes, voteWidgetHtml } = require("./vote.js");
+const { inlineStyles } = require("./stylesheets.js");
 const { sleep, tmdb } = require("./tmdb.js");
 
 // 1,500 a run clears the ~8,000-page backlog in about three runs; after that each run only has
@@ -226,7 +227,9 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
   for (const { code, slug, e } of sweepCandidates(pagesManifest, today, batch)) {
     const file = filmPagePath(code, slug).replace(/^\//, "");
     let html;
-    try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
+    // Styles may live in a shared file (lib/stylesheets.js); this patcher edits CSS, so bring
+    // them back inline first — the end-of-build pass moves them out again.
+    try { html = inlineStyles(fs.readFileSync(file, "utf8")); } catch { continue; }
     // A few old pages were saved without their TMDB id. Find it the way the legacy repair does:
     // title (+ year) search, accepted only when the poster on the page matches exactly.
     if (!e.tmdbId) {

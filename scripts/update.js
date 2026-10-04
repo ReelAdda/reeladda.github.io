@@ -30,6 +30,7 @@
 //   vote       the "Watched it? Was it worth it?" button (browser half: /js/vote.js)
 //   votes      reads visitors' votes from Firestore into votes-agg.json (build half)
 //   audit      the build checks its own pages for contradictions a visitor would notice
+//   stylesheets film pages load shared, cached CSS files; every footer links /privacy/
 // A lib module may only require modules above it in this list (tests enforce no cycles).
 
 const fs = require("fs");
@@ -310,6 +311,7 @@ const { sweepScores } = require("./lib/scoresweep.js");
 const { refreshRelated } = require("./lib/relrefresh.js");
 const { syncVotes } = require("./lib/votes.js");
 const { runAudit } = require("./lib/audit.js");
+const { filmPageFiles, finishFilmPages } = require("./lib/stylesheets.js");
 const { pruneDeadHubLinks, sweepDeadHubLinks, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 const {
   ABOUT_LASTMOD,
@@ -1439,6 +1441,12 @@ async function main() {
       const v = await syncVotes({ dataByCode, note: healthNote });
       if (v.enabled) console.log(`Votes: ${v.fetched} new, ${v.touched} films re-counted, ${v.films} films with votes`);
     } catch (e) { stageFailed("votes", e); }
+    // Film pages: styles into shared cached files, privacy link in every footer
+    // (lib/stylesheets.js). Runs after every page writer and patcher above.
+    try {
+      const f = finishFilmPages(filmPageFiles());
+      console.log(`Film pages finished: ${f.pages} checked, ${f.externalized} moved to shared styles, ${f.privacyLinked} privacy links added, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
+    } catch (e) { stageFailed("film-page styles", e); }
     // Self-audit (lib/audit.js): contradictions a visitor would notice, reported in the run
     // summary before anyone else finds them. Read-only.
     try {

@@ -371,6 +371,7 @@ function buildMoreLinks(code, data = null) {
 
   const site = [
     li("/about/", "About"),
+    li("/privacy/", "Privacy"),
     li("/data/", "Streaming data"),
     code === "in" ? li("/embed/", "Embed widget") : "",
     code === "in" ? li(`/week/${weekSlug(isoWeekOf())}/`, "Weekly archive") : "",
