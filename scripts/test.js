@@ -1278,6 +1278,7 @@ test("self-audit: catches the contradictions visitors noticed before", () => {
   const page = (stamp, head = "★ 6.4", box = "6.4", faq = "") => `<div class="head"><div class="rating">${head}</div></div><section class="fcsb" id="filmychill-score"><span class="fcsb-stamp fcsb-early">${stamp}</span><b>Audience</b><small>★ ${box} from 40 ratings</small></section>${faq}`;
   assert.deepStrictEqual(A.auditPage(page("Too early"), { released: "2026-09-04", now }).map((f) => f.check), ["too-early-on-old-film"]);
   assert.deepStrictEqual(A.auditPage(page("Too early"), { released: "2026-09-25", now }), [], "a new film may say it");
+  assert.deepStrictEqual(A.auditPage('<script type="application/ld+json">{"@type":"TVSeries"}</script>' + page("Too early"), { released: "2001-10-02", now }), [], "a series' new season may say it (Scrubs, 2026)");
   assert.deepStrictEqual(A.auditPage(page("Skip", "★ 6.4", "7.1"), { released: "2026-01-01", now }).map((f) => f.check), ["header-vs-score-rating"]);
   const faqPage = page("Skip").replace('fcsb-early">Skip', 'fcsb-skip">Skip') + '<summary>Is X worth watching?</summary><div class="fa">FilmyChill Score: Must watch — …</div>';
   assert.ok(A.auditPage(faqPage, { released: "2026-01-01", now }).some((f) => f.check === "faq-vs-score-verdict"));
