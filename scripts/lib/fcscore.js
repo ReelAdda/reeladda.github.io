@@ -183,6 +183,20 @@ function itemLists(data) {
   return out.filter(Array.isArray);
 }
 
+// ONE VERDICT PER FILM (Oct 2026). `item.verdict` used to be the rating-band label from
+// rules.js (audience only, 10+ votes) while pages showed the FilmyChill Score (audiences +
+// critics, 50+ votes), so data.json and llms-full.txt contradicted the page: Runner was
+// "Must watch" there and "Worth a watch" everywhere a person could see. Every surface that
+// reads item.verdict — data.json, llms-full.txt, the RSS feed, hub FAQs, the embed widget —
+// now carries the score's verdict, or the page's own "no verdict yet" wording when there is
+// no score (an existing no-verdict phrase is kept, never a verdict the score withholds).
+function verdictFor(item, s, nowMs = Date.now()) {
+  if (s) return s.verdict;
+  const v = item && item.verdict;
+  if (v && /verdict soon|enough ratings/i.test(v)) return v;
+  return isRecent(item, nowMs) ? "Just released — verdict soon" : "Not enough ratings";
+}
+
 // Attach item.fcScore to every title that gets a film page, in every market. `toneFor(imdbId)`
 // fills the critics tone from the takes cache for pool titles the weekly takes step skips.
 function attachFcScores(dataByCode, { toneFor = null, nowMs = Date.now() } = {}) {
@@ -198,8 +212,7 @@ function attachFcScores(dataByCode, { toneFor = null, nowMs = Date.now() } = {})
         }
         const s = fcScore(item, nowMs);
         if (s) { item.fcScore = s; scored++; } else delete item.fcScore;
-        // Early read: every other verdict on the page follows it (see backfill.js).
-        if (s && s.early) item.verdict = s.verdict;
+        item.verdict = verdictFor(item, s, nowMs);
       }
     }
   }
@@ -208,6 +221,7 @@ function attachFcScores(dataByCode, { toneFor = null, nowMs = Date.now() } = {})
 
 module.exports = {
   isRecent,
+  verdictFor,
   scoreNeed,
   itemLists,
   EARLY_READ_AGE_DAYS,

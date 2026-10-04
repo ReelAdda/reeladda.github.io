@@ -19,7 +19,7 @@
 "use strict";
 
 const fs = require("fs");
-const { escHtml, COUNTRY_PAGE_META, filmPageUrl } = require("./core.js");
+const { escHtml, COUNTRY_PAGE_META, filmPageUrl, ICON_LINKS } = require("./core.js");
 
 // The films the widget shows: this week's top streaming picks for the market, freshest first,
 // capped so the box stays small on someone else's page.
@@ -94,6 +94,7 @@ function buildEmbedInstructions() {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Embed the weekly OTT widget — FilmyChill</title>
 <meta name="description" content="Add a free, self-updating 'new on OTT this week' widget to your site. One line of code, updates itself every week.">
+${ICON_LINKS}
 <link rel="canonical" href="https://filmychill.com/embed/">
 <style>
   body { font-family: system-ui,-apple-system,sans-serif; max-width: 720px; margin: 0 auto;

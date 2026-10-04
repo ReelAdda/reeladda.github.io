@@ -210,6 +210,20 @@ function escHtml(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// JSON for a <script type="application/ld+json"> block. TMDB is crowd-edited: a title or
+// overview containing "</script>" would otherwise end the block early and inject markup into
+// the page. < is still valid JSON, so the structured data reads back identically. The one
+// helper every JSON-LD writer uses (film pages wrote raw JSON.stringify until Oct 2026).
+function ldJson(o) {
+  return JSON.stringify(o).replace(/</g, "\\u003c");
+}
+
+// Browser-tab and home-screen icons, declared in every page's <head>. Only the homepage
+// declared them until Oct 2026, so every other page fell back to /favicon.ico (which did not
+// exist) and logged a 404 per visit. Same files the homepage template links.
+const ICON_LINKS = `<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/icon-192.png">`;
+
 function slugify(t) {
   return String(t || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
@@ -291,6 +305,8 @@ module.exports = {
   COUNTRY_PAGE_META,
   LANGUAGE_PAGES,
   escHtml,
+  ICON_LINKS,
+  ldJson,
   filmPagePath,
   filmPageUrl,
   fmtDateShort,

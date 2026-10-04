@@ -266,7 +266,8 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
     e.fcs = { v: s ? s.verdict : "early", at: today, w: SWEEP_WORDING };
     if (next !== html) {
       fs.writeFileSync(file, next);
-      e.last = today; // the page changed: let the sitemap say so
+      // No `last` bump here: injecting the vote widget or re-wording markup isn't news to a
+      // crawler. syncFilmLastmods (lib/sitemap.js) moves the date if the score itself changed.
       res.updated++;
     }
   }

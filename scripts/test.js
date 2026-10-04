@@ -1342,13 +1342,16 @@ testAsync("sweepScores: writes the score into the page, records it, stops on rep
     process.chdir(tmp); fsx.mkdirSync("movie");
     fsx.writeFileSync("movie/deadpool.html", '<html><style>a{}</style><div class="head">H</div>\n  <p class="answer">A</p></html>');
     const man = { in: { deadpool: { tmdbId: 533535, kind: "movie", catalog: true, last: "2026-09-01" } } };
+    U.syncFilmLastmods(man, [{ code: "in" }], "2026-09-28");   // the page's content as it stood
     const api = { pause: async () => {}, tmdb: async () => ({ vote_average: 7.63, vote_count: 9523, external_ids: { imdb_id: "tt0" } }) };
     const r = await W.sweepScores(man, { today: "2026-09-29", batch: 5, api });
     assert.deepStrictEqual(r, { checked: 1, updated: 1, errors: 0 });
     const html = fsx.readFileSync("movie/deadpool.html", "utf8");
     assert.ok(/fcsb-stamp fcsb-must">Must watch</.test(html) && /★ 7\.6 from 9,523 ratings on TMDB/.test(html), "9,523 ratings is not 'Too early'");
     assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 6 });
-    assert.strictEqual(man.in.deadpool.last, "2026-09-29", "sitemap lastmod follows the change");
+    assert.strictEqual(man.in.deadpool.last, "2026-09-01", "the sweep itself never stamps lastmod (Oct 2026)");
+    U.syncFilmLastmods(man, [{ code: "in" }], "2026-09-29");
+    assert.strictEqual(man.in.deadpool.last, "2026-09-29", "…the end-of-build pass does, because the score really changed");
     fsx.writeFileSync("movie/dated.html", '<html><style>a{}</style><div class="head"><div class="meta">Page updated 18 Aug 2026</div></div>\n  <p class="answer">A</p></html>');
     const man3 = { in: { dated: { tmdbId: 9, kind: "movie", catalog: true } } };
     await W.sweepScores(man3, { today: "2026-09-29", batch: 1, api });
@@ -1514,11 +1517,13 @@ test("finishFilmPages: moves styles out once, adds the privacy link, keeps only 
     const files = S.filmPageFiles(root);
     assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
     const r = S.finishFilmPages(files, { root });
-    assert.deepStrictEqual(r, { pages: 3, externalized: 3, privacyLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [] });
+    assert.deepStrictEqual(r, { pages: 3, externalized: 3, privacyLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [],
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0 });
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
     assert.ok(/<a href="\/privacy\/">Privacy<\/a> · © 2026 FilmyChill/.test(a));
     assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
-    assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, privacyLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [] }, "idempotent");
+    assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, privacyLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [],
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0 }, "idempotent");
     // The 4 Oct incident: the stylesheets never reached the site. That must be reported.
     fsx.rmSync(path.join(root, "css"), { recursive: true, force: true });
     const lost = S.finishFilmPages(files, { root });
@@ -2239,7 +2244,7 @@ test("archive patch v7: frozen titles stop promising a date the page cannot give
   assert.ok(!U.retitleFrozen("<html><head><title>Whatever</title></head></html>", IN).changed);
 });
 
-test("reconcilePagesManifest: current bumps last + clears archive; departed marked ONCE", () => {
+test("reconcilePagesManifest: current clears archive, never stamps lastmod; departed marked ONCE", () => {
   const today = "2026-07-04";
   const manifest = { in: {
     "current-film": { last: "2026-07-03" },
@@ -2250,7 +2255,9 @@ test("reconcilePagesManifest: current bumps last + clears archive; departed mark
   const disk = ["current-film", "returned-film", "brand-new", "already-archived", "just-departed"];
   const toArchive = U.reconcilePagesManifest(manifest, "in", current, disk, today);
   assert.deepStrictEqual(toArchive, ["just-departed"], "only NEWLY departed pages get patched");
-  assert.strictEqual(manifest.in["current-film"].last, today);
+  // Oct 2026: a live page is rewritten twice a day whether or not it changed; only the
+  // content fingerprint (syncFilmLastmods) may move its date.
+  assert.strictEqual(manifest.in["current-film"].last, "2026-07-03", "regenerating a page is not a change");
   assert.ok(!manifest.in["returned-film"].archivedOn, "a returning film is live again");
   assert.strictEqual(manifest.in["already-archived"].archivedOn, "2026-06-10", "frozen date untouched");
   assert.strictEqual(manifest.in["just-departed"].archivedOn, today);
@@ -4268,12 +4275,14 @@ test("archive is append-only and idempotent per country+title", () => {
   assert.strictEqual(rec.k, "movie");
   assert.ok(rec.seen, "every observation is timestamped");
 });
+// A film that opened in Indian cinemas on 1 Jan, archived by a watcher that started in December.
+const _film = (o) => ({ c: "in", k: "movie", th: "2026-01-01", rel: "2026-01-01", seen: "2025-12-15T06:00:00.000Z", ...o });
 test("a median is never published on a group of one or two", () => {
   const recs = [
-    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-01" },
-    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-11" },
-    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-21" },
-    { c: "in", k: "movie", p: "SonyLIV", lang: "Hindi", rel: "2026-01-01", first: "2026-03-01" },
+    _film({ p: "Netflix", lang: "Tamil", first: "2026-02-01" }),
+    _film({ p: "Netflix", lang: "Tamil", first: "2026-02-11" }),
+    _film({ p: "Netflix", lang: "Tamil", first: "2026-02-21" }),
+    _film({ p: "SonyLIV", lang: "Hindi", first: "2026-03-01" }),
   ];
   const s = U.windowStats(recs);
   assert.strictEqual(s.measured, 4);
@@ -4282,23 +4291,26 @@ test("a median is never published on a group of one or two", () => {
 });
 test("CSV carries only measured rows and escapes titles", () => {
   const csv = U.buildWindowsCsv([
-    { id: 1, k: "movie", t: 'The "Best" Film', c: "in", p: "Netflix", rel: "2026-01-01", first: "2026-02-01" },
-    { id: 2, k: "movie", t: "No dates", c: "in", p: "Netflix", rel: null, first: "2026-02-01" },
+    _film({ id: 1, t: 'The "Best" Film', p: "Netflix", first: "2026-02-01" }),
+    _film({ id: 2, t: "Straight to streaming", p: "Netflix", th: null, first: "2026-02-01" }),
   ]);
   const lines = csv.trim().split("\n");
   assert.strictEqual(lines.length, 2, "header + the one measurable row");
   assert.ok(lines[1].includes('""Best""'), "quotes escaped for CSV");
+  assert.ok(/,2026-01-01,2026-02-01,31$/.test(lines[1]), "the cinema date, the sighting and the window");
 });
 test("data page states sample size and refuses to invent a median", () => {
   const empty = U.buildDataPage([], "26 August 2026");
   assert.ok(/Not enough measured films yet/.test(empty), "no data -> say so, don't print a number");
   const withData = U.buildDataPage([
-    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-01" },
-    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-05" },
-    { c: "in", k: "movie", p: "Netflix", lang: "Tamil", rel: "2026-01-01", first: "2026-02-09" },
-  ], "26 August 2026");
+    _film({ p: "Netflix", lang: "Tamil", first: "2026-02-01" }),
+    _film({ p: "Netflix", lang: "Tamil", first: "2026-02-05" }),
+    _film({ p: "Netflix", lang: "Tamil", first: "2026-02-09" }),
+  ], "26 August 2026", { inCinemas: 7 });
   assert.ok(/Films<\/th>/.test(withData), "sample size is published next to every median");
   assert.ok(/attribution/i.test(withData), "reuse terms are stated");
+  assert.ok(/3 cinema releases tracked/.test(withData) && /7 more are in cinemas now/.test(withData));
+  assert.ok(/Correction, 4 October 2026/.test(withData), "the old figure's flaw is stated, not buried");
 });
 
 group("build sequence — one definition, no drift");
@@ -5608,6 +5620,321 @@ test("a week with no new arrivals says so rather than pretending", () => {
   const hub = { name: "Netflix", slug: "netflix", items: onlyOld.ott };
   const html = U.buildPlatformHubPage(onlyOld, _cfgIn, hub);
   assert.ok(/Nothing new landed/.test(html));
+});
+
+// ---------------- The fixes of 4 Oct 2026 ----------------
+group("4 Oct 2026 fixes: escaping, icons, titles, one verdict, honest lastmod, /data/, live check");
+
+const _IN4 = { code: "in", name: "India", region: "IN", watchRegion: "IN", streamWord: "OTT" };
+const _UAE = { code: "ae", name: "UAE", region: "AE", watchRegion: "AE", streamWord: "OTT" };
+const _JP = { code: "jp", name: "Japan", region: "JP", watchRegion: "JP" };
+
+test("ldJson: a crowd-edited '</script>' can't end a JSON-LD block, and the data reads back intact", () => {
+  const C = require("./lib/core.js");
+  const evil = "Bad</script><script>alert(1)</script>";
+  const out = C.ldJson({ name: evil });
+  assert.ok(!out.includes("</script"), "no raw closing tag survives");
+  assert.strictEqual(JSON.parse(out).name, evil);
+});
+
+test("film pages escape every JSON-LD block (raw JSON.stringify until Oct 2026)", () => {
+  const evil = "Gotcha</script><img src=x onerror=alert(1)>";
+  const page = U.buildFilmPage({ title: evil, slug: "gotcha", kind: "movie", platform: "Netflix", providers: ["Netflix"],
+    released: "2026-01-10", rating: 7.1, votes: 300, runtime: 120, review: evil }, "2026-10-04", new Set(["gotcha"]), _IN4);
+  const blocks = [...page.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  assert.ok(blocks.length >= 2);
+  for (const b of blocks) { assert.ok(!b.includes("</"), "no closing tag inside a block"); JSON.parse(b); }
+  assert.ok(!page.includes("<img src=x onerror"), "the title never becomes live markup");
+});
+
+test("every JSON-LD writer goes through ldJson", () => {
+  const fsx = require("fs"), path = require("path");
+  const dir = path.join(__dirname, "lib");
+  for (const f of fsx.readdirSync(dir)) {
+    const src = fsx.readFileSync(path.join(dir, f), "utf8");
+    assert.ok(!/ld\+json">\$\{JSON\.stringify/.test(src), `${f} writes raw JSON into a JSON-LD block`);
+  }
+  assert.ok(!/return JSON\.stringify\(\{ "@context"/.test(fsx.readFileSync(path.join(dir, "surfaces.js"), "utf8")), "the homepage's JSON-LD too");
+});
+
+test("every page builder declares the browser icons (only the homepage did)", () => {
+  const C = require("./lib/core.js");
+  const film = U.buildFilmPage({ title: "Icon Test", slug: "icon-test", kind: "movie", platform: "Netflix", providers: ["Netflix"], released: "2026-01-10" },
+    "2026-10-04", new Set(["icon-test"]), _IN4);
+  assert.ok(film.includes(C.ICON_LINKS), "film page");
+  const listing = U.listingPageHtml({ title: "T", desc: "D", canonical: "https://filmychill.com/x/", h1: "H", sections: [], faqs: [] });
+  assert.ok(listing.includes(C.ICON_LINKS), "hubs, people, archives (listingPageHtml)");
+  assert.ok(U.buildDataPage([], "4 October 2026").includes(C.ICON_LINKS), "/data/");
+  assert.ok(U.buildEmbedInstructions().includes(C.ICON_LINKS), "/embed/");
+  assert.ok(!U.buildEmbedPage({ ott: [] }, _IN4, "4 Oct").includes(C.ICON_LINKS), "not the widget: it renders inside other people's pages");
+});
+
+test("finishSitePages adds icons to frozen pages once, and never touches a file without a <head>", () => {
+  const S = require("./lib/stylesheets.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-icons-"));
+  try {
+    fsx.mkdirSync(path.join(root, "week", "2026-W30"), { recursive: true });
+    fsx.mkdirSync(path.join(root, "embed", "week"), { recursive: true });
+    fsx.mkdirSync(path.join(root, "movie"));
+    fsx.mkdirSync(path.join(root, "scripts"));
+    fsx.writeFileSync(path.join(root, "week", "2026-W30", "index.html"), "<html><head><title>W30</title></head><body></body></html>");
+    fsx.writeFileSync(path.join(root, "embed", "week", "index.html"), "<html><head></head><body></body></html>");
+    fsx.writeFileSync(path.join(root, "googleabc.html"), "google-site-verification: googleabc.html");
+    fsx.writeFileSync(path.join(root, "movie", "x.html"), "<html><head></head></html>");
+    fsx.writeFileSync(path.join(root, "scripts", "y.html"), "<html><head></head></html>");
+    const files = S.sitePageFiles(root).sort();
+    assert.deepStrictEqual(files, ["embed/week/index.html", "googleabc.html", "week/2026-W30/index.html"], "film pages and non-site folders stay out of this pass");
+    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 1 });
+    assert.ok(/<link rel="icon"[^>]*>\n<link rel="apple-touch-icon"[^>]*>\n<\/head>/.test(fsx.readFileSync(path.join(root, "week", "2026-W30", "index.html"), "utf8")));
+    assert.strictEqual(fsx.readFileSync(path.join(root, "googleabc.html"), "utf8"), "google-site-verification: googleabc.html", "Google's verification file is untouched");
+    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 0 }, "idempotent");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+
+test("favicon.ico exists and is a real icon file", () => {
+  const b = require("fs").readFileSync(require("path").join(__dirname, "..", "favicon.ico"));
+  assert.deepStrictEqual([...b.slice(0, 4)], [0, 0, 1, 0], "ICO header");
+  assert.ok(b.readUInt16LE(4) >= 1, "at least one image inside");
+});
+
+test("titleWithCountry: every non-India edition names its country; India is untouched", () => {
+  const R = require("./lib/rules.js");
+  const t = "12th Fail (2023) OTT Release Date, Review & Where to Watch";
+  assert.strictEqual(R.titleWithCountry(t, _IN4), t, "India is the home edition");
+  assert.strictEqual(R.titleWithCountry("Dangal (2016) — Where to Watch", _JP), "Dangal (2016) — Where to Watch in Japan");
+  assert.strictEqual(R.titleWithCountry("Hi! (2026) Streaming Date: 14 Nov", _JP), "Hi! (2026) Streaming Date in Japan: 14 Nov");
+  assert.strictEqual(R.titleWithCountry("My Name Is Gutierrez (2026) - FilmyChill", { code: "us" }), "My Name Is Gutierrez (2026) — Where to Watch in the US");
+  assert.strictEqual(R.titleWithCountry("Toxic (2026) OTT Release Date: Not Announced Yet", _UAE), "Toxic (2026) OTT Release Date in the UAE: Not Announced Yet");
+  assert.strictEqual(R.titleWithCountry("Mushoku Tensei: Jobless Reincarnation (2021) — Where to Watch", _JP),
+    "Mushoku Tensei: Jobless Reincarnation — Where to Watch in Japan", "past 60 characters the year goes, never the country");
+  assert.strictEqual(R.titleWithCountry("Run (2026) — Where to Watch in Japan", _JP), "Run (2026) — Where to Watch in Japan", "already there: unchanged");
+});
+
+test("film titles: the UAE no longer copies India's title word for word", () => {
+  const item = { title: "12th Fail", kind: "movie", released: "2023-10-27", providers: ["JioHotstar"], platform: "JioHotstar" };
+  const inT = U.filmTitleTag(item, _IN4);
+  const aeT = U.filmTitleTag(item, _UAE);
+  assert.ok(!/UAE/.test(inT), inT);
+  assert.ok(/in the UAE/.test(aeT), aeT);
+  for (const c of [_JP, { code: "us" }, { code: "ph" }]) assert.ok(/ in (?:the )?[A-Z]/.test(U.filmTitleTag({ ...item, providers: [] , released: "2020-01-01" }, c)), c.code);
+});
+
+test("shortenTitleTag never drops the country to save space", () => {
+  const html = "<html><head><title>Doctor Strange in the Multiverse of Madness (2022) — Review, Rating &amp; Where to Watch in Japan | FilmyChill</title></head></html>";
+  const r = U.shortenTitleTag(html, "Japan", _JP);
+  assert.ok(r.changed);
+  assert.ok(/<title>[^<]* — Where to Watch in Japan<\/title>/.test(r.html), r.html);
+});
+
+test("finishFilmPages gives frozen non-India titles their country, once, escaped once", () => {
+  const S = require("./lib/stylesheets.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-title-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie")); fsx.mkdirSync(path.join(root, "jp", "movie"), { recursive: true });
+    const pg = (t) => `<html><head><title>${t}</title></head><body></body></html>`;
+    fsx.writeFileSync(path.join(root, "movie", "a.html"), pg("Dangal (2016) — Where to Watch"));
+    fsx.writeFileSync(path.join(root, "jp", "movie", "a.html"), pg("Dangal (2016) — Where to Watch"));
+    fsx.writeFileSync(path.join(root, "jp", "movie", "b.html"), pg("Tom &amp; Jerry (2021) — Where to Watch"));
+    const files = S.filmPageFiles(root);
+    const r = S.finishFilmPages(files, { root });
+    assert.deepStrictEqual(r.retitled.sort(), ["jp/a", "jp/b"]);
+    assert.strictEqual(r.iconed, 3, "icons on every film page");
+    assert.ok(fsx.readFileSync(path.join(root, "jp", "movie", "b.html"), "utf8").includes("<title>Tom &amp; Jerry (2021) — Where to Watch in Japan</title>"));
+    assert.ok(fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8").includes("<title>Dangal (2016) — Where to Watch</title>"), "India keeps its title");
+    const again = S.finishFilmPages(files, { root });
+    assert.deepStrictEqual([again.retitled, again.iconed], [[], 0], "idempotent");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+
+test("the 'FilmyChill data' line: dropped for TV and streaming originals, corrected for real cinema windows", () => {
+  const S = require("./lib/stylesheets.js");
+  const page = (n) => `<html><body><p class="take">T</p>\n  <p class="fcdata"><b>FilmyChill data:</b> reached streaming in India ${n} days after its theatrical release, on Netflix.</p>\n</body></html>`;
+  assert.ok(!/fcdata/.test(S.applyFcdataClaim(page(364), { action: "drop", days: null })), "an anime series never had a theatrical release");
+  assert.strictEqual(S.applyFcdataClaim(page(4), { action: "unknown", days: null }), page(4), "not checked yet: leave it");
+  assert.ok(/ 47 days after its theatrical release, on Netflix/.test(S.applyFcdataClaim(page(40), { action: "keep", days: 47 })));
+  assert.ok(/India the same day it opened/.test(S.applyFcdataClaim(page(3), { action: "keep", days: 0 })));
+});
+
+test("cinema windows: films that opened in cinemas here, seen arriving while we were watching", () => {
+  const recs = [
+    { c: "in", k: "movie", id: 1, th: "2026-08-01", first: "2026-09-20", seen: "2026-09-20T01:00:00Z" },
+    { c: "in", k: "movie", id: 2, th: null, rel: "2026-09-18", first: "2026-09-20", seen: "2026-09-20T02:00:00Z" },
+    { c: "in", k: "tv", id: 3, rel: "2025-09-28", first: "2026-09-21", seen: "2026-09-21T00:00:00Z" },
+    { c: "in", k: "movie", id: 4, th: "2026-06-01", first: "2026-08-27", seen: "2026-08-27T08:00:00Z" },
+    { c: "in", k: "movie", id: 5, rel: "2026-09-01", first: "2026-09-10", seen: "2026-09-10T00:00:00Z" },
+  ];
+  const starts = U.observationStarts(recs);
+  assert.deepStrictEqual(starts, { in: "2026-08-27" });
+  assert.strictEqual(U.cinemaWindowDays(recs[0], starts), 50);
+  for (const i of [1, 2, 3, 4]) assert.strictEqual(U.cinemaWindowDays(recs[i], starts), null, `record ${i + 1}`);
+  assert.deepStrictEqual(recs.map((r) => U.cinemaClaim(r, starts).action), ["keep", "drop", "drop", "drop", "unknown"],
+    "straight to streaming, a series and a cold-start sighting are dropped; an unchecked film waits");
+  const s = U.windowStats(recs);
+  assert.strictEqual(s.measured, 1);
+  assert.deepStrictEqual(s.excluded, { tv: 1, streamingFirst: 1, unchecked: 1 });
+});
+
+test("archive rows store the cinema date as a date, null, or not at all", () => {
+  assert.strictEqual(U.historyRecord({ code: "in", kind: "movie", tmdbId: 1, first: "2026-10-01", cinema: "2026-08-15" }).th, "2026-08-15");
+  assert.strictEqual(U.historyRecord({ code: "in", kind: "movie", tmdbId: 1, first: "2026-10-01", cinema: null }).th, null);
+  assert.ok(!("th" in U.historyRecord({ code: "in", kind: "movie", tmdbId: 1, first: "2026-10-01" })), "unknown stays absent, for the backfill");
+  assert.ok(!("th" in U.historyRecord({ code: "in", kind: "tv", tmdbId: 1, first: "2026-10-01", cinema: "2026-08-15" })), "a series has no cinema date");
+});
+
+testAsync("fillCinemaDates: one call per film, budgeted; a 404 settles, an outage waits; untouched lines stay byte-identical", async () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const dir = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-hist-"));
+  try {
+    const file = path.join(dir, "h.jsonl");
+    const raw = [
+      JSON.stringify({ c: "in", k: "movie", id: 10, first: "2026-09-20" }),
+      JSON.stringify({ c: "uk", k: "movie", id: 10, first: "2026-09-21" }),
+      JSON.stringify({ c: "in", k: "tv", id: 11, first: "2026-09-20" }),
+      "not json {",
+      JSON.stringify({ c: "in", k: "movie", id: 12, first: "2026-09-22" }),
+      JSON.stringify({ c: "in", k: "movie", id: 13, th: "2026-07-01", first: "2026-09-23" }),
+    ];
+    fsx.writeFileSync(file, raw.join("\n") + "\n");
+    const lines = U.readHistoryLines(file);
+    const calls = [];
+    const r = await U.fillCinemaDates(lines, {
+      lookup: async (id) => { calls.push(id); if (id === 12) throw new Error("TMDB /movie/12/release_dates failed: 404"); return { id }; },
+      cinemaDateFor: (body, code) => (code === "in" ? "2026-08-01" : null),
+    });
+    assert.deepStrictEqual(calls, [10, 12], "one call per film; TV and already-dated rows skipped");
+    assert.deepStrictEqual(r, { films: 2, calls: 2, filled: 3, errors: 0, pending: 0 });
+    U.writeHistoryLines(lines, file);
+    const out = fsx.readFileSync(file, "utf8").split("\n");
+    assert.strictEqual(JSON.parse(out[0]).th, "2026-08-01");
+    assert.strictEqual(JSON.parse(out[1]).th, null, "the UK never had it in cinemas");
+    assert.strictEqual(out[2], raw[2], "an untouched row is byte-identical");
+    assert.strictEqual(out[3], raw[3], "an unparseable line is kept, not dropped");
+    assert.strictEqual(JSON.parse(out[4]).th, null, "a film TMDB no longer has can't block the queue");
+    assert.strictEqual(out[5], raw[5]);
+    const outage = [{ raw: "x", rec: { c: "in", k: "movie", id: 20, first: "2026-09-20" } }];
+    const r2 = await U.fillCinemaDates(outage, { lookup: async () => { throw new Error("TMDB x failed: 503"); }, cinemaDateFor: () => "2026-01-01" });
+    assert.deepStrictEqual([r2.filled, r2.pending, outage[0].rec.th, outage[0].dirty], [0, 1, undefined, undefined], "nothing guessed during an outage");
+    const many = Array.from({ length: 5 }, (_, i) => ({ raw: "", rec: { c: "in", k: "movie", id: 100 + i } }));
+    const r3 = await U.fillCinemaDates(many, { lookup: async () => ({}), cinemaDateFor: () => null, budget: 2 });
+    assert.deepStrictEqual([r3.calls, r3.pending], [2, 3], "the budget caps a run; the rest wait");
+  } finally { fsx.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("one verdict per film: item.verdict follows the FilmyChill Score into data.json and llms-full.txt", () => {
+  const F = require("./lib/fcscore.js");
+  const now = Date.parse("2026-10-04T00:00:00Z");
+  const scored = { title: "Runner", kind: "movie", released: "2026-09-25", rating: 8.3, votes: 329, verdict: "Must watch", criticsTone: "mixed" };
+  const thin = { title: "Thin", kind: "movie", released: "2026-03-01", rating: 8.9, votes: 12, verdict: "Must watch" };
+  const fresh = { title: "Fresh", kind: "movie", released: "2026-10-03", rating: null, votes: 2, verdict: "Just released — verdict soon" };
+  F.attachFcScores({ in: { theatres: [scored, thin, fresh], ott: [] } }, { nowMs: now });
+  assert.ok(scored.fcScore, "Runner has a score");
+  assert.strictEqual(scored.verdict, scored.fcScore.verdict, "data.json says what the page says");
+  assert.strictEqual(thin.verdict, "Not enough ratings", "12 votes can't be a 'Must watch' anywhere");
+  assert.strictEqual(fresh.verdict, "Just released — verdict soon");
+  const txt = U.buildLlmsFullTxt({ in: { generatedAt: "2026-10-04", theatres: [{ ...scored, slug: "runner" }], ott: [] } });
+  const runner = txt.split("\n").filter((l) => /Runner|FilmyChill Score:/.test(l)).join("\n");
+  assert.ok(!/Must watch/.test(runner), "no second, contradicting verdict");
+  assert.strictEqual((runner.match(new RegExp(scored.fcScore.verdict, "g")) || []).length, 1, "the verdict is stated once, on the score line");
+});
+
+test("contentFingerprint: the same facts re-rendered are not a change; new facts are", () => {
+  const ICON = require("./lib/core.js").ICON_LINKS;
+  const page = (o = {}) => `<html><head><title>${o.title || "Film (2026) OTT Release Date"}</title><meta name="description" content="D">`
+    + `<link rel="stylesheet" href="/css/fp-0123456789.css">${o.head || ""}</head><body>
+<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${o.upd || "4 Oct 2026"}</div>
+<p>${o.body || "Streaming on Netflix"} · ${o.votes || "1,204"} ratings · Availability as of ${o.asof || "4 Oct 2026"}</p>
+<div class="fcvote" data-film="movie-1" data-c="in" hidden>
+    <div class="fcvote-q">Watched it?</div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+<footer>${o.foot || "© 2026 FilmyChill"}</footer></body></html>`;
+  const fp = U.contentFingerprint(page());
+  assert.strictEqual(U.contentFingerprint(page({ upd: "9 Nov 2026", asof: "9 Nov 2026", votes: "1,377" })), fp, "dates and counts are not news");
+  assert.strictEqual(U.contentFingerprint(page({ head: ICON, foot: "Privacy · © 2026 FilmyChill" })), fp, "head tags and footer links are not news");
+  assert.strictEqual(U.contentFingerprint(page().replace(/<div class="fcvote"[\s\S]*?<\/div>\s*<\/div>/, "")), fp, "the vote widget is chrome");
+  assert.notStrictEqual(U.contentFingerprint(page({ body: "Streaming on Prime Video" })), fp, "a new platform is news");
+  assert.notStrictEqual(U.contentFingerprint(page({ title: "Film (2026) — Where to Watch in Japan" })), fp, "a new title is news");
+});
+
+test("syncFilmLastmods: the first run only records; cosmetic edits never move the date; real ones do", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-lastmod-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie"));
+    const p = path.join(root, "movie", "f.html");
+    const write = (body, head = "") => fsx.writeFileSync(p, `<html><head><title>F</title>${head}</head><body><p>${body}</p></body></html>`);
+    const man = { in: { f: { last: "2026-09-01" } } };
+    write("In cinemas now");
+    assert.deepStrictEqual(U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-04", { root }), { pages: 1, changed: 0, seeded: 1 });
+    assert.strictEqual(man.in.f.last, "2026-09-01", "the first run must not stamp every page today");
+    write("In cinemas now", '<link rel="icon" href="/icon-192.png">');
+    U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-05", { root });
+    assert.strictEqual(man.in.f.last, "2026-09-01", "an icon tag is not news");
+    write("Streaming on Netflix");
+    U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-06", { root });
+    assert.strictEqual(man.in.f.last, "2026-10-06", "a streaming arrival is");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+
+test("homepage 'Coming soon' cards stay real links after the page script re-renders them", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  const fn = (src.match(/function soonCard\(item, i\) \{[\s\S]*?\n\}/) || [""])[0];
+  assert.ok(/<a class="soon-card" href="\$\{esc\(filmPagePath\(item\.slug\)\)\}"/.test(fn), "a crawlable href, like the server-rendered card");
+  assert.ok(/onclick="return soonClick\(event, \$\{i\}\)"/.test(fn), "a plain click still opens the detail sheet");
+  assert.ok(/function soonClick\(ev, i\)[\s\S]*?ev\.metaKey \|\| ev\.ctrlKey/.test(src), "cmd/ctrl-click opens the film page in a new tab");
+});
+
+test("workflows: actions pinned to commits, the probe on Node 24, and a live check after deploy", () => {
+  const fsx = require("fs");
+  const up = fsx.readFileSync(".github/workflows/update.yml", "utf8");
+  const probe = fsx.readFileSync(".github/workflows/probe.yml", "utf8");
+  for (const [name, wf] of [["update.yml", up], ["probe.yml", probe]]) {
+    const uses = [...wf.matchAll(/uses:\s*([^\s#]+)/g)].map((m) => m[1]);
+    assert.ok(uses.length >= 2, name);
+    for (const u of uses) assert.ok(/@[0-9a-f]{40}$/.test(u), `${name}: ${u} is a moving tag, not a commit`);
+  }
+  assert.ok(/node-version: "24"/.test(probe) && !/node-version: "20"/.test(probe), "Node 20 is end-of-life");
+  assert.ok(/- name: Live site check[\s\S]*?run: node scripts\/livecheck\.js/.test(up));
+  assert.ok(up.indexOf("Live site check") > up.indexOf("Build health check"), "it runs last");
+});
+
+testAsync("livecheck: waits for the deploy, then fails loudly on a stylesheet that isn't live", async () => {
+  const L = require("./livecheck.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-live-"));
+  try {
+    const home = '<html><head><link rel="preload" href="/fonts/a.woff2" as="font"><link rel="icon" href="/icon-192.png"></head><body>home v2</body></html>';
+    fsx.writeFileSync(path.join(root, "index.html"), home);
+    fsx.writeFileSync(path.join(root, "data.json"), JSON.stringify({ theatres: [{ slug: "pick" }], ott: [] }));
+    fsx.mkdirSync(path.join(root, "movie")); fsx.mkdirSync(path.join(root, "uk", "movie"), { recursive: true });
+    const film = (h) => `<html><head><link rel="stylesheet" href="/css/fp-${h}.css"></head><body>${"x".repeat(1200)}</body></html>`;
+    fsx.writeFileSync(path.join(root, "movie", "pick.html"), film("aaaaaaaaaa"));
+    fsx.writeFileSync(path.join(root, "uk", "movie", "other.html"), film("bbbbbbbbbb"));
+    assert.deepStrictEqual(L.stylesheetsLinked([film("aaaaaaaaaa"), film("aaaaaaaaaa"), film("bbbbbbbbbb")]), ["/css/fp-aaaaaaaaaa.css", "/css/fp-bbbbbbbbbb.css"]);
+    const types = { ".css": "text/css", ".txt": "text/plain; charset=utf-8", ".xml": "application/xml", ".ico": "image/x-icon" };
+    const site = (over = {}) => async (url) => {
+      const p = new URL(url).pathname;
+      const ext = (p.match(/\.[a-z0-9]+$/) || [""])[0];
+      const body = p in over ? over[p]
+        : p === "/" ? home
+        : /\/movie\//.test(p) ? film("aaaaaaaaaa")
+        : ext === ".css" ? "x".repeat(200)
+        : p.startsWith("/livecheck-missing") ? null : "ok";
+      return { status: body == null ? 404 : 200, headers: { get: () => types[ext] || "text/html; charset=utf-8" }, text: async () => (body == null ? "not found" : body) };
+    };
+    const run = (fetchImpl) => L.main({ root, base: "https://example.test", fetchImpl, waitMs: 0, pollMs: 0, sleep: async () => {}, log: () => {} });
+    const ok = await run(site());
+    assert.deepStrictEqual(ok.failures, []);
+    assert.ok(ok.passes.length >= 10, "homepage, both stylesheets, sample pages, assets, crawler files, the 404");
+    const broken = await run(site({ "/css/fp-bbbbbbbbbb.css": null }));
+    assert.strictEqual(broken.failures.length, 1);
+    assert.ok(/fp-bbbbbbbbbb\.css: HTTP 404/.test(broken.failures[0]), broken.failures[0]);
+    const stale = await run(site({ "/": "<html>home v1</html>" }));
+    assert.strictEqual(stale.failures.length, 1);
+    assert.ok(/isn't live/.test(stale.failures[0]), "an old deploy is reported, and nothing is judged against it");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 
 (async () => {

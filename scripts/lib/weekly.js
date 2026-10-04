@@ -12,6 +12,8 @@ const {
   filmPageUrl,
   fmtDateShort,
   fmtRuntime,
+  ICON_LINKS,
+  ldJson,
   trim,
   localeFor,
 } = require("./core.js");
@@ -246,9 +248,8 @@ function ssrEditorNote(data, cfg) {
 
 function buildOttWeekPage(data, cfg, allCountries) {
   const e = escHtml;
-  // JSON-LD-safe serializer: escapes "<" as \u003c inside the JSON so a title containing
-  // "</script>" can never break out of the <script type="application/ld+json"> block.
-  const ldJson = (o) => JSON.stringify(o).replace(/</g, "\\u003c");
+  // JSON-LD goes through core.js ldJson, so a title containing "</script>" can never break
+  // out of its <script type="application/ld+json"> block.
   const code = (cfg && cfg.code) || "in";
   const m = COUNTRY_PAGE_META[code] || { name: cfg && cfg.name || "India", path: `/${code}/` };
   const countryName = m.name; // "India", "the US", ...
@@ -416,6 +417,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(title)}</title>
 <meta name="description" content="${e(desc)}">
+${ICON_LINKS}
 <meta name="robots" content="max-image-preview:large">
 <link rel="canonical" href="${e(url)}">
 ${alts}

@@ -20,10 +20,12 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      # Actions are pinned to a commit, not a moving tag: a retagged release can't change what
+      # runs with write access to this repo. Same pins in probe.yml; bump both together.
       - name: Checkout site
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: "24"
 
@@ -161,8 +163,17 @@ jobs:
             -H "Content-Type: application/json; charset=utf-8" \
             -d @indexnow-payload.json || true
 
-      # LAST on purpose: the site has already been committed and deployed. Any stage that
-      # failed and was skipped during the build (see RUN HEALTH in update.js) turns this run
-      # red, which makes GitHub email you, and the run page's Summary tab says what broke.
+      # After the deploy on purpose: the site has already been committed and deployed. Any
+      # stage that failed and was skipped during the build (see RUN HEALTH in update.js) turns
+      # this run red, which makes GitHub email you, and the run page's Summary tab says what broke.
       - name: Build health check
         run: node scripts/health.js
+
+      # LAST: what visitors actually get. Waits for the new build to be live, then fetches the
+      # homepage, sample film pages, EVERY stylesheet the committed pages link, and the files
+      # crawlers read (scripts/livecheck.js). On 4 Oct 2026 every film page linked a stylesheet
+      # that was never committed and rendered unstyled for ~5 hours; this turns that into a red
+      # run (and an email) within minutes. Runs even when the health check failed.
+      - name: Live site check
+        if: ${{ !cancelled() && (steps.commit.outputs.pushed == 'true' || github.event_name == 'workflow_dispatch') }}
+        run: node scripts/livecheck.js

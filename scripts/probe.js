@@ -67,6 +67,9 @@ async function main() {
       code: w.code, kind: w.kind, tmdbId: w.tmdbId, title: w.title,
       platform: providers[0], providers, first: new Date().toISOString().slice(0, 10),
       theatrical: w.released, language: w.language, genre: w.genre,
+      // The film's cinema date in this country, from the build's watchlist. Entries written
+      // before the field existed leave it unset; the build looks those up (fillCinemaDates).
+      cinema: Object.prototype.hasOwnProperty.call(w, "th") ? w.th : undefined,
     }));
     if (wrote) { found++; console.log(`  arrival: ${w.title} → ${providers[0]} [${w.code}]`); }
   }
