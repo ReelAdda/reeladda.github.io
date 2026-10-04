@@ -301,11 +301,16 @@ function hreflangBlockFor(codes, slug) {
 
 function patchHreflang(html, codes, slug) {
   const block = hreflangBlockFor(codes, slug);
-  const existing = /(?:<link rel="alternate" hreflang="[^"]*" href="[^"]*"\/>\n?)+/;
+  // \r?\n, not \n: on a CRLF working copy the repetition stopped after the FIRST link, so
+  // the partial match never equalled `block` and a fresh block was appended instead of
+  // replacing the old one. One build from a Windows clone gave 8,558 pages duplicate
+  // alternates; CI never saw it because CI is Linux. .gitattributes now pins LF as well,
+  // but this matcher no longer depends on the checkout being right.
+  const existing = /(?:<link rel="alternate" hreflang="[^"]*" href="[^"]*"\/>\r?\n?)+/;
   const has = existing.test(html);
   if (!block) return has ? { html: html.replace(existing, ""), changed: true } : { html, changed: false };
   if (has) {
-    const current = (html.match(existing) || [""])[0].trim();
+    const current = (html.match(existing) || [""])[0].trim().replace(/\r/g, "");
     if (current === block) return { html, changed: false };
     return { html: html.replace(existing, block + "\n"), changed: true };
   }
