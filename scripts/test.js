@@ -1485,6 +1485,54 @@ test("a platform page put up before a theatrical film could stream is a placehol
   assert.strictEqual(isPreListed({ ...drishyam, firstSeen: undefined }), false, "no sighting record: can't call it a placeholder");
 });
 
+// ---- Shared film-page styles + privacy page (Oct 2026 compliance & health review) ----
+group("shared stylesheets and the privacy page");
+
+test("externalize: same CSS, loaded from a content-named file; the policy allows it; inline round-trips", () => {
+  const S = require("./lib/stylesheets.js");
+  const page = `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'"><style>.a{color:red}</style><body>x</body>`;
+  const ex = S.externalize(page);
+  assert.ok(/^fp-[0-9a-f]{10}$/.test(ex.name) && ex.css === ".a{color:red}");
+  assert.ok(ex.html.includes(`<link rel="stylesheet" href="/css/${ex.name}.css">`) && !/<style>/.test(ex.html));
+  assert.ok(/style-src 'self' 'unsafe-inline'/.test(ex.html));
+  assert.strictEqual(S.externalize("<style>a</style><style>b</style>").css, null, "two blocks: left alone");
+  assert.strictEqual(S.externalize(page).name, ex.name, "same CSS, same file");
+});
+
+test("finishFilmPages: moves styles out once, adds the privacy link, keeps only stylesheets in use", () => {
+  const S = require("./lib/stylesheets.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-css-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie")); fsx.mkdirSync(path.join(root, "uk", "movie"), { recursive: true }); fsx.mkdirSync(path.join(root, "css"));
+    const pg = (css) => `<meta http-equiv="Content-Security-Policy" content="style-src 'unsafe-inline'"><style>${css}</style><footer>Credits<br>\n  © 2026 FilmyChill · Vikram Sharma\n</footer>`;
+    fsx.writeFileSync(path.join(root, "movie", "a.html"), pg(".x{}"));
+    fsx.writeFileSync(path.join(root, "uk", "movie", "b.html"), pg(".x{}"));
+    fsx.writeFileSync(path.join(root, "movie", "c.html"), pg(".y{}"));
+    fsx.writeFileSync(path.join(root, "css", "fp-0000000000.css"), "old");
+    const files = S.filmPageFiles(root);
+    assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
+    const r = S.finishFilmPages(files, { root });
+    assert.deepStrictEqual(r, { pages: 3, externalized: 3, privacyLinked: 3, cssFiles: 2, removed: 1 });
+    const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
+    assert.ok(/<a href="\/privacy\/">Privacy<\/a> · © 2026 FilmyChill/.test(a));
+    assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
+    assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, privacyLinked: 0, cssFiles: 2, removed: 0 }, "idempotent");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+
+test("privacy page: exists, linked from every footer kind, in the sitemap, and says no cookies plainly", () => {
+  const fsx = require("fs"), path = require("path");
+  const priv = fsx.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
+  assert.ok(/<link rel="canonical" href="https:\/\/filmychill\.com\/privacy\/">/.test(priv));
+  assert.ok(/sets no cookies/.test(priv) && /GoatCounter/.test(priv) && /Firebase/.test(priv) && /anonymous ID/.test(priv));
+  assert.ok(/<a href="\/privacy\/">Privacy<\/a> · $/.test(U.footerAttribution(false)), "film, hub and weekly page footers");
+  const about = fsx.readFileSync(path.join(__dirname, "..", "about", "index.html"), "utf8");
+  assert.ok(/href="\/privacy\/"/.test(about));
+  assert.ok(/href="\/privacy\/"/.test(fsx.readFileSync(path.join(__dirname, "..", "404.html"), "utf8")));
+  assert.ok(/\/privacy\//.test(U.buildMoreLinks({ code: "in" })), "homepage footer links");
+});
+
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
 group("failure paths: outages, stalls, corrupt state, silent stages");
 

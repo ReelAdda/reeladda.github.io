@@ -463,15 +463,17 @@ function weekRangeFor(when, code) {
 // IMDb credited for ratings using IMDb's REQUIRED verbatim wording. TMDB mode: TMDB credited for
 // both (no IMDb name anywhere, since IMDb data isn't used and its terms forbid using its name
 // without a current license).
+// Every page footer links the privacy page (Oct 2026); templates follow this with "© 2026 …".
+const PRIVACY_LINK = '<a href="/privacy/">Privacy</a> · ';
 function footerAttribution(useImdb = USE_IMDB) {
   // Required wording kept verbatim (TMDB's disclaimer; IMDb's "Used with permission" when its
   // ratings are shown); only the layout is compact: credits on one line, the notice below.
   const tmdb = `<a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>`;
   const jw = `<a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a>`;
   if (useImdb) {
-    return `Film data from ${tmdb} · Where-to-watch data by ${jw} · Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>This product uses the TMDB API but is not endorsed or certified by TMDB.`;
+    return `Film data from ${tmdb} · Where-to-watch data by ${jw} · Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>${PRIVACY_LINK}`;
   }
-  return `Film data and ratings from ${tmdb} · Where-to-watch data by ${jw}<br>This product uses the TMDB API but is not endorsed or certified by TMDB.`;
+  return `Film data and ratings from ${tmdb} · Where-to-watch data by ${jw}<br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>${PRIVACY_LINK}`;
 }
 
 // A hub's share/Discover image: the first listed title with a large image (its branded card,
@@ -491,6 +493,7 @@ function ogImageTag(src) {
 }
 
 module.exports = {
+  PRIVACY_LINK,
   analyticsTag,
   canonProvider,
   cspWith,

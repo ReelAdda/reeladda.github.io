@@ -235,8 +235,10 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       scopedMonthUrls.push(`  <url><loc>https://filmychill.com/${slug}/${m}/</loc><lastmod>${m === curMonth ? today : lastDayOf(m)}</lastmod><priority>${m === curMonth ? "0.6" : "0.4"}</priority></url>`);
     }
   }
-  const aboutUrls = fs.existsSync("about/index.html")
-    ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${ABOUT_LASTMOD}</lastmod><priority>0.3</priority></url>`] : [];
+  const aboutUrls = [
+    ...(fs.existsSync("about/index.html") ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${ABOUT_LASTMOD}</lastmod><priority>0.3</priority></url>`] : []),
+    ...(fs.existsSync("privacy/index.html") ? ["  <url><loc>https://filmychill.com/privacy/</loc><lastmod>2026-10-04</lastmod><priority>0.2</priority></url>"] : []),
+  ];
   // /data/ was reaching IndexNow (so Bing saw it) but was absent from the sitemap, which is
   // Google's main discovery path — so Google could only find it by crawling a footer link.
   // It refreshes whenever the archive grows, hence changefreq weekly.
