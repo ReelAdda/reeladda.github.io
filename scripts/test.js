@@ -1513,11 +1513,16 @@ test("finishFilmPages: moves styles out once, adds the privacy link, keeps only 
     const files = S.filmPageFiles(root);
     assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
     const r = S.finishFilmPages(files, { root });
-    assert.deepStrictEqual(r, { pages: 3, externalized: 3, privacyLinked: 3, cssFiles: 2, removed: 1 });
+    assert.deepStrictEqual(r, { pages: 3, externalized: 3, privacyLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [] });
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
     assert.ok(/<a href="\/privacy\/">Privacy<\/a> · © 2026 FilmyChill/.test(a));
     assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
-    assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, privacyLinked: 0, cssFiles: 2, removed: 0 }, "idempotent");
+    assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, privacyLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [] }, "idempotent");
+    // The 4 Oct incident: the stylesheets never reached the site. That must be reported.
+    fsx.rmSync(path.join(root, "css"), { recursive: true, force: true });
+    const lost = S.finishFilmPages(files, { root });
+    assert.strictEqual(lost.missing, 3, "every page pointing at a missing stylesheet is counted");
+    assert.ok(/movie\/a\.html → \/css\/fp-[0-9a-f]{10}\.css/.test(lost.missingExamples.join(" ")));
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 
@@ -1531,6 +1536,11 @@ test("privacy page: exists, linked from every footer kind, in the sitemap, and s
   assert.ok(/href="\/privacy\/"/.test(about));
   assert.ok(/href="\/privacy\/"/.test(fsx.readFileSync(path.join(__dirname, "..", "404.html"), "utf8")));
   assert.ok(/\/privacy\//.test(U.buildMoreLinks({ code: "in" })), "homepage footer links");
+});
+
+test("the workflow commits css/ — every film page links a stylesheet in it", () => {
+  const wf = require("fs").readFileSync(require("path").join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8");
+  assert.ok(/git add -A -- css\/ 2>\/dev\/null \|\| true/.test(wf));
 });
 
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
