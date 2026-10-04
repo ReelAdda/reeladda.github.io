@@ -46,7 +46,10 @@ function auditPage(html, { released = null, now = Date.now() } = {}) {
   if (!/id="filmychill-score"/.test(html)) return out; // pages not yet swept are counted elsewhere
   const rel = released || (/"datePublished":"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1] || null;
   const age = daysSince(rel, now);
-  if (age != null && age > 28) {
+  // Series are dated by their LATEST season (a 2026 season of Scrubs is new), but the page's
+  // release date is the show's first air date — so age-based wording can't be judged here.
+  const isSeries = /"@type":"TVSeries"/.test(html);
+  if (!isSeries && age != null && age > 28) {
     if (/class="fcsb-stamp[^"]*">Too early</.test(html)) out.push({ check: "too-early-on-old-film", detail: `released ${rel}` });
     const head = html.slice(html.indexOf('<div class="head"'), html.indexOf('id="filmychill-score"'));
     if (/Early — still settling|Rating still forming/.test(head)) out.push({ check: "time-words-on-old-film", detail: `released ${rel}` });
