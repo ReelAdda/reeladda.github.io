@@ -5,8 +5,10 @@
 //   AUDIENCE  TMDB rating, counted only with 50+ ratings (below that it isn't an audience):
 //               Loved ★7.5+   ·  Liked ★6.5–7.4  ·  Lukewarm below ★6.5
 //   CRITICS   the reception tone of the film's Wikipedia article (lib/editorial.js
-//             analyzeReception), attached as item.criticsTone under the same release-week
-//             gate as the critics' take: acclaim/positive · mixed · negative.
+//             readCritics: the stated consensus, else the median of the critics' ratings
+//             it lists), attached as item.criticsTone under the same release-week gate as
+//             the critics' take (lifted at five listed reviews): acclaim/positive · mixed ·
+//             negative.
 //             Deliberately the TONE, never a Rotten Tomatoes / Metacritic percentage:
 //             those are other companies' proprietary scores.
 //
@@ -154,7 +156,12 @@ function scoreNeed(item, nowMs = Date.now()) {
 const EARLY_DAYS = 28;
 function noScoreText(item, nowMs = Date.now()) {
   const recent = isRecent(item, nowMs);
-  if (recent) return { label: "Too early", why: "Just released — not enough ratings or reviews yet." };
+  if (recent) {
+    // Reviews already in but split (a mixed reception scores nothing on its own, and the
+    // audience half isn't there yet): say so, rather than claim there are no reviews.
+    if (criticsTier(item) === "mixed") return { label: "Too early", why: "Critics are split; audience ratings are still coming in." };
+    return { label: "Too early", why: "Just released — not enough ratings or reviews yet." };
+  }
   const votes = Number((item && item.votes) || 0);
   const n = votes.toLocaleString("en-IN");
   const who = votes === 1 ? "1 person has" : `${n} people have`;
@@ -197,8 +204,9 @@ function verdictFor(item, s, nowMs = Date.now()) {
   return isRecent(item, nowMs) ? "Just released — verdict soon" : "Not enough ratings";
 }
 
-// Attach item.fcScore to every title that gets a film page, in every market. `toneFor(imdbId)`
-// fills the critics tone from the takes cache for pool titles the weekly takes step skips.
+// Attach item.fcScore to every title that gets a film page, in every market.
+// `toneFor(imdbId, item)` fills the critics tone from the takes cache for titles the takes step
+// left without one; it gets the item so it can keep the same release-week gate.
 function attachFcScores(dataByCode, { toneFor = null, nowMs = Date.now() } = {}) {
   let scored = 0, total = 0;
   for (const data of Object.values(dataByCode || {})) {
@@ -207,7 +215,7 @@ function attachFcScores(dataByCode, { toneFor = null, nowMs = Date.now() } = {})
         if (!item) continue;
         total++;
         if (!item.criticsTone && toneFor && item.imdbId) {
-          const t = toneFor(item.imdbId);
+          const t = toneFor(item.imdbId, item);
           if (t) item.criticsTone = t;
         }
         const s = fcScore(item, nowMs);
