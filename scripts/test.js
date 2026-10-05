@@ -5942,11 +5942,12 @@ testAsync("livecheck: waits for the deploy, then fails loudly on a stylesheet th
 group("5 Oct 2026: critics' ratings + the lead's consensus, Wikipedia buzz on 'Too early'");
 const EDT = require("./lib/editorial.js");
 test("criticRatings: individual reviews in the forms Indian film articles use, on a 5-point scale", () => {
-  assert.deepStrictEqual(EDT.criticRatings("M Suganth of The Times of India gave 3/5 stars."), [3]);
-  assert.deepStrictEqual(EDT.criticRatings("Vignesh Madhu of The New Indian Express gave 3 out of 5 stars."), [3]);
-  assert.deepStrictEqual(EDT.criticRatings("Bollywood Hungama gave it 4 stars out of 5."), [4]);
-  assert.deepStrictEqual(EDT.criticRatings("Firstpost rated it 3½/5. The Week awarded the film 7/10."), [3.5, 3.5]);
-  assert.deepStrictEqual(EDT.criticRatings("The Hindu's review: 3/5 stars."), [3], "marked as stars, no verb");
+  // Placeholder names: the site never names a critic or a publication, in its pages or its code.
+  assert.deepStrictEqual(EDT.criticRatings("Critic A of Newspaper One gave 3/5 stars."), [3]);
+  assert.deepStrictEqual(EDT.criticRatings("Critic B of Newspaper Two gave 3 out of 5 stars."), [3]);
+  assert.deepStrictEqual(EDT.criticRatings("A film website gave it 4 stars out of 5."), [4]);
+  assert.deepStrictEqual(EDT.criticRatings("One critic rated it 3½/5. Another awarded the film 7/10."), [3.5, 3.5]);
+  assert.deepStrictEqual(EDT.criticRatings("A newspaper's review: 3/5 stars."), [3], "marked as stars, no verb");
 });
 test("criticRatings: aggregates, dates, screens and impossible scores are not reviews", () => {
   assert.deepStrictEqual(EDT.criticRatings("The film holds an average rating of 6.5/10 from 20 critics."), []);
@@ -5992,6 +5993,14 @@ test("readCritics: the reception's own summary, else the lead's, else the rating
   assert.deepStrictEqual(pick(EDT.readCritics({ lead: "It received mixed to negative reviews from critics.", reception: high })), ["mixed", "lead"], "ratings that disagree leave it mixed");
   assert.strictEqual(EDT.readCritics({ lead: "", reception: "" }), null);
   assert.strictEqual(EDT.readCritics(), null);
+});
+test("the critics' reading keeps a tone word and numbers only: no review text, no names", () => {
+  const pad = " The cinematography and the music were also discussed at length in several of the longer reviews.";
+  const a = EDT.readCritics({ lead: "The film received positive reviews from critics.",
+    reception: "Critic A of Newspaper One gave 4/5 stars. Critic B of Newspaper Two gave 3 out of 5 stars. Critic C rated it 3.5/5." + pad });
+  assert.deepStrictEqual(Object.keys(a).sort(), ["divided", "panned", "praised", "ratings", "score", "tone", "toneSrc"]);
+  assert.deepStrictEqual(a.ratings, { n: 3, median: 3.5 }, "a count and a median, not the ratings or who gave them");
+  assert.ok(!/Critic|Newspaper/.test(JSON.stringify(a)), "nothing from the review sentences is kept");
 });
 test("criticsSettled: five listed reviews settle the critics' side, release week or not", () => {
   assert.strictEqual(EDT.CRITICS_SETTLED_MIN, 5);

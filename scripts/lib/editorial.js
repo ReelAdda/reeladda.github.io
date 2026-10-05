@@ -282,13 +282,13 @@ function analyzeReception(text) {
 // ============================================================================
 // CRITICS' STAR RATINGS + THE LEAD'S CONSENSUS (Oct 2026). Indian film articles rarely carry
 // the one-line consensus analyzeReception reads ("received positive reviews from critics");
-// their reception sections list individual reviews instead — "M Suganth of The Times of India
-// gave 3/5 stars", "Vignesh Madhu of The New Indian Express gave 3 out of 5 stars" — and the
-// consensus sentence, when there is one, sits in the article's opening paragraph. On 5 Oct
-// 2026 none of the 33 Indian titles on the India pages had a critics' tone, though Drishyam:
-// The Conclusion's article listed 10 critics' ratings three days after release, and The
-// Paradise's 13. Both now count. Same extract the take already fetches: no new source, no
-// new call.
+// their reception sections list individual reviews instead ("… gave the film 3/5 stars",
+// "… gave it 4 stars out of 5"), and the consensus sentence, when there is one, sits in the
+// article's opening paragraph. On 5 Oct 2026 none of the 33 Indian titles on the India pages
+// had a critics' tone, though Drishyam: The Conclusion's article listed 10 critics' ratings
+// three days after release, and The Paradise's 13. Both now count. Same extract the take
+// already fetches: no new source, no new call. Only numbers are kept (a count and a median):
+// no critic's or publication's name is stored or shown anywhere on the site, this file included.
 // ============================================================================
 const RATINGS_MIN = 3;              // a median of fewer reviews is not a consensus
 const CRITICS_SETTLED_MIN = 5;      // published reviews that count as a settled reception in week one
