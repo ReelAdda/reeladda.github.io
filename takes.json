@@ -2,7 +2,7 @@
  "tt29355505": {
   "take": "Reviews lean positive: strong marks for the performances and humour, quibbles about the writing.",
   "src": "wiki",
-  "hook": "The follow-up to ‘Toy Story 4’.",
+  "hook": null,
   "article": "Toy Story 5",
   "a": {
    "tone": "positive",
@@ -17,10 +17,11 @@
    "score": {
     "kind": "rt",
     "value": 92
-   }
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt8814476": {
   "take": "Critics can't agree, though the story bothered nearly everyone.",
@@ -248,10 +249,15 @@
    "score": {
     "kind": "rt",
     "value": 98
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 3.5
    }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt9018736": {
   "take": "Critics are split, though the action found admirers.",
@@ -337,11 +343,12 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 87
-   }
+    "value": 86
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt41983440": {
   "take": null,
@@ -396,22 +403,29 @@
   "checked": "2026-07-10"
  },
  "tt27050858": {
-  "take": "Reviewers singled out the performances and writing for praise.",
+  "take": "Critics liked it: the performances and writing won praise, though the runtime drew some flak.",
   "src": "wiki",
-  "hook": "The follow-up to ‘Drishyam’.",
+  "hook": "The follow-up to ‘Drishyam 2’.",
   "article": "Drishyam: The Conclusion",
   "a": {
-   "tone": null,
+   "tone": "positive",
    "praised": [
     "performances",
     "writing"
    ],
-   "panned": [],
+   "panned": [
+    "runtime"
+   ],
    "divided": [],
-   "score": null
+   "score": null,
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 10,
+    "median": 3
+   }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt43437675": {
   "take": null,
@@ -3114,11 +3128,12 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 95
-   }
+    "value": 96
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt21285562": {
   "take": "Genuinely divisive — critics can't settle this one.",
@@ -3784,11 +3799,12 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 77
-   }
+    "value": 78
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt32547691": {
   "take": "Reviewers found plenty to like here.",
@@ -3877,8 +3893,8 @@
   "src": null,
   "hook": null,
   "article": "Drawn Together (film)",
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt44147815": {
   "take": null,
@@ -3959,21 +3975,26 @@
   "v": 5
  },
  "tt31924802": {
-  "take": "The ambition drew the bulk of the complaints.",
+  "take": "Critics can't agree, though the ambition bothered nearly everyone.",
   "src": "wiki",
   "hook": null,
   "article": "The Revolutionaries (TV series)",
   "a": {
-   "tone": null,
+   "tone": "mixed",
    "praised": [],
    "panned": [
     "ambition"
    ],
    "divided": [],
-   "score": null
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 3
+   }
   },
-  "checked": "2026-09-20",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt38061210": {
   "take": null,
@@ -3993,8 +4014,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt36596965": {
   "take": "A critical darling — reviewers kept coming back to the performances and music.",
@@ -4036,18 +4057,19 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 70
-   }
+    "value": 77
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt44101690": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-09-25",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt32588798": {
   "take": "Genuinely divisive — critics can't settle this one.",
@@ -4089,15 +4111,15 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt33023009": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt6037988": {
   "take": "Critics liked it, especially the characters.",
@@ -4124,8 +4146,8 @@
   "src": null,
   "hook": null,
   "article": "South Park",
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt5875444": {
   "take": "Critics loved this one; reception has been close to universal acclaim.",
@@ -4149,8 +4171,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt38265603": {
   "take": "Critics can't agree — high marks for the performances and music, complaints about the runtime.",
@@ -4191,11 +4213,12 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 97
-   }
+    "value": 96
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt37020296": {
   "take": "The critical consensus tilts firmly positive.",
@@ -4210,10 +4233,11 @@
    "score": {
     "kind": "rt",
     "value": 63
-   }
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt37531157": {
   "take": null,
@@ -4268,8 +4292,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-09-25",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt33539520": {
   "take": "Most reviews land firmly on the positive side.",
@@ -4302,10 +4326,11 @@
    "score": {
     "kind": "rt",
     "value": 76
-   }
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt36980377": {
   "take": null,
@@ -4318,8 +4343,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt36842933": {
   "take": null,
@@ -4364,16 +4389,31 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-09-26",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt39667834": {
-  "take": null,
-  "src": null,
+  "take": "Genuinely divisive — critics can't settle this one.",
+  "src": "wiki",
   "hook": null,
   "article": "Lust Stories 3",
-  "checked": "2026-10-04",
-  "v": 5
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 87
+   },
+   "toneSrc": "ratings",
+   "ratings": {
+    "n": 4,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt9601292": {
   "take": "Critics largely gave this one a pass.",
@@ -4421,8 +4461,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "movie:1755880": {
   "take": null,
@@ -4457,20 +4497,35 @@
   "v": 5
  },
  "tt36347588": {
-  "take": null,
-  "src": null,
+  "take": "Critics can't agree — high marks for the writing and tone, complaints about the story.",
+  "src": "wiki",
   "hook": null,
   "article": "The Scandal (2026 TV series)",
-  "checked": "2026-10-04",
-  "v": 5
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "writing",
+    "tone"
+   ],
+   "panned": [
+    "story"
+   ],
+   "divided": [
+    "performances"
+   ],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt41793323": {
   "take": null,
   "src": null,
   "hook": null,
   "article": "Honor Thy Mother (TV series)",
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt39368345": {
   "take": null,
@@ -4506,8 +4561,8 @@
   "src": null,
   "hook": null,
   "article": "General Mayhem: The Killing of Brigadier J",
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt43741215": {
   "take": "Strong marks for the performances and lead chemistry, less love for the twists.",
@@ -4542,10 +4597,15 @@
    "score": {
     "kind": "rt",
     "value": 100
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 4
    }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt44568569": {
   "take": null,
@@ -4572,8 +4632,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt29516222": {
   "take": "Genuinely divisive — critics can't settle this one.",
@@ -4643,8 +4703,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt43687425": {
   "take": null,
@@ -4679,11 +4739,12 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 91
-   }
+    "value": 85
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt36583977": {
   "take": "Critics were won over, largely on the strength of the animation and ambition.",
@@ -4700,11 +4761,12 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 96
-   }
+    "value": 95
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt36983905": {
   "take": "Critics can't agree — high marks for the pacing, complaints about the writing.",
@@ -4725,17 +4787,18 @@
    "score": {
     "kind": "rt",
     "value": 55
-   }
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt39390479": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt16478058": {
   "take": "Critics were won over, largely on the strength of the performances and writing.",
@@ -4762,8 +4825,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-09-23",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt10794054": {
   "take": "Most reviews land firmly on the positive side.",
@@ -4777,18 +4840,19 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 93
-   }
+    "value": 94
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "movie:1522380": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "movie:1746787": {
   "take": null,
@@ -4801,8 +4865,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt22526100": {
   "take": "Critics are split clean down the middle on this one.",
@@ -4890,8 +4954,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt38708063": {
   "take": "Critics kept circling back to the story — in a good way.",
@@ -4910,25 +4974,33 @@
     "value": 100
    }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt31969655": {
-  "take": "The story came in for the most criticism.",
+  "take": "The reviews were not kind, and the story took the worst of it.",
   "src": "wiki",
   "hook": null,
   "article": "The Paradise (2026 Indian film)",
   "a": {
-   "tone": null,
-   "praised": [],
+   "tone": "negative",
+   "praised": [
+    "performances",
+    "music"
+   ],
    "panned": [
     "story"
    ],
    "divided": [],
-   "score": null
+   "score": null,
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 13,
+    "median": 2
+   }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt42205677": {
   "take": null,
@@ -4948,8 +5020,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-01",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "movie:1742248": {
   "take": null,
@@ -4988,17 +5060,21 @@
     "humour"
    ],
    "divided": [],
-   "score": null
+   "score": null,
+   "ratings": {
+    "n": 2,
+    "median": 2.75
+   }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt39120291": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt33071426": {
   "take": "Reviews swing both ways — kind to the performances and music, at war over the ambition.",
@@ -5027,15 +5103,15 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt44773462": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt2359704": {
   "take": null,
@@ -5050,8 +5126,8 @@
   "src": null,
   "hook": "Sreeti Mukerji's directorial debut.",
   "article": "Don't Be Shy (film)",
-  "checked": "2026-09-29",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt34498564": {
   "take": "The performances and writing works, per reviewers — the music less so.",
@@ -5080,8 +5156,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt34206385": {
   "take": "Mostly good reviews — the direction and emotional weight impressed, even if the originality didn't.",
@@ -5120,11 +5196,12 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 25
-   }
+    "value": 27
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt1844624": {
   "take": "The visuals and production design won critics over; the second half drew the odd complaint.",
@@ -5146,10 +5223,15 @@
    "score": {
     "kind": "rt",
     "value": 72
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 3
    }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt0096697": {
   "take": "Early viewer reviews on TMDB lean positive.",
@@ -5161,15 +5243,15 @@
    "praised": [],
    "panned": []
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt39379365": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt39007156": {
   "take": null,
@@ -5197,8 +5279,8 @@
   "src": null,
   "hook": null,
   "article": "A Love Other Than Yours",
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt34735922": {
   "take": null,
@@ -5211,8 +5293,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt14536120": {
   "take": "The reviews lean clearly positive.",
@@ -5234,8 +5316,8 @@
   "src": null,
   "hook": null,
   "article": "The Ordinary Jackpot",
-  "checked": "2026-10-03",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt39381622": {
   "take": null,
@@ -5248,30 +5330,30 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt46000824": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "movie:1770957": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt44934375": {
-  "take": "Strong marks for the direction and ambition, less love for the pacing.",
+  "take": "Reviews cut both ways: the direction and ambition impressed, the pacing frustrated.",
   "src": "wiki",
   "hook": null,
   "article": "Hunkkaar",
   "a": {
-   "tone": null,
+   "tone": "mixed",
    "praised": [
     "direction",
     "ambition"
@@ -5282,10 +5364,15 @@
    "divided": [
     "performances"
    ],
-   "score": null
+   "score": null,
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 10,
+    "median": 3.25
+   }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt35511966": {
   "take": "Near-universal acclaim, with the ambition and emotional weight singled out most often.",
@@ -5302,11 +5389,16 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 91
+    "value": 92
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 4
    }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt45381850": {
   "take": null,
@@ -5347,10 +5439,11 @@
    "score": {
     "kind": "rt",
     "value": 80
-   }
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-09-30",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tv:331303": {
   "take": null,
@@ -5360,52 +5453,64 @@
   "v": 5
  },
  "tt31450459": {
-  "take": "Genuinely divisive — critics can't settle this one.",
+  "take": "Critics can't agree — high marks for the humour and direction, complaints about the writing.",
   "src": "wiki",
   "hook": null,
   "article": "Digger (2026 film)",
   "a": {
    "tone": "mixed",
-   "praised": [],
-   "panned": [],
-   "divided": [],
+   "praised": [
+    "humour",
+    "direction"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [
+    "performances"
+   ],
    "score": {
     "kind": "rt",
-    "value": 52
+    "value": 51
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 3
    }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt39400348": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt38782910": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt29452783": {
   "take": null,
   "src": null,
   "hook": "Based on Chae Yong-taek and Kim Jae-han's webtoon ‘Reawakened Man’.",
   "article": "Reawaken Man: The Red",
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt34548453": {
   "take": null,
   "src": null,
   "hook": null,
   "article": "The Hole, 309 Days to the Bloodiest Tragedy",
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt41538904": {
   "take": null,
@@ -5418,8 +5523,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt32261958": {
   "take": "Critics are split — praise for the humour and tone, pushback on the twists.",
@@ -5440,18 +5545,19 @@
    ],
    "score": {
     "kind": "rt",
-    "value": 44
-   }
+    "value": 33
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "movie:1777082": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt9000310": {
   "take": "If critics agreed on one thing, it was the humour and second half.",
@@ -5468,10 +5574,14 @@
    "divided": [
     "story"
    ],
-   "score": null
+   "score": null,
+   "ratings": {
+    "n": 2,
+    "median": 4.25
+   }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt32432654": {
   "take": "Reviewers found plenty to like here.",
@@ -5485,25 +5595,26 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 86
-   }
+    "value": 87
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt37804242": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt37819415": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tv:329190": {
   "take": null,
@@ -5530,8 +5641,8 @@
     "value": 89
    }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt21097264": {
   "take": "Reviewers found plenty to like here.",
@@ -5545,18 +5656,19 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 85
-   }
+    "value": 87
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt34792531": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt44922907": {
   "take": null,
@@ -5569,8 +5681,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt39123061": {
   "take": null,
@@ -5624,23 +5736,23 @@
   "src": null,
   "hook": null,
   "article": "Doing Life",
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt35726020": {
   "take": null,
   "src": null,
   "hook": null,
   "article": "Kill Jackie",
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt39453404": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt33258199": {
   "take": null,
@@ -5662,31 +5774,32 @@
    "score": {
     "kind": "rt",
     "value": 87
-   }
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt47713200": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt47867242": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt38674953": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt7441658": {
   "take": "Critics kept circling back to the writing and animation — in a good way.",
@@ -5703,8 +5816,8 @@
    "divided": [],
    "score": null
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt32639706": {
   "take": null,
@@ -5719,5 +5832,302 @@
   "hook": null,
   "checked": "2026-10-04",
   "v": 5
+ },
+ "tt30050236": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt44686897": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt44090550": {
+  "take": "The reviews were not kind, and the emotional weight took the worst of it.",
+  "src": "wiki",
+  "hook": "A remake of the Malayalam film ‘Premalu’.",
+  "article": "Prem Keetanu",
+  "a": {
+   "tone": "negative",
+   "praised": [
+    "performances"
+   ],
+   "panned": [
+    "emotional weight"
+   ],
+   "divided": [
+    "humour"
+   ],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt40039371": {
+  "take": "The performances works, per reviewers — the pacing less so.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Love Lottery",
+  "a": {
+   "tone": null,
+   "praised": [
+    "performances"
+   ],
+   "panned": [
+    "pacing"
+   ],
+   "divided": [],
+   "score": null,
+   "ratings": {
+    "n": 2,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt40856286": {
+  "take": "The reviews were not kind, and the direction took the worst of it.",
+  "src": "wiki",
+  "hook": "A spin-off of Kunals previous film as a director.",
+  "article": "Vibe (film)",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [
+    "direction"
+   ],
+   "divided": [
+    "performances"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 82
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 6,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt32296379": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt32634611": {
+  "take": "Rave reviews across the board, especially for the direction.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Daayra",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "direction"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [
+    "performances"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 74
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 6,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt38915678": {
+  "take": "Rave reviews across the board, especially for the performances and music.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Dorothy (film)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "performances",
+    "music"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 1,
+    "median": 4.5
+   }
+  },
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt32012509": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt22754948": {
+  "take": "Critics loved it — special praise for the action.",
+  "src": "wiki",
+  "hook": "Premiered at the International Film Festival.",
+  "article": "Yezhu Kadal Yezhu Malai",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "action"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [
+    "visuals"
+   ],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 2
+   }
+  },
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt39239754": {
+  "take": null,
+  "src": null,
+  "hook": "Jason Sanjay's directorial debut.",
+  "article": "Sigma (film)",
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt31841170": {
+  "take": "Critics kept circling back to the humour and performances — in a good way.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Don't Trouble the Trouble",
+  "a": {
+   "tone": null,
+   "praised": [
+    "humour",
+    "performances"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "ratings": {
+    "n": 1,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt43407940": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "movie:1628882": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt41221277": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt33381528": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt36064406": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Coven Academy",
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt46182660": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt21378820": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt42481138": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "movie:1783270": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "movie:1780947": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt27512908": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt39460608": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
  }
 }
