@@ -1779,17 +1779,23 @@
   "v": 5
  },
  "tt32654916": {
-  "take": "Early viewer reviews on TMDB lean negative.",
-  "src": "tmdb",
+  "take": "A love-it-or-hate-it reception, right down the middle.",
+  "src": "wiki",
   "hook": "Premiered at the Gaze International LGBT Film Festival.",
   "article": "Soulm8te",
-  "ta": {
-   "lean": "negative",
+  "a": {
+   "tone": "mixed",
    "praised": [],
-   "panned": []
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 39
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt38682795": {
   "take": null,
@@ -4307,11 +4313,12 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 90
-   }
+    "value": 94
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-02",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt31510819": {
   "take": "A love-it-or-hate-it reception, right down the middle.",
@@ -4357,8 +4364,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-03",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt38984184": {
   "take": null,
@@ -4532,8 +4539,8 @@
   "src": null,
   "hook": null,
   "article": "Four Hands, Two Sonatas",
-  "checked": "2026-09-28",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt41416782": {
   "take": null,
@@ -4881,10 +4888,11 @@
    "score": {
     "kind": "rt",
     "value": 76
-   }
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-05",
+  "v": 6
  },
  "tt30051064": {
   "take": "Most critics came away happy.",
@@ -6127,6 +6135,25 @@
   "take": null,
   "src": null,
   "hook": null,
+  "checked": "2026-10-05",
+  "v": 6
+ },
+ "tt40197357": {
+  "take": "Most critics came away happy.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Scrubs (2026 TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 90
+   },
+   "toneSrc": "summary"
+  },
   "checked": "2026-10-05",
   "v": 6
  }
