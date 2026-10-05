@@ -19,7 +19,7 @@ const {
 } = require("./core.js");
 const { rankValue } = require("./score.js");
 const { releaseState } = require("./release.js");
-const { trailerViewsLabel } = require("./editorial.js");
+const { trailerViewsLabel, wikiViewsLabel } = require("./editorial.js");
 const { meterLevel } = require("./meter.js");
 const { earlyReadLabel, noScoreText } = require("./fcscore.js");
 const { freshLabel } = require("./freshness.js");
@@ -42,7 +42,8 @@ function fcScorePanel(item) {
   const bits = [];
   if (item.rating != null && item.votes) bits.push(`Audience ★ ${Number(item.rating).toFixed(1)} (${Number(item.votes).toLocaleString()} ratings)`);
   if (s && s.critics) bits.push(`Critics: ${s.critics}`);
-  if (!s) { const b = trailerViewsLabel(item.trailerViews); if (b) bits.push(b); }
+  // No score yet: show the buzz instead — clearly attention, never a verdict.
+  if (!s) for (const b of [wikiViewsLabel(item.wikiWeeklyViews), trailerViewsLabel(item.trailerViews)]) if (b) bits.push(b);
   const sig = bits.length ? `<div class="fcs-sig">${e(bits.join(" · "))}</div>` : "";
   const none = noScoreText(item);
   if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>${e(none.label)}</span></div><div class="fcs-why">${e(none.why)}</div></div>${sig}`;
@@ -76,9 +77,12 @@ function ssrCardScore(item, code) {
   }
   const none = noScoreText(item);
   if (none.label === "Too early") {
+    // One buzz figure beside "Too early": this week's Wikipedia views when notable (what
+    // people are looking up NOW), else trailer views, else the release date.
     const tv = trailerViewsLabel(item.trailerViews);
     const when = freshLabel(item, Date.now(), localeFor(code));
-    const extra = tv ? tv.replace(/^▶\s*/, "") : (when ? when.charAt(0).toLowerCase() + when.slice(1) : "");
+    const buzz = wikiViewsLabel(item.wikiWeeklyViews) || (tv ? tv.replace(/^▶\s*/, "") : "");
+    const extra = buzz || (when ? when.charAt(0).toLowerCase() + when.slice(1) : "");
     return `<div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score${extra ? ` · ${e(extra)}` : ""}</div>`;
   }
   const votes = Number(item.votes || 0);

@@ -163,10 +163,19 @@ function loadTakes() {
 // The critics half of the FilmyChill Score for a title NOT on this week's lists (back-catalogue
 // and frozen pages): whatever reception tone the takes cache already holds. Cache only — no
 // network — and published critics only (Wikipedia), never TMDB viewer reviews.
-function cachedCriticsTone(imdbId) {
-  if (!imdbId) return null;
-  const e = loadTakes()[imdbId];
-  return e && e.src === "wiki" && e.a && e.a.tone ? e.a.tone : null;
+function cachedCriticsTone(imdbId, item = null) {
+  return imdbId ? entryCriticsTone(loadTakes()[imdbId], item) : null;
+}
+// Pure: the tone one takes-cache entry gives the score, or null. Given the item, it keeps
+// attachTakes' release-week gate: a film in its first week gets no tone from the cache unless
+// five or more reviews are in (criticsSettled). Without the item check the score step's cache
+// fallback scored the films the gate had just held back — on 5 Oct 2026 the TV series War showed
+// "Worth a watch" from critics on 7 country pages, three days after release, with no critics'
+// take beside it.
+function entryCriticsTone(e, item = null) {
+  if (!(e && e.src === "wiki" && e.a && e.a.tone)) return null;
+  if (item && !takeConfident(item) && !criticsSettled(e.a)) return null;
+  return e.a.tone;
 }
 
 // Aspect vocabulary: pattern found in reception prose -> the plain noun we print.
@@ -208,6 +217,27 @@ const TAKE_PAN_RE = /criticis\w+|criticiz\w+|panned|faulted|drew criticism|flak|
 // ambiguous. That one skip is why so many films fell back to hollow tone-only lines.
 const TAKE_CLAUSE_SPLIT_RE = /\bbut\b|\bhowever\b|\bwhile\b|\balthough\b|\bthough\b|;|,\s+(?=(?:and\s+)?(?:the|several|some|critics|reviewers|others|many)\b)|,?\s+(?:and|but|with)\s+(?=(?:some\s+|particular\s+|widespread\s+|general\s+)?(?:praise|criticism|acclaim|complaints?|reservations|plaudits)\b)/i;
 
+// The consensus phrases a passage can state, strongest first.
+const TONE_PATTERNS = [
+  ["acclaim", /universal acclaim|critical acclaim|widespread acclaim|rave reviews|overwhelmingly positive/i],
+  ["positive", /generally (?:positive|favou?rable)|positive (?:reviews|response|reception)|mostly positive|favou?rable reviews|well received by critics/i],
+  ["mixed", /mixed(?:[- ]to[- ](?:positive|negative))? (?:reviews|response|reception|critical)|mixed or average|polari[sz]ed|divided (?:critics|reviews|opinion)/i],
+  ["negative", /generally (?:negative|unfavou?rable)|negative (?:reviews|response|reception)|critically panned|\bpanned\b|overwhelming dislike|unfavou?rable reviews/i],
+];
+
+// Pure: the consensus a passage states — whichever verdict phrase appears EARLIEST — plus
+// the lean of a hedged "mixed-to-negative" / "mixed-to-positive" (null otherwise).
+function statedTone(text) {
+  const t = String(text || "");
+  let tone = null, at = Infinity, phrase = "";
+  for (const [name, re] of TONE_PATTERNS) {
+    const m = t.match(re);
+    if (m && m.index < at) { tone = name; at = m.index; phrase = m[0]; }
+  }
+  const lean = tone !== "mixed" ? null : /to[- ]negative/i.test(phrase) ? "negative" : /to[- ]positive/i.test(phrase) ? "positive" : null;
+  return { tone, lean };
+}
+
 // Pure: reception-section plain text -> { tone, praised[], panned[] } | null.
 // Tone is decided by whichever verdict phrase appears EARLIEST (reception sections
 // open with the overall consensus — usually the RT/Metacritic sentence). Aspects
@@ -215,17 +245,7 @@ const TAKE_CLAUSE_SPLIT_RE = /\bbut\b|\bhowever\b|\bwhile\b|\balthough\b|\bthoug
 function analyzeReception(text) {
   if (!text || text.trim().length < 120) return null; // too thin to trust
   const t = text.slice(0, 6000);
-  const tones = [
-    ["acclaim", /universal acclaim|critical acclaim|widespread acclaim|rave reviews|overwhelmingly positive/i],
-    ["positive", /generally (?:positive|favou?rable)|positive (?:reviews|response|reception)|mostly positive|favou?rable reviews|well received by critics/i],
-    ["mixed", /mixed(?:[- ]to[- ](?:positive|negative))? (?:reviews|response|reception|critical)|mixed or average|polari[sz]ed|divided (?:critics|reviews|opinion)/i],
-    ["negative", /generally (?:negative|unfavou?rable)|negative (?:reviews|response|reception)|critically panned|\bpanned\b|overwhelming dislike|unfavou?rable reviews/i],
-  ];
-  let tone = null, toneAt = Infinity;
-  for (const [name, re] of tones) {
-    const m = t.match(re);
-    if (m && m.index < toneAt) { tone = name; toneAt = m.index; }
-  }
+  const { tone } = statedTone(t);
   // Concrete anchor: a Rotten Tomatoes / Metacritic figure from the prose. A NUMBER
   // is the strongest substance a tone-only line can carry — "a 58% critics' score"
   // beats "all over the map". Captured as a fact, printed verbatim, never invented.
@@ -257,6 +277,118 @@ function analyzeReception(text) {
   for (const n of praised) if (panned.has(n)) { praised.delete(n); panned.delete(n); divided.push(n); }
   if (!tone && !praised.size && !panned.size && !divided.length && !score) return null;
   return { tone, praised: [...praised].slice(0, 2), panned: [...panned].slice(0, 1), divided: divided.slice(0, 1), score };
+}
+
+// ============================================================================
+// CRITICS' STAR RATINGS + THE LEAD'S CONSENSUS (Oct 2026). Indian film articles rarely carry
+// the one-line consensus analyzeReception reads ("received positive reviews from critics");
+// their reception sections list individual reviews instead — "M Suganth of The Times of India
+// gave 3/5 stars", "Vignesh Madhu of The New Indian Express gave 3 out of 5 stars" — and the
+// consensus sentence, when there is one, sits in the article's opening paragraph. On 5 Oct
+// 2026 none of the 33 Indian titles on the India pages had a critics' tone, though Drishyam:
+// The Conclusion's article listed 10 critics' ratings three days after release, and The
+// Paradise's 13. Both now count. Same extract the take already fetches: no new source, no
+// new call.
+// ============================================================================
+const RATINGS_MIN = 3;              // a median of fewer reviews is not a consensus
+const CRITICS_SETTLED_MIN = 5;      // published reviews that count as a settled reception in week one
+// "3/5", "3.5 out of 5", "3½/5", "7/10", "4 stars out of 5" — never a date ("1/5/2026") or a
+// percentage.
+const RATING_RE = /(?<![\d./])(\d{1,2}(?:\.\d)?|\d?½)\s*(stars?\s+)?(?:\/|out of)\s*(5|10)\b(?![.,/]?\d|%)/gi;
+const RATING_VERB_RE = /\b(?:gave|gives|giving|rated|rates|rating|awarded|awards|scored|score of|marks)\b/i;
+// Rotten Tomatoes / Metacritic figures are aggregates, not one critic's rating.
+const AGGREGATE_RE = /average|aggregat|Rotten Tomatoes|Metacritic|weighted|approval|critics' reviews|of critics/i;
+
+// Pure: every individual critic rating in a passage, on a 5-point scale. A number counts only
+// beside a rating verb ("gave", "rated") or marked as stars ("3/5 stars", "4 stars out of 5"),
+// and never in an aggregate sentence — so "5 out of 10 screens" and "an average rating of
+// 6.5/10" are not reviews.
+function criticRatings(text) {
+  const t = String(text || "");
+  const out = [];
+  for (const m of t.matchAll(RATING_RE)) {
+    const before = t.slice(Math.max(0, m.index - 48), m.index);
+    const after = t.slice(m.index + m[0].length, m.index + m[0].length + 12);
+    if (AGGREGATE_RE.test(before)) continue;
+    if (!RATING_VERB_RE.test(before) && !m[2] && !/^\s*stars?\b/i.test(after)) continue;
+    const raw = m[1];
+    const v = raw.includes("½") ? (Number(raw.replace("½", "")) || 0) + 0.5 : Number(raw);
+    const scale = Number(m[3]);
+    if (!Number.isFinite(v) || v <= 0 || v > scale) continue;
+    out.push(Math.round((v / scale) * 5 * 100) / 100);
+  }
+  return out;
+}
+
+function medianOf(nums) {
+  const a = [...nums].sort((x, y) => x - y);
+  if (!a.length) return null;
+  const mid = Math.floor(a.length / 2);
+  return a.length % 2 ? a[mid] : (a[mid - 1] + a[mid]) / 2;
+}
+
+// Pure: the tone a set of critic ratings adds up to — positive from a 3.5/5 median, mixed from
+// 2.5, negative below — or null with fewer than three. Checked against articles that state the
+// tone themselves: Thudarum (3.5, positive), Dhurandhar (3.0, mixed) and Coolie (2.75, mixed).
+// Kantara: Chapter 1, whose article states none, reads positive (3.5 from 9 ratings).
+function ratingsTone(ratings) {
+  if (!ratings || ratings.length < RATINGS_MIN) return null;
+  const m = medianOf(ratings);
+  return m >= 3.5 ? "positive" : m >= 2.5 ? "mixed" : "negative";
+}
+
+// Pure: the consensus sentence in an article's opening paragraph ("It received mixed reviews
+// from critics"), or { tone: null, lean: null }. Only sentences about how THIS film was received
+// count: a lead can also say how its predecessor or source was received (e.g. "a sequel to the
+// 2015 film, which received positive reviews"), so those are skipped, and of what's left the LAST
+// one wins — leads close with the film's own release and reception.
+function leadTone(lead) {
+  const candidates = String(lead || "").split(/(?<=[.!?])\s+/)
+    .filter((s) => /\b(?:received|opened to|met with|garnered|drew)\b/i.test(s) && /\b(?:reviews?|critics?|reception|response)\b/i.test(s))
+    .filter((s) => !/\b(?:sequel|prequel|predecessor|original film|remake|previous film|first film|franchise|which received)\b/i.test(s));
+  for (let i = candidates.length - 1; i >= 0; i--) {
+    const t = statedTone(candidates.at(i));
+    if (t.tone) return t;
+  }
+  return { tone: null, lean: null };
+}
+
+// Pure: { lead, reception } -> the critics analysis attachTakes stores (analyzeReception's
+// shape, plus `ratings` and `toneSrc`), or null. The tone comes from the reception section's
+// own consensus sentence, else the lead's, else the median of three or more critic ratings.
+// A hedged "mixed-to-negative" consensus leans negative when the ratings agree.
+function readCritics({ lead = "", reception = "" } = {}) {
+  const a = analyzeReception(reception);
+  const ratings = criticRatings(reception);
+  const byRatings = ratingsTone(ratings);
+  const rec = statedTone(String(reception || "").slice(0, 6000));
+  const fromLead = leadTone(lead);
+  let tone = null, lean = null, toneSrc = null;
+  if (a && a.tone) { tone = a.tone; lean = rec.lean; toneSrc = "summary"; }
+  else if (fromLead.tone) { tone = fromLead.tone; lean = fromLead.lean; toneSrc = "lead"; }
+  else if (byRatings) { tone = byRatings; toneSrc = "ratings"; }
+  if (tone === "mixed" && lean && byRatings === lean) tone = lean;
+  if (!a && !tone) return null;
+  const out = a ? { ...a } : { tone: null, praised: [], panned: [], divided: [], score: null };
+  out.tone = tone;
+  if (toneSrc) out.toneSrc = toneSrc;
+  if (ratings.length) out.ratings = { n: ratings.length, median: medianOf(ratings) };
+  return out;
+}
+
+// Pure: enough published reviews to show the critics' side in a film's first week, when the
+// release-week gate (takeConfident) otherwise holds every critics' line back. Indian films are
+// reviewed on release day and Wikipedia collects the ratings within days.
+function criticsSettled(a) {
+  return !!(a && a.ratings && a.ratings.n >= CRITICS_SETTLED_MIN);
+}
+
+// Buzz for a film that can't be scored yet: Wikipedia page views over the past week, shown
+// once they're notable (the same 10,000-a-day level that marks a film as trending). Page
+// views, not people: one reader can view an article several times.
+const WIKI_BUZZ_MIN = BUZZ_TREND_MIN_DAILY * 7;
+function wikiViewsLabel(n) {
+  return Number.isFinite(n) && n >= WIKI_BUZZ_MIN ? `${fmtViews(n)} Wikipedia views this week` : null;
 }
 
 // Pure: analysis -> one original opinionated sentence (never source text). null when
@@ -327,7 +459,9 @@ function reseedTake(take, seed = 0) {
 // sentence across a page. Bumping it re-analyses stale entries ONCE with the current
 // extractor; entries already stamped with the current version are never re-flagged, so
 // a film whose seed maps to index 0 (the old wording) can't enter a refetch loop.
-const TAKE_VERSION = 5; // v5: entries store mined analysis (a/ta); pre-v5 refetch once
+// v5: entries store mined analysis (a/ta); v6 (Oct 2026): critics' star ratings and the lead's
+// consensus sentence feed the tone (readCritics), so every listed title is re-read once.
+const TAKE_VERSION = 6;
 function isPoolTake(take) {
   if (!take) return false;
   return Object.values(TAKE_VARIANTS).some((pool) => pool.includes(take));
@@ -736,8 +870,13 @@ async function attachTakes(dataByCode) {
   const takes = loadTakes();
   const today = new Date().toISOString().slice(0, 10);
   const byKey = new Map();
+  // The homepage lists AND the language-page / streaming pools (Oct 2026): 26 of the 33
+  // Indian titles on the India pages lived only in the pools, so they never got a critics'
+  // reading at all. Coming-soon titles are left out: nothing has been reviewed yet.
+  const listsOf = (data) => [data.theatres, data.ott, data.ottExtra,
+    ...Object.values(data.langPools || {}).flatMap((p) => (p ? [p.theatres, p.ott] : []))].filter(Array.isArray);
   for (const data of Object.values(dataByCode)) {
-    for (const it of [...(data.theatres || []), ...(data.ott || [])]) {
+    for (const it of listsOf(data).flat()) {
       const key = it.imdbId || (it.tmdbId ? `${it.kind}:${it.tmdbId}` : null);
       if (!key) continue;
       if (!byKey.has(key)) byKey.set(key, []);
@@ -770,7 +909,7 @@ async function attachTakes(dataByCode) {
             const { lead, reception } = await wikiExtract(article);
             hook = extractHook(lead, items[0]);
             if (!take) {
-              a = analyzeReception(reception);
+              a = readCritics({ lead, reception });
               const composed = composeTake(a, Number(items[0].tmdbId) || 0);
               if (composed) { take = composed; src = "wiki"; } else a = null;
             }
@@ -812,7 +951,12 @@ async function attachTakes(dataByCode) {
           // ratings yet" can have a perfectly settled critical consensus, and keeps its line.
           // The take stays CACHED in takes.json either way — only the attach is gated — so
           // the line appears on its own once the film ages out, with no refetch.
-          if (entry.take && takeConfident(it)) {
+          // Oct 2026 exception: five or more published critic ratings already collected on
+          // Wikipedia ARE a settled reception, release week or not (criticsSettled). Indian
+          // films are reviewed on the day they open: Drishyam: The Conclusion's article
+          // listed 10 by day three. cachedCriticsTone keeps the same rule for the score
+          // step's cache fallback.
+          if (entry.take && (takeConfident(it) || criticsSettled(entry.a))) {
             it.take = seededTake;
             it.takeSrc = entry.src;
             if (takeAspects) it.takeAspects = takeAspects; // feeds the editor's note flourish
@@ -877,13 +1021,24 @@ module.exports = {
   composeTake,
   composeTmdbTake,
   computeBuzz,
+  criticRatings,
+  criticsSettled,
+  CRITICS_SETTLED_MIN,
+  entryCriticsTone,
   extractHook,
   fmtViews,
   isLegacyTake,
   isPoolTake,
+  leadTone,
   mineViewerAspects,
+  ratingsTone,
+  RATINGS_MIN,
+  readCritics,
   reseedTake,
+  statedTone,
   TAKE_VERSION,
   TAKES_RETENTION_DAYS,
   trailerViewsLabel,
+  WIKI_BUZZ_MIN,
+  wikiViewsLabel,
 };

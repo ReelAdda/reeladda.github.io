@@ -1091,7 +1091,9 @@ test("attachFcScores scores every listed title and clears stale scores", () => {
 test("only published critics feed the score: the tone attaches from Wikipedia takes, never TMDB reviews", () => {
   const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "editorial.js"), "utf8");
   assert.ok(/if \(entry\.src === "wiki" && entry\.a && entry\.a\.tone\) it\.criticsTone = entry\.a\.tone;/.test(src));
-  const block = src.slice(src.indexOf("if (entry.take && takeConfident(it)) {"), src.indexOf("if (entry.hook) it.hook = entry.hook;"));
+  const gate = "if (entry.take && (takeConfident(it) || criticsSettled(entry.a))) {";
+  assert.ok(src.includes(gate), "the release-week gate, with the five-review exception");
+  const block = src.slice(src.indexOf(gate), src.indexOf("if (entry.hook) it.hook = entry.hook;"));
   assert.ok(block.includes("it.criticsTone"), "same release-week gate as the critics' take");
 });
 
@@ -5935,6 +5937,135 @@ testAsync("livecheck: waits for the deploy, then fails loudly on a stylesheet th
     assert.strictEqual(stale.failures.length, 1);
     assert.ok(/isn't live/.test(stale.failures[0]), "an old deploy is reported, and nothing is judged against it");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+
+group("5 Oct 2026: critics' ratings + the lead's consensus, Wikipedia buzz on 'Too early'");
+const EDT = require("./lib/editorial.js");
+test("criticRatings: individual reviews in the forms Indian film articles use, on a 5-point scale", () => {
+  assert.deepStrictEqual(EDT.criticRatings("M Suganth of The Times of India gave 3/5 stars."), [3]);
+  assert.deepStrictEqual(EDT.criticRatings("Vignesh Madhu of The New Indian Express gave 3 out of 5 stars."), [3]);
+  assert.deepStrictEqual(EDT.criticRatings("Bollywood Hungama gave it 4 stars out of 5."), [4]);
+  assert.deepStrictEqual(EDT.criticRatings("Firstpost rated it 3½/5. The Week awarded the film 7/10."), [3.5, 3.5]);
+  assert.deepStrictEqual(EDT.criticRatings("The Hindu's review: 3/5 stars."), [3], "marked as stars, no verb");
+});
+test("criticRatings: aggregates, dates, screens and impossible scores are not reviews", () => {
+  assert.deepStrictEqual(EDT.criticRatings("The film holds an average rating of 6.5/10 from 20 critics."), []);
+  assert.deepStrictEqual(EDT.criticRatings("On Rotten Tomatoes, 80% of 25 critics gave it a positive review, with an average rating of 7/10."), []);
+  assert.deepStrictEqual(EDT.criticRatings("The film was rated on 1/5/2026 by the board."), [], "a date");
+  assert.deepStrictEqual(EDT.criticRatings("It opened on 5 out of 10 screens in the city."), [], "no rating verb, no stars");
+  assert.deepStrictEqual(EDT.criticRatings("A critic gave it 7/5 stars. A fan site rated it 12/10. Another gave it 0/5."), []);
+  assert.deepStrictEqual(EDT.criticRatings("The film scored 4/10% in a poll."), [], "a percentage");
+  assert.deepStrictEqual(EDT.criticRatings(null), []);
+});
+test("ratingsTone: three or more ratings; a median of 3.5+ is positive, 2.5+ mixed, lower negative", () => {
+  assert.strictEqual(EDT.RATINGS_MIN, 3);
+  assert.strictEqual(EDT.ratingsTone([3.5, 3.5, 3.5]), "positive");
+  assert.strictEqual(EDT.ratingsTone([3, 4, 3, 4]), "positive", "even count: the middle two averaged");
+  assert.strictEqual(EDT.ratingsTone([3, 3, 3]), "mixed");
+  assert.strictEqual(EDT.ratingsTone([2.5, 2.5, 2.5]), "mixed");
+  assert.strictEqual(EDT.ratingsTone([2, 3, 2, 3]), "mixed");
+  assert.strictEqual(EDT.ratingsTone([2, 2, 2.4]), "negative");
+  assert.strictEqual(EDT.ratingsTone([4, 4]), null, "two reviews are not a consensus");
+  assert.strictEqual(EDT.ratingsTone(null), null);
+});
+test("leadTone: the film's own reception sentence, never its predecessor's; the last one wins", () => {
+  // Drishyam: The Conclusion's opening paragraph on 5 Oct 2026.
+  assert.deepStrictEqual(EDT.leadTone("Produced by Panorama Studios and Star Studio18, it is a sequel to Drishyam 2 (2022). Drishyam: The Conclusion was released in theatres on 2 October 2026, coinciding with Gandhi Jayanti. The film received positive reviews from critics."), { tone: "positive", lean: null });
+  assert.deepStrictEqual(EDT.leadTone("It is a sequel to the 2015 film, which received positive reviews. The film was released on 2 October 2026 and received mixed reviews from critics."), { tone: "mixed", lean: null });
+  assert.deepStrictEqual(EDT.leadTone("It is a sequel to the 2015 film, which received positive reviews from critics."), { tone: null, lean: null }, "only the predecessor's reception");
+  assert.deepStrictEqual(EDT.leadTone("The trailer received a positive response from audiences. The film received negative reviews from critics."), { tone: "negative", lean: null });
+  assert.deepStrictEqual(EDT.leadTone("The Paradise was released worldwide on 24 September 2026 and received mixed to negative reviews from critics and audience."), { tone: "mixed", lean: "negative" });
+  assert.deepStrictEqual(EDT.leadTone("The film was shot in Kochi. It was released on 2 October 2026."), { tone: null, lean: null });
+});
+test("readCritics: the reception's own summary, else the lead's, else the ratings; 'mixed to negative' follows agreeing ratings", () => {
+  const pad = " The cinematography and the music were also discussed at length in several of the longer reviews.";
+  const high = "Critic A of Paper One gave 4/5 stars. Critic B of Paper Two gave 4 out of 5 stars. Critic C of Paper Three rated it 4.5/5." + pad;
+  const low = "Critic A of Paper One gave 2/5 stars. Critic B of Paper Two gave 2 out of 5 stars. Critic C of Paper Three rated it 1.5/5." + pad;
+  const pick = (a) => a && [a.tone, a.toneSrc];
+  assert.deepStrictEqual(pick(EDT.readCritics({ reception: "The film received mixed reviews from critics. " + high })), ["mixed", "summary"], "a stated summary beats the ratings");
+  assert.deepStrictEqual(pick(EDT.readCritics({ lead: "The film received positive reviews from critics.", reception: low })), ["positive", "lead"]);
+  const byRatings = EDT.readCritics({ lead: "It was released on 2 October.", reception: high });
+  assert.deepStrictEqual(pick(byRatings), ["positive", "ratings"]);
+  assert.deepStrictEqual(byRatings.ratings, { n: 3, median: 4 });
+  assert.ok(EDT.composeTake(byRatings, 1), "a ratings-only reading still makes a critics' line (attachTakes drops the reading without one)");
+  assert.deepStrictEqual(pick(EDT.readCritics({ lead: "It received mixed to negative reviews from critics.", reception: low })), ["negative", "lead"], "The Paradise: the lean and the ratings agree");
+  assert.deepStrictEqual(pick(EDT.readCritics({ lead: "It received mixed to negative reviews from critics.", reception: high })), ["mixed", "lead"], "ratings that disagree leave it mixed");
+  assert.strictEqual(EDT.readCritics({ lead: "", reception: "" }), null);
+  assert.strictEqual(EDT.readCritics(), null);
+});
+test("criticsSettled: five listed reviews settle the critics' side, release week or not", () => {
+  assert.strictEqual(EDT.CRITICS_SETTLED_MIN, 5);
+  assert.strictEqual(EDT.criticsSettled({ tone: "negative", ratings: { n: 13, median: 2 } }), true, "The Paradise");
+  assert.strictEqual(EDT.criticsSettled({ tone: "negative", ratings: { n: 5, median: 2 } }), true);
+  assert.strictEqual(EDT.criticsSettled({ tone: "positive", ratings: { n: 4, median: 4 } }), false);
+  assert.strictEqual(EDT.criticsSettled({ tone: "positive" }), false, "a lead sentence alone is not five reviews");
+  assert.strictEqual(EDT.criticsSettled(null), false);
+});
+test("the score's cache fallback keeps the release-week gate (War was scored from critics three days out)", () => {
+  const e = { src: "wiki", a: { tone: "positive", ratings: { n: 1, median: 4 } } };
+  assert.strictEqual(EDT.entryCriticsTone(e, { isFresh: true }), null, "first week, one review: held back");
+  assert.strictEqual(EDT.entryCriticsTone(e, { isFresh: false }), "positive");
+  assert.strictEqual(EDT.entryCriticsTone(e), "positive", "back-catalogue and frozen pages pass no item: unchanged");
+  assert.strictEqual(EDT.entryCriticsTone({ ...e, a: { tone: "positive", ratings: { n: 5, median: 4 } } }, { isFresh: true }), "positive", "five reviews: shown in week one");
+  assert.strictEqual(EDT.entryCriticsTone({ src: "tmdb", a: { tone: "positive" } }, { isFresh: false }), null, "viewer reviews never feed the critics' side");
+  assert.strictEqual(EDT.entryCriticsTone(undefined, {}), null);
+  const F = require("./lib/fcscore.js");
+  const seen = [];
+  const item = { imdbId: "tt9", isFresh: true, rating: null, votes: 10, released: "2026-10-02" };
+  F.attachFcScores({ us: { theatres: [item], ott: [] } }, { toneFor: (id, it) => { seen.push([id, it]); return EDT.entryCriticsTone(e, it); }, nowMs: Date.parse("2026-10-05") });
+  assert.ok(seen.length === 1 && seen[0][0] === "tt9" && seen[0][1] === item, "the fallback is handed the item");
+  assert.ok(!item.fcScore && !item.criticsTone, "no week-one score from a cached tone");
+});
+test("'Too early' with split critics says so instead of 'no reviews yet'", () => {
+  const F = require("./lib/fcscore.js");
+  const now = Date.parse("2026-10-05T00:00:00Z");
+  assert.deepStrictEqual(F.noScoreText({ released: "2026-09-24", votes: 4, criticsTone: "mixed" }, now), { label: "Too early", why: "Critics are split; audience ratings are still coming in." });
+  assert.strictEqual(F.noScoreText({ released: "2026-09-24", votes: 4 }, now).why, "Just released — not enough ratings or reviews yet.");
+});
+test("wikiViewsLabel: shown from 70,000 views a week (the trending level), worded as page views", () => {
+  assert.strictEqual(EDT.WIKI_BUZZ_MIN, 70000);
+  assert.strictEqual(EDT.wikiViewsLabel(69999), null);
+  assert.strictEqual(EDT.wikiViewsLabel(70000), "70K Wikipedia views this week");
+  assert.strictEqual(EDT.wikiViewsLabel(597122), "597K Wikipedia views this week");
+  assert.strictEqual(EDT.wikiViewsLabel(undefined), null);
+});
+test("'Too early' card: Wikipedia views first, then trailer views; a scored card keeps to the score", () => {
+  const recent = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
+  const base = { title: "Drishyam: The Conclusion", slug: "drishyam-the-conclusion", kind: "movie", language: "Hindi", rating: null, votes: 2, released: recent, freshDate: recent };
+  const card = U.ssrCard({ ...base, wikiWeeklyViews: 597122, trailerViews: 52123456 }, 0, "in");
+  assert.ok(/Too early to score · 597K Wikipedia views this week</.test(card), card);
+  assert.ok(/Too early to score · 52M trailer views</.test(U.ssrCard({ ...base, wikiWeeklyViews: 52968, trailerViews: 52123456 }, 0, "in")), "under the bar: the trailer figure");
+  const scored = U.ssrCard({ ...base, wikiWeeklyViews: 597122, fcScore: { verdict: "Worth a watch", reason: "Critics are positive; audience ratings are still coming in.", audience: null, critics: "positive", basis: "critics" } }, 0, "in");
+  assert.ok(!scored.includes("Wikipedia views"), "a scored card keeps to the score");
+});
+test("homepage template mirrors the buzz line and the split-critics wording", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  const m = /function wikiViewsLabel\(n\) \{\s*return Number\.isFinite\(n\) && n >= (\d+) \?/.exec(src);
+  assert.ok(m && Number(m[1]) === EDT.WIKI_BUZZ_MIN, "the same 70,000 bar as the server");
+  assert.ok(/const buzz = wikiViewsLabel\(item\.wikiWeeklyViews\) \|\| \(tv \?/.test(src), "cardScore: Wikipedia views before trailer views");
+  assert.ok(/if \(!s\) \[wikiViewsLabel\(item\.wikiWeeklyViews\), trailerViewsLabel\(item\.trailerViews\)\]/.test(src), "detail view signals");
+  assert.ok(/item\.criticsTone === 'mixed'\s*\? \{ label: 'Too early', why: 'Critics are split; audience ratings are still coming in\.' \}/.test(src), "noScoreText mirror");
+  const W = require("fs").readFileSync(require("path").join(__dirname, "lib", "weekly.js"), "utf8");
+  assert.ok(/if \(!s\) for \(const b of \[wikiViewsLabel\(item\.wikiWeeklyViews\), trailerViewsLabel\(item\.trailerViews\)\]\)/.test(W), "server panel twin");
+});
+test("attachTakes reads every list that gets a film page, through readCritics, with the five-review exception", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "editorial.js"), "utf8");
+  const body = src.slice(src.indexOf("async function attachTakes("), src.indexOf("async function attachTrailerStats("));
+  assert.ok(/data\.langPools/.test(body) && /data\.ottExtra/.test(body), "the language and streaming pools, not just the homepage lists");
+  assert.ok(!/data\.comingSoon/.test(body), "nothing to review before release");
+  assert.ok(/a = readCritics\(\{ lead, reception \}\);/.test(body));
+  assert.ok(body.includes("if (entry.take && (takeConfident(it) || criticsSettled(entry.a))) {"));
+  assert.strictEqual(EDT.TAKE_VERSION, 6, "v6 re-reads every listed title once");
+  const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(/attachFcScores\(dataByCode, \{ toneFor: cachedCriticsTone \}\)/.test(up), "the cache fallback is the gated one");
+});
+test("About page states the ratings rule and the five-review exception the code applies", () => {
+  assert.ok(/no rating, no verdict and no critics' take/.test(ABOUT_SRC), "the gate is still described");
+  assert.ok(/three or more critics' ratings decide it: a median of 3\.5 out of 5 or higher is positive, 2\.5 or higher is mixed, anything lower is negative/.test(ABOUT_SRC));
+  assert.ok(/once five or more published reviews are listed in the film's Wikipedia article, the critics' side shows in the first week too/.test(ABOUT_SRC));
+  assert.strictEqual(EDT.RATINGS_MIN, 3);
+  assert.strictEqual(EDT.CRITICS_SETTLED_MIN, 5);
+  assert.deepStrictEqual([EDT.ratingsTone([3.5, 3.5, 3.5]), EDT.ratingsTone([2.5, 2.5, 2.5]), EDT.ratingsTone([2.4, 2.4, 2.4])], ["positive", "mixed", "negative"]);
 });
 
 (async () => {
