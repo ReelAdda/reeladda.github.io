@@ -63,6 +63,7 @@ jobs:
           # unindexed backlog — and at 700/day the site would reach GitHub Pages' 1 GB cap in
           # ~2 months (~9 months at this rate). Raise again once Search Console's Sitemaps
           # screen shows the film sitemaps' indexed share climbing, or after moving to R2.
+          # Oct 2026: 18 markets make it ~180 a day; the site was 247 MB when they launched.
           CATALOG_BATCH: "5"
         run: node scripts/update.js
 
@@ -72,7 +73,7 @@ jobs:
       - name: Smoke-test generated data
         # Every market, not just the first four: a market added later is exactly the one
         # nobody is watching.
-        run: node scripts/smoke.js in us uk au de ae ca sg my ph nz kr jp id
+        run: node scripts/smoke.js in us uk au de ae ca sg my ph nz kr jp id br mx es fr
 
       - name: Verify film pages exist
         run: |
@@ -97,7 +98,7 @@ jobs:
           # in the pathspec and its deletion was never staged — the August "Amazon Prime Video
           # with Ads" hub stayed live a month after it was removed. about/ was missing entirely,
           # so the About page's country list and analytics disclosure never shipped.
-          git add -A -- data.json 'data-*.json' ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json catalog-manifest.json feed.xml index.html about/ us/ uk/ au/ de/ ae/ ca/ sg/ my/ ph/ nz/ kr/ jp/ id/ movie/ new-on-ott/ ':(glob)new-on-*/**' hindi/ tamil/ telugu/ malayalam/ kannada/ week/ films/ ':(glob)*/films/**' data/ embed/ ':(glob)*/embed/**' ott-history.jsonl ott-watch.json sitemap.xml 'sitemap-*.xml'
+          git add -A -- data.json 'data-*.json' ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json catalog-manifest.json feed.xml index.html about/ us/ uk/ au/ de/ ae/ ca/ sg/ my/ ph/ nz/ kr/ jp/ id/ br/ mx/ es/ fr/ movie/ new-on-ott/ ':(glob)new-on-*/**' hindi/ tamil/ telugu/ malayalam/ kannada/ week/ films/ ':(glob)*/films/**' data/ embed/ ':(glob)*/embed/**' ott-history.jsonl ott-watch.json sitemap.xml 'sitemap-*.xml'
           # zz/ is the test suite's sandbox country. The ':(glob)*/films/**' and ':(glob)*/embed/**' globs used to
           # sweep it into the commit, publishing test pages at filmychill.com/zz/. It is in
           # .gitignore now; this untracks the copies already committed. Idempotent.

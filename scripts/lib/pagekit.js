@@ -278,6 +278,18 @@ const PROVIDER_CANON = [
   [/^Paramount(?: Plus|\+)(?: Premium| Essential| with Showtime)?$/i, "Paramount+"],
   [/^Peacock(?: Premium(?: Plus)?)?$/i, "Peacock"],
   [/^VI movies and tv$/i, "Vi Movies & TV"],
+  // Brazil, Mexico, Spain and France (Oct 2026): the same tier and spelling splits for these
+  // markets' own services, merged before their first build so no hub starts out split.
+  [/^ViX(?: Premium| Gratis)?$/i, "ViX"],
+  [/^Globoplay(?: Premium)?$/i, "Globoplay"],
+  [/^Claro ?video$/i, "Claro video"],
+  [/^Movistar ?(?:Plus\+?|\+)(?: Ficción Total)?$/i, "Movistar Plus+"],
+  [/^Atres ?player(?: Premium)?$/i, "Atresplayer"],
+  [/^RTVE(?: Play)?$/i, "RTVE Play"],
+  [/^Canal(?:\+| Plus)(?: S[ée]ries| Cin[ée]ma)?$/i, "Canal+"],
+  [/^France(?:\.| )?TV$/i, "France TV"],
+  [/^(?:TF1\+?|MYTF1)$/i, "TF1+"],
+  [/^(?:M6\+|6play)$/i, "M6+"],
   // A service sold as a Prime Video / Apple TV channel is still that service.
   [/^(.+?) (?:Amazon|Apple TV) Channel$/i, "$1"],
 ];

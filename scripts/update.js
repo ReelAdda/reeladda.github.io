@@ -1489,10 +1489,13 @@ async function main() {
       };
       const f = finishFilmPages(filmPageFiles(), { fcdataClaim });
       console.log(`Film pages finished: ${f.pages} checked, ${f.externalized} moved to shared styles, ${f.privacyLinked} privacy links added, ${f.iconed} icon tags added, `
-        + `${f.retitled.length} titles given their country, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
+        + `${f.retitled.length} titles given their country, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, `
+        + `${f.trailerFixed.length - f.trailerDropped} trailers given an uploadDate and ${f.trailerDropped} left out of the markup, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
       // A new title is a real change: let the sitemap say so (syncFilmLastmods would also see
-      // it, except on its first run, when it only records fingerprints).
-      for (const k of f.retitled) {
+      // it, except on its first run, when it only records fingerprints). So is repaired trailer
+      // markup: the fingerprint ignores structured data, and a fresh lastmod is what gets the
+      // page re-read and its Search Console error cleared.
+      for (const k of [...f.retitled, ...f.trailerFixed]) {
         const [code, slug] = k.split("/");
         if (pagesManifest[code] && pagesManifest[code][slug]) pagesManifest[code][slug].last = todayStr();
       }

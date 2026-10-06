@@ -1520,12 +1520,12 @@ test("finishFilmPages: moves styles out once, adds the privacy link, keeps only 
     assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
     const r = S.finishFilmPages(files, { root });
     assert.deepStrictEqual(r, { pages: 3, externalized: 3, privacyLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0 });
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0 });
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
     assert.ok(/<a href="\/privacy\/">Privacy<\/a> · © 2026 FilmyChill/.test(a));
     assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
     assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, privacyLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0 }, "idempotent");
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0 }, "idempotent");
     // The 4 Oct incident: the stylesheets never reached the site. That must be reported.
     fsx.rmSync(path.join(root, "css"), { recursive: true, force: true });
     const lost = S.finishFilmPages(files, { root });
@@ -1750,7 +1750,7 @@ test("reformatting the 'Page updated' stamp is not a content change for the site
 });
 
 // ---------------- Age certificates across every market's rating board ----------------
-group("certAudience: one reading of 14 different rating boards");
+group("certAudience: one reading of 18 different rating boards");
 
 test("every live market's real rating labels land in the right bucket", () => {
   // Boards as the relevant authority publishes them. A wrong answer here is worse than none:
@@ -6075,6 +6075,122 @@ test("About page states the ratings rule and the five-review exception the code 
   assert.strictEqual(EDT.RATINGS_MIN, 3);
   assert.strictEqual(EDT.CRITICS_SETTLED_MIN, 5);
   assert.deepStrictEqual([EDT.ratingsTone([3.5, 3.5, 3.5]), EDT.ratingsTone([2.5, 2.5, 2.5]), EDT.ratingsTone([2.4, 2.4, 2.4])], ["positive", "mixed", "negative"]);
+});
+
+group("6 Oct 2026: Brazil, Mexico, Spain and France; uploadDate on every trailer");
+const CORE18 = require("./lib/core.js");
+test("the four new editions carry exactly the settings every edition has", () => {
+  const settings = (c) => ["code", "name", "region", "watchRegion", "priorityLangs", "regionalLangs", "ottRegionalLangs", "theatreTargets", "soonTargets"].filter((k) => k in c);
+  const jp = CORE18.COUNTRIES.find((c) => c.code === "jp");
+  const sum = (t) => t.reduce((s, [, n]) => s + n, 0);
+  const want = { br: ["BR", "Brazil", "pt"], mx: ["MX", "Mexico", "es"], es: ["ES", "Spain", "es"], fr: ["FR", "France", "fr"] };
+  for (const [code, [region, name, lang]] of Object.entries(want)) {
+    const c = CORE18.COUNTRIES.find((x) => x.code === code);
+    assert.ok(c, code + " is configured");
+    assert.deepStrictEqual(settings(c), settings(jp), code + ": the same settings as the Japan edition");
+    assert.deepStrictEqual([c.region, c.watchRegion, c.name, c.priorityLangs], [region, region, name, [lang, "en"]]);
+    assert.deepStrictEqual([c.regionalLangs, c.ottRegionalLangs], [[lang], [lang]], code + ": its own language fills the regional pools");
+    assert.deepStrictEqual([sum(c.theatreTargets), sum(c.soonTargets)], [6, 7], code + ": the 6 cinema / 7 coming-soon shape");
+    assert.ok(!c.streamWord, code + ": says 'streaming', like every edition outside India and the UAE");
+    assert.strictEqual(CORE18.COUNTRY_PAGE_META[code].path, `/${code}/`);
+    assert.strictEqual(CORE18.localeFor(code), "en-GB", code + ": day-first dates and comma-grouped counts");
+    assert.strictEqual(U.langName(lang) === lang, false, code + ": its language has a display name");
+  }
+  assert.strictEqual(CORE18.COUNTRIES.length, 18);
+});
+test("every edition is smoke-tested and named on the About page", () => {
+  const wf = require("fs").readFileSync(".github/workflows/update.yml", "utf8");
+  const smoke = ((/node scripts\/smoke\.js ([a-z ]+)/.exec(wf) || [])[1] || "").split(" ");
+  for (const c of CORE18.COUNTRIES) assert.ok(smoke.includes(c.code), c.code + " is missing from the smoke test");
+  const prose = U.countryListForProse();
+  for (const n of ["Brazil", "Mexico", "Spain", "France"]) assert.ok(prose.includes(n), n);
+  assert.ok(/, Spain &amp; France$/.test(prose), prose);
+});
+test("certAudience: Brazil, Mexico, Spain and France, each read with its own board", () => {
+  const boards = {
+    BR: [["L", "family"], ["10", "family"], ["12", "teens"], ["14", "teens"], ["16", "teens"], ["18", "adults"]],
+    MX: [["AA", "family"], ["A", "family"], ["B", "teens"], ["B-15", "teens"], ["C", "adults"], ["D", "adults"]],
+    ES: [["A", "family"], ["Ai", "family"], ["7", "family"], ["7i", "family"], ["12", "teens"], ["16", "teens"], ["18", "adults"], ["X", "adults"], ["TP", "family"]],
+    FR: [["U", "family"], ["TP", "family"], ["10", "family"], ["12", "teens"], ["16", "teens"], ["18", "adults"]],
+  };
+  for (const [region, rows] of Object.entries(boards)) {
+    for (const [cert, want] of rows) assert.strictEqual(U.certAudience(cert, region).bucket, want, `${region} "${cert}" should be ${want}`);
+  }
+  assert.strictEqual(U.certAudience("A").bucket, "adults", "India's A is still adults-only");
+  assert.strictEqual(U.certAudience("A", "IN").bucket, "adults");
+});
+test("the film page reads a certificate with its own country's board", () => {
+  const item = { title: "T", slug: "t", kind: "movie", cert: "A", language: "Spanish" };
+  const row = (cfg) => U.buildGoodToKnow(item, cfg).find((r) => r.label === "Watch with family?").value;
+  assert.strictEqual(row({ code: "mx" }), "A · Yes — family friendly", "a bare { code } still finds its board");
+  assert.strictEqual(row({ code: "in", name: "India", region: "IN" }), "A · Adults only");
+  const faq = U.buildFaqs(item, "Spain", { code: "es", name: "Spain", region: "ES" }).find((f) => /family friendly/.test(f.q));
+  assert.ok(/suitable for family viewing/.test(faq.a), faq.a);
+});
+test("the new markets' services merge their tiers and spellings; existing names are unchanged", () => {
+  const P = require("./lib/pagekit.js");
+  for (const [raw, want] of [["ViX Premium", "ViX"], ["Vix", "ViX"], ["Globoplay", "Globoplay"], ["Globoplay Amazon Channel", "Globoplay"],
+    ["Claro video", "Claro video"], ["Movistar Plus+", "Movistar Plus+"], ["Movistar Plus", "Movistar Plus+"], ["Movistar+", "Movistar Plus+"],
+    ["Atres Player", "Atresplayer"], ["RTVE", "RTVE Play"], ["Canal+ Séries", "Canal+"], ["Canal Plus", "Canal+"], ["france.tv", "France TV"],
+    ["France TV", "France TV"], ["TF1+", "TF1+"], ["6play", "M6+"]]) {
+    assert.strictEqual(P.canonProvider(raw), want, raw);
+  }
+  for (const [raw, want] of [["Disney Plus", "Disney+"], ["HBO Max", "HBO Max"], ["Amazon Prime Video", "Prime Video"], ["Netflix", "Netflix"],
+    ["Rakuten TV", "Rakuten TV"], ["STARZPLAY", "STARZPLAY"], ["Paramount Plus Premium", "Paramount+"]]) {
+    assert.strictEqual(P.canonProvider(raw), want, raw + " must not change");
+  }
+});
+test("videoUploadDate: the trailer's real date, else the film's, never the future, else none", () => {
+  const now = Date.parse("2026-10-06T00:00:00Z");
+  assert.strictEqual(CORE18.videoUploadDate("2026-05-14T16:00:24.000Z", "2026-07-01", now), "2026-05-14T16:00:24Z");
+  assert.strictEqual(CORE18.videoUploadDate(null, "2026-07-01", now), "2026-07-01T00:00:00+05:30");
+  assert.strictEqual(CORE18.videoUploadDate(null, "2026-12-25", now), null, "a trailer can't have been uploaded in the future");
+  assert.strictEqual(CORE18.videoUploadDate(null, null, now), null);
+  assert.strictEqual(CORE18.videoUploadDate("junk", "", now), null);
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "enrich.js"), "utf8");
+  assert.ok(/const trailerDate = t && [^\n]*t\.published_at/.test(src) && src.includes("...(trailerDate ? { trailerDate } : {}),"),
+    "enrich keeps TMDB's published_at for the trailer it picks");
+});
+test("film page: the trailer's VideoObject always has an uploadDate, or stays out of the markup", () => {
+  const base = { ...FCS_ITEM, trailer: "https://www.youtube.com/watch?v=abcDEF12345" };
+  const IN = { code: "in", name: "India", region: "IN" };
+  const ldOf = (html) => JSON.parse(/<script type="application\/ld\+json">(\{"@context":"https:\/\/schema\.org","@type":"(?:Movie|TVSeries)"[\s\S]*?)<\/script>/.exec(html)[1]);
+  const real = ldOf(U.buildFilmPage({ ...base, trailerDate: "2026-08-01T10:00:00.000Z" }, "2026-09-28", new Set(), IN)).trailer;
+  assert.deepStrictEqual([real["@type"], real.uploadDate, real.embedUrl], ["VideoObject", "2026-08-01T10:00:00Z", "https://www.youtube-nocookie.com/embed/abcDEF12345"]);
+  assert.strictEqual(ldOf(U.buildFilmPage(base, "2026-09-28", new Set(), IN)).trailer.uploadDate, "2026-09-23T00:00:00+05:30", "the film's date as the proxy");
+  const none = U.buildFilmPage({ ...base, released: undefined, freshDate: undefined }, "2026-09-28", new Set(), IN);
+  assert.ok(!("trailer" in ldOf(none)), "no date: no trailer markup");
+  assert.ok(/youtube-nocookie\.com\/embed\/abcDEF12345/.test(none), "the trailer itself stays on the page");
+});
+test("frozen pages: an old trailer block gets uploadDate and its watch and embed URLs; with no date it's dropped", () => {
+  const S = require("./lib/stylesheets.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const old = (date) => `<html><head><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Camp Rock 3"${date ? `,"datePublished":"${date}"` : ""},"trailer":{"@type":"VideoObject","name":"Camp Rock 3 — Official Trailer","url":"https://www.youtube.com/watch?v=02-RDIZ5Rdw","description":"Trailer for Camp Rock 3","thumbnailUrl":"https://img.youtube.com/vi/02-RDIZ5Rdw/hqdefault.jpg"}}</script></head><body></body></html>`;
+  const now = Date.parse("2026-10-06T00:00:00Z");
+  const r = S.ensureTrailerUploadDate(old("2026-08-13"), now);
+  assert.strictEqual(r.fix, "dated");
+  const t = JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(r.html)[1]).trailer;
+  assert.deepStrictEqual([t.uploadDate, t.contentUrl, t.embedUrl],
+    ["2026-08-13T00:00:00+05:30", "https://www.youtube.com/watch?v=02-RDIZ5Rdw", "https://www.youtube-nocookie.com/embed/02-RDIZ5Rdw"]);
+  assert.strictEqual(S.ensureTrailerUploadDate(r.html, now).fix, null, "idempotent");
+  const dropped = S.ensureTrailerUploadDate(old(null), now);
+  assert.ok(dropped.fix === "dropped" && !/VideoObject/.test(dropped.html) && /"name":"Camp Rock 3"/.test(dropped.html), "only the trailer leaves the markup");
+  assert.strictEqual(S.ensureTrailerUploadDate(old("2027-01-01"), now).fix, "dropped", "a future film date is no upload date");
+  const broken = '<script type="application/ld+json">{"@type":"VideoObject",</script>';
+  assert.strictEqual(S.ensureTrailerUploadDate(broken, now).html, broken, "unparseable JSON is left alone");
+  const current = old("2026-08-13").replace('"thumbnailUrl"', '"uploadDate":"2026-08-01T00:00:00Z","thumbnailUrl"');
+  assert.strictEqual(S.ensureTrailerUploadDate(current, now).fix, null, "a page that has one is untouched");
+  // The end-of-build pass applies it to every film page, archived ones included.
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-trailer-"));
+  try {
+    fsx.mkdirSync(path.join(root, "ae", "movie"), { recursive: true });
+    fsx.writeFileSync(path.join(root, "ae", "movie", "camp-rock-3.html"), old("2026-08-13"));
+    const res = S.finishFilmPages(["ae/movie/camp-rock-3.html"], { root });
+    assert.deepStrictEqual([res.trailerFixed, res.trailerDropped], [["ae/camp-rock-3"], 0], "listed, so the sitemap marks it changed");
+    const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
+    assert.ok(up.includes("for (const k of [...f.retitled, ...f.trailerFixed]) {"), "the build gives repaired pages a fresh lastmod");
+    assert.ok(/"uploadDate":"2026-08-13T00:00:00\+05:30"/.test(fsx.readFileSync(path.join(root, "ae", "movie", "camp-rock-3.html"), "utf8")));
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 
 (async () => {

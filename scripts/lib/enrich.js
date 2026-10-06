@@ -79,7 +79,7 @@ function certFor(kind, d, region) {
 }
 
 // ============================================================================
-// AGE CERTIFICATES — one reading of a rating label, for 14 different rating boards.
+// AGE CERTIFICATES — one reading of a rating label, for 18 different rating boards.
 //
 // The old rule was three regexes tuned to India, the US and the UK, and it broke the moment
 // the site added Asia-Pacific markets:
@@ -94,10 +94,21 @@ function certFor(kind, d, region) {
 // Boards covered by the live markets: IN (U, U/A 7+/13+/16+, A), US (G, PG, PG-13, R, NC-17,
 // TV-MA), GB (U, PG, 12A, 15, 18), AU/NZ (G, PG, M, MA15+, R13, R16, R18), DE (0, 6, 12, 16,
 // 18), AE (G, PG13, 15+, 18TC), CA, SG (G, PG13, NC16, M18, R21), MY (U, P13, 18), PH (G, PG,
-// R-13, R-16, R-18), JP (G, PG12, R15+, R18+), KR (ALL, 12, 15, 19), ID (SU, 13+, 17+, 21+).
-function certAudience(cert) {
+// R-13, R-16, R-18), JP (G, PG12, R15+, R18+), KR (ALL, 12, 15, 19), ID (SU, 13+, 17+, 21+),
+// BR (L, 10, 12, 14, 16, 18), MX (AA, A, B, B-15, C, D), ES (A, Ai, 7, 12, 16, 18, X; TV: TP),
+// FR (U, TP, 10, 12, 16, 18).
+// Pass the region where one letter means different things: "A" is adults-only in India but
+// all ages in Mexico and Spain, and Mexico's "C" and "D" are its adult ratings.
+const REGION_CERTS = {
+  MX: { AA: "family", A: "family", B: "teens", C: "adults", D: "adults" },
+  ES: { A: "family", AI: "family", APTA: "family" },
+};
+const CERT_LABELS = { adults: "Adults only", teens: "Older kids & up", family: "Yes — family friendly" };
+function certAudience(cert, region = null) {
   const c = String(cert || "").toUpperCase().trim();
   if (!c) return { bucket: "unknown", label: "Check rating" };
+  const local = REGION_CERTS[String(region || "").toUpperCase()];
+  if (local && local[c]) return { bucket: local[c], label: CERT_LABELS[local[c]] };
   // NC-17 carries a number that would otherwise read as "teens".
   if (/^NC-?17/.test(c) || /^(TV-MA|X|A|R|R21|AO)$/.test(c)) return { bucket: "adults", label: "Adults only" };
   const n = (c.match(/\d{1,2}/) || [])[0];
@@ -108,7 +119,8 @@ function certAudience(cert) {
     return { bucket: "family", label: "Yes — family friendly" };   // U/A 7+, DE 0/6, TV-Y7
   }
   // No age in the label: universal and guidance ratings first, then the adult letters.
-  if (/^(ALL|SU|U|G|E|P|AL|TV-G|TV-Y|K-A|PG|TV-PG|GP)$/.test(c)) {
+  // L is Brazil's "Livre" and TP Spain's and France's "todos los públicos" / "tous publics".
+  if (/^(ALL|SU|U|G|E|P|AL|L|TP|TV-G|TV-Y|K-A|PG|TV-PG|GP)$/.test(c)) {
     return { bucket: "family", label: "Yes — family friendly" };
   }
   if (/^(M|MA|TV-14)$/.test(c)) return { bucket: "teens", label: "Older kids & up" };  // AU/NZ "M" is advisory
@@ -213,6 +225,9 @@ async function enrich(kind, id, region = "IN") {
   const trailer = t
     ? `https://www.youtube.com/watch?v=${t.key}`
     : `https://www.youtube.com/results?search_query=${encodeURIComponent(`${d.title || d.name || ""} official trailer`)}`;
+  // The trailer's own YouTube publish date, from the same TMDB video record ("published_at",
+  // an ISO timestamp). It is the uploadDate Google requires on the page's VideoObject.
+  const trailerDate = t && /^\d{4}-\d{2}-\d{2}T/.test(String(t.published_at || "")) ? String(t.published_at) : null;
 
   // Streaming platforms in this country's region
   const inProv = d["watch/providers"]?.results?.[region];
@@ -278,6 +293,7 @@ async function enrich(kind, id, region = "IN") {
 
   return {
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
+    ...(trailerDate ? { trailerDate } : {}),
     ...(rentBuy.length ? { rentBuy } : {}),
     imdbId: imdbId || null, // handle for cross-source lookups (Wikipedia buzz via Wikidata P345)
     seasons: kind === "tv" ? d.number_of_seasons || null : null,

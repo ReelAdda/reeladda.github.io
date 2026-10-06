@@ -17,8 +17,9 @@
 // edits a page's CSS (lib/scoresweep.js) puts it back inline first with inlineStyles().
 //
 // The same end-of-build walk finishes what frozen pages can't get from a rebuild (Oct 2026):
-// browser icons in the <head>, the country in every non-India title, and the "FilmyChill
-// data" window line checked against the archive. finishSitePages adds the icons to every
+// browser icons in the <head>, the country in every non-India title, the "FilmyChill
+// data" window line checked against the archive, and the uploadDate Google requires on a
+// trailer's VideoObject. finishSitePages adds the icons to every
 // other page on the site. Each fix is idempotent: a finished page is never written again.
 // ============================================================================
 "use strict";
@@ -26,9 +27,9 @@
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const { COUNTRIES, escHtml, ICON_LINKS } = require("./core.js");
+const { COUNTRIES, escHtml, ICON_LINKS, ldJson, videoUploadDate } = require("./core.js");
 const { fcdataWindowPhrase } = require("./filmpage.js");
-const { PRIVACY_LINK } = require("./pagekit.js");
+const { PRIVACY_LINK, ytIdOf } = require("./pagekit.js");
 const { titleWithCountry } = require("./rules.js");
 
 const CSS_DIR = "css";
@@ -98,6 +99,39 @@ function applyFcdataClaim(html, claim) {
     (whole, lead) => `${lead}${fcdataWindowPhrase(claim.days)}`);
 }
 
+// Pure: the uploadDate Google requires on a trailer VideoObject, for pages that lack one
+// (videoUploadDate in core.js). Pages written before Sept 2026 carry a trailer with only a
+// name, url, description and thumbnail, and frozen pages are never rebuilt, so 186 of them sat
+// in Search Console as invalid items in Oct 2026. The date is the film's own — the work's
+// datePublished on the same page, the generator's proxy — and the watch and embed URLs the
+// current markup has are added beside it. With no usable date the trailer leaves the markup
+// (it stays on the page). Returns { html, fix: "dated" | "dropped" | null }.
+const LD_RE = /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g;
+function ensureTrailerUploadDate(html, nowMs = Date.now()) {
+  let fix = null;
+  if (!html.includes('"VideoObject"')) return { html, fix };
+  const out = html.replace(LD_RE, (whole, json) => {
+    if (!json.includes('"VideoObject"')) return whole;
+    let o;
+    try { o = JSON.parse(json); } catch { return whole; }
+    const t = o && o.trailer;
+    if (!t || t["@type"] !== "VideoObject" || t.uploadDate) return whole;
+    const up = videoUploadDate(null, o.datePublished || o.startDate || o.dateCreated, nowMs);
+    if (!up) {
+      delete o.trailer;
+      fix = "dropped";
+    } else {
+      const id = ytIdOf(t.contentUrl || t.url);
+      o.trailer = { ...t, uploadDate: up,
+        ...(t.contentUrl || !t.url ? {} : { contentUrl: t.url }),
+        ...(t.embedUrl || !id ? {} : { embedUrl: `https://www.youtube-nocookie.com/embed/${id}` }) };
+      fix = "dated";
+    }
+    return `<script type="application/ld+json">${ldJson(o)}</script>`;
+  });
+  return { html: out, fix };
+}
+
 // "ae/movie/x.html" -> { code: "ae", slug: "x" }; India's pages live in /movie/.
 function filmPageKey(rel) {
   const m = /^(?:([a-z]{2})\/)?movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
@@ -107,11 +141,12 @@ function filmPageKey(rel) {
 // The end-of-build pass over every film page. Returns counts; removes stylesheet files no
 // page uses any more. `fcdataClaim(code, slug)` (optional) answers for the window line.
 // `retitled` lists "code/slug" for every page whose title changed, so the caller can tell the
-// sitemap: a new title is a change worth a recrawl.
+// sitemap: a new title is a change worth a recrawl. `trailerFixed` does the same for pages
+// whose trailer markup was repaired (trailerDropped of them lost it).
 function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
   const used = new Set();
   const res = { pages: 0, externalized: 0, privacyLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [],
-    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0 };
+    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0 };
   fs.mkdirSync(path.join(root, CSS_DIR), { recursive: true });
   for (const rel of files) {
     const file = path.join(root, rel);
@@ -133,6 +168,12 @@ function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
         const claim = fcdataClaim(key.code, key.slug);
         const checked = applyFcdataClaim(next, claim);
         if (checked !== next) { next = checked; if (claim.action === "drop") res.fcdataDropped++; else res.fcdataFixed++; }
+      }
+      const dated = ensureTrailerUploadDate(next);
+      if (dated.fix) {
+        next = dated.html;
+        res.trailerFixed.push(`${key.code}/${key.slug}`);
+        if (dated.fix === "dropped") res.trailerDropped++;
       }
     }
     const ex = externalize(next);
@@ -220,6 +261,7 @@ module.exports = {
   ensureCountryTitle,
   ensureIconLinks,
   ensurePrivacyLink,
+  ensureTrailerUploadDate,
   externalize,
   filmPageFiles,
   filmPageKey,

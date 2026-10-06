@@ -183,9 +183,17 @@ function buildVerdictProse(item, countryName = "India", locale = "en-IN") {
   return (lead.replace(/\.$/, "") + "." + ratingBit + formatBit + whereBit).trim();
 }
 
+// The rating board a page's certificate comes from: its country's TMDB region. Some callers
+// pass a bare { code }, so the region is looked up when it's missing.
+function certRegion(cfg) {
+  if (!cfg) return null;
+  return cfg.region || (COUNTRIES.find((c) => c.code === cfg.code) || {}).region || null;
+}
+
 // "Good to know" quick-scan facts. Returns an array of {label, value} pairs, each derived
-// deterministically. Skips any fact it can't fill so the table never shows blanks.
-function buildGoodToKnow(item) {
+// deterministically. Skips any fact it can't fill so the table never shows blanks. `cfg` is the
+// page's country: its region decides how a rating letter reads (Mexico's "A" is all ages).
+function buildGoodToKnow(item, cfg = null) {
   if (!item) return [];
   const rows = [];
   const isTv = item.kind === "tv";
@@ -201,7 +209,7 @@ function buildGoodToKnow(item) {
     const c = String(item.cert).toUpperCase();
     // Order matters: check restrictive/age-gated patterns BEFORE bare "U", because "U/A 16+"
     // starts with "U" but is NOT a universal rating.
-    const family = certAudience(item.cert).label;   // one rule for 14 rating boards
+    const family = certAudience(item.cert, certRegion(cfg)).label;   // one rule for 18 rating boards
     rows.push({ label: "Watch with family?", value: `${item.cert} · ${family}` });
   }
   if (item.genre) rows.push({ label: "Genre", value: item.genre });
@@ -278,7 +286,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
 
   // Q3: family friendly (only if we have a cert)
   if (item.cert) {
-    const bucket = certAudience(item.cert).bucket;
+    const bucket = certAudience(item.cert, certRegion(cfg)).bucket;
     const a =
       bucket === "adults" ? `${item.title} is rated ${item.cert} — aimed at adult audiences.`
       : bucket === "teens" ? `${item.title} is rated ${item.cert}. Fine for older kids with guidance.`
