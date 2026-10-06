@@ -112,10 +112,11 @@
    "praised": [],
    "panned": [],
    "divided": [],
-   "score": null
+   "score": null,
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-03",
-  "v": 5
+  "checked": "2026-10-06",
+  "v": 6
  },
  "tt40914930": {
   "take": null,
@@ -3860,7 +3861,7 @@
   "v": 5
  },
  "tt28541577": {
-  "take": "Critics can't agree — high marks for the performances and writing, complaints about the visuals.",
+  "take": "Critics can't agree — high marks for the performances and writing, complaints about the music.",
   "src": "wiki",
   "hook": "The follow-up to ‘Sardar’.",
   "article": "Sardar 2",
@@ -3871,13 +3872,18 @@
     "writing"
    ],
    "panned": [
-    "visuals"
+    "music"
    ],
    "divided": [],
-   "score": null
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 6,
+    "median": 2.5
+   }
   },
-  "checked": "2026-09-21",
-  "v": 5
+  "checked": "2026-10-06",
+  "v": 6
  },
  "tt11846550": {
   "take": null,
@@ -4323,7 +4329,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-05",
+  "checked": "2026-10-06",
   "v": 6
  },
  "tt31510819": {
@@ -4949,8 +4955,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-03",
-  "v": 5
+  "checked": "2026-10-06",
+  "v": 6
  },
  "tt32649961": {
   "take": "First viewer reviews on TMDB tilt positive.",
@@ -6407,6 +6413,13 @@
   "v": 6
  },
  "tt40407840": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt43650242": {
   "take": null,
   "src": null,
   "hook": null,
