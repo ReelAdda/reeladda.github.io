@@ -150,6 +150,50 @@ const COUNTRIES = [
     theatreTargets: [["id", 3], ["en", 3]],
     soonTargets: [["en", 3], ["id", 3], ["__regional__", 1]],
   },
+  // ---- Latin America and Europe, added Oct 2026. -----------------------------------------
+  // The same English-language edition as Germany, Japan and Korea: the market's own language
+  // leads (priorityLangs, the local quota), English fills the rest, and every list is built
+  // from the market's real TMDB provider data. Quotas keep the 6-cinema / 7-coming-soon shape
+  // every other edition uses; they are soft, so an empty local slot goes to the next best film.
+  //
+  // Brazil: Latin America's largest streaming market. Hollywood leads the box office, with a
+  // steady Brazilian slate beside it.
+  {
+    code: "br", name: "Brazil", region: "BR", watchRegion: "BR",
+    priorityLangs: ["pt", "en"],
+    regionalLangs: ["pt"],
+    ottRegionalLangs: ["pt"],
+    theatreTargets: [["pt", 2], ["en", 4]],
+    soonTargets: [["en", 4], ["pt", 2], ["__regional__", 1]],
+  },
+  // Mexico: the same shape as Brazil, with Spanish-language films (Mexican and imported).
+  {
+    code: "mx", name: "Mexico", region: "MX", watchRegion: "MX",
+    priorityLangs: ["es", "en"],
+    regionalLangs: ["es"],
+    ottRegionalLangs: ["es"],
+    theatreTargets: [["es", 2], ["en", 4]],
+    soonTargets: [["en", 4], ["es", 2], ["__regional__", 1]],
+  },
+  // Spain: a larger domestic share than Latin America, so local and English titles split evenly.
+  {
+    code: "es", name: "Spain", region: "ES", watchRegion: "ES",
+    priorityLangs: ["es", "en"],
+    regionalLangs: ["es"],
+    ottRegionalLangs: ["es"],
+    theatreTargets: [["es", 3], ["en", 3]],
+    soonTargets: [["en", 3], ["es", 3], ["__regional__", 1]],
+  },
+  // France: Europe's strongest domestic cinema, so French titles lead, as German ones do in
+  // the Germany edition.
+  {
+    code: "fr", name: "France", region: "FR", watchRegion: "FR",
+    priorityLangs: ["fr", "en"],
+    regionalLangs: ["fr"],
+    ottRegionalLangs: ["fr"],
+    theatreTargets: [["fr", 4], ["en", 2]],
+    soonTargets: [["fr", 4], ["en", 2], ["__regional__", 1]],
+  },
 ];
 
 // "145 min" reads like metadata; "2h 25m" reads like an answer to "do I have time
@@ -218,6 +262,21 @@ function ldJson(o) {
   return JSON.stringify(o).replace(/</g, "\\u003c");
 }
 
+// A trailer VideoObject's uploadDate. Google requires it: an item without one is invalid and
+// Search Console lists it under 'Missing field "uploadDate"' (186 pages in Oct 2026). The
+// trailer's real YouTube publish time when TMDB gave it ("2026-05-14T16:00:24.000Z"); otherwise
+// the film's own date, the proxy film pages have used since Sept 2026 (a trailer comes out
+// around a release). Never a date still in the future, and null when there is no date at all:
+// the caller then leaves the trailer out of the markup rather than publish an invalid item.
+function videoUploadDate(realIso, filmDate, nowMs = Date.now()) {
+  const real = String(realIso || "");
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(real)) return real.replace(/\.\d+(?=Z$)/, "");
+  const d = String(filmDate || "").slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return null;
+  const iso = `${d}T00:00:00+05:30`;
+  return Date.parse(iso) > nowMs ? null : iso;
+}
+
 // Browser-tab and home-screen icons, declared in every page's <head>. Only the homepage
 // declared them until Oct 2026, so every other page fell back to /favicon.ico (which did not
 // exist) and logged a 404 per visit. Same files the homepage template links.
@@ -279,6 +338,10 @@ const COUNTRY_PAGE_META = {
   kr: { name: "South Korea", path: "/kr/" },
   jp: { name: "Japan", path: "/jp/" },
   id: { name: "Indonesia", path: "/id/" },
+  br: { name: "Brazil", path: "/br/" },
+  mx: { name: "Mexico", path: "/mx/" },
+  es: { name: "Spain", path: "/es/" },
+  fr: { name: "France", path: "/fr/" },
 };
 
 // Flag + label for the country switcher. Kept here, beside COUNTRIES, because the switcher
@@ -287,14 +350,17 @@ const COUNTRY_PAGE_META = {
 const COUNTRY_FLAG = {
   in: "🇮🇳", us: "🇺🇸", uk: "🇬🇧", au: "🇦🇺", de: "🇩🇪", ae: "🇦🇪", ca: "🇨🇦", sg: "🇸🇬",
   my: "🇲🇾", ph: "🇵🇭", nz: "🇳🇿", kr: "🇰🇷", jp: "🇯🇵", id: "🇮🇩",
+  br: "🇧🇷", mx: "🇲🇽", es: "🇪🇸", fr: "🇫🇷",
 };
 
 // en-GB for markets with no usable English locale of their own: Germany already uses it, and
 // Japan, Korea and Indonesia join it for the same reason — en-ID renders "1.234.567" for vote
 // counts, and en-JP/en-KR fall back to US month-first dates that read oddly in an
-// English-language page written for Asia.
+// English-language page written for Asia. Brazil, Mexico, Spain and France write the day
+// first too, so en-GB ("6 Oct", "1,234") fits them the same way.
 const COUNTRY_LOCALE = { in: "en-IN", us: "en-US", uk: "en-GB", au: "en-AU", de: "en-GB", ae: "en-AE", ca: "en-CA", sg: "en-SG",
-  my: "en-MY", ph: "en-PH", nz: "en-NZ", kr: "en-GB", jp: "en-GB", id: "en-GB" };
+  my: "en-MY", ph: "en-PH", nz: "en-NZ", kr: "en-GB", jp: "en-GB", id: "en-GB",
+  br: "en-GB", mx: "en-GB", es: "en-GB", fr: "en-GB" };
 const localeFor = (code) => COUNTRY_LOCALE[code] || "en-IN";
 
 module.exports = {
@@ -314,5 +380,6 @@ module.exports = {
   fmtRuntime,
   slugify,
   trim,
+  videoUploadDate,
   xDefaultCode,
 };

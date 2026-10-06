@@ -21,6 +21,7 @@ const {
   ldJson,
   slugify,
   trim,
+  videoUploadDate,
   xDefaultCode,
   localeFor,
 } = require("./core.js");
@@ -685,22 +686,22 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
     ld.citation = { "@type": "CreativeWork", name: `Wikipedia: ${item.takeArticle}`,
       url: `https://en.wikipedia.org/wiki/${encodeURIComponent(String(item.takeArticle).replace(/ /g, "_"))}` };
   }
-  if (item.trailer && /youtube\.com\/watch/.test(item.trailer)) {
-    // A WatchAction target must be where the WORK can be watched; a trailer is not the
-    // work. schema.org gives trailers their own home: Movie/TVSeries.trailer.
-    // Google requires uploadDate and one of contentUrl/embedUrl on a VideoObject, or it drops
-    // the video rich result. We don't have the trailer's true YouTube publish date (that needs
-    // the YouTube API), so we use the film's own date as an honest proxy — a trailer is
-    // published around a film's release window. embedUrl is the privacy-friendly nocookie
-    // embed we already render; contentUrl is the watch URL.
+  // A WatchAction target must be where the WORK can be watched; a trailer is not the work.
+  // schema.org gives trailers their own home: Movie/TVSeries.trailer. Google requires
+  // uploadDate on a VideoObject: the trailer's real YouTube publish date from TMDB, else the
+  // film's own date (videoUploadDate in core.js). With neither, the trailer stays on the page
+  // but out of the markup — an item missing a required field is only an error in Search
+  // Console. embedUrl is the privacy-friendly nocookie embed we already render; contentUrl is
+  // the watch URL.
+  const _upDate = videoUploadDate(item.trailerDate, item.freshDate || item.released);
+  if (item.trailer && /youtube\.com\/watch/.test(item.trailer) && _upDate) {
     const _ytid = ytIdOf(item.trailer);
-    const _upDate = item.freshDate || item.released || null;
     ld.trailer = {
       "@type": "VideoObject",
       name: `${item.title} — Official Trailer`,
       description: `Official trailer for ${item.title}${item.language ? ` (${item.language})` : ""}.`,
       thumbnailUrl: _ytid ? `https://img.youtube.com/vi/${_ytid}/hqdefault.jpg` : undefined,
-      uploadDate: _upDate ? `${String(_upDate).slice(0, 10)}T00:00:00+05:30` : undefined,
+      uploadDate: _upDate,
       contentUrl: item.trailer,
       embedUrl: _ytid ? `https://www.youtube-nocookie.com/embed/${_ytid}` : undefined,
     };
@@ -717,7 +718,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
 
   // --- Enriched, deterministic sections (original content -> SEO value) ---
   const verdictProse = buildVerdictProse(item, country, localeFor(code));
-  const goodToKnow = buildGoodToKnow(item);
+  const goodToKnow = buildGoodToKnow(item, cfg);
   const faqs = buildFaqs(item, country, cfg);
   // On-site titles outrank off-site ones in the strip: a recommendation the reader can
   // actually open beats a dead card, and each one is a contextual internal link on a
