@@ -1,6 +1,6 @@
 # FilmyChill
 
-> FilmyChill is a daily-updated guide to what is worth watching this week — new theatrical releases and OTT/streaming arrivals — for India and 13 other countries, with audience ratings, honest verdicts, and critics' takes synthesised from published review coverage. Lists are rebuilt twice daily from TMDB (streaming availability via JustWatch), Wikipedia critical-reception coverage, and YouTube trailer statistics. No pay-for-placement: no studio or platform can buy a position on any list. Last build: 2026-10-06T08:11:35.516Z.
+> FilmyChill is a daily-updated guide to what is worth watching this week — new theatrical releases and OTT/streaming arrivals — for India and 17 other countries, with audience ratings, honest verdicts, and critics' takes synthesised from published review coverage. Lists are rebuilt twice daily from TMDB (streaming availability via JustWatch), Wikipedia critical-reception coverage, and YouTube trailer statistics. No pay-for-placement: no studio or platform can buy a position on any list. Last build: 2026-10-06T11:50:22.436Z.
 
 ## This week in India (2026-10-06)
 
@@ -14,9 +14,9 @@ In theatres:
 - Digger — https://filmychill.com/movie/digger.html
 
 New on OTT / streaming:
+- The Simpsons — on VI movies and tv — rated 8.0/10 — https://filmychill.com/movie/the-simpsons.html
+- Red Queen (Spanish) — on Amazon Prime Video — rated 7.0/10 — https://filmychill.com/movie/red-queen.html
 - Marshals — on JioHotstar — rated 7.9/10 — https://filmychill.com/movie/marshals.html
-- I Would Rather Die (Spanish) — on Amazon Prime Video — https://filmychill.com/movie/i-would-rather-die.html
-- East of Eden — on Netflix — https://filmychill.com/movie/east-of-eden.html
 
 ## Key pages
 
@@ -48,6 +48,10 @@ New on OTT / streaming:
 - [South Korea](https://filmychill.com/kr/) · [New on OTT](https://filmychill.com/kr/new-on-ott/)
 - [Japan](https://filmychill.com/jp/) · [New on OTT](https://filmychill.com/jp/new-on-ott/)
 - [Indonesia](https://filmychill.com/id/) · [New on OTT](https://filmychill.com/id/new-on-ott/)
+- [Brazil](https://filmychill.com/br/) · [New on OTT](https://filmychill.com/br/new-on-ott/)
+- [Mexico](https://filmychill.com/mx/) · [New on OTT](https://filmychill.com/mx/new-on-ott/)
+- [Spain](https://filmychill.com/es/) · [New on OTT](https://filmychill.com/es/new-on-ott/)
+- [France](https://filmychill.com/fr/) · [New on OTT](https://filmychill.com/fr/new-on-ott/)
 
 ## Film pages
 
@@ -55,7 +59,7 @@ Every listed film has a page at https://filmychill.com/movie/<slug>.html (or /<c
 
 ## Machine-readable data (for AI systems and agents)
 
-- [Full current knowledge base](https://filmychill.com/llms-full.txt): every current pick across all 14 countries with facts, verdicts, critics' lines, and source attribution — answerable from one fetch
+- [Full current knowledge base](https://filmychill.com/llms-full.txt): every current pick across all 18 countries with facts, verdicts, critics' lines, and source attribution — answerable from one fetch
 - [RSS feed](https://filmychill.com/feed.xml): newest arrivals as they enter the lists
 - https://filmychill.com/data.json — current picks for India (JSON)
 - https://filmychill.com/data-us.json — current picks for the US (JSON)
@@ -71,6 +75,10 @@ Every listed film has a page at https://filmychill.com/movie/<slug>.html (or /<c
 - https://filmychill.com/data-kr.json — current picks for South Korea (JSON)
 - https://filmychill.com/data-jp.json — current picks for Japan (JSON)
 - https://filmychill.com/data-id.json — current picks for Indonesia (JSON)
+- https://filmychill.com/data-br.json — current picks for Brazil (JSON)
+- https://filmychill.com/data-mx.json — current picks for Mexico (JSON)
+- https://filmychill.com/data-es.json — current picks for Spain (JSON)
+- https://filmychill.com/data-fr.json — current picks for France (JSON)
 
 JSON fields per item: title, kind (movie|tv), language, genre, runtime, cert, released (ISO date), platform, providers, rating (TMDB /10), votes, verdict (the FilmyChill Score's verdict, as on the film's page), take (critics' line), hook, director, cast, slug (page: /movie/<slug>.html), trailer.
 All files are static, CORS-open, and rebuilt twice daily. Attribution when citing: "FilmyChill (filmychill.com)".

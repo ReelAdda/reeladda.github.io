@@ -643,11 +643,16 @@
    ],
    "score": {
     "kind": "rt",
-    "value": 97
+    "value": 96
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 4
    }
   },
-  "checked": "2026-08-14",
-  "v": 5
+  "checked": "2026-10-06",
+  "v": 6
  },
  "tt34675596": {
   "take": "Reviewers found plenty to like here.",
@@ -1500,10 +1505,11 @@
    "score": {
     "kind": "rt",
     "value": 76
-   }
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-08-13",
-  "v": 5
+  "checked": "2026-10-06",
+  "v": 6
  },
  "tt36304003": {
   "take": "A love-it-or-hate-it reception, right down the middle.",
@@ -4435,10 +4441,11 @@
    "score": {
     "kind": "rt",
     "value": 19
-   }
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-10-01",
-  "v": 5
+  "checked": "2026-10-06",
+  "v": 6
  },
  "tt42262473": {
   "take": "Almost nobody had a bad word for it.",
@@ -4632,8 +4639,8 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-09-25",
-  "v": 5
+  "checked": "2026-10-06",
+  "v": 6
  },
  "tt39495239": {
   "take": null,
@@ -4851,7 +4858,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-05",
+  "checked": "2026-10-06",
   "v": 6
  },
  "movie:1522380": {
@@ -5251,7 +5258,7 @@
    "praised": [],
    "panned": []
   },
-  "checked": "2026-10-05",
+  "checked": "2026-10-06",
   "v": 6
  },
  "tt39379365": {
@@ -5729,8 +5736,8 @@
   "src": null,
   "hook": null,
   "article": "Red Queen (TV series)",
-  "checked": "2026-10-03",
-  "v": 5
+  "checked": "2026-10-06",
+  "v": 6
  },
  "tt32344704": {
   "take": null,
@@ -6222,6 +6229,187 @@
    },
    "toneSrc": "summary"
   },
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt35515227": {
+  "take": "Genuinely divisive — critics can't settle this one.",
+  "src": "wiki",
+  "hook": "A spin-off of FBI television franchise.",
+  "article": "CIA (TV series)",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 63
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "movie:1754582": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt44766123": {
+  "take": "The critical verdict is rare-air positive.",
+  "src": "wiki",
+  "hook": null,
+  "article": "NAZA (film)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt39369819": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt42021249": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "movie:1592410": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt0978762": {
+  "take": "Critics came away impressed, by and large.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Mary and Max",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 95
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt36164852": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Tad and the Magic Lamp",
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "movie:1777819": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt27681354": {
+  "take": "Truly divisive — for every critic who bought in, one checked out.",
+  "src": "wiki",
+  "hook": null,
+  "article": "In the Grey",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 52
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt38584405": {
+  "take": "Reviews swing both ways; the performances and writing earns praise even from the doubters.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Another Day (2026 film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "performances",
+    "writing"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 50
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt41593304": {
+  "take": "Critics have been largely positive on this one.",
+  "src": "wiki",
+  "hook": null,
+  "article": "A Man of His Time",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 78
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt37921158": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt38234547": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-06",
+  "v": 6
+ },
+ "tt40407840": {
+  "take": null,
+  "src": null,
+  "hook": null,
   "checked": "2026-10-06",
   "v": 6
  }
