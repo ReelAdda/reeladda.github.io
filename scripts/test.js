@@ -1640,8 +1640,11 @@ test("Pick of the Week is server-rendered and its backdrop preloaded", () => {
   const hero = U.ssrHero(data);
   assert.ok(!/display:none/.test(hero), "visible in the HTML — no reveal, no layout shift");
   assert.ok(/id="heroTitle">MobLand</.test(hero) && /id="heroVerdict">▸ Must watch</.test(hero));
-  assert.ok(/background-image:url\(&quot;https:\/\/image\.tmdb\.org\/t\/p\/w780\/v\.jpg&quot;\)/.test(hero));
-  assert.ok(/<link rel="preload" as="image" href="https:\/\/image\.tmdb\.org\/t\/p\/w780\/v\.jpg" fetchpriority="high">/.test(U.heroPreload(data)));
+  // Oct 2026: both sizes on the element, the phone one first; the CSS picks by screen width.
+  assert.ok(hero.includes('style="--hero-sm:url(&quot;https://image.tmdb.org/t/p/w300/v.jpg&quot;);--hero-lg:url(&quot;https://image.tmdb.org/t/p/w780/v.jpg&quot;)"'), hero);
+  assert.strictEqual(U.heroPreload(data),
+    '<link rel="preload" as="image" href="https://image.tmdb.org/t/p/w300/v.jpg" media="(max-width: 520px)" fetchpriority="high">'
+    + '<link rel="preload" as="image" href="https://image.tmdb.org/t/p/w780/v.jpg" media="(min-width: 521px)" fetchpriority="high">');
   assert.ok(/style="display:none"/.test(U.ssrHero({ pick: "Nope", theatres: [], ott: [] })), "no pick -> hidden, as before");
   assert.strictEqual(U.heroPreload({}), "");
   const src = require("fs").readFileSync("index.html", "utf8");
@@ -2681,9 +2684,11 @@ test("film page head: og:type matches kind, og:locale marks market, LD carries d
 });
 group("product polish: providers, similar titles, grammar");
 test("dedupeProviders: ad tier collapses into base service, survives alone", () => {
+  // Oct 2026: and every name comes back canonical ("Amazon Prime Video" reads "Prime Video",
+  // as its hub page always did).
   assert.deepStrictEqual(
     U.dedupeProviders(["Amazon Prime Video", "Amazon Prime Video with Ads", "Netflix"]),
-    ["Amazon Prime Video", "Netflix"]);
+    ["Prime Video", "Netflix"]);
   assert.deepStrictEqual(
     U.dedupeProviders(["Netflix", "Netflix Standard with Ads"]), ["Netflix"]);
   // ad plan is the ONLY way to stream -> keep it (dropping it would lie)
@@ -6191,6 +6196,120 @@ test("frozen pages: an old trailer block gets uploadDate and its watch and embed
     assert.ok(up.includes("for (const k of [...f.retitled, ...f.trailerFixed]) {"), "the build gives repaired pages a fresh lastmod");
     assert.ok(/"uploadDate":"2026-08-13T00:00:00\+05:30"/.test(fsx.readFileSync(path.join(root, "ae", "movie", "camp-rock-3.html"), "utf8")));
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+
+group("6 Oct 2026: homepage LCP — the hero backdrop first");
+test("phones get the 300px backdrop, on the same 520px breakpoint in the CSS and the preloads", () => {
+  const src = require("fs").readFileSync("index.html", "utf8");
+  assert.ok(/\.hero-bg \{[^}]*background-image: var\(--hero-lg, none\);/.test(src), "wide screens: the 780px file");
+  const phone = /@media \(max-width: (\d+)px\) \{[^@]*?\.hero-bg \{ background-image: var\(--hero-sm, var\(--hero-lg, none\)\); \}/.exec(src);
+  assert.ok(phone, "phones: the 300px file, inside the hero's own phone layout");
+  const pre = U.heroPreload({ pick: "X", theatres: [{ title: "X", backdrop: "https://image.tmdb.org/t/p/w780/x.jpg" }], ott: [] });
+  assert.ok(pre.includes(`media="(max-width: ${phone[1]}px)"`) && pre.includes(`media="(min-width: ${Number(phone[1]) + 1}px)"`), "the preloads split on the same width");
+  assert.ok(!/background-image:url/.test(U.ssrHero({ pick: "X", theatres: [{ title: "X", backdrop: "https://image.tmdb.org/t/p/w780/x.jpg" }], ott: [] })), "no inline background left to override the CSS");
+  // An image that isn't a TMDB w780 one is used at both sizes.
+  assert.ok(U.ssrHero({ pick: "X", theatres: [{ title: "X", backdrop: "https://example.org/x.jpg" }], ott: [] }).includes("--hero-sm:url(&quot;https://example.org/x.jpg&quot;)"));
+});
+test("the data file waits until the hero has painted; hydration reads nothing that forces a style pass", () => {
+  const src = require("fs").readFileSync("index.html", "utf8");
+  const fnSrc = (name) => { const i = src.indexOf(`function ${name}(`); return src.slice(i, src.indexOf("\n}\n", i) + 2); };
+  assert.ok(/afterHero\(\(\) => loadCountryData\(FC_PAGE\)\);/.test(fnSrc("initCountryPage")), "the first data fetch goes through afterHero");
+  const ah = fnSrc("afterHero");
+  assert.ok(/'largest-contentful-paint'/.test(ah) && /e\.element === bg/.test(ah), "waits for the browser's record of the hero's paint");
+  assert.ok(/setTimeout\(go, 3000\)/.test(ah), "never more than 3 s");
+  assert.ok(/getPropertyValue\('--hero-lg'\)\) return go\(\);/.test(ah), "no backdrop: straight away");
+  assert.ok(!/getComputedStyle/.test(ah), "getComputedStyle here forced a full style pass before the first paint");
+  assert.ok(/addEventListener\('load'/.test(ah), "browsers with no paint record wait for load");
+  const sh = fnSrc("setHeroBackdrop");
+  assert.ok(/setProperty\('--hero-lg'/.test(sh) && /setProperty\('--hero-sm', `url\("\$\{lg\.replace\('\/t\/p\/w780\/', '\/t\/p\/w300\/'\)\}"\)`\)/.test(sh), "hydration writes the same two URLs as the server");
+  assert.ok(!/style\.backgroundImage/.test(src), "nothing sets an inline background over the CSS choice");
+});
+test("the confidence strip is server-rendered with the text the page's script writes", () => {
+  const S = require("./lib/surfaces.js");
+  assert.strictEqual(S.confStripText({ theatres: [1, 2, 3, 4, 5, 6, 7], ott: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], trackedFilms: 956 }), "17 picks this week · 956 films tracked");
+  assert.strictEqual(S.confStripText({ theatres: [1], ott: [], trackedFilms: 1 }), "1 picks this week", "no tracked count when it isn't larger");
+  const src = require("fs").readFileSync("index.html", "utf8");
+  assert.ok(/<div class="conf-strip" id="confStrip"><!--SSR:CONFSTRIP-->[\s\S]*?<!--\/SSR:CONFSTRIP--><\/div>/.test(src));
+  assert.ok(src.includes("strip.textContent = `${picks} picks this week${tracked}`;"), "the client's wording, which confStripText copies");
+  const surf = require("fs").readFileSync(require("path").join(__dirname, "lib", "surfaces.js"), "utf8");
+  assert.ok(surf.includes('html = replaceBetween(html, "CONFSTRIP", escHtml(confStripText(data)));'));
+});
+test("with a hero on the page, the posters load after it (fetchpriority=low); without one, as before", () => {
+  const item = { title: "A", slug: "a", poster: "https://image.tmdb.org/t/p/w342/a.jpg" };
+  assert.ok(/loading="eager" decoding="async" fetchpriority="low">/.test(U.ssrCard(item, 0, "in", { eager: true, lowPriority: true })));
+  assert.ok(/loading="lazy" fetchpriority="low">/.test(U.ssrCard(item, 5, "in", { lowPriority: true })));
+  assert.ok(!/fetchpriority/.test(U.ssrCard(item, 0, "in", { eager: true })), "no hero: posters keep their normal priority");
+  const surf = require("fs").readFileSync(require("path").join(__dirname, "lib", "surfaces.js"), "utf8");
+  assert.ok(surf.includes('const heroFirst = heroPreload(data) !== "";') && surf.includes("{ eager: i < 2, lowPriority: heroFirst }")
+    && surf.includes("ssrOttSection(data.ott || [], cfg.code, { lowPriority: heroFirst })"));
+});
+
+group("6 Oct 2026 tidy: one name per service everywhere, and a clean Movistar URL");
+test("a channel is named as its service: Paramount Plus's Apple TV channel is Paramount+", () => {
+  const R = require("./lib/rules.js");
+  for (const [raw, want] of [["Paramount Plus Apple TV channel", "Paramount+"], ["Paramount+ Amazon Channel", "Paramount+"],
+    ["Telecine Amazon Channel", "Telecine"], ["HBO Max Amazon Channel", "HBO Max"], ["RTL+ Max Amazon Channel", "RTL+ Max"],
+    ["AMC Plus Apple TV channel", "AMC Plus"], ["Movistar Plus+ Ficción Total ", "Movistar Plus+"]]) {
+    assert.strictEqual(R.canonProvider(raw), want, raw);
+  }
+  assert.strictEqual(require("./lib/pagekit.js").canonProvider, R.canonProvider, "one implementation, re-exported");
+});
+test("provider lists carry one canonical name per service, in TMDB's order", () => {
+  assert.deepStrictEqual(U.dedupeProviders(["Paramount Plus", "Paramount+ Amazon Channel", "Netflix", "Paramount Plus Apple TV channel", "Disney Plus"]),
+    ["Paramount+", "Netflix", "Disney+"]);
+  assert.deepStrictEqual(U.dedupeProviders(["Telecine Amazon Channel", "Globoplay"]), ["Telecine", "Globoplay"]);
+  // Every place a provider list is read from TMDB goes through it: the build's enrich step,
+  // the departure and arrival sweeps, and the 30-minute probe that writes history records.
+  const fsx = require("fs"), path = require("path");
+  const src = (f) => fsx.readFileSync(path.join(__dirname, f), "utf8");
+  assert.ok(/const providers = dedupeProviders\(/.test(src("lib/enrich.js")) && /const rentBuy = dedupeProviders\(/.test(src("lib/enrich.js")));
+  assert.strictEqual((src("lib/lifecycle.js").match(/dedupeProviders\(/g) || []).length, 3, "departure check (2) and arrival sweep (1)");
+  assert.ok(/providers = dedupeProviders\(\[/.test(src("probe.js")), "the probe's history records too");
+  for (const f of ["probe.js", "lib/enrich.js", "lib/lifecycle.js"]) {
+    for (const line of src(f).split("\n").filter((l) => l.includes("provider_name"))) {
+      assert.ok(line.includes("dedupeProviders("), `${f}: a raw provider list escapes: ${line.trim().slice(0, 90)}`);
+    }
+  }
+});
+test("history reads back one name per service, old records included; the file keeps what was recorded", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const dir = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-hist-"));
+  const raw = [
+    { c: "us", k: "movie", id: 1, t: "A", p: "Paramount Plus Apple TV channel", ps: ["Paramount Plus Apple TV channel", "Paramount Plus"], first: "2026-09-01" },
+    { c: "us", k: "movie", id: 2, t: "B", p: "Paramount+", ps: ["Paramount+"], first: "2026-09-02" },
+    { c: "in", k: "tv", id: 3, t: "C", p: "VI movies and tv", first: "2026-09-03" },
+  ].map((r) => JSON.stringify(r)).join("\n") + "\n";
+  const cwd = process.cwd();
+  try {
+    fsx.writeFileSync(path.join(dir, "ott-history.jsonl"), raw);
+    process.chdir(dir);
+    const H = require("./lib/history.js");
+    const recs = H.readHistory();
+    assert.deepStrictEqual(recs.map((r) => r.p), ["Paramount+", "Paramount+", "Vi Movies & TV"]);
+    assert.deepStrictEqual(recs[0].ps, ["Paramount+"], "the two strings for one service collapse");
+    assert.strictEqual(fsx.readFileSync(path.join(dir, "ott-history.jsonl"), "utf8"), raw, "nothing is rewritten");
+  } finally { process.chdir(cwd); fsx.rmSync(dir, { recursive: true, force: true }); }
+});
+test("the Movistar Plus+ hub lives at /es/new-on-movistar-plus/; no other slug changes", () => {
+  const P = require("./lib/pagekit.js");
+  assert.strictEqual(P.platformSlug("Movistar Plus+"), "movistar-plus");
+  assert.strictEqual(P.platformSlug("Movistar Plus+ Ficción Total"), "movistar-plus");
+  for (const [name, slug] of [["Paramount+", "paramount-plus"], ["Disney+", "disney-plus"], ["Disney Plus", "disney-plus"], ["Prime Video", "prime-video"],
+    ["Amazon Prime Video", "prime-video"], ["Apple TV", "apple-tv"], ["Claro tv+", "claro-tv-plus"], ["RTL+ Max", "rtl-plus-max"], ["Vi Movies & TV", "vi-movies-and-tv"],
+    ["Netflix", "netflix"], ["JioHotstar", "jiohotstar"], ["HBO Max", "hbo-max"], ["U-NEXT", "u-next"], ["Canal+", "canal-plus"], ["TF1+", "tf1-plus"]]) {
+    assert.strictEqual(P.platformSlug(name), slug, name);
+  }
+  const fsx = require("fs");
+  assert.ok(fsx.existsSync("es/new-on-movistar-plus/index.html") && !fsx.existsSync("es/new-on-movistar-plus-plus"), "the page moved, not duplicated");
+  for (const f of ["es/new-on-movistar-plus/index.html", "es/index.html", "sitemap-pages.xml"]) {
+    assert.ok(!fsx.readFileSync(f, "utf8").includes("new-on-movistar-plus-plus"), f + " still links the old URL");
+  }
+});
+test("hubs: a service's channel titles join its own hub instead of a second one", () => {
+  const H = require("./lib/hubs.js");
+  const it = (id, providers) => ({ title: "T" + id, tmdbId: id, kind: "movie", providers, platform: providers[0] });
+  const hubs = H.hubsFor({ ott: [it(1, ["Paramount+"]), it(2, ["Paramount Plus Apple TV channel"]), it(3, ["Paramount+ Amazon Channel"]), it(4, ["Paramount Plus Premium"])] });
+  assert.deepStrictEqual(hubs.map((h) => [h.name, h.slug, h.items.length]), [["Paramount+", "paramount-plus", 4]]);
 });
 
 (async () => {

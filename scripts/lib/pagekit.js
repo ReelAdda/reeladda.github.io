@@ -21,7 +21,7 @@ const {
 const { cardPaths } = require("./cards.js");
 const { releaseState } = require("./release.js");
 const { freshLabel, THEATRE_WINDOW_FALLBACK_DAYS } = require("./freshness.js");
-const { countryNameFor, streamVocab } = require("./rules.js");
+const { canonProvider, countryNameFor, streamVocab } = require("./rules.js");
 const { USE_IMDB } = require("./tmdb.js");
 
 function img(path, size = "w342") {
@@ -251,57 +251,15 @@ function ottMonthPath(code, month) {
 }
 const PLATFORM_SLUG_OVERRIDES = { "Amazon Prime Video": "prime-video", "Apple TV": "apple-tv", "Apple TV+": "apple-tv", "Disney+": "disney-plus", "Disney Plus": "disney-plus" };
 
-// TMDB reports the same service under several provider strings — "Apple TV" and "Apple TV
-// Amazon Channel" are one destination to a viewer, as are "Amazon Prime Video", "Prime Video"
-// and "Amazon Prime Video with Ads". Grouping on the raw strings split each service's titles
-// across two or three buckets, so a service with four titles showed as two-and-two and cleared
-// no threshold at all. It also minted /new-on-amazon-prime-video-with-ads/ — a URL named after
-// a billing tier, which nobody searches for. Canonicalise before grouping.
-const PROVIDER_CANON = [
-  [/^Apple TV\+?( Amazon Channel| Channel)?$/i, "Apple TV"],
-  [/^(Amazon )?Prime Video( with Ads)?$/i, "Prime Video"],
-  [/^Netflix( Standard with Ads| basic with Ads)?$/i, "Netflix"],
-  [/^(JioHotstar|Disney\+ Hotstar|Hotstar)$/i, "JioHotstar"],
-  [/^(HBO )?Max( Amazon Channel)?$/i, "HBO Max"],
-  [/^Paramount\+?( Premium| Amazon Channel)?$/i, "Paramount+"],
-  [/^Crunchyroll( Amazon Channel)?$/i, "Crunchyroll"],
-  // Asia-Pacific services TMDB reports under several strings — free/ad tiers and casing.
-  // Ungrouped, each split its titles across two buckets and neither cleared the hub threshold.
-  [/^Disney\+?( Plus)?$/i, "Disney+"],
-  [/^Viu( Free)?$/i, "Viu"],
-  [/^WeTV( Free)?$/i, "WeTV"],
-  [/^iQIYI( Free)?$/i, "iQIYI"],
-  [/^U-?NEXT$/i, "U-NEXT"],
-  // Tier and channel variants that split one service across several "streaming on" pages
-  // (Sept 2026 trial build: the US got separate Paramount Plus, Paramount Plus Premium and
-  // Paramount Plus Essential pages, and two Peacock pages).
-  [/^Paramount(?: Plus|\+)(?: Premium| Essential| with Showtime)?$/i, "Paramount+"],
-  [/^Peacock(?: Premium(?: Plus)?)?$/i, "Peacock"],
-  [/^VI movies and tv$/i, "Vi Movies & TV"],
-  // Brazil, Mexico, Spain and France (Oct 2026): the same tier and spelling splits for these
-  // markets' own services, merged before their first build so no hub starts out split.
-  [/^ViX(?: Premium| Gratis)?$/i, "ViX"],
-  [/^Globoplay(?: Premium)?$/i, "Globoplay"],
-  [/^Claro ?video$/i, "Claro video"],
-  [/^Movistar ?(?:Plus\+?|\+)(?: Ficción Total)?$/i, "Movistar Plus+"],
-  [/^Atres ?player(?: Premium)?$/i, "Atresplayer"],
-  [/^RTVE(?: Play)?$/i, "RTVE Play"],
-  [/^Canal(?:\+| Plus)(?: S[ée]ries| Cin[ée]ma)?$/i, "Canal+"],
-  [/^France(?:\.| )?TV$/i, "France TV"],
-  [/^(?:TF1\+?|MYTF1)$/i, "TF1+"],
-  [/^(?:M6\+|6play)$/i, "M6+"],
-  // A service sold as a Prime Video / Apple TV channel is still that service.
-  [/^(.+?) (?:Amazon|Apple TV) Channel$/i, "$1"],
-];
-function canonProvider(name) {
-  const n = String(name || "").trim();
-  for (const [re, canon] of PROVIDER_CANON) if (re.test(n)) return canon.includes("$") ? n.replace(re, canon) : canon;
-  return n;
-}
+// canonProvider (one name per service) lives in rules.js beside dedupeProviders, so every
+// provider list read from TMDB is canonical from the start. Re-exported here for the callers
+// that have always imported it from this module.
+// A name that already says "Plus" before its "+" ("Movistar Plus+") reads "plus" once in the
+// URL: /es/new-on-movistar-plus/, not /new-on-movistar-plus-plus/.
 function platformSlug(name) {
   const n = canonProvider(name);
   if (PLATFORM_SLUG_OVERRIDES[n]) return PLATFORM_SLUG_OVERRIDES[n];
-  return String(n).toLowerCase().replace(/\+/g, " plus").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return String(n).toLowerCase().replace(/plus\+/g, "plus").replace(/\+/g, " plus").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 function hubPath(code, slug) { return code === "in" ? `new-on-${slug}/index.html` : `${code}/new-on-${slug}/index.html`; }
 function hubUrl(code, slug) { return code === "in" ? `https://filmychill.com/new-on-${slug}/` : `https://filmychill.com/${code}/new-on-${slug}/`; }   // days since the platform was last confirmed

@@ -19,6 +19,7 @@
 "use strict";
 
 const fs = require("fs");
+const { canonProvider } = require("./rules.js");
 
 const HISTORY_FILE = "ott-history.jsonl";
 
@@ -68,11 +69,20 @@ function appendHistory(rec) {
   return true;
 }
 
+// Readers see one name per service (canonProvider in rules.js). Records written before Oct
+// 2026 carry TMDB's raw strings ("Disney Plus", "Paramount Plus Apple TV channel"), newer ones
+// the canonical names; the month pages, the /data/ figures and the film pages' "on Disney+"
+// line group and print them as one service. The file itself keeps what was recorded.
+function canonRecord(r) {
+  if (r.p) r.p = canonProvider(r.p);
+  if (Array.isArray(r.ps)) r.ps = [...new Set(r.ps.map(canonProvider))];
+  return r;
+}
 function readHistory() {
   try {
     return fs.readFileSync(HISTORY_FILE, "utf8").split("\n")
       .filter((l) => l.trim()).map((l) => { try { return JSON.parse(l); } catch { return null; } })
-      .filter(Boolean);
+      .filter(Boolean).map(canonRecord);
   } catch { return []; }
 }
 

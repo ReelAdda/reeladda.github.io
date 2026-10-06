@@ -317,14 +317,14 @@ function buildHomeJsonLd(data, cfg) {
 // SSR OTT section with the honest divider: cards in order, one "Still worth it"
 // separator before the first stillGood card (only when a fresh group precedes it,
 // so an all-older list never renders a heading with nothing above it).
-function ssrOttSection(items, code) {
+function ssrOttSection(items, code, cardOpts = {}) {
   let out = "", divided = false;
   items.forEach((x, i) => {
     if (!divided && x.stillGood && i > 0) {
       out += `<div class="ott-divider">Still worth it — standouts from earlier weeks</div>`;
       divided = true;
     }
-    out += ssrCard(x, i, code);
+    out += ssrCard(x, i, code, cardOpts);
   });
   return out;
 }
@@ -620,6 +620,8 @@ const HOME_CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-s
 // Rendering it at build time, with the backdrop preloaded at high priority, fixes both. The
 // client code still runs and sets the same values — it just no longer has to reveal anything.
 // ============================================================================
+// Phones: the hero's own 520px layout in index.html.
+const HERO_PHONE_MAX = 520;
 const HERO_HIDDEN = `<div class="hero" id="hero" style="display:none">
   <div class="hero-card" id="heroCard">
     <div class="hero-bg" id="heroBg"></div>
@@ -637,14 +639,23 @@ function heroPickOf(data) {
   if (!data || !data.pick) return null;
   return [...(data.theatres || []), ...(data.ott || [])].find((x) => x && x.title === data.pick) || null;
 }
-// Same sanitising the client applies before putting the URL in a CSS url("…").
+// Same sanitising the client applies to the URL.
 const heroBgUrl = (u) => String(u || "").replace(/["'()\\]/g, "");
+// The backdrop is the homepage's LCP element. Phones (the hero's own 520px layout in
+// index.html) get TMDB's 300px file, ~17 KB against ~80 KB: it is drawn at 45% opacity under
+// a dark gradient, and the full-size file was about 1 s of a 2.7 s mobile LCP (Oct 2026).
+// Any URL that isn't a TMDB w780 one is used at every size.
+const heroBgSmallUrl = (u) => heroBgUrl(u).replace("/t/p/w780/", "/t/p/w300/");
 
 function ssrHero(data) {
   const pick = heroPickOf(data);
   if (!pick) return HERO_HIDDEN;
   const e = escHtml;
-  const bg = pick.backdrop ? ` style="background-image:url(&quot;${e(heroBgUrl(pick.backdrop))}&quot;)"` : "";
+  // Both sizes as custom properties; the template's CSS picks one by screen width (the same
+  // breakpoint as the preloads in heroPreload, so a screen only ever downloads its own size).
+  const bg = pick.backdrop
+    ? ` style="--hero-sm:url(&quot;${e(heroBgSmallUrl(pick.backdrop))}&quot;);--hero-lg:url(&quot;${e(heroBgUrl(pick.backdrop))}&quot;)"`
+    : "";
   const meta = [pick.platform, pick.genre, pick.language].filter(Boolean).join(" · ");
   return `<div class="hero" id="hero">
   <div class="hero-card" id="heroCard">
@@ -660,10 +671,22 @@ function ssrHero(data) {
 </div>`;
 }
 
+// The "N picks this week · M films tracked" line above the hero, exactly as the page's script
+// writes it after hydrating. Rendered here too: hydration now waits until the hero has painted,
+// so an empty strip filled late pushed the hero down — a layout shift (CLS 0.015, Oct 2026).
+function confStripText(data) {
+  const picks = ((data && data.theatres) || []).length + ((data && data.ott) || []).length;
+  const tracked = data && data.trackedFilms && data.trackedFilms > picks ? ` · ${data.trackedFilms} films tracked` : "";
+  return `${picks} picks this week${tracked}`;
+}
+
 function heroPreload(data) {
   const pick = heroPickOf(data);
   if (!pick || !pick.backdrop) return "";
-  return `<link rel="preload" as="image" href="${escHtml(heroBgUrl(pick.backdrop))}" fetchpriority="high">`;
+  // One preload per screen size, on the same breakpoint as the CSS, so a phone never fetches
+  // the large file and a desktop never fetches the small one.
+  return `<link rel="preload" as="image" href="${escHtml(heroBgSmallUrl(pick.backdrop))}" media="(max-width: ${HERO_PHONE_MAX}px)" fetchpriority="high">`
+    + `<link rel="preload" as="image" href="${escHtml(heroBgUrl(pick.backdrop))}" media="(min-width: ${HERO_PHONE_MAX + 1}px)" fetchpriority="high">`;
 }
 
 function renderCountryPage(templateHtml, cfg, data) {
@@ -693,14 +716,18 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "CSP", `<meta http-equiv="Content-Security-Policy" content="${cspWith(HOME_CSP)}">`);
   html = replaceBetween(html, "ANALYTICS", analyticsTag());
   html = replaceBetween(html, "LASTSCAN", escHtml(ssrLastScan(data, cfg)));
+  html = replaceBetween(html, "CONFSTRIP", escHtml(confStripText(data)));
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
   // Homepage share/Discover image: the Pick of the Week, then the lists (see hubOgImage).
   html = replaceBetween(html, "OGIMAGE", ogImageTag(hubOgImage([heroPickOf(data), ...(data.theatres || []), ...(data.ott || [])].filter(Boolean), cfg)));
   html = replaceBetween(html, "HERO", ssrHero(data));
   html = replaceBetween(html, "HEROPRELOAD", heroPreload(data));
-  // The first two theatre posters sit above the fold on desktop: load them immediately.
-  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code, { eager: i < 2 })).join(""));
-  html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code));
+  // The first two theatre posters sit above the fold on desktop: load them immediately — after
+  // the hero backdrop, when there is one: it is the LCP image, and in a phone's first second
+  // ~110 KB of posters shared its bandwidth (Oct 2026).
+  const heroFirst = heroPreload(data) !== "";
+  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code, { eager: i < 2, lowPriority: heroFirst })).join(""));
+  html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code, { lowPriority: heroFirst }));
   // Re-derived at render, not just at fetch: the committed data file can be a day old by the
   // time a page is rebuilt, and a passed date must never render inside "Coming soon".
   html = replaceBetween(html, "SOON", normalizeUpcoming(data.comingSoon).map((x) => ssrSoonCard(x, cfg.code)).join(""));
@@ -743,6 +770,7 @@ function prerenderIndex(data) {
 
 module.exports = {
   choosePick,
+  confStripText,
   PICK_FRESH_DAYS,
   ABOUT_LASTMOD,
   buildDataPage,
