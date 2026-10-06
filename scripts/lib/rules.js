@@ -256,13 +256,79 @@ function isOttFresh(freshDate, now = Date.now()) {
 // "Loading fresh picks". The page JS replaces it on load.
 // ============================================================
 
+// TMDB reports the same service under several provider strings — "Apple TV" and "Apple TV
+// Amazon Channel" are one destination to a viewer, as are "Amazon Prime Video", "Prime Video"
+// and "Amazon Prime Video with Ads". Grouping on the raw strings split each service's titles
+// across two or three buckets, so a service with four titles showed as two-and-two and cleared
+// no threshold at all. It also minted /new-on-amazon-prime-video-with-ads/ — a URL named after
+// a billing tier, which nobody searches for. Canonicalise before grouping.
+// (Moved here from pagekit.js in Oct 2026 so dedupeProviders can use it: cards, film pages,
+// FAQs and data files showed TMDB's raw strings — "Disney Plus", "Telecine Amazon Channel" —
+// while the hub pages used these names, so one service read two ways on the same site.)
+const PROVIDER_CANON = [
+  [/^Apple TV\+?( Amazon Channel| Channel)?$/i, "Apple TV"],
+  [/^(Amazon )?Prime Video( with Ads)?$/i, "Prime Video"],
+  [/^Netflix( Standard with Ads| basic with Ads)?$/i, "Netflix"],
+  [/^(JioHotstar|Disney\+ Hotstar|Hotstar)$/i, "JioHotstar"],
+  [/^(HBO )?Max( Amazon Channel)?$/i, "HBO Max"],
+  [/^Paramount\+?( Premium| Amazon Channel)?$/i, "Paramount+"],
+  [/^Crunchyroll( Amazon Channel)?$/i, "Crunchyroll"],
+  // Asia-Pacific services TMDB reports under several strings — free/ad tiers and casing.
+  // Ungrouped, each split its titles across two buckets and neither cleared the hub threshold.
+  [/^Disney\+?( Plus)?$/i, "Disney+"],
+  [/^Viu( Free)?$/i, "Viu"],
+  [/^WeTV( Free)?$/i, "WeTV"],
+  [/^iQIYI( Free)?$/i, "iQIYI"],
+  [/^U-?NEXT$/i, "U-NEXT"],
+  // Tier and channel variants that split one service across several "streaming on" pages
+  // (Sept 2026 trial build: the US got separate Paramount Plus, Paramount Plus Premium and
+  // Paramount Plus Essential pages, and two Peacock pages).
+  [/^Paramount(?: Plus|\+)(?: Premium| Essential| with Showtime)?$/i, "Paramount+"],
+  [/^Peacock(?: Premium(?: Plus)?)?$/i, "Peacock"],
+  [/^VI movies and tv$/i, "Vi Movies & TV"],
+  // Brazil, Mexico, Spain and France (Oct 2026): the same tier and spelling splits for these
+  // markets' own services, merged before their first build so no hub starts out split.
+  [/^ViX(?: Premium| Gratis)?$/i, "ViX"],
+  [/^Globoplay(?: Premium)?$/i, "Globoplay"],
+  [/^Claro ?video$/i, "Claro video"],
+  [/^Movistar ?(?:Plus\+?|\+)(?: Ficción Total)?$/i, "Movistar Plus+"],
+  [/^Atres ?player(?: Premium)?$/i, "Atresplayer"],
+  [/^RTVE(?: Play)?$/i, "RTVE Play"],
+  [/^Canal(?:\+| Plus)(?: S[ée]ries| Cin[ée]ma)?$/i, "Canal+"],
+  [/^France(?:\.| )?TV$/i, "France TV"],
+  [/^(?:TF1\+?|MYTF1)$/i, "TF1+"],
+  [/^(?:M6\+|6play)$/i, "M6+"],
+  // A service sold as a Prime Video / Apple TV channel is still that service.
+  [/^(.+?) (?:Amazon|Apple TV) Channel$/i, "$1"],
+];
+function canonProvider(name) {
+  const n = String(name || "").trim();
+  for (const [re, canon] of PROVIDER_CANON) {
+    if (!re.test(n)) continue;
+    if (!canon.includes("$")) return canon;
+    // The channel's own service is canonicalised too: "Paramount Plus Apple TV channel" ->
+    // "Paramount Plus" -> "Paramount+". It stopped at "Paramount Plus" until Oct 2026, so the
+    // channel's titles sat in a second Paramount bucket.
+    const inner = n.replace(re, canon);
+    return inner !== n ? canonProvider(inner) : inner;
+  }
+  return n;
+}
+
 // "Netflix" + "Netflix Standard with Ads" (or "... with Ads") is one service to a
 // reader — the ad tier is a plan, not a platform. Keep the ad-tier name only when the
 // base service isn't itself in the list (some titles stream ONLY on the ad plan).
+// Then one name per service: each provider's canonical name (canonProvider), once, in TMDB's
+// order — "Paramount Plus" and "Paramount+ Amazon Channel" are one "Paramount+".
 function dedupeProviders(names) {
   const stripAds = (n) => String(n).replace(/\s+(?:standard\s+|basic\s+)?with ads$/i, "");
   const plain = new Set(names.filter((n) => stripAds(n) === n));
-  return names.filter((n) => stripAds(n) === n || !plain.has(stripAds(n)));
+  const out = [];
+  for (const n of names.filter((x) => stripAds(x) === x || !plain.has(stripAds(x)))) {
+    const c = canonProvider(n);
+    if (c && !out.includes(c)) out.push(c);
+  }
+  return out;
 }
 
 // TMDB's raw recommendation feed is collaborative-filter noise for Indian titles — a
@@ -354,6 +420,7 @@ function countryListForProse() {
 const LANG_CODE_BY_NAME = Object.fromEntries(Object.entries(LANG).map(([c, n]) => [n, c]));
 
 module.exports = {
+  canonProvider,
   countryListForProse,
   countryNameFor,
   dedupeProviders,

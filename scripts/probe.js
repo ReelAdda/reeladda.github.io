@@ -23,6 +23,7 @@ const WATCH_FILE = "ott-watch.json";           // titles we are waiting on
 // hand-maintained copy, so a country added to the site silently never got probed.
 const { COUNTRIES: COUNTRY_CFG } = require("./lib/core.js");
 const COUNTRIES = Object.fromEntries(COUNTRY_CFG.map((c) => [c.code, c.watchRegion || c.region]));
+const { dedupeProviders } = require("./lib/rules.js");
 
 async function tmdb(path, params = {}) {
   const url = new URL(`https://api.themoviedb.org/3${path}`);
@@ -58,7 +59,8 @@ async function main() {
     try {
       const d = await tmdb(`/${w.kind === "tv" ? "tv" : "movie"}/${w.tmdbId}/watch/providers`);
       const region = d.results?.[COUNTRIES[w.code]];
-      providers = [...(region?.flatrate || []), ...(region?.free || [])].map((p) => p.provider_name);
+      // One name per service, as the build writes them (dedupeProviders in lib/rules.js).
+      providers = dedupeProviders([...(region?.flatrate || []), ...(region?.free || [])].map((p) => p.provider_name));
     } catch (e) { console.warn(`  probe ${w.tmdbId} [${w.code}]: ${e.message}`); continue; }
     if (!providers || !providers.length) continue;
     // First sighting. The timestamp is the value this script exists for: resolution of

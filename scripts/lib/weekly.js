@@ -88,10 +88,12 @@ function ssrCardScore(item, code) {
   const votes = Number(item.votes || 0);
   return `<div class="snone"><svg class="ic" aria-hidden="true"><use href="#icBars"/></svg>Not enough ratings to score${votes ? ` · only ${votes.toLocaleString("en-IN")}` : ""}</div>`;
 }
-function ssrCard(item, i, code, { eager = false } = {}) {
+// `lowPriority`: the page has a hero backdrop, its LCP image, so posters wait their turn
+// (fetchpriority="low" keeps Chrome from promoting the on-screen ones above it).
+function ssrCard(item, i, code, { eager = false, lowPriority = false } = {}) {
   const e = escHtml;
   const art = item.poster
-    ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" ${eager ? 'loading="eager" decoding="async"' : 'loading="lazy"'}>`
+    ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="150" height="200" ${eager ? 'loading="eager" decoding="async"' : 'loading="lazy"'}${lowPriority ? ' fetchpriority="low"' : ""}>`
     : `<div class="poster ph" aria-hidden="true">${e((item.title || "?").charAt(0).toUpperCase())}</div>`;
   const inner = `
     <div class="pw">${art}<span class="rank">${i + 1}</span></div>
