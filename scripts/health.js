@@ -28,6 +28,13 @@ const broken = brokenInternalLinks(process.env.HEALTH_SITE_ROOT || ".");
 if (broken.count) {
   notes.push(`${broken.count} broken internal link(s) on the site, e.g. ${broken.examples.map((x) => `${x.from} → /${x.to}`).join("; ")}`);
 }
+// Content tests that failed at the start of the run (scripts/test.js, TEST_TIERS=1). They no
+// longer stop the update, so they go red here instead, after the site is live.
+try {
+  const t = JSON.parse(fs.readFileSync(process.env.HEALTH_TEST_RESULTS || "test-results.json", "utf8"));
+  const cf = Array.isArray(t.contentFailed) ? t.contentFailed : [];
+  if (cf.length) issues.push(`${cf.length} content test(s) failed — the site updated anyway; fix before the next run: ${cf.slice(0, 5).map((f) => `"${f.name}" (${f.message})`).join("; ")}`);
+} catch { /* no results file: tests did not run in this job */ }
 const catalog = h.catalog || {};
 
 // GitHub annotations must be single-line.

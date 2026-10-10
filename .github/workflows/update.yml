@@ -39,8 +39,13 @@ jobs:
       # Unit tests run FIRST (no API calls) so a code regression fails fast,
       # before we spend time/quota on the build. Covers pure functions + the
       # SSR-injection guard (incl. the comment-in-script regression test).
+      # TEST_TIERS=1: only a SAFETY test failure stops the build here. A content (wording)
+      # failure is written to test-results.json and health.js turns the run red at the end,
+      # once the site has updated. On 8 Oct 2026 one wording test cost a whole day's update.
       - name: Run unit tests
         run: node scripts/test.js
+        env:
+          TEST_TIERS: "1"
 
       - name: Fetch latest releases
         env:
