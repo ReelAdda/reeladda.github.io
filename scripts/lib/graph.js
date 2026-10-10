@@ -2,6 +2,7 @@
 
 const fs = require("fs");
 const { COUNTRIES, COUNTRY_PAGE_META, escHtml, filmPagePath, filmPageUrl, ICON_LINKS, xDefaultCode } = require("./core.js");
+const { FOOTER_LINKS, NO_HOSTING_NOTICE } = require("./pagekit.js");
 
 // ============================================================================
 // FILM INDEX — the fix for orphaned pages.
@@ -250,7 +251,7 @@ ${headExtra || ""}
   </ul>
   ${nav}
   <div class="pages">Pages: ${pageLinks}</div>
-  <footer><a href="${e(m.path)}">← This week's picks</a> · <a href="/about/">About FilmyChill</a></footer>
+  <footer><a href="${e(m.path)}">← This week's picks</a> · <a href="/about/">About FilmyChill</a> · ${FOOTER_LINKS.replace(/ · $/, "")}<br>${NO_HOSTING_NOTICE}</footer>
 </body></html>`;
 }
 

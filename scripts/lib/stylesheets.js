@@ -29,7 +29,7 @@ const fs = require("fs");
 const path = require("path");
 const { COUNTRIES, escHtml, ICON_LINKS, ldJson, videoUploadDate } = require("./core.js");
 const { fcdataWindowPhrase } = require("./filmpage.js");
-const { PRIVACY_LINK, ytIdOf } = require("./pagekit.js");
+const { FOOTER_LINKS, NO_HOSTING_NOTICE, ytIdOf } = require("./pagekit.js");
 const { titleWithCountry } = require("./rules.js");
 
 const CSS_DIR = "css";
@@ -60,10 +60,24 @@ function inlineStyles(html, root = ".") {
   return html.replace(LINK_RE, `<style>${css}</style>`);
 }
 
-// Pure: make sure the page footer links the privacy page (pages written before Oct 2026).
-function ensurePrivacyLink(html) {
-  if (html.includes('href="/privacy/"')) return html;
-  return html.replace(/(<footer>[\s\S]*?)(© 2026 FilmyChill)/, `$1${PRIVACY_LINK}$2`);
+// Pure: the footer's no-hosting notice and Privacy · Copyright links (pagekit.js), on a page
+// written before they existed. Only a footer carrying "© 2026 FilmyChill" is touched: the
+// line goes just before it, replacing whichever of the pieces an older page already had.
+const FOOTER_RE = /<footer>([\s\S]*?)<\/footer>/;
+function ensureFooterLegal(html) {
+  const m = FOOTER_RE.exec(html);
+  if (!m) return html;
+  const foot = m[1];
+  // A homepage's credit line is footerAttribution(), re-rendered every run between these markers.
+  if (foot.includes("<!--SSR:ATTRIBUTION-->")) return html;
+  if (foot.includes(NO_HOSTING_NOTICE) && foot.includes('href="/dmca/"') && foot.includes('href="/privacy/"')) return html;
+  const at = foot.indexOf("© 2026 FilmyChill");
+  if (at < 0) return html;
+  let before = foot.slice(0, at);
+  for (const piece of [`${NO_HOSTING_NOTICE}<br>`, '<a href="/privacy/">Privacy</a> · ', '<a href="/dmca/">Copyright</a> · ']) before = before.replace(piece, "");
+  before = before.trimEnd();
+  const sep = before && !before.endsWith("<br>") ? "<br>" : "";
+  return html.replace(m[0], `<footer>${before}${sep}${NO_HOSTING_NOTICE}<br>${FOOTER_LINKS}${foot.slice(at)}</footer>`);
 }
 
 // Pure: declare the browser icons (core.js ICON_LINKS) on a page that has none. Only the
@@ -145,7 +159,7 @@ function filmPageKey(rel) {
 // whose trailer markup was repaired (trailerDropped of them lost it).
 function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
   const used = new Set();
-  const res = { pages: 0, externalized: 0, privacyLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [],
+  const res = { pages: 0, externalized: 0, footerLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [],
     iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0 };
   fs.mkdirSync(path.join(root, CSS_DIR), { recursive: true });
   for (const rel of files) {
@@ -153,8 +167,8 @@ function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
     let html;
     try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
     res.pages++;
-    let next = ensurePrivacyLink(html);
-    if (next !== html) res.privacyLinked++;
+    let next = ensureFooterLegal(html);
+    if (next !== html) res.footerLinked++;
     const key = filmPageKey(rel);
     if (key) {
       const iconed = ensureIconLinks(next);
@@ -243,15 +257,18 @@ function sitePageFiles(root = ".") {
 // rebuilt each run already carry them; this reaches the frozen ones (past weeks and months,
 // hand-written pages). The embed widget is skipped: it renders inside other people's pages.
 function finishSitePages(files, { root = "." } = {}) {
-  const res = { pages: 0, iconed: 0 };
+  const res = { pages: 0, iconed: 0, footerLinked: 0 };
   for (const rel of files) {
     if (/(?:^|\/)embed\/week\//.test(rel)) continue;
     const file = path.join(root, rel);
     let html;
     try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
     res.pages++;
-    const next = ensureIconLinks(html);
-    if (next !== html) { fs.writeFileSync(file, next); res.iconed++; }
+    let next = ensureIconLinks(html);
+    if (next !== html) res.iconed++;
+    const footed = ensureFooterLegal(next);
+    if (footed !== next) { next = footed; res.footerLinked++; }
+    if (next !== html) fs.writeFileSync(file, next);
   }
   return res;
 }
@@ -310,7 +327,7 @@ module.exports = {
   applyFcdataClaim,
   ensureCountryTitle,
   ensureIconLinks,
-  ensurePrivacyLink,
+  ensureFooterLegal,
   ensureTrailerUploadDate,
   externalize,
   filmPageFiles,

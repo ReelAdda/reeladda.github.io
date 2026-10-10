@@ -1488,7 +1488,7 @@ async function main() {
         return cinemaClaim(byKey.get(`${code}:${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`), starts);
       };
       const f = finishFilmPages(filmPageFiles(), { fcdataClaim });
-      console.log(`Film pages finished: ${f.pages} checked, ${f.externalized} moved to shared styles, ${f.privacyLinked} privacy links added, ${f.iconed} icon tags added, `
+      console.log(`Film pages finished: ${f.pages} checked, ${f.externalized} moved to shared styles, ${f.footerLinked} footers given the notice and Privacy · Copyright links, ${f.iconed} icon tags added, `
         + `${f.retitled.length} titles given their country, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, `
         + `${f.trailerFixed.length - f.trailerDropped} trailers given an uploadDate and ${f.trailerDropped} left out of the markup, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
       // A new title is a real change: let the sitemap say so (syncFilmLastmods would also see
@@ -1505,7 +1505,7 @@ async function main() {
     } catch (e) { stageFailed("film-page styles", e); }
     try {
       const s = finishSitePages(sitePageFiles());
-      if (s.iconed) console.log(`Site pages: icon tags added to ${s.iconed} of ${s.pages}`);
+      if (s.iconed || s.footerLinked) console.log(`Site pages: icon tags added to ${s.iconed} and footers finished on ${s.footerLinked} of ${s.pages}`);
     } catch (e) { stageFailed("site-page icons", e); }
     // Self-audit (lib/audit.js): contradictions a visitor would notice, reported in the run
     // summary before anyone else finds them. Read-only.

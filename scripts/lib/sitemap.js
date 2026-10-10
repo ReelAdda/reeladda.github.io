@@ -298,6 +298,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const aboutUrls = [
     ...(fs.existsSync("about/index.html") ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${ABOUT_LASTMOD}</lastmod><priority>0.3</priority></url>`] : []),
     ...(fs.existsSync("privacy/index.html") ? ["  <url><loc>https://filmychill.com/privacy/</loc><lastmod>2026-10-04</lastmod><priority>0.2</priority></url>"] : []),
+    ...(fs.existsSync("dmca/index.html") ? ["  <url><loc>https://filmychill.com/dmca/</loc><lastmod>2026-10-10</lastmod><priority>0.2</priority></url>"] : []),
   ];
   // /data/ was reaching IndexNow (so Bing saw it) but was absent from the sitemap, which is
   // Google's main discovery path — so Google could only find it by crawling a footer link.
