@@ -318,7 +318,7 @@ const { sweepScores } = require("./lib/scoresweep.js");
 const { refreshRelated } = require("./lib/relrefresh.js");
 const { syncVotes } = require("./lib/votes.js");
 const { runAudit } = require("./lib/audit.js");
-const { filmPageFiles, finishFilmPages, finishSitePages, sitePageFiles } = require("./lib/stylesheets.js");
+const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePageFiles } = require("./lib/stylesheets.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -1525,6 +1525,13 @@ async function main() {
     try { writeDatedOttPages(dataByCode[cfg.code], cfg, pagesManifest); }
     catch (e) { stageFailed(`dated OTT pages [${cfg.code}]`, e); }
   }
+
+  // Links on frozen pages to hubs and people pages this run (or an earlier one) removed
+  // (lib/stylesheets.js). After the last page writer, so every target is in its final state.
+  try {
+    const d = repairDeadLinks([...filmPageFiles(), ...sitePageFiles()]);
+    if (d.fixed.length) console.log(`Dead links: removed from ${d.fixed.length} of ${d.pages} pages (e.g. ${d.fixed.slice(0, 3).join(", ")})`);
+  } catch (e) { stageFailed("dead-link repair", e); }
 
   // All countries are built by now, so the filesystem finally shows every cluster's true
   // membership — repair them in one pass before the sitemap is written.

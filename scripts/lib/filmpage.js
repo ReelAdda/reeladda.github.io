@@ -628,7 +628,9 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // See filmMetaDescription above for why this is no longer built inline: the same function
   // has to serve both this live render and the frozen-archive patcher, or the fix reaches
   // only the ~5% of film pages that happen to be in a current list this week.
-  const desc = filmMetaDescription(item, cfg);
+  // Streaming-window estimates are as of the page's own date (the build passes today).
+  const asOfDate = /^\d{4}-\d{2}-\d{2}/.test(asOf || "") ? new Date(`${asOf.slice(0, 10)}T00:00:00Z`) : new Date();
+  const desc = filmMetaDescription(item, cfg, { now: asOfDate.getTime() });
 
   // ---- EMPTY-SHELL COUNTRY PAGES ------------------------------------------
   // A NON-India film page carrying no market-specific availability at all — no provider, no
@@ -972,7 +974,7 @@ ${FCSB_CSS}
       return `<!--SW:pending--><!--SW:digital=${e(item.digitalDate)}|${e(item.digitalNote || "")}--><h2>${e(V.heading(item.title))}</h2>`
         + `<p><strong>Streaming from ${e(fmtDateFull(item.digitalDate, localeFor(code)))}${on}.</strong> ${e(digitalAnnounceText(item.title, item.digitalDate, item.digitalNote, country, cfg))} This page switches to \u201cstreaming now\u201d the day it lands.</p><!--/SW:pending-->`;
     }
-    const est = streamWindowEstimate(item.released, item.language);
+    const est = streamWindowEstimate(item.released, item.language, asOfDate);
     const body = est && !est.passed
       ? `<p>Not streaming yet — ${e(item.title)} is in its theatrical run in ${e(country)}${item.released ? `, released ${e(item.released)}` : ""}. ${e(item.language || "Films like this")} releases typically reach streaming about ${est.lo}–${est.hi} weeks after opening, which would put it somewhere around <strong>${e(est.span)}</strong>.</p><p style="color:var(--mute);font-size:13px">That's the usual pattern, not a confirmed date — no platform has announced one. We re-check every day and this page updates the moment it lands.</p>`
       : `<p>Not streaming yet in ${e(country)}${item.released ? ` — ${e(item.title)} released in theatres ${e(item.released)}` : ""}. No platform has announced ${e(V.article.toLowerCase())} ${e(V.releaseDate)}. We re-check every day and this page updates the moment it lands.</p>`;
