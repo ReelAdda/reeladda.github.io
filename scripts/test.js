@@ -1505,7 +1505,7 @@ test("externalize: same CSS, loaded from a content-named file; the policy allows
   assert.strictEqual(S.externalize(page).name, ex.name, "same CSS, same file");
 });
 
-test("finishFilmPages: moves styles out once, adds the privacy link, keeps only stylesheets in use", () => {
+test("finishFilmPages: moves styles out once, finishes the footer, keeps only stylesheets in use", () => {
   const S = require("./lib/stylesheets.js");
   const fsx = require("fs"), os = require("os"), path = require("path");
   const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-css-"));
@@ -1519,12 +1519,12 @@ test("finishFilmPages: moves styles out once, adds the privacy link, keeps only 
     const files = S.filmPageFiles(root);
     assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
     const r = S.finishFilmPages(files, { root });
-    assert.deepStrictEqual(r, { pages: 3, externalized: 3, privacyLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [],
+    assert.deepStrictEqual(r, { pages: 3, externalized: 3, footerLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [],
       iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0 });
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
-    assert.ok(/<a href="\/privacy\/">Privacy<\/a> · © 2026 FilmyChill/.test(a));
+    assert.ok(/<a href="\/privacy\/">Privacy<\/a> · <a href="\/dmca\/">Copyright<\/a> · © 2026 FilmyChill/.test(a));
     assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
-    assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, privacyLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [],
+    assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, footerLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [],
       iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0 }, "idempotent");
     // The 4 Oct incident: the stylesheets never reached the site. That must be reported.
     fsx.rmSync(path.join(root, "css"), { recursive: true, force: true });
@@ -1539,11 +1539,65 @@ test("privacy page: exists, linked from every footer kind, in the sitemap, and s
   const priv = fsx.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
   assert.ok(/<link rel="canonical" href="https:\/\/filmychill\.com\/privacy\/">/.test(priv));
   assert.ok(/sets no cookies/.test(priv) && /GoatCounter/.test(priv) && /Firebase/.test(priv) && /anonymous ID/.test(priv));
-  assert.ok(/<a href="\/privacy\/">Privacy<\/a> · $/.test(U.footerAttribution(false)), "film, hub and weekly page footers");
+  assert.ok(/<a href="\/privacy\/">Privacy<\/a> · <a href="\/dmca\/">Copyright<\/a> · $/.test(U.footerAttribution(false)), "film, hub and weekly page footers");
   const about = fsx.readFileSync(path.join(__dirname, "..", "about", "index.html"), "utf8");
   assert.ok(/href="\/privacy\/"/.test(about));
   assert.ok(/href="\/privacy\/"/.test(fsx.readFileSync(path.join(__dirname, "..", "404.html"), "utf8")));
   assert.ok(/\/privacy\//.test(U.buildMoreLinks({ code: "in" })), "homepage footer links");
+});
+
+group("10 Oct 2026: copyright page and the no-hosting notice");
+test("copyright page: exists, gives the contact address and what to send, asks to be contacted first, in the sitemap", () => {
+  const fsx = require("fs"), path = require("path");
+  const d = fsx.readFileSync(path.join(__dirname, "..", "dmca", "index.html"), "utf8");
+  assert.ok(/<link rel="canonical" href="https:\/\/filmychill\.com\/dmca\/">/.test(d));
+  assert.ok(d.includes('<a href="mailto:filmychill.contact@gmail.com">filmychill.contact@gmail.com</a>'), "the address, as text and a link");
+  assert.ok(/does not host, upload, stream or link to copies/.test(d) && /good faith/.test(d) && /Before filing a takedown with Google/.test(d));
+  assert.ok(!/vikramksharma87/.test(d), "never the owner's personal address");
+  const sm = fsx.readFileSync(path.join(__dirname, "lib", "sitemap.js"), "utf8");
+  assert.ok(sm.includes('fs.existsSync("dmca/index.html")') && sm.includes("https://filmychill.com/dmca/"));
+  for (const f of ["dmca/index.html", "about/index.html", "privacy/index.html", "404.html"]) {
+    assert.ok(fsx.readFileSync(path.join(__dirname, "..", f), "utf8").includes('href="/dmca/"'), f + " links the copyright page");
+  }
+});
+test("every footer kind carries the notice and Privacy · Copyright", () => {
+  const P = require("./lib/pagekit.js");
+  for (const imdb of [false, true]) {
+    const f = U.footerAttribution(imdb);
+    assert.ok(f.endsWith(`${P.NO_HOSTING_NOTICE}<br><a href="/privacy/">Privacy</a> · <a href="/dmca/">Copyright</a> · `), "film, hub, weekly, homepage credit");
+    assert.ok(f.includes("This product uses the TMDB API but is not endorsed or certified by TMDB."), "TMDB's wording untouched");
+  }
+  assert.ok(/doesn't host or stream any films or shows/.test(P.NO_HOSTING_NOTICE));
+  const G = require("./lib/graph.js");
+  const browse = G.buildBrowsePage([], { code: "in", name: "India", region: "IN" }, 1, 1, "10 Oct 2026");
+  assert.ok(browse.includes(`<a href="/dmca/">Copyright</a><br>${P.NO_HOSTING_NOTICE}</footer>`), "All films pages");
+});
+test("ensureFooterLegal: frozen footers of every shape get the notice and both links, once", () => {
+  const S = require("./lib/stylesheets.js");
+  const P = require("./lib/pagekit.js");
+  const want = `${P.NO_HOSTING_NOTICE}<br><a href="/privacy/">Privacy</a> · <a href="/dmca/">Copyright</a> · © 2026 FilmyChill · Vikram Sharma\n</footer>`;
+  const shapes = {
+    "privacy link after <br> and a space": `<footer>\n  JustWatch</a>.<br> <a href="/privacy/">Privacy</a> · © 2026 FilmyChill · Vikram Sharma\n</footer>`,
+    "privacy link glued to the TMDB line": `<footer>certified by TMDB.<a href="/privacy/">Privacy</a> · © 2026 FilmyChill · Vikram Sharma\n</footer>`,
+    "no privacy link, no <br> (old month archive)": `<footer>certified by TMDB.© 2026 FilmyChill · Vikram Sharma\n</footer>`,
+    "no privacy link, <br> and a space": `<footer>JustWatch</a>.<br> © 2026 FilmyChill · Vikram Sharma\n</footer>`,
+  };
+  for (const [name, foot] of Object.entries(shapes)) {
+    const out = S.ensureFooterLegal(`<body>x${foot}</body>`);
+    assert.ok(out.endsWith(want + "</body>"), `${name}: ${out}`);
+    assert.ok(/(<br>|TMDB\.<br>|<\/a>\.<br>)\S/.test(out.replace(/<br> /g, "<br>")), name + ": the notice starts its own line");
+    assert.strictEqual((out.match(/href="\/privacy\/"/g) || []).length, 1, name + ": one Privacy link");
+    assert.strictEqual(S.ensureFooterLegal(out), out, name + ": idempotent");
+  }
+  const current = `<footer>${U.footerAttribution(false)}© 2026 FilmyChill · Vikram Sharma</footer>`;
+  assert.strictEqual(S.ensureFooterLegal(current), current, "a current footer is left alone");
+  const browse = `<footer><a href="/">← This week's picks</a> · <a href="/about/">About FilmyChill</a></footer>`;
+  assert.strictEqual(S.ensureFooterLegal(browse), browse, "no © line: not a footer this patches");
+  assert.strictEqual(S.ensureFooterLegal("<p>no footer</p>"), "<p>no footer</p>");
+  // A homepage footer is re-rendered every run; patching it put the notice in the © bar and
+  // took Privacy out of the credit line, and the next build would have shown the notice twice.
+  const home = require("fs").readFileSync("index.html", "utf8");
+  assert.strictEqual(S.ensureFooterLegal(home), home, "the homepage template is left to footerAttribution");
 });
 
 test("the workflow commits css/ — every film page links a stylesheet in it", () => {
@@ -5685,17 +5739,18 @@ test("finishSitePages adds icons to frozen pages once, and never touches a file 
     fsx.mkdirSync(path.join(root, "embed", "week"), { recursive: true });
     fsx.mkdirSync(path.join(root, "movie"));
     fsx.mkdirSync(path.join(root, "scripts"));
-    fsx.writeFileSync(path.join(root, "week", "2026-W30", "index.html"), "<html><head><title>W30</title></head><body></body></html>");
+    fsx.writeFileSync(path.join(root, "week", "2026-W30", "index.html"), "<html><head><title>W30</title></head><body><footer>TMDB.<br> © 2026 FilmyChill</footer></body></html>");
     fsx.writeFileSync(path.join(root, "embed", "week", "index.html"), "<html><head></head><body></body></html>");
     fsx.writeFileSync(path.join(root, "googleabc.html"), "google-site-verification: googleabc.html");
     fsx.writeFileSync(path.join(root, "movie", "x.html"), "<html><head></head></html>");
     fsx.writeFileSync(path.join(root, "scripts", "y.html"), "<html><head></head></html>");
     const files = S.sitePageFiles(root).sort();
     assert.deepStrictEqual(files, ["embed/week/index.html", "googleabc.html", "week/2026-W30/index.html"], "film pages and non-site folders stay out of this pass");
-    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 1 });
+    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 1, footerLinked: 1 });
+    assert.ok(fsx.readFileSync(path.join(root, "week", "2026-W30", "index.html"), "utf8").includes('<a href="/dmca/">Copyright</a> · © 2026 FilmyChill'), "frozen site pages get the footer too");
     assert.ok(/<link rel="icon"[^>]*>\n<link rel="apple-touch-icon"[^>]*>\n<\/head>/.test(fsx.readFileSync(path.join(root, "week", "2026-W30", "index.html"), "utf8")));
     assert.strictEqual(fsx.readFileSync(path.join(root, "googleabc.html"), "utf8"), "google-site-verification: googleabc.html", "Google's verification file is untouched");
-    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 0 }, "idempotent");
+    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 0, footerLinked: 0 }, "idempotent");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 
