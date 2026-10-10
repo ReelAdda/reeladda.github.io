@@ -448,6 +448,22 @@ function retitleFrozen(html, cfg = null) {
   return { html: html.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc}</title>`), changed: true };
 }
 
+// A frozen page's "Expected <month>" title, brought up to date once that month is behind it.
+// The due pass refreshes such a page's body and description every run, but its title froze
+// with whatever window was live that day: 36 pages still said "Expected Oct" past their
+// window (Oct 2026). Only a title carrying "Expected" is touched, and the new one is put in
+// the form the end-of-build pass leaves it (country added outside India), so it is written
+// once per change and never flips back and forth between runs.
+function refreshExpectedTitle(html, cfg = null) {
+  const cur = /<title>([\s\S]*?)<\/title>/.exec(html);
+  if (!cur || !/\bExpected [A-Z][a-z]{2}/.test(cur[1])) return { html, changed: false };
+  const facts = frozenFilmFacts(html);
+  if (!facts) return { html, changed: false };
+  const next = escHtml(titleWithCountry(filmTitleTag(facts.item, cfg), cfg));
+  if (!next || next === cur[1]) return { html, changed: false };
+  return { html: html.replace(cur[0], `<title>${next}</title>`), changed: true };
+}
+
 // Frozen pages need the analytics tag too, or the measurement misses exactly the pages that
 // get the traffic: 1,289 of the ~1,600 film pages are archived and are never regenerated, and
 // they are where most search visitors land. Adds the tag and widens the page's CSP to allow
@@ -658,6 +674,7 @@ module.exports = {
   PAGES_MANIFEST_FILE,
   reconcilePagesManifest,
   reEsc,
+  refreshExpectedTitle,
   repairLegacyPages,
   retitleFrozen,
   rewriteMetaDescription,
