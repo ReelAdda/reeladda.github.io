@@ -1145,7 +1145,10 @@ test("film page leads with the score and shows both signals behind it", () => {
   assert.ok(/class="take"/.test(html), "the critics' take stays on the film page");
   assert.ok(html.indexOf('id="filmychill-score"') < html.indexOf('class="answer"'));
   const early = U.buildFilmPage({ ...FCS_ITEM, released: new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10), rating: null, votes: 5, fcScore: undefined }, "2026-09-28", new Set(), { code: "in" });
-  assert.ok(/fcsb-stamp fcsb-early">Too early</.test(early) && /Not rated yet|Too few ratings/.test(early));
+  // Oct 2026, answer-first: no score yet -> one line under the answer, not an empty card.
+  assert.ok(early.includes(`<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">FilmyChill score</span> <span class="fcsb-mini-v">Too early</span> — 5 audience ratings so far, no critics' verdict yet.`), "compact line");
+  assert.ok(!/fcsb-rows|fcsb-note/.test(early.slice(early.indexOf("<body"))), "no empty rows, no card note");
+  assert.ok(early.indexOf("class=\"answer\"") < early.indexOf("id=\"filmychill-score\""), "the answer comes first");
 });
 
 test("homepage template renders the score panel client-side, like the SSR card", () => {
@@ -1552,12 +1555,12 @@ test("finishFilmPages: moves styles out once, finishes the footer, keeps only st
     assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
     const r = S.finishFilmPages(files, { root });
     assert.deepStrictEqual(r, { pages: 3, externalized: 3, footerLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0 });
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0 });
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
     assert.ok(/<a href="\/privacy\/">Privacy<\/a> · <a href="\/dmca\/">Copyright<\/a> · © 2026 FilmyChill/.test(a));
     assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
     assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, footerLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0 }, "idempotent");
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0 }, "idempotent");
     // The 4 Oct incident: the stylesheets never reached the site. That must be reported.
     fsx.rmSync(path.join(root, "css"), { recursive: true, force: true });
     const lost = S.finishFilmPages(files, { root });
@@ -1691,6 +1694,60 @@ test("1b · a frozen 'Expected <month>' title is refreshed once its window passe
   const S = require("./lib/stylesheets.js");
   assert.strictEqual(S.ensureCountryTitle(ca.html, { code: "ca", name: "Canada", region: "CA" }), ca.html, "no flip-flop with ensureCountryTitle");
 });
+// Answer-first (Oct 2026): a page with no score yet leads with its answer, then one score line.
+const AF_CARD = `<section class="fcsb" id="filmychill-score">
+    <div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-verdict"><svg></svg><span class="fcsb-stamp fcsb-early">Not enough ratings</span></div>
+    <p class="fcsb-why">Only 3 people have rated it — the score needs at least 50.</p>
+    <div class="fcsb-rows"><div class="fcsb-row"><div><b>Audience</b><small>★ 5.0 from 3 ratings — counts from 50</small></div><span class="fcsb-tag none">Too few ratings</span></div><div class="fcsb-row"><div><b>Critics</b><small>No settled critics&#39; reception on record</small></div><span class="fcsb-tag none">No verdict</span></div></div>
+  </section>
+  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception. <a href="/about/#score">How the score works</a></p>`;
+const AF_VOTE = `<div class="fcvote" data-film="movie-1" data-c="in" hidden>
+    <div class="fcvote-q">Watched it?</div>
+    <div class="fcvote-b"><button type="button" data-v="1">Worth it</button></div>
+    <div class="fcvote-done" hidden></div>
+  </div>
+  <script src="/js/vote.js" defer></script>`;
+const AF_ANSWER = `<p class="answer"><b>Hi!</b> opened in theatres in India on 28 Aug 2026, and its cinema run has most likely ended.</p>`;
+const afPage = (body) => `<html><head><style>  /* FilmyChill Score (lib/fcscore.js) */\n  .fcsb { margin:18px 0 6px; }\n  .fcsb-note { font-size:13px; }\n</style></head><body><div class="head"><h1>Hi! (2026)</h1></div>\n  ${body}\n  <h2>What the audience says</h2></body></html>`;
+test("answer-first: a frozen page with no score gets the answer on top and one score line", () => {
+  const S = require("./lib/stylesheets.js");
+  const out = S.compactEarlyScore(afPage(`${AF_CARD}\n  ${AF_VOTE}\n  ${AF_ANSWER}`));
+  assert.ok(out.includes('<span class="fcsb-mini-v">Not enough ratings</span> — 3 audience ratings so far, no critics\' verdict yet.'), "the card's own facts");
+  assert.ok(!/fcsb-rows|fcsb-note|fcsb-why/.test(out.slice(out.indexOf("<body"))), "no empty card left");
+  const a = out.indexOf('class="answer"'), s = out.indexOf('id="filmychill-score"'), v = out.indexOf('class="fcvote"');
+  assert.ok(a < s && s < v, "answer, then the score line, then the vote");
+  assert.ok(/\.fcsb\.fcsb-compact \{/.test(out) && /body:has\(\.fcsb-compact\) \.rating-few \{ display:none; \}/.test(out), "styles brought up to date");
+  assert.strictEqual(S.compactEarlyScore(out), out, "idempotent");
+  const scored = afPage(`${AF_CARD.replace('fcsb-stamp fcsb-early">Not enough ratings', 'fcsb-stamp fcsb-worth">Worth a watch')}\n  ${AF_VOTE}\n  ${AF_ANSWER}`);
+  assert.strictEqual(S.compactEarlyScore(scored), scored, "a page with a score keeps its card");
+});
+test("answer-first: when a film earns a score, the sweep brings the card back and the answer below it", () => {
+  const F = require("./lib/filmpage.js");
+  const SW = require("./lib/scoresweep.js");
+  const S = require("./lib/stylesheets.js");
+  const compact = S.compactEarlyScore(afPage(`${AF_CARD}\n  ${AF_VOTE}\n  ${AF_ANSWER}`));
+  const full = F.fcScoreSection({ title: "Hi!", kind: "movie", released: "2026-08-28", rating: 7.8, votes: 400,
+    fcScore: { verdict: "Worth a watch", reason: "Audiences like it.", audience: "Liked", critics: null, basis: "audience" } });
+  const out = SW.injectScoreSection(compact, full);
+  assert.ok(/fcsb-stamp fcsb-worth">Worth a watch/.test(out) && !/fcsb-compact"/.test(out.slice(out.indexOf("<body"))), "full card back");
+  const s = out.indexOf('id="filmychill-score"'), v = out.indexOf('class="fcvote"'), a = out.indexOf('class="answer"');
+  assert.ok(s < v && v < a, "card, vote, then the answer — the order a scored page always had");
+  assert.strictEqual(F.orderAnswer(out), out, "ordering is idempotent");
+  // And back: a re-score that has nothing yet gives the compact line, answer on top.
+  const again = SW.injectScoreSection(out, F.compactScoreHtml("Too early", "no audience ratings yet"));
+  assert.ok(again.indexOf('class="answer"') < again.indexOf('id="filmychill-score"'));
+});
+test("answer-first: the vote widget and the self-audit understand the compact line", () => {
+  const SW = require("./lib/scoresweep.js");
+  const F = require("./lib/filmpage.js");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "scoresweep.js"), "utf8");
+  assert.ok(src.includes('<section class="fcsb fcsb-compact" id="filmychill-score">[\\s\\S]*?<\\/section>/'), "injectVote anchors after the compact line");
+  const A = require("./lib/audit.js");
+  const html = `<div class="head"></div>${F.compactScoreHtml("Too early", "no audience ratings yet")}<script type="application/ld+json">{"@type":"Movie","datePublished":"2026-01-01"}</script>`;
+  assert.ok(A.auditPage(html, { released: "2026-01-01" }).some((x) => x.check === "too-early-on-old-film"), "audit still catches 'Too early' on an old film");
+  assert.ok(SW && typeof SW.injectScoreSection === "function");
+});
 test("5 · 'Page updated' and dateModified are kept to the same date", () => {
   const S = require("./lib/stylesheets.js");
   const pg = (shown, ld) => `<script type="application/ld+json">{"@type":"Movie","dateModified":"${ld}"}</script><div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${shown}</div>`;
@@ -1816,7 +1873,8 @@ test("health.js: issues make the run red, notes don't, a missing report does", (
   const run = (obj) => {
     const f = path.join(dir, "h.json");
     if (obj) fsx.writeFileSync(f, JSON.stringify(obj)); else if (fsx.existsSync(f)) fsx.unlinkSync(f);
-    return cp.spawnSync(process.execPath, [path.join(__dirname, "health.js"), f], { encoding: "utf8", env: { ...process.env, GITHUB_STEP_SUMMARY: "" } });
+    // An empty test-results path: this test is about run-health.json, not the last test run.
+    return cp.spawnSync(process.execPath, [path.join(__dirname, "health.js"), f], { encoding: "utf8", env: { ...process.env, GITHUB_STEP_SUMMARY: "", HEALTH_TEST_RESULTS: path.join(dir, "no-test-results.json") } });
   };
   try {
     assert.strictEqual(run({ issues: [], notes: ["x"], catalog: { in: 5 } }).status, 0);
@@ -1829,7 +1887,7 @@ test("health.js: issues make the run red, notes don't, a missing report does", (
     fsx.writeFileSync(path.join(site, "index.html"), '<a href="/movie/a.html">a</a><a href="/gone/">x</a><a href="https://example.com/">ext</a>');
     fsx.writeFileSync(path.join(site, "movie", "a.html"), '<a href="https://filmychill.com/">home</a>');
     const f = path.join(dir, "h2.json"); fsx.writeFileSync(f, JSON.stringify({ issues: [], notes: [], catalog: {} }));
-    const lc = cp.spawnSync(process.execPath, [path.join(__dirname, "health.js"), f], { encoding: "utf8", env: { ...process.env, GITHUB_STEP_SUMMARY: "", HEALTH_SITE_ROOT: site } });
+    const lc = cp.spawnSync(process.execPath, [path.join(__dirname, "health.js"), f], { encoding: "utf8", env: { ...process.env, GITHUB_STEP_SUMMARY: "", HEALTH_SITE_ROOT: site, HEALTH_TEST_RESULTS: path.join(dir, "no-test-results.json") } });
     assert.strictEqual(lc.status, 0, "a dead link is a note, not a red run");
     assert.ok(/1 broken internal link\(s\)[^\n]*index\.html → \/gone\/index\.html/.test(lc.stdout), lc.stdout);
   } finally { fsx.rmSync(dir, { recursive: true, force: true }); }

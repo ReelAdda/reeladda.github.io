@@ -547,8 +547,53 @@ const FCSB_CSS = [
   "  .fcsb-tag.none { background:#F4F1EA; color:#5A5470; }",
   "  .fcsb-conf { font-size:12px; font-weight:700; letter-spacing:.3px; color:#5A5470; background:#F4F1EA; border-radius:999px; padding:5px 11px; white-space:nowrap; }",
   ...VOTE_CSS,
+  // Answer-first (Oct 2026): a page with no score yet shows one line, not an empty card, and
+  // the answer to the search sits above it. Kept before .fcsb-note: injectScoreSection's
+  // refresh matches this block up to that rule.
+  "  .fcsb.fcsb-compact { margin:4px 2px 16px; padding:0; background:none; box-shadow:none; border-radius:0; }",
+  "  .fcsb-mini { font-size:13px; color:var(--mute); line-height:1.6; margin:0; }",
+  "  .fcsb-mini-k { font-weight:700; color:#8A5800; text-transform:uppercase; letter-spacing:1px; font-size:11px; margin-right:6px; }",
+  "  .answer:has(+ .fcsb-compact) { font-size:16.5px; line-height:1.6; border-left-color:var(--marigold); margin-top:16px; }",
+  "  body:has(.fcsb-compact) .rating-few { display:none; }",
   "  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }",
 ].join("\n");
+
+// The score line for a page with no score yet. `label` and `audience` come from the item on a
+// live render, or from the page's own card on a frozen one (see compactEarlyScore).
+function compactScoreHtml(label, audience) {
+  const e = escHtml;
+  return `<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">FilmyChill score</span> <span class="fcsb-mini-v">${e(label)}</span> — ${e(audience)}, no critics' verdict yet. <a href="/about/#score">How scoring works</a></p></section>`;
+}
+function audiencePhrase(votes, recent) {
+  const n = Number(votes || 0);
+  if (n > 0) return `${n.toLocaleString("en-IN")} audience rating${n === 1 ? "" : "s"} so far`;
+  return recent ? "no audience ratings yet" : "no audience ratings on TMDB";
+}
+
+// The answer line above a compact score line; below the full card (and its vote widget) once a
+// film has a score. Used by the score sweep and the frozen-page pass, so a page moves either
+// way as its score changes. Idempotent; a page with no answer line or no score is left alone.
+const SCORE_SECTION_RE = /<section class="fcsb[^"]*" id="filmychill-score">[\s\S]*?<\/section>(?:\s*<p class="fcsb-note">[\s\S]*?<\/p>)?/;
+function orderAnswer(html) {
+  const ans = /\n?[ \t]*<p class="answer">[\s\S]*?<\/p>/.exec(html);
+  const sec = SCORE_SECTION_RE.exec(html);
+  if (!ans || !sec) return html;
+  const answer = ans[0].trim();
+  const compact = sec[0].includes("fcsb-compact");
+  if (compact) {
+    if (ans.index < sec.index && html.slice(ans.index + ans[0].length, sec.index).trim() === "") return html;
+    const without = html.slice(0, ans.index) + html.slice(ans.index + ans[0].length);
+    const at = SCORE_SECTION_RE.exec(without).index;
+    return without.slice(0, at) + answer + "\n  " + without.slice(at);
+  }
+  if (ans.index > sec.index) return html;
+  const without = html.slice(0, ans.index) + html.slice(ans.index + ans[0].length);
+  const s2 = SCORE_SECTION_RE.exec(without);
+  let at = s2.index + s2[0].length;
+  const vote = /\s*<div class="fcvote"[\s\S]*?<\/div>\s*<\/div>(?:\s*<script src="\/js\/vote\.js" defer><\/script>)?/.exec(without.slice(at));
+  if (vote && vote.index === 0) at += vote[0].length;
+  return without.slice(0, at) + "\n  " + answer + without.slice(at);
+}
 
 // "If you liked this" — exported so the related-films refresh (lib/relrefresh.js) writes the
 // exact same markup into pages that are never rebuilt.
@@ -595,6 +640,9 @@ function fcScoreSection(item) {
     // replaces the header's audience-only verdict pill; the audience rating itself stays in
     // the header and again in the breakdown, labelled as the audience's.
     const s = item.fcScore || null;
+    // No score yet: one line instead of a card of empty rows (832 pages led with four
+    // "not enough ratings" blocks before the answer, Oct 2026).
+    if (!s) return compactScoreHtml(none.label, audiencePhrase(item.votes, isRecent(item)));
     const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
     const aud = s && s.audience
       ? { tag: s.audience, sub: s.early
@@ -887,7 +935,7 @@ ${FCSB_CSS}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
     </div>
   </div>
-  ${fcScoreSection(item)}
+  ${orderAnswer(`${fcScoreSection(item)}
   ${voteWidgetHtml(item, code)}
   ${(() => {
     // Lead answer line. The GSC data showed pages ranking on page 1 for "where to watch [film]"
@@ -911,7 +959,7 @@ ${FCSB_CSS}
       ans = `Where to watch <b>${e(item.title)}</b> in ${e(country)} isn't confirmed yet — this page updates the moment a platform lists it.`;
     }
     return `<p class="answer">${ans}</p>`;
-  })()}
+  })()}`)}
   ${verdictProse ? `<h2>What the audience says</h2><p class="vprose">${e(verdictProse)}</p>` : ""}
   ${item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
   ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
@@ -1094,7 +1142,10 @@ module.exports = {
   simGridHtml,
   headRatingHtml,
   FCSB_CSS,
+  audiencePhrase,
+  compactScoreHtml,
   fcScoreSection,
+  orderAnswer,
   fcdataWindowPhrase,
   assignSlugs,
   buildFilmPage,

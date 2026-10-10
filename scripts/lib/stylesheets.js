@@ -28,7 +28,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { COUNTRIES, escHtml, fmtDateFull, ICON_LINKS, ldJson, localeFor, videoUploadDate } = require("./core.js");
-const { fcdataWindowPhrase } = require("./filmpage.js");
+const { audiencePhrase, compactScoreHtml, FCSB_CSS, fcdataWindowPhrase, orderAnswer } = require("./filmpage.js");
 const { FOOTER_LINKS, NO_HOSTING_NOTICE, ytIdOf } = require("./pagekit.js");
 const { titleWithCountry } = require("./rules.js");
 
@@ -177,6 +177,26 @@ function syncDateModified(html, code) {
 }
 const escDecode = (s) => s.replace(/&#39;/g, "'").replace(/&amp;/g, "&");
 
+// Answer-first on a frozen page with no score yet (Oct 2026): its empty card becomes the one
+// line fcScoreSection now writes, built from the card's own stamp and audience row, and the
+// answer moves above it. Live renders and the score sweep produce the same markup; this
+// reaches the pages neither rebuilds. Styles come inline first if the page has a shared file.
+const EARLY_CARD_RE = /<section class="fcsb" id="filmychill-score">(?:(?!<\/section>)[\s\S])*?<span class="fcsb-stamp fcsb-early">([^<]+)<\/span>[\s\S]*?<\/section>\s*<p class="fcsb-note">[\s\S]*?<\/p>/;
+const FCSB_CSS_RE = /  \/\* FilmyChill Score \(lib\/fcscore\.js\) \*\/[\s\S]*?\.fcsb-note \{[^\n]*\}(\n  \.fcsb-conf \{[^\n]*\})?/;
+function compactEarlyScore(html, root = ".") {
+  if (!EARLY_CARD_RE.test(html)) return html;
+  let out = LINK_RE.test(html) ? inlineStyles(html, root) : html;
+  if (!/<style>/.test(out)) return html;
+  const m = EARLY_CARD_RE.exec(out);
+  const aud = (/<b>Audience<\/b><small>([^<]*)<\/small>/.exec(m[0]) || [])[1] || "";
+  const n = /from ([\d,]+) ratings?/.exec(aud);
+  const phrase = n ? audiencePhrase(Number(n[1].replace(/,/g, "")), false)
+    : /No audience ratings yet/.test(aud) ? audiencePhrase(0, true) : audiencePhrase(0, false);
+  out = out.replace(m[0], compactScoreHtml(escDecode(m[1]), phrase));
+  out = FCSB_CSS_RE.test(out) ? out.replace(FCSB_CSS_RE, FCSB_CSS) : out.replace("</style>", `${FCSB_CSS}\n</style>`);
+  return orderAnswer(out);
+}
+
 // "ae/movie/x.html" -> { code: "ae", slug: "x" }; India's pages live in /movie/.
 function filmPageKey(rel) {
   const m = /^(?:([a-z]{2})\/)?movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
@@ -191,7 +211,7 @@ function filmPageKey(rel) {
 function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
   const used = new Set();
   const res = { pages: 0, externalized: 0, footerLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [],
-    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0 };
+    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0 };
   fs.mkdirSync(path.join(root, CSS_DIR), { recursive: true });
   for (const rel of files) {
     const file = path.join(root, rel);
@@ -214,6 +234,8 @@ function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
         const checked = applyFcdataClaim(next, claim);
         if (checked !== next) { next = checked; if (claim.action === "drop") res.fcdataDropped++; else res.fcdataFixed++; }
       }
+      const compacted = compactEarlyScore(next, root);
+      if (compacted !== next) { next = compacted; res.compacted++; }
       const synced = syncDateModified(next, key.code);
       if (synced !== next) { next = synced; res.dateSynced++; }
       const dated = ensureTrailerUploadDate(next);
@@ -370,6 +392,7 @@ module.exports = {
   inlineStyles,
   repairDeadLinks,
   sitePageFiles,
+  compactEarlyScore,
   syncDateModified,
   unlinkMissingPages,
 };

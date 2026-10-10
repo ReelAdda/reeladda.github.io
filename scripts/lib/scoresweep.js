@@ -17,7 +17,7 @@
 const fs = require("fs");
 const { filmPagePath, fmtDateFull, localeFor } = require("./core.js");
 const { fcScore } = require("./fcscore.js");
-const { FCSB_CSS, fcScoreSection, headRatingHtml } = require("./filmpage.js");
+const { FCSB_CSS, fcScoreSection, headRatingHtml, orderAnswer } = require("./filmpage.js");
 const { cachedCriticsTone } = require("./editorial.js");
 const { escHtml } = require("./core.js");
 const { buildVerdictProse } = require("./filmcopy.js");
@@ -46,8 +46,9 @@ const SWEEP_WORDING = 6;
 // Pure: put (or replace) the score section in an existing film page. Returns the new HTML.
 function injectScoreSection(html, section) {
   let out = html;
-  // Replace an existing section (and its note) wholesale.
-  const re = /<section class="fcsb" id="filmychill-score">[\s\S]*?<\/section>\s*<p class="fcsb-note">[\s\S]*?<\/p>/;
+  // Replace an existing section (and its note) wholesale — the full card or the compact line a
+  // page with no score yet carries (fcScoreSection).
+  const re = /<section class="fcsb[^"]*" id="filmychill-score">[\s\S]*?<\/section>(?:\s*<p class="fcsb-note">[\s\S]*?<\/p>)?/;
   if (re.test(out)) out = out.replace(re, section.trim());
   else {
     // New: same place as on weekly pages — right before the lead answer line; older pages that
@@ -66,7 +67,8 @@ function injectScoreSection(html, section) {
     if (st < 0) return html;
     out = out.slice(0, st) + FCSB_CSS + "\n" + out.slice(st);
   }
-  return out;
+  // The answer goes above a compact line and below a full card, so it follows the score.
+  return orderAnswer(out);
 }
 
 // Pure: bring the page header in line with the score — today's audience rating in the same
@@ -174,7 +176,8 @@ function injectVote(html, item, code) {
   if (html.includes('class="fcvote"')) return html;
   const widget = voteWidgetHtml(item, code);
   if (!widget) return html;
-  const m = html.match(/<p class="fcsb-note">[\s\S]*?<\/p>/);
+  // After the card's note, or after the compact line on a page with no score yet.
+  const m = html.match(/<p class="fcsb-note">[\s\S]*?<\/p>|<section class="fcsb fcsb-compact" id="filmychill-score">[\s\S]*?<\/section>/);
   if (!m) return html;
   const at = m.index + m[0].length;
   return cspAllowVotes(html.slice(0, at) + "\n  " + widget + html.slice(at));
