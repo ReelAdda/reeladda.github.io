@@ -1,0 +1,26 @@
+name: Future-date test check
+# Once a week, the unit tests run with the clock 30 days ahead (scripts/testclock.js). A test
+# that will start failing when the real calendar catches up fails here first, weeks before it
+# can stop a daily build. This run publishes nothing and has no write access; a failure here
+# only means "fix this test (or the code) within the month".
+on:
+  schedule:
+    - cron: "17 4 * * 1"   # Mondays, ~9:47 AM IST; off-peak minute (see update.yml)
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  future:
+    runs-on: ubuntu-latest
+    steps:
+      # Same pinned actions as update.yml; bump all workflows together.
+      - name: Checkout site
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24"
+      - name: Unit tests, 30 days from now
+        run: node -r ./scripts/testclock.js scripts/test.js
+        env:
+          TEST_CLOCK_SHIFT_DAYS: "30"

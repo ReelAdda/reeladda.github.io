@@ -14,3 +14,5 @@ _site/
 
 # Per-run build report read by scripts/health.js. Never committed.
 run-health.json
+# Per-run unit-test results (scripts/test.js), also read by health.js. Never committed.
+test-results.json

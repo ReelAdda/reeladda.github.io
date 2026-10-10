@@ -1,21 +1,53 @@
 // FilmyChill unit tests — pure functions + SSR-injection hardening.
 // Run: node scripts/test.js   (no dependencies; uses Node's built-in assert)
-// Exits non-zero on any failure so CI fails the build.
+// Exits non-zero on any failure — unless TEST_TIERS=1, see below.
+//
+// TWO TIERS (Oct 2026). On 8 Oct one wording test failed and the whole day's update stopped.
+// A SAFETY test guards against publishing broken or unsafe pages or losing data: escaping and
+// injection, structured data that parses, stylesheets, state files, outage detection, the
+// sitemap, the build order. Any other test checks copy — wording, titles, descriptions. With
+// TEST_TIERS=1 (set by the daily build) only a safety failure exits non-zero; content
+// failures go to test-results.json, and scripts/health.js turns the run red at the end, after
+// the site has updated. A test is safety if its group is in SAFETY_GROUPS or its name matches
+// SAFETY_NAME. Locally, without TEST_TIERS, every failure still fails the run.
 
 const assert = require("assert");
 const U = require("./update.js"); // safe: update.js only runs main() when executed directly
 
+const SAFETY_GROUPS = new Set([
+  "escHtml()",
+  "replaceBetween() — SSR markers",
+  "JSON-LD parses as Google sees it",
+  "shared stylesheets and the privacy page",
+  "failure paths: outages, stalls, corrupt state, silent stages",
+  "build sequence — one definition, no drift",
+  "sitemap dates — never emit an invalid lastmod",
+  "country roster: every market is complete, and the switcher is built from it",
+  "streaming-window archive — the proprietary record",
+  "departure sweep — rechecking claims we already made",
+]);
+const SAFETY_NAME = /escap|injection|xss|stylesheet|corrupt|outage|\bcsp/i;
+const TIERED = process.env.TEST_TIERS === "1";
+
 let passed = 0, failed = 0;
+let currentGroup = "";
+const groupsSeen = new Set();
+const failures = [];
+function recordFailure(name, grp, e) {
+  failed++;
+  failures.push({ name, group: grp, safety: SAFETY_GROUPS.has(grp) || SAFETY_NAME.test(name), message: String(e && e.message || e).split("\n")[0].slice(0, 300) });
+  console.error(`  \u2717 ${name}\n      ${e.message}`);
+}
 function test(name, fn) {
   try { fn(); passed++; console.log(`  \u2713 ${name}`); }
-  catch (e) { failed++; console.error(`  \u2717 ${name}\n      ${e.message}`); }
+  catch (e) { recordFailure(name, currentGroup, e); }
 }
 // Async tests run AFTER every sync test, one at a time, and are awaited before the totals
 // print. test() can't take them: it would count an unresolved promise as a pass, and a test
 // that changes the working directory would leak it into every test after it.
 const ASYNC_TESTS = [];
-function testAsync(name, fn) { ASYNC_TESTS.push([name, fn]); }
-function group(title) { console.log(`\n${title}`); }
+function testAsync(name, fn) { ASYNC_TESTS.push([name, fn, currentGroup]); }
+function group(title) { currentGroup = title; groupsSeen.add(title); console.log(`\n${title}`); }
 
 // ---------------- verdict() ----------------
 group("verdict()");
@@ -6535,14 +6567,28 @@ test("hubs: a service's channel titles join its own hub instead of a second one"
 
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");
-  for (const [name, fn] of ASYNC_TESTS) {
+  for (const [name, fn, grp] of ASYNC_TESTS) {
     try { await fn(); passed++; console.log(`  \u2713 ${name}`); }
-    catch (e) { failed++; console.error(`  \u2717 ${name}\n      ${e.message}`); }
+    catch (e) { recordFailure(name, grp, e); }
   }
   // The sandbox country's files are test output, never site content. Remove them so a run
   // in the repo leaves no zz/ behind to be committed and served.
   try { require("fs").rmSync("zz", { recursive: true, force: true }); } catch {}
-  console.log(`Tests: ${passed} passed, ${failed} failed`);
-  if (failed > 0) { console.error("FAIL"); process.exit(1); }
+  // A renamed group would silently drop out of the safety tier. That is itself a safety failure.
+  for (const g of SAFETY_GROUPS) {
+    if (!groupsSeen.has(g)) recordFailure(`safety tier lists "${g}"`, "", new Error("no test group has this title any more \u2014 update SAFETY_GROUPS"));
+  }
+  const safetyFailed = failures.filter((f) => f.safety);
+  const contentFailed = failures.filter((f) => !f.safety);
+  try {
+    require("fs").writeFileSync("test-results.json", JSON.stringify({ passed, failed, safetyFailed, contentFailed }, null, 2) + "\n");
+  } catch {}
+  console.log(`Tests: ${passed} passed, ${failed} failed${failed ? ` (${safetyFailed.length} safety, ${contentFailed.length} content)` : ""}`);
+  if (safetyFailed.length || (failed > 0 && !TIERED)) { console.error("FAIL"); process.exit(1); }
+  if (failed > 0) {
+    for (const f of contentFailed) console.log(`::warning title=Content test failed (site still updates)::${f.name} \u2014 ${f.message.replace(/[\r\n]+/g, " ")}`);
+    console.log("PASS (content failures reported, not blocking: TEST_TIERS=1)");
+    return;
+  }
   console.log("PASS");
 })();
