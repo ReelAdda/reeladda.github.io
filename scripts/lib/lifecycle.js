@@ -20,8 +20,8 @@ const {
   visibleText,
 } = require("./archive.js");
 const { digitalReleaseFor } = require("./enrich.js");
-const { digitalAnnounceText, OPEN_PILL_RE, settleReleasedCopy } = require("./pagekit.js");
-const { countryNameFor, dedupeProviders, streamVocab } = require("./rules.js");
+const { digitalAnnounceText, digitalPassedBlock, OPEN_PILL_RE, settleReleasedCopy } = require("./pagekit.js");
+const { canonProvider, countryNameFor, dedupeProviders, streamVocab } = require("./rules.js");
 const { healthNote, loadStateFile } = require("./runhealth.js");
 const { sleep, tmdb } = require("./tmdb.js");
 
@@ -333,7 +333,7 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
     try { return fs.readFileSync(`${dir}/${x.slug}.html`, "utf8").includes("<!--SW:live="); }
     catch { return false; }
   });
-  if (!candidates.length) return;
+  if (!candidates.length) { syncAvailabilityStamps(manifest, cfg); return; }
   // Phase 1: ask TMDB about every candidate before touching anything. TMDB's provider data
   // comes from JustWatch, and when that feed breaks every title comes back empty at once —
   // which, checked one at a time, looks exactly like hundreds of films leaving streaming.
@@ -361,7 +361,8 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
       const live = m[c.slug].live || {};
 
       if (provs.length) {
-        // Still streaming. Record the check and refresh the provider list if it moved.
+        // Still streaming. Record the check and refresh the provider list if it moved; the
+        // page's own "as of" date follows in syncAvailabilityStamps.
         m[c.slug].live = { ...live, providers: provs, lastCheck: asOf, misses: 0 };
         stillThere++;
         continue;
@@ -390,6 +391,46 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
     } catch (e) { console.warn(`  departure ${c.slug}: ${e.message}`); }
   }
   console.log(`  departure sweep [${cfg.code}]: ${candidates.length} rechecked, ${stillThere} still streaming, ${pending} awaiting confirmation, ${confirmed} retired`);
+  syncAvailabilityStamps(manifest, cfg);
+}
+
+// A recheck that found a film still streaming used to update only the manifest, so a page
+// reconfirmed last week could still read "Availability as of" a date six weeks back (124
+// pages, Oct 2026). The page takes the date of its last successful check — but only when
+// every platform it names was still found then. Otherwise the pills are the stale part, and
+// a fresh date would vouch for them. Idempotent: <!--SW:checked--> records the date applied.
+function restampAvailability(html, live, cfg) {
+  if (!live || !live.lastCheck || live.misses) return html;
+  const done = /<!--SW:checked=(\d{4}-\d{2}-\d{2})-->/.exec(html);
+  if (done && done[1] >= live.lastCheck) return html;
+  const facts = frozenFilmFacts(html);
+  if (!facts || !facts.item.providers.length) return html;
+  const found = new Set((live.providers || []).map(canonProvider));
+  if (!facts.item.providers.every((p) => found.has(canonProvider(p)))) return html;
+  const when = escHtml(fmtDateFull(live.lastCheck, localeFor((cfg && cfg.code) || "in")));
+  let out = html.replace(/Availability as of [^<—]+? — /, `Availability as of ${when} — `);
+  out = out.replace(/(Spotted by our daily availability check on [^.<,]+?)(?:, still there on [^.<]+?)?\. We recheck periodically/,
+    `$1, still there on ${when}. We recheck periodically`);
+  if (out === html) return html;
+  return done ? out.replace(done[0], `<!--SW:checked=${live.lastCheck}-->`)
+    : out.replace(/(<!--SW:live=[^>]*-->)/, `$1<!--SW:checked=${live.lastCheck}-->`);
+}
+
+// Local: apply restampAvailability to every live claim of one country.
+function syncAvailabilityStamps(manifest, cfg) {
+  const m = manifest[cfg.code] || {};
+  const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
+  let n = 0;
+  for (const [slug, v] of Object.entries(m)) {
+    if (!v || !v.live || !v.live.lastCheck || v.live.misses) continue;
+    const p = `${dir}/${slug}.html`;
+    let html;
+    try { html = fs.readFileSync(p, "utf8"); } catch { continue; }
+    const next = restampAvailability(html, v.live, cfg);
+    if (next !== html) { fs.writeFileSync(p, next); n++; }
+  }
+  if (n) console.log(`  availability stamps [${cfg.code}]: ${n} page(s) dated to their last successful recheck`);
+  return n;
 }
 
 function patchDueIfPassed(html, { title, countryName, cfg, now = Date.now() }) {
@@ -416,6 +457,25 @@ function patchDueIfPassed(html, { title, countryName, cfg, now = Date.now() }) {
   return { html: out, changed: true };
 }
 
+const RUN_ENDED_PILL_RE = /<span class="pill">Theatrical run ended — (?:OTT|streaming) arrival pending<\/span>/;
+// The fallback description before it named the film (filmMetaDescription, Oct 2026).
+const OLD_FALLBACK_DESC_RE = /<meta name="description" content="Not (?:on any (?:OTT platform|streaming service)|streaming) in /;
+
+// Frozen page whose announced streaming date has passed with no arrival (see digitalPassed):
+// the block, and the FAQ answer applyDigitalDatePatch wrote, stop saying it is coming.
+function patchDigitalIfPassed(html, { title, countryName, cfg, now = Date.now() }) {
+  const m = /<!--SW:digital=(\d{4}-\d{2}-\d{2})\|([^>]*?)-->/.exec(html);
+  if (!m || html.includes("<!--SW:live=") || releaseState(m[1], now) !== "released") return { html, changed: false };
+  const start = "<!--SW:pending-->", end = "<!--/SW:pending-->";
+  const a = html.indexOf(start), b = html.indexOf(end);
+  if (a === -1 || b === -1 || b < a) return { html, changed: false };
+  const note = m[2].replace(/&amp;/g, "&");
+  let out = html.slice(0, a) + digitalPassedBlock(title, m[1], note, countryName, cfg) + html.slice(b + end.length);
+  out = out.replace(/ is scheduled to start streaming((?: on [^<"]+?)?) in ([^<"]+?) on ([^<".]+?)\./g,
+    (x, on, c, d) => ` was scheduled to start streaming${on} in ${c} on ${d}, but it is not showing as available there yet.`);
+  return { html: out, changed: out !== html };
+}
+
 // Live pass: walk one country's film pages and apply the due-date patch. Local only.
 function refreshDuePages(cfg, countryName, manifest = null) {
   const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
@@ -428,14 +488,19 @@ function refreshDuePages(cfg, countryName, manifest = null) {
     let out = html, changed = false;
     if (html.includes("<!--SW:due=")) {
       ({ html: out, changed } = patchDueIfPassed(html, { title: titleFromPage(html) || f.replace(/\.html$/, ""), countryName, cfg }));
-    } else if (OPEN_PILL_RE.test(html)) {
+    } else if (html.includes("<!--SW:digital=") && !html.includes("<!--SW:live=")) {
+      // An announced streaming date that has gone by without the film arriving.
+      // Its FAQ can still carry the live builder's "is in cinemas … now" (settleReleasedCopy).
+      const dg = patchDigitalIfPassed(html, { title: titleFromPage(html) || f.replace(/\.html$/, ""), countryName, cfg });
+      let next = settleReleasedCopy(dg.html, { countryName, cfg }).html;
+      if (dg.changed) next = retitleFrozen(rewriteMetaDescription(next, cfg).html, cfg).html;
+      if (next !== html) { out = next; changed = true; }
+    } else if (OPEN_PILL_RE.test(html) || RUN_ENDED_PILL_RE.test(html) || OLD_FALLBACK_DESC_RE.test(html)) {
       // Open run: re-settle so it flips to "most likely ended" on the day it crosses the
-      // window, and rebuild the description, which states the same thing.
-      const st = settleReleasedCopy(html, { countryName, cfg });
-      if (st.changed) {
-        out = rewriteMetaDescription(st.html, cfg).html;
-        changed = true;
-      }
+      // window. Ended run: bring the live builder's own theatrical sentences, and any lapsed
+      // window estimate, into line with the pill. Either way the description follows.
+      const next = rewriteMetaDescription(settleReleasedCopy(html, { countryName, cfg }).html, cfg).html;
+      if (next !== html) { out = next; changed = true; }
     } else continue;
     if (changed) {
       fs.writeFileSync(path, out); n++;
@@ -619,10 +684,13 @@ module.exports = {
   departureCandidates,
   departureOutage,
   loadPagesManifest,
+  patchDigitalIfPassed,
   patchDueIfPassed,
   recoverTmdbIds,
   refreshDuePages,
+  restampAvailability,
   settleDepartedCopy,
+  syncAvailabilityStamps,
   sweepCandidates,
   sweepStreamingArrivals,
   sweepStreamingDepartures,

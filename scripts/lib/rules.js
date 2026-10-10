@@ -269,7 +269,7 @@ const PROVIDER_CANON = [
   [/^Apple TV\+?( Amazon Channel| Channel)?$/i, "Apple TV"],
   [/^(Amazon )?Prime Video( with Ads)?$/i, "Prime Video"],
   [/^Netflix( Standard with Ads| basic with Ads)?$/i, "Netflix"],
-  [/^(JioHotstar|Disney\+ Hotstar|Hotstar)$/i, "JioHotstar"],
+  [/^(Jio ?Hotstar|Disney\+ Hotstar|Hotstar)$/i, "JioHotstar"],
   [/^(HBO )?Max( Amazon Channel)?$/i, "HBO Max"],
   [/^Paramount\+?( Premium| Amazon Channel)?$/i, "Paramount+"],
   [/^Crunchyroll( Amazon Channel)?$/i, "Crunchyroll"],

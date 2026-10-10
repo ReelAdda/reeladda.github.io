@@ -27,7 +27,7 @@
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const { COUNTRIES, escHtml, ICON_LINKS, ldJson, videoUploadDate } = require("./core.js");
+const { COUNTRIES, escHtml, fmtDateFull, ICON_LINKS, ldJson, localeFor, videoUploadDate } = require("./core.js");
 const { fcdataWindowPhrase } = require("./filmpage.js");
 const { FOOTER_LINKS, NO_HOSTING_NOTICE, ytIdOf } = require("./pagekit.js");
 const { titleWithCountry } = require("./rules.js");
@@ -146,6 +146,37 @@ function ensureTrailerUploadDate(html, nowMs = Date.now()) {
   return { html: out, fix };
 }
 
+// Pure: a film page's visible "Page updated" date and its JSON-LD dateModified, brought to the
+// later of the two. The score sweep moved only the visible one until Oct 2026, so 8,906 pages
+// told readers one date and search engines another. The visible date is in the edition's
+// locale (fmtDateFull) or, on old pages, ISO; anything unreadable leaves the page alone.
+const DATE_LOOKUP = new Map();
+function isoFromPageDate(text, code) {
+  const t = String(text).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
+  const locale = localeFor(code);
+  if (!DATE_LOOKUP.has(locale)) {
+    const m = new Map();
+    for (let ms = Date.UTC(2025, 0, 1); ms <= Date.now() + 864e5; ms += 864e5) {
+      const iso = new Date(ms).toISOString().slice(0, 10);
+      m.set(fmtDateFull(iso, locale), iso);
+    }
+    DATE_LOOKUP.set(locale, m);
+  }
+  return DATE_LOOKUP.get(locale).get(t) || null;
+}
+const PAGE_UPDATED_RE = /(<div class="meta" style="margin-top:2px;font-size:12\.5px">Page updated )([^<]+)(<\/div>)/;
+function syncDateModified(html, code) {
+  const vis = PAGE_UPDATED_RE.exec(html);
+  const ld = /"dateModified":"(\d{4}-\d{2}-\d{2})/.exec(html);
+  if (!vis || !ld) return html;
+  const shown = isoFromPageDate(escDecode(vis[2]), code);
+  if (!shown || shown === ld[1]) return html;
+  if (shown > ld[1]) return html.replace(ld[0], `"dateModified":"${shown}`);
+  return html.replace(vis[0], `${vis[1]}${escHtml(fmtDateFull(ld[1], localeFor(code)))}${vis[3]}`);
+}
+const escDecode = (s) => s.replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+
 // "ae/movie/x.html" -> { code: "ae", slug: "x" }; India's pages live in /movie/.
 function filmPageKey(rel) {
   const m = /^(?:([a-z]{2})\/)?movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
@@ -160,7 +191,7 @@ function filmPageKey(rel) {
 function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
   const used = new Set();
   const res = { pages: 0, externalized: 0, footerLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [],
-    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0 };
+    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0 };
   fs.mkdirSync(path.join(root, CSS_DIR), { recursive: true });
   for (const rel of files) {
     const file = path.join(root, rel);
@@ -183,6 +214,8 @@ function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
         const checked = applyFcdataClaim(next, claim);
         if (checked !== next) { next = checked; if (claim.action === "drop") res.fcdataDropped++; else res.fcdataFixed++; }
       }
+      const synced = syncDateModified(next, key.code);
+      if (synced !== next) { next = synced; res.dateSynced++; }
       const dated = ensureTrailerUploadDate(next);
       if (dated.fix) {
         next = dated.html;
@@ -337,5 +370,6 @@ module.exports = {
   inlineStyles,
   repairDeadLinks,
   sitePageFiles,
+  syncDateModified,
   unlinkMissingPages,
 };

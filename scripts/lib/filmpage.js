@@ -38,6 +38,8 @@ const {
   canonProvider,
   cspWith,
   digitalAnnounceText,
+  digitalPassed,
+  digitalPassedBlock,
   digitalUpcoming,
   footerAttribution,
   hubPath,
@@ -195,6 +197,14 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
       `${item.title} streams${on} in ${country} from ${when} — verdict, runtime and cast.`,
       `${item.title} streams${on} in ${country} from ${when}.`,
     ]);
+  } else if (item.kind !== "tv" && digitalPassed(item)) {
+    const when = fmtDateFull(item.digitalDate, localeFor((cfg && cfg.code) || "in"));
+    const on = item.digitalNote ? ` on ${canonProvider(item.digitalNote)}` : "";
+    desc = fitDesc([
+      `${item.title}${yr} was due to stream${on} in ${country} from ${when} but isn't showing yet. We check twice a day and update this page the moment it lands.`,
+      `${item.title} was due to stream${on} in ${country} from ${when} — not showing yet. We update this page the moment it lands.`,
+      `${item.title} was due to stream${on} in ${country} from ${when}.`,
+    ]);
   } else if (opts.gone) {
     // Left every subscription service we track. Say so — never "in cinemas", never a platform.
     desc = fitDesc([
@@ -250,6 +260,10 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
       `Not announced yet. ${basis}, so ${item.title} is ${when}. ${statsDot ? `${statsDot}. ` : ""}${pay}`,
       `Not announced yet. ${basis}, so ${item.title} is ${when}. ${pay}`,
       `Not announced yet. ${basis}, so ${item.title} is ${shortWhen}. ${pay}`,
+      // Shorter, still led by the film's name: without these, a title too long for the forms
+      // above fell through to the title-less ones below, and 30-odd pages shared one snippet.
+      `${item.title}${titleSep} ${titleSep ? "not" : "Not"} announced yet. ${basis}, so expect it ${shortWhen.replace(/^(likely|expect) /, "")}. ${pay}`,
+      `${item.title}${titleSep} ${titleSep ? "not" : "Not"} announced yet; usually ${est.lo}–${est.hi} weeks after ${venue}, so ${shortWhen.replace(/^(likely|expect) /, "")}. ${pay}`,
       `Not announced yet. ${basis}, so expect it ${when.replace(/^(likely|expect) /, "")}. ${pay}`,
       `Not announced yet. ${basis}, so expect it ${shortWhen.replace(/^(likely|expect) /, "")}. ${pay}`,
       `Not announced yet — ${item.title} is ${when}. ${pay}`,
@@ -271,11 +285,16 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
     // is that nobody has said — so the snippet says exactly that, first.
     const lapsed = item.kind !== "tv" && item.released && !upcoming && !providers.length && !rentBuy.length;
     const usual = hasLanguageWindow(item.language) ? `the usual ${item.language} window` : "the usual window";
+    // Led by the film's own name (Oct 2026): without it, 747 pages shared 93 identical
+    // snippets, and a searcher scanning results could not tell which film a line was about.
     if (lapsed) {
+      const statsDot = [ratingBit, runtimeBit].filter(Boolean).join(" · ");
+      const platform = V.word === "OTT" ? "OTT platform" : "streaming service";
       desc = fitDesc([
-        `Not on any ${V.word === "OTT" ? "OTT platform" : "streaming service"} in ${country} yet, and later than ${usual} — no date has been announced. We check twice a day and update this page the moment it streams.`,
-        `Not streaming in ${country} yet, and no date has been announced. We check twice a day and update this page the moment it streams.`,
-        `Not streaming in ${country} yet — no date announced.`,
+        `${item.title}${yr} isn't on any ${platform} in ${country} yet, and it's later than ${usual} — no date has been announced. ${statsDot ? `${statsDot}. ` : ""}We check twice a day and update this page the moment it streams.`,
+        `${item.title}${yr} isn't on any ${platform} in ${country} yet, and no date has been announced. We check twice a day and update this page the moment it streams.`,
+        `${item.title} isn't streaming in ${country} yet, and no date has been announced. We update this page the moment it streams.`,
+        `${item.title} isn't streaming in ${country} yet — no date announced.`,
       ]);
       return desc;
     }
@@ -378,10 +397,12 @@ function filmTitleTag(item, cfg = null) {
   }
   // Announced streaming date, not arrived yet: the page CAN answer "OTT release date" now,
   // with the date (and platform when TMDB names it). See digitalReleaseFor.
-  if (item.kind !== "tv" && digitalUpcoming(item)) {
+  // Once that date has passed without the film arriving, the announced date is still the
+  // answer to "OTT release date"; the page body says it hasn't shown up yet (digitalPassed).
+  if (item.kind !== "tv" && (digitalUpcoming(item) || digitalPassed(item))) {
     const code = (cfg && cfg.code) || "in";
     const d = fmtDateShort(item.digitalDate, Date.now(), localeFor(code));
-    const on = item.digitalNote ? ` on ${item.digitalNote}` : "";
+    const on = item.digitalNote ? ` on ${canonProvider(item.digitalNote)}` : "";
     const label = V.word === "OTT" ? "OTT Release Date" : "Streaming Date";
     return fitTitle([
       `${item.title}${yr} ${label}: ${d}${on} | FilmyChill`,
@@ -974,6 +995,7 @@ ${FCSB_CSS}
       return `<!--SW:pending--><!--SW:digital=${e(item.digitalDate)}|${e(item.digitalNote || "")}--><h2>${e(V.heading(item.title))}</h2>`
         + `<p><strong>Streaming from ${e(fmtDateFull(item.digitalDate, localeFor(code)))}${on}.</strong> ${e(digitalAnnounceText(item.title, item.digitalDate, item.digitalNote, country, cfg))} This page switches to \u201cstreaming now\u201d the day it lands.</p><!--/SW:pending-->`;
     }
+    if (digitalPassed(item)) return digitalPassedBlock(item.title, item.digitalDate, item.digitalNote, country, cfg);
     const est = streamWindowEstimate(item.released, item.language, asOfDate);
     const body = est && !est.passed
       ? `<p>Not streaming yet — ${e(item.title)} is in its theatrical run in ${e(country)}${item.released ? `, released ${e(item.released)}` : ""}. ${e(item.language || "Films like this")} releases typically reach streaming about ${est.lo}–${est.hi} weeks after opening, which would put it somewhere around <strong>${e(est.span)}</strong>.</p><p style="color:var(--mute);font-size:13px">That's the usual pattern, not a confirmed date — no platform has announced one. We re-check every day and this page updates the moment it lands.</p>`
