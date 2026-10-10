@@ -1674,6 +1674,23 @@ test("4 · a recheck that finds the film still streaming dates the page; a chang
   const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "lifecycle.js"), "utf8");
   assert.strictEqual((src.match(/syncAvailabilityStamps\(manifest, cfg\);/g) || []).length, 2, "the sweep stamps pages whether or not it had candidates");
 });
+test("1b · a frozen 'Expected <month>' title is refreshed once its window passes, and only then", () => {
+  const A = require("./lib/archive.js");
+  const page = (released, title) => `<title>${title}</title><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Awarapan 2","inLanguage":"Hindi","datePublished":"${released}"}</script>`
+    + `<h2>Where to watch in India</h2><div><span class="pill">Theatrical run ended — OTT arrival pending</span></div><footer></footer>`;
+  const lapsed = A.refreshExpectedTitle(page(trustDaysAgo(70), "Awarapan 2 OTT Release Date: Expected Oct, Not Yet Confirmed"), TRUST_IN);
+  assert.ok(lapsed.changed && /<title>Awarapan 2 \(\d{4}\) OTT Release Date: Not Announced Yet<\/title>/.test(lapsed.html), lapsed.html.slice(0, 120));
+  assert.strictEqual(A.refreshExpectedTitle(lapsed.html, TRUST_IN).changed, false, "no 'Expected' left: never touched again");
+  const live = page(trustDaysAgo(20), "Awarapan 2 OTT Release Date: Expected Oct, Not Yet Confirmed");
+  const r = A.refreshExpectedTitle(live, TRUST_IN);
+  assert.strictEqual(A.refreshExpectedTitle(r.html, TRUST_IN).changed, false, "a live window settles in one write");
+  const other = page(trustDaysAgo(70), "Awarapan 2 (2026) — Review &amp; Where to Watch");
+  assert.strictEqual(A.refreshExpectedTitle(other, TRUST_IN).changed, false, "titles without 'Expected' are left alone");
+  // Outside India the end-of-build pass adds the country; the refreshed title already has it.
+  const ca = A.refreshExpectedTitle(page(trustDaysAgo(70), "Awarapan 2 Streaming Date: Expected Oct").replace("Hindi", "English"), { code: "ca", name: "Canada", region: "CA" });
+  const S = require("./lib/stylesheets.js");
+  assert.strictEqual(S.ensureCountryTitle(ca.html, { code: "ca", name: "Canada", region: "CA" }), ca.html, "no flip-flop with ensureCountryTitle");
+});
 test("5 · 'Page updated' and dateModified are kept to the same date", () => {
   const S = require("./lib/stylesheets.js");
   const pg = (shown, ld) => `<script type="application/ld+json">{"@type":"Movie","dateModified":"${ld}"}</script><div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${shown}</div>`;

@@ -15,6 +15,7 @@ const {
   PAGES_MANIFEST_FILE,
   reconcilePagesManifest,
   reEsc,
+  refreshExpectedTitle,
   retitleFrozen,
   rewriteMetaDescription,
   visibleText,
@@ -458,6 +459,7 @@ function patchDueIfPassed(html, { title, countryName, cfg, now = Date.now() }) {
 }
 
 const RUN_ENDED_PILL_RE = /<span class="pill">Theatrical run ended — (?:OTT|streaming) arrival pending<\/span>/;
+const EXPECTED_TITLE_RE = /<title>[^<]*\bExpected [A-Z][a-z]{2}/;
 // The fallback description before it named the film (filmMetaDescription, Oct 2026).
 const OLD_FALLBACK_DESC_RE = /<meta name="description" content="Not (?:on any (?:OTT platform|streaming service)|streaming) in /;
 
@@ -498,9 +500,14 @@ function refreshDuePages(cfg, countryName, manifest = null) {
     } else if (OPEN_PILL_RE.test(html) || RUN_ENDED_PILL_RE.test(html) || OLD_FALLBACK_DESC_RE.test(html)) {
       // Open run: re-settle so it flips to "most likely ended" on the day it crosses the
       // window. Ended run: bring the live builder's own theatrical sentences, and any lapsed
-      // window estimate, into line with the pill. Either way the description follows.
-      const next = rewriteMetaDescription(settleReleasedCopy(html, { countryName, cfg }).html, cfg).html;
+      // window estimate, into line with the pill. Either way the description follows, and an
+      // "Expected <month>" title once its month is behind it.
+      const settled = rewriteMetaDescription(settleReleasedCopy(html, { countryName, cfg }).html, cfg).html;
+      const next = refreshExpectedTitle(settled, cfg).html;
       if (next !== html) { out = next; changed = true; }
+    } else if (EXPECTED_TITLE_RE.test(html)) {
+      // A page with no where-to-watch block to settle (6 such, Oct 2026): only its title.
+      ({ html: out, changed } = refreshExpectedTitle(html, cfg));
     } else continue;
     if (changed) {
       fs.writeFileSync(path, out); n++;
