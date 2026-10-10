@@ -50,7 +50,7 @@ function auditPage(html, { released = null, now = Date.now() } = {}) {
   // release date is the show's first air date — so age-based wording can't be judged here.
   const isSeries = /"@type":"TVSeries"/.test(html);
   if (!isSeries && age != null && age > 28) {
-    if (/class="fcsb-stamp[^"]*">Too early</.test(html)) out.push({ check: "too-early-on-old-film", detail: `released ${rel}` });
+    if (/class="fcsb-(?:stamp[^"]*|mini-v)">Too early</.test(html)) out.push({ check: "too-early-on-old-film", detail: `released ${rel}` });
     const head = html.slice(html.indexOf('<div class="head"'), html.indexOf('id="filmychill-score"'));
     if (/Early — still settling|Rating still forming/.test(head)) out.push({ check: "time-words-on-old-film", detail: `released ${rel}` });
   }
