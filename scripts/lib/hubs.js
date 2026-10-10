@@ -288,8 +288,16 @@ function buildScopedMonthPage(recs, cfg, { scope, month, months = [], index = []
   });
 }
 
+// A closed month whose page is final. The last write while the month was current leaves
+// "this month is still filling up" on it, and every September page froze that way (76 of
+// 80, Oct 2026), so a closed month is rewritten once more if its page still says so.
+function closedMonthFinal(path) {
+  try { return !fs.readFileSync(path, "utf8").includes("this month is still filling up"); }
+  catch { return false; }
+}
+
 // Platform x month for one country. Current month rewritten every run; a closed month is
-// written once and then left alone (its data cannot change).
+// written once more as a complete record and then left alone (its data cannot change).
 function writePlatformMonthPages(cfg, records = null, index = null) {
   const code = (cfg && cfg.code) || "in";
   const recs = (records || readHistory()).filter((r) => r && r.c === code && r.p && monthKey(r.first));
@@ -314,7 +322,7 @@ function writePlatformMonthPages(cfg, records = null, index = null) {
   for (const b of buckets.values()) {
     if (b.rows.length < SCOPED_MONTH_MIN) continue;
     const path = platformMonthPath(code, b.slug, b.month);
-    if (b.month !== current && fs.existsSync(path)) continue;
+    if (b.month !== current && closedMonthFinal(path)) continue;
     fs.mkdirSync(path.slice(0, path.lastIndexOf("/")), { recursive: true });
     fs.writeFileSync(path, buildScopedMonthPage(
       b.rows.slice().sort((x, y) => String(y.first).localeCompare(String(x.first))),
@@ -345,7 +353,7 @@ function writeLanguageMonthPages(records = null, index = null) {
     const months = [...byMonth.entries()].filter(([, rows]) => rows.length >= SCOPED_MONTH_MIN).map(([m]) => m);
     for (const m of months) {
       const path = languageMonthPath(langSlug, m);
-      if (m !== current && fs.existsSync(path)) continue;
+      if (m !== current && closedMonthFinal(path)) continue;
       fs.mkdirSync(path.slice(0, path.lastIndexOf("/")), { recursive: true });
       fs.writeFileSync(path, buildScopedMonthPage(
         byMonth.get(m).slice().sort((x, y) => String(y.first).localeCompare(String(x.first))),
@@ -367,7 +375,7 @@ function writeOttMonthPages(cfg, records = null, index = null) {
   let written = 0;
   for (const { month } of months) {
     const path = ottMonthPath(code, month);
-    if (month !== current && fs.existsSync(path)) continue;   // frozen: complete and unchanging
+    if (month !== current && closedMonthFinal(path)) continue;   // frozen: complete and unchanging
     const dir = path.slice(0, path.lastIndexOf("/"));
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path, buildOttMonthPage(historyForMonth(recs, code, month), cfg, { month, months, index: idx }));
@@ -540,6 +548,7 @@ function buildPlatformHubPage(data, cfg, hub) {
 const LIVE_HUBS = new Map();
 
 module.exports = {
+  closedMonthFinal,
   buildOttMonthPage,
   buildPlatformHubPage,
   buildScopedMonthPage,

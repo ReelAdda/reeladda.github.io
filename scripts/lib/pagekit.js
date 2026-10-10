@@ -21,7 +21,7 @@ const {
 const { cardPaths } = require("./cards.js");
 const { releaseState } = require("./release.js");
 const { freshLabel, THEATRE_WINDOW_FALLBACK_DAYS } = require("./freshness.js");
-const { canonProvider, countryNameFor, streamVocab } = require("./rules.js");
+const { canonProvider, countryNameFor, streamVocab, streamWindowEstimate } = require("./rules.js");
 const { USE_IMDB } = require("./tmdb.js");
 
 function img(path, size = "w342") {
@@ -104,6 +104,25 @@ function digitalUpcoming(item) {
   return !!(item && item.digitalDate && releaseState(item.digitalDate) !== "released"
     && !(Array.isArray(item.providers) && item.providers.length));
 }
+// The announced date has gone by and the film is not streaming here yet. Pages used to keep
+// "Streaming from 2 Oct … switches to 'streaming now' the day it lands" a week later under a
+// title saying "Not Announced Yet" (9 pages, Oct 2026). The date WAS announced, so it stays;
+// what changes is that the page says plainly we have not seen it arrive.
+function digitalPassed(item) {
+  return !!(item && item.digitalDate && releaseState(item.digitalDate) === "released"
+    && !(Array.isArray(item.providers) && item.providers.length));
+}
+function digitalPassedText(title, date, note, country, cfg) {
+  const d = fmtDateFull(date, localeFor((cfg && cfg.code) || "in"));
+  return `${title} was scheduled to start streaming${note ? ` on ${canonProvider(note)}` : ""} in ${country} on ${d}, but it is not showing as available there yet.`;
+}
+// The pending block for that state, on a live render and on a frozen page alike. Keeps both
+// markers: the arrival sweep still replaces the block on the day the film turns up.
+function digitalPassedBlock(title, date, note, country, cfg) {
+  const e = escHtml;
+  return `<!--SW:pending--><!--SW:digital=${e(date)}|${e(note || "")}--><h2>${e(streamVocab(cfg).heading(title))}</h2>`
+    + `<p>${e(digitalPassedText(title, date, note, country, cfg))} We re-check every day and this page updates the moment it lands.</p><!--/SW:pending-->`;
+}
 
 // ============================================================================
 // DUE-DATE PASS — the other half of the freshness problem.
@@ -166,6 +185,30 @@ const OPEN_PILL_RE = /<span class="pill">Opened in cinemas [^<]* — not streami
 // Apostrophes are matched in both forms because the same sentence lives in visible HTML
 // (&#39;) and in JSON-LD ('), and each replacement keeps the escaping of the text it replaces.
 // ============================================================================
+// The live builder's "Not streaming yet" paragraph on a frozen, released page, in either the
+// form buildFilmPage wrote ("is in its theatrical run in …, released <ISO>") or the settled
+// form below. Rewritten into the current run state; the window estimate stays only while
+// streamWindowEstimate still says it is live. Idempotent.
+function settlePendingEstimate(html, { opened, run, date, cfg, now, APOS, apos }) {
+  const V = streamVocab(cfg);
+  const lead = `<p>Not streaming yet — ([^<]+?) (?:is in its theatrical run in ([^<]+?)(?:, released \\d{4}-\\d{2}-\\d{2})?|opened in theatres in ([^<]+?) on [^<,.]+?(?:, and its cinema run has most likely ended)?)\\. `;
+  const withEst = `([^<]+?) releases typically reach streaming about (\\d+)–(\\d+) weeks after opening, which would put it somewhere around <strong>([^<]+)</strong>\\.</p><p style="color:var\\(--mute\\);font-size:13px">That${APOS}s the usual pattern, not a confirmed date — no platform has announced one\\. We re-check every day and this page updates the moment it lands\\.</p>`;
+  const noEst = `No platform has announced an? (?:OTT|streaming) release date\\. We re-check every day and this page updates the moment it lands\\.</p>`;
+  const re = new RegExp(`${lead}(?:${withEst}|${noEst})`, "g");
+  return html.replace(re, (m, title, c1, c2, lang, lo, hi, span) => {
+    const c = c1 || c2;
+    const d = escHtml(opened);
+    const state = run === "ended" ? `${title} opened in theatres in ${c} on ${d}, and its cinema run has most likely ended`
+      : `${title} opened in theatres in ${c} on ${d}`;
+    const est = lang ? streamWindowEstimate(date, lang === "Films like this" ? "" : lang, new Date(now)) : null;
+    if (est && !est.passed) {
+      return `<p>Not streaming yet — ${state}. ${lang} releases typically reach streaming about ${lo}–${hi} weeks after opening, which would put it somewhere around <strong>${span}</strong>.</p>`
+        + `<p style="color:var(--mute);font-size:13px">That${apos(m)}s the usual pattern, not a confirmed date — no platform has announced one. We re-check every day and this page updates the moment it lands.</p>`;
+    }
+    return `<p>Not streaming yet — ${state}. No platform has announced ${escHtml(V.article.toLowerCase())} ${escHtml(V.releaseDate)}. We re-check every day and this page updates the moment it lands.</p>`;
+  });
+}
+
 function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } = {}) {
   const date = (html.match(/"datePublished":"(\d{4}-\d{2}-\d{2})/) || html.match(/<!--SW:due=(\d{4}-\d{2}-\d{2})-->/) || [])[1];
   if (!date || releaseState(date, now) !== "released") return { html, changed: false };
@@ -226,6 +269,14 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
     const want = run === "open" ? openPill(short)
       : `<span class="pill">Theatrical run ended — ${streamVocab(cfg).arrival} pending</span>`;
     for (const re of statusPills) { if (re.test(out)) { out = out.replace(re, want); break; } }
+
+    // The live builder's own theatrical sentences (buildFilmPage), frozen when the film left the
+    // lists: the FAQ kept "is in cinemas in <country> now" and the streaming block "is in its
+    // theatrical run" under a pill saying the run had ended — 170 pages, Oct 2026. Both take the
+    // same run state as the pill, and the block drops a window estimate once it has lapsed.
+    out = out.replace(new RegExp(`(<b>[^<]+</b>) is in cinemas in ([^<".]+?) now\\. Its ((?:OTT|streaming) release) date hasn${APOS}t been announced — this page updates the day it lands on streaming\\.`, "g"),
+      (m, t, c, rel) => `${t} opened in theatres in ${c} on ${escHtml(opened)}${runClause(apos(m))}. Its ${rel} date hasn${apos(m)}t been announced — this page updates the day it lands on streaming.`);
+    out = settlePendingEstimate(out, { opened, run, date, cfg, now, APOS, apos });
   }
 
   if (live) {
@@ -473,6 +524,9 @@ module.exports = {
   canonProvider,
   cspWith,
   digitalAnnounceText,
+  digitalPassed,
+  digitalPassedBlock,
+  digitalPassedText,
   digitalUpcoming,
   fitFirst,
   fitSiteTitle,

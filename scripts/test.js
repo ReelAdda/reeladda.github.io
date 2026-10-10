@@ -1520,12 +1520,12 @@ test("finishFilmPages: moves styles out once, finishes the footer, keeps only st
     assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
     const r = S.finishFilmPages(files, { root });
     assert.deepStrictEqual(r, { pages: 3, externalized: 3, footerLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0 });
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0 });
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
     assert.ok(/<a href="\/privacy\/">Privacy<\/a> · <a href="\/dmca\/">Copyright<\/a> · © 2026 FilmyChill/.test(a));
     assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
     assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, footerLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0 }, "idempotent");
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0 }, "idempotent");
     // The 4 Oct incident: the stylesheets never reached the site. That must be reported.
     fsx.rmSync(path.join(root, "css"), { recursive: true, force: true });
     const lost = S.finishFilmPages(files, { root });
@@ -1544,6 +1544,114 @@ test("privacy page: exists, linked from every footer kind, in the sitemap, and s
   assert.ok(/href="\/privacy\/"/.test(about));
   assert.ok(/href="\/privacy\/"/.test(fsx.readFileSync(path.join(__dirname, "..", "404.html"), "utf8")));
   assert.ok(/\/privacy\//.test(U.buildMoreLinks({ code: "in" })), "homepage footer links");
+});
+
+group("10 Oct 2026 trust audit: frozen pages that contradicted themselves or went stale");
+const TRUST_IN = { code: "in", name: "India", region: "IN" };
+const trustDaysAgo = (d) => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
+// A frozen page as the live builder wrote it while the film was in the lists, after the archive
+// patch turned its pill to "run ended" — the shape of 170 pages in Oct 2026.
+const frozenTheatrical = (released, lang = "Tamil") =>
+  `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Four","inLanguage":"${lang}","datePublished":"${released}"}</script>`
+  + `<h2>When is Four coming to OTT?</h2><!--SW:pending--><p>Not streaming yet — Four is in its theatrical run in India, released ${released}. ${lang} releases typically reach streaming about 4–7 weeks after opening, which would put it somewhere around <strong>October 2026</strong>.</p><p style="color:var(--mute);font-size:13px">That's the usual pattern, not a confirmed date — no platform has announced one. We re-check every day and this page updates the moment it lands.</p><!--/SW:pending-->`
+  + `<h2>Where to watch in India</h2><div><span class="pill">Theatrical run ended — OTT arrival pending</span></div>`
+  + `<p class="answer"><b>Four</b> is in cinemas in India now. Its OTT release date hasn't been announced — this page updates the day it lands on streaming.</p>`;
+test("1 · run ended: the FAQ and the streaming block stop saying the film is in cinemas", () => {
+  const P = require("./lib/pagekit.js");
+  const html = frozenTheatrical(trustDaysAgo(40));
+  const out = P.settleReleasedCopy(html, { countryName: "India", cfg: TRUST_IN }).html;
+  assert.ok(!/is in cinemas in India now|is in its theatrical run/.test(out), "no present-tense cinema claim left");
+  assert.ok(/<b>Four<\/b> opened in theatres in India on [^,]+, and its cinema run has most likely ended\. Its OTT release date hasn't been announced/.test(out), "FAQ follows the pill");
+  assert.ok(/<p>Not streaming yet — Four opened in theatres in India on [^,]+, and its cinema run has most likely ended\./.test(out), "block follows the pill");
+  assert.strictEqual(P.settleReleasedCopy(out, { countryName: "India", cfg: TRUST_IN }).html, out, "idempotent");
+});
+test("1 · the window estimate stays while it is live and goes once it lapses", () => {
+  const P = require("./lib/pagekit.js");
+  const live = P.settleReleasedCopy(frozenTheatrical(trustDaysAgo(36)), { countryName: "India", cfg: TRUST_IN }).html;
+  assert.ok(/Tamil releases typically reach streaming about 4–7 weeks after opening/.test(live) && /That's the usual pattern/.test(live), "36 days in, a 4–7 week window is still open");
+  const gone = P.settleReleasedCopy(frozenTheatrical(trustDaysAgo(60)), { countryName: "India", cfg: TRUST_IN }).html;
+  assert.ok(!/typically reach streaming|usual pattern/.test(gone), "60 days in, the estimate is a missed prediction");
+  assert.ok(/No platform has announced an OTT release date\. We re-check every day/.test(gone));
+  // The same page later: the settled-with-estimate form also loses it once the window passes.
+  const later = P.settleReleasedCopy(live, { countryName: "India", cfg: TRUST_IN, now: Date.now() + 30 * 864e5 }).html;
+  assert.ok(!/usual pattern/.test(later), "settled pages are re-checked as time passes");
+});
+test("1 · an open run says it opened and may still be showing", () => {
+  const P = require("./lib/pagekit.js");
+  const out = P.settleReleasedCopy(frozenTheatrical(trustDaysAgo(10)).replace(/Theatrical run ended — OTT arrival pending/, "In theatres"), { countryName: "India", cfg: TRUST_IN }).html;
+  assert.ok(/<b>Four<\/b> opened in theatres in India on [^.]+ and may still be showing — check local cinema listings\./.test(out), out);
+  assert.ok(/<p>Not streaming yet — Four opened in theatres in India on [^.,]+\. Tamil releases/.test(out));
+});
+test("1 · the due pass reaches run-ended pages and old fallback descriptions every run", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "lifecycle.js"), "utf8");
+  assert.ok(/OPEN_PILL_RE\.test\(html\) \|\| RUN_ENDED_PILL_RE\.test\(html\) \|\| OLD_FALLBACK_DESC_RE\.test\(html\)/.test(src));
+});
+test("2 · an announced streaming date that passed: honest block, FAQ, title and description", () => {
+  const L = require("./lib/lifecycle.js");
+  const P = require("./lib/pagekit.js");
+  const date = trustDaysAgo(8);
+  const html = `<h1>Unit</h1><!--SW:pending--><!--SW:digital=${date}|Jio Hotstar--><h2>When is Unit coming to OTT?</h2><p><strong>Streaming from soon on Jio Hotstar.</strong> Unit is scheduled to start streaming on Jio Hotstar in India on 2 Oct 2026. This page switches to “streaming now” the day it lands.</p><!--/SW:pending-->`
+    + `<p class="answer">Unit is scheduled to start streaming on Jio Hotstar in India on 2 Oct 2026. This page updates automatically the day it starts streaming.</p>`;
+  const r = L.patchDigitalIfPassed(html, { title: "Unit", countryName: "India", cfg: TRUST_IN });
+  assert.ok(r.changed);
+  assert.ok(!/switches to “streaming now”|is scheduled to start/.test(r.html), "no promise the page already broke");
+  assert.ok(/Unit was scheduled to start streaming on JioHotstar in India on [^,]+, but it is not showing as available there yet\. We re-check every day/.test(r.html), "block, with the canonical service name");
+  assert.ok(/<!--SW:pending--><!--SW:digital=/.test(r.html) && /<!--\/SW:pending-->/.test(r.html), "markers kept for the arrival sweep");
+  assert.ok(/Unit was scheduled to start streaming on Jio Hotstar in India on 2 Oct 2026, but it is not showing as available there yet\./.test(r.html), "FAQ answer");
+  assert.strictEqual(L.patchDigitalIfPassed(r.html, { title: "Unit", countryName: "India", cfg: TRUST_IN }).changed, false, "idempotent");
+  assert.strictEqual(L.patchDigitalIfPassed(html.replace(date, trustDaysAgo(-3)), { title: "Unit", countryName: "India", cfg: TRUST_IN }).changed, false, "a date still ahead is left alone");
+  const item = { title: "Unit", kind: "movie", language: "Malayalam", released: trustDaysAgo(60), platform: "Theatres", digitalDate: date, digitalNote: "Jio Hotstar", providers: [] };
+  assert.ok(P.digitalPassed(item) && !P.digitalUpcoming(item));
+  assert.ok(/^Unit \(\d{4}\) OTT Release Date: .+ on JioHotstar$/.test(U.filmTitleTag(item, TRUST_IN)), "the announced date stays in the title, not 'Not Announced Yet'");
+  const dd = U.filmMetaDescription(item, TRUST_IN);
+  assert.ok(/^Unit \(\d{4}\) was due to stream on JioHotstar in India from .+ but isn't showing yet\. We check twice a day/.test(dd) && dd.length <= 155, dd);
+  const page = U.buildFilmPage({ ...item, slug: "unit" }, trustDaysAgo(0), new Set(), TRUST_IN);
+  assert.ok(/was scheduled to start streaming on JioHotstar in India/.test(page) && !/switches to “streaming now”/.test(page), "the live builder says the same");
+  assert.ok(!P.digitalPassed({ ...item, providers: ["JioHotstar"] }), "arrived: not this state");
+});
+test("3 · a closed month still saying 'filling up' is rewritten once, then left alone", () => {
+  const H = require("./lib/hubs.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const dir = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-month-"));
+  try {
+    const p = path.join(dir, "index.html");
+    assert.strictEqual(H.closedMonthFinal(p), false, "missing: write it");
+    fsx.writeFileSync(p, "<p>Updated 30 September 2026 · this month is still filling up</p>");
+    assert.strictEqual(H.closedMonthFinal(p), false, "frozen mid-month: write it once more");
+    fsx.writeFileSync(p, "<p>A complete record of September 2026</p>");
+    assert.strictEqual(H.closedMonthFinal(p), true, "final: leave it");
+  } finally { fsx.rmSync(dir, { recursive: true, force: true }); }
+  const src = fsx.readFileSync(path.join(__dirname, "lib", "hubs.js"), "utf8");
+  assert.strictEqual((src.match(/!== current && closedMonthFinal\(path\)\) continue;/g) || []).length, 3, "all three month writers: OTT, platform, language");
+  assert.ok(!/!== current && fs\.existsSync\(path\)\) continue;/.test(src));
+  const closed = H.buildOttMonthPage([], TRUST_IN, { month: "2026-09", months: [{ month: "2026-09", n: 0 }] });
+  assert.ok(!/still filling up/.test(closed) && /A complete record of/.test(closed), "a rewrite of a closed month is the final version");
+});
+test("4 · a recheck that finds the film still streaming dates the page; a changed lineup doesn't", () => {
+  const L = require("./lib/lifecycle.js");
+  const page = `<script type="application/ld+json">{"@context":"https://schema.org","@type":"TVSeries","name":"Farm"}</script><!--SW:stream--><!--SW:live=2026-07-04--><h2>Where to watch in Australia</h2><div><span class="pill">Amazon Prime Video</span></div><p>Included with a subscription.</p><p>Availability as of 22 Aug 2026 — platforms may change over time.</p><!--/SW:stream--><h2>Next</h2>`;
+  const AU = { code: "au", name: "Australia", region: "AU" };
+  const ok = L.restampAvailability(page, { providers: ["Prime Video"], lastCheck: "2026-09-27", misses: 0 }, AU);
+  assert.ok(/Availability as of 27 Sept 2026 — /.test(ok) && /<!--SW:live=2026-07-04--><!--SW:checked=2026-09-27-->/.test(ok), ok);
+  assert.strictEqual(L.restampAvailability(ok, { providers: ["Prime Video"], lastCheck: "2026-09-27", misses: 0 }, AU), ok, "idempotent");
+  assert.ok(/Availability as of 10 Oct 2026/.test(L.restampAvailability(ok, { providers: ["Prime Video"], lastCheck: "2026-10-10", misses: 0 }, AU)), "a later check moves it again");
+  assert.strictEqual(L.restampAvailability(page, { providers: ["Netflix"], lastCheck: "2026-09-27", misses: 0 }, AU), page, "the page names a service the check didn't find: its pills are what's stale");
+  assert.strictEqual(L.restampAvailability(page, { providers: ["Prime Video"], lastCheck: "2026-09-27", misses: 1 }, AU), page, "a missed check vouches for nothing");
+  const spotted = page.replace(/<p>Availability as of [^<]*<\/p>/, "<p>Spotted by our daily availability check on 2026-07-04. We recheck periodically — platforms do drop titles.</p>");
+  assert.ok(/Spotted by our daily availability check on 2026-07-04, still there on 27 Sept 2026\. We recheck periodically/.test(L.restampAvailability(spotted, { providers: ["Prime Video"], lastCheck: "2026-09-27", misses: 0 }, AU)));
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "lifecycle.js"), "utf8");
+  assert.strictEqual((src.match(/syncAvailabilityStamps\(manifest, cfg\);/g) || []).length, 2, "the sweep stamps pages whether or not it had candidates");
+});
+test("5 · 'Page updated' and dateModified are kept to the same date", () => {
+  const S = require("./lib/stylesheets.js");
+  const pg = (shown, ld) => `<script type="application/ld+json">{"@type":"Movie","dateModified":"${ld}"}</script><div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${shown}</div>`;
+  assert.strictEqual(S.syncDateModified(pg("30 Sept 2026", "2026-09-17"), "in"), pg("30 Sept 2026", "2026-09-30"), "score sweep moved the visible date: schema follows");
+  assert.strictEqual(S.syncDateModified(pg("Sep 30, 2026", "2026-08-25"), "us"), pg("Sep 30, 2026", "2026-09-30"), "US format");
+  assert.strictEqual(S.syncDateModified(pg("17 Sept 2026", "2026-09-30"), "in"), pg("30 Sept 2026", "2026-09-30"), "schema later: the visible stamp follows");
+  assert.strictEqual(S.syncDateModified(pg("30 Sept 2026", "2026-09-30"), "in"), pg("30 Sept 2026", "2026-09-30"), "agreeing: untouched");
+  assert.strictEqual(S.syncDateModified(pg("someday", "2026-09-30"), "in"), pg("someday", "2026-09-30"), "unreadable: untouched");
+  const sweep = require("fs").readFileSync(require("path").join(__dirname, "lib", "scoresweep.js"), "utf8");
+  assert.ok(sweep.includes('.replace(/("dateModified":")\\d{4}-\\d{2}-\\d{2}/, `$1${today}`)'), "the score sweep moves both now");
 });
 
 group("10 Oct 2026: copyright page and the no-hosting notice");
@@ -2862,7 +2970,8 @@ test("released, not streaming: the title answers 'OTT release date' honestly —
   const d = U.filmMetaDescription({ title: "Hi!", kind: "movie", language: "Tamil", released: ago(20), platform: "Theatres" }, IN);
   assert.ok(/^Not announced yet\. Tamil films usually reach OTT 4\u20137 weeks after theatres, so /.test(d) && /We update this page the day it streams\.$/.test(d) && d.length <= 155, d);
   const dl = U.filmMetaDescription({ title: "Old", kind: "movie", language: "Tamil", released: ago(120), platform: "Theatres" }, IN);
-  assert.ok(/^Not (on any OTT platform|streaming) in India yet/.test(dl) && /no date has been announced/.test(dl), dl);
+  // Oct 2026: led by the film's name — 747 pages used to share 93 identical snippets.
+  assert.ok(/^Old \(\d{4}\) isn't on any OTT platform in India yet/.test(dl) && /no date has been announced/.test(dl) && dl.length <= 155, dl);
 });
 
 test("film title tags fit 60 chars, keeping the query words", () => {
@@ -2967,7 +3076,8 @@ test("frozen archive pages get the new description, and stop contradicting their
   assert.ok(out.changed, "a frozen page with a stale description must be rewritten");
   const d = /name="description" content="([^"]*)"/.exec(out.html)[1];
   assert.ok(!/in cinemas/.test(d), "must not claim a theatrical run that has ended: " + d);
-  assert.ok(/Not announced yet|Not on any OTT platform|Not streaming in India yet|finished its theatrical run/.test(d), d);
+  assert.ok(/[Nn]ot announced yet|isn(?:'|&#39;)t on any OTT platform|isn(?:'|&#39;)t streaming in India yet|finished its theatrical run/.test(d), d);
+  assert.ok(/usually|isn(?:'|&#39;)t (?:on any|streaming)|finished/.test(d), "an estimate is always labelled as the usual pattern: " + d);
   assert.ok(out.html.includes(`og:description" content="${d}"`), "og twin follows the description");
   // Idempotent: a second pass over an already-correct page changes nothing.
   assert.ok(!U.rewriteMetaDescription(out.html, IN).changed, "patcher must not thrash on re-run");

@@ -261,8 +261,12 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
     if (s) item.fcScore = s;
     Object.assign(item, { title: e.title || d.title || d.name, tmdbId: e.tmdbId, kind: e.kind === "tv" ? "tv" : "movie", language: e.lang || null });
     let next = injectVote(refreshCopy(refreshHead(injectScoreSection(html, fcScoreSection(item)), item), item, s), item, code);
-    // The page changed, so its "Page updated" line should say so.
-    if (next !== html) next = next.replace(/(>Page updated )[^<]+/, (m, a) => `${a}${fmtDateFull(today, localeFor(code))}`);
+    // The page changed, so its "Page updated" line should say so — and the dateModified search
+    // engines read, which this used to leave behind (8,906 pages disagreed, Oct 2026).
+    if (next !== html) {
+      next = next.replace(/(>Page updated )[^<]+/, (m, a) => `${a}${fmtDateFull(today, localeFor(code))}`)
+        .replace(/("dateModified":")\d{4}-\d{2}-\d{2}/, `$1${today}`);
+    }
     e.fcs = { v: s ? s.verdict : "early", at: today, w: SWEEP_WORDING };
     if (next !== html) {
       fs.writeFileSync(file, next);

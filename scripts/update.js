@@ -1490,7 +1490,7 @@ async function main() {
       const f = finishFilmPages(filmPageFiles(), { fcdataClaim });
       console.log(`Film pages finished: ${f.pages} checked, ${f.externalized} moved to shared styles, ${f.footerLinked} footers given the notice and Privacy · Copyright links, ${f.iconed} icon tags added, `
         + `${f.retitled.length} titles given their country, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, `
-        + `${f.trailerFixed.length - f.trailerDropped} trailers given an uploadDate and ${f.trailerDropped} left out of the markup, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
+        + `${f.trailerFixed.length - f.trailerDropped} trailers given an uploadDate and ${f.trailerDropped} left out of the markup, ${f.dateSynced} dateModified/"Page updated" pairs reconciled, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
       // A new title is a real change: let the sitemap say so (syncFilmLastmods would also see
       // it, except on its first run, when it only records fingerprints). So is repaired trailer
       // markup: the fingerprint ignores structured data, and a fresh lastmod is what gets the
