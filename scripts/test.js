@@ -2880,7 +2880,7 @@ test("empty-shell country pages are noindexed; real localised pages are not", ()
   assert.ok(!/noindex/.test(U.buildFilmPage(shell, "2026-09-14", new Set(), AUDIT_CFG)), "India copy stays indexed");
   // Anything with a real localised answer stays indexed. /sg/movie/the-rope-curse-4-kuntilanak
   // earns Singapore clicks at position 6.7 and must never be caught by this rule.
-  for (const real of [{ providers: ["Netflix"] }, { rentBuy: ["Apple TV"] }, { platform: "Theatres" }, { released: "2027-01-01" }]) {
+  for (const real of [{ providers: ["Netflix"] }, { rentBuy: ["Apple TV"] }, { platform: "Theatres" }, { released: "2099-01-01" }]) {
     const page = U.buildFilmPage({ ...shell, ...real }, "2026-09-14", new Set(), UK);
     assert.ok(!/noindex/.test(page), "real localised page wrongly noindexed: " + JSON.stringify(real));
   }
@@ -5114,12 +5114,12 @@ test("no release date -> no estimate (never guess)", () => {
 
 group("film page — 'when is it coming to streaming' section");
 const THEATRE = { title: "Batwara 1947", slug: "b", kind: "movie", language: "Hindi", platform: "Theatres", released: "2026-08-13", rating: 7.2, votes: 400, verdict: "Worth a watch" };
-//test("India theatrical page asks the question in OTT wording", () => {
- // const html = U.buildFilmPage(THEATRE, "2026-08-22", new Set(), { code: "in", name: "India", region: "IN" });
- // assert.ok(/coming to OTT/.test(html), "heading missing");
-  //assert.ok(/that's the usual pattern, not a confirmed date/i.test(html), "estimate not labelled as a pattern");
-  //assert.ok(html.includes("<!--SW:pending-->"), "sweep marker missing");
-//});
+test("India theatrical page asks the question in OTT wording", () => {
+  const html = U.buildFilmPage(THEATRE, "2026-08-22", new Set(), { code: "in", name: "India", region: "IN" });
+  assert.ok(/coming to OTT/.test(html), "heading missing");
+  assert.ok(/that's the usual pattern, not a confirmed date/i.test(html), "estimate not labelled as a pattern");
+  assert.ok(html.includes("<!--SW:pending-->"), "sweep marker missing");
+});
 test("US theatrical page asks it in streaming wording, no 'OTT' anywhere", () => {
   const html = U.buildFilmPage({ ...THEATRE, language: "English" }, "2026-08-22", new Set(), { code: "us", name: "United States", region: "US" });
   assert.ok(/coming to streaming/.test(html), "streaming heading missing");
@@ -6290,21 +6290,77 @@ test("history reads back one name per service, old records included; the file ke
     assert.strictEqual(fsx.readFileSync(path.join(dir, "ott-history.jsonl"), "utf8"), raw, "nothing is rewritten");
   } finally { process.chdir(cwd); fsx.rmSync(dir, { recursive: true, force: true }); }
 });
-//test("the Movistar Plus+ hub lives at /es/new-on-movistar-plus/; no other slug changes", () => {
-//  const P = require("./lib/pagekit.js");
-//  assert.strictEqual(P.platformSlug("Movistar Plus+"), "movistar-plus");
-//  assert.strictEqual(P.platformSlug("Movistar Plus+ Ficción Total"), "movistar-plus");
-//  for (const [name, slug] of [["Paramount+", "paramount-plus"], ["Disney+", "disney-plus"], ["Disney Plus", "disney-plus"], ["Prime Video", "prime-video"],
- //   ["Amazon Prime Video", "prime-video"], ["Apple TV", "apple-tv"], ["Claro tv+", "claro-tv-plus"], ["RTL+ Max", "rtl-plus-max"], ["Vi Movies & TV", "vi-movies-and-tv"],
-  //  ["Netflix", "netflix"], ["JioHotstar", "jiohotstar"], ["HBO Max", "hbo-max"], ["U-NEXT", "u-next"], ["Canal+", "canal-plus"], ["TF1+", "tf1-plus"]]) {
-  //  assert.strictEqual(P.platformSlug(name), slug, name);
- // }
-//  const fsx = require("fs");
-//  assert.ok(fsx.existsSync("es/new-on-movistar-plus/index.html") && !fsx.existsSync("es/new-on-movistar-plus-plus"), "the page moved, not duplicated");
-//  for (const f of ["es/new-on-movistar-plus/index.html", "es/index.html", "sitemap-pages.xml"]) {
- //   assert.ok(!fsx.readFileSync(f, "utf8").includes("new-on-movistar-plus-plus"), f + " still links the old URL");
-//  }
-//});
+test("the Movistar Plus+ hub lives at /es/new-on-movistar-plus/; no other slug changes", () => {
+  const P = require("./lib/pagekit.js");
+  assert.strictEqual(P.platformSlug("Movistar Plus+"), "movistar-plus");
+  assert.strictEqual(P.platformSlug("Movistar Plus+ Ficción Total"), "movistar-plus");
+  for (const [name, slug] of [["Paramount+", "paramount-plus"], ["Disney+", "disney-plus"], ["Disney Plus", "disney-plus"], ["Prime Video", "prime-video"],
+    ["Amazon Prime Video", "prime-video"], ["Apple TV", "apple-tv"], ["Claro tv+", "claro-tv-plus"], ["RTL+ Max", "rtl-plus-max"], ["Vi Movies & TV", "vi-movies-and-tv"],
+    ["Netflix", "netflix"], ["JioHotstar", "jiohotstar"], ["HBO Max", "hbo-max"], ["U-NEXT", "u-next"], ["Canal+", "canal-plus"], ["TF1+", "tf1-plus"]]) {
+    assert.strictEqual(P.platformSlug(name), slug, name);
+  }
+  // The hub itself comes and goes with the week's titles (pruned below HUB_MIN_KEEP — it was,
+  // on 8 Oct 2026), so check the old URL is gone, not that the new page is there today.
+  const fsx = require("fs");
+  assert.ok(!fsx.existsSync("es/new-on-movistar-plus-plus"), "the old directory is gone");
+  for (const f of ["es/index.html", "sitemap-pages.xml", ...(fsx.existsSync("es/new-on-movistar-plus/index.html") ? ["es/new-on-movistar-plus/index.html"] : [])]) {
+    assert.ok(!fsx.readFileSync(f, "utf8").includes("new-on-movistar-plus-plus"), f + " still links the old URL");
+  }
+});
+
+group("10 Oct 2026: links on frozen pages to pruned hubs and people pages");
+test("the streaming estimate is as of the page's own date, not the clock it is built on", () => {
+  const item = { title: "Batwara 1947", slug: "b", kind: "movie", language: "Hindi", platform: "Theatres", released: "2026-08-13", rating: 7.2, votes: 400, verdict: "Worth a watch" };
+  const cfg = { code: "in", name: "India", region: "IN" };
+  assert.ok(/That's the usual pattern/.test(U.buildFilmPage(item, "2026-08-22", new Set(), cfg)), "in the window on the page's date");
+  assert.ok(!/That's the usual pattern/.test(U.buildFilmPage(item, "2027-01-10", new Set(), cfg)), "window long gone on the page's date");
+});
+test("unlinkMissingPages: dead links leave lists with their separator, keep their text elsewhere", () => {
+  const S = require("./lib/stylesheets.js");
+  const gone = new Set(["/au/new-on-netflix/", "/ca/people/ashutosh-rana/"]);
+  const missing = (h) => gone.has(h);
+  const nav = (links) => `<nav class="nav">${links.map(([h, t]) => `<a href="${h}">${t}</a>`).join(" · ")}</nav>`;
+  const A = ["https://filmychill.com/au/new-on-ott/2026-08/", "Everything new in August 2026"];
+  const B = ["https://filmychill.com/au/new-on-netflix/2026-09/", "September 2026 →"];
+  const HUB = ["https://filmychill.com/au/new-on-netflix/", "Netflix this week"];
+  assert.strictEqual(S.unlinkMissingPages(nav([B, A, HUB]), missing), nav([B, A]), "last");
+  assert.strictEqual(S.unlinkMissingPages(nav([HUB, A]), missing), nav([A]), "first");
+  assert.strictEqual(S.unlinkMissingPages(nav([B, HUB, A]), missing), nav([B, A]), "middle");
+  assert.strictEqual(S.unlinkMissingPages('<div class="cast-name"><a href="/ca/people/ashutosh-rana/">Ashutosh Rana</a></div>', missing),
+    '<div class="cast-name">Ashutosh Rana</div>', "a name keeps its text");
+  const more = '<p style="color:var(--mute);font-size:12.5px;margin-top:10px">More: <a href="/au/new-on-netflix/">Everything new on Netflix</a></p>';
+  assert.strictEqual(S.unlinkMissingPages(`x${more}y`, missing), "xy", "an emptied More: line goes");
+  const live = nav([B, A]) + '<a href="/au/people/x/">X</a>';
+  assert.strictEqual(S.unlinkMissingPages(live, missing), live, "live links untouched");
+});
+test("a platform month archive's breadcrumb moves from its missing hub to the week's page", () => {
+  const S = require("./lib/stylesheets.js");
+  const ld = (name, item) => `{"@type":"ListItem","position":1,"name":"FilmyChill","item":"https://filmychill.com/au/"},{"@type":"ListItem","position":2,"name":"${name}","item":"${item}"},{"@type":"ListItem","position":3,"name":"August 2026","item":"https://filmychill.com/au/new-on-netflix/2026-08/"}`;
+  const before = ld("New on Netflix", "https://filmychill.com/au/new-on-netflix/");
+  const after = ld("New this week", "https://filmychill.com/au/new-on-ott/");
+  assert.strictEqual(S.unlinkMissingPages(before, (h) => h === "/au/new-on-netflix/", "au/new-on-netflix/2026-08/index.html"), after);
+  assert.strictEqual(S.unlinkMissingPages(before, () => false, "au/new-on-netflix/2026-08/index.html"), before, "hub live: unchanged");
+  assert.strictEqual(S.unlinkMissingPages(before, () => true, "au/movie/x.html"), before, "only month archives");
+  const inBefore = ld("New on Netflix", "https://filmychill.com/new-on-netflix/").replace(/\/au\//g, "/");
+  assert.ok(S.unlinkMissingPages(inBefore, (h) => h === "/new-on-netflix/", "new-on-netflix/2026-08/index.html").includes('"name":"New this week","item":"https://filmychill.com/new-on-ott/"'), "India: no country prefix");
+});
+test("repairDeadLinks writes only the pages it changes, after the people pages", () => {
+  const S = require("./lib/stylesheets.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-dead-"));
+  try {
+    const w = (rel, s) => { fsx.mkdirSync(path.join(root, path.dirname(rel)), { recursive: true }); fsx.writeFileSync(path.join(root, rel), s); };
+    w("ca/people/akshay-kumar/index.html", "p");
+    w("ca/movie/s.html", '<a href="/ca/people/akshay-kumar/">Akshay Kumar</a> <a href="/ca/people/ashutosh-rana/">Ashutosh Rana</a>');
+    w("ca/movie/ok.html", '<a href="/ca/people/akshay-kumar/">Akshay Kumar</a>');
+    const r = S.repairDeadLinks(["ca/movie/s.html", "ca/movie/ok.html"], { root });
+    assert.deepStrictEqual(r, { pages: 2, fixed: ["ca/movie/s.html"] });
+    assert.strictEqual(fsx.readFileSync(path.join(root, "ca/movie/s.html"), "utf8"), '<a href="/ca/people/akshay-kumar/">Akshay Kumar</a> Ashutosh Rana');
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+  const upd = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
+  assert.ok(upd.indexOf("repairDeadLinks([") > upd.indexOf("writePeoplePages(dataByCode[cfg.code]"), "runs after the people pages are written");
+  assert.ok(upd.indexOf("repairDeadLinks([") < upd.indexOf("syncFilmLastmods(pagesManifest"), "and before the sitemap");
+});
 test("hubs: a service's channel titles join its own hub instead of a second one", () => {
   const H = require("./lib/hubs.js");
   const it = (id, providers) => ({ title: "T" + id, tmdbId: id, kind: "movie", providers, platform: providers[0] });

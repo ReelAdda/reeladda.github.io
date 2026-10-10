@@ -256,6 +256,56 @@ function finishSitePages(files, { root = "." } = {}) {
   return res;
 }
 
+// Pure: internal links whose target page no longer exists, taken out of a page. Every builder
+// links a hub or a person page only when it exists, but a frozen page (a closed month, an
+// archived film) keeps the link after a weekly hub is pruned or a person drops below the
+// film minimum — 9 such pages in Oct 2026. A link in a " · " list leaves with its separator,
+// any other keeps its text, and a "More:" line left empty goes. A platform month archive's
+// breadcrumb moves from its missing hub to the week's OTT page, as buildScopedMonthPage does
+// when the hub is already gone. `missing(href)` answers for site-relative or absolute URLs.
+const SITE = "https://filmychill.com";
+const MONTH_ARCHIVE_RE = /^(?:([a-z]{2})\/)?new-on-([^/]+)\/\d{4}-\d{2}\/index\.html$/;
+function unlinkMissingPages(html, missing, rel = "") {
+  const dead = (href) => {
+    const h = href.startsWith(SITE + "/") ? href.slice(SITE.length) : href;
+    return h.startsWith("/") && !h.startsWith("//") && missing(h);
+  };
+  // Mark each dead link, then drop marked links with a separator; the rest keep their text.
+  let out = html.replace(/<a href="([^"]+)">([^<\u0000\u0001]*)<\/a>/g, (whole, href, text) => (dead(href) ? `\u0000${text}\u0001` : whole));
+  out = out.replace(/ · \u0000[^\u0001]*\u0001/g, "").replace(/\u0000[^\u0001]*\u0001 · /g, "")
+    .replace(/(More: )\u0000[^\u0001]*\u0001(<\/p>)/g, "$1$2").replace(/\u0000([^\u0001]*)\u0001/g, "$1");
+  out = out.replace(/<p style="color:var\(--mute\);font-size:12\.5px;margin-top:10px">More: <\/p>/g, "");
+  const arch = MONTH_ARCHIVE_RE.exec(String(rel).replace(/\\/g, "/"));
+  if (arch && arch[2] !== "ott") {
+    const code = arch[1] || "in";
+    const week = code === "in" ? `${SITE}/new-on-ott/` : `${SITE}/${code}/new-on-ott/`;
+    out = out.replace(/"name":"(?:[^"\\]|\\.)*","item":"(https:\/\/filmychill\.com\/[^"]*\/)"/g,
+      (whole, item) => (item.endsWith(`/new-on-${arch[2]}/`) && dead(item) ? `"name":"New this week","item":"${week}"` : whole));
+  }
+  return out;
+}
+
+// The pass over every page, after the last page writer of the run (people pages included).
+function repairDeadLinks(files, { root = "." } = {}) {
+  const res = { pages: 0, fixed: [] };
+  const seen = new Map();
+  const missing = (href) => {
+    let p = href.split("#")[0].split("?")[0].slice(1);
+    if (p === "" || p.endsWith("/")) p += "index.html";
+    if (!seen.has(p)) seen.set(p, !fs.existsSync(path.join(root, p)));
+    return seen.get(p);
+  };
+  for (const rel of files) {
+    const file = path.join(root, rel);
+    let html;
+    try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
+    res.pages++;
+    const next = unlinkMissingPages(html, missing, rel);
+    if (next !== html) { fs.writeFileSync(file, next); res.fixed.push(rel.replace(/\\/g, "/")); }
+  }
+  return res;
+}
+
 module.exports = {
   applyFcdataClaim,
   ensureCountryTitle,
@@ -268,5 +318,7 @@ module.exports = {
   finishFilmPages,
   finishSitePages,
   inlineStyles,
+  repairDeadLinks,
   sitePageFiles,
+  unlinkMissingPages,
 };
