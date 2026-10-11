@@ -138,6 +138,18 @@ jobs:
             echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # The published site on its own branch, `site`: one commit with no parent, replaced on
+      # every build, so serving the site never adds history (Oct 2026: main grew ~16 MB a day,
+      # almost all of it rebuilt pages). For now it is exactly main's committed tree, so GitHub
+      # Pages can be switched to it with nothing changing for visitors. Next stage: main keeps
+      # only code and data, and this step adds the built pages from the working tree.
+      - name: Publish site branch
+        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
+        run: |
+          site=$(git commit-tree "HEAD^{tree}" -m "Site build $(date -u +%Y-%m-%dT%H:%MZ) from $(git rev-parse --short HEAD)")
+          git push --force origin "$site:refs/heads/site"
+          echo "site branch -> $site (tree of $(git rev-parse --short HEAD))"
+
       # Cloudflare Workers Static Assets deploy. Dormant until the CLOUDFLARE_API_TOKEN secret
       # exists, so this file can be committed before the migration without breaking any run.
       # Deploys exactly what is COMMITTED (git archive), never the working tree: the build
