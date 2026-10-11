@@ -16,3 +16,46 @@ _site/
 run-health.json
 # Per-run unit-test results (scripts/test.js), also read by health.js. Never committed.
 test-results.json
+
+# Built pages live on the `site` branch, not on main (scripts/site.js). The build restores
+# them before it runs and publishes them after; never commit them here. Locally, run
+# `node scripts/site.js restore` to get them.
+/ae/
+/au/
+/br/
+/ca/
+/de/
+/es/
+/fr/
+/id/
+/jp/
+/kr/
+/mx/
+/my/
+/nz/
+/ph/
+/sg/
+/uk/
+/us/
+/movie/
+/new-on-*/
+/hindi/
+/tamil/
+/telugu/
+/malayalam/
+/kannada/
+/week/
+/films/
+/data/
+/embed/
+/streaming/
+/people/
+/coming-to-ott/
+/cards/
+/css/
+/feed.xml
+/llms.txt
+/llms-full.txt
+/sitemap.xml
+/sitemap-*.xml
+.site-restore-*.tar

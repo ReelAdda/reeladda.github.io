@@ -578,14 +578,13 @@ test("the commit step stages deletions, ships the About page, and never publishe
   const wf = require("fs").readFileSync(".github/workflows/update.yml", "utf8");
   const add = (wf.match(/git add -A -- ([^\n]+)/) || [])[1] || "";
   assert.ok(/\babout\//.test(add), "about/ must be committed or its country list never ships");
-  for (const unquoted of [" new-on-*/", " */films/", " */embed/"]) {
-    assert.ok(!add.includes(unquoted), "unquoted glob: the shell drops deleted dirs, so their deletion is never staged");
-  }
-  assert.ok(add.includes("':(glob)new-on-*/**'"), "git itself must match hub paths, including deleted ones");
+  assert.ok(/\bindex\.html\b/.test(add) && /pages-manifest\.json/.test(add) && /ott-history\.jsonl/.test(add), "main keeps the template and the data");
   assert.ok(/git rm -r --cached --quiet --ignore-unmatch zz/.test(wf));
   assert.ok(/^zz\/$/m.test(require("fs").readFileSync(".gitignore", "utf8")));
-  // Every country directory is in the commit list.
-  for (const c of require("./lib/core.js").COUNTRIES) if (c.code !== "in") assert.ok(add.includes(` ${c.code}/`), c.code);
+  // Oct 2026: every edition folder is built output, published to the `site` branch instead
+  // (scripts/site.js); deletions reach it because each site commit is built from scratch.
+  const S = require("./site.js");
+  for (const c of require("./lib/core.js").COUNTRIES) if (c.code !== "in") assert.ok(S.isGenerated(c.code), c.code);
 });
 
 test("no page states a country count by hand", () => {
@@ -910,12 +909,17 @@ test("week pages lead with the query and the dates", () => {
   assert.ok(!/Week 39/.test(title), "nobody searches 'Week 39'");
 });
 
-test("the commit step stages the new folders without ever failing on a missing one", () => {
-  const wf = require("fs").readFileSync(".github/workflows/update.yml", "utf8");
-  assert.ok(/git add -A -- ':\(glob\)streaming\/\*\*' 2>\/dev\/null \|\| true/.test(wf));
-  assert.ok(/git add -A -- ':\(glob\)people\/\*\*' 2>\/dev\/null \|\| true/.test(wf));
-  assert.ok(/'sitemap-\*\.xml'/.test(wf), "the per-country sitemaps are committed");
-  assert.ok(/git add -A -- ':\(glob\)coming-to-ott\/\*\*' 2>\/dev\/null \|\| true/.test(wf), "India's coming-to-ott folder is committed");
+test("every built folder and file is published to the site branch, and ignored on main", () => {
+  const S = require("./site.js");
+  const ignore = require("fs").readFileSync(".gitignore", "utf8");
+  for (const p of ["movie", "streaming", "people", "coming-to-ott", "new-on-ott", "new-on-netflix", "hindi", "week", "films", "data", "embed", "cards", "css",
+    "sitemap.xml", "sitemap-films-us.xml", "sitemap-pages.xml", "feed.xml", "llms.txt", "llms-full.txt"]) {
+    assert.ok(S.isGenerated(p), p + " is published with the site");
+  }
+  for (const p of ["index.html", "about", "privacy", "dmca", "404.html", "CNAME", "robots.txt", "scripts", "data.json", "data-in.json", "pages-manifest.json", "ott-history.jsonl", "js", "fonts"]) {
+    assert.ok(!S.isGenerated(p), p + " stays on main");
+  }
+  for (const line of ["/movie/", "/new-on-*/", "/streaming/", "/people/", "/css/", "/sitemap-*.xml"]) assert.ok(ignore.includes(`\n${line}\n`), line);
 });
 
 // ---------------- The ten fixes of 22 Sept 2026 ----------------
@@ -1930,9 +1934,15 @@ test("ensureFooterLegal: frozen footers of every shape get the notice and both l
   assert.strictEqual(S.ensureFooterLegal(home), home, "the homepage template is left to footerAttribution");
 });
 
-test("the workflow commits css/ — every film page links a stylesheet in it", () => {
+test("the workflow publishes css/ with the site — every film page links a stylesheet in it", () => {
   const wf = require("fs").readFileSync(require("path").join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8");
-  assert.ok(/git add -A -- css\/ 2>\/dev\/null \|\| true/.test(wf));
+  assert.ok(require("./site.js").isGenerated("css"), "css/ goes out with the pages that link it");
+  // Restore before anything reads the pages; publish after the commit; deploy what was published.
+  const restore = wf.indexOf("node scripts/site.js restore"), tests = wf.indexOf("run: node scripts/test.js"), publish = wf.indexOf("node scripts/site.js publish");
+  assert.ok(restore > 0 && restore < tests && publish > wf.indexOf("id: commit"), "restore first, publish after the commit");
+  assert.ok(wf.includes('git archive "${{ steps.site.outputs.commit }}"'), "Cloudflare deploys the published site commit");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8");
+  assert.ok(/have < want \* MIN_SHARE/.test(src) && /refusing to build a site missing its archive/.test(src), "an incomplete restore stops the run");
 });
 
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----

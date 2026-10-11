@@ -42,6 +42,13 @@ jobs:
       # TEST_TIERS=1: only a SAFETY test failure stops the build here. A content (wording)
       # failure is written to test-results.json and health.js turns the run red at the end,
       # once the site has updated. On 8 Oct 2026 one wording test cost a whole day's update.
+      # The built pages live on the `site` branch, not main (scripts/site.js). The build reads and
+      # patches the frozen ones, so they come back first. The run stops here if far fewer film
+      # pages arrive than the manifest expects, so a bad restore can never publish a site
+      # missing its archive.
+      - name: Restore the built site
+        run: node scripts/site.js restore
+
       - name: Run unit tests
         run: node scripts/test.js
         env:
@@ -94,41 +101,17 @@ jobs:
         run: |
           git config user.name "filmychill-bot"
           git config user.email "actions@github.com"
-          # -A so DELETIONS are staged, not just additions and modifications. Platform hubs
-          # that stop qualifying are removed from disk by the build; without -A, git recorded
-          # the new sitemap (which correctly drops them) while leaving the orphaned directory
-          # committed and still served — a page reachable by URL that nothing updates.
-          # The globs are QUOTED so git matches them, not the shell. An unquoted new-on-*/
-          # expands only to directories that still exist, so a hub the build pruned was never
-          # in the pathspec and its deletion was never staged — the August "Amazon Prime Video
-          # with Ads" hub stayed live a month after it was removed. about/ was missing entirely,
-          # so the About page's country list and analytics disclosure never shipped.
-          git add -A -- data.json 'data-*.json' ott-seen.json takes.json llms.txt llms-full.txt pages-manifest.json catalog-manifest.json feed.xml index.html about/ us/ uk/ au/ de/ ae/ ca/ sg/ my/ ph/ nz/ kr/ jp/ id/ br/ mx/ es/ fr/ movie/ new-on-ott/ ':(glob)new-on-*/**' hindi/ tamil/ telugu/ malayalam/ kannada/ week/ films/ ':(glob)*/films/**' data/ embed/ ':(glob)*/embed/**' ott-history.jsonl ott-watch.json sitemap.xml 'sitemap-*.xml'
-          # zz/ is the test suite's sandbox country. The ':(glob)*/films/**' and ':(glob)*/embed/**' globs used to
-          # sweep it into the commit, publishing test pages at filmychill.com/zz/. It is in
-          # .gitignore now; this untracks the copies already committed. Idempotent.
+          # main holds code, data files and the homepage template. Built pages go to the `site`
+          # branch in the next step and are ignored here (.gitignore), so main's history grows
+          # only with real data. -A stages deletions too.
+          git add -A -- data.json 'data-*.json' ott-seen.json takes.json pages-manifest.json catalog-manifest.json index.html about/ ott-history.jsonl ott-watch.json
+          # zz/ is the test suite's sandbox country; never committed.
           git rm -r --cached --quiet --ignore-unmatch zz
-          # India's evergreen "streaming on <platform>" and people pages live in root folders
-          # that may not exist yet (or may have been emptied by a prune). A pathspec that
-          # matches nothing makes git add exit 128 and would fail the whole commit step, so
-          # each is staged on its own and allowed to match nothing. Deletions still stage:
-          # a glob pathspec matches tracked paths that are gone from disk.
-          git add -A -- ':(glob)streaming/**' 2>/dev/null || true
-          git add -A -- ':(glob)people/**' 2>/dev/null || true
-          # Vote totals exist only once the Firebase secret is set.
+          # Optional state files: absent until their feature is set up (git add exits 128 on a
+          # pathspec that matches nothing, which would fail the step).
           git add -A -- votes-agg.json votes-state.json 2>/dev/null || true
-          git add -A -- ':(glob)coming-to-ott/**' 2>/dev/null || true
-          # Honest sitemap dates for every non-film URL (lib/sitemap.js). Without it committed,
-          # every run would start from scratch and date every page today again.
+          # Honest sitemap dates for every non-film URL (lib/sitemap.js).
           git add -A -- page-lastmods.json 2>/dev/null || true
-          # Share cards are OPTIONAL: the directory only exists when the renderer AND the
-          # brand fonts are both present. `git add` on a missing pathspec exits 128 and would
-          # fail the commit step for a purely cosmetic feature, so it is added conditionally.
-          [ -d cards ] && git add -A cards/ || true
-          # Shared film-page stylesheets (scripts/lib/stylesheets.js). Every film page links one
-          # of these; leaving css/ out of the commit (as happened on 4 Oct 2026) publishes
-          # thousands of pages pointing at files that don't exist.
-          git add -A -- css/ 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit."
@@ -138,35 +121,32 @@ jobs:
             echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # The published site on its own branch, `site`: one commit with no parent, replaced on
-      # every build, so serving the site never adds history (Oct 2026: main grew ~16 MB a day,
-      # almost all of it rebuilt pages). For now it is exactly main's committed tree, so GitHub
-      # Pages can be switched to it with nothing changing for visitors. Next stage: main keeps
-      # only code and data, and this step adds the built pages from the working tree.
+      # The published site on its own branch, `site`, which GitHub Pages serves: main's tree plus
+      # the built pages, as one commit with no parent, replaced on every build. Serving the site
+      # never adds history (Oct 2026: main grew ~16 MB a day, nearly all of it pages). Skips the
+      # push when nothing changed.
       - name: Publish site branch
+        id: site
         if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
-        run: |
-          site=$(git commit-tree "HEAD^{tree}" -m "Site build $(date -u +%Y-%m-%dT%H:%MZ) from $(git rev-parse --short HEAD)")
-          git push --force origin "$site:refs/heads/site"
-          echo "site branch -> $site (tree of $(git rev-parse --short HEAD))"
+        run: node scripts/site.js publish
 
       # Cloudflare Workers Static Assets deploy. Dormant until the CLOUDFLARE_API_TOKEN secret
       # exists, so this file can be committed before the migration without breaking any run.
-      # Deploys exactly what is COMMITTED (git archive), never the working tree: the build
-      # leaves node_modules/, zz/ (test sandbox) and indexnow-payload.json on disk, none of
-      # which GitHub Pages ever served. Same files, same URLs, so Google sees no change.
+      # Deploys exactly the published `site` commit (git archive), never the working tree: the
+      # build leaves node_modules/, zz/ (test sandbox) and indexnow-payload.json on disk, none
+      # of which GitHub Pages serves. Same files, same URLs, so Google sees no change.
       - name: Check Cloudflare credentials
         id: cf
         run: echo "enabled=${{ secrets.CLOUDFLARE_API_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
 
       - name: Deploy to Cloudflare
-        if: steps.cf.outputs.enabled == 'true' && (steps.commit.outputs.pushed == 'true' || github.event_name == 'workflow_dispatch')
+        if: steps.cf.outputs.enabled == 'true' && (steps.site.outputs.changed == 'true' || github.event_name == 'workflow_dispatch')
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           rm -rf _site && mkdir _site
-          git archive HEAD | tar -x -C _site
+          git archive "${{ steps.site.outputs.commit }}" | tar -x -C _site
           echo "files to upload: $(find _site -type f | wc -l)  (free plan cap 20,000 / paid 100,000)"
           npx --yes wrangler@4 deploy
 
@@ -177,7 +157,7 @@ jobs:
       # matching KEY.txt file in the repo root, served by GitHub Pages. Only pings when a
       # commit actually happened. Ping failures never fail the build (|| true).
       - name: Ping IndexNow
-        if: steps.commit.outputs.pushed == 'true'
+        if: steps.site.outputs.changed == 'true'
         run: |
           sleep 90  # give GitHub Pages a moment to deploy the new commit first
           curl -s -X POST "https://api.indexnow.org/indexnow" \
@@ -196,5 +176,5 @@ jobs:
       # that was never committed and rendered unstyled for ~5 hours; this turns that into a red
       # run (and an email) within minutes. Runs even when the health check failed.
       - name: Live site check
-        if: ${{ !cancelled() && (steps.commit.outputs.pushed == 'true' || github.event_name == 'workflow_dispatch') }}
+        if: ${{ !cancelled() && (steps.site.outputs.changed == 'true' || github.event_name == 'workflow_dispatch') }}
         run: node scripts/livecheck.js
