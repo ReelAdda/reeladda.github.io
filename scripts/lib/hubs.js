@@ -4,6 +4,7 @@
 // ============================================================================
 "use strict";
 
+const { writeIfChanged } = require("./writeif.js");
 const fs = require("fs");
 const {
   COUNTRIES,
@@ -324,7 +325,7 @@ function writePlatformMonthPages(cfg, records = null, index = null) {
     const path = platformMonthPath(code, b.slug, b.month);
     if (b.month !== current && closedMonthFinal(path)) continue;
     fs.mkdirSync(path.slice(0, path.lastIndexOf("/")), { recursive: true });
-    fs.writeFileSync(path, buildScopedMonthPage(
+    writeIfChanged(path, buildScopedMonthPage(
       b.rows.slice().sort((x, y) => String(y.first).localeCompare(String(x.first))),
       cfg, { scope: { kind: "platform", name: b.name, slug: b.slug }, month: b.month,
              months: monthsBySlug.get(b.slug) || [], index: idx }));
@@ -355,7 +356,7 @@ function writeLanguageMonthPages(records = null, index = null) {
       const path = languageMonthPath(langSlug, m);
       if (m !== current && closedMonthFinal(path)) continue;
       fs.mkdirSync(path.slice(0, path.lastIndexOf("/")), { recursive: true });
-      fs.writeFileSync(path, buildScopedMonthPage(
+      writeIfChanged(path, buildScopedMonthPage(
         byMonth.get(m).slice().sort((x, y) => String(y.first).localeCompare(String(x.first))),
         cfg, { scope: { kind: "language", name: langName, slug: langSlug }, month: m, months, index: idx }));
       written++;
@@ -378,7 +379,7 @@ function writeOttMonthPages(cfg, records = null, index = null) {
     if (month !== current && closedMonthFinal(path)) continue;   // frozen: complete and unchanging
     const dir = path.slice(0, path.lastIndexOf("/"));
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path, buildOttMonthPage(historyForMonth(recs, code, month), cfg, { month, months, index: idx }));
+    writeIfChanged(path, buildOttMonthPage(historyForMonth(recs, code, month), cfg, { month, months, index: idx }));
     written++;
   }
   if (written) console.log(`  month archive [${code}]: ${written} page(s) written of ${months.length} month(s) on record`);
@@ -389,7 +390,7 @@ function writeOttWeekPage(data, cfg, allCountries) {
   const p = ottWeekPath(cfg.code);
   const dir = p.slice(0, p.lastIndexOf("/"));
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(p, buildOttWeekPage(data, cfg, allCountries));
+  writeIfChanged(p, buildOttWeekPage(data, cfg, allCountries));
   console.log(`  OTT-week page: /${p.replace(/index\.html$/, "")}`);
 }
 

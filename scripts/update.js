@@ -319,6 +319,7 @@ const { sweepScores } = require("./lib/scoresweep.js");
 const { refreshRelated } = require("./lib/relrefresh.js");
 const { syncVotes } = require("./lib/votes.js");
 const { runAudit } = require("./lib/audit.js");
+const { WRITE_STATS } = require("./lib/writeif.js");
 const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePageFiles } = require("./lib/stylesheets.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
@@ -1543,6 +1544,8 @@ async function main() {
   } catch (e) { stageFailed(`hreflang sync`, e); }
   // Streaming, month-archive and today pages repeated across editions (lib/graph.js).
   try { syncListingHreflang(); } catch (e) { stageFailed(`listing hreflang sync`, e); }
+  // Pages rebuilt this run that were only re-stamped are left as they were (lib/writeif.js).
+  console.log(`Page writes: ${WRITE_STATS.written} saved, ${WRITE_STATS.kept} unchanged and left alone`);
   // Honest lastmod (lib/sitemap.js): after the last page edit of the run, a film's date moves
   // only if its content did.
   try {

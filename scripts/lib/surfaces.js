@@ -4,6 +4,7 @@
 // ============================================================================
 "use strict";
 
+const { writeIfChanged } = require("./writeif.js");
 const fs = require("fs");
 const {
   COUNTRIES,
@@ -543,7 +544,7 @@ function filmsInCinemas(today = new Date().toISOString().slice(0, 10)) {
 function writeDataPage(updatedHuman) {
   const records = readHistory();
   fs.mkdirSync("data", { recursive: true });
-  fs.writeFileSync("data/index.html", buildDataPage(records, updatedHuman, { inCinemas: filmsInCinemas() }));
+  writeIfChanged("data/index.html", buildDataPage(records, updatedHuman, { inCinemas: filmsInCinemas() }));
   fs.writeFileSync("data/streaming-windows.csv", buildWindowsCsv(records));
   const s = windowStats(records);
   const x = s.excluded;

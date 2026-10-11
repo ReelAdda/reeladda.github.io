@@ -1,3 +1,4 @@
+const { writeIfChanged } = require("./writeif.js");
 // ============================================================================
 // evergreen.js — evergreen pages: 'Streaming on <platform>' and people pages.
 // ============================================================================
@@ -173,12 +174,12 @@ function writeStreamingPages(data, cfg, manifest, index = null) {
     const weekly = fs.existsSync(hubPath(code, pslug)) ? hubUrl(code, pslug) : null;
     const main = streamPagePath(code, pslug);
     fs.mkdirSync(main.slice(0, main.lastIndexOf("/")), { recursive: true });
-    fs.writeFileSync(main, buildStreamingPage(items, cfg, { platform, pslug, langLinks: langs, weeklyHub: weekly }));
+    writeIfChanged(main, buildStreamingPage(items, cfg, { platform, pslug, langLinks: langs, weeklyHub: weekly }));
     written.add(main);
     for (const l of langs) {
       const lp = streamPagePath(code, pslug, l.slug);
       fs.mkdirSync(lp.slice(0, lp.lastIndexOf("/")), { recursive: true });
-      fs.writeFileSync(lp, buildStreamingPage(l.xs, cfg, { platform, pslug, language: l.name, lslug: l.slug,
+      writeIfChanged(lp, buildStreamingPage(l.xs, cfg, { platform, pslug, language: l.name, lslug: l.slug,
         langLinks: langs.filter((x) => x.slug !== l.slug), weeklyHub: weekly }));
       written.add(lp);
     }
@@ -333,7 +334,7 @@ function writePeoplePages(data, cfg, manifest) {
   for (const p of people) {
     const path = personPagePath(code, p.slug);
     fs.mkdirSync(path.slice(0, path.lastIndexOf("/")), { recursive: true });
-    fs.writeFileSync(path, buildPersonPage(p, cfg, { availability: avail }));
+    writeIfChanged(path, buildPersonPage(p, cfg, { availability: avail }));
     written.add(p.slug);
   }
   const base = PEOPLE_BASE(code);
@@ -360,7 +361,7 @@ function writePeoplePages(data, cfg, manifest) {
       homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
     }).replace(/(<p class="lead">[\s\S]*?<\/p>)/, `$1${listHtml}`);
     fs.mkdirSync(base, { recursive: true });
-    fs.writeFileSync(`${base}/index.html`, page);
+    writeIfChanged(`${base}/index.html`, page);
     console.log(`  people pages [${code}]: ${people.length} (${PEOPLE_MIN}+ films each)`);
   } else if (fs.existsSync(`${base}/index.html`)) {
     fs.rmSync(`${base}/index.html`, { force: true });

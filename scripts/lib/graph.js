@@ -1,5 +1,6 @@
 "use strict";
 
+const { writeIfChanged } = require("./writeif.js");
 const fs = require("fs");
 const path = require("path");
 const { COUNTRIES, COUNTRY_PAGE_META, escHtml, filmPagePath, filmPageUrl, ICON_LINKS, xDefaultCode } = require("./core.js");
@@ -266,7 +267,7 @@ function writeBrowseIndex(index, cfg, updatedHuman, headExtra = "", newlyAdded =
   for (let page = 1; page <= totalPages; page++) {
     const dir = code === "in" ? (page === 1 ? "films" : `films/${page}`) : (page === 1 ? `${code}/films` : `${code}/films/${page}`);
     fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(`${dir}/index.html`, buildBrowsePage(sorted, cfg, page, totalPages, updatedHuman, headExtra, newlyAdded));
+    writeIfChanged(`${dir}/index.html`, buildBrowsePage(sorted, cfg, page, totalPages, updatedHuman, headExtra, newlyAdded));
     urls.push(`https://filmychill.com${browsePath(code, page)}`);
   }
   console.log(`  browse index [${code}]: ${sorted.length} films across ${totalPages} page(s)`);

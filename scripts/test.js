@@ -1760,6 +1760,41 @@ test("5 · 'Page updated' and dateModified are kept to the same date", () => {
   assert.ok(sweep.includes('.replace(/("dateModified":")\\d{4}-\\d{2}-\\d{2}/, `$1${today}`)'), "the score sweep moves both now");
 });
 
+group("11 Oct 2026: write a regenerated page only when its content changed");
+test("writeIfChanged keeps a page that differs only in its stamps, and writes a real change", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const W = require("./lib/writeif.js");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-wif-"));
+  try {
+    fsx.mkdirSync(path.join(root, "css"));
+    const css = ".a{color:red}";
+    fsx.writeFileSync(path.join(root, "css", "fp-0123456789.css"), css);
+    const page = (day, body, styles) => `<meta http-equiv="Content-Security-Policy" content="style-src ${styles ? "'unsafe-inline'" : "'self' 'unsafe-inline'"}">${styles ? `<style>${css}</style>` : '<link rel="stylesheet" href="/css/fp-0123456789.css">'}`
+      + `<script type="application/ld+json">{"dateModified":"2026-10-${day}"}</script><div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${day} Oct 2026</div>`
+      + `<!--SW:stream--><!--SW:live=2026-10-${day}--><!--SW:checked=2026-10-0${day % 9}--><p>${body}</p><p>Availability as of ${day} Oct 2026 — platforms may change over time.</p>`;
+    const f = path.join(root, "p.html");
+    fsx.writeFileSync(f, page(10, "On Netflix.", false));          // as the end-of-build pass left it
+    assert.strictEqual(W.writeIfChanged(f, page(11, "On Netflix.", true), { root }), false, "only stamps (and inline vs shared styles) differ");
+    assert.ok(fsx.readFileSync(f, "utf8").includes("Page updated 10 Oct"), "the file is untouched");
+    assert.strictEqual(W.writeIfChanged(f, page(11, "On Netflix and Prime Video.", true), { root }), true, "a real change is written");
+    assert.ok(fsx.readFileSync(f, "utf8").includes("Page updated 11 Oct"));
+    const changedCss = page(12, "On Netflix and Prime Video.", true).replace(css, ".a{color:blue}");
+    assert.strictEqual(W.writeIfChanged(f, changedCss, { root }), true, "a style change is a change");
+    const nf = path.join(root, "new.html");
+    assert.strictEqual(W.writeIfChanged(nf, "<p>x</p>", { root }), true, "new pages are written");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("every regenerating page writer goes through writeIfChanged", () => {
+  const fsx = require("fs"), path = require("path");
+  const src = (f) => fsx.readFileSync(path.join(__dirname, "lib", f), "utf8");
+  for (const [f, call] of [["filmpage.js", "writeIfChanged(`${dir}/${item.slug}.html`, buildFilmPage("], ["evergreen.js", "writeIfChanged(path, buildPersonPage("],
+    ["evergreen.js", "writeIfChanged(main, buildStreamingPage("], ["dated.js", "writeIfChanged(p, buildPlatformHubPage("], ["dated.js", "writeIfChanged(tp, buildTodayPage("],
+    ["hubs.js", "writeIfChanged(p, buildOttWeekPage("], ["graph.js", "writeIfChanged(`${dir}/index.html`, buildBrowsePage("]]) {
+    assert.ok(src(f).includes(call), `${f}: ${call}`);
+  }
+  assert.ok(/Page writes: \$\{WRITE_STATS\.written\} saved/.test(fsx.readFileSync(path.join(__dirname, "update.js"), "utf8")), "the build log reports it");
+});
+
 group("11 Oct 2026 audit fixes: contact, honest sitemap dates, contrast, listing hreflang");
 test("A07 · About and Privacy give the contact address; the homepage Organization has a contactPoint", () => {
   const fsx = require("fs"), path = require("path");

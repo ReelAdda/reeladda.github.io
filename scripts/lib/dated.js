@@ -1,3 +1,4 @@
+const { writeIfChanged } = require("./writeif.js");
 // ============================================================================
 // dated.js — dated and listing pages: 'Coming to OTT', 'New on OTT today', language landing
 // pages, weekly snapshots, the platform-hub writer and the IndexNow payload.
@@ -169,14 +170,14 @@ function writeDatedOttPages(data, cfg, manifest, records = null) {
   const cp = comingPath(code);
   if (hasComing) {
     fs.mkdirSync(cp.slice(0, cp.lastIndexOf("/")), { recursive: true });
-    fs.writeFileSync(cp, buildComingPage(items, cfg, { hasToday: hasWeek }));
+    writeIfChanged(cp, buildComingPage(items, cfg, { hasToday: hasWeek }));
   } else if (fs.existsSync(cp)) {
     fs.rmSync(cp.slice(0, cp.lastIndexOf("/")), { recursive: true, force: true });
   }
   const tp = todayPath(code);
   if (hasWeek) {
     fs.mkdirSync(tp.slice(0, tp.lastIndexOf("/")), { recursive: true });
-    fs.writeFileSync(tp, buildTodayPage(recs, cfg, { index: idx, hasComing }));
+    writeIfChanged(tp, buildTodayPage(recs, cfg, { index: idx, hasComing }));
   } else if (fs.existsSync(tp)) {
     fs.rmSync(tp.slice(0, tp.lastIndexOf("/")), { recursive: true, force: true });
   }
@@ -191,7 +192,7 @@ function writePlatformHubPages(data, cfg) {
     const p = hubPath(code, hub.slug);
     const dir = p.slice(0, p.lastIndexOf("/"));
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(p, buildPlatformHubPage(data, cfg, hub));
+    writeIfChanged(p, buildPlatformHubPage(data, cfg, hub));
   }
   const live = new Set(hubs.map((h) => h.slug));
   LIVE_HUBS.set(code, live);
@@ -325,7 +326,7 @@ function writeLanguagePages(data) {
   const archive = filmIndexFor({ code: "in" });
   for (const [langName, slug] of LANGUAGE_PAGES) {
     if (!fs.existsSync(slug)) fs.mkdirSync(slug, { recursive: true });
-    fs.writeFileSync(`${slug}/index.html`, buildLanguagePage(data, langName, slug, archive));
+    writeIfChanged(`${slug}/index.html`, buildLanguagePage(data, langName, slug, archive));
   }
   console.log(`Language pages: ${LANGUAGE_PAGES.map(([, sl]) => "/" + sl + "/").join(" ")}`);
 }
@@ -388,7 +389,7 @@ function writeWeekPage(data) {
   const dir = `week/${slug}`;
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   const prevExists = fs.existsSync(`week/${prevWeekSlug(slug)}/index.html`);
-  fs.writeFileSync(`${dir}/index.html`, buildWeekPage(data, slug, prevExists));
+  writeIfChanged(`${dir}/index.html`, buildWeekPage(data, slug, prevExists));
   console.log(`Week snapshot: /week/${slug}/${prevExists ? " → chained to previous week" : ""}`);
 }
 

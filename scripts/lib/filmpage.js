@@ -4,6 +4,7 @@
 // ============================================================================
 "use strict";
 
+const { writeIfChanged } = require("./writeif.js");
 const { earlyReadLabel, isRecent, noScoreText, scoreNeed } = require("./fcscore.js");
 const { VOTE_CONNECT, VOTE_CSS, voteWidgetHtml } = require("./vote.js");
 const { meterLevel, meterSvg } = require("./meter.js");
@@ -1129,7 +1130,7 @@ function generatePages(data, cfg, allSlugSets) {
       .map((c) => ({ code: c.code, region: c.region }));
     item._alts = cluster.length > 1 ? cluster : [];
     try {
-      fs.writeFileSync(`${dir}/${item.slug}.html`, buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex));
+      writeIfChanged(`${dir}/${item.slug}.html`, buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex));
       written++;
     } catch (err) { console.warn(`page ${code}/${item.slug}: ${err.message}`); }
     finally { delete item._alts; }
