@@ -14,6 +14,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { tidyProse } = require("./core.js");
 
 const FACTS_DIR = "facts";
 
@@ -152,7 +153,8 @@ function keyFacts(html) {
     state: pageState(html),
     title: text((/<h1>([\s\S]*?)<\/h1>/.exec(html) || [])[1]),
     released: (/"datePublished":"([^"]+)"/.exec(html) || [])[1] || "",
-    synopsis: text((/<h2>Story<\/h2><p>([\s\S]*?)<\/p>/.exec(html) || [])[1]),
+    // Tidied on both sides: punctuation fixes from lib/core.js tidyProse are not a fact change.
+    synopsis: tidyProse(text((/<h2>Story<\/h2><p>([\s\S]*?)<\/p>/.exec(html) || [])[1])),
     cast: [...html.matchAll(/<div class="cast-name">([\s\S]*?)<\/div>/g)].map((m) => text(m[1])).join(","),
     providers: pillSet(cut >= 0 ? wtw.slice(0, cut) : wtw),
     rentBuy: cut >= 0 ? pillSet(wtw.slice(cut)) : "",

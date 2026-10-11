@@ -4639,7 +4639,7 @@ test("early reads show their label on cards and film pages, and never win Pick o
   const card = W.ssrCard({ title: "Ikka", slug: "ikka", kind: "movie", rating: 5.7, votes: 21, released: "2026-07-10", fcScore: s }, 0, "in");
   assert.ok(/Based on 21 ratings<\/div>/.test(card), card);
   const page = U.buildFilmPage({ title: "Ikka", slug: "ikka", kind: "movie", language: "Hindi", rating: 5.7, votes: 21, released: "2026-07-10", fcScore: s }, "2026-09-29", new Set(["ikka"]), { code: "in", name: "India" });
-  assert.ok(/fcsb-stamp fcsb-skip">Skip<\/span><span class="fcsb-conf">Based on 21 ratings<\/span>/.test(page));
+  assert.ok(/fcsb-stamp fcsb-skip">Skip<\/span> <span class="fcsb-conf">Based on 21 ratings<\/span>/.test(page));
   assert.ok(/few ratings, so weighted toward an average film/.test(page) && /\(based on only 21 ratings\)/.test(page), "audience row and FAQ say so too");
   assert.ok(!/Early — still settling|still settling|too early|Early read/i.test(page), "a July film's page has no time words anywhere");
   const now = new Date().toISOString();
@@ -5927,6 +5927,21 @@ const _sf = (o) => ({ title: "T", tmdbId: 7, rating: 7.5, votes: 500, runtime: 1
 test("returns null when fewer than two honest reasons hold", () => {
   assert.strictEqual(skipIf(_sf({})), null);
   assert.strictEqual(skipIf(_sf({ runtime: 200 })), null, "one reason alone is an afterthought");
+});
+test("season count takes the article it is spoken with ('an 8-season', 'a 5-season')", () => {
+  const lines = (s) => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].flatMap((id) => skipIf(_sf({ kind: "tv", seasons: s, tmdbId: id, runtime: 200 })) || []);
+  assert.ok(lines(8).some((x) => /an 8-season/.test(x)) && !lines(8).some((x) => /\ba 8-/.test(x)));
+  assert.ok(lines(11).some((x) => /an 11-season/.test(x)));
+  assert.ok(lines(5).some((x) => /a 5-season/.test(x)));
+});
+test("tidyProse: synopsis punctuation is finished, words untouched", () => {
+  const { tidyProse } = require("./lib/core.js");
+  assert.strictEqual(tidyProse("They meet at college , and fight"), "They meet at college, and fight.");
+  assert.strictEqual(tidyProse("He says “hello\" to Olavo‘s son."), "He says “hello” to Olavo’s son.");
+  assert.strictEqual(tidyProse("A fading star and his double drift through an industry they barely know. Then the family next door moves in and…"),
+    "A fading star and his double drift through an industry they barely know.");
+  assert.strictEqual(tidyProse("Tad is an explorer... in his dreams!"), "Tad is an explorer... in his dreams!");
+  assert.strictEqual(tidyProse(""), "");
 });
 test("a long adults-only film gets both reasons", () => {
   const r = skipIf(_sf({ runtime: 195, cert: "A" }));

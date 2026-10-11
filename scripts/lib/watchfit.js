@@ -33,13 +33,13 @@ const { pickVariant, runtimePhrase } = require("./whywatch.js");
 // reason a reasonable person would bounce off a GOOD film of this kind. Never a euphemism
 // for "it's bad": quality is the verdict's job, fit is this block's job.
 const GENRE_SKIP = {
-  "action": ["you want a slower, character-led story", "you'd rather the plot moved on people than on set pieces"],
+  "action": ["you want a slower, character-led story", "you'd rather a story driven by people than by set pieces"],
   "adventure": ["you want something grounded and small-scale", "sprawling quest structure isn't what you're after"],
-  "animation": ["you won't get past the format", "you want live action tonight"],
+  "animation": ["animation isn't your thing", "you want live action tonight"],
   "comedy": ["you want real stakes underneath the jokes", "you're in the mood for something with weight"],
   "crime": ["you dislike slow-burn procedural pacing", "you want resolution faster than the genre gives it"],
   "documentary": ["you want a story rather than an argument", "you'd rather not be taught something tonight"],
-  "drama": ["you want plot momentum over character work", "you're after something that moves faster than it feels"],
+  "drama": ["you want plot momentum over character work", "you want a story that moves quickly"],
   "family": ["you want something with an adult edge", "you're watching alone and want more bite"],
   "fantasy": ["you'd rather not do the world-building work", "invented rules and maps put you off"],
   "history": ["you want pace ahead of period detail", "you'd rather not keep track of who's who"],
@@ -117,10 +117,10 @@ function bestForLine(item) {
   if (family && rt && rt.band === "short") return pickVariant(item, ["a weekend afternoon with the family", "a family evening that doesn't run late"]);
   if (family) return pickVariant(item, ["a weekend watch with the family", "an evening with the household together"]);
   if (!rt) return null;
-  if (rt.band === "short") return pickVariant(item, ["a weeknight", "a night you still want to end early"]);
+  if (rt.band === "short") return pickVariant(item, ["a weeknight", "a night when you want an early finish"]);
   if (rt.band === "long") return pickVariant(item, ["an evening with no interruptions", "a night you can give it your full attention"]);
   if (rt.band === "epic") return pickVariant(item, ["a free weekend evening", "a night with nothing after it"]);
-  return pickVariant(item, ["an ordinary evening in", "a normal night, nothing to plan around"]);
+  return pickVariant(item, ["a quiet evening at home", "a normal night, nothing to plan around"]);
 }
 
 // "Why" is the only line carrying a positive claim, so it is the most tightly bound:

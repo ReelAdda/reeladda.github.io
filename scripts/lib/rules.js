@@ -105,7 +105,10 @@ function streamWindowEstimate(releasedISO, languageName, now = new Date()) {
   const to = new Date(rel.getTime() + hi * 7 * 86400000);
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const label = (d) => `${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
-  const span = label(from) === label(to) ? label(from) : `${label(from)} and ${label(to)}`;
+  // "September and October 2026" (the year once), "December 2026 and January 2027" across years.
+  const span = label(from) === label(to) ? label(from)
+    : from.getUTCFullYear() === to.getUTCFullYear() ? `${MONTHS[from.getUTCMonth()]} and ${label(to)}`
+    : `${label(from)} and ${label(to)}`;
   return { lo, hi, span, passed: now.getTime() > to.getTime() };
 }
 

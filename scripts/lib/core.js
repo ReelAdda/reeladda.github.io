@@ -254,6 +254,25 @@ function escHtml(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// Crowd-edited prose (TMDB overviews) as a finished paragraph: no space before punctuation,
+// a stray straight quote closing a curly one made curly, an opening quote used as an
+// apostrophe ("Olavo‘s") turned the right way, a "…" cut-off trimmed back to the
+// last full sentence (when one is long enough to stand), and a closing full stop when the
+// text ends without one. Words are never changed.
+function tidyProse(s) {
+  let t = String(s == null ? "" : s).replace(/\s+/g, " ").trim();
+  if (!t) return "";
+  t = t.replace(/ +([,;:.!?])(?=\s|$)/g, "$1");
+  t = t.replace(/“([^“”"]*)"/g, "“$1”").replace(/(\w)‘(\w)/g, "$1’$2");
+  if (/(?:\.{3}|…)$/.test(t)) {
+    const body = t.replace(/\s*(?:\.{3}|…)$/, "");
+    const cut = Math.max(body.lastIndexOf(". "), body.lastIndexOf("! "), body.lastIndexOf("? "));
+    t = cut >= 60 ? body.slice(0, cut + 1) : body;
+  }
+  if (!/[.!?…”"')\]]$/.test(t)) t = t.replace(/[,;:\s—–-]+$/, "") + ".";
+  return t;
+}
+
 // JSON for a <script type="application/ld+json"> block. TMDB is crowd-edited: a title or
 // overview containing "</script>" would otherwise end the block early and inject markup into
 // the page. < is still valid JSON, so the structured data reads back identically. The one
@@ -371,6 +390,7 @@ module.exports = {
   COUNTRY_PAGE_META,
   LANGUAGE_PAGES,
   escHtml,
+  tidyProse,
   ICON_LINKS,
   ldJson,
   filmPagePath,

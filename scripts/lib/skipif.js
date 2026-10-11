@@ -136,12 +136,17 @@ function divisiveReason(item) {
 }
 
 // --- series commitment --------------------------------------------------------
+// "an 8-season", "an 11-season", "an 18-season", "an 80-season": the article follows how
+// the number is said, not how it is written.
+function articleFor(n) {
+  return /^(?:8\d{0,2}|11|18)$/.test(String(n)) ? "an" : "a";
+}
 function seasonsReason(item) {
   const s = Number(item.seasons) || 0;
   if (item.kind !== "tv" || s < 3) return null;
   return pickVariant(item, [
     `you want something that ends tonight — there are ${s} seasons of it`,
-    `you're not starting a ${s}-season show this week`,
+    `you're not starting ${articleFor(s)} ${s}-season show this week`,
   ]);
 }
 

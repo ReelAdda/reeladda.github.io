@@ -559,7 +559,7 @@ function freshenFrozenCopy(html, { countryName, cfg = null, now = Date.now() } =
   // A streaming-window estimate whose window has already closed is no longer a pattern, it is
   // a missed prediction. Drop the clause; the "not announced" sentence around it stays true.
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  out = out.replace(/ ([A-Za-z]+ )?releases typically reach streaming about \d+–\d+ weeks after their theatrical run, which would put it around (?:(\w+) (\d{4}) and )?(\w+) (\d{4}) — that(?:'|&#39;)s a pattern, not a confirmed date\./g,
+  out = out.replace(/ ([A-Za-z]+ )?releases typically reach streaming about \d+–\d+ weeks after their theatrical run, which would put it around (?:(\w+)(?: (\d{4}))? and )?(\w+) (\d{4}) — that(?:'|&#39;)s a pattern, not a confirmed date\./g,
     (m, _lang, _m1, _y1, m2, y2) => {
       const idx = MONTHS.indexOf(m2);
       if (idx < 0) return m;

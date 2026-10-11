@@ -13,6 +13,7 @@ const {
   COUNTRIES,
   LANGUAGE_PAGES,
   escHtml,
+  tidyProse,
   filmPagePath,
   filmPageUrl,
   fmtDateShort,
@@ -661,7 +662,7 @@ function fcScoreSection(item) {
     const lvl = !s ? "early" : /^must/i.test(s.verdict) ? "must" : /^skip/i.test(s.verdict) ? "skip" : "worth";
     return `<section class="fcsb" id="filmychill-score">
     <div class="fcsb-label">FilmyChill score</div>
-    <div class="fcsb-verdict">${meterSvg(s ? meterLevel(s.verdict) : "early", { size: 56, cls: "fcsb-m" })}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? `<span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
+    <div class="fcsb-verdict">${meterSvg(s ? meterLevel(s.verdict) : "early", { size: 56, cls: "fcsb-m" })}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
     <p class="fcsb-why">${e(s ? s.reason : none.why)}</p>
     <div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>
   </section>
@@ -686,7 +687,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const relState = releaseState(item.released);
   const upcoming = relState === "upcoming" || relState === "today";
   const relLabel = relState === "upcoming" ? "Releases" : relState === "today" ? "Releases today" : "Released";
-  const synopsis = item.fullReview || item.review || "";
+  const synopsis = tidyProse(item.fullReview || item.review || "");
   const url = filmPageUrl(code, item.slug);
   const ytid = ytIdOf(item.trailer);
   const cast = Array.isArray(item.cast) ? item.cast.slice(0, 6) : [];
