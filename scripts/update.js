@@ -83,6 +83,7 @@ const {
   relatedFilms,
   relatedScore,
   syncHreflangClusters,
+  syncListingHreflang,
   writeBrowseIndex,
   BROWSE_PER_PAGE,
 } = require("./lib/graph.js");
@@ -1540,6 +1541,8 @@ async function main() {
     // alternates (rewritten every run) already tell Google about the cluster.
     syncHreflangClusters();
   } catch (e) { stageFailed(`hreflang sync`, e); }
+  // Streaming, month-archive and today pages repeated across editions (lib/graph.js).
+  try { syncListingHreflang(); } catch (e) { stageFailed(`listing hreflang sync`, e); }
   // Honest lastmod (lib/sitemap.js): after the last page edit of the run, a film's date moves
   // only if its content did.
   try {

@@ -851,7 +851,7 @@ ${(() => {
   .top a span { color:var(--marigold); }
   .wrap { max-width:680px; margin:0 auto; padding:20px 16px 40px; }
   .head { display:grid; grid-template-columns:140px 1fr; gap:16px; }
-  .poster { width:140px; border-radius:12px; display:block; }
+  .poster { width:140px; height:auto; aspect-ratio:2/3; object-fit:cover; border-radius:12px; display:block; }
   h1 { font-size:24px; margin:0 0 6px; } .meta { color:var(--mute); font-size:14px; margin-bottom:10px; }
   .rating { color:var(--indigo); font-weight:800; font-size:18px; display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
   .cdot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
@@ -926,7 +926,7 @@ ${FCSB_CSS}
 <div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
 <div class="wrap">
   <div class="head">
-    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="72" height="106">` : "<div></div>"}
+    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="140" height="210">` : "<div></div>"}
     <div>
       <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
       <div class="meta">${[item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert].filter(Boolean).map(e).join(" · ")}</div>

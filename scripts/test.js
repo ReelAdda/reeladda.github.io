@@ -1555,12 +1555,12 @@ test("finishFilmPages: moves styles out once, finishes the footer, keeps only st
     assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
     const r = S.finishFilmPages(files, { root });
     assert.deepStrictEqual(r, { pages: 3, externalized: 3, footerLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0 });
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0 });
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
     assert.ok(/<a href="\/privacy\/">Privacy<\/a> · <a href="\/dmca\/">Copyright<\/a> · © 2026 FilmyChill/.test(a));
     assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
     assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, footerLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0 }, "idempotent");
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0 }, "idempotent");
     // The 4 Oct incident: the stylesheets never reached the site. That must be reported.
     fsx.rmSync(path.join(root, "css"), { recursive: true, force: true });
     const lost = S.finishFilmPages(files, { root });
@@ -1758,6 +1758,87 @@ test("5 · 'Page updated' and dateModified are kept to the same date", () => {
   assert.strictEqual(S.syncDateModified(pg("someday", "2026-09-30"), "in"), pg("someday", "2026-09-30"), "unreadable: untouched");
   const sweep = require("fs").readFileSync(require("path").join(__dirname, "lib", "scoresweep.js"), "utf8");
   assert.ok(sweep.includes('.replace(/("dateModified":")\\d{4}-\\d{2}-\\d{2}/, `$1${today}`)'), "the score sweep moves both now");
+});
+
+group("11 Oct 2026 audit fixes: contact, honest sitemap dates, contrast, listing hreflang");
+test("A07 · About and Privacy give the contact address; the homepage Organization has a contactPoint", () => {
+  const fsx = require("fs"), path = require("path");
+  const about = fsx.readFileSync(path.join(__dirname, "..", "about", "index.html"), "utf8");
+  const priv = fsx.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
+  assert.ok(/Corrections are genuinely welcome: email <a href="mailto:filmychill\.contact@gmail\.com">/.test(about), "corrections can actually be sent");
+  assert.ok(/mailto:filmychill\.contact@gmail\.com/.test(priv) && !/will be added to this page/.test(priv), "privacy placeholder replaced");
+  const S = require("./lib/surfaces.js");
+  const ld = S.buildHomeJsonLd({ generatedAt: "2026-10-11T00:00:00Z", theatres: [], ott: [] }, { code: "in", name: "India", region: "IN" });
+  const org = JSON.parse(ld)["@graph"].find((x) => x["@type"] === "Organization");
+  assert.deepStrictEqual(org.contactPoint, { "@type": "ContactPoint", contactType: "customer support", email: "filmychill.contact@gmail.com" });
+});
+test("A03 · a non-film sitemap URL keeps its date until its content changes", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const SM = require("./lib/sitemap.js");
+  const dir = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-lastmod-"));
+  try {
+    const page = path.join(dir, "p.html"), store = path.join(dir, "lm.json");
+    const html = (t) => `<html><head><title>${t}</title></head><body><p>${t} list</p><div class="meta" style="margin-top:2px;font-size:12.5px">Page updated 1 Oct 2026</div></body></html>`;
+    fsx.writeFileSync(page, html("Netflix"));
+    let t = SM.pageLastmodTracker("2026-10-01", store);
+    assert.strictEqual(t.lastmod("u", page), "2026-10-01", "first sighting starts today"); t.save();
+    fsx.writeFileSync(page, html("Netflix").replace("1 Oct", "5 Oct"));
+    t = SM.pageLastmodTracker("2026-10-05", store);
+    assert.strictEqual(t.lastmod("u", page), "2026-10-01", "a re-render with only a new stamp keeps the date"); t.save();
+    fsx.writeFileSync(page, html("Netflix and Prime"));
+    t = SM.pageLastmodTracker("2026-10-07", store);
+    assert.strictEqual(t.lastmod("u", page), "2026-10-07", "real content change moves it"); t.save();
+    t = SM.pageLastmodTracker("2026-10-09", store);
+    assert.strictEqual(t.lastmod("other", page), "2026-10-09"); t.save();
+    assert.deepStrictEqual(Object.keys(JSON.parse(fsx.readFileSync(store, "utf8"))), ["other"], "URLs gone from the sitemap drop out");
+  } finally { fsx.rmSync(dir, { recursive: true, force: true }); }
+  const src = fsx.readFileSync(path.join(__dirname, "lib", "sitemap.js"), "utf8");
+  assert.ok(!/<lastmod>\$\{today\}<\/lastmod>/.test(src), "no section writes the build date any more");
+  const wf = fsx.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8");
+  assert.ok(/git add -A -- page-lastmods\.json/.test(wf), "the build commits the date store");
+});
+test("A16 · readable count badge, posters at TMDB's 2:3, applied to frozen pages through shared CSS", () => {
+  const fsx = require("fs"), path = require("path");
+  for (const f of ["pagekit.js", "weekly.js"]) assert.ok(fsx.readFileSync(path.join(__dirname, "lib", f), "utf8").includes(".cnt { color:#8A5800; }"), f);
+  const page = U.buildFilmPage({ title: "P", slug: "p", kind: "movie", poster: "https://image.tmdb.org/t/p/w342/p.jpg", released: "2026-01-01" }, "2026-10-11", new Set(), { code: "in", name: "India", region: "IN" });
+  assert.ok(/class="poster"[^>]*width="140" height="210"/.test(page) && /\.poster \{ width:140px; height:auto; aspect-ratio:2\/3; object-fit:cover;/.test(page));
+  const S = require("./lib/stylesheets.js");
+  const os = require("os");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-cssfix-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie")); fsx.mkdirSync(path.join(root, "css"));
+    fsx.writeFileSync(path.join(root, "movie", "a.html"), `<meta http-equiv="Content-Security-Policy" content="style-src 'unsafe-inline'"><style>.poster { width:140px; border-radius:12px; display:block; }</style><footer>x<br> © 2026 FilmyChill</footer>`);
+    const r1 = S.finishFilmPages(["movie/a.html"], { root });
+    const css = fsx.readdirSync(path.join(root, "css")).map((f) => fsx.readFileSync(path.join(root, "css", f), "utf8")).join("");
+    assert.ok(css.includes("aspect-ratio:2/3") && r1.cssFixed === 1, "the shared file is corrected in place");
+    assert.strictEqual(S.finishFilmPages(["movie/a.html"], { root }).cssFixed, 0, "idempotent");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("A02 · streaming, month and today pages get reciprocal hreflang from disk; a lone page loses it", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const G = require("./lib/graph.js");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-lhl-"));
+  try {
+    const page = (rel, canon) => { fsx.mkdirSync(path.join(root, path.dirname(rel)), { recursive: true }); fsx.writeFileSync(path.join(root, rel), `<head>\n<link rel="canonical" href="${canon}">\n<meta name="x"></head>`); };
+    page("streaming/netflix/index.html", "https://filmychill.com/streaming/netflix/");
+    page("uk/streaming/netflix/index.html", "https://filmychill.com/uk/streaming/netflix/");
+    page("us/new-on-ott/2026-09/index.html", "https://filmychill.com/us/new-on-ott/2026-09/");
+    page("uk/new-on-ott/2026-09/index.html", "https://filmychill.com/uk/new-on-ott/2026-09/");
+    page("sg/new-on-ott/today/index.html", "https://filmychill.com/sg/new-on-ott/today/");
+    page("new-on-ott/index.html", "https://filmychill.com/new-on-ott/");
+    const r = G.syncListingHreflang({ root });
+    assert.strictEqual(r.clusters, 2);
+    const ind = fsx.readFileSync(path.join(root, "streaming/netflix/index.html"), "utf8");
+    assert.ok(ind.includes('<link rel="alternate" hreflang="en-IN" href="https://filmychill.com/streaming/netflix/"/>\n<link rel="alternate" hreflang="en-GB" href="https://filmychill.com/uk/streaming/netflix/"/>\n<link rel="alternate" hreflang="x-default" href="https://filmychill.com/streaming/netflix/"/>'), ind);
+    const us = fsx.readFileSync(path.join(root, "us/new-on-ott/2026-09/index.html"), "utf8");
+    assert.ok(/hreflang="en-US"/.test(us) && /hreflang="en-GB"/.test(us) && /hreflang="x-default"/.test(us), "month archives cluster too");
+    assert.ok(!/hreflang/.test(fsx.readFileSync(path.join(root, "sg/new-on-ott/today/index.html"), "utf8")), "a page alone in its group gets none");
+    assert.ok(!/hreflang/.test(fsx.readFileSync(path.join(root, "new-on-ott/index.html"), "utf8")), "the weekly page is left to its own builder");
+    assert.strictEqual(G.syncListingHreflang({ root }).fixed, 0, "idempotent");
+    fsx.rmSync(path.join(root, "uk/streaming"), { recursive: true });
+    G.syncListingHreflang({ root });
+    assert.ok(!/hreflang/.test(fsx.readFileSync(path.join(root, "streaming/netflix/index.html"), "utf8")), "a cluster that shrinks to one drops its links");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 
 group("10 Oct 2026: copyright page and the no-hosting notice");
@@ -5963,11 +6044,11 @@ test("finishSitePages adds icons to frozen pages once, and never touches a file 
     fsx.writeFileSync(path.join(root, "scripts", "y.html"), "<html><head></head></html>");
     const files = S.sitePageFiles(root).sort();
     assert.deepStrictEqual(files, ["embed/week/index.html", "googleabc.html", "week/2026-W30/index.html"], "film pages and non-site folders stay out of this pass");
-    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 1, footerLinked: 1 });
+    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 1, footerLinked: 1, cssFixed: 0 });
     assert.ok(fsx.readFileSync(path.join(root, "week", "2026-W30", "index.html"), "utf8").includes('<a href="/dmca/">Copyright</a> · © 2026 FilmyChill'), "frozen site pages get the footer too");
     assert.ok(/<link rel="icon"[^>]*>\n<link rel="apple-touch-icon"[^>]*>\n<\/head>/.test(fsx.readFileSync(path.join(root, "week", "2026-W30", "index.html"), "utf8")));
     assert.strictEqual(fsx.readFileSync(path.join(root, "googleabc.html"), "utf8"), "google-site-verification: googleabc.html", "Google's verification file is untouched");
-    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 0, footerLinked: 0 }, "idempotent");
+    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 0, footerLinked: 0, cssFixed: 0 }, "idempotent");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 

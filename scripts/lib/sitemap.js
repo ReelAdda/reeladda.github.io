@@ -19,7 +19,6 @@ const {
 const { peopleIndexUrl, personPageUrl, streamPageUrl } = require("./evergreen.js");
 const { existingHubSlugs, LIVE_HUBS, ottMonthUrl } = require("./hubs.js");
 const { isoWeekOf, PEOPLE_BASE, STREAM_BASE, weekSlug } = require("./pagekit.js");
-const { ABOUT_LASTMOD } = require("./surfaces.js");
 const { ottWeekUrl } = require("./weekly.js");
 
 // Complete sitemap: every country homepage (with hreflang alternates) + every country's
@@ -133,8 +132,40 @@ function syncFilmLastmods(pagesManifest, countries, today, { root = "." } = {}) 
   return res;
 }
 
+// Every other sitemap URL gets the same honesty (Oct 2026): 1,767 people, streaming and browse
+// URLs carried the build date on every run. page-lastmods.json keeps, per URL, the content
+// fingerprint and the date it last changed; a URL seen for the first time starts at today
+// (it claimed today already), and from then on its date moves only when its content does.
+const PAGE_LASTMODS_FILE = "page-lastmods.json";
+function pageLastmodTracker(today, file = PAGE_LASTMODS_FILE) {
+  let store = {};
+  try { store = JSON.parse(fs.readFileSync(file, "utf8")) || {}; } catch { store = {}; }
+  const seen = new Set();
+  return {
+    // The page's honest lastmod; `path` is the HTML file behind `url`.
+    lastmod(url, pagePath) {
+      seen.add(url);
+      let html;
+      try { html = fs.readFileSync(pagePath, "utf8"); } catch { return today; }
+      const fp = contentFingerprint(html);
+      const e = store[url];
+      if (!e || !/^\d{4}-\d{2}-\d{2}$/.test(e.last || "")) { store[url] = { fp, last: today }; return today; }
+      if (e.fp !== fp) { e.fp = fp; e.last = today; }
+      return e.last;
+    },
+    // URLs no longer in the sitemap drop out, so the file tracks the site.
+    save() {
+      const out = {};
+      for (const u of [...seen].sort()) out[u] = store[u];
+      fs.writeFileSync(file, JSON.stringify(out, null, 0).replace(/\},"/g, '},\n"') + "\n");
+    },
+  };
+}
+
 function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const today = new Date().toISOString().slice(0, 10);
+  const pages = pageLastmodTracker(today);
+  const lm = (url, file) => pages.lastmod(url, file);
   // Every lastmod must be a valid W3C date or Google rejects the sitemap with "Invalid date".
   // A single frozen page whose stored date was null/malformed once emitted an empty <lastmod>
   // and flagged the whole file. This coerces anything that isn't a clean YYYY-MM-DD back to
@@ -154,7 +185,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     `    <xhtml:link rel="alternate" hreflang="${c.code === "in" ? "en-IN" : "en-" + c.region}" href="${pathFor(c.code)}"/>`).join("\n")
     + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://filmychill.com/"/>`;
   const countryUrls = countries.map((c) =>
-    `  <url><loc>${pathFor(c.code)}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority>\n${homeAlts}\n  </url>`);
+    `  <url><loc>${pathFor(c.code)}</loc><lastmod>${lm(pathFor(c.code), c.code === "in" ? "index.html" : `${c.code}/index.html`)}</lastmod><changefreq>daily</changefreq><priority>1.0</priority>\n${homeAlts}\n  </url>`);
 
   // "New on OTT this week" pages — the organic-discovery pages. Daily changefreq + fresh
   // lastmod signal Google to recrawl them for the freshness-sensitive weekly queries.
@@ -162,7 +193,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     `    <xhtml:link rel="alternate" hreflang="${c.code === "in" ? "en-IN" : "en-" + c.region}" href="${ottWeekUrl(c.code)}"/>`).join("\n")
     + `\n    <xhtml:link rel="alternate" hreflang="x-default" href="${ottWeekUrl("in")}"/>`;
   const ottUrls = countries.map((c) =>
-    `  <url><loc>${ottWeekUrl(c.code)}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.9</priority>\n${ottAlts}\n  </url>`);
+    `  <url><loc>${ottWeekUrl(c.code)}</loc><lastmod>${lm(ottWeekUrl(c.code), c.code === "in" ? "new-on-ott/index.html" : `${c.code}/new-on-ott/index.html`)}</lastmod><changefreq>daily</changefreq><priority>0.9</priority>\n${ottAlts}\n  </url>`);
 
   // Per-film pages for every country. Build a map slug -> [codes that have it] so we can emit
   // hreflang alternates for films shared across markets.
@@ -231,18 +262,18 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       : (LIVE_HUBS.size ? [] : [...existingHubSlugs(c.code)]);
     for (const slug of slugs) {
       if (!fs.existsSync(`${base}/new-on-${slug}/index.html`)) continue;
-      hubUrls.push(`  <url><loc>https://filmychill.com${c.code === "in" ? "" : "/" + c.code}/new-on-${slug}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
+      hubUrls.push(`  <url><loc>https://filmychill.com${c.code === "in" ? "" : "/" + c.code}/new-on-${slug}/</loc><lastmod>${lm(`https://filmychill.com${c.code === "in" ? "" : "/" + c.code}/new-on-${slug}/`, `${base}/new-on-${slug}/index.html`)}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
     }
   }
   const langUrls = LANGUAGE_PAGES.filter(([, slug]) => fs.existsSync(`${slug}/index.html`))
-    .map(([, slug]) => `  <url><loc>https://filmychill.com/${slug}/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
+    .map(([, slug]) => `  <url><loc>https://filmychill.com/${slug}/</loc><lastmod>${lm(`https://filmychill.com/${slug}/`, `${slug}/index.html`)}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>`);
   // Weekly snapshots: the current week reports today; FROZEN weeks report their own
   // Sunday — deterministic from the directory name, never "today" for an untouched page.
   const weekUrls = [];
   if (fs.existsSync("week")) {
     const cur = weekSlug(isoWeekOf());
     for (const d of fs.readdirSync("week").filter((x) => /^\d{4}-W\d{2}$/.test(x)).sort()) {
-      weekUrls.push(`  <url><loc>https://filmychill.com/week/${d}/</loc><lastmod>${lastmodOf(d === cur ? today : isoWeekSunday(d))}</lastmod><priority>0.4</priority></url>`);
+      weekUrls.push(`  <url><loc>https://filmychill.com/week/${d}/</loc><lastmod>${d === cur ? lm(`https://filmychill.com/week/${d}/`, `week/${d}/index.html`) : lastmodOf(isoWeekSunday(d))}</lastmod><priority>0.4</priority></url>`);
     }
   }
   // Browse index pages. High priority: these are the crawl paths into the archive, so they
@@ -251,10 +282,10 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   for (const c of countries) {
     const base = c.code === "in" ? "films" : `${c.code}/films`;
     if (!fs.existsSync(`${base}/index.html`)) continue;
-    browseUrls.push(`  <url><loc>https://filmychill.com${browsePath(c.code, 1)}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`);
+    browseUrls.push(`  <url><loc>https://filmychill.com${browsePath(c.code, 1)}</loc><lastmod>${lm(`https://filmychill.com${browsePath(c.code, 1)}`, `${base}/index.html`)}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>`);
     for (const d of fs.readdirSync(base).filter((x) => /^\d+$/.test(x)).sort((a, b) => a - b)) {
       if (fs.existsSync(`${base}/${d}/index.html`))
-        browseUrls.push(`  <url><loc>https://filmychill.com${browsePath(c.code, Number(d))}</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>`);
+        browseUrls.push(`  <url><loc>https://filmychill.com${browsePath(c.code, Number(d))}</loc><lastmod>${lm(`https://filmychill.com${browsePath(c.code, Number(d))}`, `${base}/${d}/index.html`)}</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>`);
     }
   }
   // Monthly OTT archive (see buildOttMonthPage). The current month changes daily; a closed
@@ -268,7 +299,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       if (!fs.existsSync(`${base}/${d}/index.html`)) continue;
       const [yy, mm] = d.split("-").map(Number);
       const lastDay = new Date(Date.UTC(yy, mm, 0)).toISOString().slice(0, 10);
-      monthUrls.push(`  <url><loc>${ottMonthUrl(c.code, d)}</loc><lastmod>${d === curMonth ? today : lastDay}</lastmod><priority>${d === curMonth ? "0.7" : "0.5"}</priority></url>`);
+      monthUrls.push(`  <url><loc>${ottMonthUrl(c.code, d)}</loc><lastmod>${d === curMonth ? lm(ottMonthUrl(c.code, d), `${base}/${d}/index.html`) : lastDay}</lastmod><priority>${d === curMonth ? "0.7" : "0.5"}</priority></url>`);
     }
   }
   // Scoped month archives: platform x month (every country) and language x month (India).
@@ -284,7 +315,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       for (const m of fs.readdirSync(full).filter((x) => /^\d{4}-\d{2}$/.test(x)).sort()) {
         if (!fs.existsSync(`${full}/${m}/index.html`)) continue;
         const loc = `https://filmychill.com${c.code === "in" ? "" : "/" + c.code}/${dir}/${m}/`;
-        scopedMonthUrls.push(`  <url><loc>${loc}</loc><lastmod>${m === curMonth ? today : lastDayOf(m)}</lastmod><priority>${m === curMonth ? "0.6" : "0.4"}</priority></url>`);
+        scopedMonthUrls.push(`  <url><loc>${loc}</loc><lastmod>${m === curMonth ? lm(loc, `${full}/${m}/index.html`) : lastDayOf(m)}</lastmod><priority>${m === curMonth ? "0.6" : "0.4"}</priority></url>`);
       }
     }
   }
@@ -292,23 +323,23 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     if (!fs.existsSync(slug)) continue;
     for (const m of fs.readdirSync(slug).filter((x) => /^\d{4}-\d{2}$/.test(x)).sort()) {
       if (!fs.existsSync(`${slug}/${m}/index.html`)) continue;
-      scopedMonthUrls.push(`  <url><loc>https://filmychill.com/${slug}/${m}/</loc><lastmod>${m === curMonth ? today : lastDayOf(m)}</lastmod><priority>${m === curMonth ? "0.6" : "0.4"}</priority></url>`);
+      scopedMonthUrls.push(`  <url><loc>https://filmychill.com/${slug}/${m}/</loc><lastmod>${m === curMonth ? lm(`https://filmychill.com/${slug}/${m}/`, `${slug}/${m}/index.html`) : lastDayOf(m)}</lastmod><priority>${m === curMonth ? "0.6" : "0.4"}</priority></url>`);
     }
   }
   const aboutUrls = [
-    ...(fs.existsSync("about/index.html") ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${ABOUT_LASTMOD}</lastmod><priority>0.3</priority></url>`] : []),
-    ...(fs.existsSync("privacy/index.html") ? ["  <url><loc>https://filmychill.com/privacy/</loc><lastmod>2026-10-04</lastmod><priority>0.2</priority></url>"] : []),
-    ...(fs.existsSync("dmca/index.html") ? ["  <url><loc>https://filmychill.com/dmca/</loc><lastmod>2026-10-10</lastmod><priority>0.2</priority></url>"] : []),
+    ...(fs.existsSync("about/index.html") ? [`  <url><loc>https://filmychill.com/about/</loc><lastmod>${lm("https://filmychill.com/about/", "about/index.html")}</lastmod><priority>0.3</priority></url>`] : []),
+    ...(fs.existsSync("privacy/index.html") ? [`  <url><loc>https://filmychill.com/privacy/</loc><lastmod>${lm("https://filmychill.com/privacy/", "privacy/index.html")}</lastmod><priority>0.2</priority></url>`] : []),
+    ...(fs.existsSync("dmca/index.html") ? [`  <url><loc>https://filmychill.com/dmca/</loc><lastmod>${lm("https://filmychill.com/dmca/", "dmca/index.html")}</lastmod><priority>0.2</priority></url>`] : []),
   ];
   // /data/ was reaching IndexNow (so Bing saw it) but was absent from the sitemap, which is
   // Google's main discovery path — so Google could only find it by crawling a footer link.
   // It refreshes whenever the archive grows, hence changefreq weekly.
   const dataUrls = fs.existsSync("data/index.html")
-    ? [`  <url><loc>https://filmychill.com/data/</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>`] : [];
+    ? [`  <url><loc>https://filmychill.com/data/</loc><lastmod>${lm("https://filmychill.com/data/", "data/index.html")}</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>`] : [];
   // The /embed/ instructions page is indexable (people should find it); the widget pages
   // under /embed/week/ are noindex, so they're intentionally NOT listed here.
   const embedUrls = fs.existsSync("embed/index.html")
-    ? [`  <url><loc>https://filmychill.com/embed/</loc><lastmod>${today}</lastmod><priority>0.4</priority></url>`] : [];
+    ? [`  <url><loc>https://filmychill.com/embed/</loc><lastmod>${lm("https://filmychill.com/embed/", "embed/index.html")}</lastmod><priority>0.4</priority></url>`] : [];
   // Evergreen "streaming on <platform>" pages and people pages (both rebuilt every run).
   const streamUrls = [];
   for (const c of countries) {
@@ -316,25 +347,25 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     if (!fs.existsSync(base)) continue;
     for (const d of fs.readdirSync(base).sort()) {
       if (!fs.existsSync(`${base}/${d}/index.html`)) continue;
-      streamUrls.push(`  <url><loc>${streamPageUrl(c.code, d)}</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>`);
+      streamUrls.push(`  <url><loc>${streamPageUrl(c.code, d)}</loc><lastmod>${lm(streamPageUrl(c.code, d), `${base}/${d}/index.html`)}</lastmod><priority>0.7</priority></url>`);
       for (const l of fs.readdirSync(`${base}/${d}`).sort()) {
-        if (fs.existsSync(`${base}/${d}/${l}/index.html`)) streamUrls.push(`  <url><loc>${streamPageUrl(c.code, d, l)}</loc><lastmod>${today}</lastmod><priority>0.6</priority></url>`);
+        if (fs.existsSync(`${base}/${d}/${l}/index.html`)) streamUrls.push(`  <url><loc>${streamPageUrl(c.code, d, l)}</loc><lastmod>${lm(streamPageUrl(c.code, d, l), `${base}/${d}/${l}/index.html`)}</lastmod><priority>0.6</priority></url>`);
       }
     }
   }
   // Dated OTT pages: they change every run, so today is their honest lastmod.
   const datedUrls = [];
   for (const c of countries) {
-    if (fs.existsSync(comingPath(c.code))) datedUrls.push(`  <url><loc>${comingUrl(c.code)}</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>`);
-    if (fs.existsSync(todayPath(c.code))) datedUrls.push(`  <url><loc>${todayUrl(c.code)}</loc><lastmod>${today}</lastmod><priority>0.7</priority></url>`);
+    if (fs.existsSync(comingPath(c.code))) datedUrls.push(`  <url><loc>${comingUrl(c.code)}</loc><lastmod>${lm(comingUrl(c.code), comingPath(c.code))}</lastmod><priority>0.7</priority></url>`);
+    if (fs.existsSync(todayPath(c.code))) datedUrls.push(`  <url><loc>${todayUrl(c.code)}</loc><lastmod>${lm(todayUrl(c.code), todayPath(c.code))}</lastmod><priority>0.7</priority></url>`);
   }
   const peopleUrls = [];
   for (const c of countries) {
     const base = PEOPLE_BASE(c.code);
     if (!fs.existsSync(base)) continue;
-    if (fs.existsSync(`${base}/index.html`)) peopleUrls.push(`  <url><loc>${peopleIndexUrl(c.code)}</loc><lastmod>${today}</lastmod><priority>0.4</priority></url>`);
+    if (fs.existsSync(`${base}/index.html`)) peopleUrls.push(`  <url><loc>${peopleIndexUrl(c.code)}</loc><lastmod>${lm(peopleIndexUrl(c.code), `${base}/index.html`)}</lastmod><priority>0.4</priority></url>`);
     for (const d of fs.readdirSync(base).sort()) {
-      if (fs.existsSync(`${base}/${d}/index.html`)) peopleUrls.push(`  <url><loc>${personPageUrl(c.code, d)}</loc><lastmod>${today}</lastmod><priority>0.5</priority></url>`);
+      if (fs.existsSync(`${base}/${d}/index.html`)) peopleUrls.push(`  <url><loc>${personPageUrl(c.code, d)}</loc><lastmod>${lm(personPageUrl(c.code, d), `${base}/${d}/index.html`)}</lastmod><priority>0.5</priority></url>`);
     }
   }
 
@@ -348,6 +379,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const children = [];
   const pageEntries = [...countryUrls, ...langUrls, ...hubUrls, ...datedUrls, ...streamUrls, ...peopleUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...scopedMonthUrls, ...aboutUrls, ...ottUrls];
   fs.writeFileSync("sitemap-pages.xml", urlset(pageEntries));
+  pages.save();
   children.push({ file: "sitemap-pages.xml", lastmod: newest(pageEntries) });
   for (const c of countries) {
     const entries = filmUrlsBy[c.code] || [];
@@ -368,6 +400,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
 
 module.exports = {
   contentFingerprint,
+  pageLastmodTracker,
   pruneDeadHubLinks,
   sweepDeadHubLinks,
   syncFilmLastmods,

@@ -118,6 +118,9 @@ jobs:
           # Vote totals exist only once the Firebase secret is set.
           git add -A -- votes-agg.json votes-state.json 2>/dev/null || true
           git add -A -- ':(glob)coming-to-ott/**' 2>/dev/null || true
+          # Honest sitemap dates for every non-film URL (lib/sitemap.js). Without it committed,
+          # every run would start from scratch and date every page today again.
+          git add -A -- page-lastmods.json 2>/dev/null || true
           # Share cards are OPTIONAL: the directory only exists when the renderer AND the
           # brand fonts are both present. `git add` on a missing pathspec exits 128 and would
           # fail the commit step for a purely cosmetic feature, so it is added conditionally.

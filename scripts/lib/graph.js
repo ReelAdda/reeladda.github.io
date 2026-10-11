@@ -1,6 +1,7 @@
 "use strict";
 
 const fs = require("fs");
+const path = require("path");
 const { COUNTRIES, COUNTRY_PAGE_META, escHtml, filmPagePath, filmPageUrl, ICON_LINKS, xDefaultCode } = require("./core.js");
 const { FOOTER_LINKS, NO_HOSTING_NOTICE } = require("./pagekit.js");
 
@@ -349,6 +350,78 @@ function syncHreflangClusters(onChange = null) {
 }
 
 
+// Hreflang for the listing pages that repeat across editions (Oct 2026): "streaming on
+// <platform>" (and its language pages), the OTT and platform month archives, and the today
+// page. Film pages, homepages, weekly pages and hubs already carried alternates; these 1,800
+// pages read alike across editions with none, so Google had to guess which country each was
+// for. A page's group is its path without the edition prefix; membership comes from disk at
+// the end of the build, so frozen month archives join their clusters too. Rewrites only the
+// alternate links after the canonical; a page left alone in its group loses them.
+const LISTING_PATTERNS = [
+  /^streaming\/[^/]+\/(?:[^/]+\/)?index\.html$/,
+  /^new-on-[^/]+\/\d{4}-\d{2}\/index\.html$/,
+  /^new-on-ott\/today\/index\.html$/,
+];
+function listingClusterKeys(root = ".") {
+  const groups = new Map();   // key ("streaming/netflix/") -> [codes]
+  const walk = (dir, rel, depth, out) => {
+    if (depth > 3) return;
+    let entries;
+    try { entries = fs.readdirSync(path.join(root, dir, rel), { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      if (!e.isDirectory()) continue;
+      const next = rel ? `${rel}/${e.name}` : e.name;
+      if (fs.existsSync(path.join(root, dir, next, "index.html"))) out.push(`${next}/index.html`);
+      walk(dir, next, depth + 1, out);
+    }
+  };
+  for (const c of COUNTRIES) {
+    const base = c.code === "in" ? "" : c.code;
+    const tops = [];
+    try { for (const e of fs.readdirSync(path.join(root, base || "."), { withFileTypes: true })) if (e.isDirectory() && (e.name === "streaming" || e.name.startsWith("new-on-"))) tops.push(e.name); } catch { continue; }
+    for (const top of tops) {
+      const found = [];
+      walk(base, top, 1, found);
+      for (const rel of found) {
+        const file = rel;
+        if (!LISTING_PATTERNS.some((re) => re.test(file))) continue;
+        const key = file.replace(/index\.html$/, "");
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(c.code);
+      }
+    }
+  }
+  return groups;
+}
+function listingAlternates(key, codes) {
+  const url = (cc) => `https://filmychill.com${cc === "in" ? "" : "/" + cc}/${key}`;
+  const tag = (cc) => (cc === "in" ? "en-IN" : "en-" + ((COUNTRIES.find((x) => x.code === cc) || {}).region || cc.toUpperCase()));
+  return codes.map((cc) => `<link rel="alternate" hreflang="${tag(cc)}" href="${url(cc)}"/>`).join("\n")
+    + `\n<link rel="alternate" hreflang="x-default" href="${url(xDefaultCode(codes))}"/>`;
+}
+function syncListingHreflang({ root = "." } = {}) {
+  const res = { clusters: 0, fixed: 0 };
+  const order = COUNTRIES.map((c) => c.code);
+  for (const [key, found] of listingClusterKeys(root)) {
+    const codes = [...new Set(found)].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    if (codes.length > 1) res.clusters++;
+    const alts = codes.length > 1 ? listingAlternates(key, codes) : "";
+    for (const cc of codes) {
+      const file = path.join(root, cc === "in" ? "" : cc, key, "index.html");
+      let html;
+      try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
+      const m = /(<link rel="canonical" href="[^"]*">)((?:\n<link rel="alternate" hreflang="[^"]*" href="[^"]*"\/?>)*)/.exec(html);
+      if (!m) continue;
+      const want = m[1] + (alts ? "\n" + alts : "");
+      if (m[0] === want) continue;
+      fs.writeFileSync(file, html.replace(m[0], want));
+      res.fixed++;
+    }
+  }
+  console.log(`  listing hreflang: ${res.clusters} multi-edition cluster(s), ${res.fixed} page(s) updated`);
+  return res;
+}
+
 // OTT freshness window: how recent a title's EFFECTIVE freshness date (release/season date
 // OR first sighting on a platform — see first-seen tracking below) must be to count as a
 // current OTT release. Tightened from 75 to 45 days: with first-seen tracking, a late OTT
@@ -370,5 +443,6 @@ module.exports = {
   relatedFilms,
   relatedScore,
   syncHreflangClusters,
+  syncListingHreflang,
   writeBrowseIndex,
 };

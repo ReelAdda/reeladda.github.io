@@ -211,7 +211,7 @@ function filmPageKey(rel) {
 function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
   const used = new Set();
   const res = { pages: 0, externalized: 0, footerLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [],
-    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0 };
+    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0 };
   fs.mkdirSync(path.join(root, CSS_DIR), { recursive: true });
   for (const rel of files) {
     const file = path.join(root, rel);
@@ -266,11 +266,33 @@ function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
   for (const f of fs.readdirSync(path.join(root, CSS_DIR))) {
     const m = /^(fp-[0-9a-f]{10})\.css$/.exec(f);
     if (!m) continue;
-    if (used.has(m[1])) res.cssFiles++;
-    else { fs.unlinkSync(path.join(root, CSS_DIR, f)); res.removed++; }
+    if (used.has(m[1])) {
+      res.cssFiles++;
+      const p = path.join(root, CSS_DIR, f);
+      const css = fs.readFileSync(p, "utf8");
+      const fixed = fixSharedCss(css);
+      if (fixed !== css) { fs.writeFileSync(p, fixed); res.cssFixed++; }
+    } else { fs.unlinkSync(path.join(root, CSS_DIR, f)); res.removed++; }
   }
   return res;
 }
+
+// Style corrections that reach every page through the shared stylesheets (Oct 2026), so the
+// pages themselves are not rewritten: the poster drawn at TMDB's 2:3 shape instead of a
+// stretched 72x106 box. A file's name stays its original hash; a page that brings its styles
+// back inline (inlineStyles) picks up the corrected rules and gets a new file on its next save.
+const SHARED_CSS_FIXES = [
+  [".poster { width:140px; border-radius:12px; display:block; }",
+   ".poster { width:140px; height:auto; aspect-ratio:2/3; object-fit:cover; border-radius:12px; display:block; }"],
+];
+function fixSharedCss(css) {
+  let out = css;
+  for (const [from, to] of SHARED_CSS_FIXES) out = out.split(from).join(to);
+  return out;
+}
+// Inline style corrections for frozen listing pages (month archives): the count badge in a
+// readable dark gold (the light marigold was 1.7:1 on the page background).
+const SITE_CSS_FIXES = [[".cnt { color:var(--marigold); }", ".cnt { color:#8A5800; }"]];
 
 // Every film page on disk, as paths relative to the site root.
 function filmPageFiles(root = ".") {
@@ -312,7 +334,7 @@ function sitePageFiles(root = ".") {
 // rebuilt each run already carry them; this reaches the frozen ones (past weeks and months,
 // hand-written pages). The embed widget is skipped: it renders inside other people's pages.
 function finishSitePages(files, { root = "." } = {}) {
-  const res = { pages: 0, iconed: 0, footerLinked: 0 };
+  const res = { pages: 0, iconed: 0, footerLinked: 0, cssFixed: 0 };
   for (const rel of files) {
     if (/(?:^|\/)embed\/week\//.test(rel)) continue;
     const file = path.join(root, rel);
@@ -323,6 +345,9 @@ function finishSitePages(files, { root = "." } = {}) {
     if (next !== html) res.iconed++;
     const footed = ensureFooterLegal(next);
     if (footed !== next) { next = footed; res.footerLinked++; }
+    let styled = next;
+    for (const [from, to] of SITE_CSS_FIXES) styled = styled.split(from).join(to);
+    if (styled !== next) { next = styled; res.cssFixed++; }
     if (next !== html) fs.writeFileSync(file, next);
   }
   return res;

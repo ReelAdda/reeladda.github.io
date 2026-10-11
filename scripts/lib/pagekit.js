@@ -402,7 +402,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   .lead { font-size:14.5px; line-height:1.6; color:var(--mute); margin:0 0 8px; }
   .nav { font-size:13px; line-height:2; margin:8px 0 2px; } .nav a { color:var(--indigo); text-decoration:none; font-weight:600; }
   .frozen { background:rgba(64,56,199,.07); border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:13px; color:var(--mute); margin:10px 0 0; }
-  h2 { font-size:17px; margin:26px 0 10px; } .cnt { color:var(--marigold); }
+  h2 { font-size:17px; margin:26px 0 10px; } .cnt { color:#8A5800; }
   .row { display:grid; grid-template-columns:92px 1fr; gap:12px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; text-decoration:none; color:inherit; }
   .row img { border-radius:8px; display:block; width:92px; height:138px; object-fit:cover; background:var(--line); }
   .nop { width:92px; height:138px; border-radius:8px; background:var(--line); }
