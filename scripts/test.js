@@ -5697,6 +5697,11 @@ test("settled, well-rated film gets all three rows", () => {
   assert.ok(r && r.why && r.skipIf && r.bestFor);
   assert.ok(/7\.9/.test(r.why) && /24,000/.test(r.why));
 });
+test("Why line: 'An 8.6/10', 'A 9.1/10' — the article follows the spoken number", () => {
+  const whys = (rating) => Array.from({ length: 40 }, (_, i) => WF.whyLine({ tmdbId: i + 1, rating, votes: 12000, kind: "movie" })).filter(Boolean);
+  assert.ok(whys(8.6).some((w) => /^An 8\.6\/10/.test(w)) && !whys(8.6).some((w) => /^A 8/.test(w)));
+  assert.ok(whys(9.1).some((w) => /^A 9\.1\/10/.test(w)));
+});
 test("thin sample suppresses Why but keeps the fit rows", () => {
   const r = WF.watchFit({ tmdbId: 303, genre: "Drama", runtime: 120, cert: "U/A", rating: 8.1, votes: 12, kind: "movie", providers: ["Netflix"] });
   assert.ok(r && r.why === null, "must not present a 12-vote score as a finding");

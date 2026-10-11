@@ -142,7 +142,7 @@ function whyLine(item) {
     return heavy
       ? pickVariant(item, [
         `It rates ${r}/10 across ${n} ratings — among the strongest scores on this week's list, and settled enough to trust.`,
-        `A ${r}/10 that holds up over ${n} ratings, which puts it at the top of the current list.`,
+        `${/^8/.test(r) ? "An" : "A"} ${r}/10 that holds up over ${n} ratings, which puts it at the top of the current list.`,
       ])
       : pickVariant(item, [
         `It rates ${r}/10 on ${n} ratings so far — a strong early showing.`,
