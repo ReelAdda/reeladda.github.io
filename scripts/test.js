@@ -1764,6 +1764,86 @@ test("5 · 'Page updated' and dateModified are kept to the same date", () => {
   assert.ok(sweep.includes('.replace(/("dateModified":")\\d{4}-\\d{2}-\\d{2}/, `$1${today}`)'), "the score sweep moves both now");
 });
 
+group("Step 3: frozen pages rendered from their facts (lib/facts.js, lib/migrate.js)");
+const MIG_CFG = { code: "in", name: "India", region: "IN" };
+const MIG_ITEM = { title: "Geetha Test", slug: "geetha-test", kind: "movie", language: "Telugu", genre: "Romance", released: "2018-08-15", runtime: 148, cert: "UA",
+  review: "A young lecturer falls for a woman wary of strangers.", cast: ["Vijay", "Rashmika"], castPics: [{ name: "Vijay", photo: "https://image.tmdb.org/t/p/w185/v.jpg", character: "Govind" }],
+  providers: ["Vi Movies & TV"], rentBuy: ["Apple TV"], platform: "Vi Movies & TV", rating: 6.9, votes: 91, poster: "https://image.tmdb.org/t/p/w342/p.jpg",
+  trailer: "https://www.youtube.com/watch?v=abcdefghijk", hook: "The follow-up to ‘Test One’.",
+  fcScore: { verdict: "Worth a watch", reason: "Audiences like it.", audience: "Liked", critics: null, basis: "audience" },
+  similar: [{ title: "Other", slug: "other", poster: "", language: "Telugu", kind: "movie" }] };
+test("facts read back out of a rendered page are the facts it was rendered from", () => {
+  const Fx = require("./lib/facts.js");
+  const html = U.buildFilmPage(MIG_ITEM, "2026-10-01", new Set(["other"]), MIG_CFG);
+  const it = Fx.extractFacts(html, "geetha-test", { tmdbId: 7 });
+  for (const k of ["title", "kind", "language", "released", "runtime", "cert", "review", "providers", "rentBuy", "platform", "rating", "votes", "poster", "trailer", "hook"]) {
+    assert.deepStrictEqual(it[k], MIG_ITEM[k], k);
+  }
+  assert.deepStrictEqual(it.cast, ["Vijay"], "cast as shown on the page (the cast strip)");
+  assert.deepStrictEqual(it.castPics, MIG_ITEM.castPics);
+  assert.strictEqual(it.fcScore.verdict, "Worth a watch");
+  assert.strictEqual(it.tmdbId, 7);
+  assert.deepStrictEqual(it.similar.map((s) => s.slug), ["other"]);
+  assert.strictEqual(Fx.extractFacts("<p>no structured data</p>", "x"), null, "unknown shape: left alone");
+});
+test("a page rendered from its facts keeps every reader-facing fact, and the availability date", () => {
+  const Fx = require("./lib/facts.js"), Mg = require("./lib/migrate.js");
+  const html = U.buildFilmPage(MIG_ITEM, "2026-09-20", new Set(["other"]), MIG_CFG);
+  const out = Mg.renderFrozen(Fx.extractFacts(html, "geetha-test"), MIG_CFG, { asOf: "2026-10-05", knownSlugs: new Set(["other"]), availability: Fx.availabilityText(html) });
+  assert.deepStrictEqual(Fx.factsDiff(Fx.keyFacts(html), Fx.keyFacts(out)), [], "no fact differs");
+  assert.ok(/Availability as of 20 Sept 2026 — /.test(out), "the original confirmation date, not the render date");
+  assert.strictEqual(Fx.keyFacts(out).verdict, "Worth a watch");
+  // The check compares like with like: "Too early" and "Not enough ratings" are both "no score yet".
+  assert.strictEqual(Fx.keyFacts('<span class="fcsb-mini-v">Too early</span>').verdict, Fx.keyFacts('<span class="fcsb-mini-v">Not enough ratings</span>').verdict);
+  assert.strictEqual(Fx.keyFacts("<td>Runtime</td><td>108 min</td>").runtime, Fx.keyFacts("<td>Runtime</td><td>1h 48m — long</td>").runtime);
+});
+test("migrateBatch moves a page only when its facts check passes, and renderMigrated keeps it rendered", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const Mg = require("./lib/migrate.js"), Fx = require("./lib/facts.js");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-mig-"));
+  const cwd = process.cwd();
+  try {
+    process.chdir(root);
+    fsx.mkdirSync("movie");
+    fsx.writeFileSync("movie/geetha-test.html", U.buildFilmPage(MIG_ITEM, "2026-09-20", new Set(), MIG_CFG));
+    fsx.writeFileSync("movie/broken.html", "<p>an old shape with no structured data</p>");
+    const manifest = { in: { "geetha-test": { tmdbId: 7 }, broken: {} } };
+    assert.deepStrictEqual(Mg.migrateBatch(manifest, MIG_CFG, { limit: 0, today: "2026-10-11" }), { tried: 0, migrated: 0, held: [] }, "limit 0: nothing moves");
+    const r = Mg.migrateBatch(manifest, MIG_CFG, { limit: 5, today: "2026-10-11" });
+    assert.strictEqual(r.migrated, 1);
+    assert.strictEqual(manifest.in["geetha-test"].rendered, "2026-10-11");
+    assert.ok(!manifest.in.broken.rendered && manifest.in.broken.held && r.held.length === 1, "a page that can't be read is held, not guessed at");
+    const facts = Fx.readFacts("in");
+    assert.ok(facts.has("geetha-test") && facts.get("geetha-test").item.title === "Geetha Test");
+    const before = fsx.readFileSync("movie/geetha-test.html", "utf8");
+    const again = Mg.renderMigrated(manifest, MIG_CFG, { today: "2026-10-12" });
+    assert.deepStrictEqual([again.pages, again.factsChanged, again.written], [1, 0, 0], "nothing changed: nothing written");
+    assert.strictEqual(fsx.readFileSync("movie/geetha-test.html", "utf8"), before);
+    // A sweep adds a platform to the page during a run: the facts follow it.
+    fsx.writeFileSync("movie/geetha-test.html", before.replace("<span class=\"pill\">Vi Movies &amp; TV</span>", "<span class=\"pill\">Vi Movies &amp; TV</span><span class=\"pill\">Netflix</span>"));
+    const swept = Mg.renderMigrated(manifest, MIG_CFG, { today: "2026-10-13" });
+    assert.strictEqual(swept.factsChanged, 1);
+    assert.deepStrictEqual(Fx.readFacts("in").get("geetha-test").item.providers, ["Vi Movies & TV", "Netflix"]);
+    assert.strictEqual(Fx.readFacts("in").get("geetha-test").updated, "2026-10-13");
+    assert.ok(/<span class="pill">Netflix<\/span>/.test(fsx.readFileSync("movie/geetha-test.html", "utf8")));
+  } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("the migration is off unless MIGRATE_BATCH is set, and the build commits the facts", () => {
+  const Mg = require("./lib/migrate.js");
+  const prev = process.env.MIGRATE_BATCH;
+  try {
+    delete process.env.MIGRATE_BATCH; assert.strictEqual(Mg.migrateLimit(), 0);
+    process.env.MIGRATE_BATCH = "50"; assert.strictEqual(Mg.migrateLimit(), 50);
+    process.env.MIGRATE_BATCH = "nonsense"; assert.strictEqual(Mg.migrateLimit(), 0);
+  } finally { if (prev == null) delete process.env.MIGRATE_BATCH; else process.env.MIGRATE_BATCH = prev; }
+  const fsx = require("fs"), path = require("path");
+  const wf = fsx.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8");
+  assert.ok(wf.includes("MIGRATE_BATCH: ${{ vars.MIGRATE_BATCH || '0' }}") && /git add -A -- facts\//.test(wf));
+  assert.ok(!require("./site.js").isGenerated("facts"), "facts live on main, not the site branch");
+  const upd = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
+  assert.ok(upd.indexOf("renderMigrated(pagesManifest") < upd.indexOf("finishFilmPages(filmPageFiles()"), "rendered before the end-of-build pass");
+});
+
 group("11 Oct 2026: write a regenerated page only when its content changed");
 test("writeIfChanged keeps a page that differs only in its stamps, and writes a real change", () => {
   const fsx = require("fs"), os = require("os"), path = require("path");

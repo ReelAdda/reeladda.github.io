@@ -320,6 +320,7 @@ const { refreshRelated } = require("./lib/relrefresh.js");
 const { syncVotes } = require("./lib/votes.js");
 const { runAudit } = require("./lib/audit.js");
 const { WRITE_STATS } = require("./lib/writeif.js");
+const { migrateBatch, migrateLimit, renderMigrated } = require("./lib/migrate.js");
 const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePageFiles } = require("./lib/stylesheets.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
@@ -1477,6 +1478,25 @@ async function main() {
       const v = await syncVotes({ dataByCode, note: healthNote });
       if (v.enabled) console.log(`Votes: ${v.fetched} new, ${v.touched} films re-counted, ${v.films} films with votes`);
     } catch (e) { stageFailed("votes", e); }
+    // Frozen pages move to "facts rendered by the live template" (lib/migrate.js): pages
+    // already moved are rendered from their facts (after every sweep above, whose changes are
+    // read back first); then up to MIGRATE_BATCH more per edition move, if their facts check
+    // passes. MIGRATE_BATCH unset or 0: nothing moves.
+    try {
+      const limit = migrateLimit();
+      let moved = 0, rendered = 0, changed = 0;
+      const held = [];
+      for (const cfg of builtCountries) {
+        const r = renderMigrated(pagesManifest, cfg, { today: todayStr() });
+        rendered += r.pages; changed += r.factsChanged;
+        if (r.lost.length) healthNote(`migrate [${cfg.code}]: ${r.lost.length} rendered page(s) lost their facts and were left as they are — e.g. ${r.lost.slice(0, 3).join(", ")}`);
+        const b = migrateBatch(pagesManifest, cfg, { limit, today: todayStr() });
+        moved += b.migrated; held.push(...b.held);
+      }
+      const total = Object.values(pagesManifest).reduce((n, m) => n + Object.values(m || {}).filter((e) => e && e.rendered).length, 0);
+      console.log(`Migration: ${rendered} pages rendered from facts (${changed} with new facts), ${moved} moved this run, ${held.length} held; ${total} rendered in all`);
+      if (held.length) healthNote(`migrate: ${held.length} page(s) held for review (their facts would change) — e.g. ${held.slice(0, 3).join("; ")}`);
+    } catch (e) { stageFailed("migration", e); }
     // Film pages: styles into shared cached files, privacy link in every footer, browser icons,
     // the country in every non-India title, and the "FilmyChill data" window line checked
     // against the archive (lib/stylesheets.js). Runs after every page writer and patcher above.
