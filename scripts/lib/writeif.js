@@ -29,6 +29,8 @@ const STAMPS = [
   // Listing pages' "Updated 11 October 2026 · …" line, in either date order.
   /Updated \d{1,2} [A-Za-z]+\.? \d{4}/g,
   /Updated [A-Za-z]+\.? \d{1,2},? \d{4}/g,
+  // The search script (lib/search.js), added after every page writer: a fresh render has none yet.
+  /<script src="\/js\/search\.js" defer><\/script>\n?/g,
 ];
 const LINK_RE = /<link rel="stylesheet" href="\/css\/(fp-[0-9a-f]{10})\.css">/;
 

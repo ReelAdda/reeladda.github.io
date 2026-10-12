@@ -322,6 +322,7 @@ const { runAudit } = require("./lib/audit.js");
 const { WRITE_STATS } = require("./lib/writeif.js");
 const { migrateBatch, migrateLimit, renderMigrated } = require("./lib/migrate.js");
 const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePageFiles } = require("./lib/stylesheets.js");
+const { addSearchToPages, writeSearchIndexes } = require("./lib/search.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -1554,6 +1555,15 @@ async function main() {
     const d = repairDeadLinks([...filmPageFiles(), ...sitePageFiles()]);
     if (d.fixed.length) console.log(`Dead links: removed from ${d.fixed.length} of ${d.pages} pages (e.g. ${d.fixed.slice(0, 3).join(", ")})`);
   } catch (e) { stageFailed("dead-link repair", e); }
+
+  // Site search (lib/search.js): one index per edition of the pages now on disk, and the
+  // search script on every page. After the last page writer, so frozen, rebuilt and
+  // hand-written pages all carry it and no result leads to a missing page.
+  try {
+    const x = writeSearchIndexes(pagesManifest);
+    const s = addSearchToPages([...filmPageFiles(), ...sitePageFiles()]);
+    console.log(`Search: ${x.films} films and ${x.people} people across ${x.editions} editions (${x.written} index file(s) updated); script added to ${s.added} of ${s.pages} pages`);
+  } catch (e) { stageFailed("site search", e); }
 
   // All countries are built by now, so the filesystem finally shows every cluster's true
   // membership — repair them in one pass before the sitemap is written.

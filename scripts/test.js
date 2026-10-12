@@ -6866,6 +6866,93 @@ test("hubs: a service's channel titles join its own hub instead of a second one"
   assert.deepStrictEqual(hubs.map((h) => [h.name, h.slug, h.items.length]), [["Paramount+", "paramount-plus", 4]]);
 });
 
+group("12 Oct 2026: site search");
+const SRCH = require("./lib/search.js");
+test("search index: only pages on disk, verdicts coded, people listed, sorted", () => {
+  const idx = SRCH.editionIndex({
+    "b-film": { title: "B Film", released: "2023-04-01", kind: "movie", lang: "Hindi", fcs: { v: "Must watch" } },
+    "a-show": { title: "A Show", released: "2019-01-01", kind: "tv", lang: "English", fcs: { v: "early" } },
+    "gone": { title: "Gone", released: "2020-01-01" },
+    "untitled": { released: "2020-01-01" },
+  }, { exists: (s) => s !== "gone", people: [["Zed", "zed"], ["Ann", "ann"], ["", "x"]] });
+  assert.deepStrictEqual(idx, { v: 1, films: [["A Show", "a-show", 2019, 1, "English", ""], ["B Film", "b-film", 2023, 0, "Hindi", "M"]], people: [["Ann", "ann"], ["Zed", "zed"]] });
+});
+test("search index: written per edition from the pages on disk, rewritten only when it changes", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-search-"));
+  try {
+    fsx.mkdirSync(path.join(tmp, "us/movie"), { recursive: true });
+    fsx.mkdirSync(path.join(tmp, "us/people/tom-hanks"), { recursive: true });
+    fsx.writeFileSync(path.join(tmp, "us/movie/big.html"), "<html></html>");
+    fsx.writeFileSync(path.join(tmp, "us/people/tom-hanks/index.html"), "<h1>Tom Hanks: films streaming in the US</h1>");
+    const man = { us: { big: { title: "Big", released: "1988-06-03", kind: "movie" }, gone: { title: "Gone" } } };
+    const cc = [{ code: "us" }];
+    const r1 = SRCH.writeSearchIndexes(man, { root: tmp, countries: cc });
+    assert.deepStrictEqual(r1, { editions: 1, films: 1, people: 1, written: 1 });
+    assert.deepStrictEqual(JSON.parse(fsx.readFileSync(path.join(tmp, "search/us.json"), "utf8")), { v: 1, films: [["Big", "big", 1988, 0, "", ""]], people: [["Tom Hanks", "tom-hanks"]] });
+    assert.strictEqual(SRCH.writeSearchIndexes(man, { root: tmp, countries: cc }).written, 0, "unchanged: not rewritten");
+  } finally { fsx.rmSync(tmp, { recursive: true, force: true }); }
+});
+test("search script: added once before </body>, only where the page's policy allows it", () => {
+  const page = (csp) => `<html><head>${csp ? `<meta http-equiv="Content-Security-Policy" content="${csp}">` : ""}</head><body><p>x</p></body></html>`;
+  const once = SRCH.ensureSearchScript(page("default-src 'self'; script-src 'self' https://gc.zgo.at; connect-src 'self'"));
+  assert.ok(once.endsWith(`${SRCH.SEARCH_TAG}\n</body></html>`));
+  assert.strictEqual(SRCH.ensureSearchScript(once), once, "idempotent");
+  assert.ok(SRCH.ensureSearchScript(page("")).includes(SRCH.SEARCH_TAG), "no policy: allowed");
+  assert.ok(SRCH.ensureSearchScript(page("default-src 'self'; script-src 'self'")).includes(SRCH.SEARCH_TAG), "connect falls back to default-src");
+  assert.ok(!SRCH.ensureSearchScript(page("default-src 'self'; script-src https://gc.zgo.at")).includes(SRCH.SEARCH_TAG), "script-src without 'self'");
+  assert.ok(!SRCH.ensureSearchScript(page("default-src 'none'; script-src 'self'")).includes(SRCH.SEARCH_TAG), "fetch blocked");
+  assert.strictEqual(SRCH.ensureSearchScript("google-site-verification: x"), "google-site-verification: x", "no body: untouched");
+});
+test("search script: every page but the embed widget and post.html; a rebuild without it isn't a change", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-search-"));
+  try {
+    const html = "<html><body>x</body></html>";
+    for (const f of ["movie/a.html", "embed/week/index.html", "post.html", "about/index.html"]) {
+      fsx.mkdirSync(path.dirname(path.join(tmp, f)), { recursive: true });
+      fsx.writeFileSync(path.join(tmp, f), html);
+    }
+    const r = SRCH.addSearchToPages(["movie/a.html", "embed/week/index.html", "post.html", "about/index.html"], { root: tmp });
+    assert.deepStrictEqual(r, { pages: 2, added: 2 });
+    assert.strictEqual(fsx.readFileSync(path.join(tmp, "post.html"), "utf8"), html);
+    assert.strictEqual(fsx.readFileSync(path.join(tmp, "embed/week/index.html"), "utf8"), html);
+    const { writeIfChanged } = require("./lib/writeif.js");
+    assert.strictEqual(writeIfChanged(path.join(tmp, "movie/a.html"), html, { root: tmp }), false, "fresh render without the tag: kept");
+  } finally { fsx.rmSync(tmp, { recursive: true, force: true }); }
+});
+test("search: published with the site, wired into the build, every edition known to the browser script", () => {
+  const fsx = require("fs");
+  assert.ok(require("./site.js").isGenerated("search"));
+  const upd = fsx.readFileSync("scripts/update.js", "utf8");
+  assert.ok(upd.indexOf("writeSearchIndexes(pagesManifest)") > upd.indexOf("repairDeadLinks([...filmPageFiles()"), "after the last page writer");
+  const js = fsx.readFileSync("js/search.js", "utf8");
+  for (const c of require("./lib/core.js").COUNTRIES) assert.ok(new RegExp(`(?:"${c.code}"|\\b${c.code}): "`).test(js), `edition ${c.code} in js/search.js`);
+  for (const f of ["index.html", "404.html", "about/index.html", "privacy/index.html", "dmca/index.html"]) assert.ok(fsx.readFileSync(f, "utf8").includes(SRCH.SEARCH_TAG), f);
+});
+test("search ranking (js/search.js): exact, prefix, spaces ignored, one typo, people", () => {
+  const src = require("fs").readFileSync("js/search.js", "utf8");
+  const body = src.slice(src.indexOf("  function norm"), src.indexOf("  var VERDICT"));
+  const make = new Function("d", "code", "base", "MAX", `${body}
+    items = [];
+    d.films.forEach(function (f) { var n = norm(f[0]); items.push({ t: f[0], y: f[2], v: f[5], n: n, w: n.split(" ") }); });
+    d.people.forEach(function (p) { var n = norm(p[0]); items.push({ t: p[0], p: 1, n: n, w: n.split(" ") }); });
+    return function (q) { return find(q).map(function (i) { return i.t; }); };`);
+  const find = make({ films: [
+    ["Spider-Man: No Way Home", "", 2021, 0, "English", "M"], ["Leo", "", 2023, 0, "Tamil", "W"], ["Qissa: The Tale of a Lonely Ghost", "", 2013, 0, "Hindi", ""],
+    ["Rocky Aur Rani Kii Prem Kahaani", "", 2023, 0, "Hindi", "S"], ["Interstellar", "", 2014, 0, "English", "M"], ["Amélie", "", 2001, 0, "French", "M"],
+    ["K.G.F: Chapter 2", "", 2022, 0, "Kannada", "W"], ["Leon", "", 1994, 0, "French", ""],
+  ], people: [["Rajinikanth", "rajinikanth"]] }, "in", "", 20);
+  assert.deepStrictEqual(find("leo"), ["Leo", "Leon"], "word starts only: not 'Tale of'");
+  assert.deepStrictEqual(find("spiderman"), ["Spider-Man: No Way Home"]);
+  assert.deepStrictEqual(find("kgf"), ["K.G.F: Chapter 2"]);
+  assert.deepStrictEqual(find("intersteller"), ["Interstellar"], "one typo forgiven");
+  assert.deepStrictEqual(find("amelie"), ["Amélie"], "accents ignored");
+  assert.strictEqual(find("rajni")[0], "Rajinikanth", "a near first word beats a near third word");
+  assert.deepStrictEqual(find("leo 1994"), ["Leon"], "a year narrows it");
+  assert.deepStrictEqual(find("zzqqxx"), []);
+});
+
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");
   for (const [name, fn, grp] of ASYNC_TESTS) {

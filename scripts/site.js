@@ -23,7 +23,7 @@ const { execFileSync } = require("child_process");
 const GENERATED = [
   /^(ae|au|br|ca|de|es|fr|id|jp|kr|mx|my|nz|ph|sg|uk|us)$/,   // edition folders
   /^movie$/, /^new-on-[a-z0-9-]+$/, /^(hindi|tamil|telugu|malayalam|kannada)$/,
-  /^(week|films|data|embed|streaming|people|coming-to-ott|cards|css)$/,
+  /^(week|films|data|embed|streaming|people|coming-to-ott|cards|css|search)$/,
   /^(feed\.xml|llms\.txt|llms-full\.txt|sitemap\.xml|sitemap-[a-z0-9-]+\.xml)$/,
 ];
 const isGenerated = (name) => GENERATED.some((re) => re.test(name));
