@@ -20,6 +20,10 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: "24"
+      # Several tests read the built pages, which live on the `site` branch, not main
+      # (scripts/site.js). Same restore as the daily build; read-only, nothing is published.
+      - name: Restore the built site
+        run: node scripts/site.js restore
       - name: Unit tests, 30 days from now
         run: node -r ./scripts/testclock.js scripts/test.js
         env:
