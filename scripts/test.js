@@ -6886,6 +6886,17 @@ test("fixNotYetTitle: a streaming page loses its 'Not Announced' title; consiste
   assert.strictEqual(A.fixNotYetTitle(page("1917 (2020) — Review &amp; Where to Watch in Australia", '<span class="pill">Netflix</span>'), au).changed, false, "already right");
 });
 
+test("every workflow that runs the tests restores the built site first (pages live on the site branch)", () => {
+  const fsx = require("fs");
+  for (const f of fsx.readdirSync(".github/workflows").filter((n) => /\.ya?ml$/.test(n))) {
+    const wf = fsx.readFileSync(`.github/workflows/${f}`, "utf8");
+    const t = wf.indexOf("scripts/test.js");
+    if (t < 0) continue;
+    const r = wf.indexOf("node scripts/site.js restore");
+    assert.ok(r >= 0 && r < t, `${f}: restore the site before the tests`);
+  }
+});
+
 group("12 Oct 2026: site search");
 const SRCH = require("./lib/search.js");
 test("search index: only pages on disk, verdicts coded, people listed, sorted", () => {
