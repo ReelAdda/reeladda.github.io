@@ -31,6 +31,7 @@ const { COUNTRIES, escHtml, fmtDateFull, ICON_LINKS, ldJson, localeFor, videoUpl
 const { audiencePhrase, compactScoreHtml, FCSB_CSS, fcdataWindowPhrase, orderAnswer } = require("./filmpage.js");
 const { FOOTER_LINKS, NO_HOSTING_NOTICE, ytIdOf } = require("./pagekit.js");
 const { titleWithCountry } = require("./rules.js");
+const { fixNotYetTitle } = require("./archive.js");
 
 const CSS_DIR = "css";
 const STYLE_RE = /<style>([\s\S]*?)<\/style>/;
@@ -211,7 +212,7 @@ function filmPageKey(rel) {
 function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
   const used = new Set();
   const res = { pages: 0, externalized: 0, footerLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [],
-    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0 };
+    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0 };
   fs.mkdirSync(path.join(root, CSS_DIR), { recursive: true });
   for (const rel of files) {
     const file = path.join(root, rel);
@@ -224,6 +225,10 @@ function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
     if (key) {
       const iconed = ensureIconLinks(next);
       if (iconed !== next) { next = iconed; res.iconed++; }
+      // A "not streaming yet" title on a page listing where it streams (lib/archive.js).
+      const kcfg = COUNTRIES.find((c) => c.code === key.code) || { code: key.code };
+      const unNotYet = fixNotYetTitle(next, kcfg);
+      if (unNotYet.changed) { next = unNotYet.html; res.retitled.push(`${key.code}/${key.slug}`); res.notYetFixed++; }
       if (key.code !== "in") {
         const cfg = COUNTRIES.find((c) => c.code === key.code) || { code: key.code };
         const titled = ensureCountryTitle(next, cfg);

@@ -367,7 +367,10 @@ function frozenFilmFacts(html) {
   const star = /\u2605\s*([0-9]+(?:\.[0-9])?)/.exec(html);
   // The pill block under "Where to watch" holds subscription providers first, then a
   // "Rent or buy" sub-heading and its own pills. Split on that label rather than guessing.
-  const wtw = /<h2>Where to watch[^<]*<\/h2>([\s\S]{0,900}?)(?:<h2|<footer)/.exec(html);
+  // Up to the next heading, however long the section is: it was capped at 900 characters,
+  // and pages built since the rent-or-buy block and platform links read as having no
+  // platforms at all — 320 streaming films titled "Not Announced" (Oct 2026).
+  const wtw = /<h2>Where to watch[^<]*<\/h2>([\s\S]*?)(?:<h2|<footer)/.exec(html);
   const chunk = wtw ? wtw[1] : "";
   const cut = chunk.indexOf("Rent or buy");
   const pillsIn = (t) => [...t.matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((x) => x[1].trim());
@@ -461,6 +464,21 @@ function refreshExpectedTitle(html, cfg = null) {
   if (!facts) return { html, changed: false };
   const next = escHtml(titleWithCountry(filmTitleTag(facts.item, cfg), cfg));
   if (!next || next === cur[1]) return { html, changed: false };
+  return { html: html.replace(cur[0], `<title>${next}</title>`), changed: true };
+}
+
+// A title that says the film isn't streaming yet ("Expected …", "Not Announced") on a page
+// whose "Where to watch" lists platforms it streams on: the title the page's own facts call
+// for, in the form the end-of-build pass leaves it. Repairs the titles written while
+// frozenFilmFacts couldn't see the platforms (above); a no-op on every consistent page.
+const NOT_YET_TITLE = /Not Announced|\bExpected [A-Z][a-z]{2}|Not Yet Confirmed|\(Unconfirmed\)/;
+function fixNotYetTitle(html, cfg = null) {
+  const cur = /<title>([\s\S]*?)<\/title>/.exec(html);
+  if (!cur || !NOT_YET_TITLE.test(cur[1])) return { html, changed: false };
+  const facts = frozenFilmFacts(html);
+  if (!facts || !facts.item.providers.length) return { html, changed: false };
+  const next = escHtml(titleWithCountry(filmTitleTag(facts.item, cfg), cfg));
+  if (!next || next === cur[1] || NOT_YET_TITLE.test(next)) return { html, changed: false };
   return { html: html.replace(cur[0], `<title>${next}</title>`), changed: true };
 }
 
@@ -669,6 +687,7 @@ module.exports = {
   crossCountryLeak,
   ensureAnalytics,
   freshenFrozenCopy,
+  fixNotYetTitle,
   frozenFilmFacts,
   neutralizeCrossCountry,
   PAGES_MANIFEST_FILE,

@@ -1559,12 +1559,12 @@ test("finishFilmPages: moves styles out once, finishes the footer, keeps only st
     assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
     const r = S.finishFilmPages(files, { root });
     assert.deepStrictEqual(r, { pages: 3, externalized: 3, footerLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0 });
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0 });
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
     assert.ok(/<a href="\/privacy\/">Privacy<\/a> · <a href="\/dmca\/">Copyright<\/a> · © 2026 FilmyChill/.test(a));
     assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
     assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, footerLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0 }, "idempotent");
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0 }, "idempotent");
     // The 4 Oct incident: the stylesheets never reached the site. That must be reported.
     fsx.rmSync(path.join(root, "css"), { recursive: true, force: true });
     const lost = S.finishFilmPages(files, { root });
@@ -6864,6 +6864,26 @@ test("hubs: a service's channel titles join its own hub instead of a second one"
   const it = (id, providers) => ({ title: "T" + id, tmdbId: id, kind: "movie", providers, platform: providers[0] });
   const hubs = H.hubsFor({ ott: [it(1, ["Paramount+"]), it(2, ["Paramount Plus Apple TV channel"]), it(3, ["Paramount+ Amazon Channel"]), it(4, ["Paramount Plus Premium"])] });
   assert.deepStrictEqual(hubs.map((h) => [h.name, h.slug, h.items.length]), [["Paramount+", "paramount-plus", 4]]);
+});
+
+group("12 Oct 2026: 'not streaming yet' titles on pages that stream");
+test("frozenFilmFacts reads platforms however long the Where-to-watch section is", () => {
+  const A = require("./lib/archive.js");
+  const long = `<p>${"x".repeat(1500)}</p>`;
+  const html = `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"1917","datePublished":"2020-01-10"}</script>
+    <h2>Where to watch in Australia</h2>${long}<div><span class="pill">Netflix</span></div><div>Rent or buy</div><div><span class="pill">Apple TV</span></div>${long}<h2>Trailer</h2>`;
+  const f = A.frozenFilmFacts(html);
+  assert.deepStrictEqual([f.item.providers, f.item.rentBuy], [["Netflix"], ["Apple TV"]]);
+});
+test("fixNotYetTitle: a streaming page loses its 'Not Announced' title; consistent pages untouched", () => {
+  const A = require("./lib/archive.js");
+  const au = require("./lib/core.js").COUNTRIES.find((c) => c.code === "au");
+  const page = (title, pills) => `<title>${title}</title><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"1917","datePublished":"2020-01-10"}</script>
+    <h2>Where to watch in Australia</h2><div>${pills}</div><p>${"y".repeat(1200)}</p><h2>Trailer</h2>`;
+  const fixed = A.fixNotYetTitle(page("1917 (2020) Streaming Date in Australia: Not Announced", '<span class="pill">Netflix</span>'), au);
+  assert.ok(fixed.changed && !/Not Announced/.test(fixed.html) && /<title>1917 \(2020\)[^<]*Australia<\/title>/.test(fixed.html), fixed.html.slice(0, 120));
+  assert.strictEqual(A.fixNotYetTitle(page("1917 (2020) Streaming Date in Australia: Not Announced", '<span class="pill">Opened in cinemas 2 Oct — not streaming yet</span>'), au).changed, false, "really not streaming");
+  assert.strictEqual(A.fixNotYetTitle(page("1917 (2020) — Review &amp; Where to Watch in Australia", '<span class="pill">Netflix</span>'), au).changed, false, "already right");
 });
 
 group("12 Oct 2026: site search");
