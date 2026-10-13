@@ -27,6 +27,16 @@ const GENERATED = [
   /^(feed\.xml|llms\.txt|llms-full\.txt|sitemap\.xml|sitemap-[a-z0-9-]+\.xml)$/,
 ];
 const isGenerated = (name) => GENERATED.some((re) => re.test(name));
+// Files on main that only the build uses: never published. The site fetches data*.json and
+// search/ at runtime; nothing on the site reads these. facts/ alone was 23 MB of the 1 GB
+// GitHub Pages allowance (Oct 2026), pages-manifest.json another 7 MB. CNAME, robots.txt,
+// manifest.json (the web-app manifest) and the verification files stay published.
+const MAIN_ONLY = [
+  /^\.(github|gitignore|gitattributes|assetsignore)$/, /^(scripts|cloudflare|facts)$/,
+  /^(pages-manifest|catalog-manifest|page-lastmods|ott-seen|ott-watch|takes|votes-agg|votes-state)\.json$/,
+  /^ott-history\.jsonl$/, /^(firestore\.rules|wrangler\.jsonc|package\.json|package-lock\.json|MIGRATION-STEPS\.md)$/,
+];
+const isMainOnly = (name) => MAIN_ONLY.some((re) => re.test(name));
 const BRANCH = "site";
 const MIN_SHARE = 0.9;   // of the manifest's film pages that must arrive on restore
 
@@ -77,6 +87,8 @@ function publish() {
   const env = { ...process.env, GIT_INDEX_FILE: indexFile };
   fs.rmSync(indexFile, { force: true });
   git(["read-tree", "HEAD"], { env });
+  const mainOnly = git(["ls-tree", "--name-only", "HEAD"]).split("\n").filter(isMainOnly);
+  if (mainOnly.length) git(["rm", "-r", "--cached", "--quiet", "--ignore-unmatch", "--", ...mainOnly], { env });
   const present = fs.readdirSync(".").filter(isGenerated);
   // -f: these paths are in .gitignore on main, which is the point.
   if (present.length) git(["add", "-f", "-A", "--", ...present], { env });
@@ -100,7 +112,7 @@ function report(o) {
   fs.appendFileSync(process.env.GITHUB_OUTPUT, Object.entries(o).map(([k, v]) => `${k}=${v}\n`).join(""));
 }
 
-module.exports = { GENERATED, isGenerated };
+module.exports = { GENERATED, isGenerated, isMainOnly };
 
 if (require.main === module) {
   const cmd = process.argv[2];

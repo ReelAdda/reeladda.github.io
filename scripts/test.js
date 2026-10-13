@@ -6896,6 +6896,14 @@ test("every workflow that runs the tests restores the built site first (pages li
     assert.ok(r >= 0 && r < t, `${f}: restore the site before the tests`);
   }
 });
+test("publish leaves main's build-only files off the website, and keeps what the site needs", () => {
+  const S = require("./site.js");
+  for (const n of ["facts", "scripts", ".github", "pages-manifest.json", "catalog-manifest.json", "page-lastmods.json", "ott-history.jsonl", "votes-state.json", "takes.json"]) assert.ok(S.isMainOnly(n), n);
+  for (const n of ["CNAME", "manifest.json", "robots.txt", "index.html", "404.html", "data.json", "data-us.json", "js", "fonts", "about", "favicon.ico", "googled01dbf640a0df2d7.html", "334d5cb2e825f49d9f07e19943403a06.txt"]) assert.ok(!S.isMainOnly(n), n);
+  for (const n of ["movie", "us", "search", "css", "sitemap.xml"]) assert.ok(S.isGenerated(n) && !S.isMainOnly(n), n);
+  const src = require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8");
+  assert.ok(src.indexOf('"rm", "-r", "--cached"') > src.indexOf('"read-tree", "HEAD"'), "removed from the publish index, not from main");
+});
 
 group("12 Oct 2026: site search");
 const SRCH = require("./lib/search.js");
