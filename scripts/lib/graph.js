@@ -359,6 +359,10 @@ function syncHreflangClusters(onChange = null) {
 // the end of the build, so frozen month archives join their clusters too. Rewrites only the
 // alternate links after the canonical; a page left alone in its group loses them.
 const LISTING_PATTERNS = [
+  // Platform hubs: each takes its alternates from disk while editions are still being built,
+  // so an edition pruned later in the run stayed listed (13 Oct 2026: /au/ and /nz/ Netflix).
+  // (The weekly /new-on-ott/ page is not a hub and keeps its own builder's alternates.)
+  /^new-on-(?!ott\/)[^/]+\/index\.html$/,
   /^streaming\/[^/]+\/(?:[^/]+\/)?index\.html$/,
   /^new-on-[^/]+\/\d{4}-\d{2}\/index\.html$/,
   /^new-on-ott\/today\/index\.html$/,
@@ -382,6 +386,7 @@ function listingClusterKeys(root = ".") {
     try { for (const e of fs.readdirSync(path.join(root, base || "."), { withFileTypes: true })) if (e.isDirectory() && (e.name === "streaming" || e.name.startsWith("new-on-"))) tops.push(e.name); } catch { continue; }
     for (const top of tops) {
       const found = [];
+      if (fs.existsSync(path.join(root, base, top, "index.html"))) found.push(`${top}/index.html`);
       walk(base, top, 1, found);
       for (const rel of found) {
         const file = rel;

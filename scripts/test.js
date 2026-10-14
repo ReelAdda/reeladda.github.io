@@ -1959,6 +1959,26 @@ test("A02 · streaming, month and today pages get reciprocal hreflang from disk;
     assert.ok(!/hreflang/.test(fsx.readFileSync(path.join(root, "streaming/netflix/index.html"), "utf8")), "a cluster that shrinks to one drops its links");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
+test("platform hubs: an edition pruned later in the run drops out of every hub's alternates", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const G = require("./lib/graph.js");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-hub-"));
+  try {
+    const alt = (cc, hl) => `<link rel="alternate" hreflang="${hl}" href="https://filmychill.com${cc ? "/" + cc : ""}/new-on-netflix/"/>`;
+    // As built mid-run: India and the UK still saw an /au/ hub that was pruned afterwards.
+    const stale = [alt("", "en-IN"), alt("us", "en-US"), alt("uk", "en-GB"), alt("au", "en-AU"), alt("", "x-default")].join("\n");
+    for (const cc of ["", "us", "uk"]) {
+      fsx.mkdirSync(path.join(root, cc, "new-on-netflix"), { recursive: true });
+      fsx.writeFileSync(path.join(root, cc, "new-on-netflix", "index.html"), `<head>\n<link rel="canonical" href="https://filmychill.com${cc ? "/" + cc : ""}/new-on-netflix/">\n${stale}\n<meta name="x"></head>`);
+    }
+    fsx.mkdirSync(path.join(root, "au", "new-on-netflix", "2026-10"), { recursive: true });   // month archive stays
+    G.syncListingHreflang({ root });
+    for (const cc of ["", "us", "uk"]) {
+      const h = fsx.readFileSync(path.join(root, cc, "new-on-netflix", "index.html"), "utf8");
+      assert.ok(!h.includes("/au/new-on-netflix/") && h.includes(alt("us", "en-US")) && h.includes(alt("", "x-default")), h);
+    }
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
 
 group("10 Oct 2026: copyright page and the no-hosting notice");
 test("copyright page: exists, gives the contact address and what to send, asks to be contacted first, in the sitemap", () => {
