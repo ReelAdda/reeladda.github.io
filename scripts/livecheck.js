@@ -90,6 +90,23 @@ async function fetchCheck(fetchImpl, url, { expect = 200, type = null, minBytes 
   }
 }
 
+// A server error or dropped connection is retried before it counts: GitHub Pages answers 503
+// for a few seconds around a deploy (14 Oct 2026: one stylesheet, 503 once, 200 seconds
+// later, run red). A 404 is never retried: a missing file is the failure this check exists
+// for (4 Oct 2026). An outage that outlasts the retries still fails the run.
+const RETRY_WAITS_MS = [5000, 15000, 30000];
+async function fetchCheckSettled(fetchImpl, url, opts = {}, { sleep, waits = RETRY_WAITS_MS } = {}) {
+  let r = await fetchCheck(fetchImpl, url, opts);
+  let retries = 0;
+  for (const w of waits) {
+    if (r.ok || (r.status && r.status < 500)) break;
+    await sleep(w);
+    retries++;
+    r = await fetchCheck(fetchImpl, url, opts);
+  }
+  return { ...r, retries };
+}
+
 // Polls until the live homepage is byte-identical to the committed one, or time runs out.
 async function waitForDeploy(fetchImpl, localHome, { base = BASE, waitMs = WAIT_MS, pollMs = POLL_MS, sleep } = {}) {
   const want = sha1(localHome);
@@ -110,9 +127,11 @@ async function main({
 } = {}) {
   const failures = [];
   const passes = [];
+  const recovered = [];
   const check = async (label, url, opts) => {
-    const r = await fetchCheck(fetchImpl, url, opts);
-    if (r.ok) passes.push(label); else failures.push(`${label}: ${r.problems.join("; ")}`);
+    const r = await fetchCheckSettled(fetchImpl, url, opts, { sleep });
+    if (r.ok) { passes.push(label); if (r.retries) recovered.push(`${label} (after ${r.retries} retr${r.retries === 1 ? "y" : "ies"})`); }
+    else failures.push(`${label}: ${r.problems.join("; ")}${r.retries ? ` (still failing after ${r.retries} retries)` : ""}`);
     return r;
   };
 
@@ -147,6 +166,7 @@ async function main({
 
   log(`Live site check (${base}): ${passes.length} passed, ${failures.length} failed`);
   for (const f of failures) log(`  ✗ ${f}`);
+  if (recovered.length) log(`  Recovered from a brief server error: ${recovered.join(", ")}`);
   if (process.env.GITHUB_STEP_SUMMARY) {
     const md = [`## Live site check — ${failures.length ? "❌ failed" : "✅ passed"}`, "",
       `${passes.length} checks passed against ${base}.`, "",
@@ -161,4 +181,4 @@ if (require.main === module) {
     .catch((e) => { console.error(`Live site check crashed: ${e.stack || e.message}`); process.exit(1); });
 }
 
-module.exports = { fetchCheck, filmPagePaths, homepageAssets, main, sampleFilmPaths, stylesheetsLinked, waitForDeploy };
+module.exports = { fetchCheck, fetchCheckSettled, filmPagePaths, homepageAssets, main, sampleFilmPaths, stylesheetsLinked, waitForDeploy };

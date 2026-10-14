@@ -6531,6 +6531,19 @@ testAsync("livecheck: waits for the deploy, then fails loudly on a stylesheet th
     const stale = await run(site({ "/": "<html>home v1</html>" }));
     assert.strictEqual(stale.failures.length, 1);
     assert.ok(/isn't live/.test(stale.failures[0]), "an old deploy is reported, and nothing is judged against it");
+    // 14 Oct 2026: one stylesheet answered 503 once, right after the deploy, and the run went red.
+    let calls = 0;
+    const blip = site();
+    const flaky = async (url) => (new URL(url).pathname === "/css/fp-bbbbbbbbbb.css" && ++calls === 1
+      ? { status: 503, headers: { get: () => "text/html" }, text: async () => "unavailable" } : blip(url));
+    const brief = await run(flaky);
+    assert.deepStrictEqual(brief.failures, [], "a brief 503 is retried, not reported");
+    const down = await run(async (url) => (new URL(url).pathname === "/css/fp-bbbbbbbbbb.css"
+      ? { status: 503, headers: { get: () => "text/html" }, text: async () => "" } : blip(url)));
+    assert.ok(down.failures.length === 1 && /HTTP 503[\s\S]*still failing after 3 retries/.test(down.failures[0]), "a lasting outage still fails");
+    let missing = 0;
+    await L.fetchCheckSettled(async () => { missing++; return { status: 404, headers: { get: () => "" }, text: async () => "" }; }, "https://example.test/x.css", {}, { sleep: async () => {} });
+    assert.strictEqual(missing, 1, "a 404 is never retried");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 
