@@ -106,7 +106,8 @@ function buildStreamingPage(items, cfg, { platform, pslug, language = null, lslu
   const rated = sorted.filter((x) => x.rating != null && (x.votes || 0) >= 50);
   const faqs = [{
     q: `How many ${language ? language + " " : ""}titles are on ${platform} in ${country}?`,
-    a: `FilmyChill has confirmed ${n} ${language ? language + " " : ""}film${n === 1 ? "" : "s"} and series streaming on ${platform} in ${country} (${films.length} film${films.length === 1 ? "" : "s"}, ${series.length} series). That is the part of the ${platform} library FilmyChill covers, not the whole catalogue.`,
+    // Name only what is there: "(0 films, 12 series)" read as a broken count (Oct 2026).
+    a: `FilmyChill has confirmed ${n} ${language ? language + " " : ""}${!films.length ? "series" : !series.length ? `film${n === 1 ? "" : "s"}` : "films and series"} streaming on ${platform} in ${country}${films.length && series.length ? ` (${films.length} film${films.length === 1 ? "" : "s"}, ${series.length} series)` : ""}. That is the part of the ${platform} library FilmyChill covers, not the whole catalogue.`,
   }];
   if (rated.length) faqs.push({
     q: `What's the best-rated ${language ? language + " " : ""}title on ${platform} in ${country}?`,
@@ -355,7 +356,7 @@ function writePeoplePages(data, cfg, manifest) {
       desc: `Where to stream the films of ${sorted.length} actors and directors FilmyChill covers in ${country} — each page lists what is streaming now and on which platform.`,
       canonical: peopleIndexUrl(code),
       h1: `Actors & directors — ${country}`,
-      updLine: `${sorted.length} people with ${PEOPLE_MIN}+ films on FilmyChill`,
+      updLine: `${sorted.length} ${sorted.length === 1 ? "person" : "people"} with ${PEOPLE_MIN}+ films on FilmyChill`,
       lead: `Pick a name to see which of their films are streaming in ${country} right now, and where.`,
       sections: [], faqs: [], extraLd: [], code,
       homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,

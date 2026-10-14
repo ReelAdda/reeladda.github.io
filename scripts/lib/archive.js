@@ -15,7 +15,7 @@ const {
   localeFor,
 } = require("./core.js");
 const { filmIndexFor } = require("./graph.js");
-const { todayStr } = require("./release.js");
+const { releaseState, todayStr } = require("./release.js");
 const { enrich } = require("./enrich.js");
 const { buildFilmPage, filmMetaDescription, filmTitleTag } = require("./filmpage.js");
 const {
@@ -482,6 +482,32 @@ function fixNotYetTitle(html, cfg = null) {
   return { html: html.replace(cur[0], `<title>${next}</title>`), changed: true };
 }
 
+// Time words that a page's own release date has outrun (14 Oct 2026 audit). Pages the
+// migration holds keep their old layout, and two of its phrases went stale:
+//   "Releases 8 Oct 2026" in the header after 8 Oct (only pages carrying a SW:due marker
+//     were ever settled; older ones have none) — settled like any opened film;
+//   "▸ Just released — verdict soon" months after release (26 pages) — said plainly.
+const STALE_VERDICT_RE = /<div class="verdict">▸ Just released — verdict soon<\/div>/;
+function settleTimeWords(html, cfg = null, now = Date.now()) {
+  const date = (/"datePublished":"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1];
+  if (!date) return { html, changed: false };
+  let out = html;
+  const st = releaseState(date, now);
+  if (st === "released" && /<div class="meta" style="margin-top:8px">Releases /.test(out)) {
+    out = settleReleasedCopy(out, { countryName: countryNameFor(cfg), cfg, now }).html;
+  }
+  if (st === "upcoming") out = out.replace(STALE_VERDICT_RE, '<div class="verdict">▸ Not out yet — verdict after it opens</div>');
+  else if ((now - Date.parse(date)) / 864e5 > 28) out = out.replace(STALE_VERDICT_RE, '<div class="verdict">▸ Not enough ratings yet</div>');
+  // The old layout also printed a verdict from any rating at all: Kattalan "★ 8.4 (5 votes)
+  // ▸ Must watch", Dridam "(1 votes) ▸ Worth a watch". A handful of votes is not a verdict
+  // (the live builder needs 50), so the rating line goes and the verdict says so.
+  out = out.replace(/<div class="rating">★ [\d.]+ <span[^>]*>\(([1-9]) votes?\)<\/span><\/div>(\s*)<div class="verdict">▸ (?:Must watch|Worth a watch|Skip[^<]*)<\/div>/,
+    (m, n, gap) => `<div class="verdict">▸ Not enough ratings yet</div>`);
+  // Old trailer markup doubled a leading "The": "Watch the The Odyssey trailer".
+  out = out.replace(/"Watch the (The [^"]*?) trailer"/g, '"Watch the trailer for $1"');
+  return { html: out, changed: out !== html };
+}
+
 // Frozen pages need the analytics tag too, or the measurement misses exactly the pages that
 // get the traffic: 1,289 of the ~1,600 film pages are archived and are never regenerated, and
 // they are where most search visitors land. Adds the tag and widens the page's CSP to allow
@@ -688,6 +714,7 @@ module.exports = {
   ensureAnalytics,
   freshenFrozenCopy,
   fixNotYetTitle,
+  settleTimeWords,
   frozenFilmFacts,
   neutralizeCrossCountry,
   PAGES_MANIFEST_FILE,

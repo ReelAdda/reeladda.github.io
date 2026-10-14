@@ -31,6 +31,12 @@ const EARLY_READ_AGE_DAYS = 60;
 const PRIOR_MEAN = 6.5;    // "an average film" on TMDB's scale
 const PRIOR_WEIGHT = 50;   // how many average votes a small sample is blended with
 
+// Not out yet (its own release date is after today). Such a film has no score and no
+// "just released" wording: TMDB takes votes before release, and those aren't an audience.
+function notOutYet(item, nowMs = Date.now()) {
+  const d = String((item && (item.released || item.freshDate)) || "").slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) && d > new Date(nowMs).toISOString().slice(0, 10);
+}
 function releasedDaysAgo(item, nowMs) {
   const d = String((item && (item.freshDate || item.released)) || "").slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return null;
@@ -111,6 +117,7 @@ const EARLY_AUDIENCE_ONLY = {
 
 // Pure: the score for one item, or null when there isn't enough to say.
 function fcScore(item, nowMs = Date.now()) {
+  if (notOutYet(item, nowMs)) return null;
   const read = audienceRead(item, nowMs);
   const audience = read ? read.tier : null;
   const critics = criticsTier(item);
@@ -155,6 +162,7 @@ function scoreNeed(item, nowMs = Date.now()) {
 // plainly what's missing, with the real vote count.
 const EARLY_DAYS = 28;
 function noScoreText(item, nowMs = Date.now()) {
+  if (notOutYet(item, nowMs)) return { label: "Not out yet", why: "It hasn't opened yet — the score comes once people have seen it." };
   const recent = isRecent(item, nowMs);
   if (recent) {
     // Reviews already in but split (a mixed reception scores nothing on its own, and the
@@ -199,6 +207,7 @@ function itemLists(data) {
 // no score (an existing no-verdict phrase is kept, never a verdict the score withholds).
 function verdictFor(item, s, nowMs = Date.now()) {
   if (s) return s.verdict;
+  if (notOutYet(item, nowMs)) return "";
   const v = item && item.verdict;
   if (v && /verdict soon|enough ratings/i.test(v)) return v;
   return isRecent(item, nowMs) ? "Just released — verdict soon" : "Not enough ratings";
@@ -229,6 +238,7 @@ function attachFcScores(dataByCode, { toneFor = null, nowMs = Date.now() } = {})
 
 module.exports = {
   isRecent,
+  notOutYet,
   verdictFor,
   scoreNeed,
   itemLists,

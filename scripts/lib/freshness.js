@@ -6,6 +6,7 @@
 
 const { fmtDateShort } = require("./core.js");
 const { OTT_FRESH_DAYS } = require("./rules.js");
+const { releaseState } = require("./release.js");
 
 // ============================================================================
 // FIRST-SEEN TRACKING (ott-seen.json) — upgrades OTT freshness from a proxy to
@@ -235,6 +236,10 @@ function freshLabel(item, now = Date.now(), locale = "en-IN") {
   // some Indian films as series, so this fires more often than you'd think. Only claim a
   // "latest season" when there is more than one.
   const tvMulti = item.kind === "tv" && (item.seasons || 0) > 1;
+  // Tense from the date (Oct 2026: "Coming soon" cards read "Released 23 Oct").
+  const st = releaseState(d, now);
+  if (st === "today") return tvMulti ? "New season today" : item.kind === "tv" ? "Premieres today" : "Releases today";
+  if (st === "upcoming") return (tvMulti ? "New season " : item.kind === "tv" ? "Premieres " : "Releases ") + fmtDateShort(d, now, locale);
   return (tvMulti ? "Latest season " : "Released ") + fmtDateShort(d, now, locale);
 }
 

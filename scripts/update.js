@@ -389,9 +389,14 @@ async function main() {
     // isRecent: released within 7 days — drives the "New release" badge (what a user
     // means by new). isFresh: also requires thin votes — drives the rating placeholder
     // and "verdict soon", since a fresh film with few votes can't be rated honestly yet.
-    const isRecent = daysSince <= 7;
+    // Not out yet: no "just released", and no rating or verdict either — TMDB takes votes
+    // before release, and a pre-release "Must watch" would be invented (Oct 2026: every
+    // "Coming soon" card read "Just released — verdict soon", since a future date's
+    // negative age passed "within 7 days").
+    const notOut = releaseState(relDate) === "upcoming";
+    const isRecent = !notOut && daysSince <= 7;
     const tooNew = isRecent && m.vote_count < 20;
-    const showRating = !tooNew && m.vote_count >= 10;
+    const showRating = !notOut && !tooNew && m.vote_count >= 10;
     return {
       title: m.title || m.name,
       genre: genres(m.genre_ids),
@@ -399,9 +404,9 @@ async function main() {
       released: relDate,
       review: trim(m.overview),
       rating: showRating ? Number(m.vote_average.toFixed(1)) : null,
-      scores: [{ source: "TMDB", score: showRating ? `${m.vote_average.toFixed(1)}/10` : "New release" }],
+      scores: [{ source: "TMDB", score: showRating ? `${m.vote_average.toFixed(1)}/10` : notOut ? "Not out yet" : "New release" }],
       votes: m.vote_count,
-      verdict: tooNew ? "Just released — verdict soon" : verdict(m.vote_average, m.vote_count),
+      verdict: notOut ? "" : tooNew ? "Just released — verdict soon" : verdict(m.vote_average, m.vote_count),
       poster: img(m.poster_path),
       isRecent,
       isFresh: tooNew,
@@ -1512,7 +1517,7 @@ async function main() {
       };
       const f = finishFilmPages(filmPageFiles(), { fcdataClaim });
       console.log(`Film pages finished: ${f.pages} checked, ${f.externalized} moved to shared styles, ${f.footerLinked} footers given the notice and Privacy · Copyright links, ${f.iconed} icon tags added, `
-        + `${f.retitled.length - f.notYetFixed} titles given their country, ${f.notYetFixed} 'not streaming yet' titles corrected on pages that stream, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, `
+        + `${f.retitled.length - f.notYetFixed} titles given their country, ${f.notYetFixed} 'not streaming yet' titles corrected on pages that stream, ${f.timeWordsFixed} outdated release wordings settled, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, `
         + `${f.trailerFixed.length - f.trailerDropped} trailers given an uploadDate and ${f.trailerDropped} left out of the markup, ${f.dateSynced} dateModified/"Page updated" pairs reconciled, ${f.compacted} unscored pages moved to answer-first, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
       // A new title is a real change: let the sitemap say so (syncFilmLastmods would also see
       // it, except on its first run, when it only records fingerprints). So is repaired trailer

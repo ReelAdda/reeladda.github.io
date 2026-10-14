@@ -751,6 +751,10 @@ function freshLabel(item) {
   const d = item.kind === 'tv' ? (item.freshDate || item.released) : (item.released || item.freshDate);
   if (!d) return '';
   if (item.kind === 'tv' && (Date.now() - new Date(d)) > 400 * 864e5) return ''; // years-old season date reads as a bug next to a "New on ..." badge
+  // Tense from the date, as on the server (scripts/lib/freshness.js): never "Released" ahead of time.
+  const day = String(d).slice(0, 10), today = new Date().toISOString().slice(0, 10);
+  if (day === today) return item.kind === 'tv' ? 'New season today' : 'Releases today';
+  if (day > today) return (item.kind === 'tv' ? 'New season ' : 'Releases ') + fmtDate(d);
   return (item.kind === 'tv' ? 'Latest season ' : 'Released ') + fmtDate(d);
 }
 
@@ -813,6 +817,8 @@ function trackStatus(saved) {
 // otherwise say what's missing, with the real vote count.
 function noScoreText(item) {
   const d = String(item.freshDate || item.released || '').slice(0, 10);
+  const rel = String(item.released || item.freshDate || '').slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rel) && rel > new Date().toISOString().slice(0, 10)) return { label: 'Not out yet', why: "It hasn't opened yet — the score comes once people have seen it." };
   const recent = /^\d{4}-\d{2}-\d{2}$/.test(d) && Date.parse(d) > Date.now() - 28 * 864e5;
   if (recent) return item.criticsTone === 'mixed'
     ? { label: 'Too early', why: 'Critics are split; audience ratings are still coming in.' }

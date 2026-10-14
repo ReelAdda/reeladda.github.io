@@ -659,7 +659,7 @@ function fcScoreSection(item) {
         ? `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — few ratings, so weighted toward an average film`
         : `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB` }
       : item.rating != null && item.votes
-        ? { tag: "Too few ratings", sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — counts from ${scoreNeed(item)}`, none: true }
+        ? { tag: "Too few ratings", sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} rating${Number(item.votes) === 1 ? "" : "s"} — counts from ${scoreNeed(item)}`, none: true }
         : isRecent(item)
           ? { tag: "Not rated yet", sub: "No audience ratings yet", none: true }
           : { tag: "Not rated", sub: "No audience ratings on TMDB", none: true };

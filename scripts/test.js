@@ -407,8 +407,13 @@ test("freshLabel: a multi-season show shows 'Latest season <date>', not the seri
 test("freshLabel: a one-season title says 'Released', not 'Latest season'", () => {
   // TMDB classifies some Indian films as series. "Latest season" on a single-season entry
   // reads like a bug to a reader who thinks they're looking at a film.
-  assert.strictEqual(U.freshLabel({ kind: "tv", seasons: 1, freshDate: "2026-08-07" }, TH_NOW), "Released 7 Aug");
-  assert.strictEqual(U.freshLabel({ kind: "tv", freshDate: "2026-08-07" }, TH_NOW), "Released 7 Aug");
+  assert.strictEqual(U.freshLabel({ kind: "tv", seasons: 1, freshDate: "2026-06-07" }, TH_NOW), "Released 7 Jun");
+  assert.strictEqual(U.freshLabel({ kind: "tv", freshDate: "2026-06-07" }, TH_NOW), "Released 7 Jun");
+  // A future date is never "Released" (Oct 2026: "Coming soon" cards said "Released 23 Oct").
+  assert.strictEqual(U.freshLabel({ kind: "tv", seasons: 1, freshDate: "2026-08-07" }, TH_NOW), "Premieres 7 Aug");
+  assert.strictEqual(U.freshLabel({ kind: "tv", seasons: 3, freshDate: "2026-08-07" }, TH_NOW), "New season 7 Aug");
+  assert.strictEqual(U.freshLabel({ kind: "movie", released: "2026-08-07" }, TH_NOW), "Releases 7 Aug");
+  assert.strictEqual(U.freshLabel({ kind: "movie", released: "2026-07-02" }, TH_NOW), "Releases today");
 });
 test("freshLabel: cross-year date includes the year (no ambiguity)", () => {
   assert.ok(U.freshLabel({ kind: "movie", freshDate: "2025-12-20" }, TH_NOW).includes("2025"));
@@ -765,13 +770,16 @@ test("upcoming cinema releases: description and page give the usual streaming wi
   const F = require("./lib/filmpage.js");
   const { COUNTRIES } = require("./lib/core.js");
   const IN = COUNTRIES.find((c) => c.code === "in"), UK = COUNTRIES.find((c) => c.code === "uk");
-  const it = { title: "Dude 2", released: "2026-10-24", language: "Tamil", platform: "Theatres", kind: "movie", providers: [], rentBuy: [] };
-  const d = F.filmMetaDescription(it, IN, { now: "2026-10-14" });
-  assert.ok(/Expected on OTT late November to mid-December/.test(d) && d.length <= 155, d);
-  assert.ok(/Expected to stream /.test(F.filmMetaDescription(it, UK, { now: "2026-10-14" })), "streaming markets say 'stream'");
-  const html = F.buildFilmPage({ ...it, tmdbId: 1, slug: "dude-2" }, "2026-10-14", new Set(), IN, null);
-  assert.ok(/Tamil releases usually reach OTT 4–7 weeks after opening, which would put it around <strong>November and December 2026<\/strong> — an estimate, not a confirmed date\./.test(html), "the page backs the description");
-  const direct = F.filmMetaDescription({ ...it, platform: "Netflix" }, IN, { now: "2026-10-14" });
+  // Dates relative to the clock: "upcoming" is judged against today, so a fixed date would
+  // stop being upcoming (the 30-days-ahead check caught exactly that).
+  const day = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+  const it = { title: "Dude 2", released: day(10), language: "Tamil", platform: "Theatres", kind: "movie", providers: [], rentBuy: [] };
+  const d = F.filmMetaDescription(it, IN, { now: day(0) });
+  assert.ok(/Expected on OTT (early|mid-|late) ?[A-Z][a-z]+ to (early|mid-|late) ?[A-Z][a-z]+ —/.test(d) && d.length <= 155, d);
+  assert.ok(/Expected to stream /.test(F.filmMetaDescription(it, UK, { now: day(0) })), "streaming markets say 'stream'");
+  const html = F.buildFilmPage({ ...it, tmdbId: 1, slug: "dude-2" }, day(0), new Set(), IN, null);
+  assert.ok(/Tamil releases usually reach OTT 4–7 weeks after opening, which would put it around <strong>[^<]+<\/strong> — an estimate, not a confirmed date\./.test(html), "the page backs the description");
+  const direct = F.filmMetaDescription({ ...it, platform: "Netflix" }, IN, { now: day(0) });
   assert.ok(!/Expected on OTT/.test(direct), "no window for a release that isn't in cinemas");
 });
 test("India film pages link their language page from the body; other languages and editions don't", () => {
@@ -784,6 +792,26 @@ test("India film pages link their language page from the body; other languages a
   if (fsx.existsSync("tamil/index.html")) assert.ok(F.buildFilmPage(it("Tamil"), "2026-10-14", new Set(), IN, null).includes(btn));
   assert.ok(!F.buildFilmPage(it("Tamil"), "2026-10-14", new Set(), UK, null).includes('href="/tamil/">New'), "India only");
   assert.ok(!/class="btn" href="\/(hindi|tamil|telugu|malayalam|kannada)\/"/.test(F.buildFilmPage(it("English"), "2026-10-14", new Set(), IN, null)), "no language page, no link");
+});
+test("held old-layout pages: release words follow the page's own date (14 Oct 2026 audit)", () => {
+  const A = require("./lib/archive.js");
+  const now = Date.parse("2026-10-14T06:00:00Z");
+  const page = (date, verdict, header) => `<script type="application/ld+json">{"@type":"Movie","datePublished":"${date}"}</script>`
+    + `<h1>X (2026)</h1><div class="verdict">▸ ${verdict}</div><div class="meta" style="margin-top:8px">${header}</div>`;
+  const old = A.settleTimeWords(page("2026-08-20", "Just released — verdict soon", "Released 20 Aug 2026"), { code: "ae" }, now);
+  assert.ok(old.changed && old.html.includes("▸ Not enough ratings yet") && !/Just released/.test(old.html), old.html);
+  const opened = A.settleTimeWords(page("2026-10-09", "Just released — verdict soon", "Releases 9 Oct 2026"), { code: "in" }, now);
+  assert.ok(opened.html.includes("Released 9 Oct 2026") && !/Releases 9 Oct/.test(opened.html), "a passed date reads 'Released'");
+  assert.ok(opened.html.includes("Just released — verdict soon"), "five days out, 'just released' is still true");
+  const soon = A.settleTimeWords(page("2026-11-05", "Just released — verdict soon", "Releases 5 Nov 2026"), { code: "in" }, now);
+  assert.ok(soon.html.includes("▸ Not out yet — verdict after it opens") && soon.html.includes("Releases 5 Nov 2026"), soon.html);
+  assert.strictEqual(A.settleTimeWords(old.html, { code: "ae" }, now).changed, false, "idempotent");
+  const thin = '<script type="application/ld+json">{"datePublished":"2026-05-08","name":"Watch the The Odyssey trailer"}</script><div class="rating">★ 7.4 <span style="color:var(--mute)">(1 votes)</span></div>\n      <div class="verdict">▸ Worth a watch</div>';
+  const t = A.settleTimeWords(thin, { code: "in" }, now).html;
+  assert.ok(t.includes("▸ Not enough ratings yet") && !/★ 7\.4|Worth a watch/.test(t), "a verdict from one vote is withdrawn");
+  assert.ok(t.includes('"Watch the trailer for The Odyssey"'), t);
+  const solid = thin.replace("(1 votes)", "(420 votes)");
+  assert.ok(A.settleTimeWords(solid, { code: "in" }, now).html.includes("▸ Worth a watch"), "a real sample keeps its verdict");
 });
 test("a pending page says when it was last checked; Page updated and streaming pages are left alone", () => {
   const L = require("./lib/lifecycle.js");
@@ -1600,12 +1628,12 @@ test("finishFilmPages: moves styles out once, finishes the footer, keeps only st
     assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
     const r = S.finishFilmPages(files, { root });
     assert.deepStrictEqual(r, { pages: 3, externalized: 3, footerLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0 });
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0, timeWordsFixed: 0 });
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
     assert.ok(/<a href="\/privacy\/">Privacy<\/a> · <a href="\/dmca\/">Copyright<\/a> · © 2026 FilmyChill/.test(a));
     assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
     assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, footerLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0 }, "idempotent");
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0, timeWordsFixed: 0 }, "idempotent");
     // The 4 Oct incident: the stylesheets never reached the site. That must be reported.
     fsx.rmSync(path.join(root, "css"), { recursive: true, force: true });
     const lost = S.finishFilmPages(files, { root });
@@ -4712,7 +4740,10 @@ test("noScoreText: early only within 4 weeks; exact counts; split critics named"
   const F = require("./lib/fcscore.js");
   const now = Date.parse("2026-09-29T00:00:00Z");
   assert.strictEqual(F.noScoreText({ released: "2026-09-20", votes: 2 }, now).label, "Too early");
-  assert.strictEqual(F.noScoreText({ released: "2026-10-15" }, now).label, "Too early", "unreleased counts as early");
+  assert.strictEqual(F.noScoreText({ released: "2026-10-15" }, now).label, "Not out yet", "unreleased: never 'just released'");
+  assert.ok(!/released/i.test(F.noScoreText({ released: "2026-10-15" }, now).why));
+  assert.strictEqual(F.verdictFor({ released: "2026-10-15", verdict: "Just released — verdict soon" }, null, now), "", "no verdict wording before release");
+  assert.strictEqual(F.fcScore({ released: "2026-10-15", rating: 8.4, votes: 400, criticsTone: "acclaim" }, now), null, "pre-release votes never score");
   const thin = F.noScoreText({ released: "2026-07-10", votes: 9 }, now);
   assert.deepStrictEqual(thin, { label: "Not enough ratings", why: "Only 9 people have rated it — the score needs at least 15." });
   assert.ok(/needs at least 50\.$/.test(F.noScoreText({ released: "2026-08-20", votes: 30 }, now).why), "under two months old: still 50");
