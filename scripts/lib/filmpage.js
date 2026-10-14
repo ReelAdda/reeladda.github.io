@@ -218,7 +218,15 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
     // Pre-release: the date is the draw and it is public anyway, so lead with it. What is held
     // back is what the searcher wants next — is it any good, how long, when will it stream.
     const when = fmtDateFull(item.released, localeFor((cfg && cfg.code) || "in"));
+    // Searchers ask about OTT before a film opens; quote the usual window (the page body
+    // carries the same estimate, labelled as one). Cinema releases only.
+    const w = item.kind !== "tv" && !providers.length && !rentBuy.length && item.platform === "Theatres"
+      ? windowDates(item, now.getTime()) : null;
+    const expect = w ? `${V.word === "OTT" ? "Expected on OTT" : "Expected to stream"} ${partOfMonth(w.from)} to ${partOfMonth(w.to)}` : "";
     desc = fitDesc([
+      expect && `${item.title} opens in cinemas in ${country} on ${when}. ${expect} \u2014 runtime, cast, trailer and early reception.`,
+      expect && `${item.title} opens in ${country} on ${when}. ${expect} \u2014 runtime, cast and trailer.`,
+      expect && `${item.title} opens in ${country} on ${when}. ${expect}.`,
       `${item.title} opens in cinemas in ${country} on ${when}. Runtime, cast, the trailer and the early reception \u2014 plus when it's likely to reach ${V.word}.`,
       `${item.title} opens in cinemas in ${country} on ${when}. Runtime, cast, trailer and when it's likely to reach ${V.word}.`,
       `${item.title} opens in ${country} on ${when} \u2014 runtime, cast, trailer and early reception.`,
@@ -1038,7 +1046,14 @@ ${FCSB_CSS}
       const opens = relState === "today"
         ? `${e(item.title)} opens in theatres in ${e(country)} today.`
         : `${e(item.title)} hasn't had its theatrical release yet${due ? `, and is due ${e(fmtDateFull(due, localeFor(code)))}` : ""}.`;
-      return `<!--SW:pending--><!--SW:due=${e(due)}--><h2>${e(V.heading(item.title))}</h2><p>${opens} ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens — this page updates automatically the day it starts streaming.</p><!--/SW:pending-->`;
+      // The usual window, labelled as an estimate: people search "<film> OTT release date"
+      // before it opens (Street Fighter, Oct 2026: 1,272 such impressions on a page that only
+      // gave the cinema date). The description quotes the same window, so the page backs it.
+      const est = item.platform === "Theatres" ? streamWindowEstimate(item.released, item.language, asOfDate) : null;
+      const usual = est && !est.passed
+        ? ` ${e(hasLanguageWindow(item.language) ? `${item.language} releases` : "Releases like this")} usually reach ${V.word === "OTT" ? "OTT" : "streaming"} ${est.lo}–${est.hi} weeks after opening, which would put it around <strong>${e(est.span)}</strong> — an estimate, not a confirmed date.`
+        : "";
+      return `<!--SW:pending--><!--SW:due=${e(due)}--><h2>${e(V.heading(item.title))}</h2><p>${opens} ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens — this page updates automatically the day it starts streaming.${usual}</p><!--/SW:pending-->`;
     }
     if (digitalUpcoming(item)) {
       const on = item.digitalNote ? ` on ${e(item.digitalNote)}` : "";
@@ -1077,6 +1092,13 @@ ${FCSB_CSS}
   ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
   ${simGridHtml(similar, code, linkable)}
   ${faqs.length ? `<h2>Frequently asked</h2><div class="faq">${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("")}</div>` : ""}
+  ${(() => {
+    // The film's language page, from the page body rather than only the footer menu
+    // (Oct 2026 GSC: language pages averaged position 48.5, film pages 13.3). India only, where
+    // those pages live; written only when the page exists, so it never leads to a 404.
+    const lp = code === "in" && LANGUAGE_PAGES.find(([n]) => n === item.language);
+    return lp && fs.existsSync(`${lp[1]}/index.html`) ? `<a class="btn" href="/${e(lp[1])}/">New ${e(lp[0])} movies &amp; OTT this week →</a>` : "";
+  })()}
   <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">See this week's top picks on FilmyChill →</a>
   <a class="btn" href="${e(browsePath(code, 1))}">Browse every film we've covered →</a>
 </div>

@@ -51,12 +51,17 @@ const SWEEP_MAX_WEEKS = 30;
 const SWEEP_MAX_CHECKS = 60;
 
 // Pure: which archived slugs are worth an API call this run, newest release first.
-function sweepCandidates(entries, now = new Date(), max = SWEEP_MAX_CHECKS) {
+// `eligible` (the page still says "pending") is applied BEFORE the budget. Applied after it,
+// pages that no longer needed a check were never stamped `swept`, so they sorted first on
+// every run and took every slot: India, the UK and the UAE checked no pending page at all
+// from 27 Sept to 14 Oct 2026.
+function sweepCandidates(entries, now = new Date(), max = SWEEP_MAX_CHECKS, eligible = () => true) {
   const MS_WEEK = 7 * 86400000;
   return entries
     .filter((x) => x.archivedOn && x.tmdbId && x.released && x.kind !== "tv")
     .map((x) => ({ ...x, ageWeeks: (now.getTime() - new Date(x.released + "T00:00:00Z").getTime()) / MS_WEEK }))
     .filter((x) => Number.isFinite(x.ageWeeks) && x.ageWeeks >= SWEEP_MIN_WEEKS && x.ageWeeks <= SWEEP_MAX_WEEKS)
+    .filter(eligible)
     // Least recently checked first (never-checked before all), youngest first within that:
     // every eligible page gets its turn instead of the same newest pages every run.
     .sort((a, b) => String(a.swept || "").localeCompare(String(b.swept || "")) || a.ageWeeks - b.ageWeeks)
@@ -417,6 +422,16 @@ function restampAvailability(html, live, cfg) {
     : out.replace(/(<!--SW:live=[^>]*-->)/, `$1<!--SW:checked=${live.lastCheck}-->`);
 }
 
+// The pending counterpart of restampAvailability: a check that found no platform yet is
+// still a check, so the page says when it was made ("Availability as of 14 Oct 2026").
+// Hi! (7,234 impressions) read "as of 17 Sept" for a month of checks. "Page updated" is
+// left alone: the page's content did not change.
+function stampPendingCheck(html, asOf, cfg) {
+  if (!asOf || !html.includes("<!--SW:pending-->")) return html;
+  const when = escHtml(fmtDateFull(asOf, localeFor((cfg && cfg.code) || "in")));
+  return html.replace(/Availability as of [^<—]+? — /, `Availability as of ${when} — `);
+}
+
 // Local: apply restampAvailability to every live claim of one country.
 function syncAvailabilityStamps(manifest, cfg) {
   const m = manifest[cfg.code] || {};
@@ -594,7 +609,7 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
   const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
   if (!fs.existsSync(dir)) return;
   const entries = Object.entries(m).map(([slug, v]) => ({ slug, ...v }));
-  const candidates = sweepCandidates(entries).filter((x) => {
+  const candidates = sweepCandidates(entries, new Date(), SWEEP_MAX_CHECKS, (x) => {
     try { return fs.readFileSync(`${dir}/${x.slug}.html`, "utf8").includes("<!--SW:pending-->"); }
     catch { return false; }
   });
@@ -623,6 +638,10 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
             announced++;
           }
         }
+        const p = `${dir}/${c.slug}.html`;
+        const html = fs.readFileSync(p, "utf8");
+        const stamped = stampPendingCheck(html, asOf, cfg);
+        if (stamped !== html) fs.writeFileSync(p, stamped);
         continue;
       }
       const p = `${dir}/${c.slug}.html`;
@@ -696,6 +715,7 @@ module.exports = {
   recoverTmdbIds,
   refreshDuePages,
   restampAvailability,
+  stampPendingCheck,
   settleDepartedCopy,
   syncAvailabilityStamps,
   sweepCandidates,

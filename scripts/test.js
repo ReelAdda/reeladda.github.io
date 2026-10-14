@@ -753,6 +753,47 @@ test("sweepCandidates rotates: never-checked pages first, so the whole archive g
     .map((x) => x.slug);
   assert.deepStrictEqual(picked, ["old-never", "mid-older"]);
 });
+test("sweepCandidates: pages that no longer need a check never take the budget (14 Oct 2026)", () => {
+  const now = new Date("2026-10-14T00:00:00Z");
+  const e = (slug, swept, pending) => ({ slug, archivedOn: "x", tmdbId: 1, released: "2026-08-28", kind: "movie", pending, ...(swept ? { swept } : {}) });
+  // Already streaming, never stamped `swept`: these used to fill every slot, run after run.
+  const entries = [e("streaming-1", null, false), e("streaming-2", null, false), e("hi", "2026-09-27", true), e("once-more", "2026-09-27", true)];
+  const picked = U.sweepCandidates(entries, now, 2, (x) => x.pending).map((x) => x.slug);
+  assert.deepStrictEqual(picked, ["hi", "once-more"]);
+});
+test("upcoming cinema releases: description and page give the usual streaming window, labelled as an estimate", () => {
+  const F = require("./lib/filmpage.js");
+  const { COUNTRIES } = require("./lib/core.js");
+  const IN = COUNTRIES.find((c) => c.code === "in"), UK = COUNTRIES.find((c) => c.code === "uk");
+  const it = { title: "Dude 2", released: "2026-10-24", language: "Tamil", platform: "Theatres", kind: "movie", providers: [], rentBuy: [] };
+  const d = F.filmMetaDescription(it, IN, { now: "2026-10-14" });
+  assert.ok(/Expected on OTT late November to mid-December/.test(d) && d.length <= 155, d);
+  assert.ok(/Expected to stream /.test(F.filmMetaDescription(it, UK, { now: "2026-10-14" })), "streaming markets say 'stream'");
+  const html = F.buildFilmPage({ ...it, tmdbId: 1, slug: "dude-2" }, "2026-10-14", new Set(), IN, null);
+  assert.ok(/Tamil releases usually reach OTT 4–7 weeks after opening, which would put it around <strong>November and December 2026<\/strong> — an estimate, not a confirmed date\./.test(html), "the page backs the description");
+  const direct = F.filmMetaDescription({ ...it, platform: "Netflix" }, IN, { now: "2026-10-14" });
+  assert.ok(!/Expected on OTT/.test(direct), "no window for a release that isn't in cinemas");
+});
+test("India film pages link their language page from the body; other languages and editions don't", () => {
+  const F = require("./lib/filmpage.js");
+  const { COUNTRIES } = require("./lib/core.js");
+  const fsx = require("fs");
+  const IN = COUNTRIES.find((c) => c.code === "in"), UK = COUNTRIES.find((c) => c.code === "uk");
+  const it = (language) => ({ title: "X", slug: "x", tmdbId: 1, released: "2026-08-28", language, platform: "Theatres", kind: "movie", providers: [], rentBuy: [] });
+  const btn = '<a class="btn" href="/tamil/">New Tamil movies &amp; OTT this week →</a>';
+  if (fsx.existsSync("tamil/index.html")) assert.ok(F.buildFilmPage(it("Tamil"), "2026-10-14", new Set(), IN, null).includes(btn));
+  assert.ok(!F.buildFilmPage(it("Tamil"), "2026-10-14", new Set(), UK, null).includes('href="/tamil/">New'), "India only");
+  assert.ok(!/class="btn" href="\/(hindi|tamil|telugu|malayalam|kannada)\/"/.test(F.buildFilmPage(it("English"), "2026-10-14", new Set(), IN, null)), "no language page, no link");
+});
+test("a pending page says when it was last checked; Page updated and streaming pages are left alone", () => {
+  const L = require("./lib/lifecycle.js");
+  const page = '<!--SW:pending-->x<!--/SW:pending--><div class="meta">Page updated 30 Sept 2026</div><p>Availability as of 17 Sept 2026 — platforms may change over time.</p>';
+  const out = L.stampPendingCheck(page, "2026-10-14", { code: "in" });
+  assert.ok(out.includes("Availability as of 14 Oct 2026 — ") && out.includes("Page updated 30 Sept 2026"), out);
+  assert.strictEqual(L.stampPendingCheck(out, "2026-10-14", { code: "in" }), out, "idempotent");
+  const live = page.replace(/<!--\/?SW:pending-->/g, "");
+  assert.strictEqual(L.stampPendingCheck(live, "2026-10-14", { code: "in" }), live, "a streaming page keeps its confirmed date");
+});
 
 test("Coming to OTT: announced dates only, grouped by week, soonest first", () => {
   const data = { theatres: [
