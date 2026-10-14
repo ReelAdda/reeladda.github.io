@@ -1727,7 +1727,15 @@ test("3 · a closed month still saying 'filling up' is rewritten once, then left
     fsx.writeFileSync(p, "<p>Updated 30 September 2026 · this month is still filling up</p>");
     assert.strictEqual(H.closedMonthFinal(p), false, "frozen mid-month: write it once more");
     fsx.writeFileSync(p, "<p>A complete record of September 2026</p>");
+    assert.strictEqual(H.closedMonthFinal(p), false, "complete but built by older card rules: rebuilt once");
+    fsx.writeFileSync(p, `${require("./lib/pagekit.js").LISTING_VERSION}<p>A complete record of September 2026</p>`);
     assert.strictEqual(H.closedMonthFinal(p), true, "final: leave it");
+    // 14 Oct 2026: a re-release date after the streaming start was printed as the release.
+    const row = H.monthRow({ t: "The Strange Little Cat", rel: "2026-10-30", first: "2026-08-25", p: "MUBI" },
+      { bySlug: new Map([["the-strange-little-cat", { released: "2013-02-11" }]]), code: "de", now: Date.parse("2026-10-14") });
+    assert.strictEqual(row.released, "2013-02-11", "the film page's own date");
+    assert.strictEqual(H.monthRow({ t: "X", rel: "2026-10-30", first: "2026-08-25" }, { bySlug: new Map(), code: "de" }).released, null, "unknown: no date at all");
+    assert.strictEqual(H.monthRow({ t: "X", rel: "2026-08-01", first: "2026-08-25" }, { bySlug: new Map(), code: "de" }).released, "2026-08-01", "a normal date is kept");
   } finally { fsx.rmSync(dir, { recursive: true, force: true }); }
   const src = fsx.readFileSync(path.join(__dirname, "lib", "hubs.js"), "utf8");
   assert.strictEqual((src.match(/!== current && closedMonthFinal\(path\)\) continue;/g) || []).length, 3, "all three month writers: OTT, platform, language");
@@ -6283,11 +6291,11 @@ test("finishSitePages adds icons to frozen pages once, and never touches a file 
     fsx.writeFileSync(path.join(root, "scripts", "y.html"), "<html><head></head></html>");
     const files = S.sitePageFiles(root).sort();
     assert.deepStrictEqual(files, ["embed/week/index.html", "googleabc.html", "week/2026-W30/index.html"], "film pages and non-site folders stay out of this pass");
-    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 1, footerLinked: 1, cssFixed: 0 });
+    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 1, footerLinked: 1, cssFixed: 0, verdictsSettled: 0 });
     assert.ok(fsx.readFileSync(path.join(root, "week", "2026-W30", "index.html"), "utf8").includes('<a href="/dmca/">Copyright</a> · © 2026 FilmyChill'), "frozen site pages get the footer too");
     assert.ok(/<link rel="icon"[^>]*>\n<link rel="apple-touch-icon"[^>]*>\n<\/head>/.test(fsx.readFileSync(path.join(root, "week", "2026-W30", "index.html"), "utf8")));
     assert.strictEqual(fsx.readFileSync(path.join(root, "googleabc.html"), "utf8"), "google-site-verification: googleabc.html", "Google's verification file is untouched");
-    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 0, footerLinked: 0, cssFixed: 0 }, "idempotent");
+    assert.deepStrictEqual(S.finishSitePages(files, { root }), { pages: 2, iconed: 0, footerLinked: 0, cssFixed: 0, verdictsSettled: 0 }, "idempotent");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 
@@ -7082,6 +7090,33 @@ test("end-of-build pass: wording fixers skip pages rendered from facts, still fi
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8"), b = fsx.readFileSync(path.join(root, "movie", "b.html"), "utf8");
     assert.ok(/Just released/.test(a), "a page from facts is the template's: left to it");
     assert.ok(/Not enough ratings yet/.test(b), "a frozen page still gets the fix");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("closed weekly lists: 'verdict soon' becomes the film's verdict today, once it's out four weeks", () => {
+  const S = require("./lib/stylesheets.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-wk-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie"));
+    const film = (date, body) => `<script type="application/ld+json">{"@type":"Movie","datePublished":"${date}"}</script>${body}`;
+    fsx.writeFileSync(path.join(root, "movie", "scored.html"), film("2026-07-10", '<span class="fcsb-stamp fcsb-worth">Worth a watch</span>'));
+    fsx.writeFileSync(path.join(root, "movie", "thin.html"), film("2026-07-10", '<span class="fcsb-mini-v">Not enough ratings</span>'));
+    fsx.writeFileSync(path.join(root, "movie", "new.html"), film("2026-10-09", ""));
+    const card = (slug) => `<a class="row" href="/movie/${slug}.html">\n      <div>\n        <div class="rm">In theatres · Released 10 Jul</div>\n        <div class="rm">Just released — verdict soon</div>\n        <div class="rm hk">x</div></div></a>`;
+    const page = ["scored", "thin", "new", "gone"].map(card).join("\n");
+    const out = S.settleArchiveVerdicts(page, { root, now: Date.parse("2026-10-14T00:00:00Z") });
+    assert.ok(out.includes('<div class="rm">Verdict now: Worth a watch</div>'), out);
+    assert.ok(out.includes('<div class="rm">Not enough ratings yet</div>'));
+    assert.strictEqual((out.match(/Just released — verdict soon/g) || []).length, 1, "five days out it is still true");
+    assert.ok(/href="\/movie\/gone\.html">[\s\S]*?Released 10 Jul<\/div>\s*<div class="rm hk">/.test(out), "film page gone: the line goes");
+    assert.strictEqual(S.settleArchiveVerdicts(out, { root, now: Date.parse("2026-10-14T00:00:00Z") }), out, "idempotent");
+    const yet = card("scored").replace("Just released — verdict soon", "Not enough ratings yet");
+    assert.ok(S.settleArchiveVerdicts(yet, { root, now: Date.parse("2026-10-14T00:00:00Z") }).includes("Verdict now: Worth a watch"), "'yet' resolves too once there is a verdict");
+    const still = card("thin").replace("Just released — verdict soon", "Not enough ratings yet");
+    assert.strictEqual(S.settleArchiveVerdicts(still, { root, now: Date.parse("2026-10-14T00:00:00Z") }), still, "still true: left exactly as it is");
+    const two = card("thin") + "\n" + card("scored");
+    const both = S.settleArchiveVerdicts(two, { root, now: Date.parse("2026-10-14T00:00:00Z") });
+    assert.ok(/thin\.html[\s\S]*?Not enough ratings yet[\s\S]*?scored\.html[\s\S]*?Verdict now: Worth a watch/.test(both), "each card reads its own film page");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 test("a frozen verdict with no vote count under it is withdrawn; the rating stays", () => {

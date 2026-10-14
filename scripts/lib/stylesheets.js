@@ -354,8 +354,35 @@ function sitePageFiles(root = ".") {
 // Browser icons on every non-film page: hubs, people, archives, About, Privacy, 404. Pages
 // rebuilt each run already carry them; this reaches the frozen ones (past weeks and months,
 // hand-written pages). The embed widget is skipped: it renders inside other people's pages.
-function finishSitePages(files, { root = "." } = {}) {
-  const res = { pages: 0, iconed: 0, footerLinked: 0, cssFixed: 0 };
+// Closed weekly and monthly lists are snapshots, but "Just released — verdict soon" on a card
+// promises something that has since happened (14 Oct 2026: 28 cards, 3 to 4 months on). Once
+// the film is out more than four weeks, the card gives the verdict its film page shows today,
+// or says plainly there still isn't one. A card whose film page is gone loses the line.
+// The card's own link only: the match may not run past its </a> into the next card.
+// "Not enough ratings yet" goes the same way once the film has a verdict (Alpha, W28: "yet",
+// while its page says "Skip").
+const JUST_RELEASED_CARD = /(<a class="row" href="(\/[^"]+\.html)">(?:(?!<\/a>)[\s\S])*?)<div class="rm">(?:Just released — verdict soon|Not enough ratings yet)<\/div>\s*/g;
+function verdictNow(film) {
+  const v = (/class="fcsb-stamp fcsb-[a-z]+">([^<]+)</.exec(film) || /<div class="verdict">▸ (Must watch|Worth a watch|Skip)<\/div>/.exec(film) || [])[1];
+  return v ? `Verdict now: ${v}` : "Not enough ratings yet";
+}
+function settleArchiveVerdicts(html, { root = ".", now = Date.now(), cache = new Map() } = {}) {
+  if (!html.includes("Just released — verdict soon") && !html.includes("Not enough ratings yet")) return html;
+  return html.replace(JUST_RELEASED_CARD, (whole, before, href) => {
+    if (!cache.has(href)) { let f = null; try { f = fs.readFileSync(path.join(root, href.replace(/^\//, "")), "utf8"); } catch { /* gone */ } cache.set(href, f); }
+    const film = cache.get(href);
+    if (film == null) return before;
+    const rel = (/"datePublished":"(\d{4}-\d{2}-\d{2})/.exec(film) || [])[1];
+    if (!rel || (now - Date.parse(rel)) / 864e5 <= 28) return whole;
+    const line = verdictNow(film);
+    if (whole.includes(`<div class="rm">${line}</div>`)) return whole;   // already says it
+    return `${before}<div class="rm">${line}</div>\n        `;
+  });
+}
+
+function finishSitePages(files, { root = ".", now = Date.now() } = {}) {
+  const res = { pages: 0, iconed: 0, footerLinked: 0, cssFixed: 0, verdictsSettled: 0 };
+  const cache = new Map();
   for (const rel of files) {
     if (/(?:^|\/)embed\/week\//.test(rel)) continue;
     const file = path.join(root, rel);
@@ -369,6 +396,8 @@ function finishSitePages(files, { root = "." } = {}) {
     let styled = next;
     for (const [from, to] of SITE_CSS_FIXES) styled = styled.split(from).join(to);
     if (styled !== next) { next = styled; res.cssFixed++; }
+    const settled = settleArchiveVerdicts(next, { root, now, cache });
+    if (settled !== next) { next = settled; res.verdictsSettled++; }
     if (next !== html) fs.writeFileSync(file, next);
   }
   return res;
@@ -425,6 +454,7 @@ function repairDeadLinks(files, { root = "." } = {}) {
 }
 
 module.exports = {
+  settleArchiveVerdicts,
   applyFcdataClaim,
   ensureCountryTitle,
   ensureIconLinks,

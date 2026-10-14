@@ -29,6 +29,7 @@ const {
   fitFirst,
   hubUrl,
   listingPageHtml,
+  LISTING_VERSION,
   ottMonthPath,
   platformSlug,
   streamPagePath,
@@ -70,20 +71,25 @@ function ottMonthUrl(code, month) {
 function monthRow(r, { bySlug, code = "in", now = Date.now() }) {
   const slug = slugify(r.t || "");
   const page = bySlug.get(slug);
+  // A release date after the day it started streaming is not its release (TMDB had a German
+  // re-release, 30 Oct 2026, for a 2013 film on MUBI since 25 Aug: "Released 30 Oct" on an
+  // August list). The film page's own date wins; without one, the card shows no date.
+  const rel = r.rel && r.first && String(r.rel).slice(0, 10) > String(r.first).slice(0, 10)
+    ? (page && page.released) || null : r.rel || null;
   return {
     title: r.t,
     slug: page ? slug : null,
     platform: r.p || null,
     genre: r.g || "",
     language: r.lang || "",
-    released: r.rel || null,
+    released: rel,
     freshDate: r.first || null,
     poster: page ? page.poster || "" : "",
     kind: r.k === "tv" ? "tv" : "movie",
     // The arrival date is the whole point of these pages and exists nowhere else — but the row
     // meta already shows it for series (freshLabel uses freshDate for TV) and for anything that
     // went straight to streaming on release day. Only add the line when it adds something.
-    hook: (r.k !== "tv" && r.first && String(r.first).slice(0, 10) !== String(r.rel || "").slice(0, 10))
+    hook: (r.k !== "tv" && r.first && String(r.first).slice(0, 10) !== String(rel || "").slice(0, 10))
       ? `Started streaming ${fmtDateShort(r.first, now, localeFor(code))}` : null,
   };
 }
@@ -292,8 +298,10 @@ function buildScopedMonthPage(recs, cfg, { scope, month, months = [], index = []
 // A closed month whose page is final. The last write while the month was current leaves
 // "this month is still filling up" on it, and every September page froze that way (76 of
 // 80, Oct 2026), so a closed month is rewritten once more if its page still says so.
+// Final once complete AND built by the current card rules: a rules change reaches every
+// closed month once, then they are left alone again (pagekit.js LISTING_VERSION).
 function closedMonthFinal(path) {
-  try { return !fs.readFileSync(path, "utf8").includes("this month is still filling up"); }
+  try { const h = fs.readFileSync(path, "utf8"); return !h.includes("this month is still filling up") && h.includes(LISTING_VERSION); }
   catch { return false; }
 }
 

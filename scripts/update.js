@@ -1534,7 +1534,7 @@ async function main() {
     } catch (e) { stageFailed("film-page styles", e); }
     try {
       const s = finishSitePages(sitePageFiles());
-      if (s.iconed || s.footerLinked) console.log(`Site pages: icon tags added to ${s.iconed} and footers finished on ${s.footerLinked} of ${s.pages}`);
+      if (s.iconed || s.footerLinked || s.verdictsSettled) console.log(`Site pages: icon tags added to ${s.iconed} and footers finished on ${s.footerLinked} of ${s.pages}; ${s.verdictsSettled} closed list(s) given today's verdicts`);
     } catch (e) { stageFailed("site-page icons", e); }
     // Self-audit (lib/audit.js): contradictions a visitor would notice, reported in the run
     // summary before anyone else finds them. Read-only.

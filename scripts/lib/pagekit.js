@@ -331,6 +331,10 @@ function fitFirst(options, max) {
   return opts.find((x) => x.length <= max) || opts.reduce((a, b) => (b.length < a.length ? b : a), opts[0] || "");
 }
 
+// Bumped when the cards' rules change: a closed month counts as final only when it was built
+// by the current rules (lib/hubs.js closedMonthFinal), so a fix reaches it once. v2, 14 Oct
+// 2026: release dates after the streaming start no longer shown as the release.
+const LISTING_VERSION = "<!--listing:2-->";
 function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null }) {
   // ~80 hubs, month archives and week pages ran 61–72 characters; see fitSiteTitle.
   title = fitSiteTitle(title);
@@ -422,7 +426,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
 </style>
 </head>
-<body>
+<body>${LISTING_VERSION}
 <div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
 <div class="wrap">
   <h1>${e(h1)}</h1>
@@ -539,6 +543,7 @@ module.exports = {
   isoWeekMonday,
   isoWeekOf,
   listingPageHtml,
+  LISTING_VERSION,
   ogImageTag,
   OPEN_PILL_RE,
   ottMonthPath,
