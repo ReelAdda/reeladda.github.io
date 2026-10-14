@@ -130,9 +130,9 @@ function relead(text, lead) {
 const unesc = (t) => t.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 // The four time-worded "Don't watch this if…" lines (lib/skipif.js), as they appear on a page.
 const SKIP_TIME_LINES = [
-  /you want a safe bet — that rating is resting on [\d,]+ votes so far/,
-  /you&#39;d rather wait for a consensus\. Only [\d,]+ ratings in so far/,
-  /you take the score at face value — it&#39;s early, and [\d,]+ votes can still move it/,
+  /you want a safe bet — that rating is resting on [\d,]+ votes? so far/,
+  /you&#39;d rather wait for a consensus\. Only [\d,]+ ratings? in so far/,
+  /you take the score at face value — it&#39;s early, and [\d,]+ votes? can still move it/,
   /you want a number you can lean on\. This one is still settling/,
 ];
 function refreshCopy(html, item, s) {

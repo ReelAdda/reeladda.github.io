@@ -105,10 +105,11 @@ function confidenceReason(item) {
   // Time words ("so far", "it's early", "still settling") only for a film that is new; an
   // older film's thin rating is described by its count (the site-wide rule, lib/fcscore.js).
   if (!isRecent(item)) return countReason(item, votes);
+  const s = votes === 1 ? "" : "s";
   return pickVariant(item, [
-    `you want a safe bet — that rating is resting on ${votes} votes so far`,
-    `you'd rather wait for a consensus. Only ${votes} ratings in so far`,
-    `you take the score at face value — it's early, and ${votes} votes can still move it`,
+    `you want a safe bet — that rating is resting on ${votes} vote${s} so far`,
+    `you'd rather wait for a consensus. Only ${votes} rating${s} in so far`,
+    `you take the score at face value — it's early, and ${votes} vote${s} can still move it`,
     `you want a number you can lean on. This one is still settling`,
   ]);
 }

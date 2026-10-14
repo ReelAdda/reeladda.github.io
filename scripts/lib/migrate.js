@@ -19,18 +19,19 @@
 // whatever the arrival, departure or score sweeps changed during the run carries through;
 // the facts store is updated when they moved; the page is rendered from them.
 //
-// The batch size comes from MIGRATE_BATCH (default 0: nothing moves until it is set).
+// Every build: new pages move to facts the run they are written; held pages are retried.
 // ============================================================================
 "use strict";
 
 const fs = require("fs");
-const { COUNTRIES } = require("./core.js");
+const { COUNTRIES, fmtDateFull, localeFor } = require("./core.js");
 const { archivePatchHtml } = require("./archive.js");
 const { buildFilmPage } = require("./filmpage.js");
 const { filmPageExists } = require("./graph.js");
 const { countryNameFor } = require("./rules.js");
 const { availabilityText, extractFacts, factsDiff, keyFacts, readFacts, writeFacts } = require("./facts.js");
 const { writeIfChanged } = require("./writeif.js");
+const { fcScore } = require("./fcscore.js");
 
 const dirFor = (code) => (code === "in" ? "movie" : `${code}/movie`);
 
@@ -51,16 +52,39 @@ function knownSlugsFor(code) {
 }
 const asOfOf = (html, fallback) => (/"dateModified":"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1] || fallback;
 
+// The older layout (no FilmyChill Score card, no markers, no dates in its data) differs from a
+// render in ways that are not fact changes. Each rule is narrow, and every other difference
+// still holds the page (Oct 2026: 495 pages held, all for these reasons):
+//   availability  it never printed the line; the render adds the page's real last-checked date
+//   verdict       its verdict came from the old rating bands ("▸ Worth a watch" from a few
+//                 votes); the render applies today's rule to the same rating and vote count
+//   state         "upcoming" when its own release date is still ahead (the old page was wrong)
+function acceptedDiff(diff, old, item, today) {
+  const oldLayout = !/class="fcsb/.test(old);
+  const a = keyFacts(old);
+  return diff.filter((k) => !(
+    (k === "availability" && a.availability === "")
+    || (k === "verdict" && oldLayout)
+    || (k === "state" && item.released > today)
+  ));
+}
+
 // One page through the check. Returns { ok, item, html, diff } without writing anything.
 function tryMigrate(file, slug, cfg, entry, ctx) {
   let old;
   try { old = fs.readFileSync(file, "utf8"); } catch { return { ok: false, diff: ["unreadable"] }; }
   const item = extractFacts(old, slug, { tmdbId: entry && entry.tmdbId });
   if (!item) return { ok: false, diff: ["no structured data"] };
-  const asOf = asOfOf(old, ctx.today);
+  // No score card to read on the older layout: today's rule, from the same rating and count,
+  // exactly as the live build scores a film (Toy Story 5: 535 ratings, "Worth a watch").
+  if (!item.fcScore && !/class="fcsb/.test(old)) { const s = fcScore(item); if (s) item.fcScore = s; }
+  // A page with no date in its data: the manifest knows when it last changed and was checked.
+  const lastTouched = [entry && entry.last, entry && entry.swept].filter(Boolean).sort().pop() || ctx.today;
+  const asOf = asOfOf(old, (entry && entry.last) || ctx.today);
+  const availability = availabilityText(old) || fmtDateFull(lastTouched, localeFor(cfg.code));
   let html;
-  try { html = renderFrozen(item, cfg, { asOf, knownSlugs: ctx.knownSlugs, availability: availabilityText(old) }); } catch (e) { return { ok: false, diff: [`render: ${e.message}`] }; }
-  const diff = factsDiff(keyFacts(old), keyFacts(html));
+  try { html = renderFrozen(item, cfg, { asOf, knownSlugs: ctx.knownSlugs, availability }); } catch (e) { return { ok: false, diff: [`render: ${e.message}`] }; }
+  const diff = acceptedDiff(factsDiff(keyFacts(old), keyFacts(html)), old, item, ctx.today);
   return { ok: diff.length === 0, item, html, diff, asOf };
 }
 
@@ -72,7 +96,9 @@ function migrateBatch(manifest, cfg, { limit = 0, today }) {
   const m = manifest[code] || {};
   const facts = readFacts(code);
   const ctx = { today, knownSlugs: knownSlugsFor(code) };
-  const queue = Object.keys(m).filter((s) => m[s] && !m[s].rendered && !m[s].held && fs.existsSync(`${dirFor(code)}/${s}.html`)).sort();
+  // New pages first, then held ones again: a reader fix releases them without a manual step.
+  const waiting = Object.keys(m).filter((s) => m[s] && !m[s].rendered && fs.existsSync(`${dirFor(code)}/${s}.html`)).sort();
+  const queue = [...waiting.filter((s) => !m[s].held), ...waiting.filter((s) => m[s].held)];
   for (const slug of queue.slice(0, limit)) {
     res.tried++;
     const r = tryMigrate(`${dirFor(code)}/${slug}.html`, slug, cfg, m[slug], ctx);
@@ -84,6 +110,7 @@ function migrateBatch(manifest, cfg, { limit = 0, today }) {
     facts.set(slug, { slug, updated: r.asOf, item: r.item });
     writeIfChanged(`${dirFor(code)}/${slug}.html`, r.html);
     m[slug].rendered = today;
+    delete m[slug].held;
     res.migrated++;
   }
   if (res.migrated) writeFacts(code, facts);
@@ -121,8 +148,13 @@ function renderMigrated(manifest, cfg, { today }) {
   return res;
 }
 
+// Always on since the queue emptied (14 Oct 2026): a page written this run moves to facts in
+// the same run. MIGRATE_BATCH, when set, overrides the per-edition cap (0 stops it).
+const MIGRATE_DEFAULT = 500;
 function migrateLimit() {
-  const n = Number(process.env.MIGRATE_BATCH || 0);
+  const raw = process.env.MIGRATE_BATCH;
+  if (raw == null || raw === "") return MIGRATE_DEFAULT;
+  const n = Number(raw);
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
 }
 

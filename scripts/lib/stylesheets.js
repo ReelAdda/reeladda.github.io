@@ -209,20 +209,33 @@ function filmPageKey(rel) {
 // `retitled` lists "code/slug" for every page whose title changed, so the caller can tell the
 // sitemap: a new title is a change worth a recrawl. `trailerFixed` does the same for pages
 // whose trailer markup was repaired (trailerDropped of them lost it).
-function finishFilmPages(files, { root = ".", fcdataClaim = null } = {}) {
+// `fromFacts(code, slug)`: true for a page rendered from its facts this run (lib/migrate.js).
+// The template already writes everything the wording fixers below correct (14 Oct 2026: none
+// of them changed any of 647 fresh renders sampled across every edition), so those pages skip
+// them; only pages still frozen (held by the migration check) get them. Data checks
+// (applyFcdataClaim) and the shared stylesheet apply to every page.
+function finishFilmPages(files, { root = ".", fcdataClaim = null, fromFacts = null } = {}) {
   const used = new Set();
   const res = { pages: 0, externalized: 0, footerLinked: 0, cssFiles: 0, removed: 0, missing: 0, missingExamples: [],
-    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0, timeWordsFixed: 0 };
+    iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0, timeWordsFixed: 0, fromFacts: 0 };
   fs.mkdirSync(path.join(root, CSS_DIR), { recursive: true });
   for (const rel of files) {
     const file = path.join(root, rel);
     let html;
     try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
     res.pages++;
-    let next = ensureFooterLegal(html);
-    if (next !== html) res.footerLinked++;
     const key = filmPageKey(rel);
-    if (key) {
+    const frozen = !(key && fromFacts && fromFacts(key.code, key.slug));
+    if (!frozen) res.fromFacts++;
+    let next = frozen ? ensureFooterLegal(html) : html;
+    if (next !== html) res.footerLinked++;
+    if (key && !frozen) {
+      if (fcdataClaim && FCDATA_RE.test(next)) {
+        const claim = fcdataClaim(key.code, key.slug);
+        const checked = applyFcdataClaim(next, claim);
+        if (checked !== next) { next = checked; if (claim.action === "drop") res.fcdataDropped++; else res.fcdataFixed++; }
+      }
+    } else if (key) {
       const iconed = ensureIconLinks(next);
       if (iconed !== next) { next = iconed; res.iconed++; }
       // A "not streaming yet" title on a page listing where it streams (lib/archive.js).

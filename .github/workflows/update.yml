@@ -63,10 +63,10 @@ jobs:
           # Google Cloud Console (YouTube Data API v3) and add it as a repo secret named
           # YT_API_KEY. If absent, the build simply skips trailer stats — nothing breaks.
           YT_API_KEY: ${{ secrets.YT_API_KEY }}
-          # Frozen pages moved per edition per build to "facts rendered by the live template"
-          # (scripts/lib/migrate.js). Set in Settings → Secrets and variables → Actions →
-          # Variables. Unset or 0: nothing moves.
-          MIGRATE_BATCH: ${{ vars.MIGRATE_BATCH || '0' }}
+          # Pages moved to "facts rendered by the live template" per edition per build
+          # (scripts/lib/migrate.js). Always on: unset means the default (500). Set the
+          # repository variable only to override it; 0 stops the migration.
+          MIGRATE_BATCH: ${{ vars.MIGRATE_BATCH }}
           # Back-catalogue backfill (see backfillCatalog in scripts/update.js). Builds a batch
           # of already-streaming catalogue titles per country per run — the long tail that
           # answers "where can I watch X" years after any release week. Each built page costs

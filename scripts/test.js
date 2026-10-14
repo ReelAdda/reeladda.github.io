@@ -1628,12 +1628,12 @@ test("finishFilmPages: moves styles out once, finishes the footer, keeps only st
     assert.deepStrictEqual(files.sort(), ["movie/a.html", "movie/c.html", "uk/movie/b.html"]);
     const r = S.finishFilmPages(files, { root });
     assert.deepStrictEqual(r, { pages: 3, externalized: 3, footerLinked: 3, cssFiles: 2, removed: 1, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0, timeWordsFixed: 0 });
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0, timeWordsFixed: 0, fromFacts: 0 });
     const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8");
     assert.ok(/<a href="\/privacy\/">Privacy<\/a> · <a href="\/dmca\/">Copyright<\/a> · © 2026 FilmyChill/.test(a));
     assert.strictEqual(S.inlineStyles(a, root).includes("<style>.x{}</style>"), true, "a patcher can bring it back inline");
     assert.deepStrictEqual(S.finishFilmPages(files, { root }), { pages: 3, externalized: 0, footerLinked: 0, cssFiles: 2, removed: 0, missing: 0, missingExamples: [],
-      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0, timeWordsFixed: 0 }, "idempotent");
+      iconed: 0, retitled: [], fcdataDropped: 0, fcdataFixed: 0, trailerFixed: [], trailerDropped: 0, dateSynced: 0, compacted: 0, cssFixed: 0, notYetFixed: 0, timeWordsFixed: 0, fromFacts: 0 }, "idempotent");
     // The 4 Oct incident: the stylesheets never reached the site. That must be reported.
     fsx.rmSync(path.join(root, "css"), { recursive: true, force: true });
     const lost = S.finishFilmPages(files, { root });
@@ -1897,17 +1897,19 @@ test("migrateBatch moves a page only when its facts check passes, and renderMigr
     assert.ok(/<span class="pill">Netflix<\/span>/.test(fsx.readFileSync("movie/geetha-test.html", "utf8")));
   } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
 });
-test("the migration is off unless MIGRATE_BATCH is set, and the build commits the facts", () => {
+test("the migration is always on (MIGRATE_BATCH only overrides it), and the build commits the facts", () => {
   const Mg = require("./lib/migrate.js");
   const prev = process.env.MIGRATE_BATCH;
   try {
-    delete process.env.MIGRATE_BATCH; assert.strictEqual(Mg.migrateLimit(), 0);
+    delete process.env.MIGRATE_BATCH; assert.strictEqual(Mg.migrateLimit(), 500, "unset: on by default");
+    process.env.MIGRATE_BATCH = ""; assert.strictEqual(Mg.migrateLimit(), 500, "the workflow passes '' when the variable is gone");
     process.env.MIGRATE_BATCH = "50"; assert.strictEqual(Mg.migrateLimit(), 50);
+    process.env.MIGRATE_BATCH = "0"; assert.strictEqual(Mg.migrateLimit(), 0, "0 stops it");
     process.env.MIGRATE_BATCH = "nonsense"; assert.strictEqual(Mg.migrateLimit(), 0);
   } finally { if (prev == null) delete process.env.MIGRATE_BATCH; else process.env.MIGRATE_BATCH = prev; }
   const fsx = require("fs"), path = require("path");
   const wf = fsx.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8");
-  assert.ok(wf.includes("MIGRATE_BATCH: ${{ vars.MIGRATE_BATCH || '0' }}") && /git add -A -- facts\//.test(wf));
+  assert.ok(wf.includes("MIGRATE_BATCH: ${{ vars.MIGRATE_BATCH }}") && !wf.includes("vars.MIGRATE_BATCH || '0'") && /git add -A -- facts\//.test(wf), "always on: no '0' fallback in the workflow");
   assert.ok(!require("./site.js").isGenerated("facts"), "facts live on main, not the site branch");
   const upd = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
   assert.ok(upd.indexOf("renderMigrated(pagesManifest") < upd.indexOf("finishFilmPages(filmPageFiles()"), "rendered before the end-of-build pass");
@@ -7012,6 +7014,81 @@ test("publish leaves main's build-only files off the website, and keeps what the
   for (const n of ["movie", "us", "search", "css", "sitemap.xml"]) assert.ok(S.isGenerated(n) && !S.isMainOnly(n), n);
   const src = require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8");
   assert.ok(src.indexOf('"rm", "-r", "--cached"') > src.indexOf('"read-tree", "HEAD"'), "removed from the publish index, not from main");
+});
+
+group("14 Oct 2026: the last held pages, migration always on, fixers only for frozen pages");
+const OLD_PAGE = (o = {}) => `<html><head><script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "Movie", name: "Toy Story 5", datePublished: "2026-06-19", inLanguage: "English", genre: "Animation / Family", director: { "@type": "Person", name: "Andrew Stanton" } })}</script></head><body>
+<div class="head"><img class="poster" src="https://image.tmdb.org/p.jpg"><div><h1>Toy Story 5 (2026)</h1>
+      <div class="meta">English · Animation / Family · 102 min · U</div>
+      <div class="rating">★ 7.4 <span style="color:var(--mute)">(${o.votes ?? 535} votes)</span></div>
+      <div class="verdict">▸ Worth a watch</div>
+      <div class="meta" style="margin-top:8px">Released 19 Jun 2026</div></div></div>
+<h2>Story</h2><p>When Bonnie receives a tablet, the toys face a new threat.</p>
+<h2>Good to know</h2><table><tr><td>Runtime</td><td>102 min</td></tr></table>
+<h2>Where to watch in India</h2><div><span class="pill">Theatrical run ended — OTT arrival pending</span></div>
+<footer></footer></body></html>`;
+test("older layout: runtime, certificate and status are read the way the page shows them", () => {
+  const F = require("./lib/facts.js");
+  const h = OLD_PAGE();
+  const it = F.extractFacts(h, "toy-story-5");
+  assert.strictEqual(it.runtime, 102);
+  assert.strictEqual(it.cert, "U", "certificate from the header line");
+  assert.strictEqual(F.pageState(h), "theatrical", "the status pill, with no markers");
+  const k = F.keyFacts(h);
+  assert.strictEqual(k.runtime, "102"); assert.strictEqual(k.cert, "U");
+  const headerOnly = h.replace(/<h2>Good to know<\/h2><table>[\s\S]*?<\/table>/, "");
+  assert.strictEqual(F.extractFacts(headerOnly, "toy-story-5").runtime, 102, "runtime only in the header still counts");
+  assert.strictEqual(F.keyFacts(headerOnly).runtime, "102", "so losing it would hold the page");
+  assert.ok(!F.extractFacts(h.replace(" · U</div>", "</div>"), "x").cert, "no certificate shape, no certificate");
+  const one = '<div class="fcsb-row"><div><b>Audience</b><small>★ 7.0 from 1 rating — counts from 50</small></div>';
+  assert.strictEqual(F.extractFacts(h.replace("<h2>Story", one + "<h2>Story").replace(/<div class="rating">[\s\S]*?<\/div>\n/, ""), "x").votes, 1, "'from 1 rating' (singular) still reads");
+});
+test("tryMigrate: an older-layout page moves with an honest date and a score by today's rule", () => {
+  const M = require("./lib/migrate.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-held-"));
+  try {
+    const file = path.join(root, "toy-story-5.html");
+    fsx.writeFileSync(file, OLD_PAGE());
+    const cfg = { code: "in", name: "India", region: "IN" };
+    const entry = { last: "2026-10-10", archivedOn: "2026-07-10", released: "2026-06-19" };
+    const r = M.tryMigrate(file, "toy-story-5", cfg, entry, { today: "2026-10-14", knownSlugs: new Set() });
+    assert.ok(r.ok, `held: ${r.diff}`);
+    assert.ok(r.item.fcScore && r.item.fcScore.verdict, "535 ratings: scored, not 'Not enough ratings'");
+    assert.ok(/Availability as of 10 Oct 2026 — /.test(r.html), "the manifest's date, never the render date");
+    assert.ok(!/Availability as of 14 Oct/.test(r.html));
+    assert.ok(/102 min|1h 42m/.test(r.html), "runtime kept");
+    fsx.writeFileSync(file, OLD_PAGE().replace(/ <span[^>]*>\(535 votes\)<\/span>/, ""));
+    const nocount = M.tryMigrate(file, "toy-story-5", cfg, entry, { today: "2026-10-14", knownSlugs: new Set() });
+    assert.ok(!nocount.ok && nocount.diff.includes("rating"), "a rating with no count behind it stays held, never 'not rated'");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("held pages are retried every build, new pages first; the cap is a default, not a switch", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "migrate.js"), "utf8");
+  assert.ok(/\.\.\.waiting\.filter\(\(s\) => !m\[s\]\.held\), \.\.\.waiting\.filter\(\(s\) => m\[s\]\.held\)/.test(src));
+  assert.ok(/delete m\[slug\]\.held/.test(src), "a released page loses its held mark");
+});
+test("end-of-build pass: wording fixers skip pages rendered from facts, still fix frozen ones", () => {
+  const S = require("./lib/stylesheets.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-finish-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie"));
+    const stale = '<html><head><title>X (2026) OTT Release Date: Expected Oct</title><script type="application/ld+json">{"@type":"Movie","datePublished":"2026-08-20"}</script></head><body><div class="verdict">▸ Just released — verdict soon</div><footer></footer></body></html>';
+    fsx.writeFileSync(path.join(root, "movie", "a.html"), stale);
+    fsx.writeFileSync(path.join(root, "movie", "b.html"), stale);
+    const r = S.finishFilmPages(["movie/a.html", "movie/b.html"], { root, fromFacts: (code, slug) => slug === "a" });
+    assert.strictEqual(r.fromFacts, 1);
+    const a = fsx.readFileSync(path.join(root, "movie", "a.html"), "utf8"), b = fsx.readFileSync(path.join(root, "movie", "b.html"), "utf8");
+    assert.ok(/Just released/.test(a), "a page from facts is the template's: left to it");
+    assert.ok(/Not enough ratings yet/.test(b), "a frozen page still gets the fix");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("a frozen verdict with no vote count under it is withdrawn; the rating stays", () => {
+  const A = require("./lib/archive.js");
+  const h = '<script type="application/ld+json">{"datePublished":"2026-05-21"}</script><div class="rating">★ 7.9</div>\n      <div class="verdict">▸ Must watch</div>';
+  const out = A.settleTimeWords(h, { code: "in" }, Date.parse("2026-10-14T00:00:00Z")).html;
+  assert.ok(out.includes("★ 7.9") && out.includes("▸ Not enough ratings yet") && !/Must watch/.test(out), out);
 });
 
 group("12 Oct 2026: site search");

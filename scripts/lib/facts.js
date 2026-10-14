@@ -26,6 +26,12 @@ function section(html, title) {
   const j = html.indexOf("<h2", i + 4);
   return html.slice(i, j < 0 ? undefined : j);
 }
+// The first meta line under the title: "Hindi · Action / Thriller · 141 min · U/A 16+".
+const headMeta = (html) => (/<h1>[\s\S]*?<\/h1>\s*<div class="meta">([^<]*)<\/div>/.exec(html) || [])[1] || "";
+// The certificate at the end of that line, when the page has no table row for it ("· U",
+// "· U/A 16+", "· R 18+"). Only a recognised certificate shape, never a genre or a runtime.
+const CERT_RE = /^(?:U|UA|U\/A(?: \d{1,2}\+)?|A|S|G|PG|PG-1[23]|M|MA ?15\+|R|R ?1[368]\+?|NC-?1[67]|TV-(?:Y7?|G|PG|14|MA)|FSK ?\d{1,2}|\d{1,2}\+?|P13|SPG|SU|ALL)$/;
+const certOf = (meta) => { const last = meta.split(" · ").pop().trim(); return meta.includes(" · ") && CERT_RE.test(last) ? last : ""; };
 const STATUS_PILL = /theatre|cinema|Theatrical run|Not out|arrival pending/i;
 
 function jsonLd(html) {
@@ -43,7 +49,8 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   const head = html.slice(Math.max(0, html.indexOf('<div class="head"')), scoreAt > 0 ? scoreAt : undefined);
   const star = /★ ([\d.]+)/.exec(head);
   const votesHead = /<span class="cvotes">(?:— only )?([\d,]+)(?: ratings)?<\/span>/.exec(head) || /\(([\d,]+) votes\)/.exec(head);
-  const audRow = /<b>Audience<\/b><small>★ ([\d.]+) from ([\d,]+) ratings/.exec(html);
+  // "ratings?": one vote reads "from 1 rating" since 14 Oct 2026.
+  const audRow = /<b>Audience<\/b><small>★ ([\d.]+) from ([\d,]+) ratings?\b/.exec(html);
   const story = /<h2>Story<\/h2><p>([\s\S]*?)<\/p>/.exec(html);
   const castPics = [...html.matchAll(/<div class="cast-card"><img src="([^"]*)" alt="[^"]*"[^>]*><div class="cast-name">([\s\S]*?)<\/div>(?:<div class="cast-role">([\s\S]*?)<\/div>)?<\/div>/g)]
     .map((m) => ({ name: text(m[2]), photo: dec(m[1]), ...(m[3] ? { character: text(m[3]) } : {}) }));
@@ -80,7 +87,10 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   const runtimeFromTable = (() => {
     const ep = /~?(\d+) min per episode/.exec(gtkRuntime); if (ep) return Number(ep[1]);
     const hm = /(\d+)h(?: (\d+)m)?/.exec(gtkRuntime); if (hm) return Number(hm[1]) * 60 + Number(hm[2] || 0);
-    const mm = /^(\d+)m/.exec(gtkRuntime); return mm ? Number(mm[1]) : null;
+    // "102 min": the older layout's form (175 pages held for it, Oct 2026).
+    const mm = /^(\d+) ?m(?:in)?\b/.exec(gtkRuntime); if (mm) return Number(mm[1]);
+    // Older pages: only the header line carries it ("Marathi · Comedy / Drama · 182 min").
+    const meta = /· (\d+) min\b/.exec(headMeta(html)); return meta ? Number(meta[1]) : null;
   })();
   const actorNames = [].concat(ld.actor || []).map((a) => a && a.name).filter(Boolean);
   const item = {
@@ -98,7 +108,8 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   };
   if (tmdbId) item.tmdbId = tmdbId;
   if (ld.numberOfSeasons) item.seasons = ld.numberOfSeasons;
-  if (cert || ld.contentRating) item.cert = (cert || ld.contentRating).trim();
+  const headCert = certOf(headMeta(html));
+  if (cert || ld.contentRating || headCert) item.cert = (cert || ld.contentRating || headCert).trim();
   const director = [].concat(ld.director || []).map((d) => d && d.name).filter(Boolean).join(", ");
   if (director) item.director = director;
   const poster = (/<img class="poster" src="([^"]+)"/.exec(html) || [])[1];
@@ -140,6 +151,10 @@ function pageState(html) {
   if (/<!--SW:due=/.test(html)) return "upcoming";
   if (cut >= 0) return "rent";
   if (/<!--SW:pending-->/.test(html)) return "theatrical";
+  // The older layout has no markers, only its status pill (260 pages held for it, Oct 2026).
+  const status = (wtw.match(/<span class="pill">([^<]+)<\/span>/g) || []).join(" ");
+  if (/In cinemas from|In cinemas today|Releases/.test(status)) return "upcoming";
+  if (/Theatrical run ended|In theatres|Opened in cinemas|arrival pending/.test(status)) return "theatrical";
   return "other";
 }
 
@@ -160,12 +175,14 @@ function keyFacts(html) {
     rentBuy: cut >= 0 ? pillSet(wtw.slice(cut)) : "",
     // "Too early" and "Not enough ratings" both mean "no score yet"; which one shows depends on
     // the film's age on the day the page is drawn.
-    verdict: ((/class="fcsb-(?:stamp fcsb-[a-z]+|mini-v)">([^<]+)</.exec(html) || [])[1] || "").replace(/^(Too early|Not enough ratings)$/, "no score yet"),
+    verdict: ((/class="fcsb-(?:stamp fcsb-[a-z]+|mini-v)">([^<]+)</.exec(html) || [])[1] || "").replace(/^(Too early|Not enough ratings|Not out yet)$/, "no score yet"),
     rating: (/★ ([\d.]+)/.exec(html.slice(Math.max(0, html.indexOf('<div class="head"')))) || [])[1] || "",
     trailer: (/youtube(?:-nocookie)?\.com\/(?:embed\/|watch\?v=)([A-Za-z0-9_-]{6,})/.exec(html) || [])[1] || "",
     digital: (/<!--SW:digital=(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1] || "",
     availability: availabilityText(html),
-    runtime: runtimeMinutes((/<td>Runtime<\/td><td>([^<]+)<\/td>/.exec(html) || [])[1] || ""),
+    cert: ((/<td>Watch with family\?<\/td><td>([^<·]+?)\s*·/.exec(html) || [])[1] || certOf(headMeta(html))).trim(),
+    // The table, else the header line: a runtime shown only in the header still counts.
+    runtime: runtimeMinutes((/<td>Runtime<\/td><td>([^<]+)<\/td>/.exec(html) || [])[1] || "") || runtimeMinutes((/· (\d+ min)\b/.exec(headMeta(html)) || [])[1] || ""),
   };
 }
 // "108 min", "1h 48m", "1h 48m — long" and "~23 min per episode" as minutes, so a format

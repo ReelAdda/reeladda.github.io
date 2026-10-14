@@ -1515,8 +1515,9 @@ async function main() {
         if (!e || !e.tmdbId) return { action: "unknown", days: null };
         return cinemaClaim(byKey.get(`${code}:${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`), starts);
       };
-      const f = finishFilmPages(filmPageFiles(), { fcdataClaim });
-      console.log(`Film pages finished: ${f.pages} checked, ${f.externalized} moved to shared styles, ${f.footerLinked} footers given the notice and Privacy · Copyright links, ${f.iconed} icon tags added, `
+      const fromFacts = (code, slug) => !!(pagesManifest[code] && pagesManifest[code][slug] && pagesManifest[code][slug].rendered);
+      const f = finishFilmPages(filmPageFiles(), { fcdataClaim, fromFacts });
+      console.log(`Film pages finished: ${f.pages} checked (${f.fromFacts} rendered from facts, ${f.pages - f.fromFacts} still frozen), ${f.externalized} moved to shared styles,${f.footerLinked} footers given the notice and Privacy · Copyright links, ${f.iconed} icon tags added, `
         + `${f.retitled.length - f.notYetFixed} titles given their country, ${f.notYetFixed} 'not streaming yet' titles corrected on pages that stream, ${f.timeWordsFixed} outdated release wordings settled, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, `
         + `${f.trailerFixed.length - f.trailerDropped} trailers given an uploadDate and ${f.trailerDropped} left out of the markup, ${f.dateSynced} dateModified/"Page updated" pairs reconciled, ${f.compacted} unscored pages moved to answer-first, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
       // A new title is a real change: let the sitemap say so (syncFilmLastmods would also see

@@ -503,6 +503,10 @@ function settleTimeWords(html, cfg = null, now = Date.now()) {
   // (the live builder needs 50), so the rating line goes and the verdict says so.
   out = out.replace(/<div class="rating">★ [\d.]+ <span[^>]*>\(([1-9]) votes?\)<\/span><\/div>(\s*)<div class="verdict">▸ (?:Must watch|Worth a watch|Skip[^<]*)<\/div>/,
     (m, n, gap) => `<div class="verdict">▸ Not enough ratings yet</div>`);
+  // ...or from a rating with no count at all ("★ 7.9 ▸ Must watch": Deool Band 2, Sing
+  // Geetham). The rating is TMDB's and stays; the verdict has nothing under it.
+  out = out.replace(/(<div class="rating">★ [\d.]+<\/div>\s*)<div class="verdict">▸ (?:Must watch|Worth a watch|Skip[^<]*)<\/div>/,
+    '$1<div class="verdict">▸ Not enough ratings yet</div>');
   // Old trailer markup doubled a leading "The": "Watch the The Odyssey trailer".
   out = out.replace(/"Watch the (The [^"]*?) trailer"/g, '"Watch the trailer for $1"');
   return { html: out, changed: out !== html };
