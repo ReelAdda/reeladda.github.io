@@ -1486,8 +1486,8 @@ async function main() {
     } catch (e) { stageFailed("votes", e); }
     // Frozen pages move to "facts rendered by the live template" (lib/migrate.js): pages
     // already moved are rendered from their facts (after every sweep above, whose changes are
-    // read back first); then up to MIGRATE_BATCH more per edition move, if their facts check
-    // passes. MIGRATE_BATCH unset or 0: nothing moves.
+    // read back first); then pages written this run, and any still held, move if their facts
+    // check passes (up to 500 per edition; MIGRATE_BATCH overrides, 0 stops it).
     try {
       const limit = migrateLimit();
       let moved = 0, rendered = 0, changed = 0;
