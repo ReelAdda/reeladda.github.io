@@ -123,7 +123,22 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "Daily release scan: $(date -u +%Y-%m-%d)"
-            git push
+            # Code pushed to main while the build ran (14 Oct 2026) made a plain push a
+            # non-fast-forward and failed the run. Rebase this data commit onto the new main
+            # and push again. Never force: a rebase that can't apply cleanly fails the run
+            # rather than overwrite someone's commit; the next run rebuilds the data anyway.
+            pushed=false
+            for attempt in 1 2 3; do
+              if git push origin HEAD:main; then pushed=true; break; fi
+              echo "Push rejected (attempt $attempt): rebasing onto the latest main"
+              git fetch --quiet origin main
+              if ! git rebase origin/main; then
+                git rebase --abort
+                echo "::error::main changed the same files during this build; this run's data was not saved. The next run will rebuild it."
+                exit 1
+              fi
+            done
+            if [ "$pushed" != true ]; then echo "::error::push still rejected after 3 attempts"; exit 1; fi
             echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
 

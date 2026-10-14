@@ -6495,6 +6495,10 @@ test("workflows: actions pinned to commits, the probe on Node 24, and a live che
   assert.ok(/node-version: "24"/.test(probe) && !/node-version: "20"/.test(probe), "Node 20 is end-of-life");
   assert.ok(/- name: Live site check[\s\S]*?run: node scripts\/livecheck\.js/.test(up));
   assert.ok(up.indexOf("Live site check") > up.indexOf("Build health check"), "it runs last");
+  // 14 Oct 2026: code pushed mid-build made the data push a non-fast-forward.
+  const commit = (/- name: Commit updated data[\s\S]*?(?=\n      - name:)/.exec(up) || [""])[0];
+  assert.ok(/git fetch --quiet origin main/.test(commit) && /git rebase origin\/main/.test(commit) && /git rebase --abort/.test(commit), "rejected push: rebase onto the new main and retry");
+  assert.ok(!/--force|-f\b/.test(commit.replace(/git add -f/g, "")), "never force-push main");
 });
 
 testAsync("livecheck: waits for the deploy, then fails loudly on a stylesheet that isn't live", async () => {
