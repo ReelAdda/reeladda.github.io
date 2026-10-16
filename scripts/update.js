@@ -1454,6 +1454,15 @@ async function main() {
     try { refreshDuePages(cfg, countryNameFor(cfg), pagesManifest); }
     catch (e) { stageFailed(`due pass [${cfg.code}]`, e); }
   }
+  // Data accuracy (scripts/accuracy.js): a sample of film pages compared with TMDB every run,
+  // measured before anything changes; frozen pages get TMDB's facts recorded, which the render
+  // from facts below applies (lib/truth.js). Results committed in accuracy-*.json(l).
+  try {
+    const { runAccuracyPass } = require("./accuracy.js");
+    const t = require("./lib/tmdb.js");
+    const a = await runAccuracyPass(pagesManifest, { per: Number(process.env.ACCURACY_PER_EDITION || 6), api: { tmdb: t.tmdb, pause: t.sleep } });
+    if (a.checked >= 50 && a.high / a.checked > 0.08) healthNote(`accuracy: ${a.high} high-severity disagreement(s) with TMDB in ${a.checked} sampled pages — see accuracy-latest.json`);
+  } catch (e) { stageFailed("accuracy", e); }
   // Wrong-market legacy pages (see repairLegacyPages). Before hreflang sync so rebuilt pages
   // rejoin their clusters in the same run.
   for (const cfg of builtCountries) {
@@ -1511,17 +1520,19 @@ async function main() {
     // check passes (up to 500 per edition; MIGRATE_BATCH overrides, 0 stops it).
     try {
       const limit = migrateLimit();
-      let moved = 0, rendered = 0, changed = 0;
+      let moved = 0, rendered = 0, changed = 0, corrected = 0; const correctedFields = {};
       const held = [];
       for (const cfg of builtCountries) {
         const r = renderMigrated(pagesManifest, cfg, { today: todayStr() });
-        rendered += r.pages; changed += r.factsChanged;
+        rendered += r.pages; changed += r.factsChanged; corrected += r.corrected || 0;
+        for (const [f, n] of Object.entries(r.fields || {})) correctedFields[f] = (correctedFields[f] || 0) + n;
         if (r.lost.length) healthNote(`migrate [${cfg.code}]: ${r.lost.length} rendered page(s) lost their facts and were left as they are — e.g. ${r.lost.slice(0, 3).join(", ")}`);
         const b = migrateBatch(pagesManifest, cfg, { limit, today: todayStr() });
         moved += b.migrated; held.push(...b.held);
       }
       const total = Object.values(pagesManifest).reduce((n, m) => n + Object.values(m || {}).filter((e) => e && e.rendered).length, 0);
       console.log(`Migration: ${rendered} pages rendered from facts (${changed} with new facts), ${moved} moved this run, ${held.length} held; ${total} rendered in all`);
+      if (corrected) console.log(`TMDB facts applied to ${corrected} frozen page(s): ${Object.entries(correctedFields).map(([f, n]) => `${f} ${n}`).join(", ")}`);
       if (held.length) healthNote(`migrate: ${held.length} page(s) held for review (their facts would change) — e.g. ${held.slice(0, 3).join("; ")}`);
     } catch (e) { stageFailed("migration", e); }
     // Film pages: styles into shared cached files, privacy link in every footer, browser icons,

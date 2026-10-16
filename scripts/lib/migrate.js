@@ -32,6 +32,7 @@ const { countryNameFor } = require("./rules.js");
 const { availabilityText, extractFacts, factsDiff, keyFacts, readFacts, writeFacts } = require("./facts.js");
 const { writeIfChanged } = require("./writeif.js");
 const { fcScore } = require("./fcscore.js");
+const { applyTruth } = require("./truth.js");
 
 const dirFor = (code) => (code === "in" ? "movie" : `${code}/movie`);
 
@@ -120,7 +121,7 @@ function migrateBatch(manifest, cfg, { limit = 0, today }) {
 // Every migrated page of one edition: facts read back (sweeps may have changed the page this
 // run), stored when they moved, page rendered from them.
 function renderMigrated(manifest, cfg, { today }) {
-  const res = { pages: 0, factsChanged: 0, written: 0, lost: [] };
+  const res = { pages: 0, factsChanged: 0, written: 0, lost: [], corrected: 0, fields: {} };
   const code = cfg.code;
   const m = manifest[code] || {};
   const facts = readFacts(code);
@@ -132,8 +133,21 @@ function renderMigrated(manifest, cfg, { today }) {
     if (!e || !e.rendered || !fs.existsSync(file)) { facts.delete(slug); dirty = true; continue; }
     res.pages++;
     const html = fs.readFileSync(file, "utf8");
-    const now = extractFacts(html, slug, { tmdbId: e.tmdbId });
+    let now = extractFacts(html, slug, { tmdbId: e.tmdbId });
     if (!now) { res.lost.push(`${code}/${slug}`); continue; }   // left as is; reported
+    let availability = availabilityText(html);
+    // What TMDB said at the last check of a frozen page (lib/truth.js): platforms that changed,
+    // rent/buy, a moved release date, a new title. Pages in this week's lists are rebuilt from
+    // fresh data anyway. A changed platform list is dated by the check that saw it.
+    if (e.archivedOn && e.truth) {
+      const t = applyTruth(now, e.truth);
+      if (t.changed.length) {
+        now = t.item;
+        res.corrected = (res.corrected || 0) + 1;
+        for (const f of t.changed) res.fields[f] = (res.fields[f] || 0) + 1;
+        if (t.changed.includes("providers") && e.truth.at) availability = fmtDateFull(e.truth.at, localeFor(code));
+      }
+    }
     let r = rec;
     if (JSON.stringify(now) !== JSON.stringify(rec.item)) {
       r = { slug, updated: today, item: now };
@@ -141,7 +155,7 @@ function renderMigrated(manifest, cfg, { today }) {
       res.factsChanged++;
       dirty = true;
     }
-    const out = renderFrozen(r.item, cfg, { asOf: r.updated, knownSlugs, availability: availabilityText(html) });
+    const out = renderFrozen(r.item, cfg, { asOf: r.updated, knownSlugs, availability });
     if (writeIfChanged(file, out)) res.written++;
   }
   if (dirty) writeFacts(code, facts);

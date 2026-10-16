@@ -25,6 +25,7 @@ const { digitalAnnounceText, digitalPassedBlock, OPEN_PILL_RE, settleReleasedCop
 const { canonProvider, countryNameFor, dedupeProviders, streamVocab } = require("./rules.js");
 const { healthNote, loadStateFile } = require("./runhealth.js");
 const { readHistory } = require("./history.js");
+const { tmdbTruth } = require("./truth.js");
 const { sleep, tmdb } = require("./tmdb.js");
 
 // ============================================================================
@@ -67,6 +68,25 @@ function sweepCandidates(entries, now = new Date(), max = SWEEP_MAX_CHECKS, elig
     // every eligible page gets its turn instead of the same newest pages every run.
     .sort((a, b) => String(a.swept || "").localeCompare(String(b.swept || "")) || a.ageWeeks - b.ageWeeks)
     .slice(0, max);
+}
+
+// Waiting pages released more than SWEEP_MAX_WEEKS ago were never checked again, so a late
+// arrival stayed "not streaming yet" for good (Romería, US: released Oct 2025, on Criterion
+// Channel per TMDB, Oct 2026 accuracy check; 162 such pages). They get a small share of each
+// run (whatever the recent ones leave, at least SWEEP_OLD_QUOTA), each at most every
+// SWEEP_OLD_EVERY_DAYS, least recently checked first.
+const SWEEP_OLD_QUOTA = 10;
+const SWEEP_OLD_EVERY_DAYS = 14;
+function oldSweepCandidates(entries, now = new Date(), max = SWEEP_OLD_QUOTA, eligible = () => true) {
+  const MS_WEEK = 7 * 86400000;
+  const cutoff = new Date(now.getTime() - SWEEP_OLD_EVERY_DAYS * 864e5).toISOString().slice(0, 10);
+  return entries
+    .filter((x) => x.archivedOn && x.tmdbId && x.released && x.kind !== "tv")
+    .filter((x) => (now.getTime() - new Date(x.released + "T00:00:00Z").getTime()) / MS_WEEK > SWEEP_MAX_WEEKS)
+    .filter((x) => !x.swept || x.swept <= cutoff)
+    .filter(eligible)
+    .sort((a, b) => String(a.swept || "").localeCompare(String(b.swept || "")))
+    .slice(0, Math.max(0, max));
 }
 
 // Frozen pending page -> "streaming from <date> on <platform>". Replaces the pending block's
@@ -377,9 +397,11 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
   for (const c of candidates) {
     try {
       const kind = c.kind === "tv" ? "tv" : "movie";
-      const d = await tmdb(`/${kind}/${c.tmdbId}/watch/providers`);
-      const region = d?.results?.[cfg.watchRegion] || {};
-      checks.push({ c,
+      // The film itself with its providers (and dates): still one call, and what it says about
+      // platforms, rent/buy, date and title is kept for the page (lib/truth.js).
+      const d = await tmdb(`/${kind}/${c.tmdbId}`, { append_to_response: kind === "tv" ? "watch/providers" : "watch/providers,release_dates" });
+      const region = d?.["watch/providers"]?.results?.[cfg.watchRegion] || {};
+      checks.push({ c, truth: tmdbTruth(d, kind, cfg, asOf),
         provs: dedupeProviders((region.flatrate || []).map((x) => x.provider_name)).slice(0, 4),
         rentBuy: dedupeProviders([...(region.rent || []), ...(region.buy || [])].map((x) => x.provider_name)).slice(0, 3) });
     } catch (e) { console.warn(`  departure ${c.slug}: ${e.message}`); }
@@ -392,9 +414,10 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
   }
   // Phase 2: apply.
   let confirmed = 0, stillThere = 0, pending = 0;
-  for (const { c, provs, rentBuy } of checks) {
+  for (const { c, provs, rentBuy, truth } of checks) {
     try {
       const live = m[c.slug].live || {};
+      if (truth && !outage) m[c.slug].truth = truth;
 
       if (provs.length) {
         // Still streaming. Record the check and refresh the provider list if it moved; the
@@ -674,10 +697,13 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
   const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
   if (!fs.existsSync(dir)) return;
   const entries = Object.entries(m).map(([slug, v]) => ({ slug, ...v }));
-  const candidates = sweepCandidates(entries, new Date(), SWEEP_MAX_CHECKS, (x) => {
+  const pendingPage = (x) => {
     try { return fs.readFileSync(`${dir}/${x.slug}.html`, "utf8").includes("<!--SW:pending-->"); }
     catch { return false; }
-  });
+  };
+  const recent = sweepCandidates(entries, new Date(), SWEEP_MAX_CHECKS - SWEEP_OLD_QUOTA, pendingPage);
+  const old = oldSweepCandidates(entries, new Date(), SWEEP_MAX_CHECKS - recent.length, pendingPage);
+  const candidates = [...recent, ...old];
   if (!candidates.length) return;
   let found = 0, announced = 0, dated = 0;
   // Earliest sighting per film in this country (probe and build), to narrow an arrival window.
@@ -689,6 +715,7 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
       // One call returns both answers: is it streaming, and if not, has a date been announced.
       const d = await tmdb(`/movie/${c.tmdbId}`, { append_to_response: "watch/providers,release_dates" });
       m[c.slug].swept = asOf;
+      m[c.slug].truth = tmdbTruth(d, "movie", cfg, asOf);   // date, title, rent/buy for the page (lib/truth.js)
       const provs = dedupeProviders((d?.["watch/providers"]?.results?.[cfg.watchRegion]?.flatrate || []).map((x) => x.provider_name)).slice(0, 4);
       if (!provs.length) {
         const dig = digitalReleaseFor(d, cfg.watchRegion);
@@ -792,6 +819,7 @@ module.exports = {
   settleDepartedCopy,
   syncAvailabilityStamps,
   sweepCandidates,
+  oldSweepCandidates,
   sweepStreamingArrivals,
   sweepStreamingDepartures,
 };

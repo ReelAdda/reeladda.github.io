@@ -7074,6 +7074,87 @@ test("the accuracy workflow is manual, read-only, restores the site first and pa
   for (const u of [...wf.matchAll(/uses:\s*([^\s#]+)/g)].map((m) => m[1])) assert.ok(/@[0-9a-f]{40}$/.test(u), `${u} is pinned to a commit`);
 });
 
+group("16 Oct 2026: TMDB's facts corrected automatically, accuracy measured every build");
+test("tmdbTruth reads an edition's facts the build's way; applyTruth corrects, never strips platforms", () => {
+  const T = require("./lib/truth.js");
+  const JP = require("./lib/core.js").COUNTRIES.find((c) => c.code === "jp");
+  const d = { title: "A Minecraft Movie", release_date: "2025-03-31",
+    release_dates: { results: [{ iso_3166_1: "JP", release_dates: [{ type: 1, release_date: "2025-03-01" }, { type: 3, release_date: "2025-04-25" }] }] },
+    "watch/providers": { results: { JP: { flatrate: [{ provider_name: "Amazon Prime Video" }, { provider_name: "Hulu" }], rent: [{ provider_name: "Apple TV" }] } } } };
+  const t = T.tmdbTruth(d, "movie", JP, "2026-10-16");
+  assert.strictEqual(t.released, "2025-04-25", "the edition's theatrical date, not the premiere");
+  assert.ok(t.providers.length === 2 && t.rentBuy.length === 1 && t.title === "A Minecraft Movie" && t.at === "2026-10-16");
+  const page = { title: "A Minecraft Movie", released: "2025-04-25", providers: ["U-NEXT"], platform: "U-NEXT", rentBuy: [] };
+  const r = T.applyTruth(page, t);
+  assert.deepStrictEqual(r.changed, ["providers", "rentBuy"]);
+  assert.strictEqual(r.item.platform, t.providers[0]);
+  const empty = T.applyTruth(page, { ...t, providers: [] });
+  assert.deepStrictEqual(empty.item.providers, ["U-NEXT"], "one empty answer can't strip a page; the departure sweep confirms twice");
+  assert.strictEqual(T.applyTruth({ ...page, released: "2026-12-24" }, { at: "x", released: "2027-03-12" }).item.released, "2027-03-12", "a postponed film moves (Shakti Shalini)");
+});
+test("a frozen page is rendered with TMDB's recorded facts; a page in this week's lists is left to the builder", () => {
+  const Mg = require("./lib/migrate.js"), Fa = require("./lib/facts.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-truth-")), cwd = process.cwd();
+  try {
+    process.chdir(root); fsx.mkdirSync("jp/movie", { recursive: true });
+    const JP = require("./lib/core.js").COUNTRIES.find((c) => c.code === "jp");
+    const item = { title: "A Minecraft Movie", slug: "a-minecraft-movie", kind: "movie", released: "2025-04-25", language: "English", providers: ["U-NEXT"], platform: "U-NEXT", rentBuy: [] };
+    for (const s of ["a-minecraft-movie", "current-film"]) fsx.writeFileSync(`jp/movie/${s}.html`, Mg.renderFrozen({ ...item, slug: s }, JP, { asOf: "2026-09-01", knownSlugs: new Set() }));
+    Fa.writeFacts("jp", new Map(["a-minecraft-movie", "current-film"].map((s) => [s, { slug: s, updated: "2026-09-01", item: Fa.extractFacts(fsx.readFileSync(`jp/movie/${s}.html`, "utf8"), s) }])));
+    const truth = { at: "2026-10-16", providers: ["Amazon Prime Video", "Hulu"], rentBuy: [], released: "2025-04-25" };
+    const man = { jp: { "a-minecraft-movie": { rendered: "2026-10-14", archivedOn: "2026-06-01", truth }, "current-film": { rendered: "2026-10-14", truth } } };
+    const r = Mg.renderMigrated(man, JP, { today: "2026-10-16" });
+    assert.strictEqual(r.corrected, 1); assert.deepStrictEqual(r.fields, { providers: 1 });
+    const fixed = fsx.readFileSync("jp/movie/a-minecraft-movie.html", "utf8");
+    assert.ok(/<span class="pill">Amazon Prime Video<\/span><span class="pill">Hulu<\/span>/.test(fixed) && !/>U-NEXT</.test(fixed), "platforms now TMDB's");
+    assert.ok(/Availability as of 16 Oct 2026/.test(fixed), "dated by the check that saw the change");
+    assert.ok(/>U-NEXT</.test(fsx.readFileSync("jp/movie/current-film.html", "utf8")), "not archived: untouched");
+  } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("waiting pages older than 30 weeks get a small share of the arrival sweep, each every 14 days", () => {
+  const Lc = require("./lib/lifecycle.js");
+  const now = new Date("2026-10-16T00:00:00Z");
+  const e = (slug, released, swept) => ({ slug, archivedOn: "x", tmdbId: 1, released, kind: "movie", ...(swept ? { swept } : {}) });
+  const entries = [e("romeria", "2025-10-06"), e("checked-last-week", "2025-01-01", "2026-10-09"), e("checked-a-month-ago", "2025-01-01", "2026-09-10"), e("recent", "2026-09-10")];
+  assert.deepStrictEqual(Lc.oldSweepCandidates(entries, now, 10).map((x) => x.slug), ["romeria", "checked-a-month-ago"]);
+  assert.strictEqual(Lc.oldSweepCandidates(entries, now, 1).length, 1, "budget respected");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "lifecycle.js"), "utf8");
+  assert.ok(/SWEEP_MAX_CHECKS - SWEEP_OLD_QUOTA/.test(src) && /oldSweepCandidates\(entries, new Date\(\), SWEEP_MAX_CHECKS - recent\.length/.test(src), "recent first; old ones get what's left, at least the quota");
+  assert.ok(/await tmdb\(`\/\$\{kind\}\/\$\{c\.tmdbId\}`, \{ append_to_response: kind === "tv" \? "watch\/providers" : "watch\/providers,release_dates" \}\)/.test(src), "departure recheck: still one call, now with dates and title");
+  assert.ok(/m\[c\.slug\]\.truth = tmdbTruth\(d, "movie", cfg, asOf\)/.test(src) && /if \(truth && !outage\) m\[c\.slug\]\.truth = truth;/.test(src), "both sweeps record what they saw; never during a provider outage");
+});
+testAsync("daily accuracy pass: measures first, records TMDB's facts for frozen pages, writes latest + history", async () => {
+  const A = require("./accuracy.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-accd-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie"));
+    const html = `<html><head><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Enna Vilai","inLanguage":"Tamil","datePublished":"2026-09-17"}</script></head><body><h1>Enna Vilai (2026)</h1><!--SW:pending--><p>x</p><!--/SW:pending--><h2>Where to watch in India</h2><div><span class="pill">Opened in cinemas 17 Sept — not streaming yet</span></div><footer></footer></body></html>`;
+    for (const s of ["frozen", "current"]) fsx.writeFileSync(path.join(root, `movie/${s}.html`), html);
+    const man = { in: { frozen: { tmdbId: 1, kind: "movie", rendered: "x", archivedOn: "2026-09-30" }, current: { tmdbId: 2, kind: "movie", rendered: "x" } } };
+    const api = { tmdb: async () => ACC_TMDB(), pause: async () => {} };
+    const s1 = await A.runAccuracyPass(man, { root, per: 5, api, now: new Date("2026-10-16T06:00:00Z"), log: () => {} });
+    assert.strictEqual(s1.checked, 2); assert.strictEqual(s1.pagesDisagreeing, 2); assert.strictEqual(s1.correctable, 2);
+    assert.ok(man.in.frozen.truth && man.in.frozen.truth.providers[0] === "Netflix" && !man.in.current.truth, "recorded for frozen pages only");
+    const latest = JSON.parse(fsx.readFileSync(path.join(root, "accuracy-latest.json"), "utf8"));
+    assert.ok(latest.rows.length && latest.byField.streaming === 2);
+    await A.runAccuracyPass(man, { root, per: 5, api, now: new Date("2026-10-17T06:00:00Z"), log: () => {} });
+    const hist = fsx.readFileSync(path.join(root, "accuracy-history.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l));
+    assert.deepStrictEqual(hist.map((h) => h.date), ["2026-10-16", "2026-10-17"], "one line per run");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("the daily build runs the accuracy pass before the render from facts and commits its results", () => {
+  const fsx = require("fs"), path = require("path");
+  const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
+  assert.ok(up.indexOf("runAccuracyPass(pagesManifest") > up.indexOf("refreshDuePages(cfg") && up.indexOf("runAccuracyPass(pagesManifest") < up.indexOf("renderMigrated(pagesManifest"));
+  const wf = fsx.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8");
+  assert.ok(/git add -A -- accuracy-latest\.json accuracy-history\.jsonl/.test(wf));
+  const S = require("./site.js");
+  assert.ok(S.isMainOnly("accuracy-latest.json") && S.isMainOnly("accuracy-history.jsonl"), "not published");
+  assert.ok(require("./accuracy.js").sameName("Lasja Fauzia Susatyo", "Lasja F. Susatyo") && !require("./accuracy.js").sameName("Ajay Devgn", "Ajay Kumar"));
+});
+
 group("16 Oct 2026: duplicate pages folded into one, without a 404");
 test("merges: the duplicate leaves the build, links follow the survivor, the old URL redirects", () => {
   const Mg = require("./lib/merges.js");

@@ -24,6 +24,15 @@ const SITE = "https://filmychill.com";
 const STATUS_PILL = /theatre|cinema|Theatrical|Not out|pending/i;
 const norm = (s) => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/&amp;/g, "&").replace(/[^a-z0-9]+/g, " ").trim();
 const days = (a, b) => Math.abs(Date.parse(a) - Date.parse(b)) / 864e5;
+// The same person written two ways: "Lasja F. Susatyo" and "Lasja Fauzia Susatyo" (same first and
+// last name, middle names agreeing on their initials).
+function sameName(a, b) {
+  const x = norm(a).split(" "), y = norm(b).split(" ");
+  if (x.join(" ") === y.join(" ")) return true;
+  if (x.length < 2 || y.length < 2 || x[0] !== y[0] || x[x.length - 1] !== y[y.length - 1]) return false;
+  const mx = x.slice(1, -1), my = y.slice(1, -1);
+  return mx.length === my.length && mx.every((t, i) => t[0] === my[i][0]);
+}
 
 // Pure: the sample. Per edition, up to `per` facts-rendered pages with a TMDB id: a third that
 // still say "not streaming yet" (the ones most likely to have gone stale), the rest spread
@@ -57,7 +66,7 @@ function expectedFromTmdb(d, kind, cfg) {
   for (const x of (local && local.release_dates) || []) if (x.release_date) dates.add(String(x.release_date).slice(0, 10));
   const crew = (d.credits && d.credits.crew) || [];
   const directors = kind === "tv" ? (d.created_by || []).map((x) => x.name) : crew.filter((x) => x.job === "Director").map((x) => x.name);
-  const cast = ((kind === "tv" ? d.aggregate_credits && d.aggregate_credits.cast : d.credits && d.credits.cast) || []).slice(0, 15).map((x) => x.name);
+  const cast = ((kind === "tv" ? d.aggregate_credits && d.aggregate_credits.cast : d.credits && d.credits.cast) || []).map((x) => x.name);
   const runtime = kind === "tv" ? ((d.episode_run_time || [])[0] || null) : (d.runtime || null);
   return {
     title: kind === "tv" ? d.name : d.title, original: kind === "tv" ? d.original_name : d.original_title,
@@ -82,9 +91,9 @@ function compare(item, exp) {
   if (item.released && exp.dates.length && !exp.dates.some((d) => days(d, item.released) <= 1)) add("release date", days(exp.dates.sort()[0], item.released) > 7 ? "high" : "medium", item.released, exp.dates.sort().join(" / "));
   if (item.language && exp.language && norm(item.language) !== norm(exp.language)) add("language", "high", item.language, exp.language);
   if (item.runtime && exp.runtime && Math.abs(item.runtime - exp.runtime) > 5) add("runtime", "medium", `${item.runtime} min`, `${exp.runtime} min`);
-  if (item.director && exp.directors.length && !item.director.split(", ").some((x) => exp.directors.some((y) => norm(y) === norm(x)))) add("director", "medium", item.director, exp.directors.join(", "));
+  if (item.director && exp.directors.length && !item.director.split(", ").some((x) => exp.directors.some((y) => sameName(x, y)))) add("director", "medium", item.director, exp.directors.join(", "));
   const lead = (item.cast || [])[0];
-  if (lead && exp.cast.length && !exp.cast.some((x) => norm(x) === norm(lead))) add("lead actor", "medium", lead, exp.cast.slice(0, 3).join(", "));
+  if (lead && exp.cast.length && !exp.cast.some((x) => sameName(x, lead))) add("lead actor", "medium", lead, exp.cast.slice(0, 3).join(", "));
   if (item.title && exp.title && norm(item.title) !== norm(exp.title) && norm(item.title) !== norm(exp.original)) add("title", "low", item.title, exp.title);
   const pageGenres = String(item.genre || "").split(" / ").filter(Boolean);
   if (pageGenres.length && exp.genres.length && !pageGenres.every((g) => exp.genres.some((x) => norm(x) === norm(g) || norm(x).includes(norm(g)) || norm(g).includes(norm(x))))) add("genres", "low", pageGenres.join(" / "), exp.genres.join(", "));
@@ -145,8 +154,51 @@ async function main({ root = ".", per = Number(process.env.ACCURACY_PER_EDITION 
   return { rows, checked, errors };
 }
 
+// The daily build's pass (scripts/update.js): a smaller sample each run (a different slice each
+// day), measured before anything is corrected; then, for frozen pages, TMDB's facts are recorded
+// (lib/truth.js) so the render from facts later in the same run corrects them. Results go to
+// accuracy-latest.json (this run's findings) and accuracy-history.jsonl (one line per run), both
+// committed, so the trend is in git without anyone copying a summary.
+const CORRECTABLE = new Set(["streaming", "platform", "rent/buy", "release date", "title"]);
+async function runAccuracyPass(manifest, { root = ".", per = 6, api, now = new Date(), log = console.log } = {}) {
+  const { tmdbTruth } = require("./lib/truth.js");
+  const today = now.toISOString().slice(0, 10);
+  const file = (code, slug) => path.join(root, code === "in" ? "movie" : `${code}/movie`, `${slug}.html`);
+  const exists = (code, slug) => fs.existsSync(file(code, slug));
+  const isPending = (code, slug) => { try { return fs.readFileSync(file(code, slug), "utf8").includes("<!--SW:pending-->"); } catch { return false; } };
+  const sample = samplePages(manifest, { per, exists, isPending, seed: Math.floor(now.getTime() / 864e5) * 13 });
+  const rows = [];
+  let checked = 0, errors = 0, recorded = 0;
+  for (const s of sample) {
+    const cfg = COUNTRIES.find((c) => c.code === s.code);
+    let d;
+    try {
+      d = await api.tmdb(`/${s.kind}/${s.tmdbId}`, { append_to_response: s.kind === "tv" ? "watch/providers,aggregate_credits" : "watch/providers,release_dates,credits" });
+      await api.pause(120);
+    } catch (e) { errors++; continue; }
+    const item = extractFacts(fs.readFileSync(file(s.code, s.slug), "utf8"), s.slug);
+    if (!item) continue;
+    checked++;
+    for (const r of compare(item, expectedFromTmdb(d, s.kind, cfg))) rows.push({ ...r, code: s.code, slug: s.slug });
+    const e = manifest[s.code] && manifest[s.code][s.slug];
+    if (e && e.archivedOn) { e.truth = tmdbTruth(d, s.kind, cfg, today); recorded++; }
+  }
+  const byField = {};
+  for (const r of rows) byField[r.field] = (byField[r.field] || 0) + 1;
+  const pages = new Set(rows.map((r) => `${r.code}/${r.slug}`));
+  const summary = { date: today, checked, errors, pagesDisagreeing: pages.size,
+    high: rows.filter((r) => r.severity === "high").length,
+    correctable: new Set(rows.filter((r) => CORRECTABLE.has(r.field)).map((r) => `${r.code}/${r.slug}`)).size,
+    byField };
+  fs.writeFileSync(path.join(root, "accuracy-latest.json"), JSON.stringify({ ...summary, rows }, null, 1) + "\n");
+  fs.appendFileSync(path.join(root, "accuracy-history.jsonl"), JSON.stringify(summary) + "\n");
+  if (process.env.GITHUB_STEP_SUMMARY) { try { fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, report(rows, { checked, errors, per, at: today }) + "\n"); } catch { /* nicety */ } }
+  log(`Accuracy: ${checked} pages compared with TMDB, ${pages.size} disagree (${summary.high} high); ${summary.correctable} correctable now, TMDB facts recorded for ${recorded} frozen page(s)`);
+  return summary;
+}
+
 if (require.main === module) {
   main().catch((e) => { console.error(`accuracy check failed: ${e.stack || e.message}`); process.exit(0); });
 }
 
-module.exports = { compare, expectedFromTmdb, main, report, samplePages };
+module.exports = { compare, expectedFromTmdb, main, report, runAccuracyPass, sameName, samplePages };
