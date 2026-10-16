@@ -38,7 +38,10 @@ function filmIndexFor(cfg) {
       genre: ld.genre || "",
       language: ld.inLanguage || "",
       released: (ld.datePublished || "").slice(0, 10),
-      poster: ld.image || "",
+      // JSON-LD `image` is a list since film pages added the backdrop: [w780 poster, w1280
+      // backdrop]. Taken whole, it printed "url1,url2" into card <img>s and every card loaded the
+      // 265 KB w780 poster (28,687 cards, 16 Oct 2026 audit). Cards want the poster at w342.
+      poster: String([].concat(ld.image || "")[0] || "").replace(/\/t\/p\/w\d+\//, "/t/p/w342/"),
       kind: ld["@type"] === "TVSeries" ? "tv" : "movie",
       // People, for "same actor / same director" neighbours (already in the page's JSON-LD).
       cast: personNames(ld.actor).slice(0, 8),

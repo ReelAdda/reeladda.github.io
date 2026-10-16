@@ -333,8 +333,9 @@ function fitFirst(options, max) {
 
 // Bumped when the cards' rules change: a closed month counts as final only when it was built
 // by the current rules (lib/hubs.js closedMonthFinal), so a fix reaches it once. v2, 14 Oct
-// 2026: release dates after the streaming start no longer shown as the release.
-const LISTING_VERSION = "<!--listing:2-->";
+// 2026: release dates after the streaming start no longer shown as the release. v3, 16 Oct
+// 2026: card posters one URL at w342 (they were "url1,url2", 132 month pages).
+const LISTING_VERSION = "<!--listing:3-->";
 function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null }) {
   // ~80 hubs, month archives and week pages ran 61–72 characters; see fitSiteTitle.
   title = fitSiteTitle(title);
@@ -399,7 +400,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
   .top { background:var(--indigo); padding:14px 16px; } .top a { color:var(--cream); text-decoration:none; font-weight:800; letter-spacing:1px; font-size:18px; }
-  .top a span { color:var(--marigold); }
+  .top a span { color:#FFC04D; } /* 4.95:1 on indigo; marigold is 4.3:1 */
   .wrap { max-width:680px; margin:0 auto; padding:20px 16px 40px; }
   h1 { font-size:24px; margin:0 0 4px; line-height:1.3; }
   .upd { color:var(--mute); font-size:13px; margin-bottom:6px; }
@@ -412,7 +413,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   .nop { width:92px; height:138px; border-radius:8px; background:var(--line); }
   .rt { display:flex; gap:8px; align-items:center; flex-wrap:wrap; } .rt h3 { font-size:16px; margin:2px 0; }
   .badge { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); background:var(--marigold); border-radius:5px; padding:3px 7px; font-weight:800; }
-  .badge.trend { background:#FF4E3A; color:#fff; }
+  .badge.trend { background:#D93A28; color:#fff; }
   .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
   .rm.tk { color:var(--indigo); font-weight:600; }
   .rm.hk { font-style:italic; }

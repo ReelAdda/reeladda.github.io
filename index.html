@@ -62,9 +62,9 @@
     --ink: #241D52;         /* deep indigo text */
     --indigo: #4038C7;      /* primary */
     --marigold: #FFAD1F;    /* festival accent */
-    --marigold-dk: #A66B00; /* readable accent on light */
-    --coral: #FF4B3E;       /* NEW badge / hot */
-    --mute: #837C9B;
+    --marigold-dk: #8A5900; /* readable accent on light: 5.6:1 on cream (was #A66B00, 4.2:1) */
+    --coral: #D93A28;       /* NEW badge / hot: 4.6:1 with white (was #FF4B3E, 3.3:1) */
+    --mute: #716A8C;        /* 4.8:1 on cream (was #837C9B, 3.7:1) */
     --line: #EFE6D6;
     --shadow: 0 4px 18px rgba(64,56,199,0.08);
   }
@@ -76,7 +76,7 @@
   header { text-align: center; padding: 46px 24px 8px; }
   .ic { width: 1em; height: 1em; vertical-align: -0.12em; }
   .ednote { margin: 18px auto 4px; max-width: 720px; padding: 12px 16px; border-left: 3px solid var(--marigold); background: rgba(255, 173, 31, 0.06); border-radius: 0 10px 10px 0; }
-  .ednote-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--marigold-dark, #BA7517); font-weight: 600; margin-bottom: 4px; }
+  .ednote-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--marigold-dark, #94590F); font-weight: 600; margin-bottom: 4px; }
   .ednote p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink, #1A1633); }
   .logo { font-family: 'Anton', sans-serif; font-size: clamp(42px, 8vw, 72px); letter-spacing: 2px; line-height: 1; color: var(--indigo); }
   .logo span { color: var(--marigold); -webkit-text-stroke: 1.5px var(--indigo); }
@@ -168,7 +168,7 @@
   .cb { min-width: 0; padding-top: 2px; }
   .cchips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
   .cchip { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #F1EFFC; color: var(--indigo); white-space: nowrap; }
-  .cchip.trend { background: #FFF0EE; color: #D23A2E; }
+  .cchip.trend { background: #FFF0EE; color: #B8301F; }
   .cchip.new { background: #FFF3DC; color: #8A5800; }
   .cchip.foryou { background: transparent; box-shadow: inset 0 0 0 1px var(--indigo); }
   .sline { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
@@ -184,7 +184,7 @@
     background: var(--coral); border-radius: 5px; padding: 3px 8px; font-weight: 800; }
   .fresh-badge { font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink);
     background: var(--marigold); border-radius: 5px; padding: 3px 8px; font-weight: 800; }
-  .fresh-badge.trend { background: #FF4E3A; color: #fff; }
+  .fresh-badge.trend { background: #D93A28; color: #fff; }
   .fresh-badge.foryou { background: transparent; border: 1.5px solid var(--indigo); color: var(--indigo); padding: 2px 7px; }
   .meta { color: var(--mute); font-size: 12.5px; margin-top: 4px; }
   .review { margin-top: 9px; font-size: 13.5px; line-height: 1.6; color: #4A4366; }

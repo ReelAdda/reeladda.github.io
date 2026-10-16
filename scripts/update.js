@@ -1406,9 +1406,11 @@ async function main() {
   const pagesManifest = loadPagesManifest();
   for (const cfg of builtCountries) {
     const d = dataByCode[cfg.code] || {};
-    // slug -> the few fields the streaming sweep needs after this page freezes.
+    // slug -> the few fields the streaming sweep needs after this page freezes. Pool items
+    // (language pools, ottExtra) get pages and count as current too; without them here their
+    // entries kept no id, title or date, and froze that way (100 pages, 16 Oct 2026 audit).
     const meta = {};
-    for (const it of [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || [])]) {
+    for (const it of [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || []), ...poolItems(d)]) {
       if (it && it.slug) meta[it.slug] = { tmdbId: it.tmdbId, released: it.released, language: it.language, kind: it.kind, title: it.title };
     }
     archiveDepartedPages(pagesManifest, cfg, allSlugSets[cfg.code] || new Set(), meta);

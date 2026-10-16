@@ -7024,6 +7024,103 @@ test("publish leaves main's build-only files off the website, and keeps what the
   assert.ok(src.indexOf('"rm", "-r", "--cached"') > src.indexOf('"read-tree", "HEAD"'), "removed from the publish index, not from main");
 });
 
+group("16 Oct 2026 audit: rechecks for every streaming page, ids, pre-release scores, card images, contrast");
+test("a streaming page born from the template joins the recheck queue from its own block date", () => {
+  const Lc = require("./lib/lifecycle.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-claim-")), cwd = process.cwd();
+  try {
+    process.chdir(root); fsx.mkdirSync("movie");
+    const page = (body) => `<html><head><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"X","datePublished":"2026-08-01"}</script></head><body><h2>Story</h2><p>x</p>${body}<footer></footer></body></html>`;
+    fsx.writeFileSync("movie/born.html", page('<!--SW:stream--><!--SW:live=2026-09-20--><h2>Where to watch in India</h2><div><span class="pill">Netflix</span></div><!--/SW:stream-->'));
+    fsx.writeFileSync("movie/waiting.html", page('<!--SW:pending--><h2>Where to watch in India</h2><div><span class="pill">In theatres</span></div><!--/SW:pending-->'));
+    const before = fsx.readFileSync("movie/born.html", "utf8");
+    const man = { in: { born: { archivedOn: "2026-09-25", tmdbId: 1 }, waiting: { archivedOn: "2026-09-25", tmdbId: 2 } } };
+    const log = console.log; console.log = () => {};
+    try { assert.strictEqual(Lc.backfillStreamClaims(man, { code: "in" }), 1); } finally { console.log = log; }
+    assert.deepStrictEqual(man.in.born.live, { since: "2026-09-20", providers: ["Netflix"], lastCheck: "2026-09-20", misses: 0 });
+    assert.ok(!man.in.waiting.live, "no platform, no claim");
+    assert.strictEqual(fsx.readFileSync("movie/born.html", "utf8"), before, "the page itself is not edited");
+  } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("an id is borrowed from another edition only when title, year and the exact poster all match", () => {
+  const Lc = require("./lib/lifecycle.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-borrow-")), cwd = process.cwd();
+  try {
+    process.chdir(root);
+    const page = (name, poster, year = "2026") => `<html><head><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"${name}","datePublished":"${year}-07-31"}</script></head><body><img class="poster" src="https://image.tmdb.org/t/p/w342/${poster}.jpg"><h1>${name} (${year})</h1></body></html>`;
+    for (const d of ["movie", "us/movie", "uk/movie", "de/movie"]) fsx.mkdirSync(d, { recursive: true });
+    fsx.writeFileSync("movie/spider.html", page("Spider-Man: Brand New Day", "P1"));
+    fsx.writeFileSync("us/movie/spider.html", page("Spider-Man: Brand New Day", "P1"));
+    const man = { in: { spider: { released: "2026-07-31" } }, us: { spider: { tmdbId: 969681, released: "2026-07-31", kind: "movie" } } };
+    const html = fsx.readFileSync("movie/spider.html", "utf8");
+    assert.deepStrictEqual(Lc.borrowTmdbId(man, "in", "spider", man.in.spider, html), { id: 969681, kind: "movie" });
+    // a different poster (another film of the same name, or a changed poster): left unmatched
+    fsx.writeFileSync("us/movie/spider.html", page("Spider-Man: Brand New Day", "P2"));
+    assert.strictEqual(Lc.borrowTmdbId(man, "in", "spider", man.in.spider, html), null);
+    // a different year: left unmatched
+    fsx.writeFileSync("us/movie/spider.html", page("Spider-Man: Brand New Day", "P1"));
+    man.us.spider.released = "2015-07-31";
+    assert.strictEqual(Lc.borrowTmdbId(man, "in", "spider", man.in.spider, html), null);
+    man.us.spider.released = "2026-07-31";
+    // two editions disagree on the id: ambiguous, left unmatched
+    fsx.writeFileSync("uk/movie/spider.html", page("Spider-Man: Brand New Day", "P1"));
+    man.uk = { spider: { tmdbId: 111, released: "2026-07-31", kind: "movie" } };
+    assert.strictEqual(Lc.borrowTmdbId(man, "in", "spider", man.in.spider, html), null);
+    // a different title under the same slug: left unmatched
+    delete man.uk;
+    fsx.writeFileSync("us/movie/spider.html", page("Spider Man Returns", "P1"));
+    assert.strictEqual(Lc.borrowTmdbId(man, "in", "spider", man.in.spider, html), null);
+  } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("pool items record their id, title and date in the manifest, like the weekly lists", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(/for \(const it of \[\.\.\.\(d\.theatres \|\| \[\]\), \.\.\.\(d\.ott \|\| \[\]\), \.\.\.\(d\.comingSoon \|\| \[\]\), \.\.\.poolItems\(d\)\]\)/.test(src));
+});
+test("a film that isn't out shows 'Not out yet' and why, never a score carried over from facts", () => {
+  const F = require("./lib/filmpage.js"), Fa = require("./lib/facts.js");
+  const day = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+  const item = { title: "The Uprising", slug: "the-uprising", kind: "movie", released: day(40), language: "English", platform: "Theatres", providers: [], rentBuy: [], rating: 8, votes: 116, fcScore: { verdict: "Worth a watch", reason: "Audiences like it.", audience: "Liked", critics: null, basis: "audience" } };
+  const html = F.buildFilmPage(item, day(0), new Set(), { code: "au", name: "Australia", region: "AU" }, null);
+  assert.ok(!/class="fcsb-stamp/.test(html) && !/Worth a watch/.test(html), "no score before release, in the panel or the FAQ");
+  assert.ok(html.includes('<span class="fcsb-mini-v">Not out yet</span> — 116 audience ratings so far, all from before its release. The score comes once people have watched it.'), "says why");
+  assert.strictEqual(Fa.extractFacts(html, "the-uprising").votes, 116, "the count still reads back");
+  assert.ok(!Fa.extractFacts(html, "the-uprising").fcScore, "and no score goes back into the facts");
+  const none = F.buildFilmPage({ ...item, votes: 0, rating: null }, day(0), new Set(), { code: "au", name: "Australia", region: "AU" }, null);
+  assert.ok(none.includes("Not out yet</span> — nobody has seen it yet. The score comes once people have watched it."));
+});
+test("card posters are one URL at w342, from the index and from facts written before the fix", () => {
+  const F = require("./lib/filmpage.js"), G = require("./lib/graph.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const both = "https://image.tmdb.org/t/p/w780/qHSg.jpg,https://image.tmdb.org/t/p/w1280/xzA3.jpg";
+  const html = F.buildFilmPage({ title: "1: Nenokkadine", slug: "one", kind: "movie", released: "2014-01-10", language: "Telugu", providers: ["Sun Nxt"], rentBuy: [], rating: 6.7, votes: 900,
+    similar: [{ title: "Srimanthudu", slug: "srimanthudu", poster: both, language: "Telugu", kind: "movie" }] }, "2026-10-16", new Set(["srimanthudu"]), { code: "in" }, null);
+  assert.ok(html.includes('<img src="https://image.tmdb.org/t/p/w342/qHSg.jpg" alt="Srimanthudu poster"'), "facts written before the fix are cleaned when drawn");
+  assert.ok(!html.includes("w1280/xzA3.jpg\" alt=\"Srimanthudu"));
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-idx-")), cwd = process.cwd();
+  try {
+    process.chdir(root); fsx.mkdirSync("movie");
+    fsx.writeFileSync("movie/srimanthudu.html", `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Srimanthudu","image":["https://image.tmdb.org/t/p/w780/qHSg.jpg","https://image.tmdb.org/t/p/w1280/xzA3.jpg"],"datePublished":"2015-08-07"}</script>`);
+    const idx = G.filmIndexFor({ code: "in" });
+    assert.strictEqual(idx.find((x) => x.slug === "srimanthudu").poster, "https://image.tmdb.org/t/p/w342/qHSg.jpg");
+  } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("text colours meet WCAG AA (4.5:1) on the backgrounds they sit on", () => {
+  const fsx = require("fs"), path = require("path");
+  const L = (h) => { const c = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4))); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const cr = (a, b) => { const x = L(a), y = L(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const home = fsx.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  const v = (name) => (new RegExp(`--${name}:\\s*(#[0-9A-Fa-f]{6})`).exec(home) || [])[1];
+  for (const [fg, bg, what] of [[v("mute"), "#FFF7EC", "muted text on cream"], [v("mute"), "#FFFFFF", "muted text on white"], [v("marigold-dk"), "#FFF7EC", "gold counts on cream"], ["#FFFFFF", v("coral"), "white on coral"], [v("coral"), "#FFFFFF", "coral text on white"]]) assert.ok(cr(fg, bg) >= 4.5, `${what}: ${fg} on ${bg} is ${cr(fg, bg).toFixed(2)}`);
+  for (const f of ["lib/pagekit.js", "lib/weekly.js", "lib/filmpage.js"]) {
+    const src = fsx.readFileSync(path.join(__dirname, f), "utf8");
+    assert.ok(/\.top a span \{ color:#FFC04D; \}/.test(src) && cr("#FFC04D", "#4038C7") >= 4.5, `${f}: logo on the indigo bar`);
+    assert.ok(!/#FF4E3A/.test(src), `${f}: trend badge`);
+  }
+  assert.ok(!/#837C9B/i.test(fsx.readFileSync(path.join(__dirname, "lib/embed.js"), "utf8")), "embed widget muted text");
+});
+
 group("14 Oct 2026: the last held pages, migration always on, fixers only for frozen pages");
 const OLD_PAGE = (o = {}) => `<html><head><script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "Movie", name: "Toy Story 5", datePublished: "2026-06-19", inLanguage: "English", genre: "Animation / Family", director: { "@type": "Person", name: "Andrew Stanton" } })}</script></head><body>
 <div class="head"><img class="poster" src="https://image.tmdb.org/p.jpg"><div><h1>Toy Story 5 (2026)</h1>

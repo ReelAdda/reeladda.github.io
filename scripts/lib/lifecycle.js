@@ -278,7 +278,17 @@ function backfillStreamClaims(manifest, cfg) {
     const p = `${dir}/${slug}.html`;
     let html;
     try { html = fs.readFileSync(p, "utf8"); } catch { continue; }
-    if (html.includes("<!--SW:")) continue;               // already on a lifecycle track
+    if (html.includes("<!--SW:")) {
+      // Born streaming from the live template (or rendered from facts): the marked block is
+      // already there, but no claim was ever opened, so the departure sweep never rechecked it
+      // (825 pages, 16 Oct 2026 audit). Open the claim from the block's own date; no page edit.
+      const mk = /<!--SW:stream--><!--SW:live=(\d{4}-\d{2}-\d{2})-->/.exec(html);
+      const provs = mk ? (frozenFilmFacts(html) || { item: { providers: [] } }).item.providers : [];
+      if (!mk || !provs.length) continue;
+      e.live = { since: mk[1], providers: provs, lastCheck: mk[1], misses: 0 };
+      n++;
+      continue;
+    }
     const facts = frozenFilmFacts(html);
     const providers = facts ? facts.item.providers : [];
     if (!providers.length) continue;                     // no claim to check
@@ -294,7 +304,7 @@ function backfillStreamClaims(manifest, cfg) {
     e.live = { since, providers, lastCheck: since, misses: 0 };
     n++;
   }
-  if (n) console.log(`  stream claims [${code}]: ${n} born-streaming page(s) joined the recheck queue`);
+  if (n) console.log(`  stream claims [${code}]: ${n} streaming page(s) joined the recheck queue`);
   return n;
 }
 
@@ -563,7 +573,7 @@ async function recoverTmdbIds(cfg, manifest, { budget = ID_RECOVERY_BUDGET, api 
   const code = cfg.code;
   const dir = code === "in" ? "movie" : `${code}/movie`;
   const m = manifest[code] || {};
-  let recovered = 0, filled = 0, tried = 0;
+  let recovered = 0, filled = 0, tried = 0, borrowed = 0;
   // Newest releases first: those are the pages still inside the arrival window, where a
   // recovered id pays off the same run (Hi!, 28 Aug, before a 2019 film nobody is waiting on).
   const order = Object.entries(m).sort((a, b) =>
@@ -579,6 +589,11 @@ async function recoverTmdbIds(cfg, manifest, { budget = ID_RECOVERY_BUDGET, api 
       if (!e.lang && it.language) e.lang = it.language;
       if (!e.kind && it.kind) e.kind = it.kind;
       if (!e.title && it.title) e.title = it.title;
+    }
+    // The same film already identified in another edition: no search needed (and none spent).
+    if (!e.tmdbId) {
+      const b = borrowTmdbId(manifest, code, slug, e, html, facts);
+      if (b) { e.tmdbId = b.id; e.kind = b.kind; delete e.noMatch; delete e.idLookup; borrowed++; continue; }
     }
     if (e.tmdbId || (e.noMatch || 0) >= 2 || tried >= budget) continue;
     const title = (facts && facts.item.title) || "";
@@ -600,8 +615,38 @@ async function recoverTmdbIds(cfg, manifest, { budget = ID_RECOVERY_BUDGET, api 
     if (hit) { e.tmdbId = hit.id; e.kind = kind; recovered++; }
     else e.noMatch = (e.noMatch || 0) + 1;
   }
-  if (recovered || filled) console.log(`  id recovery [${code}]: ${recovered} TMDB id(s) recovered from ${tried} search(es), ${filled} release date(s) filled from the page`);
-  return recovered;
+  if (recovered || filled || borrowed) console.log(`  id recovery [${code}]: ${recovered} TMDB id(s) recovered from ${tried} search(es), ${borrowed} taken from the same film in another edition, ${filled} release date(s) filled from the page`);
+  return recovered + borrowed;
+}
+
+// The id from another edition's page for the same film, accepted only when everything that
+// identifies a film agrees: same slug, same release year, same title, and this page shows that
+// page's exact poster file (the identity rule of the search above and of scoresweep's
+// resolveTmdbId, checked against a page instead of search results). Same-name films are common
+// (remakes, dubs, five "Drishyam"s), so anything less, or two candidate ids, is left unmatched.
+// Oct 2026 audit: ca/spider-man-brand-new-day had no id while 8 editions had 969681.
+const TMDB_IMG_RE = /image\.tmdb\.org\/t\/p\/w\d+(\/[A-Za-z0-9_-]+\.(?:jpg|png))/g;
+const normTitle = (t) => String(t || "").toLowerCase().replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/[^a-z0-9]+/g, " ").trim();
+function borrowTmdbId(manifest, code, slug, e, html, facts = null) {
+  if (!facts) facts = frozenFilmFacts(html);
+  const mine = new Set([...String(html).matchAll(TMDB_IMG_RE)].map((x) => x[1]));
+  const title = normTitle((facts && facts.item && facts.item.title) || e.title);
+  const year = String(e.released || "").slice(0, 4);
+  if (!mine.size || !title || !/^\d{4}$/.test(year)) return null;
+  const ids = new Map();
+  for (const [c2, m2] of Object.entries(manifest || {})) {
+    if (c2 === code || !m2) continue;
+    const d = m2[slug];
+    if (!d || !d.tmdbId || String(d.released || "").slice(0, 4) !== year) continue;
+    let dh;
+    try { dh = fs.readFileSync(`${c2 === "in" ? "movie" : `${c2}/movie`}/${slug}.html`, "utf8"); } catch { continue; }
+    const df = frozenFilmFacts(dh);
+    if (normTitle((df && df.item.title) || d.title) !== title) continue;
+    const poster = (/<img class="poster" src="https:\/\/image\.tmdb\.org\/t\/p\/w\d+(\/[^"]+)"/.exec(dh) || [])[1];
+    if (!poster || !mine.has(poster)) continue;
+    ids.set(`${d.kind === "tv" ? "tv" : "movie"}:${d.tmdbId}`, { id: d.tmdbId, kind: d.kind === "tv" ? "tv" : "movie" });
+  }
+  return ids.size === 1 ? [...ids.values()][0] : null;
 }
 
 async function sweepStreamingArrivals(manifest, cfg, asOf) {
@@ -713,6 +758,7 @@ module.exports = {
   patchDigitalIfPassed,
   patchDueIfPassed,
   recoverTmdbIds,
+  borrowTmdbId,
   refreshDuePages,
   restampAvailability,
   stampPendingCheck,

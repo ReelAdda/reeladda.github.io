@@ -72,10 +72,10 @@ function buildEmbedPage(data, cfg, updatedHuman) {
   .fcw-row:first-of-type { border-top: none; }
   .fcw-row:hover { background: #fff; }
   .fcw-t { display: block; font-size: 14px; font-weight: 600; color: #4038C7; }
-  .fcw-m { display: block; font-size: 12px; color: #837C9B; margin-top: 1px; }
+  .fcw-m { display: block; font-size: 12px; color: #716A8C; margin-top: 1px; }
   .fcw-s { float: right; margin-top: -30px; font-size: 13px; font-weight: 700; color: #FFAD1F; }
   .fcw-f { display: block; padding: 9px 14px; text-align: center; font-size: 11px;
-           text-decoration: none; color: #837C9B; border-top: 1px solid #EADFCE; background: #fff; }
+           text-decoration: none; color: #716A8C; border-top: 1px solid #EADFCE; background: #fff; }
   .fcw-f b { color: #4038C7; }
 </style></head><body>
 <div class="fcw">
@@ -102,7 +102,7 @@ ${ICON_LINKS}
   h1 { font-size: 26px; } code, pre { background: #fff; border: 1px solid #EADFCE; border-radius: 8px; }
   pre { padding: 14px; overflow-x: auto; font-size: 13px; margin: 16px 0; }
   .prev { margin: 22px 0; }
-  a { color: #4038C7; } footer { margin-top: 34px; border-top: 1px solid #EADFCE; padding-top: 16px; font-size: 13px; color: #837C9B; }
+  a { color: #4038C7; } footer { margin-top: 34px; border-top: 1px solid #EADFCE; padding-top: 16px; font-size: 13px; color: #716A8C; }
 </style></head><body>
   <h1>Put this week's OTT picks on your site</h1>
   <p>A compact, self-updating widget showing what's new on streaming in India each week. Paste
@@ -111,7 +111,7 @@ ${ICON_LINKS}
   <pre>${e('<iframe src="https://filmychill.com/embed/week/" width="340" height="420" style="border:0;max-width:100%" loading="lazy" title="New on OTT this week — FilmyChill"></iframe>')}</pre>
   <h2>Preview</h2>
   <div class="prev">${e('<iframe src="/embed/week/" width="340" height="420" style="border:0" loading="lazy"></iframe>').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')}</div>
-  <p style="font-size:14px;color:#837C9B;">Other countries: swap <code>/embed/week/</code> for
+  <p style="font-size:14px;color:#716A8C;">Other countries: swap <code>/embed/week/</code> for
   <code>/us/embed/week/</code>, <code>/uk/embed/week/</code>, and so on.</p>
   <footer><a href="/">← FilmyChill</a></footer>
 </body></html>`;

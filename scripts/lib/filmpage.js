@@ -5,7 +5,7 @@
 "use strict";
 
 const { writeIfChanged } = require("./writeif.js");
-const { earlyReadLabel, isRecent, noScoreText, scoreNeed } = require("./fcscore.js");
+const { earlyReadLabel, isRecent, noScoreText, notOutYet, scoreNeed } = require("./fcscore.js");
 const { VOTE_CONNECT, VOTE_CSS, voteWidgetHtml } = require("./vote.js");
 const { meterLevel, meterSvg } = require("./meter.js");
 const fs = require("fs");
@@ -570,9 +570,9 @@ const FCSB_CSS = [
 
 // The score line for a page with no score yet. `label` and `audience` come from the item on a
 // live render, or from the page's own card on a frozen one (see compactEarlyScore).
-function compactScoreHtml(label, audience) {
+function compactScoreHtml(label, audience, tail = ", no critics' verdict yet.") {
   const e = escHtml;
-  return `<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">FilmyChill score</span> <span class="fcsb-mini-v">${e(label)}</span> — ${e(audience)}, no critics' verdict yet. <a href="/about/#score">How scoring works</a></p></section>`;
+  return `<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">FilmyChill score</span> <span class="fcsb-mini-v">${e(label)}</span> — ${e(audience)}${tail} <a href="/about/#score">How scoring works</a></p></section>`;
 }
 function audiencePhrase(votes, recent) {
   const n = Number(votes || 0);
@@ -607,11 +607,15 @@ function orderAnswer(html) {
 
 // "If you liked this" — exported so the related-films refresh (lib/relrefresh.js) writes the
 // exact same markup into pages that are never rebuilt.
+// A card poster: one URL at w342. Pages and facts written before the fix carry "url1,url2"
+// (see filmIndexFor in lib/graph.js), and cards are 2:3 thumbnails, not 780px posters.
+const cardPoster = (src) => String(src || "").split(",")[0].trim().replace(/(image\.tmdb\.org\/t\/p\/)w\d+\//, "$1w342/");
 function simGridHtml(similar, code, linkable = () => true) {
   const e = escHtml;
   return similar.length ? `<h2>If you liked this</h2><div class="simgrid">${similar.map((s) => {
     const exists = linkable(s);
-    const inner = `${s.poster ? `<img src="${e(s.poster)}" alt="${e(s.title)} poster" loading="lazy">` : ""}<div class="st">${e(s.title)}</div><div class="sm">${[s.language, s.kind === "tv" ? "Series" : "Film"].filter(Boolean).map(e).join(" · ")}</div>`;
+    const poster = cardPoster(s.poster);
+    const inner = `${poster ? `<img src="${e(poster)}" alt="${e(s.title)} poster" loading="lazy">` : ""}<div class="st">${e(s.title)}</div><div class="sm">${[s.language, s.kind === "tv" ? "Series" : "Film"].filter(Boolean).map(e).join(" · ")}</div>`;
     return exists
       ? `<a class="simcard" href="${e(filmPagePath(code, s.slug))}">${inner}</a>`
       : `<div class="simcard" style="cursor:default">${inner}</div>`;
@@ -649,6 +653,15 @@ function fcScoreSection(item) {
     // FilmyChill Score (lib/fcscore.js): the site's own verdict, audiences + critics. It
     // replaces the header's audience-only verdict pill; the audience rating itself stays in
     // the header and again in the breakdown, labelled as the audience's.
+    // Not out yet: no score, whatever the facts carried over from an older page (7 pages showed
+    // "Worth a watch" ahead of release, 16 Oct 2026 audit), and the line says why. The vote count
+    // stays in the "N audience ratings so far" form, which lib/facts.js reads back.
+    if (notOutYet(item)) {
+      const n = Number(item.votes || 0);
+      return compactScoreHtml(none.label, n > 0
+        ? `${n.toLocaleString("en-IN")} audience rating${n === 1 ? "" : "s"} so far, all from before its release`
+        : "nobody has seen it yet", ". The score comes once people have watched it.");
+    }
     const s = item.fcScore || null;
     // No score yet: one line instead of a card of empty rows (832 pages led with four
     // "not enough ratings" blocks before the answer, Oct 2026).
@@ -684,6 +697,9 @@ function fcdataWindowPhrase(days) {
 }
 
 function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
+  // No score before release, wherever it came from: facts read back from an older page carry
+  // the score it showed, and the FAQ, share-card text and panel would all repeat it.
+  if (item && item.fcScore && notOutYet(item)) item = { ...item, fcScore: null };
   const e = escHtml;
   const code = (cfg && cfg.code) || "in";
   const country = countryNameFor(cfg); // "the US", not the config's "United States" — reads right in titles and prose
@@ -858,7 +874,7 @@ ${(() => {
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
   .top { background:var(--indigo); padding:14px 16px; } .top a { color:var(--cream); text-decoration:none; font-weight:800; letter-spacing:1px; font-size:18px; }
-  .top a span { color:var(--marigold); }
+  .top a span { color:#FFC04D; } /* 4.95:1 on indigo; marigold is 4.3:1 */
   .wrap { max-width:680px; margin:0 auto; padding:20px 16px 40px; }
   .head { display:grid; grid-template-columns:140px 1fr; gap:16px; }
   .poster { width:140px; height:auto; aspect-ratio:2/3; object-fit:cover; border-radius:12px; display:block; }
