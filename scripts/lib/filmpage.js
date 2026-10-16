@@ -83,17 +83,47 @@ function poolItems(data) {
   });
 }
 
-function assignSlugs(data) {
+// `existing` (optional): "kind:tmdbId" -> { slugs: Set, preferred } for films that already have
+// a page in some edition (existingSlugsById). A film TMDB renames keeps its address: "Drishyam
+// 3" became "Drishyam: The Conclusion" and the build started a second page beside the first
+// (32 such duplicate groups, Oct 2026 audit). The current title's slug wins only if a page
+// already uses it; otherwise the address most editions use, so hreflang clusters stay whole.
+function assignSlugs(data, existing = null) {
   const used = new Map(); // slug -> tmdbId
   for (const list of [data.theatres, data.ott, data.comingSoon, poolItems(data)]) {
     for (const item of list || []) {
-      let slug = slugify(item.title) || `film-${item.tmdbId || ""}`;
+      const fresh = slugify(item.title) || `film-${item.tmdbId || ""}`;
       const year = (item.released || "").slice(0, 4);
+      // Same id AND same release year: a wrong id on an old entry must never send a new film
+      // onto another film's page.
+      const known = existing && item.tmdbId != null && year ? existing.get(`${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}:${year}`) : null;
+      let slug = known && !known.slugs.has(fresh) ? known.preferred : fresh;
       if (used.has(slug) && used.get(slug) !== item.tmdbId && year) slug = `${slug}-${year}`;
       used.set(slug, item.tmdbId);
       item.slug = slug;
     }
   }
+}
+
+// "kind:tmdbId:year" -> { slugs, preferred } over every edition's manifest, for pages on disk.
+// `preferred` is the slug the most editions use (ties: alphabetical, so it is stable).
+function existingSlugsById(manifest, { exists = () => true } = {}) {
+  const counts = new Map();
+  for (const [code, m] of Object.entries(manifest || {})) {
+    for (const [slug, e] of Object.entries(m || {})) {
+      const year = String((e && e.released) || "").slice(0, 4);
+      if (!e || e.tmdbId == null || !/^\d{4}$/.test(year) || !exists(code, slug)) continue;
+      const k = `${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}:${year}`;
+      if (!counts.has(k)) counts.set(k, new Map());
+      counts.get(k).set(slug, (counts.get(k).get(slug) || 0) + 1);
+    }
+  }
+  const out = new Map();
+  for (const [k, c] of counts) {
+    const preferred = [...c.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0][0];
+    out.set(k, { slugs: new Set(c.keys()), preferred });
+  }
+  return out;
 }
 
 
@@ -1196,6 +1226,7 @@ module.exports = {
   orderAnswer,
   fcdataWindowPhrase,
   assignSlugs,
+  existingSlugsById,
   buildFilmPage,
   filmHubLinks,
   filmMetaDescription,

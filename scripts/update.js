@@ -178,6 +178,7 @@ const {
 const { buildFaqs, buildGoodToKnow, buildVerdictProse } = require("./lib/filmcopy.js");
 const {
   assignSlugs,
+  existingSlugsById,
   buildFilmPage,
   filmHubLinks,
   filmMetaDescription,
@@ -321,6 +322,7 @@ const { syncVotes } = require("./lib/votes.js");
 const { runAudit } = require("./lib/audit.js");
 const { WRITE_STATS } = require("./lib/writeif.js");
 const { migrateBatch, migrateLimit, renderMigrated } = require("./lib/migrate.js");
+const { activeMerges, dropMergedEntries, loadMerges, removeMergedPages, retargetMergedLinks, writeMergeStubs } = require("./lib/merges.js");
 const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePageFiles } = require("./lib/stylesheets.js");
 const { addSearchToPages, writeSearchIndexes } = require("./lib/search.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
@@ -1287,13 +1289,29 @@ async function main() {
   try { pageTemplate = fs.readFileSync("index.html", "utf8"); }
   catch { pageTemplate = null; console.warn("index.html template not found — page render skipped"); }
 
+  // Duplicate pages folded into one (lib/merges.js): off the disk before anything lists film
+  // pages, links retargeted before the dead-link repair, a redirect page written last.
+  let merges = [];
+  try {
+    merges = activeMerges(loadMerges());
+    const gone = removeMergedPages(merges);
+    if (merges.length) console.log(`Merges: ${merges.length} duplicate page(s) folded into their surviving page (${gone} removed before the build)`);
+  } catch (e) { stageFailed("merges", e); merges = []; }
+
   const builtCountries = [];
   const dataByCode = {};
   const allSlugSets = {};
+  // A film TMDB renames keeps the address it already has (lib/filmpage.js assignSlugs).
+  let slugsById = null;
+  try {
+    slugsById = existingSlugsById(loadPagesManifest(), {
+      exists: (code, slug) => fs.existsSync(`${code === "in" ? "movie" : `${code}/movie`}/${slug}.html`),
+    });
+  } catch (e) { stageFailed("existing slugs", e); }
   // Pass 1: build data for every country.
   for (const cfg of COUNTRIES) {
     const data = await buildCountry(cfg);
-    assignSlugs(data);
+    assignSlugs(data, slugsById);
     dataByCode[cfg.code] = data;
     const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || []), ...poolItems(data)];
     allSlugSets[cfg.code] = new Set(all.map((x) => x.slug).filter(Boolean));
@@ -1404,6 +1422,7 @@ async function main() {
   // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
   // and the manifest records real lastmod dates for the sitemap (see module-scope docs).
   const pagesManifest = loadPagesManifest();
+  dropMergedEntries(pagesManifest, merges);
   for (const cfg of builtCountries) {
     const d = dataByCode[cfg.code] || {};
     // slug -> the few fields the streaming sweep needs after this page freezes. Pool items
@@ -1560,6 +1579,10 @@ async function main() {
   // Links on frozen pages to hubs and people pages this run (or an earlier one) removed
   // (lib/stylesheets.js). After the last page writer, so every target is in its final state.
   try {
+    const r = retargetMergedLinks([...filmPageFiles(), ...sitePageFiles()], merges);
+    if (r.links) console.log(`Merges: ${r.links} link(s) on ${r.pages} page(s) now point at the surviving page`);
+  } catch (e) { stageFailed("merge links", e); }
+  try {
     const d = repairDeadLinks([...filmPageFiles(), ...sitePageFiles()]);
     if (d.fixed.length) console.log(`Dead links: removed from ${d.fixed.length} of ${d.pages} pages (e.g. ${d.fixed.slice(0, 3).join(", ")})`);
   } catch (e) { stageFailed("dead-link repair", e); }
@@ -1601,6 +1624,11 @@ async function main() {
   try { sweepDeadHubLinks(COUNTRIES); } catch (e) { stageFailed(`dead hub links`, e); }
 
   writeMultiCountrySitemap(builtCountries, pagesManifest);
+  // After the sitemap, so a redirect page is never listed in it.
+  try {
+    const n = writeMergeStubs(merges);
+    if (n < merges.length) healthNote(`merges: ${merges.length - n} surviving page(s) went missing during the build; their old URL has no redirect this run`);
+  } catch (e) { stageFailed("merge stubs", e); }
   fs.writeFileSync(RUN_HEALTH_FILE, JSON.stringify(RUN_HEALTH, null, 1));
   console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.` +
     ` Health: ${RUN_HEALTH.issues.length} issue(s), ${RUN_HEALTH.notes.length} note(s).`);

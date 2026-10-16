@@ -7025,6 +7025,60 @@ test("publish leaves main's build-only files off the website, and keeps what the
   assert.ok(src.indexOf('"rm", "-r", "--cached"') > src.indexOf('"read-tree", "HEAD"'), "removed from the publish index, not from main");
 });
 
+group("16 Oct 2026: duplicate pages folded into one, without a 404");
+test("merges: the duplicate leaves the build, links follow the survivor, the old URL redirects", () => {
+  const Mg = require("./lib/merges.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-merge-"));
+  try {
+    for (const d of ["movie", "ae/movie", "ae/people/ajay"]) fsx.mkdirSync(path.join(root, d), { recursive: true });
+    const film = (name) => `<html><head><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"${name}"}</script></head><body><h1>${name} (2026)</h1></body></html>`;
+    fsx.writeFileSync(path.join(root, "movie/drishyam-the-conclusion.html"), film("Drishyam: The Conclusion"));
+    fsx.writeFileSync(path.join(root, "movie/drishyam-3.html"), film("Drishyam 3"));
+    fsx.writeFileSync(path.join(root, "ae/movie/khalifa-part-1.html"), film("Khalifa Part 1"));
+    fsx.writeFileSync(path.join(root, "merges.json"), JSON.stringify({ in: { "drishyam-3": "drishyam-the-conclusion" }, ae: { "khalifa-part-1": "khalifa-the-ruler" } }));
+    const active = Mg.activeMerges(Mg.loadMerges(root), { root });
+    assert.deepStrictEqual(active, [{ code: "in", dup: "drishyam-3", to: "drishyam-the-conclusion" }], "no surviving page, no merge: the duplicate stays");
+    assert.strictEqual(Mg.removeMergedPages(active, { root }), 1);
+    assert.ok(!fsx.existsSync(path.join(root, "movie/drishyam-3.html")) && fsx.existsSync(path.join(root, "ae/movie/khalifa-part-1.html")));
+    const man = { in: { "drishyam-3": { title: "Drishyam 3" }, other: {} } };
+    assert.strictEqual(Mg.dropMergedEntries(man, active), 1); assert.ok(!man.in["drishyam-3"] && man.in.other);
+    const person = path.join(root, "ae/people/ajay/index.html");
+    fsx.writeFileSync(person, '<link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/drishyam-3.html"/>\n<a href="/movie/drishyam-3.html">Drishyam 3</a> <a href="https://filmychill.com/movie/drishyam-3.html">x</a> <a href="/movie/drishyam-3-x.html">y</a>');
+    const r = Mg.retargetMergedLinks(["ae/people/ajay/index.html"], active, { root });
+    const after = fsx.readFileSync(person, "utf8");
+    assert.strictEqual(r.links, 2);
+    assert.ok(after.includes('<a href="/movie/drishyam-the-conclusion.html">') && after.includes('href="https://filmychill.com/movie/drishyam-the-conclusion.html">x'), after);
+    assert.ok(after.includes('hreflang="en-IN" href="https://filmychill.com/movie/drishyam-3.html"'), "hreflang is left to the cluster sync");
+    assert.ok(after.includes('href="/movie/drishyam-3-x.html"'), "only the exact URL");
+    assert.strictEqual(Mg.writeMergeStubs(active, { root }), 1);
+    const stub = fsx.readFileSync(path.join(root, "movie/drishyam-3.html"), "utf8");
+    assert.ok(stub.includes('<link rel="canonical" href="https://filmychill.com/movie/drishyam-the-conclusion.html">'));
+    assert.ok(stub.includes('<meta http-equiv="refresh" content="0; url=/movie/drishyam-the-conclusion.html">'));
+    assert.ok(/<h1>Drishyam: The Conclusion has moved<\/h1>/.test(stub) && !/noindex/.test(stub));
+    assert.ok(stub.length >= 1000, "the live check reads a film page as at least 1,000 bytes");
+    assert.ok(require("./site.js").isMainOnly("merges.json"), "merges.json stays on main");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("a film TMDB renames keeps its existing address, in every edition; a wrong id can't move a film", () => {
+  const F = require("./lib/filmpage.js");
+  const man = { in: { "drishyam-3": { tmdbId: 1269325, kind: "movie", released: "2026-10-02" } }, uk: { "drishyam-3": { tmdbId: 1269325, kind: "movie", released: "2026-10-02" } }, ae: { "other-film": { tmdbId: 999, kind: "movie", released: "2019-01-01" } } };
+  const ex = F.existingSlugsById(man);
+  const data = { theatres: [{ title: "Drishyam: The Conclusion", tmdbId: 1269325, kind: "movie", released: "2026-10-02" }, { title: "Brand New Film", tmdbId: 999, kind: "movie", released: "2026-05-01" }], ott: [], comingSoon: [] };
+  F.assignSlugs(data, ex);
+  assert.strictEqual(data.theatres[0].slug, "drishyam-3", "renamed: keeps the address");
+  assert.strictEqual(data.theatres[1].slug, "brand-new-film", "same id but another year: its own address");
+  const d2 = { theatres: [{ title: "Drishyam 3", tmdbId: 1269325, kind: "movie", released: "2026-10-02" }], ott: [], comingSoon: [] };
+  F.assignSlugs(d2, F.existingSlugsById({ in: { "drishyam-3": man.in["drishyam-3"], "drishyam-the-conclusion": { tmdbId: 1269325, kind: "movie", released: "2026-10-02" } } }));
+  assert.strictEqual(d2.theatres[0].slug, "drishyam-3", "a slug already in use for the film is kept as is");
+  const plain = { theatres: [{ title: "Drishyam: The Conclusion", tmdbId: 1269325, kind: "movie", released: "2026-10-02" }], ott: [], comingSoon: [] };
+  F.assignSlugs(plain);
+  assert.strictEqual(plain.theatres[0].slug, "drishyam-the-conclusion", "no manifest: the title's slug, as before");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(src.indexOf("removeMergedPages(merges)") < src.indexOf("existingSlugsById(loadPagesManifest()") && /assignSlugs\(data, slugsById\)/.test(src), "merges first, so a survivor is the address kept");
+  assert.ok(src.indexOf("retargetMergedLinks(") < src.indexOf("repairDeadLinks([") && src.indexOf("writeMergeStubs(merges)") > src.indexOf("writeMultiCountrySitemap(builtCountries"), "links before the dead-link repair, redirects after the sitemap");
+});
+
 group("16 Oct 2026: arrival dates we can stand behind, and when a waiting film was last checked");
 test("arrivalDate: a date only when a 'not streaming' check and a 'streaming' check are a day apart", () => {
   const Lc = require("./lib/lifecycle.js");

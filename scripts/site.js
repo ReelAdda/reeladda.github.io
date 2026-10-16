@@ -33,7 +33,7 @@ const isGenerated = (name) => GENERATED.some((re) => re.test(name));
 // manifest.json (the web-app manifest) and the verification files stay published.
 const MAIN_ONLY = [
   /^\.(github|gitignore|gitattributes|assetsignore)$/, /^(scripts|cloudflare|facts)$/,
-  /^(pages-manifest|catalog-manifest|page-lastmods|ott-seen|ott-watch|takes|votes-agg|votes-state)\.json$/,
+  /^(pages-manifest|catalog-manifest|page-lastmods|ott-seen|ott-watch|takes|votes-agg|votes-state|merges)\.json$/,
   /^ott-history\.jsonl$/, /^(firestore\.rules|wrangler\.jsonc|package\.json|package-lock\.json|MIGRATION-STEPS\.md)$/,
 ];
 const isMainOnly = (name) => MAIN_ONLY.some((re) => re.test(name));
