@@ -6633,6 +6633,62 @@ test("criticsSettled: five listed reviews settle the critics' side, release week
   assert.strictEqual(EDT.criticsSettled({ tone: "positive" }), false, "a lead sentence alone is not five reviews");
   assert.strictEqual(EDT.criticsSettled(null), false);
 });
+test("catalog critics sweep: films deduped across editions, most pages first, read ones skipped", () => {
+  const man = {
+    in: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { w: 6 } },
+          solo: { archivedOn: "2026-09-01", tmdbId: 22, kind: "movie", title: "Solo", released: "2020-01-01" },
+          read: { catalog: true, tmdbId: 33, imdb: "tt33", kind: "movie", released: "1990-01-01" },
+          noid: { catalog: true, tmdbId: 44, imdb: "", kind: "movie", released: "1980-01-01" },
+          weekly: { tmdbId: 55, kind: "movie", released: "1970-01-01" } },
+    us: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16" } },
+  };
+  const c = EDT.criticsSweepCandidates(man, { tt33: { checked: "2026-10-01" } }, 10);
+  assert.deepStrictEqual(c.map((f) => f.key), ["movie:11", "movie:22"], "already read, no IMDb id and weekly pages never take the budget");
+  assert.strictEqual(c[0].pages.length, 2, "one fetch serves every edition's page");
+  assert.strictEqual(EDT.criticsSweepCandidates(man, {}, 1).length, 1, "budget respected");
+});
+testAsync("catalog critics sweep: reads Wikipedia's reception, caches it and flags the pages for rescoring", async () => {
+  const man = {
+    in: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { v: "Worth a watch", w: 6 } },
+          quiet: { catalog: true, tmdbId: 22, kind: "movie", title: "Quiet", released: "2001-01-01", fcs: { w: 6 } },
+          noimdb: { catalog: true, tmdbId: 33, kind: "movie", title: "None", released: "2002-01-01", fcs: { w: 6 } } },
+    us: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { w: 6 } } },
+  };
+  const ids = { 11: "tt0172684", 22: "tt22", 33: null };
+  const api = { tmdb: async (p) => ({ imdb_id: ids[p.split("/")[2]] }), pause: async () => {} };
+  const wiki = {
+    article: async (imdb) => (imdb === "tt0172684" ? "Kuch Kuch Hota Hai" : imdb === "tt22" ? "Quiet (film)" : null),
+    extract: async (art) => (art === "Kuch Kuch Hota Hai"
+      ? { lead: "Kuch Kuch Hota Hai is a 1998 Indian Hindi-language romantic comedy-drama film.",
+          reception: "The film received widespread critical acclaim upon release. Critics praised the performances, the music and the direction, calling it a landmark of Hindi cinema." }
+      : { lead: "A 2001 film.", reception: null }),
+  };
+  const takes = {}; let saved = null;
+  const r = await EDT.sweepCatalogCritics(man, { api, wiki, takes, save: (t) => { saved = t; }, now: () => Date.parse("2026-10-16T00:00:00Z") });
+  assert.deepStrictEqual([r.checked, r.toned, r.pages, r.noImdb, r.left], [2, 1, 2, 1, 0]);
+  assert.strictEqual(takes.tt0172684.src, "wiki");
+  assert.strictEqual(EDT.entryCriticsTone(takes.tt0172684), "acclaim", "the score sweep now gets a critics' verdict for it");
+  assert.strictEqual(takes.tt0172684.cat, true);
+  assert.ok(takes.tt22 && !takes.tt22.take, "no reception is cached too, so it isn't fetched again every run");
+  assert.strictEqual(man.in.kkhh.fcs.w, 0, "pages flagged: the score sweep redoes them first");
+  assert.strictEqual(man.us.kkhh.fcs.w, 0);
+  assert.strictEqual(man.in.quiet.fcs.w, 6, "no verdict found: the page is left as it is");
+  assert.strictEqual(man.in.noimdb.imdb, "", "no IMDb id remembered, so TMDB isn't asked again");
+  assert.strictEqual(man.in.kkhh.imdb, "tt0172684");
+  assert.strictEqual(saved, takes);
+  const again = await EDT.sweepCatalogCritics(man, { api, wiki, takes, save: () => {} });
+  assert.strictEqual(again.checked, 0, "nothing re-read on the next run");
+});
+test("takes pruning keeps a back-catalogue critics' reading; an empty one ages out to be retried", () => {
+  const now = Date.parse("2026-10-16T00:00:00Z");
+  const t = EDT.pruneTakes({
+    cat: { cat: true, src: "wiki", a: { tone: "acclaim" }, checked: "2025-01-01" },
+    catEmpty: { cat: true, take: null, checked: "2025-01-01" },
+    weekly: { src: "wiki", a: { tone: "mixed" }, checked: "2025-01-01" },
+    fresh: { checked: "2026-10-01" },
+  }, now);
+  assert.deepStrictEqual(Object.keys(t).sort(), ["cat", "fresh"]);
+});
 test("the score's cache fallback keeps the release-week gate (War was scored from critics three days out)", () => {
   const e = { src: "wiki", a: { tone: "positive", ratings: { n: 1, median: 4 } } };
   assert.strictEqual(EDT.entryCriticsTone(e, { isFresh: true }), null, "first week, one review: held back");

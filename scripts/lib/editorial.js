@@ -155,9 +155,19 @@ function loadTakes() {
   if (TAKES) return TAKES;
   try { TAKES = JSON.parse(fs.readFileSync(TAKES_FILE, "utf8")); }
   catch { TAKES = {}; } // first ever run -> empty cache
-  const cutoff = new Date(Date.now() - TAKES_RETENTION_DAYS * 864e5).toISOString().slice(0, 10);
-  for (const k of Object.keys(TAKES)) if ((TAKES[k].checked || "") < cutoff) delete TAKES[k];
-  return TAKES;
+  return pruneTakes(TAKES, Date.now());
+}
+// Pure: drop entries not touched for TAKES_RETENTION_DAYS. A back-catalogue critics' reading
+// (sweepCatalogCritics) is kept: an old film's reception doesn't change, and nothing else
+// touches the entry. An empty one ages out and is retried.
+function pruneTakes(takes, nowMs) {
+  const cutoff = new Date(nowMs - TAKES_RETENTION_DAYS * 864e5).toISOString().slice(0, 10);
+  for (const k of Object.keys(takes)) {
+    const e = takes[k];
+    if (e.cat && e.a && e.a.tone) continue;
+    if ((e.checked || "") < cutoff) delete takes[k];
+  }
+  return takes;
 }
 
 // The critics half of the FilmyChill Score for a title NOT on this week's lists (back-catalogue
@@ -979,6 +989,88 @@ async function attachTakes(dataByCode) {
   console.log(`Takes: ${found}/${byKey.size} titles have a critics' line`);
 }
 
+// ============================================================================
+// CATALOG CRITICS SWEEP (Oct 2026). attachTakes only researches films on this week's lists, so
+// the back-catalogue and frozen pages read a cache that never held their film: 91% of their
+// score cards said "No verdict" for critics — Kuch Kuch Hota Hai included, whose Wikipedia
+// article has a full Reception section. Each run this takes a budget of those films (one TMDB
+// call for the IMDb id, then the same Wikidata -> Wikipedia -> readCritics route attachTakes
+// uses), caches the result in takes.json marked `cat`, and flags the film's pages so the score
+// sweep (lib/scoresweep.js) redoes them first. A film with no reception is cached too, and is
+// tried again once the entry ages out (TAKES_RETENTION_DAYS). Wikipedia critics only — never
+// TMDB reviews — because only published critics count toward the score.
+// ============================================================================
+const CRITICS_SWEEP_BATCH = Math.max(0, Number(process.env.CRITICS_SWEEP_BATCH || 250));
+const CRITICS_SWEEP_MAX_MS = 10 * 60 * 1000;   // never let it hold the build longer than this
+
+// Pure: the films (deduped across editions) whose critics' reading isn't cached yet. Films on
+// the most editions come first (one fetch fixes the most pages), then the oldest releases (the
+// ones most likely to have a Reception section).
+function criticsSweepCandidates(pagesManifest, takes, limit) {
+  const byFilm = new Map();
+  for (const [code, m] of Object.entries(pagesManifest || {})) {
+    for (const [slug, e] of Object.entries(m || {})) {
+      if (!e || !(e.catalog || e.archivedOn) || !e.tmdbId) continue;
+      if (e.imdb === "") continue;                       // TMDB has no IMDb id: no route to Wikipedia
+      if (e.imdb && takes[e.imdb]) continue;             // already read (or recently found empty)
+      const key = `${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`;
+      if (!byFilm.has(key)) byFilm.set(key, { key, kind: e.kind === "tv" ? "tv" : "movie", tmdbId: e.tmdbId, imdb: e.imdb || null, title: e.title, released: e.released || "", pages: [] });
+      const f = byFilm.get(key);
+      f.pages.push({ code, slug });
+      if (!f.imdb && e.imdb) f.imdb = e.imdb;
+    }
+  }
+  return [...byFilm.values()]
+    .sort((a, b) => b.pages.length - a.pages.length || (a.released || "9999").localeCompare(b.released || "9999"))
+    .slice(0, limit);
+}
+
+async function sweepCatalogCritics(pagesManifest, { batch = CRITICS_SWEEP_BATCH, api = { tmdb, pause: sleep }, wiki = { article: wikiArticleForImdb, extract: wikiExtract }, maxMs = CRITICS_SWEEP_MAX_MS, now = Date.now, takes = loadTakes(),
+  save = (t) => fs.writeFileSync(TAKES_FILE, JSON.stringify(t, null, 1)) } = {}) {
+  const today = new Date(now()).toISOString().slice(0, 10);
+  const res = { checked: 0, toned: 0, pages: 0, noImdb: 0, errors: 0, left: 0 };
+  const films = criticsSweepCandidates(pagesManifest, takes, batch);
+  const started = now();
+  for (const f of films) {
+    if (now() - started > maxMs || res.errors >= 5) break;   // Wikimedia/TMDB trouble or slow: resume next run
+    const entries = f.pages.map(({ code, slug }) => pagesManifest[code][slug]);
+    try {
+      let imdb = f.imdb;
+      if (!imdb) {
+        const ids = await api.tmdb(`/${f.kind}/${f.tmdbId}/external_ids`);
+        await api.pause(120);
+        imdb = (ids && ids.imdb_id) || "";
+        for (const e of entries) e.imdb = imdb;
+        if (!imdb) { res.noImdb++; continue; }
+      }
+      res.checked++;
+      if (takes[imdb]) continue;   // another film key led to the same IMDb id this run
+      let take = null, src = null, a = null;
+      const article = await wiki.article(imdb);
+      if (article) {
+        const { lead, reception } = await wiki.extract(article);
+        a = readCritics({ lead, reception });
+        take = composeTake(a, Number(f.tmdbId) || 0);
+        if (take) src = "wiki"; else a = null;
+      }
+      // No hook: if the film comes back onto a weekly list, attachTakes reads its lead once then.
+      takes[imdb] = { take, src, article: article || undefined, a: a || undefined, checked: today, v: TAKE_VERSION, cat: true };
+      if (src === "wiki" && a && a.tone) {
+        res.toned++;
+        // w = 0: the score sweep treats the page as outdated and redoes it first.
+        for (const e of entries) { if (e.fcs) e.fcs.w = 0; res.pages++; }
+      }
+      await api.pause(150);   // polite pace against Wikimedia
+    } catch (e) {
+      res.errors++;
+      console.warn(`  catalog critics: ${f.title} skipped (${e.message})`);
+    }
+  }
+  save(takes);
+  res.left = criticsSweepCandidates(pagesManifest, takes, Infinity).length;
+  return res;
+}
+
 // Attach YouTube trailer view counts (theatres + OTT + coming soon — pre-release trailer
 // hype is buzz too). One videos.list call per 50 unique trailers; ~2 calls/run total,
 // costing ~2 of the 10,000 free daily quota units.
@@ -1024,6 +1116,10 @@ module.exports = {
   criticRatings,
   criticsSettled,
   CRITICS_SETTLED_MIN,
+  CRITICS_SWEEP_BATCH,
+  criticsSweepCandidates,
+  pruneTakes,
+  sweepCatalogCritics,
   entryCriticsTone,
   extractHook,
   fmtViews,

@@ -145,6 +145,7 @@ const {
   isPoolTake,
   mineViewerAspects,
   reseedTake,
+  sweepCatalogCritics,
   TAKE_VERSION,
   TAKES_RETENTION_DAYS,
   trailerViewsLabel,
@@ -1492,6 +1493,13 @@ async function main() {
   // FilmyChill Score on pages that are never rebuilt (frozen + back-catalogue): a budgeted
   // sweep each run, never-scored first (lib/scoresweep.js).
   {
+    // First the critics' half for those films (lib/editorial.js sweepCatalogCritics): pages
+    // whose film gains a reading are flagged so the score sweep below redoes them first.
+    try {
+      const r = await sweepCatalogCritics(pagesManifest);
+      console.log(`Catalog critics sweep: ${r.checked} films read, ${r.toned} with a critics' verdict (${r.pages} pages to rescore), ${r.noImdb} without an IMDb id, ${r.left} still to read${r.errors ? `, ${r.errors} errors` : ""}`);
+      if (r.errors >= 5) healthNote(`catalog critics sweep stopped early after ${r.errors} errors — it resumes next run`);
+    } catch (e) { stageFailed("catalog critics sweep", e); }
     try {
       const r = await sweepScores(pagesManifest, { today: todayStr() });
       console.log(`FilmyChill Score sweep: ${r.checked} checked, ${r.updated} pages updated${r.errors ? `, ${r.errors} TMDB errors` : ""}`);
