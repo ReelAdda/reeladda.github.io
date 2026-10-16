@@ -7044,10 +7044,11 @@ test("merges: the duplicate leaves the build, links follow the survivor, the old
     const man = { in: { "drishyam-3": { title: "Drishyam 3" }, other: {} } };
     assert.strictEqual(Mg.dropMergedEntries(man, active), 1); assert.ok(!man.in["drishyam-3"] && man.in.other);
     const person = path.join(root, "ae/people/ajay/index.html");
-    fsx.writeFileSync(person, '<link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/drishyam-3.html"/>\n<a href="/movie/drishyam-3.html">Drishyam 3</a> <a href="https://filmychill.com/movie/drishyam-3.html">x</a> <a href="/movie/drishyam-3-x.html">y</a>');
+    fsx.writeFileSync(person, '<link rel="alternate" hreflang="en-IN" href="https://filmychill.com/movie/drishyam-3.html"/>\n<a href="/movie/drishyam-3.html">Drishyam 3</a> <a href="https://filmychill.com/movie/drishyam-3.html">x</a> <a href="/movie/drishyam-3-x.html">y</a>\n<script type="application/ld+json">{"@type":"ListItem","position":1,"name":"Drishyam 3","url":"https://filmychill.com/movie/drishyam-3.html"}</script>');
     const r = Mg.retargetMergedLinks(["ae/people/ajay/index.html"], active, { root });
     const after = fsx.readFileSync(person, "utf8");
-    assert.strictEqual(r.links, 2);
+    assert.strictEqual(r.links, 3);
+    assert.ok(after.includes('"url":"https://filmychill.com/movie/drishyam-the-conclusion.html"'), "structured-data list items too");
     assert.ok(after.includes('<a href="/movie/drishyam-the-conclusion.html">') && after.includes('href="https://filmychill.com/movie/drishyam-the-conclusion.html">x'), after);
     assert.ok(after.includes('hreflang="en-IN" href="https://filmychill.com/movie/drishyam-3.html"'), "hreflang is left to the cluster sync");
     assert.ok(after.includes('href="/movie/drishyam-3-x.html"'), "only the exact URL");
@@ -7065,17 +7066,25 @@ test("a film TMDB renames keeps its existing address, in every edition; a wrong 
   const man = { in: { "drishyam-3": { tmdbId: 1269325, kind: "movie", released: "2026-10-02" } }, uk: { "drishyam-3": { tmdbId: 1269325, kind: "movie", released: "2026-10-02" } }, ae: { "other-film": { tmdbId: 999, kind: "movie", released: "2019-01-01" } } };
   const ex = F.existingSlugsById(man);
   const data = { theatres: [{ title: "Drishyam: The Conclusion", tmdbId: 1269325, kind: "movie", released: "2026-10-02" }, { title: "Brand New Film", tmdbId: 999, kind: "movie", released: "2026-05-01" }], ott: [], comingSoon: [] };
-  F.assignSlugs(data, ex);
+  F.assignSlugs(data, ex, "in");
   assert.strictEqual(data.theatres[0].slug, "drishyam-3", "renamed: keeps the address");
+  // Another edition already uses the new title's address, but this one has its own page: keep it.
+  const split = F.existingSlugsById({ in: { ramayana: { tmdbId: 656908, kind: "movie", released: "2026-11-05" } }, uk: { "ramayana-rise-of-a-legend": { tmdbId: 656908, kind: "movie", released: "2026-11-05" } } });
+  const dIn = { theatres: [{ title: "Ramayana: Rise of a Legend", tmdbId: 656908, kind: "movie", released: "2026-11-05" }], ott: [], comingSoon: [] };
+  F.assignSlugs(dIn, split, "in");
+  assert.strictEqual(dIn.theatres[0].slug, "ramayana", "an edition never gets a second page for a film it has");
+  const dNz = { theatres: [{ title: "Ramayana: Rise of a Legend", tmdbId: 656908, kind: "movie", released: "2026-11-05" }], ott: [], comingSoon: [] };
+  F.assignSlugs(dNz, split, "nz");
+  assert.strictEqual(dNz.theatres[0].slug, "ramayana-rise-of-a-legend", "a new edition joins an address already in use for the title");
   assert.strictEqual(data.theatres[1].slug, "brand-new-film", "same id but another year: its own address");
   const d2 = { theatres: [{ title: "Drishyam 3", tmdbId: 1269325, kind: "movie", released: "2026-10-02" }], ott: [], comingSoon: [] };
-  F.assignSlugs(d2, F.existingSlugsById({ in: { "drishyam-3": man.in["drishyam-3"], "drishyam-the-conclusion": { tmdbId: 1269325, kind: "movie", released: "2026-10-02" } } }));
+  F.assignSlugs(d2, F.existingSlugsById({ in: { "drishyam-3": man.in["drishyam-3"], "drishyam-the-conclusion": { tmdbId: 1269325, kind: "movie", released: "2026-10-02" } } }), "in");
   assert.strictEqual(d2.theatres[0].slug, "drishyam-3", "a slug already in use for the film is kept as is");
   const plain = { theatres: [{ title: "Drishyam: The Conclusion", tmdbId: 1269325, kind: "movie", released: "2026-10-02" }], ott: [], comingSoon: [] };
   F.assignSlugs(plain);
   assert.strictEqual(plain.theatres[0].slug, "drishyam-the-conclusion", "no manifest: the title's slug, as before");
   const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
-  assert.ok(src.indexOf("removeMergedPages(merges)") < src.indexOf("existingSlugsById(loadPagesManifest()") && /assignSlugs\(data, slugsById\)/.test(src), "merges first, so a survivor is the address kept");
+  assert.ok(src.indexOf("removeMergedPages(merges)") < src.indexOf("existingSlugsById(loadPagesManifest()") && /assignSlugs\(data, slugsById, cfg\.code\)/.test(src), "merges first, so a survivor is the address kept");
   assert.ok(src.indexOf("retargetMergedLinks(") < src.indexOf("repairDeadLinks([") && src.indexOf("writeMergeStubs(merges)") > src.indexOf("writeMultiCountrySitemap(builtCountries"), "links before the dead-link repair, redirects after the sitemap");
 });
 

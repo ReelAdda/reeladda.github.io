@@ -1311,7 +1311,7 @@ async function main() {
   // Pass 1: build data for every country.
   for (const cfg of COUNTRIES) {
     const data = await buildCountry(cfg);
-    assignSlugs(data, slugsById);
+    assignSlugs(data, slugsById, cfg.code);
     dataByCode[cfg.code] = data;
     const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || []), ...poolItems(data)];
     allSlugSets[cfg.code] = new Set(all.map((x) => x.slug).filter(Boolean));

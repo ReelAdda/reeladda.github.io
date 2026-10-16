@@ -73,7 +73,10 @@ function retargetMergedLinks(files, active, { root = "." } = {}) {
     map.set(filmUrlPath(code, dup), filmUrlPath(code, to));
     map.set(`${SITE}${filmUrlPath(code, dup)}`, `${SITE}${filmUrlPath(code, to)}`);
   }
+  // Attributes, and the "url" of a structured-data list item (people, month and hub pages list
+  // films as ItemList entries: 65 of them named a merged page, Oct 2026).
   const re = new RegExp(`(href|src)="(${[...map.keys()].map((k) => k.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")).join("|")})"`, "g");
+  const reLd = new RegExp(`"url":"(${[...map.keys()].filter((k) => k.startsWith(SITE)).map((k) => k.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")).join("|")})"`, "g");
   const res = { pages: 0, links: 0 };
   for (const rel of files) {
     const file = path.join(root, rel);
@@ -81,7 +84,8 @@ function retargetMergedLinks(files, active, { root = "." } = {}) {
     try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
     let n = 0;
     const out = html.split("\n").map((line) => (/<link rel="alternate" hreflang=/.test(line) ? line
-      : line.replace(re, (m, attr, url) => { n++; return `${attr}="${map.get(url)}"`; }))).join("\n");
+      : line.replace(re, (m, attr, url) => { n++; return `${attr}="${map.get(url)}"`; })
+        .replace(reLd, (m, url) => { n++; return `"url":"${map.get(url)}"`; }))).join("\n");
     if (n) { fs.writeFileSync(file, out); res.pages++; res.links += n; }
   }
   return res;

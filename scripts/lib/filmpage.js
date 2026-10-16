@@ -83,12 +83,14 @@ function poolItems(data) {
   });
 }
 
-// `existing` (optional): "kind:tmdbId" -> { slugs: Set, preferred } for films that already have
-// a page in some edition (existingSlugsById). A film TMDB renames keeps its address: "Drishyam
-// 3" became "Drishyam: The Conclusion" and the build started a second page beside the first
-// (32 such duplicate groups, Oct 2026 audit). The current title's slug wins only if a page
-// already uses it; otherwise the address most editions use, so hreflang clusters stay whole.
-function assignSlugs(data, existing = null) {
+// `existing` (optional, from existingSlugsById) and `code` (this edition): a film TMDB renames
+// keeps its address. "Drishyam 3" became "Drishyam: The Conclusion" and the build started a
+// second page beside the first (32 such duplicate groups, Oct 2026 audit). In order:
+//   1. this edition already has a page for the film: keep it (the current title's slug only if
+//      that page is the one using it), so an edition never gets a second page;
+//   2. no page here yet: the current title's slug if another edition uses it, else the address
+//      most editions use, so the hreflang cluster stays whole.
+function assignSlugs(data, existing = null, code = null) {
   const used = new Map(); // slug -> tmdbId
   for (const list of [data.theatres, data.ott, data.comingSoon, poolItems(data)]) {
     for (const item of list || []) {
@@ -97,7 +99,10 @@ function assignSlugs(data, existing = null) {
       // Same id AND same release year: a wrong id on an old entry must never send a new film
       // onto another film's page.
       const known = existing && item.tmdbId != null && year ? existing.get(`${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}:${year}`) : null;
-      let slug = known && !known.slugs.has(fresh) ? known.preferred : fresh;
+      const here = known && code && known.byEdition.get(code);
+      let slug = fresh;
+      if (here && here.size) slug = here.has(fresh) ? fresh : here.has(known.preferred) ? known.preferred : [...here].sort()[0];
+      else if (known && !known.slugs.has(fresh)) slug = known.preferred;
       if (used.has(slug) && used.get(slug) !== item.tmdbId && year) slug = `${slug}-${year}`;
       used.set(slug, item.tmdbId);
       item.slug = slug;
@@ -105,23 +110,26 @@ function assignSlugs(data, existing = null) {
   }
 }
 
-// "kind:tmdbId:year" -> { slugs, preferred } over every edition's manifest, for pages on disk.
-// `preferred` is the slug the most editions use (ties: alphabetical, so it is stable).
+// "kind:tmdbId:year" -> { slugs, preferred, byEdition } over every edition's manifest, for pages
+// on disk. `preferred` is the slug the most editions use (ties: alphabetical, so it is stable);
+// `byEdition` maps an edition to the slugs it has for the film.
 function existingSlugsById(manifest, { exists = () => true } = {}) {
-  const counts = new Map();
+  const counts = new Map(), eds = new Map();
   for (const [code, m] of Object.entries(manifest || {})) {
     for (const [slug, e] of Object.entries(m || {})) {
       const year = String((e && e.released) || "").slice(0, 4);
       if (!e || e.tmdbId == null || !/^\d{4}$/.test(year) || !exists(code, slug)) continue;
       const k = `${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}:${year}`;
-      if (!counts.has(k)) counts.set(k, new Map());
+      if (!counts.has(k)) { counts.set(k, new Map()); eds.set(k, new Map()); }
       counts.get(k).set(slug, (counts.get(k).get(slug) || 0) + 1);
+      if (!eds.get(k).has(code)) eds.get(k).set(code, new Set());
+      eds.get(k).get(code).add(slug);
     }
   }
   const out = new Map();
   for (const [k, c] of counts) {
     const preferred = [...c.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0][0];
-    out.set(k, { slugs: new Set(c.keys()), preferred });
+    out.set(k, { slugs: new Set(c.keys()), preferred, byEdition: eds.get(k) });
   }
   return out;
 }
