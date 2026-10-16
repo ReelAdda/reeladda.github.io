@@ -1,0 +1,71 @@
+{
+ "date": "2026-10-16",
+ "checked": 108,
+ "errors": 0,
+ "pagesDisagreeing": 7,
+ "high": 1,
+ "correctable": 7,
+ "byField": {
+  "rent/buy": 5,
+  "platform": 1,
+  "title": 1
+ },
+ "rows": [
+  {
+   "field": "rent/buy",
+   "severity": "medium",
+   "page": "none",
+   "tmdb": "Amazon Video",
+   "code": "in",
+   "slug": "babita-singh-reporting"
+  },
+  {
+   "field": "rent/buy",
+   "severity": "medium",
+   "page": "none",
+   "tmdb": "Apple TV Store, Amazon Video",
+   "code": "in",
+   "slug": "obsession"
+  },
+  {
+   "field": "rent/buy",
+   "severity": "medium",
+   "page": "none",
+   "tmdb": "Amazon Video, Apple TV Store, Fandango At Home",
+   "code": "us",
+   "slug": "motor-city"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Amazon Prime Video, Peacock Premium, Philo, Peacock Premium Plus",
+   "tmdb": "Prime Video, Peacock",
+   "code": "us",
+   "slug": "columbo"
+  },
+  {
+   "field": "rent/buy",
+   "severity": "medium",
+   "page": "none",
+   "tmdb": "Apple TV Store, Rakuten TV, Amazon Video, Sky Store",
+   "code": "uk",
+   "slug": "pinocchio-unstrung"
+  },
+  {
+   "field": "rent/buy",
+   "severity": "medium",
+   "page": "none",
+   "tmdb": "JustWatch TV, Apple TV Store, Amazon Video",
+   "code": "au",
+   "slug": "mutiny"
+  },
+  {
+   "field": "title",
+   "severity": "low",
+   "page": "Toxic: A Fairy Tale for Grown-ups",
+   "tmdb": "Toxic",
+   "code": "au",
+   "slug": "toxic-a-fairy-tale-for-grown-ups"
+  }
+ ]
+}
