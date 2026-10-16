@@ -24,6 +24,7 @@ const { digitalReleaseFor } = require("./enrich.js");
 const { digitalAnnounceText, digitalPassedBlock, OPEN_PILL_RE, settleReleasedCopy } = require("./pagekit.js");
 const { canonProvider, countryNameFor, dedupeProviders, streamVocab } = require("./rules.js");
 const { healthNote, loadStateFile } = require("./runhealth.js");
+const { readHistory } = require("./history.js");
 const { sleep, tmdb } = require("./tmdb.js");
 
 // ============================================================================
@@ -88,7 +89,23 @@ function applyDigitalDatePatch(html, { title, date, note = "", countryName, cfg 
   return { html: out, changed: out !== html };
 }
 
-function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf, now = Date.now() }) {
+// ============================================================================
+// ARRIVAL DATE — only one we can stand behind (Oct 2026).
+//
+// A page may say "Streaming on Netflix since 16 Oct" only when we saw the film NOT streaming
+// and then saw it streaming, at most a day apart: the arrival lies between those two checks.
+// `prev` is the arrival sweep's previous check (it found nothing), `detected` the check that
+// found a platform. Another sighting inside that window (the 30-minute probe, a build) narrows
+// it. A first-seen date alone is never an arrival: for back-catalogue pages it is the day the
+// page was built. Wider than a day, or no previous check: no date at all.
+// ============================================================================
+function arrivalDate({ prev = null, detected = null, sighting = null } = {}) {
+  if (!prev || !detected || prev > detected) return null;
+  const d = sighting && sighting >= prev && sighting < detected ? sighting : detected;
+  return (Date.parse(d) - Date.parse(prev)) / 864e5 <= 1 ? d : null;
+}
+
+function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf, arrived = null, now = Date.now() }) {
   if (!providers || !providers.length) return { html, changed: false };
   const V = streamVocab(cfg);
   const e = escHtml;
@@ -99,7 +116,10 @@ function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf, now
   // The <!--SW:live--> stamp is what makes departures detectable. Without it, a page that
   // has been patched to "streaming on X" is indistinguishable from any other frozen page,
   // and the claim can never be rechecked. It carries the date so the sweep can pace itself.
-  const block = `${start}<!--SW:live=${e(asOf || "")}--><h2>${e(V.heading(title))}</h2><p><strong>It's streaming now.</strong> ${e(title)} is available in ${e(countryName)} on ${e(list)}.</p><p style="color:var(--mute);font-size:13px">Spotted by our daily availability check${asOf ? ` on ${e(asOf)}` : ""}. We recheck periodically — platforms do drop titles.</p>${end}`;
+  // The verified arrival (see arrivalDate), carried as a marker so lib/facts.js reads it back
+  // and every later render keeps it; the platform is the one it arrived on.
+  const arrivedMark = arrived ? `<!--SW:arrived=${e(arrived)}|${e(providers[0])}-->` : "";
+  const block = `${start}<!--SW:live=${e(asOf || "")}-->${arrivedMark}<h2>${e(V.heading(title))}</h2><p><strong>It's streaming now.</strong> ${e(title)} is available in ${e(countryName)} on ${e(list)}.</p><p style="color:var(--mute);font-size:13px">Spotted by our daily availability check${asOf ? ` on ${e(asOf)}` : ""}. We recheck periodically — platforms do drop titles.</p>${end}`;
   let out = html.slice(0, a) + block + html.slice(b + end.length);
   // The archived page still advertises a finished theatrical run in its pills.
   const pills = providers.map((pv) => `<span class="pill">${e(pv)}</span>`).join("");
@@ -659,9 +679,13 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
     catch { return false; }
   });
   if (!candidates.length) return;
-  let found = 0, announced = 0;
+  let found = 0, announced = 0, dated = 0;
+  // Earliest sighting per film in this country (probe and build), to narrow an arrival window.
+  const sightings = new Map();
+  for (const r of readHistory()) if (r && r.c === cfg.code && r.k !== "tv" && r.first) { const k = String(r.id); if (!sightings.has(k) || r.first < sightings.get(k)) sightings.set(k, r.first); }
   for (const c of candidates) {
     try {
+      const prevCheck = m[c.slug].swept || null;   // the last check that found no platform
       // One call returns both answers: is it streaming, and if not, has a date been announced.
       const d = await tmdb(`/movie/${c.tmdbId}`, { append_to_response: "watch/providers,release_dates" });
       m[c.slug].swept = asOf;
@@ -690,20 +714,22 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
         continue;
       }
       const p = `${dir}/${c.slug}.html`;
+      const arrived = arrivalDate({ prev: prevCheck, detected: asOf, sighting: sightings.get(String(c.tmdbId)) || null });
       const { html, changed } = applyArrivalPatch(fs.readFileSync(p, "utf8"), {
-        title: c.title || c.slug, providers: provs, countryName: countryNameFor(cfg), cfg, asOf,
+        title: c.title || c.slug, providers: provs, countryName: countryNameFor(cfg), cfg, asOf, arrived,
       });
       if (changed) {
         fs.writeFileSync(p, html);
         m[c.slug].last = asOf;
         // Open a live claim. This is what the departure sweep later rechecks — without it
         // the assertion we just wrote onto the page could never be revisited.
-        m[c.slug].live = { since: asOf, providers: provs, lastCheck: asOf, misses: 0 };
+        m[c.slug].live = { since: asOf, providers: provs, lastCheck: asOf, misses: 0, ...(arrived ? { arrived, prevCheck } : {}) };
         found++;
+        if (arrived) dated++;
       }
     } catch (e) { console.warn(`  sweep ${c.slug}: ${e.message}`); }
   }
-  console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming, ${announced} streaming date(s) announced`);
+  console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming (${dated} with an arrival date within a day), ${announced} streaming date(s) announced`);
 }
 
 function loadPagesManifest() {
@@ -747,6 +773,7 @@ function archiveDepartedPages(manifest, cfg, currentSlugs, meta = null) {
 
 module.exports = {
   applyArrivalPatch,
+  arrivalDate,
   applyDeparturePatch,
   applyDigitalDatePatch,
   archiveDepartedPages,

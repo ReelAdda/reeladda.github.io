@@ -4301,11 +4301,12 @@ test("reseeded output always stays inside the same tone pool (never flips sentim
 
 // ---------------- keywords: OTT release date FAQ ----------------
 group("OTT release date FAQ");
-test("streaming film: states platform and arrival date from first-seen tracking", () => {
-  const faqs = U.buildFaqs({ title: "Raakh", kind: "movie", platform: "Amazon Prime Video",
-    providers: ["Amazon Prime Video"], ottFreshDate: "2026-06-12", released: "2026-05-01" }, "India");
-  const f = faqs.find((x) => /releasing on OTT/.test(x.q));
-  assert.ok(f && /already streaming/.test(f.a) && /2026-06-12/.test(f.a));
+test("streaming film: states platform; an arrival date only when one was verified, never first-seen", () => {
+  const base = { title: "Raakh", kind: "movie", platform: "Amazon Prime Video", providers: ["Amazon Prime Video"], ottFreshDate: "2026-06-12", released: "2026-05-01" };
+  const seenOnly = U.buildFaqs(base, "India").find((x) => /releasing on OTT/.test(x.q));
+  assert.ok(seenOnly && /already streaming/.test(seenOnly.a) && !/arrived|2026-06-12|12 Jun/.test(seenOnly.a), "a first-seen date is not an arrival");
+  const verified = U.buildFaqs({ ...base, arrived: "2026-06-12", arrivedOn: "Amazon Prime Video" }, "India").find((x) => /releasing on OTT/.test(x.q));
+  assert.ok(/it arrived on Amazon Prime Video on 12 Jun 2026\./.test(verified.a), verified.a);
 });
 test("theatrical film: honestly says not announced, never invents a date", () => {
   const faqs = U.buildFaqs({ title: "Alpha", kind: "movie", platform: "Theatres", providers: [], released: "2026-07-03" }, "India");
@@ -7022,6 +7023,41 @@ test("publish leaves main's build-only files off the website, and keeps what the
   for (const n of ["movie", "us", "search", "css", "sitemap.xml"]) assert.ok(S.isGenerated(n) && !S.isMainOnly(n), n);
   const src = require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8");
   assert.ok(src.indexOf('"rm", "-r", "--cached"') > src.indexOf('"read-tree", "HEAD"'), "removed from the publish index, not from main");
+});
+
+group("16 Oct 2026: arrival dates we can stand behind, and when a waiting film was last checked");
+test("arrivalDate: a date only when a 'not streaming' check and a 'streaming' check are a day apart", () => {
+  const Lc = require("./lib/lifecycle.js");
+  assert.strictEqual(Lc.arrivalDate({ prev: "2026-10-15", detected: "2026-10-16" }), "2026-10-16");
+  assert.strictEqual(Lc.arrivalDate({ prev: "2026-10-16", detected: "2026-10-16" }), "2026-10-16", "same-day checks");
+  assert.strictEqual(Lc.arrivalDate({ prev: "2026-10-12", detected: "2026-10-16" }), null, "a four-day window is not a date");
+  assert.strictEqual(Lc.arrivalDate({ prev: "2026-10-12", detected: "2026-10-16", sighting: "2026-10-13" }), "2026-10-13", "a sighting inside the window narrows it");
+  assert.strictEqual(Lc.arrivalDate({ prev: "2026-10-12", detected: "2026-10-16", sighting: "2026-10-15" }), null, "still three days wide");
+  assert.strictEqual(Lc.arrivalDate({ prev: "2026-10-15", detected: "2026-10-16", sighting: "2026-08-01" }), "2026-10-16", "a sighting before the 'not streaming' check is ignored (a seeded first-seen)");
+  assert.strictEqual(Lc.arrivalDate({ prev: null, detected: "2026-10-16" }), null, "never checked before: no date");
+});
+test("a verified arrival is shown, carried through facts, named in the FAQ; the template never invents one", () => {
+  const F = require("./lib/filmpage.js"), Fa = require("./lib/facts.js"), Lc = require("./lib/lifecycle.js");
+  const IN = { code: "in", name: "India", region: "IN" };
+  const pending = `<html><head><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Mandaadi","datePublished":"2026-09-10","inLanguage":"Tamil"}</script></head><body><h1>Mandaadi (2026)</h1><!--SW:pending--><h2>When is Mandaadi coming to OTT?</h2><p>Not streaming yet.</p><!--/SW:pending--><h2>Where to watch in India</h2><div><span class="pill">Theatrical run ended — OTT arrival pending</span></div><footer></footer></body></html>`;
+  const patched = Lc.applyArrivalPatch(pending, { title: "Mandaadi", providers: ["Netflix"], countryName: "India", cfg: IN, asOf: "2026-10-09", arrived: "2026-10-09" }).html;
+  const item = Fa.extractFacts(patched, "mandaadi");
+  assert.strictEqual(item.arrived, "2026-10-09"); assert.strictEqual(item.arrivedOn, "Netflix");
+  const html = F.buildFilmPage({ ...item, platform: "Netflix" }, "2026-10-16", new Set(), IN, null);
+  assert.ok(html.includes("<b>Streaming on Netflix in India since 9 Oct 2026.</b>"), "the line");
+  assert.strictEqual(Fa.extractFacts(html, "mandaadi").arrived, "2026-10-09", "kept on every later render");
+  assert.ok(/arrived on Netflix on 9 Oct 2026/.test(html), "and in the FAQ");
+  const plain = F.buildFilmPage({ ...item, arrived: undefined, arrivedOn: undefined, platform: "Netflix" }, "2026-10-16", new Set(), IN, null);
+  assert.ok(!/since \d|arrived on/.test(plain), "no verified arrival, no date");
+  const gone = Fa.extractFacts(patched.replace(/<span class="pill">Netflix<\/span>/g, ""), "mandaadi");
+  assert.ok(!gone.arrived, "once it lists no platform, the arrival date goes with it");
+});
+test("a film not streaming yet says when that was last checked; the date still restamps", () => {
+  const F = require("./lib/filmpage.js"), Fa = require("./lib/facts.js"), Lc = require("./lib/lifecycle.js");
+  const html = F.buildFilmPage({ title: "Enna Vilai", slug: "enna-vilai", kind: "movie", released: "2026-09-17", language: "Tamil", platform: "Theatres", providers: [], rentBuy: [] }, "2026-10-16", new Set(), { code: "in", name: "India", region: "IN" }, null);
+  assert.ok(html.includes("Availability as of 16 Oct 2026 — checked that day: not on any streaming service in India yet."), "the line");
+  assert.strictEqual(Fa.availabilityText(html), "16 Oct 2026", "still read as the availability date");
+  assert.ok(Lc.stampPendingCheck(html, "2026-10-18", { code: "in" }).includes("Availability as of 18 Oct 2026 — checked that day"), "the sweep's check date replaces it");
 });
 
 group("16 Oct 2026 audit: rechecks for every streaming page, ids, pre-release scores, card images, contrast");

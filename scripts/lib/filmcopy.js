@@ -269,9 +269,11 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   // that this page updates the day it lands.
   if (item.kind !== "tv") {
     let ottA;
-    const arrival = item.ottFreshDate || null;
+    // Only a verified arrival date (lib/lifecycle.js arrivalDate). This used ottFreshDate, which
+    // is a first sighting or the release date: neither is when the film reached the platform.
+    const arrival = item.arrived ? fmtDateFull(item.arrived, localeFor(cfg && cfg.code)) : null;
     if (provs.length) {
-      ottA = `${item.title} is already streaming in ${countryName} on ${provs.join(", ")}${arrival ? ` — it arrived on ${arrival}` : ""}.`;
+      ottA = `${item.title} is already streaming in ${countryName} on ${provs.join(", ")}${arrival ? ` — it arrived${item.arrivedOn && provs.includes(item.arrivedOn) ? ` on ${item.arrivedOn}` : ""} on ${arrival}` : ""}.`;
     } else if (digitalUpcoming(item)) {
       ottA = `${digitalAnnounceText(item.title, item.digitalDate, item.digitalNote, countryName, cfg)} This page updates automatically the day it starts streaming.`;
     } else {

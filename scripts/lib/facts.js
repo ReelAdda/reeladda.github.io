@@ -137,6 +137,9 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
     if (cite) item.takeArticle = cite[1];
   }
   if (dig) { item.digitalDate = dig[1]; if (dig[2]) item.digitalNote = dec(dig[2]); }
+  // A verified arrival (lib/lifecycle.js arrivalDate), only while the page lists platforms.
+  const arr = /<!--SW:arrived=(\d{4}-\d{2}-\d{2})\|([^>]*?)-->/.exec(html);
+  if (arr && providers.length) { item.arrived = arr[1]; if (arr[2]) item.arrivedOn = dec(arr[2]); }
   return item;
 }
 const slugGuess = (t) => String(t).toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");

@@ -1094,8 +1094,16 @@ ${FCSB_CSS}
     // Wrapped in SW:stream + SW:live so the departure sweep can find and rewrite it. Pages
     // born streaming (the whole catalogue) used to carry no marker at all, so no sweep could
     // ever touch their "you can stream it on…" claim — permanent, unchecked availability.
-    if (providers.length) return `<!--SW:stream--><!--SW:live=${e(asOf || "")}--><h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}${filmHubLinks(item, cfg)}<!--/SW:stream-->`;
-    if (item.platform === "Theatres") return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>${rb.length ? rbRow + `<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>` : ""}${note}`;
+    // "Streaming on Netflix since 16 Oct": only a verified arrival (lib/lifecycle.js arrivalDate),
+    // never a first-seen date. Named for the platform it arrived on while that one still lists
+    // it; the marker carries the date through every later render.
+    const arrivedLine = item.arrived && providers.length
+      ? `<!--SW:arrived=${e(item.arrived)}|${e(item.arrivedOn || providers[0])}--><p class="arrived" style="font-size:13.5px;margin-top:8px"><b>Streaming ${providers.includes(item.arrivedOn) ? `on ${e(item.arrivedOn)} ` : ""}in ${e(country)} since ${e(fmtDateFull(item.arrived, localeFor(code)))}.</b></p>`
+      : "";
+    if (providers.length) return `<!--SW:stream--><!--SW:live=${e(asOf || "")}--><h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div>${arrivedLine}<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}${filmHubLinks(item, cfg)}<!--/SW:stream-->`;
+    // Not streaming yet: the date says when that was last checked, not just "as of".
+    const checkedNote = `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${asOf ? e(fmtDateFull(asOf, localeFor(code))) : ""} — checked that day: not on any streaming service in ${e(country)} yet.</p>`;
+    if (item.platform === "Theatres") return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>${rb.length ? rbRow + `<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>${note}` : checkedNote}`;
     if (rb.length) return `<h2>Where to watch in ${e(country)}</h2>${rbRow}<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>${note}`;
     // Unreleased film: previously this block rendered nothing at all, so the page answered
     // "where to watch" with silence. State it plainly instead.
