@@ -2,70 +2,38 @@
  "date": "2026-10-16",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 7,
- "high": 1,
- "correctable": 7,
+ "pagesDisagreeing": 3,
+ "high": 2,
+ "correctable": 2,
  "byField": {
-  "rent/buy": 5,
-  "platform": 1,
-  "title": 1
+  "streaming": 1,
+  "lead actor": 1,
+  "platform": 1
  },
  "rows": [
   {
-   "field": "rent/buy",
-   "severity": "medium",
-   "page": "none",
-   "tmdb": "Amazon Video",
-   "code": "in",
-   "slug": "babita-singh-reporting"
+   "field": "streaming",
+   "severity": "high",
+   "page": "not streaming",
+   "tmdb": "on Queer Cinemab",
+   "code": "de",
+   "slug": "cocoon"
   },
   {
-   "field": "rent/buy",
+   "field": "lead actor",
    "severity": "medium",
-   "page": "none",
-   "tmdb": "Apple TV Store, Amazon Video",
-   "code": "in",
-   "slug": "obsession"
-  },
-  {
-   "field": "rent/buy",
-   "severity": "medium",
-   "page": "none",
-   "tmdb": "Amazon Video, Apple TV Store, Fandango At Home",
-   "code": "us",
-   "slug": "motor-city"
+   "page": "Koo Hye-sun",
+   "tmdb": "Ku Hye-sun, Lee Min-ho, Kim Hyun-joong",
+   "code": "id",
+   "slug": "boys-over-flowers"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "Amazon Prime Video, Peacock Premium, Philo, Peacock Premium Plus",
-   "tmdb": "Prime Video, Peacock",
-   "code": "us",
-   "slug": "columbo"
-  },
-  {
-   "field": "rent/buy",
-   "severity": "medium",
-   "page": "none",
-   "tmdb": "Apple TV Store, Rakuten TV, Amazon Video, Sky Store",
-   "code": "uk",
-   "slug": "pinocchio-unstrung"
-  },
-  {
-   "field": "rent/buy",
-   "severity": "medium",
-   "page": "none",
-   "tmdb": "JustWatch TV, Apple TV Store, Amazon Video",
-   "code": "au",
-   "slug": "mutiny"
-  },
-  {
-   "field": "title",
-   "severity": "low",
-   "page": "Toxic: A Fairy Tale for Grown-ups",
-   "tmdb": "Toxic",
-   "code": "au",
-   "slug": "toxic-a-fairy-tale-for-grown-ups"
+   "page": "Claro tv+, Universal+",
+   "tmdb": "Universal+",
+   "code": "br",
+   "slug": "oppenheimer"
   }
  ]
 }
