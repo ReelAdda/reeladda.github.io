@@ -7025,6 +7025,55 @@ test("publish leaves main's build-only files off the website, and keeps what the
   assert.ok(src.indexOf('"rm", "-r", "--cached"') > src.indexOf('"read-tree", "HEAD"'), "removed from the publish index, not from main");
 });
 
+group("16 Oct 2026: data accuracy check against TMDB");
+const ACC_TMDB = (o = {}) => ({
+  title: "Enna Vilai", original_title: "Enna Vilai", original_language: "ta", release_date: "2026-09-17", runtime: 132,
+  genres: [{ name: "Drama" }, { name: "Crime" }],
+  credits: { cast: [{ name: "Karunaas" }, { name: "Nimisha Sajayan" }], crew: [{ job: "Director", name: "Sajeev Pazhoor" }] },
+  release_dates: { results: [{ iso_3166_1: "IN", release_dates: [{ type: 3, release_date: "2026-09-17T00:00:00.000Z" }] }] },
+  "watch/providers": { results: { IN: { flatrate: [{ provider_name: "Netflix" }] } } }, ...o,
+});
+test("accuracy: each kind of disagreement with TMDB is found, and agreement finds nothing", () => {
+  const A = require("./accuracy.js");
+  const IN = require("./lib/core.js").COUNTRIES.find((c) => c.code === "in");
+  const page = { title: "Enna Vilai", language: "Tamil", genre: "Drama / Crime", released: "2026-09-17", runtime: 132, director: "Sajeev Pazhoor", cast: ["Karunaas"], providers: ["Netflix"], rentBuy: [] };
+  const exp = A.expectedFromTmdb(ACC_TMDB(), "movie", IN);
+  assert.deepStrictEqual(A.compare(page, exp), [], "agreement");
+  const stale = A.compare({ ...page, providers: ["Opened in cinemas 17 Sept — not streaming yet"] }, exp);
+  assert.deepStrictEqual(stale.map((x) => [x.field, x.severity, x.tmdb]), [["streaming", "high", "on Netflix"]], "the Enna Vilai case: TMDB has it streaming, the page doesn't");
+  assert.strictEqual(A.compare({ ...page, providers: ["Prime Video"] }, exp)[0].field, "platform");
+  assert.strictEqual(A.compare(page, A.expectedFromTmdb(ACC_TMDB({ "watch/providers": { results: {} } }), "movie", IN))[0].tmdb, "on no subscription service", "left the platform");
+  const many = A.compare({ ...page, released: "2026-11-01", language: "English", runtime: 90, director: "Someone Else", cast: ["Nobody"], title: "Other" }, exp).map((x) => x.field);
+  assert.deepStrictEqual(many, ["release date", "language", "runtime", "director", "lead actor", "title"]);
+  assert.strictEqual(A.compare({ ...page, released: "2026-09-18" }, exp).length, 0, "a day either side is the same date (time zones)");
+});
+testAsync("accuracy: samples every edition, reads the pages on disk, writes a report; never needs the network in tests", async () => {
+  const A = require("./accuracy.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-acc-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie"));
+    const html = `<html><head><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Enna Vilai","inLanguage":"Tamil","genre":"Drama / Crime","datePublished":"2026-09-17","director":{"@type":"Person","name":"Sajeev Pazhoor"}}</script></head><body><h1>Enna Vilai (2026)</h1><!--SW:pending--><p>x</p><!--/SW:pending--><h2>Where to watch in India</h2><div><span class="pill">Opened in cinemas 17 Sept — not streaming yet</span></div><footer></footer></body></html>`;
+    fsx.writeFileSync(path.join(root, "movie/enna-vilai.html"), html);
+    fsx.writeFileSync(path.join(root, "pages-manifest.json"), JSON.stringify({ in: { "enna-vilai": { tmdbId: 1686999, kind: "movie", rendered: "2026-10-14" }, "no-id": { rendered: "2026-10-14" } } }));
+    const calls = [];
+    const r = await A.main({ root, per: 5, log: () => {}, api: { tmdb: async (p) => { calls.push(p); return ACC_TMDB(); }, pause: async () => {} } });
+    assert.deepStrictEqual(calls, ["/movie/1686999"], "pages without an id are not sampled");
+    assert.strictEqual(r.checked, 1);
+    assert.ok(r.rows.some((x) => x.field === "streaming" && x.code === "in" && x.slug === "enna-vilai"));
+    const md = fsx.readFileSync(path.join(root, "accuracy-report.md"), "utf8");
+    assert.ok(/1 page\(s\) disagree with TMDB/.test(md) && md.includes("https://filmychill.com/movie/enna-vilai.html"), md);
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("the accuracy workflow is manual, read-only, restores the site first and passes the key", () => {
+  const wf = require("fs").readFileSync(require("path").join(__dirname, "..", ".github", "workflows", "data-accuracy.yml"), "utf8");
+  assert.ok(/on:\s*\n\s*workflow_dispatch:/.test(wf) && !/schedule:/.test(wf), "manual only");
+  assert.ok(/permissions:\s*\n\s*contents: read/.test(wf) && !/contents: write/.test(wf), "read-only");
+  assert.ok(wf.indexOf("node scripts/site.js restore") < wf.indexOf("node scripts/accuracy.js"));
+  assert.ok(/TMDB_API_KEY: \$\{\{ secrets\.TMDB_API_KEY \}\}/.test(wf));
+  for (const u of [...wf.matchAll(/uses:\s*([^\s#]+)/g)].map((m) => m[1])) assert.ok(/@[0-9a-f]{40}$/.test(u), `${u} is pinned to a commit`);
+});
+
 group("16 Oct 2026: duplicate pages folded into one, without a 404");
 test("merges: the duplicate leaves the build, links follow the survivor, the old URL redirects", () => {
   const Mg = require("./lib/merges.js");

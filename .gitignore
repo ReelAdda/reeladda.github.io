@@ -16,6 +16,8 @@ _site/
 run-health.json
 # Per-run unit-test results (scripts/test.js), also read by health.js. Never committed.
 test-results.json
+# Data accuracy check report (scripts/accuracy.js). Never committed.
+accuracy-report.md
 
 # Built pages live on the `site` branch, not on main (scripts/site.js). The build restores
 # them before it runs and publishes them after; never commit them here. Locally, run

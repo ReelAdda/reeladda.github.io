@@ -1,0 +1,31 @@
+name: Data accuracy check
+# Manual: compares a sample of film pages in every edition with TMDB, the site's source
+# (scripts/accuracy.js), and writes each disagreement to this run's summary. Read-only:
+# publishes nothing, commits nothing, and never fails on what it finds.
+on:
+  workflow_dispatch:
+    inputs:
+      per_edition:
+        description: "Film pages to check per edition (18 editions; 14 = about 250 pages)"
+        default: "14"
+permissions:
+  contents: read
+jobs:
+  accuracy:
+    runs-on: ubuntu-latest
+    steps:
+      # Same pinned actions as update.yml; bump all workflows together.
+      - name: Checkout site
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24"
+      # The film pages live on the `site` branch (scripts/site.js); read-only.
+      - name: Restore the built site
+        run: node scripts/site.js restore
+      - name: Compare film pages with TMDB
+        run: node scripts/accuracy.js
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          ACCURACY_PER_EDITION: ${{ inputs.per_edition }}
