@@ -217,8 +217,13 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
   const titleSep = /[:.!?\u2014-]$/.test(rawTitle) ? "" : (rawTitle.includes(":") ? " \u2014" : ":");
   // Quote the window only where doing so is honest: a released theatrical title, nothing
   // streaming or rentable yet, and a window that has not already lapsed.
-  const est = (item.kind !== "tv" && !providers.length && !rentBuy.length
-    && item.platform === "Theatres" && !upcoming)
+  // A released film with no platform at all. A frozen page's facts can carry no `platform`,
+  // where a weekly page says "Theatres"; both mean the same, and the title (filmTitle) already
+  // treats them alike. 93 pages titled "Not Announced Yet" had a description promising "where
+  // to watch it" because only "Theatres" counted here (The Invite, Oct 2026).
+  const inCinemasOnly = item.kind !== "tv" && !providers.length && !rentBuy.length
+    && (item.platform === "Theatres" || !item.platform);
+  const est = (inCinemasOnly && !upcoming)
     ? streamWindowShort(item.released, item.language, now) : null;
   const openedOn = item.released ? `${fmtDateShort(item.released, now.getTime(), localeFor(cfg && cfg.code))}` : "";
   const inCinemas = runEnded ? `theatrical run over in ${country}`
@@ -326,7 +331,7 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
       `${item.title}${titleSep} ${V.word} release expected around ${est.short} (a pattern, not a confirmed date). ${cap(inCinemas)}.`,
       `${item.title}${titleSep} ${V.word} release expected around ${est.short}. ${cap(inCinemas)}.`,
     ]);
-  } else if (item.platform === "Theatres") {
+  } else if (item.platform === "Theatres" || (inCinemasOnly && item.released && !upcoming)) {
     // No usable window (no release date on file, or the window already lapsed). There is
     // genuinely nothing to promise about the date, so the payoff clause carries the click.
     // Released, not streaming, and past the usual window: the honest answer to "when on OTT?"
@@ -476,6 +481,10 @@ function filmTitleTag(item, cfg = null) {
           `${item.title} OTT Release Date: Expected ${left}, Not Yet Confirmed`,
           `${item.title}${yr} OTT Release Date: Expected ${left} (Unconfirmed)`,
           `${item.title} OTT Release Date: Expected ${left} (Unconfirmed)`,
+          // Before the year goes: "Street Fighter (2026) OTT Release Date: Expected Nov–Dec"
+          // (56 chars) was never offered, so the year fell out — and "street fighter 2026 …"
+          // searches had ~400 impressions in a month. The description says it's unconfirmed.
+          `${item.title}${yr} OTT Release Date: Expected ${left}`,
           `${item.title} OTT Release Date: Expected ${left}`,
         ]);
       }

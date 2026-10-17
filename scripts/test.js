@@ -7295,6 +7295,26 @@ test("tmdbTruth reads an edition's facts the build's way; applyTruth corrects, n
   assert.deepStrictEqual(empty.item.providers, ["U-NEXT"], "one empty answer can't strip a page; the departure sweep confirms twice");
   assert.strictEqual(T.applyTruth({ ...page, released: "2026-12-24" }, { at: "x", released: "2027-03-12" }).item.released, "2027-03-12", "a postponed film moves (Shakti Shalini)");
 });
+test("a released film keeps its year in the title when only the 'unconfirmed' tag has to go (Street Fighter)", () => {
+  const IN = require("./lib/core.js").COUNTRIES[0];
+  const F = require("./lib/filmpage.js");
+  const rel = new Date(Date.now() - 1 * 864e5).toISOString().slice(0, 10);
+  const t = F.filmTitleTag({ title: "Street Fighter", released: rel, kind: "movie", language: "English", providers: [], platform: "Theatres" }, IN);
+  assert.ok(/^Street Fighter \(\d{4}\) OTT Release Date: Expected /.test(t) && t.length <= 60, t);
+  const short = F.filmTitleTag({ title: "Dorothy", released: rel, kind: "movie", language: "Tamil", providers: [], platform: "Theatres" }, IN);
+  assert.ok(/\(Unconfirmed\)|Not Yet Confirmed/.test(short), "a title that fits with the tag keeps it: " + short);
+});
+test("a frozen page with no platform gets the 'not streaming yet' description its title promises (The Invite)", () => {
+  const IN = require("./lib/core.js").COUNTRIES[0];
+  const F = require("./lib/filmpage.js");
+  const item = { title: "The Invite", released: "2026-07-10", kind: "movie", language: "English", genre: "Drama", providers: [], rentBuy: [], platform: "" };
+  const d = F.filmMetaDescription(item, IN);
+  assert.ok(/isn't on any OTT platform in India yet/.test(d), d);
+  assert.ok(!/where to watch it/.test(d));
+  assert.ok(/Not Announced/.test(F.filmTitleTag(item, IN)), "title and description agree");
+  const tv = F.filmMetaDescription({ ...item, kind: "tv" }, IN);
+  assert.ok(!/isn't on any OTT platform/.test(tv), "a series isn't given a film's cinema wording");
+});
 test("the film's language is one of TMDB's facts a frozen page takes (The Weight, Oct 2026)", () => {
   const T = require("./lib/truth.js");
   const US = require("./lib/core.js").COUNTRIES.find((c) => c.code === "us");
