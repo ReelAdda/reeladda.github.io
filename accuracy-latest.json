@@ -2,46 +2,21 @@
  "date": "2026-10-17",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 5,
- "high": 4,
- "correctable": 4,
+ "pagesDisagreeing": 2,
+ "high": 2,
+ "correctable": 1,
  "byField": {
-  "rent/buy": 1,
-  "platform": 3,
+  "release date": 1,
   "language": 1
  },
  "rows": [
   {
-   "field": "rent/buy",
-   "severity": "medium",
-   "page": "none",
-   "tmdb": "Apple TV Store, CosmoGo, Amazon Video",
-   "code": "ca",
-   "slug": "coyote-vs-acme"
-  },
-  {
-   "field": "platform",
+   "field": "release date",
    "severity": "high",
-   "page": "Netflix, Amazon Prime Video",
-   "tmdb": "Netflix",
-   "code": "kr",
-   "slug": "ninjago-masters-of-spinjitzu"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "U-NEXT, HBO Max on U-Next",
-   "tmdb": "HBO Max on U-Next",
-   "code": "jp",
-   "slug": "curb-your-enthusiasm"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix, Amazon Prime Video, Hulu, U-NEXT",
-   "tmdb": "Prime Video, Hulu, HBO Max on U-Next",
-   "code": "jp",
-   "slug": "harry-potter-and-the-deathly-hallows-part-2"
+   "page": "2026-08-05",
+   "tmdb": "2026-11-19",
+   "code": "de",
+   "slug": "transition"
   },
   {
    "field": "language",
