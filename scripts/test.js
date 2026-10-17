@@ -7588,6 +7588,166 @@ test("a check date alone never moves 'Page updated'", () => {
     assert.strictEqual(stored.updated, "2026-10-01", "a recheck isn't an update");
   } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); Q.clearQueue(); }
 });
+group("17 Oct 2026 review: the paths that write a claim onto a page, end to end");
+// Loads a module with TMDB replaced by a stub (the sweeps take tmdb from lib/tmdb.js at load).
+function withTmdbStub(stub, mod, fn) {
+  const tm = require.resolve("./lib/tmdb.js"), target = require.resolve(mod);
+  const saved = require.cache[tm], savedTarget = require.cache[target];
+  require.cache[tm] = { id: tm, filename: tm, loaded: true, exports: { ...saved.exports, tmdb: stub, sleep: async () => {} } };
+  delete require.cache[target];
+  const restore = () => { require.cache[tm] = saved; if (savedTarget) require.cache[target] = savedTarget; else delete require.cache[target]; };
+  let out;
+  try { out = fn(require(mod)); } catch (e) { restore(); throw e; }
+  return Promise.resolve(out).finally(restore);
+}
+function inTempDirSync(fn) {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-e2e-")), cwd = process.cwd();
+  process.chdir(root);
+  try { return fn(); } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
+}
+function inTempDir(fn) {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-e2e-")), cwd = process.cwd();
+  process.chdir(root);
+  return Promise.resolve().then(fn).finally(() => { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); });
+}
+testAsync("departure sweep: two empty checks on separate runs retire the claim, on the page and in the facts", () => inTempDir(async () => {
+  const fsx = require("fs"), Mg = require("./lib/migrate.js"), Q = require("./lib/factsq.js");
+  const NZ = require("./lib/core.js").COUNTRIES.find((c) => c.code === "nz");
+  fsx.mkdirSync("nz/movie", { recursive: true });
+  const item = { title: "Gone Film", slug: "gone-film", kind: "movie", released: "2025-01-10", language: "English", providers: ["Netflix"], platform: "Netflix", rentBuy: [], tmdbId: 9 };
+  fsx.writeFileSync("nz/movie/gone-film.html", Mg.renderFrozen(item, NZ, { asOf: "2026-08-01", knownSlugs: new Set(), availability: "1 Aug 2026" }));
+  const man = { nz: { "gone-film": { tmdbId: 9, title: "Gone Film", released: "2025-01-10", archivedOn: "2026-06-01", live: { since: "2026-06-01", lastCheck: "2026-08-01", providers: ["Netflix"], misses: 0 } } } };
+  Q.clearQueue();
+  const empty = async () => ({ "watch/providers": { results: { NZ: {} } } });
+  await withTmdbStub(empty, "./lib/lifecycle.js", (L) => L.sweepStreamingDepartures(man, NZ, "2026-10-16"));
+  assert.strictEqual(man.nz["gone-film"].live.misses, 1, "one empty answer only counts");
+  assert.ok(!/<!--SW:gone=/.test(fsx.readFileSync("nz/movie/gone-film.html", "utf8")));
+  // A day later (the next runs): the confirming check retires it.
+  const realNow = Date.now; Date.now = () => Date.parse("2026-10-17T12:00:00Z");
+  try { await withTmdbStub(empty, "./lib/lifecycle.js", (L) => L.sweepStreamingDepartures(man, NZ, "2026-10-17")); }
+  finally { Date.now = realNow; }
+  const page = fsx.readFileSync("nz/movie/gone-film.html", "utf8");
+  assert.ok(/<!--SW:gone=2026-10-17-->/.test(page) && /it was on Netflix/.test(page), "the page says it left, and where it was");
+  assert.ok(!man.nz["gone-film"].live, "the claim is retired");
+  const q = Q.queuedFacts("nz").get("gone-film");
+  assert.deepStrictEqual([q.state, q.goneAt, q.providers.length], ["gone", "2026-10-17", 0], "and the facts say the same");
+  Q.clearQueue();
+}));
+testAsync("arrival sweep: a waiting page that gains a platform streams, opens a claim and records the facts", () => inTempDir(async () => {
+  const fsx = require("fs"), Mg = require("./lib/migrate.js"), Q = require("./lib/factsq.js");
+  const NZ = require("./lib/core.js").COUNTRIES.find((c) => c.code === "nz");
+  fsx.mkdirSync("nz/movie", { recursive: true });
+  const rel = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  const item = { title: "New Arrival", slug: "new-arrival", kind: "movie", released: rel, language: "English", providers: [], platform: "Theatres", rentBuy: [], tmdbId: 11 };
+  fsx.writeFileSync("nz/movie/new-arrival.html", Mg.renderFrozen(item, NZ, { asOf: rel, knownSlugs: new Set(), availability: "" }));
+  const man = { nz: { "new-arrival": { tmdbId: 11, title: "New Arrival", released: rel, kind: "movie", archivedOn: rel } } };
+  Q.clearQueue();
+  const today = new Date().toISOString().slice(0, 10);
+  const stub = async () => ({ title: "New Arrival", release_date: rel, "watch/providers": { results: { NZ: { flatrate: [{ provider_name: "Netflix" }] } } }, release_dates: { results: [] } });
+  await withTmdbStub(stub, "./lib/lifecycle.js", (L) => L.sweepStreamingArrivals(man, NZ, today));
+  const page = fsx.readFileSync("nz/movie/new-arrival.html", "utf8");
+  assert.ok(/<!--SW:stream-->|<!--SW:live=/.test(page) && />Netflix</.test(page), "the page names the platform");
+  assert.deepStrictEqual(man.nz["new-arrival"].live.providers, ["Netflix"], "a live claim is opened for the departure sweep");
+  const q = Q.queuedFacts("nz").get("new-arrival");
+  assert.deepStrictEqual([q.providers, q.checkedAt], [["Netflix"], today], "and the facts record the arrival");
+  Q.clearQueue();
+}));
+test("header rating line at every threshold: hidden under 10, 'Few' under 50, 'Moderate' to 300, then 'Solid'", () => {
+  const F = require("./lib/filmpage.js");
+  const old = "2024-01-01";
+  const head = (votes) => F.headRatingHtml({ rating: 7.1, votes, released: old, kind: "movie" });
+  assert.ok(/Too few ratings to rate/.test(head(9)) && /only 9/.test(head(9)) && !/★/.test(head(9)), head(9));
+  assert.ok(/Few ratings/.test(head(49)) && /★ 7\.1/.test(head(49)));
+  assert.ok(/Moderate ratings/.test(head(50)) && /Moderate ratings/.test(head(299)));
+  assert.ok(/Solid/.test(head(300)));
+  assert.ok(/Not rated on TMDB/.test(F.headRatingHtml({ rating: null, votes: 0, released: old })));
+});
+test("a departed page keeps no 'streaming on X' sentence anywhere, FAQ included", () => {
+  const L = require("./lib/lifecycle.js");
+  const html = `<p>A tense thriller. In New Zealand you can stream it on Netflix.</p><p>You can stream Gone Film in New Zealand on Netflix.</p><div class="fa">Gone Film is already streaming in New Zealand on Netflix — it arrived on 2 Sept 2026.</div><p>It's streaming in New Zealand now — see where to watch above.</p>`;
+  const out = L.settleDepartedCopy(html, { title: "Gone Film", was: ["Netflix"], countryName: "New Zealand" });
+  assert.ok(!/stream it on Netflix|can stream Gone Film|is already streaming|streaming in New Zealand now/.test(out), out);
+  assert.ok(/isn't on a subscription service in New Zealand right now — it was on Netflix/.test(out));
+});
+test("an announced streaming date that passes says 'was due to stream', never 'streams from'", () => {
+  const P = require("./lib/pagekit.js");
+  const NZ = require("./lib/core.js").COUNTRIES.find((c) => c.code === "nz");
+  const block = P.digitalPassedBlock("Late Film", "2026-10-01", "Netflix", "New Zealand", NZ);
+  assert.ok(/was (?:scheduled|due) to (?:start )?stream/i.test(block), block);
+  assert.ok(!/Streaming from/.test(block));
+  assert.ok(/<!--SW:pending-->/.test(block), "still a block the arrival sweep can replace");
+  assert.ok(/Netflix/.test(P.digitalPassedText("Late Film", "2026-10-01", "Netflix", "New Zealand", NZ)));
+});
+test("a platform page never lists a film today's data shows in cinemas only", () => inTempDirSync(() => {
+  const fsx = require("fs"), E = require("./lib/evergreen.js");
+  const NZ = require("./lib/core.js").COUNTRIES.find((c) => c.code === "nz");
+  const ott = Array.from({ length: 12 }, (_, i) => ({ slug: `s${i}`, title: `Streamer ${i}`, language: "English", kind: "movie", providers: ["Netflix"], released: "2025-01-01" }));
+  const data = { ott, ottExtra: [], theatres: [{ slug: "in-cinemas", title: "In Cinemas", providers: [] }] };
+  const today = new Date().toISOString().slice(0, 10);
+  const manifest = { nz: { "in-cinemas": { title: "In Cinemas", lang: "English", kind: "movie", live: { since: today, lastCheck: today, providers: ["Netflix"] } } } };
+  E.writeStreamingPages(data, NZ, manifest, []);
+  const page = fsx.readFileSync("nz/streaming/netflix/index.html", "utf8");
+  assert.ok(/Streamer 0/.test(page), "the platform page was written");
+  assert.ok(!/In Cinemas/.test(page), "the film in cinemas isn't on it, whatever an older claim says");
+}));
+test("no FilmyChill Score on a film that isn't out yet, whatever its ratings", () => {
+  const Fc = require("./lib/fcscore.js");
+  const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+  assert.ok(Fc.notOutYet({ released: tomorrow }));
+  assert.strictEqual(Fc.fcScore({ released: tomorrow, rating: 8.4, votes: 900, criticsTone: "acclaim" }), null);
+  assert.ok(Fc.fcScore({ released: "2025-01-01", rating: 8.4, votes: 900 }), "released: scored");
+});
+test("the render applies the calendar: a page whose cinema date has passed stops saying it's coming", () => {
+  const Mg = require("./lib/migrate.js");
+  const NZ = require("./lib/core.js").COUNTRIES.find((c) => c.code === "nz");
+  const soon = new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+  const up = Mg.renderFrozen({ title: "Due Film", slug: "due-film", kind: "movie", released: soon, language: "English", providers: [], platform: "Theatres", rentBuy: [] }, NZ, { asOf: yesterday, knownSlugs: new Set() });
+  assert.ok(/<!--SW:due=/.test(up), "an upcoming page carries its due date");
+  const L = require("./lib/lifecycle.js");
+  const passed = L.duePassPage(up.replace(/<!--SW:due=\d{4}-\d{2}-\d{2}-->/, `<!--SW:due=${yesterday}-->`), { title: "Due Film", countryName: "New Zealand", cfg: NZ });
+  assert.ok(passed.changed && /opened in theatres in New Zealand/.test(passed.html), "the date passing flips it");
+  assert.ok(!/hasn't had its theatrical release yet/.test(passed.html.slice(passed.html.indexOf("<!--SW:pending-->"))));
+});
+test("the data page publishes exactly what windowStats measures, and the CSV holds the same rows", () => inTempDirSync(() => {
+  const fsx = require("fs"), S = require("./lib/surfaces.js"), H = require("./lib/history.js");
+  const recs = [
+    { c: "in", k: "movie", id: 1, th: "2026-08-01", first: "2026-08-20", seen: "2026-08-01T00:00:00Z", lang: "Tamil", p: "Netflix" },
+    { c: "in", k: "movie", id: 2, th: "2026-08-01", first: "2026-09-10", seen: "2026-09-10T00:00:00Z", lang: "Tamil", p: "Netflix" },
+    { c: "in", k: "movie", id: 3, th: "2026-08-05", first: "2026-09-20", seen: "2026-09-20T00:00:00Z", lang: "Tamil", p: "Prime Video" },
+    { c: "in", k: "movie", id: 4, th: "2026-08-05", first: "2026-09-25", seen: "2026-09-25T00:00:00Z", lang: "Tamil", p: "Netflix" },
+  ];
+  fsx.writeFileSync("ott-history.jsonl", recs.map((r) => JSON.stringify(r)).join("\n") + "\n");
+  S.writeDataPage("18 October 2026");
+  const s = H.windowStats(H.readHistory());
+  const html = fsx.readFileSync("data/index.html", "utf8");
+  assert.ok(html.includes(`${s.overall} days`), `median ${s.overall} published`);
+  const csvRows = fsx.readFileSync("data/streaming-windows.csv", "utf8").trim().split("\n").length - 1;
+  assert.strictEqual(csvRows, s.measured, "one CSV row per measured film");
+}));
+test("an unreadable facts line is counted, and its page is captured again rather than frozen", () => inTempDirSync(() => {
+  const fsx = require("fs"), Fa = require("./lib/facts.js"), Mg = require("./lib/migrate.js");
+  const NZ = require("./lib/core.js").COUNTRIES.find((c) => c.code === "nz");
+  fsx.mkdirSync("nz/movie", { recursive: true }); fsx.mkdirSync("facts", { recursive: true });
+  const item = { title: "Ok", slug: "ok", kind: "movie", released: "2025-01-01", language: "English", providers: [], platform: "Theatres", rentBuy: [] };
+  for (const s of ["ok", "lost"]) fsx.writeFileSync(`nz/movie/${s}.html`, Mg.renderFrozen({ ...item, slug: s, title: s }, NZ, { asOf: "2026-10-01", knownSlugs: new Set() }));
+  fsx.writeFileSync("facts/nz.jsonl", JSON.stringify({ slug: "ok", updated: "2026-10-01", item: { ...item } }) + "\n{\"slug\":\"lost\",\"updated\":\n");
+  assert.strictEqual(Fa.readFacts("nz").skipped, 1);
+  const man = { nz: { ok: { rendered: "x", archivedOn: "x" }, lost: { rendered: "x", archivedOn: "x" } } };
+  const r = Mg.renderMigrated(man, NZ, { today: "2026-10-18" });
+  assert.strictEqual(r.unreadable, 1, "reported");
+  assert.ok(!man.nz.lost.rendered && man.nz.ok.rendered, "the lost page is captured again this run (migrateBatch), the good one untouched");
+}));
+test("a rendered page's title follows its record's platforms, even if the page would read them wrong", () => {
+  const A = require("./lib/archive.js");
+  const parsed = { title: "Cocoon", kind: "movie", released: "2020-08-13", providers: [], rentBuy: ["Apple TV Store"], platform: "", rating: 6.1, votes: 999 };
+  const rec = { title: "Cocoon", kind: "movie", released: "2020-08-13", providers: ["Queer Cinemab"], rentBuy: ["Apple TV Store"], votes: 40, rating: 6.1 };
+  const it = A.withRecord(parsed, rec);
+  assert.deepStrictEqual([it.providers, it.platform, it.votes], [["Queer Cinemab"], "Queer Cinemab", 999], "platforms from the record; the vote-gated display stays as drawn");
+  assert.strictEqual(A.withRecord(parsed, null), parsed, "no record: the page's own facts");
+});
 test("waiting pages older than 30 weeks get a small share of the arrival sweep, each every 14 days", () => {
   const Lc = require("./lib/lifecycle.js");
   const now = new Date("2026-10-16T00:00:00Z");

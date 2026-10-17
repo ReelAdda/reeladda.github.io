@@ -46,16 +46,16 @@ function renderFrozen(item, cfg, { asOf, knownSlugs, availability = "", untracke
   const it = { ...item, _alts: cluster.length > 1 ? cluster : [], ...(untracked ? { untracked: true } : {}) };
   const html = buildFilmPage(it, asOf, knownSlugs, cfg, null);
   const countryName = countryNameFor(cfg);
-  let out = archivePatchHtml(html, countryName, cfg).html;
+  let out = archivePatchHtml(html, countryName, cfg, item).html;
   // What the calendar alone changes (lib/lifecycle.js duePassPage): the same pass the build
   // runs over pages on disk, so a page drawn from facts says what a patched page says.
-  out = duePassPage(out, { title: item.title, countryName, cfg }).html;
+  out = duePassPage(out, { title: item.title, countryName, cfg, item }).html;
   // A departure is part of the facts (lib/factsq.js): drawn on every render, so it can't be
   // erased by the next one (it was: no departure notice survived, Oct 2026 audit).
   if (item.state === "gone") {
     const r = applyDeparturePatch(out, { title: item.title, was: item.wasOn || [], rentBuy: item.rentBuy || [],
       countryName, cfg, asOf: item.goneAt || item.checkedAt || "", unconfirmed: !!item.goneUnconfirmed });
-    if (r.changed) out = retitleFrozen(rewriteMetaDescription(r.html, cfg).html, cfg).html;
+    if (r.changed) out = retitleFrozen(rewriteMetaDescription(r.html, cfg, item).html, cfg, item).html;
   }
   // The date the platforms were last confirmed stays the page's own, never the render date.
   return availability ? out.replace(/Availability as of [^<—]+? — /, `Availability as of ${availability} — `) : out;

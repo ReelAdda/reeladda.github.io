@@ -413,12 +413,12 @@ function frozenFilmFacts(html) {
 
 // Returns {html, changed} like the other patchers. Never lengthens past the snippet budget,
 // never writes when the parse failed, never writes when the result is identical.
-function rewriteMetaDescription(html, cfg = null) {
+function rewriteMetaDescription(html, cfg = null, item = null) {
   const cur = /<meta name="description" content="([^"]*)"/.exec(html);
   if (!cur) return { html, changed: false };
   const facts = frozenFilmFacts(html);
   if (!facts) return { html, changed: false };
-  const next = filmMetaDescription(facts.item, cfg, { runEnded: facts.runEnded, runOpen: facts.runOpen, gone: facts.gone });
+  const next = filmMetaDescription(withRecord(facts.item, item), cfg, { runEnded: facts.runEnded, runOpen: facts.runOpen, gone: facts.gone });
   const esc = escHtml(next);
   if (!next || next.length < 20 || esc === cur[1]) return { html, changed: false };
   let out = html.replace(/(<meta name="description" content=")[^"]*(")/, `$1${esc}$2`);
@@ -443,13 +443,32 @@ function stripAggregateRating(html) {
 // the rule change is meant to fix. Everything needed is already in the HTML: frozenFilmFacts
 // reads the provider pills, so the same rule decides the same way it does on a live render.
 // Only <title> is touched; og:title carries the "— FilmyChill verdict" social form.
-function retitleFrozen(html, cfg = null) {
+// The facts that decide a title or description: the page's record when the caller has it
+// (the render from facts always does), else what the page shows. Only what can be MISREAD
+// comes from the record: platforms, title, kind, language, dates, runtime. Display decisions
+// the render already made stay as drawn: the rating (shown only past its vote gate), the
+// cinema-run state and the "in cinemas" platform inferred from the page's own markers.
+// Reading platforms back from the page is how Cocoon's "Queer Cinemab" became "Not
+// Announced" (review, Oct 2026).
+const RECORD_FIELDS = ["title", "kind", "language", "genre", "released", "runtime", "providers", "rentBuy"];
+function withRecord(parsed, item) {
+  if (!item) return parsed;
+  const out = { ...parsed };
+  for (const k of RECORD_FIELDS) if (item[k] !== undefined && item[k] !== null && item[k] !== "") out[k] = item[k];
+  const provs = Array.isArray(out.providers) ? out.providers : [];
+  out.platform = provs.length ? provs[0] : (parsed.providers && parsed.providers.length ? "Theatres" : parsed.platform);
+  if (item.state) out.state = item.state;
+  return out;
+}
+
+function retitleFrozen(html, cfg = null, item = null) {
   const cur = /<title>([\s\S]*?)<\/title>/.exec(html);
   if (!cur) return { html, changed: false };
   const facts = frozenFilmFacts(html);
   if (!facts) return { html, changed: false };
   // A departed film (SW:gone) isn't waiting for a release date: its title says where to watch.
-  const next = filmTitleTag(facts.gone ? { ...facts.item, state: "gone" } : facts.item, cfg);
+  const it = withRecord(facts.item, item);
+  const next = filmTitleTag(facts.gone ? { ...it, state: "gone" } : it, cfg);
   const esc = escHtml(next);
   if (!next || esc === cur[1]) return { html, changed: false };
   return { html: html.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc}</title>`), changed: true };
@@ -461,12 +480,12 @@ function retitleFrozen(html, cfg = null) {
 // window (Oct 2026). Only a title carrying "Expected" is touched, and the new one is put in
 // the form the end-of-build pass leaves it (country added outside India), so it is written
 // once per change and never flips back and forth between runs.
-function refreshExpectedTitle(html, cfg = null) {
+function refreshExpectedTitle(html, cfg = null, item = null) {
   const cur = /<title>([\s\S]*?)<\/title>/.exec(html);
   if (!cur || !/\bExpected [A-Z][a-z]{2}/.test(cur[1])) return { html, changed: false };
   const facts = frozenFilmFacts(html);
   if (!facts) return { html, changed: false };
-  const next = escHtml(titleWithCountry(filmTitleTag(facts.item, cfg), cfg));
+  const next = escHtml(titleWithCountry(filmTitleTag(withRecord(facts.item, item), cfg), cfg));
   if (!next || next === cur[1]) return { html, changed: false };
   return { html: html.replace(cur[0], `<title>${next}</title>`), changed: true };
 }
@@ -629,7 +648,7 @@ function visibleText(html) {
     .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-function archivePatchHtml(html, countryName, cfg = null) {
+function archivePatchHtml(html, countryName, cfg = null, item = null) {
   const V = streamVocab(cfg);
   // Pages frozen BEFORE the per-country vocabulary split carry India's "OTT" wording
   // in every market, so we match both the country's current word and the legacy one.
@@ -660,7 +679,7 @@ function archivePatchHtml(html, countryName, cfg = null) {
   }
   const r = stripAggregateRating(out);
   if (r.changed) { out = r.html; changed = true; }
-  const rt = retitleFrozen(out, cfg);
+  const rt = retitleFrozen(out, cfg, item);
   if (rt.changed) { out = rt.html; changed = true; }
   const an = ensureAnalytics(out);
   if (an.changed) { out = an.html; changed = true; }
@@ -673,7 +692,7 @@ function archivePatchHtml(html, countryName, cfg = null) {
   // Runs LAST, after the body swaps above have set "Theatrical run ended" — frozenFilmFacts
   // reads that marker to decide between "in cinemas" and "theatrical run over", so ordering
   // here is load-bearing.
-  const d = rewriteMetaDescription(out, cfg);
+  const d = rewriteMetaDescription(out, cfg, item);
   if (d.changed) { out = d.html; changed = true; }
   return { html: out, changed };
 }
@@ -715,6 +734,7 @@ function reconcilePagesManifest(manifest, code, currentSlugs, diskSlugs, todaySt
 }
 
 module.exports = {
+  withRecord,
   NOT_YET_TITLE,
   ARCHIVE_PATCH_VERSION,
   archivePatchHtml,

@@ -576,7 +576,7 @@ function patchDigitalIfPassed(html, { title, countryName, cfg, now = Date.now() 
 // (a release date or an announced streaming date passing, a cinema run ending, an "Expected"
 // month going by). The render from facts runs it too (lib/migrate.js renderFrozen), so a page
 // drawn from its facts and a page patched here say the same thing on the same day.
-function duePassPage(html, { title, countryName, cfg }) {
+function duePassPage(html, { title, countryName, cfg, item = null }) {
   let out = html, changed = false;
   if (html.includes("<!--SW:due=")) {
     ({ html: out, changed } = patchDueIfPassed(html, { title, countryName, cfg }));
@@ -585,19 +585,19 @@ function duePassPage(html, { title, countryName, cfg }) {
     // Its FAQ can still carry the live builder's "is in cinemas … now" (settleReleasedCopy).
     const dg = patchDigitalIfPassed(html, { title, countryName, cfg });
     let next = settleReleasedCopy(dg.html, { countryName, cfg }).html;
-    if (dg.changed) next = retitleFrozen(rewriteMetaDescription(next, cfg).html, cfg).html;
+    if (dg.changed) next = retitleFrozen(rewriteMetaDescription(next, cfg, item).html, cfg, item).html;
     if (next !== html) { out = next; changed = true; }
   } else if (OPEN_PILL_RE.test(html) || RUN_ENDED_PILL_RE.test(html) || OLD_FALLBACK_DESC_RE.test(html)) {
     // Open run: re-settle so it flips to "most likely ended" on the day it crosses the
     // window. Ended run: bring the live builder's own theatrical sentences, and any lapsed
     // window estimate, into line with the pill. Either way the description follows, and an
     // "Expected <month>" title once its month is behind it.
-    const settled = rewriteMetaDescription(settleReleasedCopy(html, { countryName, cfg }).html, cfg).html;
-    const next = refreshExpectedTitle(settled, cfg).html;
+    const settled = rewriteMetaDescription(settleReleasedCopy(html, { countryName, cfg }).html, cfg, item).html;
+    const next = refreshExpectedTitle(settled, cfg, item).html;
     if (next !== html) { out = next; changed = true; }
   } else if (EXPECTED_TITLE_RE.test(html)) {
     // A page with no where-to-watch block to settle (6 such, Oct 2026): only its title.
-    ({ html: out, changed } = refreshExpectedTitle(html, cfg));
+    ({ html: out, changed } = refreshExpectedTitle(html, cfg, item));
   }
   return { html: out, changed };
 }
