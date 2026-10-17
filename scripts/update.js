@@ -394,15 +394,13 @@ if (!API_KEY && !process.env.PAGES_ONLY && require.main === module) {
   process.exit(1);
 }
 
-async function main() {
-  const [movieGenres, tvGenres] = await Promise.all([tmdb("/genre/movie/list"), tmdb("/genre/tv/list")]);
-
-  // Load IMDb's daily ratings dataset once (used to attach a second-opinion rating).
-  // Filled in place (not reassigned): the Map is shared with lib/enrich.js, which reads it.
-  { const loaded = await loadImdbRatings(); imdbRatings.clear(); for (const [k, v] of loaded) imdbRatings.set(k, v); }
-  const gmap = {};
-  for (const g of [...movieGenres.genres, ...tvGenres.genres]) gmap[g.id] = g.name;
-  const genres = (ids) => (ids || []).slice(0, 2).map((i) => gmap[i]).filter(Boolean).join(" / ");
+// ============================================================================
+// ONE EDITION'S LISTS (buildCountry) and the item helpers it shares with the catalogue backfill
+// and the legacy repair. Moved out of main() (review, Oct 2026: main was 1,400 lines, 890 of
+// them this). gmap is filled by main() once per run from TMDB's genre lists.
+// ============================================================================
+const gmap = {};
+const genres = (ids) => (ids || []).slice(0, 2).map((i) => gmap[i]).filter(Boolean).join(" / ");
 
   function baseItem(m, kind) {
     const relDate = m.release_date || m.first_air_date;
@@ -1356,461 +1354,506 @@ async function main() {
   const poolCount = poolLists.reduce((n, l) => n + l.length, 0);
   console.log(`[${cfg.code}] ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming, ${poolCount} language-page extras${data.soonExtra ? ` (${data.soonExtra.length} upcoming by language: ${Object.entries(data.soonExtra.reduce((o, x) => ((o[x.language] = (o[x.language] || 0) + 1), o), {})).map(([l, n]) => `${l} ${n}`).join(", ")})` : ""}. Pick: ${data.pick}`);
   return data;
-  } // end buildCountry
+} // end buildCountry
 
-  // Run the pipeline for every configured country, writing data-<code>.json for each.
-  // India (first) ALSO writes the canonical data.json + per-film pages. Every country gets its
-  // own indexable page: India at "/", others at "/<code>/". The pristine index.html template is
-  // read ONCE here so per-country injections never stack (India's render writes back to
-  // index.html, which would otherwise corrupt the template for later countries).
-  let pageTemplate;
-  try { pageTemplate = fs.readFileSync("index.html", "utf8"); }
-  catch { pageTemplate = null; console.warn("index.html template not found — page render skipped"); }
 
-  // Duplicate pages folded into one (lib/merges.js): off the disk before anything lists film
-  // pages, links retargeted before the dead-link repair, a redirect page written last.
-  let merges = [];
-  try {
-    merges = activeMerges(loadMerges());
-    const gone = removeMergedPages(merges);
-    if (merges.length) console.log(`Merges: ${merges.length} duplicate page(s) folded into their surviving page (${gone} removed before the build)`);
-  } catch (e) { stageFailed("merges", e); merges = []; }
+async function main() {
+  // main() runs the build as named stages, in order (review, Oct 2026: it was one 1,400-line
+  // function). These are the only values the stages share; everything else stays inside
+  // the stage that uses it.
+  let pageTemplate = null, merges = [], slugsById = null, pagesManifest = null;
+  const builtCountries = [], dataByCode = {}, allSlugSets = {};
+  const factsModes = loadModes(), factsResults = {};   // facts-only rendering (lib/factsq.js)
 
-  const builtCountries = [];
-  // Facts-only rendering, edition by edition (lib/factsq.js): modes in, this run's results out.
-  const factsModes = loadModes();
-  const factsResults = {};
-  const dataByCode = {};
-  const allSlugSets = {};
-  // A film TMDB renames keeps the address it already has (lib/filmpage.js assignSlugs).
-  let slugsById = null;
-  try {
-    slugsById = existingSlugsById(loadPagesManifest(), {
-      exists: (code, slug) => fs.existsSync(`${code === "in" ? "movie" : `${code}/movie`}/${slug}.html`),
-    });
-  } catch (e) { stageFailed("existing slugs", e); }
-  // Pass 1: build data for every country.
-  for (const cfg of COUNTRIES) {
-    const data = await buildCountry(cfg);
-    assignSlugs(data, slugsById, cfg.code);
-    dataByCode[cfg.code] = data;
-    const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || []), ...poolItems(data)];
-    allSlugSets[cfg.code] = new Set(all.map((x) => x.slug).filter(Boolean));
-    builtCountries.push(cfg);
+  // TMDB genres, the IMDb ratings file, the page template, merges and the slug map.
+  async function stageSetup() {
+    const [movieGenres, tvGenres] = await Promise.all([tmdb("/genre/movie/list"), tmdb("/genre/tv/list")]);
+
+    // Load IMDb's daily ratings dataset once (used to attach a second-opinion rating).
+    // Filled in place (not reassigned): the Map is shared with lib/enrich.js, which reads it.
+    { const loaded = await loadImdbRatings(); imdbRatings.clear(); for (const [k, v] of loaded) imdbRatings.set(k, v); }
+    for (const g of [...movieGenres.genres, ...tvGenres.genres]) gmap[g.id] = g.name;
+
+
+    // Run the pipeline for every configured country, writing data-<code>.json for each.
+    // India (first) ALSO writes the canonical data.json + per-film pages. Every country gets its
+    // own indexable page: India at "/", others at "/<code>/". The pristine index.html template is
+    // read ONCE here so per-country injections never stack (India's render writes back to
+    // index.html, which would otherwise corrupt the template for later countries).
+    try { pageTemplate = fs.readFileSync("index.html", "utf8"); }
+    catch { pageTemplate = null; console.warn("index.html template not found — page render skipped"); }
+
+    // Duplicate pages folded into one (lib/merges.js): off the disk before anything lists film
+    // pages, links retargeted before the dead-link repair, a redirect page written last.
+    merges = [];
+    try {
+      merges = activeMerges(loadMerges());
+      const gone = removeMergedPages(merges);
+      if (merges.length) console.log(`Merges: ${merges.length} duplicate page(s) folded into their surviving page (${gone} removed before the build)`);
+    } catch (e) { stageFailed("merges", e); merges = []; }
+
+    // Facts-only rendering, edition by edition (lib/factsq.js): modes in, this run's results out.
+    // A film TMDB renames keeps the address it already has (lib/filmpage.js assignSlugs).
+    try {
+      slugsById = existingSlugsById(loadPagesManifest(), {
+        exists: (code, slug) => fs.existsSync(`${code === "in" ? "movie" : `${code}/movie`}/${slug}.html`),
+      });
+    } catch (e) { stageFailed("existing slugs", e); }
   }
 
-  // Watchlist for the 30-minute probe (scripts/probe.js): films that have opened in theatres
-  // but have not yet been observed with a provider anywhere. The probe polls only these, so
-  // its API cost stays bounded no matter how large the archive grows.
-  try {
-    const archived = new Set(readHistory().map((r) => `${r.c}:${r.k}:${r.id}`));
-    const watch = [];
-    for (const [code, d] of Object.entries(dataByCode)) {
-      for (const it of [...(d.theatres || []), ...(d.comingSoon || [])]) {
-        if (!it.tmdbId || it.kind === "tv") continue;
-        if (archived.has(`${code}:movie:${it.tmdbId}`)) continue;
-        watch.push({ code, kind: "movie", tmdbId: it.tmdbId, title: it.title,
-          released: it.released || null, language: it.language || null, genre: it.genre || null,
-          // Carried into the probe's archive row (scripts/probe.js) as the cinema date.
-          th: it.theatricalHere ? (it.released || null) : null });
+  // Every edition's lists from TMDB; the probe watchlist and India census; archive upkeep; buzz, trailers, critics' takes and scores.
+  async function stageBuildData() {
+    // Pass 1: build data for every country.
+    for (const cfg of COUNTRIES) {
+      const data = await buildCountry(cfg);
+      assignSlugs(data, slugsById, cfg.code);
+      dataByCode[cfg.code] = data;
+      const all = [...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || []), ...poolItems(data)];
+      allSlugSets[cfg.code] = new Set(all.map((x) => x.slug).filter(Boolean));
+      builtCountries.push(cfg);
+    }
+
+    // Watchlist for the 30-minute probe (scripts/probe.js): films that have opened in theatres
+    // but have not yet been observed with a provider anywhere. The probe polls only these, so
+    // its API cost stays bounded no matter how large the archive grows.
+    try {
+      const archived = new Set(readHistory().map((r) => `${r.c}:${r.k}:${r.id}`));
+      const watch = [];
+      for (const [code, d] of Object.entries(dataByCode)) {
+        for (const it of [...(d.theatres || []), ...(d.comingSoon || [])]) {
+          if (!it.tmdbId || it.kind === "tv") continue;
+          if (archived.has(`${code}:movie:${it.tmdbId}`)) continue;
+          watch.push({ code, kind: "movie", tmdbId: it.tmdbId, title: it.title,
+            released: it.released || null, language: it.language || null, genre: it.genre || null,
+            // Carried into the probe's archive row (scripts/probe.js) as the cinema date.
+            th: it.theatricalHere ? (it.released || null) : null });
+        }
+      }
+      // Every Indian-language film in Indian cinemas, not only the listed ones (lib/indiadata.js):
+      // without it /data/ had no Hindi row at all. A failure here leaves the listed films watched.
+      let census = "";
+      try {
+        const known = new Set([...archived, ...watch.map((w) => `${w.code}:movie:${w.tmdbId}`)]);
+        const { res, watch: more } = await indiaCinemaCensus({ api: { tmdb, pause: sleep }, today: todayStr(), known });
+        watch.push(...more);
+        census = ` (India census: ${res.found} Indian cinema releases from the last ${180} days, ${res.watching} awaited, ${res.alreadyStreaming} already streaming when they joined — not counted${res.joined ? `, ${res.joined} joined this run` : ""})`;
+      } catch (e) { stageFailed("India cinema census", e); }
+      fs.writeFileSync("ott-watch.json", JSON.stringify(watch, null, 1));
+      console.log(`  probe watchlist: ${watch.length} title(s) awaiting a streaming sighting${census}`);
+    } catch (e) { stageFailed(`watchlist`, e); }
+
+    // Historical windows for Indian films from TMDB's digital release dates (lib/indiadata.js):
+    // a budgeted, resumable read; /data/ publishes them as their own table.
+    try {
+      const r = await runDigitalBackfill({ api: { tmdb, pause: sleep }, today: todayStr(), budget: DIGITAL_BUDGET });
+      if (r.calls) console.log(`  digital release dates: ${r.discovered} film(s) discovered, ${r.read} read (${r.dated} with a date), ${r.left} left to read, ${r.calls} TMDB call(s)${r.errors ? `, ${r.errors} errors` : ""}`);
+    } catch (e) { stageFailed("digital release dates", e); }
+
+    // Cinema dates for archived films recorded before the archive stored them (fillCinemaDates
+    // in lib/history.js): one TMDB call per film covers every country. /data/ and the film
+    // pages' "FilmyChill data" line count only films that opened in cinemas in that country, so
+    // a film is simply left out until its date is known. Bounded per run; the backlog of a few
+    // hundred films clears in a run or two, after which new rows arrive with the date.
+    try {
+      const lines = readHistoryLines();
+      const regionOf = (code) => (COUNTRIES.find((c) => c.code === code) || {}).region || String(code).toUpperCase();
+      const r = await fillCinemaDates(lines, {
+        lookup: (id) => tmdb(`/movie/${id}/release_dates`),
+        cinemaDateFor: (body, code) => regionalTheatricalDate({ release_dates: body }, regionOf(code)),
+        budget: CINEMA_DATE_BUDGET,
+        pause: () => sleep(120),
+      });
+      if (r.filled) writeHistoryLines(lines);
+      if (r.films) console.log(`  cinema dates: ${r.filled} archive row(s) filled from ${r.calls} TMDB call(s); ${r.pending} film(s) left to check`);
+    } catch (e) { stageFailed("cinema-date backfill", e); }
+
+    // Early arrivals rechecked before they are published as fact (verifyEarlyArrivals in
+    // lib/history.js): a listing before the cinema release is a placeholder, and one within two
+    // weeks of release is confirmed a week later or withdrawn after two empty checks. A withdrawn
+    // sighting's first-seen date is forgotten, so the real arrival is dated when it comes.
+    try {
+      const lines = readHistoryLines();
+      const regionOf = (code) => { const c = COUNTRIES.find((x) => x.code === code) || {}; return c.watchRegion || c.region || String(code).toUpperCase(); };
+      const r = await verifyEarlyArrivals(lines, {
+        today: todayStr(),
+        check: async (rec) => {
+          const d = await tmdb(`/movie/${rec.id}/watch/providers`);
+          const wp = (d && d.results && d.results[regionOf(rec.c)]) || {};
+          return (wp.flatrate || []).map((p) => p.provider_name);
+        },
+        pause: () => sleep(120),
+      });
+      if (lines.some((l) => l.dirty)) writeHistoryLines(lines);
+      const seenAll = loadOttSeen();
+      for (const k of r.keys) {
+        const [c, kind, id] = k.split(":");
+        if (seenAll[c]) delete seenAll[c][`${kind}:${id}`];
+      }
+      if (r.prelisted || r.checked) console.log(`  early arrivals: ${r.prelisted} placeholder sighting(s) withdrawn; ${r.checked} rechecked — ${r.confirmed} confirmed, ${r.pending} empty once (rechecked next run), ${r.retracted - r.prelisted} withdrawn${r.outage ? "; looked like a provider-data outage, nothing changed" : ""}`);
+      if (r.outage) healthNote("early-arrival recheck: most answers came back empty — treated as a TMDB/JustWatch outage, nothing withdrawn");
+    } catch (e) { stageFailed("early-arrival check", e); }
+
+    if (HISTORY_WRITE_FAILURES.length) healthIssue(`archive: ${HISTORY_WRITE_FAILURES.length} streaming sighting(s) couldn't be written to ott-history.jsonl — e.g. ${HISTORY_WRITE_FAILURES.slice(0, 3).join("; ")}`);
+
+    // Persist first-seen tracking (see ott-seen.json docs) — every country has now recorded
+    // today's sightings; the workflow commits this file so tomorrow's run remembers them.
+    fs.writeFileSync(OTT_SEEN_FILE, JSON.stringify(loadOttSeen(), null, 1));
+
+    // Buzz signals attach BEFORE the data files are written, so client-rendered cards
+    // (which read data.json) see the same badges the SSR cards do. Both are non-fatal.
+    await attachBuzz(dataByCode);
+    await attachTrailerStats(dataByCode);
+    // Critics' takes attach last but still BEFORE data files are written, so
+    // client-rendered cards (which read data.json) show the same line the SSR cards do.
+    await attachTakes(dataByCode);
+    // FilmyChill Score (lib/fcscore.js): audiences + critics, after the takes attach the critics
+    // tone and before the data files are written, so cards, film pages and share cards agree.
+    {
+      const { scored, total } = attachFcScores(dataByCode, { toneFor: cachedCriticsTone });
+      console.log(`FilmyChill Score: ${scored}/${total} listed titles scored (the rest: too early)`);
+      // Pick of the Week is re-chosen now that scores exist (see choosePick in lib/surfaces.js).
+      // The pick made in buildCountry stays as the fallback when nothing new qualifies.
+      for (const [code, d] of Object.entries(dataByCode)) {
+        if (!d) continue;
+        const cfg = COUNTRIES.find((c) => c.code === code) || { code };
+        const p = choosePick([...(d.theatres || []), ...(d.ott || [])], cfg, d.generatedAt);
+        if (p && p.title !== d.pick) { console.log(`  pick [${code}]: ${d.pick || "—"} → ${p.title} (${p.fcScore.verdict})`); d.pick = p.title; }
       }
     }
-    // Every Indian-language film in Indian cinemas, not only the listed ones (lib/indiadata.js):
-    // without it /data/ had no Hindi row at all. A failure here leaves the listed films watched.
-    let census = "";
-    try {
-      const known = new Set([...archived, ...watch.map((w) => `${w.code}:movie:${w.tmdbId}`)]);
-      const { res, watch: more } = await indiaCinemaCensus({ api: { tmdb, pause: sleep }, today: todayStr(), known });
-      watch.push(...more);
-      census = ` (India census: ${res.found} Indian cinema releases from the last ${180} days, ${res.watching} awaited, ${res.alreadyStreaming} already streaming when they joined — not counted${res.joined ? `, ${res.joined} joined this run` : ""})`;
-    } catch (e) { stageFailed("India cinema census", e); }
-    fs.writeFileSync("ott-watch.json", JSON.stringify(watch, null, 1));
-    console.log(`  probe watchlist: ${watch.length} title(s) awaiting a streaming sighting${census}`);
-  } catch (e) { stageFailed(`watchlist`, e); }
 
-  // Historical windows for Indian films from TMDB's digital release dates (lib/indiadata.js):
-  // a budgeted, resumable read; /data/ publishes them as their own table.
-  try {
-    const r = await runDigitalBackfill({ api: { tmdb, pause: sleep }, today: todayStr(), budget: DIGITAL_BUDGET });
-    if (r.calls) console.log(`  digital release dates: ${r.discovered} film(s) discovered, ${r.read} read (${r.dated} with a date), ${r.left} left to read, ${r.calls} TMDB call(s)${r.errors ? `, ${r.errors} errors` : ""}`);
-  } catch (e) { stageFailed("digital release dates", e); }
-
-  // Cinema dates for archived films recorded before the archive stored them (fillCinemaDates
-  // in lib/history.js): one TMDB call per film covers every country. /data/ and the film
-  // pages' "FilmyChill data" line count only films that opened in cinemas in that country, so
-  // a film is simply left out until its date is known. Bounded per run; the backlog of a few
-  // hundred films clears in a run or two, after which new rows arrive with the date.
-  try {
-    const lines = readHistoryLines();
-    const regionOf = (code) => (COUNTRIES.find((c) => c.code === code) || {}).region || String(code).toUpperCase();
-    const r = await fillCinemaDates(lines, {
-      lookup: (id) => tmdb(`/movie/${id}/release_dates`),
-      cinemaDateFor: (body, code) => regionalTheatricalDate({ release_dates: body }, regionOf(code)),
-      budget: CINEMA_DATE_BUDGET,
-      pause: () => sleep(120),
-    });
-    if (r.filled) writeHistoryLines(lines);
-    if (r.films) console.log(`  cinema dates: ${r.filled} archive row(s) filled from ${r.calls} TMDB call(s); ${r.pending} film(s) left to check`);
-  } catch (e) { stageFailed("cinema-date backfill", e); }
-
-  // Early arrivals rechecked before they are published as fact (verifyEarlyArrivals in
-  // lib/history.js): a listing before the cinema release is a placeholder, and one within two
-  // weeks of release is confirmed a week later or withdrawn after two empty checks. A withdrawn
-  // sighting's first-seen date is forgotten, so the real arrival is dated when it comes.
-  try {
-    const lines = readHistoryLines();
-    const regionOf = (code) => { const c = COUNTRIES.find((x) => x.code === code) || {}; return c.watchRegion || c.region || String(code).toUpperCase(); };
-    const r = await verifyEarlyArrivals(lines, {
-      today: todayStr(),
-      check: async (rec) => {
-        const d = await tmdb(`/movie/${rec.id}/watch/providers`);
-        const wp = (d && d.results && d.results[regionOf(rec.c)]) || {};
-        return (wp.flatrate || []).map((p) => p.provider_name);
-      },
-      pause: () => sleep(120),
-    });
-    if (lines.some((l) => l.dirty)) writeHistoryLines(lines);
-    const seenAll = loadOttSeen();
-    for (const k of r.keys) {
-      const [c, kind, id] = k.split(":");
-      if (seenAll[c]) delete seenAll[c][`${kind}:${id}`];
-    }
-    if (r.prelisted || r.checked) console.log(`  early arrivals: ${r.prelisted} placeholder sighting(s) withdrawn; ${r.checked} rechecked — ${r.confirmed} confirmed, ${r.pending} empty once (rechecked next run), ${r.retracted - r.prelisted} withdrawn${r.outage ? "; looked like a provider-data outage, nothing changed" : ""}`);
-    if (r.outage) healthNote("early-arrival recheck: most answers came back empty — treated as a TMDB/JustWatch outage, nothing withdrawn");
-  } catch (e) { stageFailed("early-arrival check", e); }
-
-  if (HISTORY_WRITE_FAILURES.length) healthIssue(`archive: ${HISTORY_WRITE_FAILURES.length} streaming sighting(s) couldn't be written to ott-history.jsonl — e.g. ${HISTORY_WRITE_FAILURES.slice(0, 3).join("; ")}`);
-
-  // Persist first-seen tracking (see ott-seen.json docs) — every country has now recorded
-  // today's sightings; the workflow commits this file so tomorrow's run remembers them.
-  fs.writeFileSync(OTT_SEEN_FILE, JSON.stringify(loadOttSeen(), null, 1));
-
-  // Buzz signals attach BEFORE the data files are written, so client-rendered cards
-  // (which read data.json) see the same badges the SSR cards do. Both are non-fatal.
-  await attachBuzz(dataByCode);
-  await attachTrailerStats(dataByCode);
-  // Critics' takes attach last but still BEFORE data files are written, so
-  // client-rendered cards (which read data.json) show the same line the SSR cards do.
-  await attachTakes(dataByCode);
-  // FilmyChill Score (lib/fcscore.js): audiences + critics, after the takes attach the critics
-  // tone and before the data files are written, so cards, film pages and share cards agree.
-  {
-    const { scored, total } = attachFcScores(dataByCode, { toneFor: cachedCriticsTone });
-    console.log(`FilmyChill Score: ${scored}/${total} listed titles scored (the rest: too early)`);
-    // Pick of the Week is re-chosen now that scores exist (see choosePick in lib/surfaces.js).
-    // The pick made in buildCountry stays as the fallback when nothing new qualifies.
-    for (const [code, d] of Object.entries(dataByCode)) {
-      if (!d) continue;
-      const cfg = COUNTRIES.find((c) => c.code === code) || { code };
-      const p = choosePick([...(d.theatres || []), ...(d.ott || [])], cfg, d.generatedAt);
-      if (p && p.title !== d.pick) { console.log(`  pick [${code}]: ${d.pick || "—"} → ${p.title} (${p.fcScore.verdict})`); d.pick = p.title; }
-    }
   }
 
-  // Product stats, BEFORE data files are written so the client can render the
-  // confidence strip ("N picks · M+ films tracked") from data alone.
-  const priorManifest = loadPagesManifest();
-  for (const cfg of builtCountries) {
-    dataByCode[cfg.code].trackedFilms = Object.keys(priorManifest[cfg.code] || {}).length;
-  }
-
-  // Now write every country's data file (India also writes the legacy data.json).
-  for (const cfg of builtCountries) {
-    // soonExtra only feeds pages written in this run (film pages, language pages); the homepage
-    // never reads it, and at ~4 KB a film it would add ~130 KB to every homepage visit.
-    const json = JSON.stringify(dataByCode[cfg.code], (k, v) => (k === "soonExtra" ? undefined : v), 1);
-    fs.writeFileSync(`data-${cfg.code}.json`, json);
-    if (cfg.code === "in") fs.writeFileSync("data.json", json);
-  }
-  // Pass 2: now that ALL slug sets are known, generate per-film pages for every country (so
-  // hreflang alternates between countries are accurate) and render each country homepage.
-  for (const cfg of COUNTRIES) {
-    // Cards BEFORE pages: socialImage() checks the card file on disk, so the render order
-    // decides whether a page points at its branded card or falls back to the backdrop.
-    try { writeShareCards(dataByCode[cfg.code], cfg); }
-    catch (e) { stageFailed(`share cards [${cfg.code}]`, e, { optional: true }); }
-    generatePages(dataByCode[cfg.code], cfg, allSlugSets);
-    // Everything local for this country, in one place (see writeCountrySurfaces). Runs after
-    // generatePages so this run's films are already in the browse listing and card lookups.
-    writeCountrySurfaces(cfg, dataByCode[cfg.code], { template: pageTemplate, allCountries: builtCountries });
-  }
-  // India-only surfaces: language landing pages (/tamil/, /hindi/, ...) and the
-  // permanent weekly snapshot (/week/<year>-W<ww>/). Both are pure re-renders of
-  // this run's India data — zero extra API calls.
-  if (dataByCode.in) {
-    writeLanguagePages(dataByCode.in);
-    writeWeekPage(dataByCode.in);
-  }
-  writeIndexNowPayload(builtCountries, dataByCode); // fresh URL list for the workflow's IndexNow ping
-  writeLlmsTxt(dataByCode); // AI-answer-engine site map with this week's actual picks
-  // Keep the About page's country sentence in step with the config (see patchAboutPage).
-  // Non-fatal: a broken marker should surface loudly in the log, not kill a good build.
-  try { patchAboutPage(); } catch (e) { stageFailed(`about page`, e); }
-
-  // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
-  // and the manifest records real lastmod dates for the sitemap (see module-scope docs).
-  const pagesManifest = loadPagesManifest();
-  dropMergedEntries(pagesManifest, merges);
-  for (const cfg of builtCountries) {
-    const d = dataByCode[cfg.code] || {};
-    // slug -> the few fields the streaming sweep needs after this page freezes. Pool items
-    // (language pools, ottExtra) get pages and count as current too; without them here their
-    // entries kept no id, title or date, and froze that way (100 pages, 16 Oct 2026 audit).
-    const meta = {};
-    for (const it of [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || []), ...poolItems(d)]) {
-      if (it && it.slug) meta[it.slug] = { tmdbId: it.tmdbId, released: it.released, language: it.language, kind: it.kind, title: it.title };
-    }
-    archiveDepartedPages(pagesManifest, cfg, allSlugSets[cfg.code] || new Set(), meta);
-  }
-  // Re-check frozen theatrical pages for a streaming arrival they'd otherwise never
-  // reflect (see sweepStreamingArrivals). Runs after archiving so newly-frozen pages
-  // are eligible immediately; budgeted per country.
-  for (const cfg of builtCountries) {
-    // First give every frozen page an id the sweep can use (see recoverTmdbIds).
-    try { await recoverTmdbIds(cfg, pagesManifest); }
-    catch (e) { stageFailed(`id recovery [${cfg.code}]`, e); }
-    try { await sweepStreamingArrivals(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
-    catch (e) { stageFailed(`sweep [${cfg.code}]`, e); }
-    // The mirror pass: recheck claims we already made (see sweepStreamingDepartures).
-    // Budgeted and slow-cadence, so this adds a flat ~15 calls per country per run no
-    // matter how large the archive grows.
-    try { backfillStreamClaims(pagesManifest, cfg); }
-    catch (e) { stageFailed(`stream claims [${cfg.code}]`, e); }
-    try { await sweepStreamingDepartures(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
-    catch (e) { stageFailed(`departure sweep [${cfg.code}]`, e); }
-    // Free, local, no budget: move any page past its stamped release date (see patchDueIfPassed).
-    try { refreshDuePages(cfg, countryNameFor(cfg), pagesManifest); }
-    catch (e) { stageFailed(`due pass [${cfg.code}]`, e); }
-  }
-  // Data accuracy (scripts/accuracy.js): a sample of film pages compared with TMDB every run,
-  // measured before anything changes; frozen pages get TMDB's facts recorded, which the render
-  // from facts below applies (lib/truth.js). Results committed in accuracy-*.json(l).
-  try {
-    const { runAccuracyPass } = require("./accuracy.js");
-    const t = require("./lib/tmdb.js");
-    const a = await runAccuracyPass(pagesManifest, { per: Number(process.env.ACCURACY_PER_EDITION || 6), api: { tmdb: t.tmdb, pause: t.sleep } });
-    if (a.checked >= 50 && a.high / a.checked > 0.08) healthNote(`accuracy: ${a.high} high-severity disagreement(s) with TMDB in ${a.checked} sampled pages — see accuracy-latest.json`);
-  } catch (e) { stageFailed("accuracy", e); }
-  // Wrong-market legacy pages (see repairLegacyPages). Before hreflang sync so rebuilt pages
-  // rejoin their clusters in the same run.
-  for (const cfg of builtCountries) {
-    try { await repairLegacyPages(cfg, pagesManifest, { baseItem, withImdb }); }
-    catch (e) { stageFailed(`legacy repair [${cfg.code}]`, e); }
-  }
-  // Back-catalogue backfill (see backfillCatalog). Runs after the weekly pipeline has taken
-  // every slug it wants and before the hreflang + sitemap passes, so new catalogue pages join
-  // their clusters and the sitemap in the same run they are written.
-  if (CATALOG_ENABLED) {
-    const catalogState = loadCatalogManifest();
-    const reopened = reopenForBar(catalogState);
-    if (reopened) console.log(`  catalog: eligibility bar changed — ${reopened} retired queue(s) re-opened`);
+  // The data files, every weekly page and homepage, India's language pages, IndexNow, llms.txt.
+  async function stageWriteData() {
+    // Product stats, BEFORE data files are written so the client can render the
+    // confidence strip ("N picks · M+ films tracked") from data alone.
+    const priorManifest = loadPagesManifest();
     for (const cfg of builtCountries) {
-      try { await backfillCatalog(cfg, pagesManifest, { state: catalogState, baseItem, withImdb, batch: CATALOG_BATCH }); }
-      catch (e) { stageFailed(`catalog [${cfg.code}]`, e); }
+      dataByCode[cfg.code].trackedFilms = Object.keys(priorManifest[cfg.code] || {}).length;
     }
-    fs.writeFileSync(CATALOG_MANIFEST_FILE, JSON.stringify(catalogState, null, 1));
+
+    // Now write every country's data file (India also writes the legacy data.json).
     for (const cfg of builtCountries) {
-      const v = catalogStall(catalogState, cfg.code);
-      RUN_HEALTH.catalog[cfg.code] = v.last;
-      if (v.stalled) healthIssue(`catalog [${cfg.code}]: 0 new pages two runs in a row while ${v.live} queue(s) are still open — check the "catalog" lines in the build log`);
-      else if (v.exhausted) healthNote(`catalog [${cfg.code}]: every queue retired — no more back-catalogue titles from this source`);
+      // soonExtra only feeds pages written in this run (film pages, language pages); the homepage
+      // never reads it, and at ~4 KB a film it would add ~130 KB to every homepage visit.
+      const json = JSON.stringify(dataByCode[cfg.code], (k, v) => (k === "soonExtra" ? undefined : v), 1);
+      fs.writeFileSync(`data-${cfg.code}.json`, json);
+      if (cfg.code === "in") fs.writeFileSync("data.json", json);
     }
+    // Pass 2: now that ALL slug sets are known, generate per-film pages for every country (so
+    // hreflang alternates between countries are accurate) and render each country homepage.
+    for (const cfg of COUNTRIES) {
+      // Cards BEFORE pages: socialImage() checks the card file on disk, so the render order
+      // decides whether a page points at its branded card or falls back to the backdrop.
+      try { writeShareCards(dataByCode[cfg.code], cfg); }
+      catch (e) { stageFailed(`share cards [${cfg.code}]`, e, { optional: true }); }
+      generatePages(dataByCode[cfg.code], cfg, allSlugSets);
+      // Everything local for this country, in one place (see writeCountrySurfaces). Runs after
+      // generatePages so this run's films are already in the browse listing and card lookups.
+      writeCountrySurfaces(cfg, dataByCode[cfg.code], { template: pageTemplate, allCountries: builtCountries });
+    }
+    // India-only surfaces: language landing pages (/tamil/, /hindi/, ...) and the
+    // permanent weekly snapshot (/week/<year>-W<ww>/). Both are pure re-renders of
+    // this run's India data — zero extra API calls.
+    if (dataByCode.in) {
+      writeLanguagePages(dataByCode.in);
+      writeWeekPage(dataByCode.in);
+    }
+    writeIndexNowPayload(builtCountries, dataByCode); // fresh URL list for the workflow's IndexNow ping
+    writeLlmsTxt(dataByCode); // AI-answer-engine site map with this week's actual picks
+    // Keep the About page's country sentence in step with the config (see patchAboutPage).
+    // Non-fatal: a broken marker should surface loudly in the log, not kill a good build.
+    try { patchAboutPage(); } catch (e) { stageFailed(`about page`, e); }
+
   }
 
-  // FilmyChill Score on pages that are never rebuilt (frozen + back-catalogue): a budgeted
-  // sweep each run, never-scored first (lib/scoresweep.js).
-  {
-    // First the critics' half for those films (lib/editorial.js sweepCatalogCritics): pages
-    // whose film gains a reading are flagged so the score sweep below redoes them first.
+  // Frozen pages: archive pass, arrival and departure sweeps, the accuracy pass, legacy repair, back-catalogue.
+  async function stageSweeps() {
+    // Archive pass: pages whose films left this week's lists get a one-time honesty patch,
+    // and the manifest records real lastmod dates for the sitemap (see module-scope docs).
+    pagesManifest = loadPagesManifest();
+    dropMergedEntries(pagesManifest, merges);
+    for (const cfg of builtCountries) {
+      const d = dataByCode[cfg.code] || {};
+      // slug -> the few fields the streaming sweep needs after this page freezes. Pool items
+      // (language pools, ottExtra) get pages and count as current too; without them here their
+      // entries kept no id, title or date, and froze that way (100 pages, 16 Oct 2026 audit).
+      const meta = {};
+      for (const it of [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || []), ...poolItems(d)]) {
+        if (it && it.slug) meta[it.slug] = { tmdbId: it.tmdbId, released: it.released, language: it.language, kind: it.kind, title: it.title };
+      }
+      archiveDepartedPages(pagesManifest, cfg, allSlugSets[cfg.code] || new Set(), meta);
+    }
+    // Re-check frozen theatrical pages for a streaming arrival they'd otherwise never
+    // reflect (see sweepStreamingArrivals). Runs after archiving so newly-frozen pages
+    // are eligible immediately; budgeted per country.
+    for (const cfg of builtCountries) {
+      // First give every frozen page an id the sweep can use (see recoverTmdbIds).
+      try { await recoverTmdbIds(cfg, pagesManifest); }
+      catch (e) { stageFailed(`id recovery [${cfg.code}]`, e); }
+      try { await sweepStreamingArrivals(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
+      catch (e) { stageFailed(`sweep [${cfg.code}]`, e); }
+      // The mirror pass: recheck claims we already made (see sweepStreamingDepartures).
+      // Budgeted and slow-cadence, so this adds a flat ~15 calls per country per run no
+      // matter how large the archive grows.
+      try { backfillStreamClaims(pagesManifest, cfg); }
+      catch (e) { stageFailed(`stream claims [${cfg.code}]`, e); }
+      try { await sweepStreamingDepartures(pagesManifest, cfg, new Date().toISOString().slice(0, 10)); }
+      catch (e) { stageFailed(`departure sweep [${cfg.code}]`, e); }
+      // Free, local, no budget: move any page past its stamped release date (see patchDueIfPassed).
+      try { refreshDuePages(cfg, countryNameFor(cfg), pagesManifest); }
+      catch (e) { stageFailed(`due pass [${cfg.code}]`, e); }
+    }
+    // Data accuracy (scripts/accuracy.js): a sample of film pages compared with TMDB every run,
+    // measured before anything changes; frozen pages get TMDB's facts recorded, which the render
+    // from facts below applies (lib/truth.js). Results committed in accuracy-*.json(l).
     try {
-      const r = await sweepCatalogCritics(pagesManifest);
-      console.log(`Catalog critics sweep: ${r.checked} films read, ${r.toned} with a critics' verdict (${r.pages} pages to rescore), ${r.noImdb} without an IMDb id, ${r.left} still to read${r.errors ? `, ${r.errors} errors` : ""}`);
-      if (r.errors >= 5) healthNote(`catalog critics sweep stopped early after ${r.errors} errors — it resumes next run`);
-    } catch (e) { stageFailed("catalog critics sweep", e); }
-    try {
-      // Pages dated years after the same film elsewhere (re-release dates) go first this run.
-      const outliers = flagYearOutliers(pagesManifest);
-      if (outliers) console.log(`  ${outliers} page(s) dated 2+ years after the same film in another edition — rechecked first`);
-      const r = await sweepScores(pagesManifest, { today: todayStr() });
-      console.log(`FilmyChill Score sweep: ${r.checked} checked, ${r.updated} pages updated${r.errors ? `, ${r.errors} TMDB errors` : ""}`);
-      if (r.errors >= 5) healthNote(`score sweep stopped early after ${r.errors} TMDB errors — it resumes next run`);
-      // Pages whose film couldn't be identified on TMDB (no id saved, no poster match) can't be
-      // scored honestly, so they get no score box. Surface the count so it never goes unnoticed.
-      let unidentified = 0;
-      for (const m of Object.values(pagesManifest)) for (const e of Object.values(m || {})) if (e && !e.tmdbId && e.idLookup === "none") unidentified++;
-      if (unidentified) healthNote(`${unidentified} old film page(s) have no FilmyChill Score: their film couldn't be matched on TMDB`);
-    } catch (e) { stageFailed("score sweep", e); }
-    // "If you liked this" on frozen/back-catalogue pages, redone once per rules version
-    // (lib/relrefresh.js). Local only — no API calls.
-    try {
-      const r = refreshRelated(pagesManifest, COUNTRIES);
-      if (r.checked) console.log(`Related-films refresh: ${r.checked} old pages checked, ${r.updated} updated`);
-    } catch (e) { stageFailed("related-films refresh", e); }
-    // Visitors' votes (lib/votes.js): read new ones, keep per-film totals, report privately.
-    // Dormant until the FIREBASE_SERVICE_ACCOUNT secret exists.
-    try {
-      const v = await syncVotes({ dataByCode, note: healthNote });
-      if (v.enabled) console.log(`Votes: ${v.fetched} new, ${v.touched} films re-counted, ${v.films} films with votes`);
-    } catch (e) { stageFailed("votes", e); }
-    // (factsModes / factsResults: lib/factsq.js — loaded here, decided after the self-audit.)
-    // Frozen pages move to "facts rendered by the live template" (lib/migrate.js): pages
-    // already moved are rendered from their facts (after every sweep above, whose changes are
-    // read back first); then pages written this run, and any still held, move if their facts
-    // check passes (up to 500 per edition; MIGRATE_BATCH overrides, 0 stops it).
-    try {
-      const limit = migrateLimit();
-      let moved = 0, rendered = 0, changed = 0, corrected = 0; const correctedFields = {};
-      const held = [];
+      const { runAccuracyPass } = require("./accuracy.js");
+      const t = require("./lib/tmdb.js");
+      const a = await runAccuracyPass(pagesManifest, { per: Number(process.env.ACCURACY_PER_EDITION || 6), api: { tmdb: t.tmdb, pause: t.sleep } });
+      if (a.checked >= 50 && a.high / a.checked > 0.08) healthNote(`accuracy: ${a.high} high-severity disagreement(s) with TMDB in ${a.checked} sampled pages — see accuracy-latest.json`);
+    } catch (e) { stageFailed("accuracy", e); }
+    // Wrong-market legacy pages (see repairLegacyPages). Before hreflang sync so rebuilt pages
+    // rejoin their clusters in the same run.
+    for (const cfg of builtCountries) {
+      try { await repairLegacyPages(cfg, pagesManifest, { baseItem, withImdb }); }
+      catch (e) { stageFailed(`legacy repair [${cfg.code}]`, e); }
+    }
+    // Back-catalogue backfill (see backfillCatalog). Runs after the weekly pipeline has taken
+    // every slug it wants and before the hreflang + sitemap passes, so new catalogue pages join
+    // their clusters and the sitemap in the same run they are written.
+    if (CATALOG_ENABLED) {
+      const catalogState = loadCatalogManifest();
+      const reopened = reopenForBar(catalogState);
+      if (reopened) console.log(`  catalog: eligibility bar changed — ${reopened} retired queue(s) re-opened`);
       for (const cfg of builtCountries) {
-        // Facts-only rendering, edition by edition (lib/factsq.js): "facts" editions are drawn
-        // from their stored records alone; "shadow" ones as before, compared with the facts-only way.
-        const r = renderMigrated(pagesManifest, cfg, { today: todayStr(), modes: factsModes, listed: allSlugSets[cfg.code] });
-        factsResults[cfg.code] = { pages: r.pages, shadowDiffs: r.shadow.diffs, lost: r.lost.length, mode: r.mode, examples: r.shadow.examples };
-        rendered += r.pages; changed += r.factsChanged; corrected += r.corrected || 0;
-        for (const [f, n] of Object.entries(r.fields || {})) correctedFields[f] = (correctedFields[f] || 0) + n;
-        if (r.lost.length) healthNote(`migrate [${cfg.code}]: ${r.lost.length} rendered page(s) lost their facts and were left as they are — e.g. ${r.lost.slice(0, 3).join(", ")}`);
-        if (r.unreadable) healthIssue(`facts [${cfg.code}]: ${r.unreadable} unreadable line(s) in facts/${cfg.code}.jsonl — those pages are captured again from their HTML this run`);
-        else if (r.recaptured) healthNote(`facts [${cfg.code}]: ${r.recaptured} page(s) had no facts record and are captured again from their HTML`);
-        const b = migrateBatch(pagesManifest, cfg, { limit, today: todayStr() });
-        moved += b.migrated; held.push(...b.held);
+        try { await backfillCatalog(cfg, pagesManifest, { state: catalogState, baseItem, withImdb, batch: CATALOG_BATCH }); }
+        catch (e) { stageFailed(`catalog [${cfg.code}]`, e); }
       }
-      const total = Object.values(pagesManifest).reduce((n, m) => n + Object.values(m || {}).filter((e) => e && e.rendered).length, 0);
-      console.log(`Migration: ${rendered} pages rendered from facts (${changed} with new facts), ${moved} moved this run, ${held.length} held; ${total} rendered in all`);
-      if (corrected) console.log(`TMDB facts applied to ${corrected} frozen page(s): ${Object.entries(correctedFields).map(([f, n]) => `${f} ${n}`).join(", ")}`);
-      if (held.length) healthNote(`migrate: ${held.length} page(s) held for review (their facts would change) — e.g. ${held.slice(0, 3).join("; ")}`);
-    } catch (e) { stageFailed("migration", e); }
-    // Film pages: styles into shared cached files, privacy link in every footer, browser icons,
-    // the country in every non-India title, and the "FilmyChill data" window line checked
-    // against the archive (lib/stylesheets.js). Runs after every page writer and patcher above.
-    try {
-      // Withdrawn sightings included (later lines win): a page that states one loses the line.
-      const records = readHistory({ all: true });
-      const starts = observationStarts(records);
-      const byKey = new Map(records.map((r) => [`${r.c}:${r.k}:${r.id}`, r]));
-      const fcdataClaim = (code, slug) => {
-        const e = pagesManifest[code] && pagesManifest[code][slug];
-        if (!e || !e.tmdbId) return { action: "unknown", days: null };
-        return cinemaClaim(byKey.get(`${code}:${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`), starts);
-      };
-      const fromFacts = (code, slug) => !!(pagesManifest[code] && pagesManifest[code][slug] && pagesManifest[code][slug].rendered);
-      const f = finishFilmPages(filmPageFiles(), { fcdataClaim, fromFacts });
-      console.log(`Film pages finished: ${f.pages} checked (${f.fromFacts} rendered from facts, ${f.pages - f.fromFacts} still frozen), ${f.externalized} moved to shared styles,${f.footerLinked} footers given the notice and Privacy · Copyright links, ${f.iconed} icon tags added, `
-        + `${f.retitled.length - f.notYetFixed} titles given their country, ${f.notYetFixed} 'not streaming yet' titles corrected on pages that stream, ${f.timeWordsFixed} outdated release wordings settled, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, `
-        + `${f.trailerFixed.length - f.trailerDropped} trailers given an uploadDate and ${f.trailerDropped} left out of the markup, ${f.dateSynced} dateModified/"Page updated" pairs reconciled, ${f.compacted} unscored pages moved to answer-first, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
-      // A new title is a real change: let the sitemap say so (syncFilmLastmods would also see
-      // it, except on its first run, when it only records fingerprints). So is repaired trailer
-      // markup: the fingerprint ignores structured data, and a fresh lastmod is what gets the
-      // page re-read and its Search Console error cleared.
-      for (const k of [...f.retitled, ...f.trailerFixed]) {
-        const [code, slug] = k.split("/");
-        if (pagesManifest[code] && pagesManifest[code][slug]) pagesManifest[code][slug].last = todayStr();
+      fs.writeFileSync(CATALOG_MANIFEST_FILE, JSON.stringify(catalogState, null, 1));
+      for (const cfg of builtCountries) {
+        const v = catalogStall(catalogState, cfg.code);
+        RUN_HEALTH.catalog[cfg.code] = v.last;
+        if (v.stalled) healthIssue(`catalog [${cfg.code}]: 0 new pages two runs in a row while ${v.live} queue(s) are still open — check the "catalog" lines in the build log`);
+        else if (v.exhausted) healthNote(`catalog [${cfg.code}]: every queue retired — no more back-catalogue titles from this source`);
       }
-      // Oct 2026: the workflow didn't commit css/, so for a few hours every film page linked a
-      // stylesheet that wasn't on the site. A missing stylesheet is a red run, not a note.
-      if (f.missing) healthIssue(`${f.missing} film page(s) link a stylesheet that doesn't exist — they render unstyled. e.g. ${f.missingExamples.join("; ")}`);
-    } catch (e) { stageFailed("film-page styles", e); }
-    try {
-      const s = finishSitePages(sitePageFiles());
-      if (s.iconed || s.footerLinked || s.verdictsSettled) console.log(`Site pages: icon tags added to ${s.iconed} and footers finished on ${s.footerLinked} of ${s.pages}; ${s.verdictsSettled} closed list(s) given today's verdicts`);
-    } catch (e) { stageFailed("site-page icons", e); }
-    // Self-audit (lib/audit.js): contradictions a visitor would notice, reported in the run
-    // summary before anyone else finds them. Read-only.
-    try {
-      const a = runAudit({ dataByCode, pagesManifest, countries: COUNTRIES, note: healthNote, issue: healthIssue });
-      console.log(`Audit: ${a.findings.length} finding(s)`);
-      // False claims per edition, for the facts-only switch below.
-      for (const fnd of a.findings) {
-        if (!FALSE_CLAIMS.has(fnd.check)) continue;
-        const code = (/^\/?([a-z]{2})\/movie\//.exec(fnd.url) || /^([a-z]{2})\/[^/]+$/.exec(fnd.url) || [null, "in"])[1];
-        if (factsResults[code]) factsResults[code].falseClaims = (factsResults[code].falseClaims || 0) + 1;
-      }
-    } catch (e) { stageFailed("self-audit", e); }
-    // The facts-only switch (lib/factsq.js): an edition whose two renders agreed for
-    // SHADOW_CLEAN_RUNS runs moves to facts mode (one a run, India last); one in facts mode that
-    // lost pages or showed a false claim goes back, and the run turns red. Fully automatic.
-    try {
-      const { events } = decideModes(factsModes, factsResults, todayStr());
-      saveModes(factsModes);
-      const inFacts = Object.entries(factsResults).filter(([, r]) => r.mode === "facts").map(([c]) => c);
-      const shadow = Object.entries(factsResults).filter(([, r]) => r.mode !== "facts");
-      const differing = shadow.filter(([, r]) => r.shadowDiffs);
-      console.log(`Facts-only pages: ${inFacts.length} edition(s) drawn from facts alone${inFacts.length ? ` (${inFacts.join(", ")})` : ""}; ${shadow.length} compared in shadow, ${differing.length} with differences${differing.length ? ` — ${differing.map(([c, r]) => `${c} ${r.shadowDiffs}`).join(", ")}` : ""}`);
-      for (const [c, r] of differing.slice(0, 4)) if (r.examples.length) console.log(`  shadow [${c}] e.g. ${r.examples.slice(0, 2).join("; ")}`);
-      for (const ev of events) {
-        if (ev.kind === "promote") healthNote(`facts-only: ${ev.code} now draws every frozen page from its facts alone`);
-        else if (ev.kind === "rollback") healthIssue(`facts-only: ${ev.code} went back to shadow mode — ${ev.why}. It retries on its own after a week and fresh clean comparisons.`);
-        else if (ev.kind === "stalled") healthNote(`facts-only: ${ev.code} has differed from its facts-only render for a week (${ev.diffs} page(s) this run), so it isn't switching — e.g. ${(factsResults[ev.code].examples || []).slice(0, 2).join("; ")}`);
-      }
-    } catch (e) { stageFailed("facts-only switch", e); }
+    }
+
   }
 
-  // "Streaming on <platform>" pages (see writeStreamingPages). After every claim for this run
-  // has been made, rechecked or retired, so the lists reflect today's verified availability.
-  for (const cfg of builtCountries) {
-    try { writeStreamingPages(dataByCode[cfg.code], cfg, pagesManifest); }
-    catch (e) { stageFailed(`streaming pages [${cfg.code}]`, e); }
-    try { writePeoplePages(dataByCode[cfg.code], cfg, pagesManifest); }
-    catch (e) { stageFailed(`people pages [${cfg.code}]`, e); }
-    try { writeDatedOttPages(dataByCode[cfg.code], cfg, pagesManifest); }
-    catch (e) { stageFailed(`dated OTT pages [${cfg.code}]`, e); }
+  // Critics and score sweeps, related films, the render from facts, finishing passes, the self-audit and the facts-only switch.
+  async function stageScoresRender() {
+    // FilmyChill Score on pages that are never rebuilt (frozen + back-catalogue): a budgeted
+    // sweep each run, never-scored first (lib/scoresweep.js).
+    {
+      // First the critics' half for those films (lib/editorial.js sweepCatalogCritics): pages
+      // whose film gains a reading are flagged so the score sweep below redoes them first.
+      try {
+        const r = await sweepCatalogCritics(pagesManifest);
+        console.log(`Catalog critics sweep: ${r.checked} films read, ${r.toned} with a critics' verdict (${r.pages} pages to rescore), ${r.noImdb} without an IMDb id, ${r.left} still to read${r.errors ? `, ${r.errors} errors` : ""}`);
+        if (r.errors >= 5) healthNote(`catalog critics sweep stopped early after ${r.errors} errors — it resumes next run`);
+      } catch (e) { stageFailed("catalog critics sweep", e); }
+      try {
+        // Pages dated years after the same film elsewhere (re-release dates) go first this run.
+        const outliers = flagYearOutliers(pagesManifest);
+        if (outliers) console.log(`  ${outliers} page(s) dated 2+ years after the same film in another edition — rechecked first`);
+        const r = await sweepScores(pagesManifest, { today: todayStr() });
+        console.log(`FilmyChill Score sweep: ${r.checked} checked, ${r.updated} pages updated${r.errors ? `, ${r.errors} TMDB errors` : ""}`);
+        if (r.errors >= 5) healthNote(`score sweep stopped early after ${r.errors} TMDB errors — it resumes next run`);
+        // Pages whose film couldn't be identified on TMDB (no id saved, no poster match) can't be
+        // scored honestly, so they get no score box. Surface the count so it never goes unnoticed.
+        let unidentified = 0;
+        for (const m of Object.values(pagesManifest)) for (const e of Object.values(m || {})) if (e && !e.tmdbId && e.idLookup === "none") unidentified++;
+        if (unidentified) healthNote(`${unidentified} old film page(s) have no FilmyChill Score: their film couldn't be matched on TMDB`);
+      } catch (e) { stageFailed("score sweep", e); }
+      // "If you liked this" on frozen/back-catalogue pages, redone once per rules version
+      // (lib/relrefresh.js). Local only — no API calls.
+      try {
+        const r = refreshRelated(pagesManifest, COUNTRIES);
+        if (r.checked) console.log(`Related-films refresh: ${r.checked} old pages checked, ${r.updated} updated`);
+      } catch (e) { stageFailed("related-films refresh", e); }
+      // Visitors' votes (lib/votes.js): read new ones, keep per-film totals, report privately.
+      // Dormant until the FIREBASE_SERVICE_ACCOUNT secret exists.
+      try {
+        const v = await syncVotes({ dataByCode, note: healthNote });
+        if (v.enabled) console.log(`Votes: ${v.fetched} new, ${v.touched} films re-counted, ${v.films} films with votes`);
+      } catch (e) { stageFailed("votes", e); }
+      // (factsModes / factsResults: lib/factsq.js — loaded here, decided after the self-audit.)
+      // Frozen pages move to "facts rendered by the live template" (lib/migrate.js): pages
+      // already moved are rendered from their facts (after every sweep above, whose changes are
+      // read back first); then pages written this run, and any still held, move if their facts
+      // check passes (up to 500 per edition; MIGRATE_BATCH overrides, 0 stops it).
+      try {
+        const limit = migrateLimit();
+        let moved = 0, rendered = 0, changed = 0, corrected = 0; const correctedFields = {};
+        const held = [];
+        for (const cfg of builtCountries) {
+          // Facts-only rendering, edition by edition (lib/factsq.js): "facts" editions are drawn
+          // from their stored records alone; "shadow" ones as before, compared with the facts-only way.
+          const r = renderMigrated(pagesManifest, cfg, { today: todayStr(), modes: factsModes, listed: allSlugSets[cfg.code] });
+          factsResults[cfg.code] = { pages: r.pages, shadowDiffs: r.shadow.diffs, lost: r.lost.length, mode: r.mode, examples: r.shadow.examples };
+          rendered += r.pages; changed += r.factsChanged; corrected += r.corrected || 0;
+          for (const [f, n] of Object.entries(r.fields || {})) correctedFields[f] = (correctedFields[f] || 0) + n;
+          if (r.lost.length) healthNote(`migrate [${cfg.code}]: ${r.lost.length} rendered page(s) lost their facts and were left as they are — e.g. ${r.lost.slice(0, 3).join(", ")}`);
+          if (r.unreadable) healthIssue(`facts [${cfg.code}]: ${r.unreadable} unreadable line(s) in facts/${cfg.code}.jsonl — those pages are captured again from their HTML this run`);
+          else if (r.recaptured) healthNote(`facts [${cfg.code}]: ${r.recaptured} page(s) had no facts record and are captured again from their HTML`);
+          const b = migrateBatch(pagesManifest, cfg, { limit, today: todayStr() });
+          moved += b.migrated; held.push(...b.held);
+        }
+        const total = Object.values(pagesManifest).reduce((n, m) => n + Object.values(m || {}).filter((e) => e && e.rendered).length, 0);
+        console.log(`Migration: ${rendered} pages rendered from facts (${changed} with new facts), ${moved} moved this run, ${held.length} held; ${total} rendered in all`);
+        if (corrected) console.log(`TMDB facts applied to ${corrected} frozen page(s): ${Object.entries(correctedFields).map(([f, n]) => `${f} ${n}`).join(", ")}`);
+        if (held.length) healthNote(`migrate: ${held.length} page(s) held for review (their facts would change) — e.g. ${held.slice(0, 3).join("; ")}`);
+      } catch (e) { stageFailed("migration", e); }
+      // Film pages: styles into shared cached files, privacy link in every footer, browser icons,
+      // the country in every non-India title, and the "FilmyChill data" window line checked
+      // against the archive (lib/stylesheets.js). Runs after every page writer and patcher above.
+      try {
+        // Withdrawn sightings included (later lines win): a page that states one loses the line.
+        const records = readHistory({ all: true });
+        const starts = observationStarts(records);
+        const byKey = new Map(records.map((r) => [`${r.c}:${r.k}:${r.id}`, r]));
+        const fcdataClaim = (code, slug) => {
+          const e = pagesManifest[code] && pagesManifest[code][slug];
+          if (!e || !e.tmdbId) return { action: "unknown", days: null };
+          return cinemaClaim(byKey.get(`${code}:${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`), starts);
+        };
+        const fromFacts = (code, slug) => !!(pagesManifest[code] && pagesManifest[code][slug] && pagesManifest[code][slug].rendered);
+        const f = finishFilmPages(filmPageFiles(), { fcdataClaim, fromFacts });
+        console.log(`Film pages finished: ${f.pages} checked (${f.fromFacts} rendered from facts, ${f.pages - f.fromFacts} still frozen), ${f.externalized} moved to shared styles,${f.footerLinked} footers given the notice and Privacy · Copyright links, ${f.iconed} icon tags added, `
+          + `${f.retitled.length - f.notYetFixed} titles given their country, ${f.notYetFixed} 'not streaming yet' titles corrected on pages that stream, ${f.timeWordsFixed} outdated release wordings settled, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, `
+          + `${f.trailerFixed.length - f.trailerDropped} trailers given an uploadDate and ${f.trailerDropped} left out of the markup, ${f.dateSynced} dateModified/"Page updated" pairs reconciled, ${f.compacted} unscored pages moved to answer-first, ${f.cssFiles} stylesheets in use${f.removed ? `, ${f.removed} unused removed` : ""}`);
+        // A new title is a real change: let the sitemap say so (syncFilmLastmods would also see
+        // it, except on its first run, when it only records fingerprints). So is repaired trailer
+        // markup: the fingerprint ignores structured data, and a fresh lastmod is what gets the
+        // page re-read and its Search Console error cleared.
+        for (const k of [...f.retitled, ...f.trailerFixed]) {
+          const [code, slug] = k.split("/");
+          if (pagesManifest[code] && pagesManifest[code][slug]) pagesManifest[code][slug].last = todayStr();
+        }
+        // Oct 2026: the workflow didn't commit css/, so for a few hours every film page linked a
+        // stylesheet that wasn't on the site. A missing stylesheet is a red run, not a note.
+        if (f.missing) healthIssue(`${f.missing} film page(s) link a stylesheet that doesn't exist — they render unstyled. e.g. ${f.missingExamples.join("; ")}`);
+      } catch (e) { stageFailed("film-page styles", e); }
+      try {
+        const s = finishSitePages(sitePageFiles());
+        if (s.iconed || s.footerLinked || s.verdictsSettled) console.log(`Site pages: icon tags added to ${s.iconed} and footers finished on ${s.footerLinked} of ${s.pages}; ${s.verdictsSettled} closed list(s) given today's verdicts`);
+      } catch (e) { stageFailed("site-page icons", e); }
+      // Self-audit (lib/audit.js): contradictions a visitor would notice, reported in the run
+      // summary before anyone else finds them. Read-only.
+      try {
+        const a = runAudit({ dataByCode, pagesManifest, countries: COUNTRIES, note: healthNote, issue: healthIssue });
+        console.log(`Audit: ${a.findings.length} finding(s)`);
+        // False claims per edition, for the facts-only switch below.
+        for (const fnd of a.findings) {
+          if (!FALSE_CLAIMS.has(fnd.check)) continue;
+          const code = (/^\/?([a-z]{2})\/movie\//.exec(fnd.url) || /^([a-z]{2})\/[^/]+$/.exec(fnd.url) || [null, "in"])[1];
+          if (factsResults[code]) factsResults[code].falseClaims = (factsResults[code].falseClaims || 0) + 1;
+        }
+      } catch (e) { stageFailed("self-audit", e); }
+      // The facts-only switch (lib/factsq.js): an edition whose two renders agreed for
+      // SHADOW_CLEAN_RUNS runs moves to facts mode (one a run, India last); one in facts mode that
+      // lost pages or showed a false claim goes back, and the run turns red. Fully automatic.
+      try {
+        const { events } = decideModes(factsModes, factsResults, todayStr());
+        saveModes(factsModes);
+        const inFacts = Object.entries(factsResults).filter(([, r]) => r.mode === "facts").map(([c]) => c);
+        const shadow = Object.entries(factsResults).filter(([, r]) => r.mode !== "facts");
+        const differing = shadow.filter(([, r]) => r.shadowDiffs);
+        console.log(`Facts-only pages: ${inFacts.length} edition(s) drawn from facts alone${inFacts.length ? ` (${inFacts.join(", ")})` : ""}; ${shadow.length} compared in shadow, ${differing.length} with differences${differing.length ? ` — ${differing.map(([c, r]) => `${c} ${r.shadowDiffs}`).join(", ")}` : ""}`);
+        for (const [c, r] of differing.slice(0, 4)) if (r.examples.length) console.log(`  shadow [${c}] e.g. ${r.examples.slice(0, 2).join("; ")}`);
+        for (const ev of events) {
+          if (ev.kind === "promote") healthNote(`facts-only: ${ev.code} now draws every frozen page from its facts alone`);
+          else if (ev.kind === "rollback") healthIssue(`facts-only: ${ev.code} went back to shadow mode — ${ev.why}. It retries on its own after a week and fresh clean comparisons.`);
+          else if (ev.kind === "stalled") healthNote(`facts-only: ${ev.code} has differed from its facts-only render for a week (${ev.diffs} page(s) this run), so it isn't switching — e.g. ${(factsResults[ev.code].examples || []).slice(0, 2).join("; ")}`);
+        }
+      } catch (e) { stageFailed("facts-only switch", e); }
+    }
+
   }
 
-  // Links on frozen pages to hubs and people pages this run (or an earlier one) removed
-  // (lib/stylesheets.js). After the last page writer, so every target is in its final state.
-  try {
-    const r = retargetMergedLinks([...filmPageFiles(), ...sitePageFiles()], merges);
-    if (r.links) console.log(`Merges: ${r.links} link(s) on ${r.pages} page(s) now point at the surviving page`);
-  } catch (e) { stageFailed("merge links", e); }
-  try {
-    const d = repairDeadLinks([...filmPageFiles(), ...sitePageFiles()]);
-    if (d.fixed.length) console.log(`Dead links: removed from ${d.fixed.length} of ${d.pages} pages (e.g. ${d.fixed.slice(0, 3).join(", ")})`);
-  } catch (e) { stageFailed("dead-link repair", e); }
+  // Platform, people and search pages, dead-link repair, hreflang across editions.
+  async function stageSitePages() {
+    // "Streaming on <platform>" pages (see writeStreamingPages). After every claim for this run
+    // has been made, rechecked or retired, so the lists reflect today's verified availability.
+    for (const cfg of builtCountries) {
+      try { writeStreamingPages(dataByCode[cfg.code], cfg, pagesManifest); }
+      catch (e) { stageFailed(`streaming pages [${cfg.code}]`, e); }
+      try { writePeoplePages(dataByCode[cfg.code], cfg, pagesManifest); }
+      catch (e) { stageFailed(`people pages [${cfg.code}]`, e); }
+      try { writeDatedOttPages(dataByCode[cfg.code], cfg, pagesManifest); }
+      catch (e) { stageFailed(`dated OTT pages [${cfg.code}]`, e); }
+    }
 
-  // Site search (lib/search.js): one index per edition of the pages now on disk, and the
-  // search script on every page. After the last page writer, so frozen, rebuilt and
-  // hand-written pages all carry it and no result leads to a missing page.
-  try {
-    const x = writeSearchIndexes(pagesManifest);
-    const s = addSearchToPages([...filmPageFiles(), ...sitePageFiles()]);
-    console.log(`Search: ${x.films} films and ${x.people} people across ${x.editions} editions (${x.written} index file(s) updated); script added to ${s.added} of ${s.pages} pages`);
-  } catch (e) { stageFailed("site search", e); }
+    // Links on frozen pages to hubs and people pages this run (or an earlier one) removed
+    // (lib/stylesheets.js). After the last page writer, so every target is in its final state.
+    try {
+      const r = retargetMergedLinks([...filmPageFiles(), ...sitePageFiles()], merges);
+      if (r.links) console.log(`Merges: ${r.links} link(s) on ${r.pages} page(s) now point at the surviving page`);
+    } catch (e) { stageFailed("merge links", e); }
+    try {
+      const d = repairDeadLinks([...filmPageFiles(), ...sitePageFiles()]);
+      if (d.fixed.length) console.log(`Dead links: removed from ${d.fixed.length} of ${d.pages} pages (e.g. ${d.fixed.slice(0, 3).join(", ")})`);
+    } catch (e) { stageFailed("dead-link repair", e); }
 
-  // All countries are built by now, so the filesystem finally shows every cluster's true
-  // membership — repair them in one pass before the sitemap is written.
-  try {
-    // No lastmod bump for this: an hreflang repair is a head-only edit, and the sitemap's own
-    // alternates (rewritten every run) already tell Google about the cluster.
-    syncHreflangClusters();
-  } catch (e) { stageFailed(`hreflang sync`, e); }
-  // Streaming, month-archive and today pages repeated across editions (lib/graph.js).
-  try { syncListingHreflang(); } catch (e) { stageFailed(`listing hreflang sync`, e); }
-  // Pages rebuilt this run that were only re-stamped are left as they were (lib/writeif.js).
-  console.log(`Page writes: ${WRITE_STATS.written} saved, ${WRITE_STATS.kept} unchanged and left alone`);
-  // Honest lastmod (lib/sitemap.js): after the last page edit of the run, a film's date moves
-  // only if its content did.
-  try {
-    const l = syncFilmLastmods(pagesManifest, builtCountries, todayStr());
-    console.log(`Film lastmod: ${l.changed} of ${l.pages} pages changed content${l.seeded ? `, ${l.seeded} fingerprinted for the first time` : ""}`);
-  } catch (e) { stageFailed("film lastmod", e); }
-  fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
+    // Site search (lib/search.js): one index per edition of the pages now on disk, and the
+    // search script on every page. After the last page writer, so frozen, rebuilt and
+    // hand-written pages all carry it and no result leads to a missing page.
+    try {
+      const x = writeSearchIndexes(pagesManifest);
+      const s = addSearchToPages([...filmPageFiles(), ...sitePageFiles()]);
+      console.log(`Search: ${x.films} films and ${x.people} people across ${x.editions} editions (${x.written} index file(s) updated); script added to ${s.added} of ${s.pages} pages`);
+    } catch (e) { stageFailed("site search", e); }
 
-  // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
-  // Frozen archived pages are never rewritten, so pages generated before the x-default
-  // fix carry a dead India URL in their hreflang forever unless repaired in place.
-  repairXDefaults(builtCountries);
+    // All countries are built by now, so the filesystem finally shows every cluster's true
+    // membership — repair them in one pass before the sitemap is written.
+    try {
+      // No lastmod bump for this: an hreflang repair is a head-only edit, and the sitemap's own
+      // alternates (rewritten every run) already tell Google about the cluster.
+      syncHreflangClusters();
+    } catch (e) { stageFailed(`hreflang sync`, e); }
+    // Streaming, month-archive and today pages repeated across editions (lib/graph.js).
+    try { syncListingHreflang(); } catch (e) { stageFailed(`listing hreflang sync`, e); }
+    // Pages rebuilt this run that were only re-stamped are left as they were (lib/writeif.js).
+    console.log(`Page writes: ${WRITE_STATS.written} saved, ${WRITE_STATS.kept} unchanged and left alone`);
+  }
 
-  // Every hub for this run has been written or pruned by now, so disk is the truth.
-  try { sweepDeadHubLinks(COUNTRIES); } catch (e) { stageFailed(`dead hub links`, e); }
+  // Honest lastmods, the manifest, sitemaps, redirects and the run's health file.
+  async function stageFinish() {
+    // Honest lastmod (lib/sitemap.js): after the last page edit of the run, a film's date moves
+    // only if its content did.
+    try {
+      const l = syncFilmLastmods(pagesManifest, builtCountries, todayStr());
+      console.log(`Film lastmod: ${l.changed} of ${l.pages} pages changed content${l.seeded ? `, ${l.seeded} fingerprinted for the first time` : ""}`);
+    } catch (e) { stageFailed("film lastmod", e); }
+    fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
 
-  writeMultiCountrySitemap(builtCountries, pagesManifest);
-  // After the sitemap, so a redirect page is never listed in it.
-  try {
-    const n = writeMergeStubs(merges);
-    if (n < merges.length) healthNote(`merges: ${merges.length - n} surviving page(s) went missing during the build; their old URL has no redirect this run`);
-  } catch (e) { stageFailed("merge stubs", e); }
-  fs.writeFileSync(RUN_HEALTH_FILE, JSON.stringify(RUN_HEALTH, null, 1));
-  console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.` +
-    ` Health: ${RUN_HEALTH.issues.length} issue(s), ${RUN_HEALTH.notes.length} note(s).`);
+    // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
+    // Frozen archived pages are never rewritten, so pages generated before the x-default
+    // fix carry a dead India URL in their hreflang forever unless repaired in place.
+    repairXDefaults(builtCountries);
+
+    // Every hub for this run has been written or pruned by now, so disk is the truth.
+    try { sweepDeadHubLinks(COUNTRIES); } catch (e) { stageFailed(`dead hub links`, e); }
+
+    writeMultiCountrySitemap(builtCountries, pagesManifest);
+    // After the sitemap, so a redirect page is never listed in it.
+    try {
+      const n = writeMergeStubs(merges);
+      if (n < merges.length) healthNote(`merges: ${merges.length - n} surviving page(s) went missing during the build; their old URL has no redirect this run`);
+    } catch (e) { stageFailed("merge stubs", e); }
+    fs.writeFileSync(RUN_HEALTH_FILE, JSON.stringify(RUN_HEALTH, null, 1));
+    console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.` +
+      ` Health: ${RUN_HEALTH.issues.length} issue(s), ${RUN_HEALTH.notes.length} note(s).`);
+  }
+
+  await stageSetup();
+  await stageBuildData();
+  await stageWriteData();
+  await stageSweeps();
+  await stageScoresRender();
+  await stageSitePages();
+  await stageFinish();
 }
 
 // Run the build only when executed directly (not when required by tests/tools).
