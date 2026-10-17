@@ -89,18 +89,23 @@ function sweepDeadHubLinks(countries) {
 const VOTE_WIDGET_RE = /<div class="fcvote"[\s\S]*?<div class="fcvote-done"[^>]*><\/div>\s*<\/div>/g;
 
 // Pure: a short hash of what a reader (and a search engine) would call the page's content.
-function contentFingerprint(html) {
+// Dates in either form leave the fingerprint: "as of 22 Sept 2026" and the US/Canada/Philippines
+// "as of Oct 1, 2026", whose month name used to move a page's lastmod when only its
+// availability date changed. `legacy` is the rule before that, kept so a fingerprint stored
+// under it is recognised and upgraded without moving any page's date.
+function contentFingerprint(html, { legacy = false } = {}) {
   const s = String(html || "");
   const title = (/<title>([\s\S]*?)<\/title>/.exec(s) || [])[1] || "";
   const desc = (/<meta name="description" content="([^"]*)"/.exec(s) || [])[1] || "";
   const at = s.indexOf("<body");
-  const body = (at >= 0 ? s.slice(at) : s)
+  let body = (at >= 0 ? s.slice(at) : s)
     .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g, " ")
     .replace(/<footer[\s\S]*?<\/footer>/g, " ")
     .replace(VOTE_WIDGET_RE, " ")
     .replace(/Page updated [^<]*/g, " ")
-    .replace(/\bas of \d{1,2} [A-Za-z]+\.? \d{4}/g, " ")
-    .replace(/<[^>]+>/g, " ");
+    .replace(/\bas of \d{1,2} [A-Za-z]+\.? \d{4}/g, " ");
+  if (!legacy) body = body.replace(/\bas of [A-Za-z]+\.? \d{1,2}, \d{4}/g, " ");
+  body = body.replace(/<[^>]+>/g, " ");
   const text = `${title}\n${desc}\n${body}`.replace(/\d/g, "").replace(/\s+/g, " ").trim();
   return crypto.createHash("sha1").update(text).digest("hex").slice(0, 12);
 }
@@ -126,6 +131,7 @@ function syncFilmLastmods(pagesManifest, countries, today, { root = "." } = {}) 
       res.pages++;
       const fp = contentFingerprint(html);
       if (!e.fp) { e.fp = fp; res.seeded++; continue; }
+      if (e.fp !== fp && e.fp === contentFingerprint(html, { legacy: true })) { e.fp = fp; continue; } // same page, new rule
       if (e.fp !== fp) { e.fp = fp; e.last = today; res.changed++; }
     }
   }
@@ -150,6 +156,7 @@ function pageLastmodTracker(today, file = PAGE_LASTMODS_FILE) {
       const fp = contentFingerprint(html);
       const e = store[url];
       if (!e || !/^\d{4}-\d{2}-\d{2}$/.test(e.last || "")) { store[url] = { fp, last: today }; return today; }
+      if (e.fp !== fp && e.fp === contentFingerprint(html, { legacy: true })) e.fp = fp; // same page, new rule
       if (e.fp !== fp) { e.fp = fp; e.last = today; }
       return e.last;
     },

@@ -32,7 +32,9 @@ const headMeta = (html) => (/<h1>[\s\S]*?<\/h1>\s*<div class="meta">([^<]*)<\/di
 // "· U/A 16+", "· R 18+"). Only a recognised certificate shape, never a genre or a runtime.
 const CERT_RE = /^(?:U|UA|U\/A(?: \d{1,2}\+)?|A|S|G|PG|PG-1[23]|M|MA ?15\+|R|R ?1[368]\+?|NC-?1[67]|TV-(?:Y7?|G|PG|14|MA)|FSK ?\d{1,2}|\d{1,2}\+?|P13|SPG|SU|ALL)$/;
 const certOf = (meta) => { const last = meta.split(" · ").pop().trim(); return meta.includes(" · ") && CERT_RE.test(last) ? last : ""; };
-const STATUS_PILL = /theatre|cinema|Theatrical run|Not out|arrival pending/i;
+// Status pills, matched by how they start (lib/archive.js frozenFilmFacts has the same rule):
+// "cinema" anywhere also matched platforms — Queer Cinemab, Now TV Cinema, Curzon Home Cinema.
+const STATUS_PILL = /^(?:In (?:theatres|cinemas)\b|Opened in (?:theatres|cinemas)\b|Theatrical run\b|Releases? in (?:theatres|cinemas)\b|Not out\b)|arrival pending/i;
 
 function jsonLd(html) {
   return [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]

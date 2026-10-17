@@ -21,6 +21,8 @@
 const MIN_VOTES = 10;
 // A "solid" score has enough ratings that it won't move much. Set near this site's median.
 const SOLID_VOTES = 300;
+// Below this, "Few ratings" — the same line the FilmyChill Score draws (lib/fcscore.js).
+const FEW_VOTES = 50;
 
 // Bayesian shrinkage toward the pooled mean C, with weight m. A film with few votes is
 // pulled toward average; a film with many keeps its own score. This is the same idea behind
@@ -43,7 +45,10 @@ function ratingOf(item) {
 // lib/fcscore.js — the site-wide wording rule).
 function confidenceTier(votes, { recent = true } = {}) {
   if (!votes || votes < MIN_VOTES) return { key: "few", label: recent ? "Too few to call" : "Too few ratings", pct: 0.06 };
-  if (votes < SOLID_VOTES) return { key: "early", label: recent ? "Early — still settling" : "Few ratings", pct: Math.max(0.18, Math.min(0.55, votes / SOLID_VOTES)) };
+  // "Few ratings" only below the FilmyChill Score's own threshold (SCORE_MIN_VOTES, 50, in
+  // lib/fcscore.js): from 50 ratings the score box gives a full verdict, and 3,361 headers
+  // called the same count "Few ratings" beside it (Oct 2026 audit).
+  if (votes < SOLID_VOTES) return { key: "early", label: recent ? "Early — still settling" : votes < FEW_VOTES ? "Few ratings" : "Moderate ratings", pct: Math.max(0.18, Math.min(0.55, votes / SOLID_VOTES)) };
   // Solid: scale the bar with a log so 300 and 3,000 don't look identical, capped at ~0.97.
   const pct = 0.6 + 0.37 * Math.min(1, Math.log10(votes / SOLID_VOTES) / Math.log10(30));
   return { key: "solid", label: "Solid", pct: Math.min(0.97, pct) };

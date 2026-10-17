@@ -38,10 +38,10 @@ const { langName } = require("./rules.js");
 const dirFor = (code) => (code === "in" ? "movie" : `${code}/movie`);
 
 // Pure-ish (reads which editions have the film): a frozen page from its facts.
-function renderFrozen(item, cfg, { asOf, knownSlugs, availability = "" }) {
+function renderFrozen(item, cfg, { asOf, knownSlugs, availability = "", untracked = false }) {
   const code = cfg.code;
   const cluster = COUNTRIES.filter((c) => c.code === code || filmPageExists(c.code, item.slug)).map((c) => ({ code: c.code, region: c.region }));
-  const it = { ...item, _alts: cluster.length > 1 ? cluster : [] };
+  const it = { ...item, _alts: cluster.length > 1 ? cluster : [], ...(untracked ? { untracked: true } : {}) };
   const html = buildFilmPage(it, asOf, knownSlugs, cfg, null);
   const out = archivePatchHtml(html, countryNameFor(cfg), cfg).html;
   // The date the platforms were last confirmed stays the page's own, never the render date.
@@ -152,6 +152,9 @@ function renderMigrated(manifest, cfg, { today }) {
         res.corrected = (res.corrected || 0) + 1;
         for (const f of t.changed) res.fields[f] = (res.fields[f] || 0) + 1;
         if (t.changed.includes("providers") && e.truth.at) availability = fmtDateFull(e.truth.at, localeFor(code));
+        // The manifest follows the page, or the self-audit reads them as two different films.
+        if (t.changed.includes("language")) e.lang = now.language;
+        if (t.changed.includes("released") && now.released) e.released = now.released;
       }
     }
     let r = rec;
@@ -161,7 +164,15 @@ function renderMigrated(manifest, cfg, { today }) {
       res.factsChanged++;
       dirty = true;
     }
-    const out = renderFrozen(r.item, cfg, { asOf: r.updated, knownSlugs, availability });
+    // "Page updated" and dateModified: the later of the facts' date and the date the page last
+    // visibly changed (`last`, the sitemap's lastmod, moved by syncFilmLastmods). The facts'
+    // date alone missed changes that aren't facts, such as a title moving from "Expected Oct"
+    // to "Not Announced Yet": 9,230 pages told Google they changed after the date they showed
+    // (Oct 2026 audit). Neither date is in the content fingerprint, so this can't loop.
+    const asOf = e.last && e.last > r.updated && e.last <= today ? e.last : r.updated;
+    // No TMDB id, or one TMDB no longer has (lib/lifecycle.js): no sweep can recheck it.
+    const untracked = !e.tmdbId || !!e.tmdbGone;
+    const out = renderFrozen(r.item, cfg, { asOf, knownSlugs, availability, untracked });
     if (writeIfChanged(file, out)) res.written++;
   }
   if (dirty) writeFacts(code, facts);

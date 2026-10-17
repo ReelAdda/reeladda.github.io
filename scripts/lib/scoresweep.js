@@ -27,6 +27,7 @@ const { cspAllowVotes, voteWidgetHtml } = require("./vote.js");
 const { inlineStyles } = require("./stylesheets.js");
 const { sleep, tmdb } = require("./tmdb.js");
 const { tmdbLanguage } = require("./truth.js");
+const { isReRelease } = require("./enrich.js");
 
 // 1,500 a run clears the ~8,000-page backlog in about three runs; after that each run only has
 // the 30-day re-checks (~300 a day), so the cap rarely binds.
@@ -184,6 +185,27 @@ function injectVote(html, item, code) {
   return cspAllowVotes(html.slice(0, at) + "\n  " + widget + html.slice(at));
 }
 
+// Pure: a film page dated two or more years after the same film in another edition is almost
+// always carrying a re-release date (Harry Potter "(2026)" in Malaysia, Oct 2026 audit). Such
+// pages go to the front of the queue (w = 0), so this run's sweep puts TMDB's date on them.
+function flagYearOutliers(pagesManifest) {
+  const byFilm = new Map();
+  for (const m of Object.values(pagesManifest || {})) {
+    for (const e of Object.values(m || {})) {
+      if (!e || !e.tmdbId || e.kind === "tv" || !/^\d{4}/.test(String(e.released || ""))) continue;
+      if (!byFilm.has(e.tmdbId)) byFilm.set(e.tmdbId, []);
+      byFilm.get(e.tmdbId).push(e);
+    }
+  }
+  let n = 0;
+  for (const es of byFilm.values()) {
+    if (es.length < 2) continue;
+    const min = Math.min(...es.map((e) => Number(String(e.released).slice(0, 4))));
+    for (const e of es) if (Number(String(e.released).slice(0, 4)) - min >= 2 && e.fcs && e.fcs.w !== 0) { e.fcs.w = 0; n++; }
+  }
+  return n;
+}
+
 // Pure: which manifest entries to (re)score this run.
 function sweepCandidates(pagesManifest, today, limit) {
   const stale = new Date(Date.parse(today) - RESCORE_DAYS * 864e5).toISOString().slice(0, 10);
@@ -256,6 +278,12 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
     // The film's language as TMDB has it now, for the page's facts (lib/truth.js applies it).
     const lang = tmdbLanguage(d);
     if (lang && lang !== e.lang) { e.truth = { ...(e.truth || {}), language: lang }; e.lang = lang; }
+    // A stored date more than a year after TMDB's own is a re-release (lib/enrich.js
+    // isReRelease): the page takes the original date, and with it the right year.
+    if (e.kind !== "tv" && d.release_date && isReRelease(e.released, d.release_date)) {
+      e.truth = { ...(e.truth || {}), released: String(d.release_date).slice(0, 10) };
+      e.released = String(d.release_date).slice(0, 10);
+    }
     const votes = d.vote_count || 0;
     const item = {
       rating: d.vote_average > 0 ? Number(Number(d.vote_average).toFixed(1)) : null,
@@ -289,6 +317,7 @@ module.exports = {
   RESCORE_DAYS,
   SCORE_SWEEP_BATCH,
   injectScoreSection,
+  flagYearOutliers,
   injectVote,
   refreshCopy,
   refreshHead,

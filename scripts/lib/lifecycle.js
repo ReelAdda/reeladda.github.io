@@ -199,6 +199,7 @@ const DEPART_CONFIRM_MISSES = 2;   // consecutive empty checks before we touch t
 // live for one day in four countries, Oct 2026, and the frozen pages kept saying Prime Video).
 const EARLY_CLAIM_DAYS = 14;
 const EARLY_RECHECK_DAYS = 7;
+const CONFIRM_AFTER_DAYS = 0.4;   // ~10 hours: the next run (builds are 12 hours apart)
 // Pure: was this live claim opened within EARLY_CLAIM_DAYS of the release?
 function earlyClaim(x) {
   if (!x || !x.live || !x.live.since || !x.released) return false;
@@ -227,7 +228,10 @@ function departureCandidates(entries, now = new Date(), max = DEPART_MAX_CHECKS)
       return { ...x, daysSince };
     })
     // Early claims wait a week only until their first confirmation (misses 0, never rechecked).
-    .filter((x) => Number.isFinite(x.daysSince) && x.daysSince >= (earlyClaim(x) && !x.live.confirmed ? EARLY_RECHECK_DAYS : DEPART_RECHECK_DAYS))
+    // A claim with one empty check waits only for the next run to confirm it: the two checks
+    // must be separate runs, not a month apart (Oct 2026 audit: a film that left a platform
+    // stayed on the page up to 30 days).
+    .filter((x) => Number.isFinite(x.daysSince) && x.daysSince >= (x.live.misses ? CONFIRM_AFTER_DAYS : earlyClaim(x) && !x.live.confirmed ? EARLY_RECHECK_DAYS : DEPART_RECHECK_DAYS))
     .sort((a, b) => b.daysSince - a.daysSince)
     .slice(0, max);
 }
@@ -413,7 +417,7 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
       const kind = c.kind === "tv" ? "tv" : "movie";
       // The film itself with its providers (and dates): still one call, and what it says about
       // platforms, rent/buy, date and title is kept for the page (lib/truth.js).
-      const d = await tmdb(`/${kind}/${c.tmdbId}`, { append_to_response: kind === "tv" ? "watch/providers" : "watch/providers,release_dates" });
+      const d = await tmdb(`/${kind}/${c.tmdbId}`, { append_to_response: kind === "tv" ? "watch/providers,aggregate_credits" : "watch/providers,release_dates,credits" });
       const region = d?.["watch/providers"]?.results?.[cfg.watchRegion] || {};
       checks.push({ c, truth: tmdbTruth(d, kind, cfg, asOf),
         provs: dedupeProviders((region.flatrate || []).map((x) => x.provider_name)).slice(0, 4),
@@ -730,8 +734,9 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
     try {
       const prevCheck = m[c.slug].swept || null;   // the last check that found no platform
       // One call returns both answers: is it streaming, and if not, has a date been announced.
-      const d = await tmdb(`/movie/${c.tmdbId}`, { append_to_response: "watch/providers,release_dates" });
+      const d = await tmdb(`/movie/${c.tmdbId}`, { append_to_response: "watch/providers,release_dates,credits" });
       m[c.slug].swept = asOf;
+      delete m[c.slug].tmdbGone;   // found again
       m[c.slug].truth = tmdbTruth(d, "movie", cfg, asOf);   // date, title, rent/buy for the page (lib/truth.js)
       const provs = dedupeProviders((d?.["watch/providers"]?.results?.[cfg.watchRegion]?.flatrate || []).map((x) => x.provider_name)).slice(0, 4);
       if (!provs.length) {
@@ -771,7 +776,13 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
         found++;
         if (arrived) dated++;
       }
-    } catch (e) { console.warn(`  sweep ${c.slug}: ${e.message}`); }
+    } catch (e) {
+      // TMDB no longer has this id: record it, or the page is retried (and never updated) on
+      // every run while still saying it was "checked" weeks ago (Hunkkaar, Oct 2026 audit).
+      // The page then says plainly it can't be rechecked (lib/migrate.js, untracked).
+      if (/failed: 404\b/.test(String(e && e.message))) { m[c.slug].tmdbGone = asOf; m[c.slug].swept = asOf; }
+      console.warn(`  sweep ${c.slug}: ${e.message}`);
+    }
   }
   console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming (${dated} with an arrival date within a day), ${announced} streaming date(s) announced`);
 }

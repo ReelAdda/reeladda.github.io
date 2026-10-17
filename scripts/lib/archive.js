@@ -376,9 +376,12 @@ function frozenFilmFacts(html) {
   const pillsIn = (t) => [...t.matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((x) => x[1].trim());
   const subPills = pillsIn(cut >= 0 ? chunk.slice(0, cut) : chunk);
   const rentBuy = cut >= 0 ? pillsIn(chunk.slice(cut)) : [];
-  // "In theatres", "In cinemas from …" and the archive patcher's "Theatrical run ended — …"
-  // are status pills, not platforms.
-  const statusPill = /theatre|cinema|Theatrical run/i;
+  // "In theatres", "In cinemas from …", "Opened in cinemas … — not streaming yet" and the
+  // archive patcher's "Theatrical run ended — …" are status pills, not platforms. Matched by
+  // how they START: "cinema" anywhere also caught Queer Cinemab, Now TV Cinema and Curzon
+  // Home Cinema, so those pages read as not streaming and got a "Not Announced" title over
+  // a body that named the platform (Cocoon, Germany; Oct 2026 audit).
+  const statusPill = /^(?:In (?:theatres|cinemas)\b|Opened in (?:theatres|cinemas)\b|Theatrical run\b|Releases? in (?:theatres|cinemas)\b)/i;
   const providers = subPills.filter((p) => !statusPill.test(p));
   const pending = /<!--SW:pending-->/.test(html);
   const gone = /<!--SW:gone=/.test(html);

@@ -40,6 +40,92 @@ function auditData(code, data, now = Date.now()) {
   return out;
 }
 
+// Oct 2026 data-integrity audit: every finding there is checked here on every build, so a
+// regression shows in the run summary instead of waiting for the next audit. Pure.
+const NOT_YET_TITLE = /Not Announced|\bExpected [A-Z][a-z]{2}|Not Yet Confirmed|\(Unconfirmed\)/;
+const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Sept: 8, Oct: 9, Nov: 10, Dec: 11,
+  January: 0, February: 1, March: 2, April: 3, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
+function shownDate(s) {
+  if (!s) return null;
+  let m = /(\d{1,2}) ([A-Z][a-z]+)\.? (\d{4})/.exec(s);
+  if (m && MONTHS[m[2]] != null) return `${m[3]}-${String(MONTHS[m[2]] + 1).padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+  m = /([A-Z][a-z]+)\.? (\d{1,2}), (\d{4})/.exec(s);
+  if (m && MONTHS[m[1]] != null) return `${m[3]}-${String(MONTHS[m[1]] + 1).padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+  return null;
+}
+function auditIntegrity(html, { entry = null, now = Date.now() } = {}) {
+  const out = [];
+  const title = (/<title>([^<]*)<\/title>/.exec(html) || [])[1] || "";
+  const desc = (/<meta name="description" content="([^"]*)"/.exec(html) || [])[1] || "";
+  const answer = ((/<p class="answer">([\s\S]*?)<\/p>/.exec(html) || [])[1] || "").replace(/<[^>]+>/g, "");
+  const streaming = /<!--SW:stream-->/.test(html) || / is streaming in /.test(answer);
+  const notYet = NOT_YET_TITLE.test(title);
+  if (notYet && streaming) out.push({ check: "title-not-streaming-page-streaming", detail: title.slice(0, 70) });
+  if (notYet && !streaming && /where to watch(?: it)? in /.test(desc) && !/ is streaming in /.test(desc)) out.push({ check: "title-vs-description", detail: title.slice(0, 70) });
+  if (/ is streaming in /.test(desc) && !streaming) out.push({ check: "description-streaming-page-not", detail: desc.slice(0, 70) });
+  const ld = /"@type":"(Movie|TVSeries)"[\s\S]*?"inLanguage":"([^"]*)"/.exec(html);
+  if (ld && /^[a-z]{2,3}$/.test(ld[2])) out.push({ check: "raw-language-code", detail: `"${ld[2]}"` });
+  if (entry && ld) {
+    const kind = ld[1] === "TVSeries" ? "tv" : "movie";
+    if ((entry.kind === "tv" ? "tv" : "movie") !== kind || (entry.lang && !/^[a-z]{2,3}$/.test(ld[2]) && entry.lang !== ld[2] && !/^[a-z]{2,3}$/.test(entry.lang)))
+      out.push({ check: "page-is-another-film", detail: `page ${kind} ${ld[2]}, manifest ${entry.kind || "movie"} ${entry.lang} (id ${entry.tmdbId})` });
+  }
+  const head = html.slice(Math.max(0, html.indexOf('<div class="head"')), Math.max(0, html.indexOf('id="filmychill-score"')));
+  if (/Few ratings/.test(head) && /class="fcsb-stamp[^"]*">(?:Must watch|Worth a watch|Skip)</.test(html) && !/class="fcsb-conf"/.test(html))
+    out.push({ check: "few-ratings-beside-full-verdict", detail: ((/([\d,]+) ratings/.exec(head) || [])[0]) || "" });
+  const mod = (/"dateModified":"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1];
+  if (entry && entry.last && mod && daysSince(mod, Date.parse(`${entry.last}T00:00:00Z`)) > 1)
+    out.push({ check: "page-updated-behind-lastmod", detail: `page ${mod}, sitemap ${entry.last}` });
+  if (/<!--SW:pending-->/.test(html) && !/the last time we could check/.test(html)) {
+    const rel = (/"datePublished":"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1];
+    const av = shownDate((/Availability as of ([^<]+)/.exec(html) || [])[1]);
+    const age = daysSince(rel, now);
+    if (av && age != null && age >= 0 && age <= 120 && daysSince(av, now) > 14) out.push({ check: "waiting-not-rechecked", detail: `as of ${av}, released ${rel}` });
+  }
+  return out;
+}
+
+// Pure, over the whole manifest: identity problems no single page shows.
+function auditManifest(pagesManifest) {
+  const out = [];
+  const byFilm = new Map();
+  for (const [code, m] of Object.entries(pagesManifest || {})) {
+    const perEdition = new Map();
+    for (const [slug, e] of Object.entries(m || {})) {
+      if (!e || !e.tmdbId) continue;
+      const k = `${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`;
+      if (perEdition.has(k)) out.push({ check: "two-pages-one-film", url: `${code}/${slug}`, detail: `also ${code}/${perEdition.get(k)}` });
+      perEdition.set(k, slug);
+      if (e.kind !== "tv" && /^\d{4}/.test(String(e.released || ""))) {
+        if (!byFilm.has(e.tmdbId)) byFilm.set(e.tmdbId, []);
+        byFilm.get(e.tmdbId).push({ code, slug, y: Number(String(e.released).slice(0, 4)) });
+      }
+    }
+  }
+  for (const list of byFilm.values()) {
+    if (list.length < 2) continue;
+    const min = Math.min(...list.map((x) => x.y));
+    for (const x of list) if (x.y - min >= 2) out.push({ check: "year-later-than-other-editions", url: `${x.code}/${x.slug}`, detail: `${x.y}, elsewhere ${min}` });
+  }
+  // One film, two languages across editions: at least one is wrong (The Weight: "Portuguese"
+  // on five editions, English on one, Oct 2026). A page agreeing with its own manifest can
+  // still be wrong, so only the comparison across editions shows it.
+  const langs = new Map();
+  for (const [code, m] of Object.entries(pagesManifest || {})) {
+    for (const [slug, e] of Object.entries(m || {})) {
+      if (!e || !e.tmdbId || !e.lang || /^[a-z]{2,3}$/.test(e.lang)) continue;
+      const k = `${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`;
+      if (!langs.has(k)) langs.set(k, []);
+      langs.get(k).push({ code, slug, lang: e.lang });
+    }
+  }
+  for (const list of langs.values()) {
+    const set = [...new Set(list.map((x) => x.lang))];
+    if (set.length > 1) out.push({ check: "language-differs-across-editions", url: `${list[0].code}/${list[0].slug}`, detail: set.join(" / ") });
+  }
+  return out;
+}
+
 // Pure checks over one rendered film page. `released` from the manifest when known.
 function auditPage(html, { released = null, now = Date.now() } = {}) {
   const out = [];
@@ -64,7 +150,12 @@ function auditPage(html, { released = null, now = Date.now() } = {}) {
   return out;
 }
 
-function runAudit({ dataByCode = {}, pagesManifest = {}, countries = [], now = Date.now(), note = () => {} } = {}) {
+// Findings that put something false in front of a visitor: these turn the run red (and email),
+// the rest are notes in the run summary.
+const FALSE_CLAIMS = new Set(["title-not-streaming-page-streaming", "description-streaming-page-not", "raw-language-code",
+  "page-is-another-film", "two-pages-one-film"]);
+
+function runAudit({ dataByCode = {}, pagesManifest = {}, countries = [], now = Date.now(), note = () => {}, issue = null } = {}) {
   const findings = [];
   for (const cfg of countries) {
     findings.push(...auditData(cfg.code, dataByCode[cfg.code], now));
@@ -75,6 +166,7 @@ function runAudit({ dataByCode = {}, pagesManifest = {}, countries = [], now = D
       let html;
       try { html = fs.readFileSync(url.replace(/^\//, ""), "utf8"); } catch { continue; }
       for (const f of auditPage(html, { released: e && e.released, now })) findings.push({ ...f, url });
+      for (const f of auditIntegrity(html, { entry: e, now })) findings.push({ ...f, url });
       // Recommendations: a distant-language pick is only a fault when better ones exist.
       const sec = /<h2>If you liked this<\/h2><div class="simgrid">([\s\S]*?)<\/div>(?=\s*(?:<h2>|<a class="btn"))/.exec(html);
       if (!sec) continue;
@@ -89,7 +181,19 @@ function runAudit({ dataByCode = {}, pagesManifest = {}, countries = [], now = D
       if (closeAvailable >= 3) findings.push({ check: "distant-recommendations", url, detail: `${far[0].title} (${far[0].language}) on a ${seed.language} film` });
     }
   }
+  findings.push(...auditManifest(pagesManifest));
   const LABEL = {
+    "title-not-streaming-page-streaming": "film page(s) titled not streaming / not announced while the page says it streams",
+    "title-vs-description": "film page(s) titled not announced whose description promises where to watch",
+    "description-streaming-page-not": "film page(s) whose description says streaming while the page says not",
+    "raw-language-code": "film page(s) showing a language code instead of its name",
+    "page-is-another-film": "film page(s) whose manifest entry is a different film (kind or language disagree)",
+    "few-ratings-beside-full-verdict": "film page(s) saying \"Few ratings\" beside a full FilmyChill verdict",
+    "page-updated-behind-lastmod": "film page(s) whose \"Page updated\" date is behind the sitemap's",
+    "waiting-not-rechecked": "waiting film page(s) not rechecked for 14+ days",
+    "two-pages-one-film": "edition(s) with two pages for one film",
+    "year-later-than-other-editions": "film page(s) dated 2+ years after the same film elsewhere (re-release date?)",
+    "language-differs-across-editions": "film(s) with a different language on different editions",
     "pick-not-new": "Pick of the Week isn't a new release",
     "streaming-right-after-cinema": "listed as streaming within 2 weeks of a cinema release — check it's not a placeholder",
     "too-early-on-old-film": "film page(s) say \"Too early\" for a film out over 4 weeks",
@@ -102,10 +206,10 @@ function runAudit({ dataByCode = {}, pagesManifest = {}, countries = [], now = D
   for (const f of findings) (byCheck[f.check] = byCheck[f.check] || []).push(f);
   for (const [check, list] of Object.entries(byCheck)) {
     const eg = list.slice(0, 3).map((f) => `${f.url}${f.detail ? ` (${f.detail})` : ""}`).join("; ");
-    note(`audit: ${list.length} ${LABEL[check] || check} — e.g. ${eg}`);
+    (FALSE_CLAIMS.has(check) && issue ? issue : note)(`audit: ${list.length} ${LABEL[check] || check} — e.g. ${eg}`);
   }
   if (!findings.length) note("audit: no contradictions found");
   return { findings, byCheck };
 }
 
-module.exports = { auditData, auditPage, runAudit };
+module.exports = { FALSE_CLAIMS, auditData, auditIntegrity, auditManifest, auditPage, runAudit, shownDate };

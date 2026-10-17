@@ -7310,6 +7310,124 @@ test("tmdbTruth reads an edition's facts the build's way; applyTruth corrects, n
   assert.deepStrictEqual(empty.item.providers, ["U-NEXT"], "one empty answer can't strip a page; the departure sweep confirms twice");
   assert.strictEqual(T.applyTruth({ ...page, released: "2026-12-24" }, { at: "x", released: "2027-03-12" }).item.released, "2027-03-12", "a postponed film moves (Shakti Shalini)");
 });
+group("17 Oct 2026 integrity audit: fixes, and the self-audit that catches each finding");
+test("a country's re-release date never becomes the film's date or year", () => {
+  const E = require("./lib/enrich.js"), T = require("./lib/truth.js");
+  assert.ok(E.isReRelease("2025-08-01", "1972-03-14"), "The Godfather, India");
+  assert.ok(!E.isReRelease("2026-10-10", "2026-10-02"), "a normal regional date a week later");
+  assert.ok(!E.isReRelease("2026-10-10", null));
+  const IN = require("./lib/core.js").COUNTRIES[0];
+  const d = { title: "The Godfather", release_date: "1972-03-14", original_language: "en",
+    release_dates: { results: [{ iso_3166_1: "IN", release_dates: [{ type: 3, release_date: "2025-08-01T00:00:00.000Z" }] }] } };
+  assert.strictEqual(T.tmdbTruth(d, "movie", IN, "2026-10-17").released, "1972-03-14");
+  const d2 = { ...d, release_date: "2026-10-01", release_dates: { results: [{ iso_3166_1: "IN", release_dates: [{ type: 3, release_date: "2026-10-02T00:00:00.000Z" }] }] } };
+  assert.strictEqual(T.tmdbTruth(d2, "movie", IN, "2026-10-17").released, "2026-10-02", "a real Indian date is kept");
+});
+test("pages dated years after the same film elsewhere jump the score sweep's queue", () => {
+  const W = require("./lib/scoresweep.js");
+  const man = { in: { a: { tmdbId: 1, released: "1972-03-24", fcs: { w: 6 } } }, my: { a: { tmdbId: 1, released: "2026-02-01", fcs: { w: 6 } } },
+    sg: { b: { tmdbId: 2, released: "2026-01-01", fcs: { w: 6 } } }, uk: { b: { tmdbId: 2, released: "2026-12-30", fcs: { w: 6 } } } };
+  assert.strictEqual(W.flagYearOutliers(man), 1);
+  assert.strictEqual(man.my.a.fcs.w, 0);
+  assert.strictEqual(man.uk.b.fcs.w, 6, "a year apart is a regional difference, not a re-release");
+});
+test("a new film can't take an address another film already owns in that edition (WAR, Canada)", () => {
+  const F = require("./lib/filmpage.js");
+  const manifest = { ca: { war: { tmdbId: 585268, kind: "movie", released: "2019-10-02" } }, us: {} };
+  const existing = F.existingSlugsById(manifest);
+  const data = { theatres: [], ott: [{ title: "WAR", kind: "tv", tmdbId: 298852, released: "2026-10-02" }], comingSoon: [] };
+  F.assignSlugs(data, existing, "ca");
+  assert.strictEqual(data.ott[0].slug, "war-2026");
+  const same = { theatres: [], ott: [{ title: "War", kind: "movie", tmdbId: 585268, released: "2019-10-02" }], comingSoon: [] };
+  F.assignSlugs(same, existing, "ca");
+  assert.strictEqual(same.ott[0].slug, "war", "the owner keeps its address");
+  const elsewhere = { theatres: [], ott: [{ title: "WAR", kind: "tv", tmdbId: 298852, released: "2026-10-02" }], comingSoon: [] };
+  F.assignSlugs(elsewhere, existing, "us");
+  assert.strictEqual(elsewhere.ott[0].slug, "war", "no clash in another edition");
+});
+test("a platform named after cinemas is still a platform (Queer Cinemab, Curzon Home Cinema)", () => {
+  const Fa = require("./lib/facts.js");
+  const page = (pill) => `<html><head><title>X</title><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Cocoon","datePublished":"2020-08-13","inLanguage":"German"}</script></head><body><h1>Cocoon (2020)</h1><!--SW:stream--><h2>Where to watch in Germany</h2><div><span class="pill">${pill}</span></div><!--/SW:stream--><h2>Trailer</h2></body></html>`;
+  for (const p of ["Queer Cinemab", "Curzon Home Cinema", "Now TV Cinema"]) {
+    const it = Fa.extractFacts(page(p), "cocoon", {});
+    assert.ok(it && (it.providers || []).includes(p), `${p} kept`);
+  }
+  const st = Fa.extractFacts(page("Opened in cinemas 25 Sept — not streaming yet"), "cocoon", {});
+  assert.ok(st && !(st.providers || []).length, "a status pill is still not a platform");
+});
+test("'Few ratings' only below the score's own 50-rating line", () => {
+  const Sc = require("./lib/score.js");
+  assert.strictEqual(Sc.confidenceTier(30, { recent: false }).label, "Few ratings");
+  assert.strictEqual(Sc.confidenceTier(204, { recent: false }).label, "Moderate ratings");
+  assert.strictEqual(Sc.confidenceTier(500, { recent: false }).label, "Solid");
+});
+test("a claim with one empty check is confirmed next run, not in a month", () => {
+  const L = require("./lib/lifecycle.js");
+  const x = { slug: "a", tmdbId: 1, released: "2025-01-01", live: { since: "2026-09-01", lastCheck: "2026-10-17", providers: ["Netflix"], misses: 1 } };
+  assert.strictEqual(L.departureCandidates([x], new Date("2026-10-17T13:00:00Z")).length, 1, "the next run confirms");
+  assert.strictEqual(L.departureCandidates([{ ...x, live: { ...x.live, misses: 0 } }], new Date("2026-10-17T13:00:00Z")).length, 0, "no miss: the usual cadence");
+});
+test("credits and runtime are among TMDB's facts a frozen page takes, on a real disagreement only", () => {
+  const T = require("./lib/truth.js");
+  const IN = require("./lib/core.js").COUNTRIES[0];
+  const d = { title: "X", release_date: "2026-01-01", runtime: 140, genres: [{ name: "Drama" }, { name: "Crime" }],
+    credits: { crew: [{ job: "Director", name: "Real Director" }], cast: [{ name: "Lead A" }, { name: "B" }] } };
+  const t = T.tmdbTruth(d, "movie", IN, "2026-10-17");
+  assert.deepStrictEqual([t.runtime, t.genre, t.director, t.cast[0]], [140, "Drama / Crime", "Real Director", "Lead A"]);
+  const page = { title: "X", released: "2026-01-01", runtime: 120, director: "Wrong Person", cast: ["Someone Else", "B"], castPics: [{ name: "Someone Else" }, { name: "B" }], genre: "Comedy" };
+  const r = T.applyTruth(page, t);
+  assert.deepStrictEqual(r.changed.sort(), ["cast", "director", "genre", "runtime"]);
+  assert.deepStrictEqual(r.item.castPics.map((p) => p.name), ["B"], "no photo of someone no longer in the cast");
+  const close = T.applyTruth({ title: "X", released: "2026-01-01", runtime: 142, director: "Real Director", cast: ["Lead A"], genre: "Drama" }, t);
+  assert.deepStrictEqual(close.changed, [], "within 5 minutes, same people, a genre TMDB lists: left alone");
+});
+test("a film no sweep can recheck says so instead of 'checked that day' (Pulavar)", () => {
+  const IN = require("./lib/core.js").COUNTRIES[0];
+  const item = { title: "Pulavar", slug: "pulavar", kind: "movie", released: "2026-09-25", language: "Tamil", providers: [], rentBuy: [], platform: "Theatres" };
+  const yes = U.buildFilmPage({ ...item, untracked: true }, "2026-09-25", new Set(), IN);
+  assert.ok(/the last time we could check/.test(yes) && !/checked that day/.test(yes));
+  assert.ok(/checked that day/.test(U.buildFilmPage({ ...item, tmdbId: 5 }, "2026-10-17", new Set(), IN)), "a tracked film keeps the usual line");
+});
+test("the self-audit catches every kind of finding from the 17 Oct integrity audit", () => {
+  const A = require("./lib/audit.js");
+  const now = Date.parse("2026-10-17T12:00:00Z");
+  const pg = ({ title = "X", desc = "", body = "", ld = '"@type":"Movie","inLanguage":"English","datePublished":"2026-09-01","dateModified":"2026-10-17"' } = {}) =>
+    `<title>${title}</title><meta name="description" content="${desc}"><script type="application/ld+json">{${ld}}</script><body>${body}</body>`;
+  const checks = (html, entry) => A.auditIntegrity(html, { entry, now }).map((f) => f.check);
+  assert.ok(checks(pg({ title: "Cocoon (2020) Streaming Date in Germany: Not Announced", body: "<!--SW:stream-->" })).includes("title-not-streaming-page-streaming"));
+  assert.ok(checks(pg({ title: "The Invite (2026) OTT Release Date: Not Announced Yet", desc: "The Invite (2026): Drama — the verdict and where to watch it in India." })).includes("title-vs-description"));
+  assert.ok(checks(pg({ desc: "X is streaming in India — but is it worth it?", body: '<p class="answer">X isn\'t confirmed yet</p>' })).includes("description-streaming-page-not"));
+  assert.ok(checks(pg({ ld: '"@type":"Movie","inLanguage":"ar","datePublished":"2026-01-01"' })).includes("raw-language-code"));
+  assert.ok(checks(pg({ ld: '"@type":"TVSeries","inLanguage":"English","datePublished":"2026-10-02"' }), { kind: "movie", lang: "Hindi", tmdbId: 1 }).includes("page-is-another-film"));
+  assert.ok(checks(pg({ body: '<div class="head"><div class="rating">★ 6.9 <span class="ctag">Few ratings</span> 204 ratings</div></div><section class="fcsb" id="filmychill-score"><span class="fcsb-stamp fcsb-worth">Worth a watch</span></section>' })).includes("few-ratings-beside-full-verdict"));
+  assert.ok(checks(pg({ ld: '"@type":"Movie","inLanguage":"English","datePublished":"2026-01-01","dateModified":"2026-09-30"' }), { kind: "movie", lang: "English", last: "2026-10-16" }).includes("page-updated-behind-lastmod"));
+  assert.ok(checks(pg({ ld: '"@type":"Movie","inLanguage":"Tamil","datePublished":"2026-09-25"', body: "<!--SW:pending-->Availability as of 25 Sept 2026 — checked that day" })).includes("waiting-not-rechecked"));
+  assert.deepStrictEqual(checks(pg({ title: "Fine (2026) — Review", desc: "Fine is streaming in India", body: '<!--SW:stream--><p class="answer">Fine is streaming in India on Netflix.</p>' }), { kind: "movie", lang: "English", last: "2026-10-17" }), [], "a consistent page has no findings");
+  const man = { in: { godfather: { tmdbId: 1, released: "2025-08-01", lang: "English" }, a: { tmdbId: 7, lang: "Hindi" }, b: { tmdbId: 7, lang: "Hindi" } },
+    us: { godfather: { tmdbId: 1, released: "1972-03-24", lang: "English" }, w: { tmdbId: 9, lang: "Portuguese" } }, sg: { w: { tmdbId: 9, lang: "English" } } };
+  const mf = A.auditManifest(man).map((f) => f.check);
+  assert.ok(mf.includes("year-later-than-other-editions") && mf.includes("two-pages-one-film") && mf.includes("language-differs-across-editions"));
+  assert.strictEqual(A.shownDate("Oct 1, 2026"), "2026-10-01");
+  assert.strictEqual(A.shownDate("25 Sept 2026"), "2026-09-25");
+});
+test("a US-style availability date no longer moves a page's lastmod; stored fingerprints upgrade quietly", () => {
+  const Sm = require("./lib/sitemap.js");
+  const a = "<body><p>Availability as of Oct 1, 2026 — x</p></body>", b = "<body><p>Availability as of Nov 3, 2026 — x</p></body>";
+  assert.strictEqual(Sm.contentFingerprint(a), Sm.contentFingerprint(b));
+  const fs = require("fs"), os = require("os"), path = require("path");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "fc-fp-"));
+  fs.mkdirSync(path.join(root, "us", "movie"), { recursive: true });
+  fs.writeFileSync(path.join(root, "us", "movie", "x.html"), b);
+  const man = { us: { x: { fp: Sm.contentFingerprint(b, { legacy: true }), last: "2026-10-01" } } };
+  const r = Sm.syncFilmLastmods(man, [{ code: "us" }], "2026-10-17", { root });
+  assert.strictEqual(man.us.x.last, "2026-10-01", "an old-rule fingerprint of the same page doesn't restamp it");
+  assert.strictEqual(r.changed, 0);
+  assert.strictEqual(man.us.x.fp, Sm.contentFingerprint(b), "...and is upgraded to the new rule");
+  fs.writeFileSync(path.join(root, "us", "movie", "x.html"), a);
+  Sm.syncFilmLastmods(man, [{ code: "us" }], "2026-10-18", { root });
+  assert.strictEqual(man.us.x.last, "2026-10-01", "only the availability month changed: no new lastmod");
+  fs.rmSync(root, { recursive: true, force: true });
+});
 test("a released film keeps its year in the title when only the 'unconfirmed' tag has to go (Street Fighter)", () => {
   const IN = require("./lib/core.js").COUNTRIES[0];
   const F = require("./lib/filmpage.js");
@@ -7370,7 +7488,7 @@ test("waiting pages older than 30 weeks get a small share of the arrival sweep, 
   assert.strictEqual(Lc.oldSweepCandidates(entries, now, 1).length, 1, "budget respected");
   const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "lifecycle.js"), "utf8");
   assert.ok(/SWEEP_MAX_CHECKS - SWEEP_OLD_QUOTA/.test(src) && /oldSweepCandidates\(entries, new Date\(\), SWEEP_MAX_CHECKS - recent\.length/.test(src), "recent first; old ones get what's left, at least the quota");
-  assert.ok(/await tmdb\(`\/\$\{kind\}\/\$\{c\.tmdbId\}`, \{ append_to_response: kind === "tv" \? "watch\/providers" : "watch\/providers,release_dates" \}\)/.test(src), "departure recheck: still one call, now with dates and title");
+  assert.ok(/await tmdb\(`\/\$\{kind\}\/\$\{c\.tmdbId\}`, \{ append_to_response: kind === "tv" \? "watch\/providers,aggregate_credits" : "watch\/providers,release_dates,credits" \}\)/.test(src), "departure recheck: still one call, now with dates, title and credits");
   assert.ok(/m\[c\.slug\]\.truth = tmdbTruth\(d, "movie", cfg, asOf\)/.test(src) && /if \(truth && !outage\) m\[c\.slug\]\.truth = truth;/.test(src), "both sweeps record what they saw; never during a provider outage");
 });
 testAsync("daily accuracy pass: measures first, records TMDB's facts for frozen pages, writes latest + history", async () => {

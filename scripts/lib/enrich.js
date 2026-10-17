@@ -155,6 +155,13 @@ function theatreEligible(d, region, providers = []) {
 // earliest when several. null when TMDB has no dated entry for this region — the caller
 // then keeps the global primary date. Indian films open in the UAE/Canada days apart
 // from India; each country page should show (and gate freshness by) ITS OWN date.
+// Pure: is this country's cinema date a re-release (over a year after the original)?
+function isReRelease(regional, original) {
+  if (!regional || !original) return false;
+  const a = Date.parse(`${String(original).slice(0, 10)}T00:00:00Z`), b = Date.parse(`${String(regional).slice(0, 10)}T00:00:00Z`);
+  return Number.isFinite(a) && Number.isFinite(b) && b - a > 365 * 864e5;
+}
+
 function regionalTheatricalDate(d, region) {
   const rel = d.release_dates?.results?.find((r) => r.iso_3166_1 === region);
   // TYPE 2 (limited) and 3 (theatrical) only — deliberately NOT type 1 (premiere).
@@ -287,7 +294,12 @@ async function enrich(kind, id, region = "IN") {
 
   // Region's own theatrical date overrides the global primary date when TMDB has one —
   // so each country page shows (and freshness-gates by) its own market's release day.
-  const regionalRelease = kind === "movie" ? regionalTheatricalDate(d, region) : null;
+  // A country's only cinema date can be a re-release decades later (The Godfather, India:
+  // 2025; Harry Potter, Malaysia: 2026). Taken as the release date it put the wrong year in
+  // titles and headings on 23 pages (Oct 2026 audit). More than a year after TMDB's own
+  // release date, it is a re-release: the film keeps its original date.
+  const regionalRaw = kind === "movie" ? regionalTheatricalDate(d, region) : null;
+  const regionalRelease = regionalRaw && !isReRelease(regionalRaw, d.release_date) ? regionalRaw : null;
   const theatrical = kind === "movie" ? theatreEligible(d, region, providers) : null;
 
 
@@ -327,6 +339,7 @@ module.exports = {
   extractCastPics,
   imdbRatings,
   loadImdbRatings,
+  isReRelease,
   regionalTheatricalDate,
   THEATRE_EXCLUDE_IDS,
   theatreEligible,

@@ -21,7 +21,8 @@ const { extractFacts } = require("./lib/facts.js");
 const { canonProvider, dedupeProviders, langName } = require("./lib/rules.js");
 
 const SITE = "https://filmychill.com";
-const STATUS_PILL = /theatre|cinema|Theatrical|Not out|pending/i;
+// Status pills by how they start, as in lib/facts.js: "cinema" anywhere also matched platforms.
+const STATUS_PILL = /^(?:In (?:theatres|cinemas)\b|Opened in (?:theatres|cinemas)\b|Theatrical run\b|Releases? in (?:theatres|cinemas)\b|Not out\b)|pending/i;
 const norm = (s) => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/&amp;/g, "&").replace(/[^a-z0-9]+/g, " ").trim();
 const days = (a, b) => Math.abs(Date.parse(a) - Date.parse(b)) / 864e5;
 // The same person written two ways: "Lasja F. Susatyo" and "Lasja Fauzia Susatyo" (same first and
@@ -168,7 +169,8 @@ async function runAccuracyPass(manifest, { root = ".", per = 6, api, now = new D
   const isPending = (code, slug) => { try { return fs.readFileSync(file(code, slug), "utf8").includes("<!--SW:pending-->"); } catch { return false; } };
   const sample = samplePages(manifest, { per, exists, isPending, seed: Math.floor(now.getTime() / 864e5) * 13 });
   const rows = [];
-  let checked = 0, errors = 0, recorded = 0;
+  let checked = 0, errors = 0, recorded = 0, liveChecked = 0;
+  const emptyClaims = [];
   for (const s of sample) {
     const cfg = COUNTRIES.find((c) => c.code === s.code);
     let d;
@@ -181,8 +183,17 @@ async function runAccuracyPass(manifest, { root = ".", per = 6, api, now = new D
     checked++;
     for (const r of compare(item, expectedFromTmdb(d, s.kind, cfg))) rows.push({ ...r, code: s.code, slug: s.slug });
     const e = manifest[s.code] && manifest[s.code][s.slug];
-    if (e && e.archivedOn) { e.truth = tmdbTruth(d, s.kind, cfg, today); recorded++; }
+    if (e && e.archivedOn) {
+      e.truth = tmdbTruth(d, s.kind, cfg, today); recorded++;
+      if (e.live && !(e.truth.providers || []).length) emptyClaims.push(e);
+      if (e.live) liveChecked++;
+    }
   }
+  // A page still claiming a platform that TMDB no longer lists: this check counts as the
+  // departure sweep's first empty check, and the confirming one comes next run, not in 30 days.
+  // Never on a batch that looks like a provider-data outage (most claims empty at once).
+  const outage = liveChecked >= 15 && emptyClaims.length / liveChecked >= 0.6;
+  if (!outage) for (const e of emptyClaims) e.live = { ...e.live, misses: (e.live.misses || 0) + 1, lastCheck: today };
   const byField = {};
   for (const r of rows) byField[r.field] = (byField[r.field] || 0) + 1;
   const pages = new Set(rows.map((r) => `${r.code}/${r.slug}`));
@@ -193,7 +204,7 @@ async function runAccuracyPass(manifest, { root = ".", per = 6, api, now = new D
   fs.writeFileSync(path.join(root, "accuracy-latest.json"), JSON.stringify({ ...summary, rows }, null, 1) + "\n");
   fs.appendFileSync(path.join(root, "accuracy-history.jsonl"), JSON.stringify(summary) + "\n");
   if (process.env.GITHUB_STEP_SUMMARY) { try { fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, report(rows, { checked, errors, per, at: today }) + "\n"); } catch { /* nicety */ } }
-  log(`Accuracy: ${checked} pages compared with TMDB, ${pages.size} disagree (${summary.high} high); ${summary.correctable} correctable now, TMDB facts recorded for ${recorded} frozen page(s)`);
+  log(`Accuracy: ${checked} pages compared with TMDB, ${pages.size} disagree (${summary.high} high); ${summary.correctable} correctable now, TMDB facts recorded for ${recorded} frozen page(s)${emptyClaims.length && !outage ? `; ${emptyClaims.length} streaming claim(s) TMDB no longer lists, queued to confirm next run` : ""}`);
   return summary;
 }
 

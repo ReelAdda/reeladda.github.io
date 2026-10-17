@@ -319,7 +319,7 @@ const {
 } = require("./lib/runhealth.js");
 const { attachFcScores } = require("./lib/fcscore.js");
 const { cachedCriticsTone } = require("./lib/editorial.js");
-const { sweepScores } = require("./lib/scoresweep.js");
+const { flagYearOutliers, sweepScores } = require("./lib/scoresweep.js");
 const { refreshRelated } = require("./lib/relrefresh.js");
 const { syncVotes } = require("./lib/votes.js");
 const { runAudit } = require("./lib/audit.js");
@@ -1613,6 +1613,9 @@ async function main() {
       if (r.errors >= 5) healthNote(`catalog critics sweep stopped early after ${r.errors} errors — it resumes next run`);
     } catch (e) { stageFailed("catalog critics sweep", e); }
     try {
+      // Pages dated years after the same film elsewhere (re-release dates) go first this run.
+      const outliers = flagYearOutliers(pagesManifest);
+      if (outliers) console.log(`  ${outliers} page(s) dated 2+ years after the same film in another edition — rechecked first`);
       const r = await sweepScores(pagesManifest, { today: todayStr() });
       console.log(`FilmyChill Score sweep: ${r.checked} checked, ${r.updated} pages updated${r.errors ? `, ${r.errors} TMDB errors` : ""}`);
       if (r.errors >= 5) healthNote(`score sweep stopped early after ${r.errors} TMDB errors — it resumes next run`);
@@ -1692,7 +1695,7 @@ async function main() {
     // Self-audit (lib/audit.js): contradictions a visitor would notice, reported in the run
     // summary before anyone else finds them. Read-only.
     try {
-      const a = runAudit({ dataByCode, pagesManifest, countries: COUNTRIES, note: healthNote });
+      const a = runAudit({ dataByCode, pagesManifest, countries: COUNTRIES, note: healthNote, issue: healthIssue });
       console.log(`Audit: ${a.findings.length} finding(s)`);
     } catch (e) { stageFailed("self-audit", e); }
   }

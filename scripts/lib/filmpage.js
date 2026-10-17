@@ -104,6 +104,17 @@ function assignSlugs(data, existing = null, code = null) {
       if (here && here.size) slug = here.has(fresh) ? fresh : here.has(known.preferred) ? known.preferred : [...here].sort()[0];
       else if (known && !known.slugs.has(fresh)) slug = known.preferred;
       if (used.has(slug) && used.get(slug) !== item.tmdbId && year) slug = `${slug}-${year}`;
+      // An address another film already owns in this edition is taken too. Only this run's
+      // slugs were checked, so the TV series WAR (2026) overwrote the Hindi film War's page in
+      // Canada, and the manifest kept the old film's id: every sweep then applied the wrong
+      // film's facts to it (Oct 2026 audit; "Made in Korea" in Malaysia the same way).
+      const owner = existing && existing.owners && code ? existing.owners.get(code) : null;
+      const me = `${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}`;
+      const takenHere = (s) => !!(owner && owner.has(s) && owner.get(s) !== me) || (used.has(s) && used.get(s) !== item.tmdbId);
+      if (item.tmdbId != null && takenHere(slug)) {
+        const withYear = year ? `${fresh}-${year}` : null;
+        slug = withYear && !takenHere(withYear) ? withYear : `${fresh}-${item.kind === "tv" ? "tv-" : ""}${item.tmdbId}`;
+      }
       used.set(slug, item.tmdbId);
       item.slug = slug;
     }
@@ -131,6 +142,16 @@ function existingSlugsById(manifest, { exists = () => true } = {}) {
     const preferred = [...c.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0][0];
     out.set(k, { slugs: new Set(c.keys()), preferred, byEdition: eds.get(k) });
   }
+  // Who owns each address, per edition: "kind:tmdbId" by slug (assignSlugs).
+  const owners = new Map();
+  for (const [code, m] of Object.entries(manifest || {})) {
+    const own = new Map();
+    for (const [slug, e] of Object.entries(m || {})) {
+      if (e && e.tmdbId != null && exists(code, slug)) own.set(slug, `${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`);
+    }
+    owners.set(code, own);
+  }
+  out.owners = owners;
   return out;
 }
 
@@ -1149,7 +1170,11 @@ ${FCSB_CSS}
       : "";
     if (providers.length) return `<!--SW:stream--><!--SW:live=${e(asOf || "")}--><h2>Where to watch in ${e(country)}</h2><div>${providers.map((p) => `<span class="pill">${e(p)}</span>`).join("")}</div>${arrivedLine}<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Included with a subscription — no extra charge on these platforms.</p>${rbRow}${note}${filmHubLinks(item, cfg)}<!--/SW:stream-->`;
     // Not streaming yet: the date says when that was last checked, not just "as of".
-    const checkedNote = `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${asOf ? e(fmtDateFull(asOf, localeFor(code))) : ""} — checked that day: not on any streaming service in ${e(country)} yet.</p>`;
+    // A film we can't look up (no TMDB match, or an id TMDB no longer has) is never rechecked:
+    // "checked that day" under a date weeks old read as current (Pulavar, Oct 2026 audit).
+    const checkedNote = item.untracked
+      ? `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${asOf ? e(fmtDateFull(asOf, localeFor(code))) : ""} — the last time we could check. We can't match this film on TMDB, so this page won't update on its own.</p>`
+      : `<p style="color:var(--mute);font-size:12px;margin-top:6px">Availability as of ${asOf ? e(fmtDateFull(asOf, localeFor(code))) : ""} — checked that day: not on any streaming service in ${e(country)} yet.</p>`;
     if (item.platform === "Theatres") return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">In theatres</span></div>${rb.length ? rbRow + `<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>${note}` : checkedNote}`;
     if (rb.length) return `<h2>Where to watch in ${e(country)}</h2>${rbRow}<p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>${note}`;
     // Unreleased film: previously this block rendered nothing at all, so the page answered
