@@ -71,7 +71,7 @@ const { countryNameFor, hasLanguageWindow, streamVocab, streamWindowEstimate, st
 // outright by `.filter(x => x.slug)` further downstream.
 function poolItems(data) {
   if (!data) return [];
-  const out = [...(data.ottExtra || [])];
+  const out = [...(data.ottExtra || []), ...(data.soonExtra || [])];
   for (const p of Object.values(data.langPools || {})) out.push(...(p.theatres || []), ...(p.ott || []));
   const seen = new Set();
   return out.filter((x) => {

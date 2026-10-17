@@ -3846,6 +3846,21 @@ test("canonical, title, FAQ schema and take line present", () => {
   assert.ok(html.includes("FAQPage"));
   assert.ok(html.includes("especially the performances"));
 });
+test("a language page lists that language's upcoming pool, soonest first, never a passed date", () => {
+  const d = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+  const data = { ...LANG_DATA, soonExtra: [
+    { title: "Tamil Later", slug: "tamil-later", language: "Tamil", released: d(60), kind: "movie", tmdbId: 11 },
+    { title: "Tamil Sooner", slug: "tamil-sooner", language: "Tamil", released: d(10), kind: "movie", tmdbId: 12 },
+    { title: "Telugu Soon", slug: "telugu-soon", language: "Telugu", released: d(20), kind: "movie", tmdbId: 13 },
+    { title: "Tamil Gone", slug: "tamil-gone", language: "Tamil", released: d(-2), kind: "movie", tmdbId: 14 },
+  ] };
+  const html = U.buildLanguagePage(data, "Tamil", "tamil");
+  assert.ok(html.includes("Tamil Later") && html.includes("Tamil Sooner") && html.includes("Tamil Soon"));
+  assert.ok(html.indexOf("Tamil Sooner") < html.indexOf("Tamil Later"), "soonest first");
+  assert.ok(!html.includes("Telugu Soon"), "only this language");
+  assert.ok(!html.includes("Tamil Gone"), "a passed date is never under Coming soon");
+  assert.ok(U.poolItems(data).some((x) => x.slug === "tamil-later"), "every pool film gets its own page");
+});
 test("five language pages configured", () => {
   assert.strictEqual(U.LANGUAGE_PAGES.length, 5);
   assert.ok(U.LANGUAGE_PAGES.some(([n, s]) => n === "Tamil" && s === "tamil"));

@@ -333,6 +333,10 @@ const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmo
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
 // cinema-date backfill in main()). One call per film; the backlog clears in a run or two.
 const CINEMA_DATE_BUDGET = Number(process.env.CINEMA_DATE_BUDGET || 150);
+// Coming-soon pool per Indian language (buildCountry): the most anticipated N per language,
+// released within the next SOON_EXTRA_DAYS. One enrich call each, about 40 calls a build.
+const SOON_EXTRA_PER_LANG = 4;
+const SOON_EXTRA_DAYS = 120;
 // TMDB calls per run for the Indian digital-release backfill (lib/indiadata.js). The one-off
 // catch-up runs from the "India streaming data" workflow with a larger budget.
 const DIGITAL_BUDGET = Number(process.env.DIGITAL_BUDGET || 300);
@@ -1228,6 +1232,53 @@ async function main() {
     await sleep(150);
   }
 
+  // ---------- COMING SOON, BY LANGUAGE (Oct 2026) ----------
+  // The homepage has eight coming-soon slots, two of them for every Indian language other
+  // than Hindi, so Tamil, Telugu and Malayalam films rarely had a page before release, though
+  // Tamil releases drove the month's clicks (Dorothy, Meesaya Murukku 2, The Dark Heaven). A
+  // page made in release week starts from nothing, just as the searches peak. This pool gives
+  // the most anticipated upcoming films of each Indian language a page early. The homepage
+  // never shows it; the language pages list it, which is also how the pages get linked.
+  const soonExtra = [];
+  if (Array.isArray(cfg.regionalLangs) && cfg.regionalLangs.length) {
+    const soonIds = new Set(comingSoon.map((x) => x.tmdbId));
+    const horizon = new Date(Date.now() + SOON_EXTRA_DAYS * 864e5).toISOString().slice(0, 10);
+    for (const lang of cfg.regionalLangs) {
+      // Films with a proven cinema date here first; then by premiere date, as the homepage
+      // list does, because upcoming regional films often have no Indian release type on TMDB yet.
+      const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+      const queries = [
+        { region: cfg.region, with_release_type: "3|2", "release_date.gte": tomorrow, "release_date.lte": horizon },
+        { "primary_release_date.gte": tomorrow, "primary_release_date.lte": horizon },
+      ];
+      const cands = [];
+      for (const q of queries) {
+        try {
+          const d = await tmdb("/discover/movie", { ...q, with_original_language: lang, sort_by: "popularity.desc", include_adult: "false", page: "1" });
+          // A poster and a date, or there is nothing to show and nothing to search for yet.
+          for (const m of d.results || []) {
+            if (m.poster_path && m.release_date && m.release_date >= tomorrow && !soonIds.has(m.id) && !isExcluded(m) && !cands.some((c) => c.id === m.id)) cands.push(m);
+          }
+        } catch (e) { console.warn(`soon-extra ${cfg.code}/${lang}: ${e.message}`); }
+        await sleep(150);
+      }
+      let kept = 0;
+      for (const m of cands) {
+        if (kept >= SOON_EXTRA_PER_LANG) break;
+        const item = { title: m.title, released: m.release_date, genre: genres(m.genre_ids), language: langName(langCode(m)),
+          review: trim(m.overview, 120), poster: img(m.poster_path), kind: "movie", tmdbId: m.id, popularity: m.popularity ?? null };
+        try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); } catch (e) { console.warn(`soon-extra ${m.id}: ${e.message}`); continue; }
+        await sleep(150);
+        // Already on a platform, or premiering digitally with no cinema date: a streaming
+        // original, not a film coming to cinemas. Its page would say "opens in cinemas".
+        if ((item.providers || []).length || (item.digitalDate && !item.theatricalHere)) continue;
+        soonIds.add(m.id);
+        soonExtra.push(item);
+        kept++;
+      }
+    }
+  }
+
   // ---------- CROSS-SECTION DEDUP (a film must appear in only ONE section) ----------
   // TMDB's now_playing for a region can include a film that is actually a STREAMING release
   // (e.g. a Netflix original given a theatrical date), so the same title can land in both the
@@ -1285,14 +1336,15 @@ async function main() {
       ottExtra.push(x);
     }
   }
-  const data = { generatedAt: new Date().toISOString(), country: cfg.code, pick: pick ? pick.title : null, theatres, ott, comingSoon: upcoming, langPools, ottExtra };
+  const data = { generatedAt: new Date().toISOString(), country: cfg.code, pick: pick ? pick.title : null, theatres, ott, comingSoon: upcoming, langPools, ottExtra,
+    ...(soonExtra.length ? { soonExtra: normalizeUpcoming(soonExtra) } : {}) };
   // Strip internal-only fields (ranking helpers) so they never reach the data file.
-  const poolLists = [...Object.values(langPools).flatMap((p) => [p.theatres, p.ott]), ottExtra];
+  const poolLists = [...Object.values(langPools).flatMap((p) => [p.theatres, p.ott]), ottExtra, data.soonExtra || []];
   for (const list of [data.theatres, data.ott, data.comingSoon, ...poolLists]) {
     for (const it of list) { delete it._pop; delete it._tmdbWeighted; delete it._imdbNum; delete it._imdbRating; delete it._imdbVotes; delete it._w; }
   }
   const poolCount = poolLists.reduce((n, l) => n + l.length, 0);
-  console.log(`[${cfg.code}] ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming, ${poolCount} language-page extras. Pick: ${data.pick}`);
+  console.log(`[${cfg.code}] ${theatres.length} theatre, ${ott.length} OTT, ${comingSoon.length} upcoming, ${poolCount} language-page extras${data.soonExtra ? ` (${data.soonExtra.length} upcoming by language: ${Object.entries(data.soonExtra.reduce((o, x) => ((o[x.language] = (o[x.language] || 0) + 1), o), {})).map(([l, n]) => `${l} ${n}`).join(", ")})` : ""}. Pick: ${data.pick}`);
   return data;
   } // end buildCountry
 
@@ -1449,8 +1501,11 @@ async function main() {
 
   // Now write every country's data file (India also writes the legacy data.json).
   for (const cfg of builtCountries) {
-    fs.writeFileSync(`data-${cfg.code}.json`, JSON.stringify(dataByCode[cfg.code], null, 1));
-    if (cfg.code === "in") fs.writeFileSync("data.json", JSON.stringify(dataByCode[cfg.code], null, 1));
+    // soonExtra only feeds pages written in this run (film pages, language pages); the homepage
+    // never reads it, and at ~4 KB a film it would add ~130 KB to every homepage visit.
+    const json = JSON.stringify(dataByCode[cfg.code], (k, v) => (k === "soonExtra" ? undefined : v), 1);
+    fs.writeFileSync(`data-${cfg.code}.json`, json);
+    if (cfg.code === "in") fs.writeFileSync("data.json", json);
   }
   // Pass 2: now that ALL slug sets are known, generate per-film pages for every country (so
   // hreflang alternates between countries are accurate) and render each country homepage.

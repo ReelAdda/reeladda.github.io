@@ -251,7 +251,10 @@ function buildLanguagePage(data, langName, slug, archive = null) {
   // claim it cannot back, and thin-content-plus-overclaim is the worst combination to put in
   // front of a crawler. Below the threshold the copy softens and says so plainly instead.
   const thin = theatres.length + ott.length < 3;
-  const soon = normalizeUpcoming(of("comingSoon")); // never list a passed date under "Coming soon"
+  // The homepage's few coming-soon titles first, then this language's own upcoming pool
+  // (soonExtra in buildCountry), soonest first. Never a passed date (normalizeUpcoming).
+  const soon = normalizeUpcoming(merge(of("comingSoon"), of("soonExtra"))
+    .sort((a, b) => String(a.released || "").localeCompare(String(b.released || ""))));
   const faqs = [];
   if (ott.length) faqs.push({
     q: `What's new in ${langName} on OTT this week?`,
