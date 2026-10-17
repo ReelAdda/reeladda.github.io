@@ -58,7 +58,9 @@ const {
   cinemaWindowDays,
   cinemaClaim,
   fillCinemaDates,
+  prelisted,
   readHistoryLines,
+  verifyEarlyArrivals,
   writeHistoryLines,
 } = require("./lib/history.js");
 const { writeEmbed, buildEmbedPage, buildEmbedInstructions, embedItems } = require("./lib/embed.js");
@@ -887,18 +889,27 @@ async function main() {
     // First-seen tracking: this title was observed WITH a provider today. ottSince is the
     // (approximate) platform-arrival date; ottFreshDate is what the gate + recency decay use.
     const firstSeen = recordOttSeen(seenCountry, `${item.kind}:${item.tmdbId}`, item.freshDate, todayStr, seenColdStart);
+    // A platform listing before the film's cinema release here is a placeholder, not an
+    // arrival (Drishyam: The Conclusion, July 2026): not archived, and not remembered as the
+    // first sighting, so the real arrival date is the one recorded when it comes.
+    // A re-release (TMDB's own release date more than a year before this cinema date) is an
+    // old film back in cinemas: no new window to measure, and no placeholder to catch.
+    const reRelease = item.kind === "movie" && !!c.release_date && !!item.released
+      && Date.parse(`${item.released}T00:00:00Z`) - Date.parse(`${String(c.release_date).slice(0, 10)}T00:00:00Z`) > 365 * 864e5;
+    const beforeCinema = !seenColdStart && !reRelease && item.kind === "movie" && item.theatricalHere && item.released && firstSeen && firstSeen < item.released;
+    if (beforeCinema) delete seenCountry[`${item.kind}:${item.tmdbId}`];
     // Mirror the sighting into the append-only archive (see lib/history.js). ott-seen.json
     // prunes after 180 days because it is a freshness signal; this never prunes, because it
     // is the record. Written for EVERY candidate observed with a provider — not only the ones
     // that win a slot on the page — which is the difference between a sample and a census.
-    try {
+    if (!beforeCinema) try {
       appendHistory(historyRecord({
         code: cfg.code, kind: item.kind, tmdbId: item.tmdbId, title: item.title,
         platform: extra.providers && extra.providers[0], providers: extra.providers,
         first: firstSeen, theatrical: item.released, language: item.language, genre: item.genre,
         // This country's own cinema date, or null for a film that never opened here — the
         // difference /data/ needs (enrich sets theatricalHere only for a TMDB type 2/3 date).
-        cinema: item.kind === "tv" ? undefined : (item.theatricalHere ? item.released : null),
+        cinema: item.kind === "tv" ? undefined : (item.theatricalHere && !reRelease ? item.released : null),
       }));
     } catch (e) { /* archive is additive; never let it break a build */ }
     // Placeholder listing (platform page up before the cinema release, still inside the usual
@@ -1357,6 +1368,32 @@ async function main() {
     if (r.films) console.log(`  cinema dates: ${r.filled} archive row(s) filled from ${r.calls} TMDB call(s); ${r.pending} film(s) left to check`);
   } catch (e) { stageFailed("cinema-date backfill", e); }
 
+  // Early arrivals rechecked before they are published as fact (verifyEarlyArrivals in
+  // lib/history.js): a listing before the cinema release is a placeholder, and one within two
+  // weeks of release is confirmed a week later or withdrawn after two empty checks. A withdrawn
+  // sighting's first-seen date is forgotten, so the real arrival is dated when it comes.
+  try {
+    const lines = readHistoryLines();
+    const regionOf = (code) => { const c = COUNTRIES.find((x) => x.code === code) || {}; return c.watchRegion || c.region || String(code).toUpperCase(); };
+    const r = await verifyEarlyArrivals(lines, {
+      today: todayStr(),
+      check: async (rec) => {
+        const d = await tmdb(`/movie/${rec.id}/watch/providers`);
+        const wp = (d && d.results && d.results[regionOf(rec.c)]) || {};
+        return (wp.flatrate || []).map((p) => p.provider_name);
+      },
+      pause: () => sleep(120),
+    });
+    if (lines.some((l) => l.dirty)) writeHistoryLines(lines);
+    const seenAll = loadOttSeen();
+    for (const k of r.keys) {
+      const [c, kind, id] = k.split(":");
+      if (seenAll[c]) delete seenAll[c][`${kind}:${id}`];
+    }
+    if (r.prelisted || r.checked) console.log(`  early arrivals: ${r.prelisted} placeholder sighting(s) withdrawn; ${r.checked} rechecked — ${r.confirmed} confirmed, ${r.pending} empty once (rechecked next run), ${r.retracted - r.prelisted} withdrawn${r.outage ? "; looked like a provider-data outage, nothing changed" : ""}`);
+    if (r.outage) healthNote("early-arrival recheck: most answers came back empty — treated as a TMDB/JustWatch outage, nothing withdrawn");
+  } catch (e) { stageFailed("early-arrival check", e); }
+
   // Persist first-seen tracking (see ott-seen.json docs) — every country has now recorded
   // today's sightings; the workflow commits this file so tomorrow's run remembers them.
   fs.writeFileSync(OTT_SEEN_FILE, JSON.stringify(loadOttSeen(), null, 1));
@@ -1547,7 +1584,8 @@ async function main() {
     // the country in every non-India title, and the "FilmyChill data" window line checked
     // against the archive (lib/stylesheets.js). Runs after every page writer and patcher above.
     try {
-      const records = readHistory();
+      // Withdrawn sightings included (later lines win): a page that states one loses the line.
+      const records = readHistory({ all: true });
       const starts = observationStarts(records);
       const byKey = new Map(records.map((r) => [`${r.c}:${r.k}:${r.id}`, r]));
       const fcdataClaim = (code, slug) => {
@@ -1706,6 +1744,7 @@ module.exports = {
   buildDataPage, buildWindowsCsv, writeDataPage,
   appendHistory, readHistory, historyRecord, streamingWindowDays, windowStats,
   observationStarts, cinemaWindowDays, cinemaClaim, fillCinemaDates, readHistoryLines, writeHistoryLines,
+  verifyEarlyArrivals, prelisted,
   contentFingerprint, syncFilmLastmods, CINEMA_DATE_BUDGET,
   writeCountrySurfaces,
   syncHreflangClusters, patchHreflang, hreflangBlockFor, filmPageExists,

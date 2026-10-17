@@ -52,7 +52,9 @@ function loadHistoryIndex() {
     const raw = fs.readFileSync(HISTORY_FILE, "utf8");
     for (const line of raw.split("\n")) {
       if (!line.trim()) continue;
-      try { const o = JSON.parse(line); _index.add(`${o.c}:${o.k}:${o.id}`); } catch { /* skip malformed */ }
+      // A retracted sighting (verifyEarlyArrivals) doesn't block the title: when it really
+      // arrives, that observation is recorded as a new line.
+      try { const o = JSON.parse(line); if (!o.x) _index.add(`${o.c}:${o.k}:${o.id}`); } catch { /* skip malformed */ }
     }
   } catch { /* first ever run */ }
   return _index;
@@ -78,11 +80,14 @@ function canonRecord(r) {
   if (Array.isArray(r.ps)) r.ps = [...new Set(r.ps.map(canonProvider))];
   return r;
 }
-function readHistory() {
+// Retracted sightings (`x`, see verifyEarlyArrivals) are left out: no month page, data figure
+// or film page counts an arrival a later check disproved. `all` includes them, for the one
+// reader that has to remove what a page already says.
+function readHistory({ all = false } = {}) {
   try {
     return fs.readFileSync(HISTORY_FILE, "utf8").split("\n")
       .filter((l) => l.trim()).map((l) => { try { return JSON.parse(l); } catch { return null; } })
-      .filter(Boolean).map(canonRecord);
+      .filter((r) => r && (all || !r.x)).map(canonRecord);
   } catch { return []; }
 }
 
@@ -118,15 +123,102 @@ function observationStarts(records) {
   return out;
 }
 
+// ---------------------------------------------------------------------------
+// EARLY-ARRIVAL CHECK (Oct 2026). TMDB's provider data (from JustWatch) sometimes lists a film
+// on a platform before it is really there: Prime Video's placeholder for Drishyam: The
+// Conclusion showed in India and the UAE three months before its 2 October cinema release, and
+// for a single day in the US, Indonesia, the Philippines and Korea around its release. The
+// archive recorded those as arrivals; the US page said the film "reached streaming 4 days after
+// its theatrical release", and /data/ counted 0- and 4-day windows. TMDB listed no offers for
+// it in either country on 17 October.
+//
+//   - A sighting BEFORE the film's cinema release in that country is a placeholder: retracted.
+//   - A sighting within EARLY_WINDOW_DAYS of the release (or premiere) is rechecked once it is
+//     VERIFY_AFTER_DAYS old. Still listed: confirmed (`ok`). Missing on two checks on separate
+//     days: retracted (`x`). One empty answer is often a feed blip, so it only marks `xq`.
+// A retracted line stays in the file (nothing is deleted) and readers skip it.
+// ---------------------------------------------------------------------------
+const EARLY_WINDOW_DAYS = 14;
+const VERIFY_AFTER_DAYS = 7;
+const PRELIST_MAX_DAYS = 180;    // further back than this: an old film's re-release, not a placeholder
+
+function daysBetween(a, b) {
+  const x = Date.parse(`${String(a).slice(0, 10)}T00:00:00Z`), y = Date.parse(`${String(b).slice(0, 10)}T00:00:00Z`);
+  return Number.isFinite(x) && Number.isFinite(y) ? Math.round((y - x) / 864e5) : null;
+}
+// Pure: seen on a platform before the film opened in cinemas here (a placeholder listing).
+function prelisted(rec) {
+  if (!rec || rec.k !== "movie" || !rec.th || !rec.first) return false;
+  const d = daysBetween(rec.first, rec.th);
+  return d != null && d > 0 && d <= PRELIST_MAX_DAYS;
+}
+// Pure: a film sighting close enough to its release that it needs a confirming check.
+function awaitingCheck(rec) {
+  if (!rec || rec.x || rec.ok || rec.k !== "movie" || !rec.first) return false;
+  const base = rec.th || rec.rel;
+  const d = base ? daysBetween(base, rec.first) : null;
+  return d != null && d <= EARLY_WINDOW_DAYS;
+}
+
+// Marks lines in place (dirty) and returns what it did. `check(rec)` resolves to the
+// subscription platforms TMDB lists for the film in that country today (an array) or throws.
+// `keys` lists the country:kind:id of each withdrawn sighting, so the caller can forget its
+// first-seen date and record the real arrival when it comes.
+async function verifyEarlyArrivals(lines, { check, today, budget = 80, pause = async () => {} } = {}) {
+  const res = { prelisted: 0, checked: 0, confirmed: 0, retracted: 0, pending: 0, outage: false, keys: [] };
+  const retract = (l, why) => {
+    l.rec.x = today; l.rec.xr = why; delete l.rec.xq; l.dirty = true;
+    res.retracted++; res.keys.push(`${l.rec.c}:${l.rec.k}:${l.rec.id}`);
+  };
+  // Only sightings made while we were watching. A row dated at or before the country's first
+  // build is a reconstruction (Project Hail Mary: "first seen" 15 March in 14 countries), not a
+  // listing anyone saw, and withdrawing it would re-date the film as a brand-new arrival.
+  const starts = observationStarts((lines || []).map((l) => l && l.rec).filter(Boolean));
+  const due = [];
+  for (const l of lines || []) {
+    const r = l && l.rec;
+    if (!r || r.x || r.ok) continue;
+    const start = starts[r.c];
+    const cold = !start || String(r.first || "").slice(0, 10) <= start;
+    // ...except a film that hadn't opened in cinemas yet when we began watching: whatever
+    // listing it had then was a placeholder (Drishyam: The Conclusion on the July 2026 page).
+    if (cold && !(start && prelisted(r) && r.th > start)) continue;
+    if (prelisted(r)) { retract(l, "listed before its cinema release"); res.prelisted++; continue; }
+    if (!awaitingCheck(r)) continue;
+    const age = daysBetween(r.first, today);
+    if (age == null || age < VERIFY_AFTER_DAYS) continue;
+    if (r.xq && r.xq >= today) continue;                  // the second check is on a later day
+    due.push(l);
+  }
+  const results = [];
+  for (const l of due.slice(0, budget)) {
+    try { results.push({ l, provs: await check(l.rec) }); res.checked++; }
+    catch { /* not evidence either way: retry next run */ }
+    await pause();
+  }
+  // Most of a sizeable batch empty at once is the provider feed failing, not films vanishing.
+  const empty = results.filter((x) => !(x.provs && x.provs.length)).length;
+  if (results.length >= 10 && empty / results.length >= 0.6) { res.outage = true; return res; }
+  for (const { l, provs } of results) {
+    const r = l.rec;
+    if (provs && provs.length) { r.ok = today; delete r.xq; l.dirty = true; res.confirmed++; }
+    else if (r.xq) retract(l, "not found on two later checks");
+    else { r.xq = today; l.dirty = true; res.pending++; }
+  }
+  return res;
+}
+
 // The theatrical window /data/ publishes and film pages state: days from the film's cinema
 // release in THIS country (`th`) to the day we first saw it streaming there. Null unless all
 // of it is true — a film (not TV), that opened in cinemas here, first seen streaming after we
 // began watching this country, within 0..730 days. `starts` = observationStarts(records).
 function cinemaWindowDays(rec, starts) {
-  if (!rec || rec.k !== "movie" || !rec.th || !rec.first) return null;
+  if (!rec || rec.x || rec.k !== "movie" || !rec.th || !rec.first) return null;
   const start = starts && starts[rec.c];
   if (!start || String(rec.first).slice(0, 10) <= start) return null;
-  return windowBetween(rec.th, rec.first);
+  const d = windowBetween(rec.th, rec.first);
+  // A very short window is published only once a later check has confirmed it (`ok`).
+  return d != null && d <= EARLY_WINDOW_DAYS && !rec.ok ? null : d;
 }
 
 // What a film page that already states a window should do with it: "keep" (still true, and
@@ -134,8 +226,11 @@ function cinemaWindowDays(rec, starts) {
 // sighting) or "unknown" (cinema date not looked up yet: leave the page as it is for now).
 function cinemaClaim(rec, starts) {
   if (!rec) return { action: "unknown", days: null };
+  if (rec.x) return { action: "drop", days: null };                  // the sighting was disproved
   if (rec.k === "tv") return { action: "drop", days: null };
   if (rec.th === undefined) return { action: "unknown", days: null };
+  // A short window opened in cinemas here, not yet confirmed: the recheck decides.
+  if (rec.th && awaitingCheck(rec)) return { action: "unknown", days: null };
   const days = cinemaWindowDays(rec, starts);
   return days == null ? { action: "drop", days: null } : { action: "keep", days };
 }
@@ -279,6 +374,7 @@ module.exports = {
   HISTORY_FILE, appendHistory, readHistory, loadHistoryIndex,
   historyRecord, streamingWindowDays, windowStats, median,
   observationStarts, cinemaWindowDays, cinemaClaim,
+  EARLY_WINDOW_DAYS, VERIFY_AFTER_DAYS, awaitingCheck, prelisted, verifyEarlyArrivals,
   fillCinemaDates, readHistoryLines, writeHistoryLines,
   monthKey, monthLabel, historyMonths, historyForMonth,
 };

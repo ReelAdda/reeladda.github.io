@@ -76,9 +76,14 @@ function verifiedAvailability(data, manifestForCountry, index, now = Date.now())
       rating: it.rating ?? null, votes: it.votes || 0, verdict: it.verdict || null, poster: it.poster || "",
       released: it.released || null, platform: null }, it.providers);
   }
+  // Today's lists also say what ISN'T streaming: a film in the cinema or coming-soon list keeps
+  // no older claim (Drishyam: The Conclusion, in Indian cinemas, sat on India's Prime Video
+  // pages from a placeholder listing, Oct 2026).
+  const notStreaming = new Set([...((data && data.theatres) || []), ...((data && data.comingSoon) || [])]
+    .filter((it) => it && it.slug && !(it.providers || []).length).map((it) => it.slug));
   for (const [slug, e] of Object.entries(manifestForCountry || {})) {
     const live = e && e.live;
-    if (!live || !Array.isArray(live.providers) || !live.providers.length) continue;
+    if (!live || !Array.isArray(live.providers) || !live.providers.length || notStreaming.has(slug)) continue;
     const checked = Date.parse(`${live.lastCheck || live.since}T00:00:00Z`);
     if (!Number.isFinite(checked) || (now - checked) / 864e5 > STREAM_PAGE_MAX_AGE) continue;
     const ix = idx.get(slug) || {};

@@ -194,6 +194,17 @@ const DEPART_RECHECK_DAYS = 30;    // how stale a live claim gets before we rech
 // One watch/providers call each — 60 x 14 countries x 2 runs is ~1,700 light calls a day.
 const DEPART_MAX_CHECKS = 60;      // per country per run
 const DEPART_CONFIRM_MISSES = 2;   // consecutive empty checks before we touch the page
+// A claim made within two weeks of the film's release is rechecked after a week, not a month:
+// that is when placeholder listings show up (Prime Video's for Drishyam: The Conclusion was
+// live for one day in four countries, Oct 2026, and the frozen pages kept saying Prime Video).
+const EARLY_CLAIM_DAYS = 14;
+const EARLY_RECHECK_DAYS = 7;
+// Pure: was this live claim opened within EARLY_CLAIM_DAYS of the release?
+function earlyClaim(x) {
+  if (!x || !x.live || !x.live.since || !x.released) return false;
+  const d = (Date.parse(`${x.live.since}T00:00:00Z`) - Date.parse(`${String(x.released).slice(0, 10)}T00:00:00Z`)) / 86400000;
+  return Number.isFinite(d) && d <= EARLY_CLAIM_DAYS;
+}
 
 // Pure: does a recheck batch look like an upstream outage rather than real departures?
 // Normal churn is a small share of any batch; most of a sizeable batch vanishing at once is
@@ -215,14 +226,15 @@ function departureCandidates(entries, now = new Date(), max = DEPART_MAX_CHECKS)
       const daysSince = (now.getTime() - new Date(last + "T00:00:00Z").getTime()) / MS_DAY;
       return { ...x, daysSince };
     })
-    .filter((x) => Number.isFinite(x.daysSince) && x.daysSince >= DEPART_RECHECK_DAYS)
+    // Early claims wait a week only until their first confirmation (misses 0, never rechecked).
+    .filter((x) => Number.isFinite(x.daysSince) && x.daysSince >= (earlyClaim(x) && !x.live.confirmed ? EARLY_RECHECK_DAYS : DEPART_RECHECK_DAYS))
     .sort((a, b) => b.daysSince - a.daysSince)
     .slice(0, max);
 }
 
 // Pure: rewrite a live claim into an honest "we could not find it" block. Mirrors
 // applyArrivalPatch — same markers, same shape, opposite direction.
-function applyDeparturePatch(html, { title, was, rentBuy, countryName, cfg, asOf }) {
+function applyDeparturePatch(html, { title, was, rentBuy, countryName, cfg, asOf, unconfirmed = false }) {
   const V = streamVocab(cfg);
   const e = escHtml;
   const start = "<!--SW:pending-->", end = "<!--/SW:pending-->";
@@ -234,20 +246,22 @@ function applyDeparturePatch(html, { title, was, rentBuy, countryName, cfg, asOf
   }
   const a = html.indexOf(start), b = html.indexOf(end);
   if (a === -1 || b === -1 || b < a) return { html, changed: false };
-  const wasList = (was || []).join(", ");
+  const wasList = unconfirmed ? "" : (was || []).join(", ");
   const rb = (rentBuy || []).filter(Boolean);
 
   // Two genuinely different situations, and conflating them would be a false claim either
   // way: still purchasable is not the same as gone.
   const body = rb.length
     ? `<p><strong>Not on subscription any more.</strong> ${e(title)} is no longer included with a subscription in ${e(countryName)}${wasList ? ` — it was on ${e(wasList)}` : ""}. You can still rent or buy it on ${e(rb.slice(0, 3).join(", "))}.</p>`
-    : `<p><strong>We can't find it streaming right now.</strong> ${e(title)} isn't on any subscription service we track in ${e(countryName)}${wasList ? ` — it was on ${e(wasList)}` : ""}. Rights move around, so it may return.</p>`;
+    : unconfirmed
+      ? `<p><strong>Not streaming yet.</strong> ${e(title)} isn't on any subscription service we track in ${e(countryName)} yet.</p>`
+      : `<p><strong>We can't find it streaming right now.</strong> ${e(title)} isn't on any subscription service we track in ${e(countryName)}${wasList ? ` — it was on ${e(wasList)}` : ""}. Rights move around, so it may return.</p>`;
 
   // NOT V.heading() — that asks "when is it coming to OTT", which is the arrival question
   // and reads as nonsense above a departure notice.
   const heading = `Where to watch ${title}`;
   const block = `${start}<!--SW:gone=${e(asOf || "")}--><h2>${e(heading)}</h2>${body}`
-    + `<p style="color:var(--mute);font-size:13px">Checked ${e(asOf || "recently")}. We keep looking — if it comes back, this page updates.</p>${end}`;
+    + `<p style="color:var(--mute);font-size:13px">Checked ${e(asOf || "recently")}. We keep looking — ${unconfirmed ? "this page updates the day it arrives" : "if it comes back, this page updates"}.</p>${end}`;
   let out = html.slice(0, a) + block + html.slice(b + end.length);
 
   // Strip the stale provider pills. `was` comes from the manifest claim, but a page patched
@@ -268,7 +282,7 @@ function applyDeparturePatch(html, { title, was, rentBuy, countryName, cfg, asOf
     : `<span class="pill">Not currently streaming</span>`;
   out = out.replace(`<h2>${e(heading)}</h2>`, `${pill}<h2>${e(heading)}</h2>`);
   // The notice is right; the rest of the page still said it was streaming.
-  out = settleDepartedCopy(out, { title, was, countryName });
+  out = settleDepartedCopy(out, { title, was: unconfirmed ? [] : was, countryName });
   return { html: out, changed: true };
 }
 
@@ -422,7 +436,7 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
       if (provs.length) {
         // Still streaming. Record the check and refresh the provider list if it moved; the
         // page's own "as of" date follows in syncAvailabilityStamps.
-        m[c.slug].live = { ...live, providers: provs, lastCheck: asOf, misses: 0 };
+        m[c.slug].live = { ...live, providers: provs, lastCheck: asOf, misses: 0, confirmed: true };
         stillThere++;
         continue;
       }
@@ -436,6 +450,9 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
       const { html, changed } = applyDeparturePatch(fs.readFileSync(p, "utf8"), {
         title: c.title || c.slug, was: live.providers || [], rentBuy,
         countryName: countryNameFor(cfg), cfg, asOf,
+        // Never confirmed and listed only around release: likely a placeholder, so the page
+        // doesn't say the film "was on" a platform it may never have reached.
+        unconfirmed: earlyClaim(c) && !live.confirmed,
       });
       if (changed) {
         // Description and title were written for a streaming page; rebuild both from what the

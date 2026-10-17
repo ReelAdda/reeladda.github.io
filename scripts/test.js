@@ -925,6 +925,8 @@ test("verifiedAvailability lists only titles confirmed recently", () => {
   assert.deepStrictEqual(names("Netflix"), ["today"], "this run's lists count");
   const prime = [...a.keys()].find((k) => /Prime Video/.test(k));
   assert.deepStrictEqual(names(prime), ["fresh"], "a claim unchecked for 90 days is not evidence");
+  const inCinemas = U.verifiedAvailability({ ...data, theatres: [{ slug: "fresh", title: "Fresh", providers: [] }] }, manifest, []);
+  assert.ok(!(inCinemas.get(prime) || []).length, "in today's cinema list with no platform: an older claim doesn't list it (Drishyam)");
 });
 
 test("streaming pages: honest lead, counts that match, language nav, within budget", () => {
@@ -6128,7 +6130,73 @@ test("og:title is rewritten in step with the title tag", () => {
   assert.strictEqual(t, og, "the social title must not drift from the search title");
 });
 
+test("early arrivals: a placeholder or unconfirmed short window is never published (Drishyam, Oct 2026)", () => {
+  const starts = { us: "2026-08-27" };
+  const four = { c: "us", k: "movie", id: 1, th: "2026-10-02", rel: "2026-10-02", first: "2026-10-06" };
+  assert.strictEqual(U.cinemaWindowDays(four, starts), null, "4 days, not yet rechecked: withheld");
+  assert.strictEqual(U.cinemaClaim(four, starts).action, "unknown", "an old page's line waits for the recheck");
+  assert.strictEqual(U.cinemaWindowDays({ ...four, ok: "2026-10-14" }, starts), 4, "confirmed a week later: published");
+  assert.strictEqual(U.cinemaClaim({ ...four, x: "2026-10-17" }, starts).action, "drop", "withdrawn: the line goes");
+  assert.strictEqual(U.cinemaWindowDays({ ...four, first: "2026-11-20" }, starts), 49, "a normal window needs no recheck");
+  assert.ok(U.prelisted({ k: "movie", th: "2026-10-02", first: "2026-07-06" }), "seen three months before the cinema release");
+  assert.ok(!U.prelisted({ k: "movie", th: "2026-10-02", first: "2020-01-01" }), "years before: a re-release, not a placeholder");
+  assert.ok(!U.prelisted({ k: "movie", th: "2026-10-02", first: "2026-10-02" }), "same day is rechecked, not withdrawn");
+});
+testAsync("early arrivals: placeholders withdrawn, short windows confirmed or withdrawn after two empty checks", async () => {
+  const line = (rec) => ({ raw: JSON.stringify(rec), rec: { seen: "2026-08-27T00:00:00Z", ...rec } });
+  const lines = [
+    line({ c: "in", k: "movie", id: 1, th: "2026-10-02", first: "2026-09-10" }),              // placeholder
+    line({ c: "us", k: "movie", id: 2, th: "2026-10-02", first: "2026-10-06" }),              // will vanish
+    line({ c: "uk", k: "movie", id: 3, th: "2026-10-01", first: "2026-10-05" }),              // really there
+    line({ c: "uk", k: "movie", id: 4, th: "2026-10-10", first: "2026-10-14" }),              // too young to check
+    line({ c: "uk", k: "movie", id: 5, th: "2026-07-01", first: "2026-09-01" }),              // normal window
+    line({ c: "in", k: "movie", id: 6, th: null, rel: "2026-10-01", first: "2026-10-01" }),   // streaming original
+    line({ c: "us", k: "movie", id: 7, th: "2026-03-20", first: "2026-03-15" }),              // cold-start reconstruction
+    line({ c: "ae", k: "movie", id: 8, th: "2026-10-02", first: "2026-07-10" }),              // cold start, film not out yet
+  ];
+  const listed = { 2: [], 3: ["Netflix"], 6: ["Netflix"] };
+  const asked = [];
+  const check = async (r) => { asked.push(r.id); return listed[r.id]; };
+  const r1 = await U.verifyEarlyArrivals(lines, { check, today: "2026-10-16" });
+  assert.deepStrictEqual(asked.sort(), [2, 3, 6], "only short windows a week old are rechecked");
+  assert.ok(!lines[6].rec.x, "a row from before we began watching is a reconstruction, never withdrawn (Project Hail Mary)");
+  assert.strictEqual(lines[0].rec.x, "2026-10-16");
+  assert.strictEqual(lines[1].rec.xq, "2026-10-16", "one empty answer only marks it");
+  assert.ok(!lines[1].rec.x);
+  assert.strictEqual(lines[2].rec.ok, "2026-10-16");
+  assert.strictEqual(lines[7].rec.x, "2026-10-16", "listed before a cinema release still to come when we began watching: a placeholder");
+  assert.deepStrictEqual(r1.keys, ["in:movie:1", "ae:movie:8"]);
+  asked.length = 0;
+  await U.verifyEarlyArrivals(lines, { check, today: "2026-10-16" });
+  assert.deepStrictEqual(asked, [], "the second check waits for another day; confirmed ones are done");
+  const r3 = await U.verifyEarlyArrivals(lines, { check, today: "2026-10-17" });
+  assert.strictEqual(lines[1].rec.x, "2026-10-17", "empty again a day later: withdrawn");
+  assert.deepStrictEqual(r3.keys, ["us:movie:2"]);
+  assert.ok(lines.every((l, i) => (l.dirty ? [0, 1, 2, 5, 7].includes(i) : true)));
+});
+testAsync("early arrivals: a batch of empty answers is an outage, not withdrawals", async () => {
+  const lines = Array.from({ length: 12 }, (_, i) => ({ rec: { c: "us", k: "movie", id: i + 1, th: "2026-10-01", first: "2026-10-03", seen: "2026-08-27T00:00:00Z" } }));
+  const r = await U.verifyEarlyArrivals(lines, { check: async () => [], today: "2026-10-16" });
+  assert.ok(r.outage);
+  assert.ok(lines.every((l) => !l.rec.xq && !l.rec.x));
+});
+
 group("departure sweep — rechecking claims we already made");
+test("a streaming claim made around release is rechecked after a week, not a month", () => {
+  const early = { slug: "d", tmdbId: 1, released: "2026-10-02", live: { since: "2026-10-06", lastCheck: "2026-10-06", providers: ["Prime Video"], misses: 0 } };
+  assert.strictEqual(U.departureCandidates([early], new Date("2026-10-14")).length, 1);
+  assert.strictEqual(U.departureCandidates([{ ...early, live: { ...early.live, confirmed: true } }], new Date("2026-10-14")).length, 0, "once confirmed, the usual month");
+  assert.strictEqual(U.departureCandidates([{ ...early, released: "2026-06-01" }], new Date("2026-10-14")).length, 0, "a normal arrival waits the month");
+});
+test("an unconfirmed early listing that vanished reads 'not streaming yet', never 'it was on'", () => {
+  const pg = '<span class="pill">Netflix</span><!--SW:pending--><!--SW:live=2026-10-06--><h2>When is X coming to OTT?</h2><p><strong>It&#39;s streaming now.</strong> X is available in India on Netflix.</p><!--/SW:pending-->';
+  const r = U.applyDeparturePatch(pg, { title: "X", was: ["Netflix"], rentBuy: [], countryName: "India", cfg: { code: "in" }, asOf: "2026-10-14", unconfirmed: true });
+  assert.ok(r.changed);
+  assert.ok(/Not streaming yet\./.test(r.html));
+  assert.ok(!/it was on/.test(r.html), "the page doesn't claim it was ever there");
+  assert.ok(!/<span class="pill">Netflix<\/span>/.test(r.html), "the platform pill is gone");
+  assert.ok(/updates the day it arrives/.test(r.html));
+});
 const _liveEnt = (slug, lastCheck, extra = {}) => ({ slug, tmdbId: 1, title: slug, live: { since: lastCheck, lastCheck, providers: ["Netflix"], misses: 0 }, ...extra });
 test("only pages with an open live claim are candidates", () => {
   const c = U.departureCandidates([_liveEnt("a", "2026-06-01"), { slug: "b", tmdbId: 2 }], new Date("2026-09-09"));
