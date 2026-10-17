@@ -340,7 +340,13 @@ const SOON_EXTRA_DAYS = 120;
 // TMDB calls per run for the Indian digital-release backfill (lib/indiadata.js). The one-off
 // catch-up runs from the "India streaming data" workflow with a larger budget.
 const DIGITAL_BUDGET = Number(process.env.DIGITAL_BUDGET || 300);
+// Pick of the Week needs at least this many ratings before its rating can earn the crown.
+const PICK_MIN_VOTES = 20;
+// Archive lines that failed to write this run (the archive is additive, so a failure never
+// stops the build, but a lost arrival must not go unnoticed). Reported once, below.
+const HISTORY_WRITE_FAILURES = [];
 const { indiaCinemaCensus, runDigitalBackfill } = require("./lib/indiadata.js");
+const { isReRelease } = require("./lib/enrich.js");
 const { decideModes, loadModes, saveModes } = require("./lib/factsq.js");
 const { FALSE_CLAIMS } = require("./lib/audit.js");
 const {
@@ -904,8 +910,7 @@ async function main() {
     // first sighting, so the real arrival date is the one recorded when it comes.
     // A re-release (TMDB's own release date more than a year before this cinema date) is an
     // old film back in cinemas: no new window to measure, and no placeholder to catch.
-    const reRelease = item.kind === "movie" && !!c.release_date && !!item.released
-      && Date.parse(`${item.released}T00:00:00Z`) - Date.parse(`${String(c.release_date).slice(0, 10)}T00:00:00Z`) > 365 * 864e5;
+    const reRelease = item.kind === "movie" && isReRelease(item.released, c.release_date);
     const beforeCinema = !seenColdStart && !reRelease && item.kind === "movie" && item.theatricalHere && item.released && firstSeen && firstSeen < item.released;
     if (beforeCinema) delete seenCountry[`${item.kind}:${item.tmdbId}`];
     // Mirror the sighting into the append-only archive (see lib/history.js). ott-seen.json
@@ -921,7 +926,7 @@ async function main() {
         // difference /data/ needs (enrich sets theatricalHere only for a TMDB type 2/3 date).
         cinema: item.kind === "tv" ? undefined : (item.theatricalHere && !reRelease ? item.released : null),
       }));
-    } catch (e) { /* archive is additive; never let it break a build */ }
+    } catch (e) { HISTORY_WRITE_FAILURES.push(`${cfg.code}/${item.title}: ${e.message}`); /* never break a build */ }
     // Placeholder listing (platform page up before the cinema release, still inside the usual
     // window): not streaming yet — the film belongs under In Theatres (lib/enrich.js isPreListed).
     if (isPreListed({ kind: item.kind, hasProviders: true, theatricalDate: item.theatricalHere ? item.released : null,
@@ -1229,7 +1234,10 @@ async function main() {
       popularity: m.popularity ?? null, // buzz/anticipation signal (films are ranked by this)
     };
     // Full details so the modal can show trailer, backdrop, cast, runtime
-    try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); } catch (e) { console.warn(`soon ${m.id}: ${e.message}`); }
+    // A film whose lookup failed is left out this run rather than given a page with no trailer,
+    // cast or runtime (review, Oct 2026). It comes back next run.
+    try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); }
+    catch (e) { console.warn(`soon ${m.id}: ${e.message} — left out this run`); await sleep(150); continue; }
     comingSoon.push(item);
     await sleep(150);
   }
@@ -1303,7 +1311,7 @@ async function main() {
   // If no newcomer qualifies, a genuinely great holdover (>=7.0) can be re-featured.
   // If nothing clears either bar, there is no pick this week — honesty over decoration.
   const all = [...theatres, ...ott];
-  const pickPool = all.filter((x) => x.rating != null && ((x.imdbRating != null ? (x.imdbVotes || 0) : (x.votes || 0)) >= 20));
+  const pickPool = all.filter((x) => x.rating != null && ((x.imdbRating != null ? (x.imdbVotes || 0) : (x.votes || 0)) >= PICK_MIN_VOTES));
   const pick = (pickPool.filter((x) => x.isRecent && x.rating >= 6.5).sort((a, b) => b.rating - a.rating)[0]) ||
                (pickPool.filter((x) => x.rating >= 7.0).sort((a, b) => b.rating - a.rating)[0]) || null;
 
@@ -1470,6 +1478,8 @@ async function main() {
     if (r.prelisted || r.checked) console.log(`  early arrivals: ${r.prelisted} placeholder sighting(s) withdrawn; ${r.checked} rechecked — ${r.confirmed} confirmed, ${r.pending} empty once (rechecked next run), ${r.retracted - r.prelisted} withdrawn${r.outage ? "; looked like a provider-data outage, nothing changed" : ""}`);
     if (r.outage) healthNote("early-arrival recheck: most answers came back empty — treated as a TMDB/JustWatch outage, nothing withdrawn");
   } catch (e) { stageFailed("early-arrival check", e); }
+
+  if (HISTORY_WRITE_FAILURES.length) healthIssue(`archive: ${HISTORY_WRITE_FAILURES.length} streaming sighting(s) couldn't be written to ott-history.jsonl — e.g. ${HISTORY_WRITE_FAILURES.slice(0, 3).join("; ")}`);
 
   // Persist first-seen tracking (see ott-seen.json docs) — every country has now recorded
   // today's sightings; the workflow commits this file so tomorrow's run remembers them.
@@ -1659,6 +1669,8 @@ async function main() {
         rendered += r.pages; changed += r.factsChanged; corrected += r.corrected || 0;
         for (const [f, n] of Object.entries(r.fields || {})) correctedFields[f] = (correctedFields[f] || 0) + n;
         if (r.lost.length) healthNote(`migrate [${cfg.code}]: ${r.lost.length} rendered page(s) lost their facts and were left as they are — e.g. ${r.lost.slice(0, 3).join(", ")}`);
+        if (r.unreadable) healthIssue(`facts [${cfg.code}]: ${r.unreadable} unreadable line(s) in facts/${cfg.code}.jsonl — those pages are captured again from their HTML this run`);
+        else if (r.recaptured) healthNote(`facts [${cfg.code}]: ${r.recaptured} page(s) had no facts record and are captured again from their HTML`);
         const b = migrateBatch(pagesManifest, cfg, { limit, today: todayStr() });
         moved += b.migrated; held.push(...b.held);
       }

@@ -17,12 +17,10 @@
 const fs = require("fs");
 const path = require("path");
 const { COUNTRIES } = require("./lib/core.js");
-const { extractFacts } = require("./lib/facts.js");
-const { canonProvider, dedupeProviders, langName } = require("./lib/rules.js");
+const { extractFacts, STATUS_PILL } = require("./lib/facts.js");
+const { canonProvider, dedupeProviders, langName, looksLikeOutage } = require("./lib/rules.js");
 
 const SITE = "https://filmychill.com";
-// Status pills by how they start, as in lib/facts.js: "cinema" anywhere also matched platforms.
-const STATUS_PILL = /^(?:In (?:theatres|cinemas)\b|Opened in (?:theatres|cinemas)\b|Theatrical run\b|Releases? in (?:theatres|cinemas)\b|Not out\b)|pending/i;
 const norm = (s) => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/&amp;/g, "&").replace(/[^a-z0-9]+/g, " ").trim();
 const days = (a, b) => Math.abs(Date.parse(a) - Date.parse(b)) / 864e5;
 // The same person written two ways: "Lasja F. Susatyo" and "Lasja Fauzia Susatyo" (same first and
@@ -192,7 +190,7 @@ async function runAccuracyPass(manifest, { root = ".", per = 6, api, now = new D
   // A page still claiming a platform that TMDB no longer lists: this check counts as the
   // departure sweep's first empty check, and the confirming one comes next run, not in 30 days.
   // Never on a batch that looks like a provider-data outage (most claims empty at once).
-  const outage = liveChecked >= 15 && emptyClaims.length / liveChecked >= 0.6;
+  const outage = looksLikeOutage(liveChecked, emptyClaims.length);
   if (!outage) for (const e of emptyClaims) e.live = { ...e.live, misses: (e.live.misses || 0) + 1, lastCheck: today };
   const byField = {};
   for (const r of rows) byField[r.field] = (byField[r.field] || 0) + 1;

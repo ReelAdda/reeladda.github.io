@@ -9,6 +9,8 @@
 //                                  (the build reads and patches the frozen pages, so it needs
 //                                  them before it starts; run this locally too)
 //   node scripts/site.js publish   commit main's tree plus the built pages as the new `site`
+//                                  (the outgoing one is kept as `site-prev`)
+//   node scripts/site.js rollback  put `site-prev` back as the live site
 //
 // Safety: `restore` refuses to continue if far fewer film pages arrive than the manifest
 // knows about, so a broken branch can never be rebuilt into a site missing most of its pages.
@@ -38,13 +40,17 @@ const MAIN_ONLY = [
 ];
 const isMainOnly = (name) => MAIN_ONLY.some((re) => re.test(name));
 const BRANCH = "site";
+// The site published before this one (review, Oct 2026): each publish replaced the branch with
+// no parent, so a bad build could not be undone. `rollback` puts it back; `restore` falls back
+// to it when the current branch is missing most of its pages.
+const PREV = "site-prev";
 const MIN_SHARE = 0.9;   // of the manifest's film pages that must arrive on restore
 
 const git = (args, opts = {}) => execFileSync("git", args, { encoding: "utf8", maxBuffer: 1 << 30, ...opts }).trim();
 
-function siteRef() {
-  try { git(["fetch", "--quiet", "--depth=1", "origin", `${BRANCH}:refs/remotes/origin/${BRANCH}`]); } catch { /* offline: use what we have */ }
-  try { git(["rev-parse", "--verify", `refs/remotes/origin/${BRANCH}`]); return `refs/remotes/origin/${BRANCH}`; } catch { return null; }
+function siteRef(branch = BRANCH) {
+  try { git(["fetch", "--quiet", "--depth=1", "origin", `${branch}:refs/remotes/origin/${branch}`]); } catch { /* offline: use what we have */ }
+  try { git(["rev-parse", "--verify", `refs/remotes/origin/${branch}`]); return `refs/remotes/origin/${branch}`; } catch { return null; }
 }
 
 function expectedFilmPages() {
@@ -64,7 +70,16 @@ function filmPagesOnDisk() {
 }
 
 function restore() {
-  const ref = siteRef();
+  try { restoreFrom(siteRef()); }
+  catch (e) {
+    const prev = siteRef(PREV);
+    if (!prev) throw e;
+    console.warn(`::warning title=site branch::${e.message} — restoring the previous publish (${PREV}) instead`);
+    restoreFrom(prev);
+  }
+}
+
+function restoreFrom(ref) {
   if (!ref) throw new Error(`no "${BRANCH}" branch to restore from`);
   const paths = git(["ls-tree", "--name-only", ref]).split("\n").filter(isGenerated);
   // git archive | tar, without a shell: archive to a file, then extract it. A relative name in
@@ -102,9 +117,20 @@ function publish() {
   const head = git(["rev-parse", "--short", "HEAD"]);
   const commit = git(["commit-tree", tree, "-m", `Site build ${new Date().toISOString().slice(0, 16)}Z from ${head}`]);
   if (process.env.SITE_DRY_RUN) { console.log(`dry run: would publish ${commit.slice(0, 10)} (tree ${tree.slice(0, 10)})`); report({ changed: "dry-run", commit }); return; }
+  // Keep the outgoing site reachable as site-prev before replacing it.
+  if (ref) { try { git(["push", "--force", "--quiet", "origin", `${git(["rev-parse", ref])}:refs/heads/${PREV}`]); } catch (e) { console.warn(`could not keep the previous site as ${PREV}: ${e.message}`); } }
   git(["push", "--force", "--quiet", "origin", `${commit}:refs/heads/${BRANCH}`]);
   console.log(`site published: ${commit.slice(0, 10)} (main ${head}, ${present.length} generated paths)`);
   report({ changed: "true", commit });
+}
+
+// Put the previous publish back as the live site (manual: node scripts/site.js rollback).
+function rollback() {
+  const prev = siteRef(PREV);
+  if (!prev) throw new Error(`no "${PREV}" branch to roll back to`);
+  const commit = git(["rev-parse", prev]);
+  git(["push", "--force", "--quiet", "origin", `${commit}:refs/heads/${BRANCH}`]);
+  console.log(`site rolled back to ${commit.slice(0, 10)} (${PREV})`);
 }
 
 function report(o) {
@@ -119,7 +145,8 @@ if (require.main === module) {
   try {
     if (cmd === "restore") restore();
     else if (cmd === "publish") publish();
-    else { console.error("usage: node scripts/site.js restore|publish"); process.exit(2); }
+    else if (cmd === "rollback") rollback();
+    else { console.error("usage: node scripts/site.js restore|publish|rollback"); process.exit(2); }
   } catch (e) {
     console.error(`::error title=site branch::${e.message}`);
     process.exit(1);

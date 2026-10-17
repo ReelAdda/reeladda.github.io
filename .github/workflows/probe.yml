@@ -45,6 +45,10 @@ jobs:
           else
             git commit -m "OTT arrival probe: $(date -u +%Y-%m-%dT%H:%M)"
             # The site build commits to the same branch; rebase rather than fail.
-            git pull --rebase --autostash origin main || true
+            if ! git pull --rebase --autostash origin main; then
+              git rebase --abort || true
+              echo "main moved under the probe; these sightings are recorded again on the next probe run"
+              exit 0
+            fi
             git push
           fi

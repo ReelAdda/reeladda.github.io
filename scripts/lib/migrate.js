@@ -241,6 +241,13 @@ function renderMigrated(manifest, cfg, { today, mode = null, modes = null, liste
     }
     if (writeIfChanged(file, out)) res.written++;
   }
+  // A page marked rendered whose record is missing (an unreadable line, a lost write) is
+  // captured again from its page by migrateBatch, later this run, instead of sitting frozen.
+  res.unreadable = facts.skipped || 0;
+  res.recaptured = 0;
+  for (const [slug, e] of Object.entries(m)) {
+    if (e && e.rendered && !facts.has(slug)) { delete e.rendered; res.recaptured++; }
+  }
   if (dirty) writeFacts(code, facts);
   return res;
 }

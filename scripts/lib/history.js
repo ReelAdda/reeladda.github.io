@@ -19,7 +19,7 @@
 "use strict";
 
 const fs = require("fs");
-const { canonProvider } = require("./rules.js");
+const { canonProvider, looksLikeOutage } = require("./rules.js");
 
 const HISTORY_FILE = "ott-history.jsonl";
 
@@ -198,7 +198,7 @@ async function verifyEarlyArrivals(lines, { check, today, budget = 80, pause = a
   }
   // Most of a sizeable batch empty at once is the provider feed failing, not films vanishing.
   const empty = results.filter((x) => !(x.provs && x.provs.length)).length;
-  if (results.length >= 10 && empty / results.length >= 0.6) { res.outage = true; return res; }
+  if (looksLikeOutage(results.length, empty)) { res.outage = true; return res; }
   for (const { l, provs } of results) {
     const r = l.rec;
     if (provs && provs.length) { r.ok = today; delete r.xq; l.dirty = true; res.confirmed++; }

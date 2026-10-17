@@ -2,7 +2,8 @@
 # native binaries, thousands of files. The workflow's git add is an explicit allowlist,
 # so this is belt-and-braces against a future `git add -A`.
 node_modules/
-package-lock.json
+# package-lock.json IS committed (Oct 2026): the build installs with `npm ci`, exactly the pinned
+# versions, because that code later runs with the build's secrets.
 
 # The test suite's sandbox country (code "zz"). Tests write real files under it; they
 # must never be committed — the workflow's '*/films/' glob once published them.

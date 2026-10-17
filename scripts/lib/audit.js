@@ -13,6 +13,8 @@
 
 const fs = require("fs");
 const { filmPagePath } = require("./core.js");
+const { isoFromShown } = require("./facts.js");
+const { NOT_YET_TITLE } = require("./archive.js");
 const { filmIndexFor, isClose, relatedFilms } = require("./graph.js");
 
 const DAY = 864e5;
@@ -42,17 +44,8 @@ function auditData(code, data, now = Date.now()) {
 
 // Oct 2026 data-integrity audit: every finding there is checked here on every build, so a
 // regression shows in the run summary instead of waiting for the next audit. Pure.
-const NOT_YET_TITLE = /Not Announced|\bExpected [A-Z][a-z]{2}|Not Yet Confirmed|\(Unconfirmed\)/;
-const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Sept: 8, Oct: 9, Nov: 10, Dec: 11,
-  January: 0, February: 1, March: 2, April: 3, June: 5, July: 6, August: 7, September: 8, October: 9, November: 10, December: 11 };
-function shownDate(s) {
-  if (!s) return null;
-  let m = /(\d{1,2}) ([A-Z][a-z]+)\.? (\d{4})/.exec(s);
-  if (m && MONTHS[m[2]] != null) return `${m[3]}-${String(MONTHS[m[2]] + 1).padStart(2, "0")}-${m[1].padStart(2, "0")}`;
-  m = /([A-Z][a-z]+)\.? (\d{1,2}), (\d{4})/.exec(s);
-  if (m && MONTHS[m[1]] != null) return `${m[3]}-${String(MONTHS[m[1]] + 1).padStart(2, "0")}-${m[2].padStart(2, "0")}`;
-  return null;
-}
+// One date parser and one not-yet title pattern for the whole build (lib/facts.js, lib/archive.js).
+const shownDate = isoFromShown;
 function auditIntegrity(html, { entry = null, now = Date.now() } = {}) {
   const out = [];
   const title = (/<title>([^<]*)<\/title>/.exec(html) || [])[1] || "";

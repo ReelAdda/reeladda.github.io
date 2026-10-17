@@ -21,15 +21,16 @@
 const MIN_VOTES = 10;
 // A "solid" score has enough ratings that it won't move much. Set near this site's median.
 const SOLID_VOTES = 300;
-// Below this, "Few ratings" — the same line the FilmyChill Score draws (lib/fcscore.js).
+// Below this, "Few ratings"; from it, a full FilmyChill Score. The one definition: lib/fcscore.js
+// imports it as SCORE_MIN_VOTES, so the header and the score box can never disagree again.
 const FEW_VOTES = 50;
 
 // Bayesian shrinkage toward the pooled mean C, with weight m. A film with few votes is
 // pulled toward average; a film with many keeps its own score. This is the same idea behind
 // every credible weighted-rating system (IMDb's Top 250 uses it) — it's what stops 13 votes
 // from ranking like 13,000. Used for ORDERING only.
-const PRIOR_MEAN = 6.5;   // the pooled average sits near here on a 10-point scale
-const PRIOR_WEIGHT = 150; // ~ the p25 vote count: below it, the prior dominates; above, the film does
+const PRIOR_MEAN = 6.5;   // the pooled average sits near here on a 10-point scale (also lib/fcscore.js)
+const RANK_PRIOR_WEIGHT = 150; // ~ the p25 vote count: below it, the prior dominates; above, the film does
 
 function ratingOf(item) {
   const useImdb = item && item.imdbRating != null && item.imdbVotes != null;
@@ -58,7 +59,7 @@ function confidenceTier(votes, { recent = true } = {}) {
 function rankValue(item) {
   const { rating, votes } = ratingOf(item);
   if (rating == null || votes < MIN_VOTES) return -1; // unranked films sort last among rated
-  return (votes * rating + PRIOR_WEIGHT * PRIOR_MEAN) / (votes + PRIOR_WEIGHT);
+  return (votes * rating + RANK_PRIOR_WEIGHT * PRIOR_MEAN) / (votes + RANK_PRIOR_WEIGHT);
 }
 
 // The full signal for a film. displayRating is TMDB's own number (or null); tier is the
@@ -87,5 +88,7 @@ function rankFilms(items) {
 }
 
 module.exports = {
+  FEW_VOTES,
+  PRIOR_MEAN,
   MIN_VOTES, SOLID_VOTES, confidenceTier, rankValue, filmScore, rankFilms, ratingOf,
 };

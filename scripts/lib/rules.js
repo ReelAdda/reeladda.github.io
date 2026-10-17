@@ -188,6 +188,16 @@ function langCode(m) {
 // this replaces: LANG[code] || code rendered an "ar 1" chip the day an Arabic title
 // entered the list. Falls back to the code only if the runtime lacks DisplayNames.
 let _langDN = null;
+// Most of a sizeable batch of TMDB provider checks coming back empty at once is the
+// JustWatch feed failing, not films leaving: nothing is changed on such a run. One rule for
+// every sweep that judges availability (departures, early arrivals, the accuracy pass); it
+// was three copies with different minimums (review, Oct 2026).
+const OUTAGE_MIN_CHECKS = 10;
+const OUTAGE_SHARE = 0.6;
+function looksLikeOutage(checked, empty) {
+  return checked >= OUTAGE_MIN_CHECKS && empty / checked >= OUTAGE_SHARE;
+}
+
 function langName(code) {
   if (!code) return code;
   if (LANG[code]) return LANG[code];
@@ -423,6 +433,9 @@ function countryListForProse() {
 const LANG_CODE_BY_NAME = Object.fromEntries(Object.entries(LANG).map(([c, n]) => [n, c]));
 
 module.exports = {
+  OUTAGE_MIN_CHECKS,
+  OUTAGE_SHARE,
+  looksLikeOutage,
   canonProvider,
   countryListForProse,
   countryNameFor,

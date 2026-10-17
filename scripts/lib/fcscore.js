@@ -18,7 +18,9 @@
 // ============================================================================
 "use strict";
 
-const SCORE_MIN_VOTES = 50;
+const { FEW_VOTES, PRIOR_MEAN } = require("./score.js");
+
+const SCORE_MIN_VOTES = FEW_VOTES;   // 50, defined once in lib/score.js (the header's "Few ratings" line)
 
 // EARLY READS (Sept 2026). An older film with 15–49 ratings may never reach 50 — TMDB votes
 // barely grow once a film is a few months old — so "not enough ratings" would be permanent.
@@ -28,8 +30,10 @@ const SCORE_MIN_VOTES = 50;
 // "early read" with its vote count.
 const EARLY_READ_MIN_VOTES = 15;
 const EARLY_READ_AGE_DAYS = 60;
-const PRIOR_MEAN = 6.5;    // "an average film" on TMDB's scale
-const PRIOR_WEIGHT = 50;   // how many average votes a small sample is blended with
+// Early reads blend a small sample with this many votes at the site's average rating
+// (PRIOR_MEAN, lib/score.js). Smaller than the ranking prior (RANK_PRIOR_WEIGHT, 150) on
+// purpose: a 15-49 vote film's verdict should still lean on its own ratings.
+const EARLY_READ_PRIOR_WEIGHT = 50;
 
 // Not out yet (its own release date is after today). Such a film has no score and no
 // "just released" wording: TMDB takes votes before release, and those aren't an audience.
@@ -43,7 +47,7 @@ function releasedDaysAgo(item, nowMs) {
   return (nowMs - Date.parse(d)) / 864e5;
 }
 function shrunkRating(rating, votes) {
-  return (votes * rating + PRIOR_WEIGHT * PRIOR_MEAN) / (votes + PRIOR_WEIGHT);
+  return (votes * rating + EARLY_READ_PRIOR_WEIGHT * PRIOR_MEAN) / (votes + EARLY_READ_PRIOR_WEIGHT);
 }
 const LEVELS = ["Must watch", "Worth a watch", "Skip"];
 

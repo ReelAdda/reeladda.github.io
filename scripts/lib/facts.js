@@ -238,7 +238,10 @@ function readFacts(code, root = ".") {
   try { raw = fs.readFileSync(factsPath(code, root), "utf8"); } catch { return out; }
   for (const line of raw.split("\n")) {
     if (!line.trim()) continue;
-    try { const r = JSON.parse(line); if (r && r.slug) out.set(r.slug, r); } catch { /* skip a bad line, never the file */ }
+    // A bad line is skipped, never the file, and counted: since the record is the page's only
+    // source (lib/factsq.js), a lost one must never go unnoticed (review, Oct 2026).
+    try { const r = JSON.parse(line); if (r && r.slug) out.set(r.slug, r); else out.skipped = (out.skipped || 0) + 1; }
+    catch { out.skipped = (out.skipped || 0) + 1; }
   }
   return out;
 }
@@ -248,4 +251,4 @@ function writeFacts(code, map, root = ".") {
   fs.writeFileSync(factsPath(code, root), lines.join("\n") + (lines.length ? "\n" : ""));
 }
 
-module.exports = { FACTS_DIR, availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, pageState, readFacts, writeFacts };
+module.exports = { FACTS_DIR, STATUS_PILL, availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, pageState, readFacts, writeFacts };

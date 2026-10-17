@@ -22,9 +22,9 @@ const {
 } = require("./archive.js");
 const { digitalReleaseFor } = require("./enrich.js");
 const { digitalAnnounceText, digitalPassedBlock, OPEN_PILL_RE, settleReleasedCopy } = require("./pagekit.js");
-const { canonProvider, countryNameFor, dedupeProviders, streamVocab } = require("./rules.js");
+const { canonProvider, countryNameFor, dedupeProviders, streamVocab, looksLikeOutage } = require("./rules.js");
 const { healthNote, loadStateFile } = require("./runhealth.js");
-const { readHistory } = require("./history.js");
+const { readHistory, EARLY_WINDOW_DAYS, VERIFY_AFTER_DAYS } = require("./history.js");
 const { tmdbTruth } = require("./truth.js");
 const { queueFacts } = require("./factsq.js");
 const { sleep, tmdb } = require("./tmdb.js");
@@ -198,8 +198,8 @@ const DEPART_CONFIRM_MISSES = 2;   // consecutive empty checks before we touch t
 // A claim made within two weeks of the film's release is rechecked after a week, not a month:
 // that is when placeholder listings show up (Prime Video's for Drishyam: The Conclusion was
 // live for one day in four countries, Oct 2026, and the frozen pages kept saying Prime Video).
-const EARLY_CLAIM_DAYS = 14;
-const EARLY_RECHECK_DAYS = 7;
+const EARLY_CLAIM_DAYS = EARLY_WINDOW_DAYS;     // lib/history.js: one definition of "early"
+const EARLY_RECHECK_DAYS = VERIFY_AFTER_DAYS;
 const CONFIRM_AFTER_DAYS = 0.4;   // ~10 hours: the next run (builds are 12 hours apart)
 // Pure: was this live claim opened within EARLY_CLAIM_DAYS of the release?
 function earlyClaim(x) {
@@ -211,10 +211,8 @@ function earlyClaim(x) {
 // Pure: does a recheck batch look like an upstream outage rather than real departures?
 // Normal churn is a small share of any batch; most of a sizeable batch vanishing at once is
 // the provider feed failing, not the catalogue emptying.
-const DEPART_OUTAGE_MIN_CHECKS = 15;
-const DEPART_OUTAGE_SHARE = 0.6;
 function departureOutage(checked, empty) {
-  return checked >= DEPART_OUTAGE_MIN_CHECKS && empty / checked >= DEPART_OUTAGE_SHARE;
+  return looksLikeOutage(checked, empty);   // the shared rule (lib/rules.js)
 }
 
 // Pure: pick which live-claim pages are due a recheck. Oldest claim first, so the most
@@ -808,6 +806,26 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
   console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming (${dated} with an arrival date within a day), ${announced} streaming date(s) announced`);
 }
 
+// pages-manifest.json: { <edition>: { <slug>: entry } }. Who writes each field — a field
+// written in two places must agree on its meaning, so check this list before adding a writer.
+//   tmdbId, kind, title       page writers (generatePages, archive, backfillCatalog, legacy
+//                             repair); recoverTmdbIds fills a missing id
+//   released, lang            page writers; corrected by scoresweep (re-release date, TMDB
+//                             language) and by renderMigrated when TMDB's facts change them
+//   archivedOn, catalog, pv   archive pass and backfillCatalog
+//   last                      the date the page last visibly changed (sitemap lastmod):
+//                             syncFilmLastmods, plus any writer that changes a page
+//   fp                        syncFilmLastmods (content fingerprint)
+//   live                      arrival sweep (opens), departure sweep (rechecks, retires),
+//                             backfillStreamClaims/backfillLiveClaims (opens from markers),
+//                             accuracy pass (counts a first empty check)
+//   truth                     arrival, departure and accuracy passes (whole record);
+//                             scoresweep (merges language/released)
+//   fcs                       scoresweep; sweepCatalogCritics and flagYearOutliers set w = 0
+//   swept, digital, tmdbGone  arrival sweep
+//   rendered                  migrateBatch (sets), renderMigrated / legacy repair (clear it
+//                             so a page is captured again)
+//   rel                       refreshRelated;  imdb  sweepCatalogCritics
 function loadPagesManifest() {
   return loadStateFile(PAGES_MANIFEST_FILE, {});
 }

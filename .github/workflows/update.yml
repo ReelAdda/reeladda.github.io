@@ -33,7 +33,10 @@ jobs:
       # optionalDependencies and every call site is guarded, so if this step fails the build
       # still completes — pages simply fall back to TMDB backdrops for og:image.
       - name: Install optional deps (share-card renderer)
-        run: npm install --no-audit --no-fund
+        # npm ci installs exactly what package-lock.json pins (review, Oct 2026): this code later
+        # runs with the TMDB key, the Firebase service account and a write token, so it must never
+        # pick up a new release of some package mid-tree. Update the lock deliberately.
+        run: npm ci --no-audit --no-fund
         continue-on-error: true
 
       # Unit tests run FIRST (no API calls) so a code regression fails fast,
