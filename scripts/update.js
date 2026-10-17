@@ -333,6 +333,10 @@ const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmo
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
 // cinema-date backfill in main()). One call per film; the backlog clears in a run or two.
 const CINEMA_DATE_BUDGET = Number(process.env.CINEMA_DATE_BUDGET || 150);
+// TMDB calls per run for the Indian digital-release backfill (lib/indiadata.js). The one-off
+// catch-up runs from the "India streaming data" workflow with a larger budget.
+const DIGITAL_BUDGET = Number(process.env.DIGITAL_BUDGET || 300);
+const { indiaCinemaCensus, runDigitalBackfill } = require("./lib/indiadata.js");
 const {
   ABOUT_LASTMOD,
   buildDataPage,
@@ -1346,9 +1350,25 @@ async function main() {
           th: it.theatricalHere ? (it.released || null) : null });
       }
     }
+    // Every Indian-language film in Indian cinemas, not only the listed ones (lib/indiadata.js):
+    // without it /data/ had no Hindi row at all. A failure here leaves the listed films watched.
+    let census = "";
+    try {
+      const known = new Set([...archived, ...watch.map((w) => `${w.code}:movie:${w.tmdbId}`)]);
+      const { res, watch: more } = await indiaCinemaCensus({ api: { tmdb, pause: sleep }, today: todayStr(), known });
+      watch.push(...more);
+      census = ` (India census: ${res.found} Indian cinema releases from the last ${180} days, ${res.watching} awaited, ${res.alreadyStreaming} already streaming when they joined — not counted${res.joined ? `, ${res.joined} joined this run` : ""})`;
+    } catch (e) { stageFailed("India cinema census", e); }
     fs.writeFileSync("ott-watch.json", JSON.stringify(watch, null, 1));
-    console.log(`  probe watchlist: ${watch.length} title(s) awaiting a streaming sighting`);
+    console.log(`  probe watchlist: ${watch.length} title(s) awaiting a streaming sighting${census}`);
   } catch (e) { stageFailed(`watchlist`, e); }
+
+  // Historical windows for Indian films from TMDB's digital release dates (lib/indiadata.js):
+  // a budgeted, resumable read; /data/ publishes them as their own table.
+  try {
+    const r = await runDigitalBackfill({ api: { tmdb, pause: sleep }, today: todayStr(), budget: DIGITAL_BUDGET });
+    if (r.calls) console.log(`  digital release dates: ${r.discovered} film(s) discovered, ${r.read} read (${r.dated} with a date), ${r.left} left to read, ${r.calls} TMDB call(s)${r.errors ? `, ${r.errors} errors` : ""}`);
+  } catch (e) { stageFailed("digital release dates", e); }
 
   // Cinema dates for archived films recorded before the archive stored them (fillCinemaDates
   // in lib/history.js): one TMDB call per film covers every country. /data/ and the film

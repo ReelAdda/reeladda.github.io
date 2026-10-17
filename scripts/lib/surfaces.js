@@ -18,6 +18,7 @@ const {
   localeFor,
 } = require("./core.js");
 const { readHistory, cinemaWindowDays, observationStarts, windowStats, monthKey } = require("./history.js");
+const { DIGITAL_FILE, PUBLISH_MIN, digitalStats, digitalWindow } = require("./indiadata.js");
 const { writeEmbed } = require("./embed.js");
 const { browsePath, filmIndexFor, writeBrowseIndex } = require("./graph.js");
 const { normalizeUpcoming } = require("./release.js");
@@ -453,7 +454,37 @@ function newlyAddedFor(code, max = 12) {
 // pages said 6–8 weeks. It now counts films that opened in cinemas in that country, from
 // arrivals we actually saw (windowStats / cinemaWindowDays in lib/history.js), and says so.
 // ============================================================================
-function buildDataPage(records, updatedHuman, { inCinemas = 0 } = {}) {
+// India, the site's largest audience, on its own: what we measured, and what TMDB's digital
+// release dates say for earlier years, side by side and never mixed (lib/indiadata.js). Every
+// row carries its film count; a group under PUBLISH_MIN films is marked as an early reading.
+function indiaDataSection(records, digital) {
+  const e = escHtml;
+  const m = windowStats(records, { code: "in" });
+  const fmtN = (r) => `${r.n}${r.small ? "*" : ""}`;
+  const table = (head, rows, extra = null) => `<table><thead><tr><th>${e(head)}</th><th class="n">Median days</th><th class="n">Films</th>${extra ? `<th class="n">${e(extra)}</th>` : ""}</tr></thead><tbody>`
+    + rows.map((r) => `<tr><td>${e(r.key)}</td><td class="n">${r.median}</td><td class="n">${fmtN(r)}</td>${extra ? `<td class="n">${r.of}</td>` : ""}</tr>`).join("") + "</tbody></table>";
+  const measuredRows = m.byLanguage.map((r) => ({ ...r, small: r.n < PUBLISH_MIN }));
+  let out = `<h2 id="india">India: from cinema to streaming</h2>
+  <h3>Measured by FilmyChill</h3>`;
+  out += measuredRows.length
+    ? `<p class="sub">${e(String(m.measured))} films we saw arrive on streaming in India${m.overall != null ? `, median ${m.overall} days` : ""}. Since October 2026 every Indian-language film in Indian cinemas is tracked, not only the ones on our lists.</p>${table("Language", measuredRows)}`
+    : `<p class="sub">Not enough films measured yet.</p>`;
+  const d = digital;
+  if (d && d.measured >= PUBLISH_MIN) {
+    const yr = (x) => new Date(`${x}T00:00:00Z`).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
+    const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
+    out += `<h3>From TMDB's digital release dates, ${e(yr(d.from))} to ${e(yr(d.to))}</h3>
+  <p class="sub">Median ${d.overall} days across ${e(String(d.measured))} Indian-language films that opened in Indian cinemas.
+  Coverage: ${pct(d.notable.measured, d.notable.films)}% of films with 20 or more ratings on TMDB have a usable digital date
+  (${e(String(d.notable.measured))} of ${e(String(d.notable.films))}); ${pct(d.measured, d.films)}% of all ${e(String(d.films))}.</p>
+  ${table("Language", d.byLanguage, "Released")}
+  ${d.byYear.length ? table("Cinema release year", d.byYear, "Released") : ""}`;
+  }
+  out += `<p class="sub">* Fewer than ${PUBLISH_MIN} films: an early reading, not a finding.</p>`;
+  return out;
+}
+
+function buildDataPage(records, updatedHuman, { inCinemas = 0, digital = null } = {}) {
   const e = escHtml;
   const s = windowStats(records);
   const row = (r) => `<tr><td>${e(r.key)}</td><td class="n">${r.median}</td><td class="n">${r.n}</td></tr>`;
@@ -493,6 +524,8 @@ ${ICON_LINKS}
   ${table("Median window by language", s.byLanguage)}
   ${table("Median window by platform", s.byPlatform)}
 
+  ${indiaDataSection(records, digital)}
+
   <div class="method">
     <b>Method.</b> FilmyChill checks streaming availability every day in ${COUNTRIES.length} countries and records the
     first date each title appears with a provider. Only films that opened in cinemas in that country count:
@@ -503,6 +536,13 @@ ${ICON_LINKS}
     the figures when they reach streaming, so while the archive is young the medians lean towards faster
     releases. This is a record of when a film became <i>visible to us</i>, which is normally the day it
     drops but is not a studio announcement.
+    <br><br><b>India.</b> Measured figures cover every Indian-language film TMDB lists as opening in Indian
+    cinemas, from October 2026; earlier, only films on our own lists were followed. A film already streaming
+    when we began following it is left out. The second India table uses a different source: the digital release
+    date TMDB's contributors record for India, which for Indian films is normally the streaming premiere. It
+    reaches back to 2023, but it is volunteer-entered, so we publish its coverage beside it and never mix it
+    with our own measurements. Films whose digital date comes before their cinema date, or more than a year
+    after it, are left out. The rows behind it are in <a href="/data/india-digital-windows.csv">this CSV</a>.
     <br><br><b>Correction, 4 October 2026.</b> Earlier versions of this page also counted TV series,
     straight-to-streaming films and titles we hadn't seen arrive, which pulled every median down to a few days.
   </div>
@@ -541,11 +581,28 @@ function filmsInCinemas(today = new Date().toISOString().slice(0, 10)) {
   return seen.size;
 }
 
+// The rows behind the India digital-release table.
+function buildDigitalCsv(store) {
+  const q = (x) => `"${String(x || "").replace(/"/g, '""')}"`;
+  const rows = [["tmdb_id", "title", "language", "cinema_release_in", "digital_release_in", "platform_note", "window_days"]];
+  for (const [id, f] of Object.entries((store && store.films) || {})) {
+    const w = digitalWindow(f);
+    if (w.days == null) continue;
+    rows.push([id, q(f.t), q(f.lang), f.th, f.dig, q(f.note), w.days]);
+  }
+  return rows.map((r) => r.join(",")).join("\n") + "\n";
+}
+
 function writeDataPage(updatedHuman) {
   const records = readHistory();
+  let store = null;
+  try { store = JSON.parse(fs.readFileSync(DIGITAL_FILE, "utf8")); } catch { /* not built yet */ }
+  const digital = store ? digitalStats(store) : null;
   fs.mkdirSync("data", { recursive: true });
-  writeIfChanged("data/index.html", buildDataPage(records, updatedHuman, { inCinemas: filmsInCinemas() }));
+  writeIfChanged("data/index.html", buildDataPage(records, updatedHuman, { inCinemas: filmsInCinemas(), digital }));
   fs.writeFileSync("data/streaming-windows.csv", buildWindowsCsv(records));
+  if (store) fs.writeFileSync("data/india-digital-windows.csv", buildDigitalCsv(store));
+  if (digital) console.log(`  /data/ India digital dates: ${digital.measured} usable window(s) of ${digital.films} films (median ${digital.overall == null ? "n/a" : digital.overall + "d"}; 20+ ratings: ${digital.notable.measured}/${digital.notable.films})`);
   const s = windowStats(records);
   const x = s.excluded;
   console.log(`  /data/: ${s.measured} measured window(s) from ${s.total} cinema release(s), median ${s.overall == null ? "n/a" : s.overall + "d"}`
@@ -777,6 +834,8 @@ module.exports = {
   PICK_FRESH_DAYS,
   ABOUT_LASTMOD,
   buildDataPage,
+  buildDigitalCsv,
+  indiaDataSection,
   buildHeadTags,
   buildHomeJsonLd,
   buildMoreLinks,

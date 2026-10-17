@@ -6130,6 +6130,85 @@ test("og:title is rewritten in step with the title tag", () => {
   assert.strictEqual(t, og, "the social title must not drift from the search title");
 });
 
+const IND = require("./lib/indiadata.js");
+const S2 = require("./lib/surfaces.js");
+test("India digital dates: windows, exclusions and the published figures", () => {
+  assert.deepStrictEqual(IND.digitalWindow({ th: "2025-01-10", dig: "2025-03-07" }), { days: 56 });
+  assert.strictEqual(IND.digitalWindow({ th: "2025-01-10" }).why, "noDigitalDate");
+  assert.strictEqual(IND.digitalWindow({ th: "2025-01-10", dig: "2025-01-01" }).why, "digitalFirst");
+  assert.strictEqual(IND.digitalWindow({ th: "2023-01-10", dig: "2025-01-01" }).why, "tooLong", "a late catalogue listing isn't a release window");
+  const films = {};
+  for (let i = 0; i < 25; i++) films[i] = { t: "H" + i, lang: "Hindi", votes: 50, th: "2025-02-01", dig: `2025-03-${String(10 + (i % 10)).padStart(2, "0")}` };
+  for (let i = 0; i < 6; i++) films[100 + i] = { t: "T" + i, lang: "Tamil", votes: 5, th: "2024-05-01", dig: "2024-05-29" };
+  films[200] = { t: "No date", lang: "Hindi", votes: 30, th: "2025-01-01" };
+  films[201] = { t: "Future", lang: "Hindi", th: "2030-01-01" };
+  const s = IND.digitalStats({ films }, { today: "2026-10-17" });
+  assert.strictEqual(s.films, 32, "films not yet released are left out");
+  assert.strictEqual(s.measured, 31);
+  assert.deepStrictEqual(s.notable, { films: 26, measured: 25 }, "coverage among films people watch");
+  const hi = s.byLanguage.find((r) => r.key === "Hindi");
+  assert.deepStrictEqual([hi.n, hi.of, hi.small], [25, 26, false]);
+  assert.strictEqual(s.byLanguage.find((r) => r.key === "Tamil").small, true, "under 20 films: flagged");
+  assert.deepStrictEqual(s.byYear.map((r) => r.key), ["2024", "2025"]);
+  assert.deepStrictEqual(s.excluded, { noDigitalDate: 1 });
+  assert.deepStrictEqual(IND.digitalWindows("2023-08-15", "2023-01-01").map((w) => w.from + ">" + w.to),
+    ["2023-01-01>2023-03-31", "2023-04-01>2023-06-30", "2023-07-01>2023-08-15"]);
+});
+testAsync("India census: every Indian cinema release is watched, except films already streaming when they join", async () => {
+  const disc = { hi: [{ id: 1, title: "Arriving", release_date: "2026-09-20" }, { id: 2, title: "Already on OTT", release_date: "2026-06-01" }, { id: 3, title: "Listed", release_date: "2026-10-02" }],
+    ta: [{ id: 1, title: "Arriving", release_date: "2026-09-20" }] };
+  const calls = [];
+  const api = { pause: async () => {}, tmdb: async (p, q) => {
+    calls.push(p);
+    if (p === "/discover/movie") return { results: q.page === "1" ? disc[q.with_original_language] || [] : [], total_pages: 1 };
+    if (p === "/movie/2/watch/providers") return { results: { IN: { flatrate: [{ provider_name: "Netflix" }] } } };
+    return { results: {} };
+  } };
+  let saved = null;
+  const state = { films: {} };
+  const { res, watch } = await IND.indiaCinemaCensus({ api, today: "2026-10-17", known: new Set(["in:movie:3"]), state, save: (s) => { saved = s; } });
+  assert.deepStrictEqual(watch.map((w) => w.tmdbId), [1], "the listed film is already watched; the streaming one is set aside");
+  assert.strictEqual(watch[0].language, "Hindi");
+  assert.ok(!("th" in watch[0]), "no cinema date guessed: the build looks up the Indian one on arrival");
+  assert.strictEqual(state.films[2].s, "already");
+  assert.deepStrictEqual([res.found, res.alreadyStreaming, res.joined], [3, 1, 2]);
+  assert.strictEqual(calls.filter((p) => p.endsWith("/watch/providers")).length, 2, "the already-known film costs no check");
+  calls.length = 0;
+  await IND.indiaCinemaCensus({ api, today: "2026-10-18", known: new Set(["in:movie:3"]), state, save: () => {} });
+  assert.strictEqual(calls.filter((p) => p.endsWith("/watch/providers")).length, 0, "each film is checked once, when it joins");
+  assert.strictEqual(saved, state);
+});
+testAsync("India digital backfill: discovers once, reads dates within budget, resumes", async () => {
+  const api = { pause: async () => {}, tmdb: async (p, q) => {
+    if (p === "/discover/movie") return { results: q.with_original_language === "hi" && q["release_date.gte"] === "2026-07-01" ? [{ id: 9, title: "Film", vote_count: 40 }] : [], total_pages: 1 };
+    if (p === "/movie/9/release_dates") return { results: [{ iso_3166_1: "IN", release_dates: [{ type: 3, release_date: "2026-07-10T00:00:00.000Z" }, { type: 4, release_date: "2026-09-04T00:00:00.000Z", note: "Netflix" }] }] };
+    throw new Error("unexpected " + p);
+  } };
+  const store = { windows: {}, films: {} };
+  const r = await IND.runDigitalBackfill({ api, today: "2026-10-17", budget: 1000, store, save: () => {} });
+  assert.deepStrictEqual(store.films[9], { t: "Film", lang: "Hindi", votes: 40, th: "2026-07-10", dig: "2026-09-04", note: "Netflix", at: "2026-10-17" });
+  assert.strictEqual(r.dated, 1);
+  const again = await IND.runDigitalBackfill({ api, today: "2026-10-18", budget: 1000, store, save: () => {} });
+  assert.strictEqual(again.read, 0, "a dated film isn't read again");
+  assert.ok(again.calls < r.calls, "old quarters aren't rediscovered");
+  const tight = await IND.runDigitalBackfill({ api, today: "2026-10-17", budget: 3, store: { windows: {}, films: {} }, save: () => {} });
+  assert.strictEqual(tight.calls, 3, "budget respected");
+});
+test("data page: India section keeps measured and TMDB figures apart, with counts and early-reading marks", () => {
+  const recs = Array.from({ length: 6 }, (_, i) => ({ c: "in", k: "movie", id: i + 1, th: "2026-08-01", first: `2026-09-${String(10 + i).padStart(2, "0")}`, lang: "Telugu", seen: i ? `2026-09-${String(10 + i).padStart(2, "0")}T00:00:00Z` : "2026-08-27T00:00:00Z" }));
+  const films = {};
+  for (let i = 0; i < 25; i++) films[i] = { t: "H" + i, lang: "Hindi", votes: 50, th: "2025-02-01", dig: "2025-04-01" };
+  const html = S2.indiaDataSection(recs, IND.digitalStats({ films }, { today: "2026-10-17" }));
+  assert.ok(/India: from cinema to streaming/.test(html));
+  assert.ok(/Measured by FilmyChill/.test(html) && /From TMDB&#39;s digital release dates|From TMDB's digital release dates/.test(html));
+  assert.ok(/<td>Telugu<\/td><td class="n">\d+<\/td><td class="n">6\*<\/td>/.test(html), "a small measured group is marked");
+  assert.ok(/<td>Hindi<\/td><td class="n">59<\/td><td class="n">25<\/td>/.test(html), "Hindi from digital dates, 59 days");
+  assert.ok(/Coverage: 100% of films with 20 or more ratings/.test(html));
+  const thin = S2.indiaDataSection(recs, IND.digitalStats({ films: { 1: films[1] } }, { today: "2026-10-17" }));
+  assert.ok(!/digital release dates,/.test(thin), "too few dated films: the TMDB table isn't shown");
+  const csv = S2.buildDigitalCsv({ films: { 7: { t: 'A "B"', lang: "Hindi", th: "2025-02-01", dig: "2025-04-01", note: "Netflix" }, 8: { t: "No", th: "2025-01-01" } } });
+  assert.strictEqual(csv, 'tmdb_id,title,language,cinema_release_in,digital_release_in,platform_note,window_days\n7,"A ""B""","Hindi",2025-02-01,2025-04-01,"Netflix",59\n');
+});
 test("early arrivals: a placeholder or unconfirmed short window is never published (Drishyam, Oct 2026)", () => {
   const starts = { us: "2026-08-27" };
   const four = { c: "us", k: "movie", id: 1, th: "2026-10-02", rel: "2026-10-02", first: "2026-10-06" };

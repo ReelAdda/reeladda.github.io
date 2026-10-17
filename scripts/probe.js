@@ -50,9 +50,16 @@ async function main() {
     : !seen.has(`${w.code}:${w.kind === "tv" ? "tv" : "movie"}:${w.tmdbId}`));
   // Oldest theatrical release first: those are the ones closest to a streaming drop.
   pending.sort((a, b) => String(a.released || "").localeCompare(String(b.released || "")));
+  // ...in rotation. Oldest-first alone never reached the back of the list once it outgrew one
+  // run's budget (Oct 2026: every Indian cinema release joined it), and a film that never
+  // streams would hold the front for good. Each half-hour slot starts further along, so every
+  // film is checked every ceil(pending / budget) runs: about 3 hours at 80 for 450 films.
+  const slot = Math.floor(Date.now() / (30 * 60 * 1000));
+  const start = pending.length ? (slot * MAX_CALLS) % pending.length : 0;
+  const order = [...pending.slice(start), ...pending.slice(0, start)];
 
   let calls = 0, found = 0;
-  for (const w of pending) {
+  for (const w of order) {
     if (calls >= MAX_CALLS) break;
     calls++;
     let providers;

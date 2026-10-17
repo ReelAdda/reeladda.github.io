@@ -1,0 +1,49 @@
+# India streaming data: the one-off catch-up for the Indian digital-release backfill
+# (scripts/india-digital.js, lib/indiadata.js). Reads every Indian-language film released in
+# Indian cinemas since 2023, commits ott-digital.json, and writes a coverage report with a
+# spot-check list of well-known Hindi films to the run's Summary tab. Manual only: the daily
+# build keeps the file up to date after this, a few hundred films a run.
+name: India streaming data
+
+on:
+  workflow_dispatch: {}
+
+# Same group as the build and the probe: never two writers on main at once.
+concurrency:
+  group: filmychill-writes
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      # Pinned to commits, same versions as update.yml (bump together).
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24"
+
+      - name: Read digital release dates and report coverage
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          DIGITAL_BUDGET: "8000"
+        run: node scripts/india-digital.js
+
+      - name: Commit the data
+        run: |
+          git config user.name "filmychill-bot"
+          git config user.email "actions@github.com"
+          git add ott-digital.json
+          if git diff --staged --quiet; then echo "nothing new"; exit 0; fi
+          git commit -m "India digital release dates: $(date -u +%Y-%m-%d)"
+          # Never force: rebase onto whatever landed meanwhile, or fail and let a rerun redo it.
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            git fetch --quiet origin main
+            git rebase origin/main || { git rebase --abort; echo "::error::main changed the same file; rerun this workflow"; exit 1; }
+          done
+          echo "::error::push still rejected after 3 attempts"; exit 1

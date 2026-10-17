@@ -32,7 +32,7 @@ jobs:
       - name: Probe for streaming arrivals
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-          PROBE_BUDGET: "40"
+          PROBE_BUDGET: "80"
         run: node scripts/probe.js
 
       - name: Commit new observations
