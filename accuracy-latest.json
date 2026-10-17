@@ -1,39 +1,55 @@
 {
- "date": "2026-10-16",
+ "date": "2026-10-17",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 3,
- "high": 2,
- "correctable": 2,
+ "pagesDisagreeing": 5,
+ "high": 4,
+ "correctable": 4,
  "byField": {
-  "streaming": 1,
-  "lead actor": 1,
-  "platform": 1
+  "rent/buy": 1,
+  "platform": 3,
+  "language": 1
  },
  "rows": [
   {
-   "field": "streaming",
-   "severity": "high",
-   "page": "not streaming",
-   "tmdb": "on Queer Cinemab",
-   "code": "de",
-   "slug": "cocoon"
-  },
-  {
-   "field": "lead actor",
+   "field": "rent/buy",
    "severity": "medium",
-   "page": "Koo Hye-sun",
-   "tmdb": "Ku Hye-sun, Lee Min-ho, Kim Hyun-joong",
-   "code": "id",
-   "slug": "boys-over-flowers"
+   "page": "none",
+   "tmdb": "Apple TV Store, CosmoGo, Amazon Video",
+   "code": "ca",
+   "slug": "coyote-vs-acme"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "Claro tv+, Universal+",
-   "tmdb": "Universal+",
+   "page": "Netflix, Amazon Prime Video",
+   "tmdb": "Netflix",
+   "code": "kr",
+   "slug": "ninjago-masters-of-spinjitzu"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "U-NEXT, HBO Max on U-Next",
+   "tmdb": "HBO Max on U-Next",
+   "code": "jp",
+   "slug": "curb-your-enthusiasm"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, Amazon Prime Video, Hulu, U-NEXT",
+   "tmdb": "Prime Video, Hulu, HBO Max on U-Next",
+   "code": "jp",
+   "slug": "harry-potter-and-the-deathly-hallows-part-2"
+  },
+  {
+   "field": "language",
+   "severity": "high",
+   "page": "Portuguese",
+   "tmdb": "English",
    "code": "br",
-   "slug": "oppenheimer"
+   "slug": "the-weight"
   }
  ]
 }
