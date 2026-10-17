@@ -13,7 +13,7 @@
 "use strict";
 
 const { regionalTheatricalDate } = require("./enrich.js");
-const { dedupeProviders } = require("./rules.js");
+const { dedupeProviders, langCode, langName } = require("./rules.js");
 
 // Pure: the facts TMDB gives for one edition, from /movie|tv/{id} with watch/providers (and
 // release_dates for films) appended. Same rules as the build (lib/enrich.js): subscription
@@ -31,7 +31,17 @@ function tmdbTruth(d, kind, cfg, asOf) {
     rentBuy: dedupeProviders([...(wp.rent || []), ...(wp.buy || [])].map((p) => p.provider_name)).slice(0, 3),
     ...(released ? { released } : {}),
     ...((tv ? d.name : d.title) ? { title: tv ? d.name : d.title } : {}),
+    ...(tmdbLanguage(d) ? { language: tmdbLanguage(d) } : {}),
   };
+}
+
+// Pure: the film's language as the site names it (the build's own override list applies).
+// The Weight (2026), an Ethan Hawke film, was "Portuguese" on five editions because TMDB had
+// it wrong the week those pages were built (accuracy check, 17 Oct 2026).
+function tmdbLanguage(d) {
+  if (!d || !d.original_language) return null;
+  const n = langName(langCode(d));
+  return n && !/^[a-z]{2,3}$/.test(n) ? n : null;
 }
 
 // Pure: the item with TMDB's facts applied, and which fields moved. An empty platform list is
@@ -47,7 +57,8 @@ function applyTruth(item, truth) {
   if (Array.isArray(truth.rentBuy) && !same(out.rentBuy, truth.rentBuy)) { out.rentBuy = truth.rentBuy; changed.push("rentBuy"); }
   if (truth.released && truth.released !== out.released) { out.released = truth.released; changed.push("released"); }
   if (truth.title && truth.title !== out.title) { out.title = truth.title; changed.push("title"); }
+  if (truth.language && truth.language !== out.language) { out.language = truth.language; changed.push("language"); }
   return { item: out, changed };
 }
 
-module.exports = { applyTruth, tmdbTruth };
+module.exports = { applyTruth, tmdbLanguage, tmdbTruth };

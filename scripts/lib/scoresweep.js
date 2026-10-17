@@ -26,6 +26,7 @@ const { COUNT_REASONS } = require("./skipif.js");
 const { cspAllowVotes, voteWidgetHtml } = require("./vote.js");
 const { inlineStyles } = require("./stylesheets.js");
 const { sleep, tmdb } = require("./tmdb.js");
+const { tmdbLanguage } = require("./truth.js");
 
 // 1,500 a run clears the ~8,000-page backlog in about three runs; after that each run only has
 // the 30-day re-checks (~300 a day), so the cap rarely binds.
@@ -252,6 +253,9 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
       continue;
     }
     res.checked++;
+    // The film's language as TMDB has it now, for the page's facts (lib/truth.js applies it).
+    const lang = tmdbLanguage(d);
+    if (lang && lang !== e.lang) { e.truth = { ...(e.truth || {}), language: lang }; e.lang = lang; }
     const votes = d.vote_count || 0;
     const item = {
       rating: d.vote_average > 0 ? Number(Number(d.vote_average).toFixed(1)) : null,

@@ -158,7 +158,7 @@ function isExcluded(c) {
   return t ? EXCLUDE_TITLES.has(slugify(t)) : false;
 }
 
-const LANG = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", ml: "Malayalam", kn: "Kannada", ko: "Korean", ja: "Japanese", es: "Spanish", fr: "French", mr: "Marathi", bn: "Bengali", pa: "Punjabi", gu: "Gujarati", de: "German", it: "Italian", pt: "Portuguese", zh: "Chinese" };
+const LANG = { en: "English", hi: "Hindi", ta: "Tamil", te: "Telugu", ml: "Malayalam", kn: "Kannada", ko: "Korean", ja: "Japanese", es: "Spanish", fr: "French", mr: "Marathi", bn: "Bengali", pa: "Punjabi", gu: "Gujarati", de: "German", it: "Italian", pt: "Portuguese", zh: "Chinese", cn: "Cantonese" }; // cn: TMDB's code for Cantonese, unknown to Intl
 
 // TMDB's original_language is community-entered and occasionally WRONG for Indian
 // releases (a Tamil film tagged "en"). Aggregators that trust it blindly then show

@@ -33,6 +33,7 @@ const { availabilityText, extractFacts, factsDiff, keyFacts, readFacts, writeFac
 const { writeIfChanged } = require("./writeif.js");
 const { fcScore } = require("./fcscore.js");
 const { applyTruth } = require("./truth.js");
+const { langName } = require("./rules.js");
 
 const dirFor = (code) => (code === "in" ? "movie" : `${code}/movie`);
 
@@ -136,6 +137,11 @@ function renderMigrated(manifest, cfg, { today }) {
     let now = extractFacts(html, slug, { tmdbId: e.tmdbId });
     if (!now) { res.lost.push(`${code}/${slug}`); continue; }   // left as is; reported
     let availability = availabilityText(html);
+    // A bare language code ("2h 3m of ar action") from a build that couldn't name it.
+    if (/^[a-z]{2,3}$/.test(now.language || "") && langName(now.language) !== now.language) {
+      now = { ...now, language: langName(now.language) };
+      res.fields.language = (res.fields.language || 0) + 1;
+    }
     // What TMDB said at the last check of a frozen page (lib/truth.js): platforms that changed,
     // rent/buy, a moved release date, a new title. Pages in this week's lists are rebuilt from
     // fresh data anyway. A changed platform list is dated by the check that saw it.

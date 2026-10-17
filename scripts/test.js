@@ -7295,6 +7295,17 @@ test("tmdbTruth reads an edition's facts the build's way; applyTruth corrects, n
   assert.deepStrictEqual(empty.item.providers, ["U-NEXT"], "one empty answer can't strip a page; the departure sweep confirms twice");
   assert.strictEqual(T.applyTruth({ ...page, released: "2026-12-24" }, { at: "x", released: "2027-03-12" }).item.released, "2027-03-12", "a postponed film moves (Shakti Shalini)");
 });
+test("the film's language is one of TMDB's facts a frozen page takes (The Weight, Oct 2026)", () => {
+  const T = require("./lib/truth.js");
+  const US = require("./lib/core.js").COUNTRIES.find((c) => c.code === "us");
+  const t = T.tmdbTruth({ id: 1433583, title: "The Weight", original_language: "en" }, "movie", US, "2026-10-17");
+  assert.strictEqual(t.language, "English");
+  const r = T.applyTruth({ title: "The Weight", language: "Portuguese", providers: [] }, t);
+  assert.ok(r.changed.includes("language") && r.item.language === "English");
+  assert.strictEqual(T.tmdbLanguage({ original_language: "xx" }), null, "a code the site can't name is never applied");
+  assert.strictEqual(T.tmdbLanguage({ original_language: "cn" }), "Cantonese", "TMDB's Cantonese code has a name");
+  assert.ok(!T.applyTruth({ language: "Tamil" }, { language: "Tamil" }).changed.length);
+});
 test("a frozen page is rendered with TMDB's recorded facts; a page in this week's lists is left to the builder", () => {
   const Mg = require("./lib/migrate.js"), Fa = require("./lib/facts.js");
   const fsx = require("fs"), os = require("os"), path = require("path");
