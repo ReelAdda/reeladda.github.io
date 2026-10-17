@@ -28,6 +28,7 @@ const { inlineStyles } = require("./stylesheets.js");
 const { sleep, tmdb } = require("./tmdb.js");
 const { tmdbLanguage } = require("./truth.js");
 const { isReRelease } = require("./enrich.js");
+const { queueFacts } = require("./factsq.js");
 
 // 1,500 a run clears the ~8,000-page backlog in about three runs; after that each run only has
 // the 30-day re-checks (~300 a day), so the cap rarely binds.
@@ -303,6 +304,8 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
         .replace(/("dateModified":")\d{4}-\d{2}-\d{2}/, `$1${today}`);
     }
     e.fcs = { v: s ? s.verdict : "early", at: today, w: SWEEP_WORDING };
+    // The same rating and score as facts (lib/factsq.js), for pages drawn from their record.
+    queueFacts(code, slug, { rating: item.rating, votes: item.votes, fcScore: s || undefined });
     if (next !== html) {
       fs.writeFileSync(file, next);
       // No `last` bump here: injecting the vote widget or re-wording markup isn't news to a

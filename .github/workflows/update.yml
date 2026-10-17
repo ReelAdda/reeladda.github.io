@@ -122,6 +122,8 @@ jobs:
           git add -A -- accuracy-latest.json accuracy-history.jsonl 2>/dev/null || true
           # India streaming data (scripts/lib/indiadata.js): the cinema census and digital release dates.
           git add -A -- ott-census.json ott-digital.json 2>/dev/null || true
+          # Facts-only rendering: each edition's mode and comparison record (scripts/lib/factsq.js).
+          git add -A -- facts-mode.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit."

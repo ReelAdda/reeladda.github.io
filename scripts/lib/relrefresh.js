@@ -13,6 +13,7 @@
 const fs = require("fs");
 const { filmPagePath } = require("./core.js");
 const { filmIndexFor, relatedFilms } = require("./graph.js");
+const { queueFacts } = require("./factsq.js");
 const { simGridHtml } = require("./filmpage.js");
 
 // Bump when relatedFilms' rules change, so every old page is redone once.
@@ -49,6 +50,8 @@ function refreshRelated(pagesManifest, countries) {
       try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
       res.checked++;
       const picks = relatedFilms(seed, index, 6);
+      // The same picks as facts (lib/factsq.js), in the shape the page's facts carry them.
+      queueFacts(cfg.code, slug, { similar: picks.map((f) => ({ title: f.title, slug: f.slug, poster: f.poster || "", language: f.language || "", kind: f.kind || "movie" })) });
       // Whatever the rules allow, even one or two — never the old picks they'd now reject.
       // Nothing that qualifies at all: the section goes rather than stay wrong.
       const next = picks.length ? replaceRelated(html, simGridHtml(picks, cfg.code)) : html.replace(SECTION_RE, "");

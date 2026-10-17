@@ -7479,6 +7479,115 @@ test("a frozen page is rendered with TMDB's recorded facts; a page in this week'
     assert.ok(/>U-NEXT</.test(fsx.readFileSync("jp/movie/current-film.html", "utf8")), "not archived: untouched");
   } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
 });
+group("17 Oct 2026: facts-only film pages, switched on edition by edition, automatically");
+test("fact updates merge into a record; undefined removes a field", () => {
+  const Q = require("./lib/factsq.js");
+  Q.clearQueue();
+  Q.queueFacts("nz", "a", { providers: ["Netflix"], state: undefined });
+  Q.queueFacts("nz", "a", { checkedAt: "2026-10-17" });
+  const p = Q.queuedFacts("nz").get("a");
+  assert.deepStrictEqual(Q.applyPatch({ title: "A", state: "gone", providers: [] }, p), { title: "A", providers: ["Netflix"], checkedAt: "2026-10-17" });
+  assert.strictEqual(Q.queuedFacts("uk").size, 0);
+  Q.clearQueue();
+});
+test("the switch: promoted after clean runs, one a run, unclean editions never hold the rest, India last", () => {
+  const Q = require("./lib/factsq.js");
+  const st = { v: 1, editions: {} };
+  const clean = (codes) => Object.fromEntries(codes.map((c) => [c, { pages: 1000, shadowDiffs: 0, lost: 0 }]));
+  const all = clean(["nz", "es", "in"]);
+  all.nz.shadowDiffs = 50;                       // nz keeps differing
+  for (let i = 0; i < Q.SHADOW_CLEAN_RUNS - 1; i++) assert.deepStrictEqual(Q.decideModes(st, all, "2026-10-18").events.filter((e) => e.kind === "promote"), []);
+  let ev = Q.decideModes(st, all, "2026-10-18").events;
+  assert.deepStrictEqual(ev.filter((e) => e.kind === "promote").map((e) => e.code), ["es"], "first clean edition in order; nz doesn't block it");
+  ev = Q.decideModes(st, all, "2026-10-19").events;
+  assert.ok(!ev.some((e) => e.kind === "promote" && e.code === "in"), "India waits while another edition isn't in facts mode");
+  all.nz.shadowDiffs = 1;                        // within the allowance (0.2% of 1,000 = 2)
+  for (let i = 0; i < Q.SHADOW_CLEAN_RUNS; i++) Q.decideModes(st, all, "2026-10-20");
+  assert.strictEqual(Q.modeOf(st, "nz"), "facts");
+  Q.decideModes(st, all, "2026-10-21");
+  assert.strictEqual(Q.modeOf(st, "in"), "facts", "India goes last, once every other edition has");
+  const rb = Q.decideModes(st, { ...all, es: { pages: 1000, shadowDiffs: 0, lost: 0, falseClaims: 2 } }, "2026-10-22").events;
+  assert.ok(rb.some((e) => e.kind === "rollback" && e.code === "es"));
+  assert.strictEqual(Q.modeOf(st, "es"), "shadow");
+  for (let i = 0; i < 6; i++) Q.decideModes(st, all, "2026-10-25");
+  assert.strictEqual(Q.modeOf(st, "es"), "shadow", "a rollback waits a week, however clean");
+  for (let i = 0; i < Q.SHADOW_CLEAN_RUNS; i++) Q.decideModes(st, all, "2026-10-30");
+  assert.strictEqual(Q.modeOf(st, "es"), "facts", "then it tries again on its own");
+  const dirty = { v: 1, editions: {} };
+  let stalled = [];
+  for (let i = 0; i < 14; i++) stalled = stalled.concat(Q.decideModes(dirty, { kr: { pages: 900, shadowDiffs: 40, lost: 0 } }, "2026-10-18").events);
+  assert.ok(stalled.some((e) => e.kind === "stalled" && e.code === "kr"), "a week without coming clean is reported");
+});
+test("the facts record carries departures and the availability date, which used to live only in the page", () => {
+  const Fa = require("./lib/facts.js"), Mg = require("./lib/migrate.js"), L = require("./lib/lifecycle.js");
+  const NZ = require("./lib/core.js").COUNTRIES.find((c) => c.code === "nz");
+  const item = { title: "1917", slug: "1917", kind: "movie", released: "2020-01-10", language: "English", providers: ["Netflix"], platform: "Netflix", rentBuy: [], tmdbId: 530915 };
+  const page = Mg.renderFrozen(item, NZ, { asOf: "2026-10-01", knownSlugs: new Set(), availability: "1 Oct 2026" });
+  assert.strictEqual(Fa.extractFacts(page, "1917").checkedAt, "2026-10-01");
+  const gone = L.applyDeparturePatch(page, { title: "1917", was: ["Netflix"], rentBuy: [], countryName: "New Zealand", cfg: NZ, asOf: "2026-10-17" }).html;
+  const f = Fa.extractFacts(gone, "1917");
+  assert.deepStrictEqual([f.state, f.goneAt, f.wasOn], ["gone", "2026-10-17", ["Netflix"]]);
+  const again = Mg.renderFrozen(f, NZ, { asOf: "2026-10-17", knownSlugs: new Set() });
+  assert.ok(/<!--SW:gone=2026-10-17-->/.test(again) && /it was on Netflix/.test(again), "a re-render keeps the departure (it used to erase it)");
+  assert.ok(!/Not Announced/.test((/<title>([^<]*)/.exec(again) || [])[1]), "a departed film's title isn't 'not announced'");
+  const series = Mg.renderFrozen({ ...f, kind: "tv", title: "24" }, NZ, { asOf: "2026-10-17", knownSlugs: new Set() });
+  assert.ok(/<!--SW:gone=/.test(series), "a series keeps its departure too");
+  assert.strictEqual(Fa.isoFromShown("Oct 1, 2026"), "2026-10-01");
+});
+test("facts mode draws pages from the record alone; shadow mode catches a patch nobody recorded", () => {
+  const Mg = require("./lib/migrate.js"), Fa = require("./lib/facts.js"), Q = require("./lib/factsq.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-factsonly-")), cwd = process.cwd();
+  try {
+    process.chdir(root); fsx.mkdirSync("nz/movie", { recursive: true });
+    const NZ = require("./lib/core.js").COUNTRIES.find((c) => c.code === "nz");
+    const item = { title: "Hope", slug: "hope", kind: "movie", released: "2026-08-01", language: "English", providers: [], platform: "Theatres", rentBuy: [], tmdbId: 7 };
+    fsx.writeFileSync("nz/movie/hope.html", Mg.renderFrozen(item, NZ, { asOf: "2026-10-01", knownSlugs: new Set(), availability: "1 Oct 2026" }));
+    Fa.writeFacts("nz", new Map([["hope", { slug: "hope", updated: "2026-10-01", item: Fa.extractFacts(fsx.readFileSync("nz/movie/hope.html", "utf8"), "hope", { tmdbId: 7 }) }]]));
+    const man = { nz: { hope: { rendered: "2026-10-01", archivedOn: "2026-09-01", tmdbId: 7, last: "2026-10-01" } } };
+    Q.clearQueue();
+    let r = Mg.renderMigrated(man, NZ, { today: "2026-10-17" });
+    assert.strictEqual(r.shadow.diffs, 0, "nothing changed: the two renders agree");
+    // A sweep that patches the page and records the same fact: still agree.
+    fsx.writeFileSync("nz/movie/hope.html", fsx.readFileSync("nz/movie/hope.html", "utf8").replace("Availability as of 1 Oct 2026", "Availability as of 17 Oct 2026"));
+    Q.queueFacts("nz", "hope", { checkedAt: "2026-10-17" });
+    r = Mg.renderMigrated(man, NZ, { today: "2026-10-17" });
+    assert.strictEqual(r.shadow.diffs, 0);
+    Q.clearQueue();
+    // A patch with no recorded fact: the shadow comparison shows it.
+    const html = fsx.readFileSync("nz/movie/hope.html", "utf8");
+    fsx.writeFileSync("nz/movie/hope.html", html.replace("Availability as of 17 Oct 2026", "Availability as of 18 Oct 2026"));
+    r = Mg.renderMigrated(man, NZ, { today: "2026-10-18" });
+    assert.strictEqual(r.shadow.diffs, 1, "an unrecorded change is caught before any switch");
+    // Facts mode: the page on disk is never read.
+    fsx.writeFileSync("nz/movie/hope.html", fsx.readFileSync("nz/movie/hope.html", "utf8").replace(/<title>[^<]*<\/title>/, "<title>Hand-edited</title>"));
+    r = Mg.renderMigrated(man, NZ, { today: "2026-10-18", modes: { v: 1, editions: { nz: { mode: "facts" } } } });
+    assert.strictEqual(r.mode, "facts");
+    assert.ok(!/Hand-edited/.test(fsx.readFileSync("nz/movie/hope.html", "utf8")), "the record, not the old page, decides");
+    // ...except a film in this run's lists, freshly built from TMDB: that page is the source.
+    fsx.writeFileSync("nz/movie/hope.html", Mg.renderFrozen({ ...item, providers: ["Netflix"], platform: "Netflix" }, NZ, { asOf: "2026-10-18", knownSlugs: new Set() }));
+    Mg.renderMigrated(man, NZ, { today: "2026-10-18", modes: { v: 1, editions: { nz: { mode: "facts" } } }, listed: new Set(["hope"]) });
+    assert.deepStrictEqual(Fa.readFacts("nz").get("hope").item.providers, ["Netflix"]);
+  } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); Q.clearQueue(); }
+});
+test("a check date alone never moves 'Page updated'", () => {
+  const Mg = require("./lib/migrate.js"), Fa = require("./lib/facts.js"), Q = require("./lib/factsq.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-updated-")), cwd = process.cwd();
+  try {
+    process.chdir(root); fsx.mkdirSync("nz/movie", { recursive: true });
+    const NZ = require("./lib/core.js").COUNTRIES.find((c) => c.code === "nz");
+    const item = { title: "Hope", slug: "hope", kind: "movie", released: "2026-08-01", language: "English", providers: [], platform: "Theatres", rentBuy: [], tmdbId: 7 };
+    fsx.writeFileSync("nz/movie/hope.html", Mg.renderFrozen(item, NZ, { asOf: "2026-10-01", knownSlugs: new Set(), availability: "1 Oct 2026" }));
+    const rec = Fa.extractFacts(fsx.readFileSync("nz/movie/hope.html", "utf8"), "hope", { tmdbId: 7 });
+    Fa.writeFacts("nz", new Map([["hope", { slug: "hope", updated: "2026-10-01", item: rec }]]));
+    Q.clearQueue(); Q.queueFacts("nz", "hope", { checkedAt: "2026-10-17" });
+    Mg.renderMigrated({ nz: { hope: { rendered: "x", archivedOn: "x", tmdbId: 7 } } }, NZ, { today: "2026-10-17", modes: { v: 1, editions: { nz: { mode: "facts" } } } });
+    const stored = Fa.readFacts("nz").get("hope");
+    assert.strictEqual(stored.item.checkedAt, "2026-10-17");
+    assert.strictEqual(stored.updated, "2026-10-01", "a recheck isn't an update");
+  } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); Q.clearQueue(); }
+});
 test("waiting pages older than 30 weeks get a small share of the arrival sweep, each every 14 days", () => {
   const Lc = require("./lib/lifecycle.js");
   const now = new Date("2026-10-16T00:00:00Z");

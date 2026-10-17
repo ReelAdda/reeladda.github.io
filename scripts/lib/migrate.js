@@ -25,11 +25,13 @@
 
 const fs = require("fs");
 const { COUNTRIES, fmtDateFull, localeFor } = require("./core.js");
-const { archivePatchHtml } = require("./archive.js");
+const { archivePatchHtml, retitleFrozen, rewriteMetaDescription } = require("./archive.js");
+const { applyDeparturePatch, duePassPage } = require("./lifecycle.js");
+const { applyPatch, modeOf, queuedFacts } = require("./factsq.js");
 const { buildFilmPage } = require("./filmpage.js");
 const { filmPageExists } = require("./graph.js");
 const { countryNameFor } = require("./rules.js");
-const { availabilityText, extractFacts, factsDiff, keyFacts, readFacts, writeFacts } = require("./facts.js");
+const { availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, readFacts, writeFacts } = require("./facts.js");
 const { writeIfChanged } = require("./writeif.js");
 const { fcScore } = require("./fcscore.js");
 const { applyTruth } = require("./truth.js");
@@ -43,9 +45,31 @@ function renderFrozen(item, cfg, { asOf, knownSlugs, availability = "", untracke
   const cluster = COUNTRIES.filter((c) => c.code === code || filmPageExists(c.code, item.slug)).map((c) => ({ code: c.code, region: c.region }));
   const it = { ...item, _alts: cluster.length > 1 ? cluster : [], ...(untracked ? { untracked: true } : {}) };
   const html = buildFilmPage(it, asOf, knownSlugs, cfg, null);
-  const out = archivePatchHtml(html, countryNameFor(cfg), cfg).html;
+  const countryName = countryNameFor(cfg);
+  let out = archivePatchHtml(html, countryName, cfg).html;
+  // What the calendar alone changes (lib/lifecycle.js duePassPage): the same pass the build
+  // runs over pages on disk, so a page drawn from facts says what a patched page says.
+  out = duePassPage(out, { title: item.title, countryName, cfg }).html;
+  // A departure is part of the facts (lib/factsq.js): drawn on every render, so it can't be
+  // erased by the next one (it was: no departure notice survived, Oct 2026 audit).
+  if (item.state === "gone") {
+    const r = applyDeparturePatch(out, { title: item.title, was: item.wasOn || [], rentBuy: item.rentBuy || [],
+      countryName, cfg, asOf: item.goneAt || item.checkedAt || "", unconfirmed: !!item.goneUnconfirmed });
+    if (r.changed) out = retitleFrozen(rewriteMetaDescription(r.html, cfg).html, cfg).html;
+  }
   // The date the platforms were last confirmed stays the page's own, never the render date.
   return availability ? out.replace(/Availability as of [^<—]+? — /, `Availability as of ${availability} — `) : out;
+}
+
+// The "Availability as of" text for an item: its own check date, in the edition's format.
+const availabilityFor = (item, code) => (item && item.checkedAt ? fmtDateFull(item.checkedAt, localeFor(code)) : "");
+// Fields that record checks, not content: a change to them alone isn't "Page updated".
+const BOOKKEEPING = ["checkedAt"];
+const visible = (item) => JSON.stringify(item, (k, v) => (BOOKKEEPING.includes(k) ? undefined : v));
+// keyFacts with the availability date compared as a date, whatever format the page wrote it in.
+function comparable(html) {
+  const k = keyFacts(html);
+  return { ...k, availability: isoFromShown(k.availability) || k.availability };
 }
 
 function knownSlugsFor(code) {
@@ -119,60 +143,102 @@ function migrateBatch(manifest, cfg, { limit = 0, today }) {
   return res;
 }
 
-// Every migrated page of one edition: facts read back (sweeps may have changed the page this
-// run), stored when they moved, page rendered from them.
-function renderMigrated(manifest, cfg, { today }) {
-  const res = { pages: 0, factsChanged: 0, written: 0, lost: [], corrected: 0, fields: {} };
+// Every migrated page of one edition, rendered from facts (lib/factsq.js has the full story).
+//   shadow mode (the default): the facts are read back from the page, so whatever the sweeps
+//     patched this run carries through, exactly as before. Each page is ALSO drawn the
+//     facts-only way, from its stored record plus this run's queued updates, and the two are
+//     compared; res.shadow counts the pages that differ.
+//   facts mode: the stored record plus this run's queued updates is the page. The page on disk
+//     is never read.
+function renderMigrated(manifest, cfg, { today, mode = null, modes = null, listed = null } = {}) {
+  const res = { pages: 0, factsChanged: 0, written: 0, lost: [], corrected: 0, fields: {}, shadow: { pages: 0, diffs: 0, examples: [] } };
   const code = cfg.code;
   const m = manifest[code] || {};
   const facts = readFacts(code);
   const knownSlugs = knownSlugsFor(code);
+  const queued = queuedFacts(code);
+  const factsOnly = (mode || (modes ? modeOf(modes, code) : "shadow")) === "facts";
+  res.mode = factsOnly ? "facts" : "shadow";
   let dirty = false;
+  // What TMDB said at the last check of a frozen page (lib/truth.js): platforms that changed,
+  // rent/buy, a moved release date, a new title, language, credits. Pages in this week's lists
+  // are rebuilt from fresh data anyway. A changed platform list is dated by the check that saw it.
+  const withTruth = (item, e, count) => {
+    let out = item;
+    if (/^[a-z]{2,3}$/.test(out.language || "") && langName(out.language) !== out.language) {
+      out = { ...out, language: langName(out.language) };     // a bare code from a build that couldn't name it
+      if (count) res.fields.language = (res.fields.language || 0) + 1;
+    }
+    if (e.archivedOn && e.truth) {
+      const t = applyTruth(out, e.truth);
+      if (t.changed.length) {
+        out = t.item;
+        if (t.changed.includes("providers") && e.truth.at) out = { ...out, checkedAt: e.truth.at };
+        if (count) {
+          res.corrected = (res.corrected || 0) + 1;
+          for (const f of t.changed) res.fields[f] = (res.fields[f] || 0) + 1;
+          // The manifest follows the page, or the self-audit reads them as two different films.
+          if (t.changed.includes("language")) e.lang = out.language;
+          if (t.changed.includes("released") && out.released) e.released = out.released;
+        }
+      }
+    }
+    if (e.tmdbId && out.tmdbId !== e.tmdbId) out = { ...out, tmdbId: e.tmdbId };
+    return out;
+  };
+  const render = (item, rec, e) => {
+    // "Page updated" and dateModified: the later of the facts' date and the date the page last
+    // visibly changed (`last`, the sitemap's lastmod, moved by syncFilmLastmods). Neither date
+    // is in the content fingerprint, so this can't loop.
+    const asOf = e.last && e.last > rec.updated && e.last <= today ? e.last : rec.updated;
+    // No TMDB id, or one TMDB no longer has (lib/lifecycle.js): no sweep can recheck it.
+    const untracked = !e.tmdbId || !!e.tmdbGone;
+    return renderFrozen(item, cfg, { asOf, knownSlugs, availability: availabilityFor(item, code), untracked });
+  };
   for (const [slug, rec] of facts) {
     const e = m[slug];
     const file = `${dirFor(code)}/${slug}.html`;
     if (!e || !e.rendered || !fs.existsSync(file)) { facts.delete(slug); dirty = true; continue; }
     res.pages++;
-    const html = fs.readFileSync(file, "utf8");
-    let now = extractFacts(html, slug, { tmdbId: e.tmdbId });
-    if (!now) { res.lost.push(`${code}/${slug}`); continue; }   // left as is; reported
-    let availability = availabilityText(html);
-    // A bare language code ("2h 3m of ar action") from a build that couldn't name it.
-    if (/^[a-z]{2,3}$/.test(now.language || "") && langName(now.language) !== now.language) {
-      now = { ...now, language: langName(now.language) };
-      res.fields.language = (res.fields.language || 0) + 1;
-    }
-    // What TMDB said at the last check of a frozen page (lib/truth.js): platforms that changed,
-    // rent/buy, a moved release date, a new title. Pages in this week's lists are rebuilt from
-    // fresh data anyway. A changed platform list is dated by the check that saw it.
-    if (e.archivedOn && e.truth) {
-      const t = applyTruth(now, e.truth);
-      if (t.changed.length) {
-        now = t.item;
-        res.corrected = (res.corrected || 0) + 1;
-        for (const f of t.changed) res.fields[f] = (res.fields[f] || 0) + 1;
-        if (t.changed.includes("providers") && e.truth.at) availability = fmtDateFull(e.truth.at, localeFor(code));
-        // The manifest follows the page, or the self-audit reads them as two different films.
-        if (t.changed.includes("language")) e.lang = now.language;
-        if (t.changed.includes("released") && now.released) e.released = now.released;
-      }
+    // The stored record plus this run's queued updates: the facts-only page.
+    const fromStore = withTruth(applyPatch(rec.item, queued.get(slug)), e, factsOnly);
+    // A film in this run's lists was just rebuilt from fresh TMDB data: that page is the newest
+    // source, in either mode, and there is nothing to compare it with.
+    const onLists = !!(listed && listed.has(slug));
+    let now;
+    if (factsOnly && !onLists) now = fromStore;
+    else {
+      const html = fs.readFileSync(file, "utf8");
+      const read = extractFacts(html, slug, { tmdbId: e.tmdbId });
+      if (!read) { res.lost.push(`${code}/${slug}`); continue; }   // left as is; reported
+      now = withTruth(read, e, true);
     }
     let r = rec;
     if (JSON.stringify(now) !== JSON.stringify(rec.item)) {
-      r = { slug, updated: today, item: now };
+      // Only a visible change moves "Page updated"; a new check date alone doesn't.
+      r = { slug, updated: visible(now) !== visible(rec.item) ? today : rec.updated, item: now };
       facts.set(slug, r);
-      res.factsChanged++;
+      if (r.updated === today) res.factsChanged++;
       dirty = true;
     }
-    // "Page updated" and dateModified: the later of the facts' date and the date the page last
-    // visibly changed (`last`, the sitemap's lastmod, moved by syncFilmLastmods). The facts'
-    // date alone missed changes that aren't facts, such as a title moving from "Expected Oct"
-    // to "Not Announced Yet": 9,230 pages told Google they changed after the date they showed
-    // (Oct 2026 audit). Neither date is in the content fingerprint, so this can't loop.
-    const asOf = e.last && e.last > r.updated && e.last <= today ? e.last : r.updated;
-    // No TMDB id, or one TMDB no longer has (lib/lifecycle.js): no sweep can recheck it.
-    const untracked = !e.tmdbId || !!e.tmdbGone;
-    const out = renderFrozen(r.item, cfg, { asOf, knownSlugs, availability, untracked });
+    let out;
+    try { out = render(r.item, r, e); } catch (err) { res.lost.push(`${code}/${slug} (${err.message})`); continue; }
+    if (!factsOnly && !onLists) {
+      // Shadow: the same page drawn from the stored record and this run's updates only.
+      res.shadow.pages++;
+      try {
+        const alt = render(fromStore, r, e);
+        const a = comparable(out), b = comparable(alt);
+        const diff = factsDiff(a, b);
+        if (diff.length) {
+          res.shadow.diffs++;
+          if (res.shadow.examples.length < 5) res.shadow.examples.push(`${code}/${slug} (${diff.map((k) => `${k}: "${String(a[k]).slice(0, 40)}" vs "${String(b[k]).slice(0, 40)}"`).join("; ")})`);
+        }
+      } catch (err) {
+        res.shadow.diffs++;
+        if (res.shadow.examples.length < 5) res.shadow.examples.push(`${code}/${slug} (facts-only render failed: ${err.message})`);
+      }
+    }
     if (writeIfChanged(file, out)) res.written++;
   }
   if (dirty) writeFacts(code, facts);

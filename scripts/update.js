@@ -341,6 +341,8 @@ const SOON_EXTRA_DAYS = 120;
 // catch-up runs from the "India streaming data" workflow with a larger budget.
 const DIGITAL_BUDGET = Number(process.env.DIGITAL_BUDGET || 300);
 const { indiaCinemaCensus, runDigitalBackfill } = require("./lib/indiadata.js");
+const { decideModes, loadModes, saveModes } = require("./lib/factsq.js");
+const { FALSE_CLAIMS } = require("./lib/audit.js");
 const {
   ABOUT_LASTMOD,
   buildDataPage,
@@ -1367,6 +1369,9 @@ async function main() {
   } catch (e) { stageFailed("merges", e); merges = []; }
 
   const builtCountries = [];
+  // Facts-only rendering, edition by edition (lib/factsq.js): modes in, this run's results out.
+  const factsModes = loadModes();
+  const factsResults = {};
   const dataByCode = {};
   const allSlugSets = {};
   // A film TMDB renames keeps the address it already has (lib/filmpage.js assignSlugs).
@@ -1637,6 +1642,7 @@ async function main() {
       const v = await syncVotes({ dataByCode, note: healthNote });
       if (v.enabled) console.log(`Votes: ${v.fetched} new, ${v.touched} films re-counted, ${v.films} films with votes`);
     } catch (e) { stageFailed("votes", e); }
+    // (factsModes / factsResults: lib/factsq.js — loaded here, decided after the self-audit.)
     // Frozen pages move to "facts rendered by the live template" (lib/migrate.js): pages
     // already moved are rendered from their facts (after every sweep above, whose changes are
     // read back first); then pages written this run, and any still held, move if their facts
@@ -1646,7 +1652,10 @@ async function main() {
       let moved = 0, rendered = 0, changed = 0, corrected = 0; const correctedFields = {};
       const held = [];
       for (const cfg of builtCountries) {
-        const r = renderMigrated(pagesManifest, cfg, { today: todayStr() });
+        // Facts-only rendering, edition by edition (lib/factsq.js): "facts" editions are drawn
+        // from their stored records alone; "shadow" ones as before, compared with the facts-only way.
+        const r = renderMigrated(pagesManifest, cfg, { today: todayStr(), modes: factsModes, listed: allSlugSets[cfg.code] });
+        factsResults[cfg.code] = { pages: r.pages, shadowDiffs: r.shadow.diffs, lost: r.lost.length, mode: r.mode, examples: r.shadow.examples };
         rendered += r.pages; changed += r.factsChanged; corrected += r.corrected || 0;
         for (const [f, n] of Object.entries(r.fields || {})) correctedFields[f] = (correctedFields[f] || 0) + n;
         if (r.lost.length) healthNote(`migrate [${cfg.code}]: ${r.lost.length} rendered page(s) lost their facts and were left as they are — e.g. ${r.lost.slice(0, 3).join(", ")}`);
@@ -1697,7 +1706,30 @@ async function main() {
     try {
       const a = runAudit({ dataByCode, pagesManifest, countries: COUNTRIES, note: healthNote, issue: healthIssue });
       console.log(`Audit: ${a.findings.length} finding(s)`);
+      // False claims per edition, for the facts-only switch below.
+      for (const fnd of a.findings) {
+        if (!FALSE_CLAIMS.has(fnd.check)) continue;
+        const code = (/^\/?([a-z]{2})\/movie\//.exec(fnd.url) || /^([a-z]{2})\/[^/]+$/.exec(fnd.url) || [null, "in"])[1];
+        if (factsResults[code]) factsResults[code].falseClaims = (factsResults[code].falseClaims || 0) + 1;
+      }
     } catch (e) { stageFailed("self-audit", e); }
+    // The facts-only switch (lib/factsq.js): an edition whose two renders agreed for
+    // SHADOW_CLEAN_RUNS runs moves to facts mode (one a run, India last); one in facts mode that
+    // lost pages or showed a false claim goes back, and the run turns red. Fully automatic.
+    try {
+      const { events } = decideModes(factsModes, factsResults, todayStr());
+      saveModes(factsModes);
+      const inFacts = Object.entries(factsResults).filter(([, r]) => r.mode === "facts").map(([c]) => c);
+      const shadow = Object.entries(factsResults).filter(([, r]) => r.mode !== "facts");
+      const differing = shadow.filter(([, r]) => r.shadowDiffs);
+      console.log(`Facts-only pages: ${inFacts.length} edition(s) drawn from facts alone${inFacts.length ? ` (${inFacts.join(", ")})` : ""}; ${shadow.length} compared in shadow, ${differing.length} with differences${differing.length ? ` — ${differing.map(([c, r]) => `${c} ${r.shadowDiffs}`).join(", ")}` : ""}`);
+      for (const [c, r] of differing.slice(0, 4)) if (r.examples.length) console.log(`  shadow [${c}] e.g. ${r.examples.slice(0, 2).join("; ")}`);
+      for (const ev of events) {
+        if (ev.kind === "promote") healthNote(`facts-only: ${ev.code} now draws every frozen page from its facts alone`);
+        else if (ev.kind === "rollback") healthIssue(`facts-only: ${ev.code} went back to shadow mode — ${ev.why}. It retries on its own after a week and fresh clean comparisons.`);
+        else if (ev.kind === "stalled") healthNote(`facts-only: ${ev.code} has differed from its facts-only render for a week (${ev.diffs} page(s) this run), so it isn't switching — e.g. ${(factsResults[ev.code].examples || []).slice(0, 2).join("; ")}`);
+      }
+    } catch (e) { stageFailed("facts-only switch", e); }
   }
 
   // "Streaming on <platform>" pages (see writeStreamingPages). After every claim for this run

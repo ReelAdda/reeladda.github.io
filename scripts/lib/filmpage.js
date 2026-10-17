@@ -492,7 +492,8 @@ function filmTitleTag(item, cfg = null) {
   // title failed for a different reason: it promised a date and the snippet had none. This
   // one answers the question honestly IN the title: the expected window, marked unconfirmed,
   // or "Not Announced Yet" once the usual window has passed. Films only; TV has no such date.
-  if (item.kind !== "tv" && !providers.length && item.released && releaseState(item.released) !== "upcoming") {
+  // A film that left streaming (lib/factsq.js state "gone") isn't awaiting a release date.
+  if (item.kind !== "tv" && !providers.length && item.released && releaseState(item.released) !== "upcoming" && item.state !== "gone") {
     const left = expectedMonthsLeft(item, Date.now());
     if (V.word === "OTT") {
       // India is the home edition, so no country in its title; fitTitle adds it for the UAE.
@@ -1118,6 +1119,10 @@ ${FCSB_CSS}
     // Shown only for films with NO streaming provider — once real data exists the
     // Where-to-watch block below is the better answer and this disappears on the
     // next build. Never invents a date: an estimate is always a labelled range.
+    // A departure (lib/factsq.js state "gone"): the block the departure notice fills on every
+    // render (lib/migrate.js renderFrozen) — series and films alike, platform or not. Without
+    // it the notice had nowhere to go and the next render erased it (Oct 2026 audit).
+    if (item.state === "gone" && !providers.length) return "<!--SW:pending--><!--/SW:pending-->";
     if (item.kind === "tv" || providers.length) return "";
     if (item.platform !== "Theatres" && !upcoming) return "";
     const V = streamVocab(cfg);

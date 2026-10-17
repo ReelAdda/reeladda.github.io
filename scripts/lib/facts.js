@@ -142,7 +142,32 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   // A verified arrival (lib/lifecycle.js arrivalDate), only while the page lists platforms.
   const arr = /<!--SW:arrived=(\d{4}-\d{2}-\d{2})\|([^>]*?)-->/.exec(html);
   if (arr && providers.length) { item.arrived = arr[1]; if (arr[2]) item.arrivedOn = dec(arr[2]); }
+  // State that lived only in the page (Oct 2026, lib/factsq.js): when availability was last
+  // confirmed, and a departure. Without them a re-render erased every departure notice.
+  const checked = isoFromShown(availabilityText(html));
+  if (checked) item.checkedAt = checked;
+  const gone = /<!--SW:gone=(\d{4}-\d{2}-\d{2})?-->/.exec(html);
+  if (gone && !providers.length) {
+    item.state = "gone";
+    if (gone[1]) item.goneAt = gone[1];
+    const was = / — it was on ([^<]+?)\.(?: |<)/.exec(html.slice(gone.index));
+    if (was) item.wasOn = dec(was[1]).split(/, /).map((x) => x.trim()).filter(Boolean);
+    const rb = /You can still rent or buy it on ([^<]+?)\.</.exec(html.slice(gone.index));
+    if (rb && !rentBuy.length) item.rentBuy = dec(rb[1]).split(/, /).map((x) => x.trim()).filter(Boolean);
+    if (/<strong>Not streaming yet\.<\/strong>/.test(html.slice(gone.index))) item.goneUnconfirmed = true;
+  }
   return item;
+}
+
+// "17 Oct 2026", "30 Sept 2026", "Oct 1, 2026", "17 October 2026" -> "2026-10-17". null if unknown.
+const MONTH_INDEX = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+function isoFromShown(s) {
+  if (!s) return null;
+  let m = /(\d{1,2}) ([A-Za-z]+)\.? (\d{4})/.exec(s), d, mo, y;
+  if (m) { d = m[1]; mo = MONTH_INDEX[m[2].slice(0, 3).toLowerCase()]; y = m[3]; }
+  else if ((m = /([A-Za-z]+)\.? (\d{1,2}), (\d{4})/.exec(s))) { d = m[2]; mo = MONTH_INDEX[m[1].slice(0, 3).toLowerCase()]; y = m[3]; }
+  if (!mo) return null;
+  return `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
 }
 const slugGuess = (t) => String(t).toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
@@ -223,4 +248,4 @@ function writeFacts(code, map, root = ".") {
   fs.writeFileSync(factsPath(code, root), lines.join("\n") + (lines.length ? "\n" : ""));
 }
 
-module.exports = { FACTS_DIR, availabilityText, extractFacts, factsDiff, keyFacts, pageState, readFacts, writeFacts };
+module.exports = { FACTS_DIR, availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, pageState, readFacts, writeFacts };

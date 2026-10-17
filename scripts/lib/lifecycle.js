@@ -26,6 +26,7 @@ const { canonProvider, countryNameFor, dedupeProviders, streamVocab } = require(
 const { healthNote, loadStateFile } = require("./runhealth.js");
 const { readHistory } = require("./history.js");
 const { tmdbTruth } = require("./truth.js");
+const { queueFacts } = require("./factsq.js");
 const { sleep, tmdb } = require("./tmdb.js");
 
 // ============================================================================
@@ -467,6 +468,11 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
         m[c.slug].last = asOf;
         delete m[c.slug].live;      // claim retired; the page no longer asserts a platform
         confirmed++;
+        // The same departure as facts (lib/factsq.js), so the render keeps drawing it.
+        const unconfirmed = earlyClaim(c) && !live.confirmed;
+        queueFacts(cfg.code, c.slug, { providers: [], platform: "", rentBuy, state: "gone", goneAt: asOf,
+          wasOn: unconfirmed ? undefined : (live.providers || []), goneUnconfirmed: unconfirmed || undefined,
+          checkedAt: asOf, arrived: undefined, arrivedOn: undefined });
       }
     } catch (e) { console.warn(`  departure ${c.slug}: ${e.message}`); }
   }
@@ -517,7 +523,7 @@ function syncAvailabilityStamps(manifest, cfg) {
     let html;
     try { html = fs.readFileSync(p, "utf8"); } catch { continue; }
     const next = restampAvailability(html, v.live, cfg);
-    if (next !== html) { fs.writeFileSync(p, next); n++; }
+    if (next !== html) { fs.writeFileSync(p, next); n++; queueFacts(cfg.code, slug, { checkedAt: v.live.lastCheck }); }
   }
   if (n) console.log(`  availability stamps [${cfg.code}]: ${n} page(s) dated to their last successful recheck`);
   return n;
@@ -568,6 +574,36 @@ function patchDigitalIfPassed(html, { title, countryName, cfg, now = Date.now() 
 }
 
 // Live pass: walk one country's film pages and apply the due-date patch. Local only.
+// Pure: one page through the due-date pass — the changes that come from the calendar alone
+// (a release date or an announced streaming date passing, a cinema run ending, an "Expected"
+// month going by). The render from facts runs it too (lib/migrate.js renderFrozen), so a page
+// drawn from its facts and a page patched here say the same thing on the same day.
+function duePassPage(html, { title, countryName, cfg }) {
+  let out = html, changed = false;
+  if (html.includes("<!--SW:due=")) {
+    ({ html: out, changed } = patchDueIfPassed(html, { title, countryName, cfg }));
+  } else if (html.includes("<!--SW:digital=") && !html.includes("<!--SW:live=")) {
+    // An announced streaming date that has gone by without the film arriving.
+    // Its FAQ can still carry the live builder's "is in cinemas … now" (settleReleasedCopy).
+    const dg = patchDigitalIfPassed(html, { title, countryName, cfg });
+    let next = settleReleasedCopy(dg.html, { countryName, cfg }).html;
+    if (dg.changed) next = retitleFrozen(rewriteMetaDescription(next, cfg).html, cfg).html;
+    if (next !== html) { out = next; changed = true; }
+  } else if (OPEN_PILL_RE.test(html) || RUN_ENDED_PILL_RE.test(html) || OLD_FALLBACK_DESC_RE.test(html)) {
+    // Open run: re-settle so it flips to "most likely ended" on the day it crosses the
+    // window. Ended run: bring the live builder's own theatrical sentences, and any lapsed
+    // window estimate, into line with the pill. Either way the description follows, and an
+    // "Expected <month>" title once its month is behind it.
+    const settled = rewriteMetaDescription(settleReleasedCopy(html, { countryName, cfg }).html, cfg).html;
+    const next = refreshExpectedTitle(settled, cfg).html;
+    if (next !== html) { out = next; changed = true; }
+  } else if (EXPECTED_TITLE_RE.test(html)) {
+    // A page with no where-to-watch block to settle (6 such, Oct 2026): only its title.
+    ({ html: out, changed } = refreshExpectedTitle(html, cfg));
+  }
+  return { html: out, changed };
+}
+
 function refreshDuePages(cfg, countryName, manifest = null) {
   const dir = cfg.code === "in" ? "movie" : `${cfg.code}/movie`;
   if (!fs.existsSync(dir)) return 0;
@@ -576,28 +612,7 @@ function refreshDuePages(cfg, countryName, manifest = null) {
     const path = `${dir}/${f}`;
     let html;
     try { html = fs.readFileSync(path, "utf8"); } catch { continue; }
-    let out = html, changed = false;
-    if (html.includes("<!--SW:due=")) {
-      ({ html: out, changed } = patchDueIfPassed(html, { title: titleFromPage(html) || f.replace(/\.html$/, ""), countryName, cfg }));
-    } else if (html.includes("<!--SW:digital=") && !html.includes("<!--SW:live=")) {
-      // An announced streaming date that has gone by without the film arriving.
-      // Its FAQ can still carry the live builder's "is in cinemas … now" (settleReleasedCopy).
-      const dg = patchDigitalIfPassed(html, { title: titleFromPage(html) || f.replace(/\.html$/, ""), countryName, cfg });
-      let next = settleReleasedCopy(dg.html, { countryName, cfg }).html;
-      if (dg.changed) next = retitleFrozen(rewriteMetaDescription(next, cfg).html, cfg).html;
-      if (next !== html) { out = next; changed = true; }
-    } else if (OPEN_PILL_RE.test(html) || RUN_ENDED_PILL_RE.test(html) || OLD_FALLBACK_DESC_RE.test(html)) {
-      // Open run: re-settle so it flips to "most likely ended" on the day it crosses the
-      // window. Ended run: bring the live builder's own theatrical sentences, and any lapsed
-      // window estimate, into line with the pill. Either way the description follows, and an
-      // "Expected <month>" title once its month is behind it.
-      const settled = rewriteMetaDescription(settleReleasedCopy(html, { countryName, cfg }).html, cfg).html;
-      const next = refreshExpectedTitle(settled, cfg).html;
-      if (next !== html) { out = next; changed = true; }
-    } else if (EXPECTED_TITLE_RE.test(html)) {
-      // A page with no where-to-watch block to settle (6 such, Oct 2026): only its title.
-      ({ html: out, changed } = refreshExpectedTitle(html, cfg));
-    } else continue;
+    const { html: out, changed } = duePassPage(html, { title: titleFromPage(html) || f.replace(/\.html$/, ""), countryName, cfg });
     if (changed) {
       fs.writeFileSync(path, out); n++;
       const e = manifest && manifest[cfg.code] && manifest[cfg.code][f.replace(/\.html$/, "")];
@@ -752,6 +767,7 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
             out = retitleFrozen(out, cfg).html;
             fs.writeFileSync(p, out);
             m[c.slug].digital = { date: dig.date, note: dig.note || "" };
+            queueFacts(cfg.code, c.slug, { digitalDate: dig.date, digitalNote: dig.note || undefined });
             m[c.slug].last = asOf;
             announced++;
           }
@@ -759,6 +775,7 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
         const p = `${dir}/${c.slug}.html`;
         const html = fs.readFileSync(p, "utf8");
         const stamped = stampPendingCheck(html, asOf, cfg);
+        queueFacts(cfg.code, c.slug, { checkedAt: asOf });
         if (stamped !== html) fs.writeFileSync(p, stamped);
         continue;
       }
@@ -773,6 +790,10 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
         // Open a live claim. This is what the departure sweep later rechecks — without it
         // the assertion we just wrote onto the page could never be revisited.
         m[c.slug].live = { since: asOf, providers: provs, lastCheck: asOf, misses: 0, ...(arrived ? { arrived, prevCheck } : {}) };
+        // The same arrival as facts (lib/factsq.js).
+        queueFacts(cfg.code, c.slug, { providers: provs, platform: provs[0], checkedAt: asOf,
+          arrived: arrived || undefined, arrivedOn: arrived ? provs[0] : undefined,
+          state: undefined, goneAt: undefined, wasOn: undefined, goneUnconfirmed: undefined, digitalDate: undefined, digitalNote: undefined });
         found++;
         if (arrived) dated++;
       }
@@ -835,6 +856,7 @@ module.exports = {
   backfillLiveClaims,
   backfillStreamClaims,
   departureCandidates,
+  duePassPage,
   departureOutage,
   loadPagesManifest,
   patchDigitalIfPassed,

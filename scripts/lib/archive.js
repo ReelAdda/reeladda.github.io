@@ -171,6 +171,9 @@ async function repairLegacyPages(cfg, pagesManifest, { baseItem, withImdb, budge
       m[slug] = { ...(m[slug] || {}), last: today, archivedOn: (m[slug] && m[slug].archivedOn) || today,
         pv: ARCHIVE_PATCH_VERSION, tmdbId: item.tmdbId, released: item.released || null,
         lang: item.language || null, kind, title: item.title, repairedOn: today };
+      // A rebuilt page's old facts are the wrong film's: it is captured into the facts store
+      // again, this run (lib/migrate.js migrateBatch), from the page just written.
+      delete m[slug].rendered;
       rebuilt++;
     } catch (e) { console.warn(`  legacy rebuild ${code}/${slug}: ${e.message}`); }
   }
@@ -448,7 +451,8 @@ function retitleFrozen(html, cfg = null) {
   if (!cur) return { html, changed: false };
   const facts = frozenFilmFacts(html);
   if (!facts) return { html, changed: false };
-  const next = filmTitleTag(facts.item, cfg);
+  // A departed film (SW:gone) isn't waiting for a release date: its title says where to watch.
+  const next = filmTitleTag(facts.gone ? { ...facts.item, state: "gone" } : facts.item, cfg);
   const esc = escHtml(next);
   if (!next || esc === cur[1]) return { html, changed: false };
   return { html: html.replace(/<title>[\s\S]*?<\/title>/, `<title>${esc}</title>`), changed: true };
