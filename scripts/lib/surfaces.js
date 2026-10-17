@@ -667,7 +667,9 @@ function ssrLastScan(data, cfg = null) {
 // The homepage's own policy. Looser than the generated pages' (the page runs its own inline
 // script and self-hosted fonts), and the single place it is defined now that the CSP is
 // rendered rather than hardcoded in the template.
-const HOME_CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; connect-src 'self'; object-src 'none'; base-uri 'self'";
+// No 'unsafe-inline' for scripts (Oct 2026): the homepage's script is js/app.js and no element
+// carries an inline handler, so a script injected into any page text can't run.
+const HOME_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; connect-src 'self'; object-src 'none'; base-uri 'self'";
 
 // ============================================================================
 // PICK OF THE WEEK, SERVER-RENDERED.

@@ -40,6 +40,9 @@ function stylesheetsLinked(htmls) {
 function homepageAssets(html) {
   const out = new Set();
   for (const m of String(html).matchAll(/<link rel="(?:preload|manifest|icon|apple-touch-icon)"[^>]*href="(\/[^"/][^"]*)"/g)) out.add(m[1]);
+  // The page's own scripts too: since Oct 2026 the homepage's whole script is /js/app.js, and a
+  // missing one would leave every button dead with no other sign.
+  for (const m of String(html).matchAll(/<script[^>]*\ssrc="(\/[^"/][^"]*)"/g)) out.add(m[1]);
   return [...out].sort();
 }
 

@@ -12,7 +12,10 @@
 // SAFETY_NAME. Locally, without TEST_TIERS, every failure still fails the run.
 
 const assert = require("assert");
-const U = require("./update.js"); // safe: update.js only runs main() when executed directly
+const U = require("./update.js");
+// The homepage as a reader gets it: its template plus its script (js/app.js since the CSP
+// change, Oct 2026). Tests about the homepage's client code read both.
+const homeSource = () => { const fs = require("fs"), path = require("path"); return fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8") + "\n" + fs.readFileSync(path.join(__dirname, "..", "js", "app.js"), "utf8"); };
 
 const SAFETY_GROUPS = new Set([
   "escHtml()",
@@ -1227,7 +1230,7 @@ test("film page leads with the score and shows both signals behind it", () => {
 });
 
 test("homepage template renders the score panel client-side, like the SSR card", () => {
-  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  const src = homeSource();
   // Cards: the one-line score (cardScore). The detail view keeps the full panel (fcScoreHtml).
   assert.ok(/function cardScore\(item\)/.test(src) && /\$\{cardScore\(item\)\}/.test(src), "card");
   assert.ok(/function fcScoreHtml\(item\)/.test(src) && (src.match(/\$\{fcScoreHtml\(item\)\}/g) || []).length === 1, "detail view");
@@ -1264,7 +1267,7 @@ test("meter: Indigo sunset zones, needle per verdict, grey dial for too early", 
 
 test("homepage sprite is exactly meterSymbols(), so cards and film pages can't drift", () => {
   const M = require("./lib/meter.js");
-  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  const src = homeSource();
   assert.ok(src.includes(M.meterSymbols()), "regenerate the fcm-* symbols in index.html from meterSymbols()");
   assert.ok(/<svg class="fcm" aria-hidden="true"><use href="#fcm-\$\{lvl\}"\/><\/svg>/.test(src), "client card uses the sprite");
 });
@@ -1303,7 +1306,7 @@ test("pick: actually new, FilmyChill Score first, market recognition breaks ties
 });
 
 test("phones: headings wrap cleanly, language is one dropdown, badges share a line, note clamps", () => {
-  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  const src = homeSource();
   assert.ok(/\.section-head \{ display: flex; align-items: baseline; flex-wrap: wrap;/.test(src));
   assert.ok(/\.section-head h2, \.section-head \.count \{ white-space: nowrap; \}/.test(src));
   const m = src.slice(src.indexOf("---- Phones: films within the first screen"));
@@ -1576,8 +1579,8 @@ testAsync("vote reader: fetches new votes, re-counts touched films, writes total
 });
 
 test("homepage: one language dropdown instead of a row of chips, choice remembered", () => {
-  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
-  assert.ok(/<select id="langSel" aria-label="Filter by language" onchange="setLang\(this\.value\)">/.test(src));
+  const src = homeSource();
+  assert.ok(/<select id="langSel" aria-label="Filter by language" data-change="setLang">/.test(src) && /setLang: \(el\) => setLang\(el\.value\)/.test(src));
   assert.ok(!/id="chips"/.test(src), "the chip row is gone");
   assert.ok(/`<option value="All">All languages \(\$\{total\}\)<\/option>`/.test(src) && /\$\{esc\(l\)\} \(\$\{counts\[l\]\}\)<\/option>/.test(src), "options carry counts");
   assert.ok(/localStorage\.setItem\('filmychill-lang', activeLang\)/.test(src) && /langSel\.value = activeLang;/.test(src));
@@ -2111,7 +2114,7 @@ test("ensureFooterLegal: frozen footers of every shape get the notice and both l
   assert.strictEqual(S.ensureFooterLegal("<p>no footer</p>"), "<p>no footer</p>");
   // A homepage footer is re-rendered every run; patching it put the notice in the © bar and
   // took Privacy out of the credit line, and the next build would have shown the notice twice.
-  const home = require("fs").readFileSync("index.html", "utf8");
+  const home = homeSource();
   assert.strictEqual(S.ensureFooterLegal(home), home, "the homepage template is left to footerAttribution");
 });
 
@@ -2223,7 +2226,7 @@ test("Pick of the Week is server-rendered and its backdrop preloaded", () => {
     + '<link rel="preload" as="image" href="https://image.tmdb.org/t/p/w780/v.jpg" media="(min-width: 521px)" fetchpriority="high">');
   assert.ok(/style="display:none"/.test(U.ssrHero({ pick: "Nope", theatres: [], ott: [] })), "no pick -> hidden, as before");
   assert.strictEqual(U.heroPreload({}), "");
-  const src = require("fs").readFileSync("index.html", "utf8");
+  const src = homeSource();
   assert.ok(/<!--SSR:HERO-->[\s\S]*id="hero"[\s\S]*<!--\/SSR:HERO-->/.test(src) && /<!--SSR:HEROPRELOAD-->/.test(src));
   const first = U.ssrCard({ title: "A", poster: "https://image.tmdb.org/t/p/w342/a.jpg" }, 0, "in", { eager: true });
   const later = U.ssrCard({ title: "B", poster: "https://image.tmdb.org/t/p/w342/b.jpg" }, 5, "in");
@@ -2418,7 +2421,7 @@ test("locales render English dates and counts, not another script or grouping", 
 });
 
 test("the country switcher is rendered from config, and the page reads its maps back from it", () => {
-  const src = require("fs").readFileSync("index.html", "utf8");
+  const src = homeSource();
   assert.ok(/<!--SSR:COUNTRYOPTS-->[\s\S]*?<!--\/SSR:COUNTRYOPTS-->/.test(src), "switcher is build-rendered");
   assert.ok(/document\.querySelectorAll\('#countrySel option'\)/.test(src),
     "labels and paths derive from the rendered list — no second hardcoded copy to go stale");
@@ -4949,7 +4952,7 @@ test("other countries sit in a closed <details> picker — out of sight, still r
   assert.strictEqual((list.match(/<a href=/g) || []).length, require("./lib/core.js").COUNTRIES.length - 1);
 });
 test("the template has the new footer and no stale markers", () => {
-  const src = require("fs").readFileSync("index.html", "utf8");
+  const src = homeSource();
   assert.ok(!/SSR:FOOTOTT/.test(src), "FOOTOTT retired");
   assert.ok(/<footer>[\s\S]*class="foot-brand"[\s\S]*<!--SSR:MORELINKS-->[\s\S]*<!--SSR:ATTRIBUTION-->/.test(src));
 });
@@ -5565,7 +5568,7 @@ test("client upcomingOnly + daysAway (index.html) mirror the server rule and cou
   // The client re-renders Coming Soon over the server HTML, so its date rules must match
   // normalizeUpcoming exactly or the page contradicts itself a second after load.
   const vm = require("vm");
-  const src = require("fs").readFileSync("index.html", "utf8");
+  const src = homeSource();
   const grab = (name) => {
     const i = src.indexOf("function " + name + "(");
     assert.ok(i >= 0, name + " present in index.html");
@@ -5596,7 +5599,7 @@ test("client upcomingOnly + daysAway (index.html) mirror the server rule and cou
 });
 
 test("the freshness stamp is server-rendered, absolute, and can't go false on a stale cache", () => {
-  const src = require("fs").readFileSync("index.html", "utf8");
+  const src = homeSource();
   assert.ok(/<span id="lastScan"><!--SSR:LASTSCAN-->[\s\S]*?<!--\/SSR:LASTSCAN--><\/span>/.test(src),
     "the stamp carries SSR markers so renderCountryPage can fill it");
   assert.strictEqual(U.ssrLastScan({ generatedAt: "2026-09-19T06:46:00Z" }, { code: "in" }), "Updated 19 Sept");
@@ -6648,11 +6651,26 @@ test("syncFilmLastmods: the first run only records; cosmetic edits never move th
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 
+test("homepage: no inline script and no inline handler, so its CSP can refuse inline scripts (Oct 2026)", () => {
+  const fsx = require("fs");
+  const tpl = fsx.readFileSync("index.html", "utf8"), app = fsx.readFileSync("js/app.js", "utf8");
+  const scripts = [...tpl.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
+  for (const [, attrs, body] of scripts) assert.ok(/\bsrc=|type="application\/ld\+json"/.test(attrs) || !body.trim(), `inline script: ${body.slice(0, 60)}`);
+  assert.ok(/<script src="\/js\/app\.js"><\/script>/.test(tpl), "the page loads its script from a file");
+  for (const src of [tpl, app]) assert.ok(!/\son(?:click|change|keydown|keyup|input|submit|load|error)="/.test(src), "no inline handlers");
+  assert.ok(!/script-src[^;"]*'unsafe-inline'/.test(tpl), "template CSP");
+  const S = require("./lib/surfaces.js");
+  assert.ok(!/script-src[^;"]*'unsafe-inline'/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "surfaces.js"), "utf8").match(/const HOME_CSP = "[^"]*"/)[0]), "built homepage CSP");
+  // every action named in the markup has a handler
+  const names = new Set([...(tpl + app).matchAll(/data-(?:click|change|enter)="([A-Za-z]+)"/g)].map((m) => m[1]));
+  for (const n of names) assert.ok(new RegExp(`\\b${n}: \\(`).test(app), `no handler for data action "${n}"`);
+  assert.ok(require("./livecheck.js").homepageAssets(tpl).includes("/js/app.js"), "the live check fetches the script");
+});
 test("homepage 'Coming soon' cards stay real links after the page script re-renders them", () => {
-  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  const src = homeSource();
   const fn = (src.match(/function soonCard\(item, i\) \{[\s\S]*?\n\}/) || [""])[0];
   assert.ok(/<a class="soon-card" href="\$\{esc\(filmPagePath\(item\.slug\)\)\}"/.test(fn), "a crawlable href, like the server-rendered card");
-  assert.ok(/onclick="return soonClick\(event, \$\{i\}\)"/.test(fn), "a plain click still opens the detail sheet");
+  assert.ok(/data-click="soonClick" data-i="\$\{i\}"/.test(fn) && /soonClick: \(el, ev\) => soonClick\(ev, Number\(el\.dataset\.i\)\)/.test(src), "a plain click still opens the detail sheet");
   assert.ok(/function soonClick\(ev, i\)[\s\S]*?ev\.metaKey \|\| ev\.ctrlKey/.test(src), "cmd/ctrl-click opens the film page in a new tab");
 });
 
@@ -6889,7 +6907,7 @@ test("'Too early' card: Wikipedia views first, then trailer views; a scored card
   assert.ok(!scored.includes("Wikipedia views"), "a scored card keeps to the score");
 });
 test("homepage template mirrors the buzz line and the split-critics wording", () => {
-  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  const src = homeSource();
   const m = /function wikiViewsLabel\(n\) \{\s*return Number\.isFinite\(n\) && n >= (\d+) \?/.exec(src);
   assert.ok(m && Number(m[1]) === EDT.WIKI_BUZZ_MIN, "the same 70,000 bar as the server");
   assert.ok(/const buzz = wikiViewsLabel\(item\.wikiWeeklyViews\) \|\| \(tv \?/.test(src), "cardScore: Wikipedia views before trailer views");
@@ -7036,7 +7054,7 @@ test("frozen pages: an old trailer block gets uploadDate and its watch and embed
 
 group("6 Oct 2026: homepage LCP — the hero backdrop first");
 test("phones get the 300px backdrop, on the same 520px breakpoint in the CSS and the preloads", () => {
-  const src = require("fs").readFileSync("index.html", "utf8");
+  const src = homeSource();
   assert.ok(/\.hero-bg \{[^}]*background-image: var\(--hero-lg, none\);/.test(src), "wide screens: the 780px file");
   const phone = /@media \(max-width: (\d+)px\) \{[^@]*?\.hero-bg \{ background-image: var\(--hero-sm, var\(--hero-lg, none\)\); \}/.exec(src);
   assert.ok(phone, "phones: the 300px file, inside the hero's own phone layout");
@@ -7047,7 +7065,7 @@ test("phones get the 300px backdrop, on the same 520px breakpoint in the CSS and
   assert.ok(U.ssrHero({ pick: "X", theatres: [{ title: "X", backdrop: "https://example.org/x.jpg" }], ott: [] }).includes("--hero-sm:url(&quot;https://example.org/x.jpg&quot;)"));
 });
 test("the data file waits until the hero has painted; hydration reads nothing that forces a style pass", () => {
-  const src = require("fs").readFileSync("index.html", "utf8");
+  const src = homeSource();
   const fnSrc = (name) => { const i = src.indexOf(`function ${name}(`); return src.slice(i, src.indexOf("\n}\n", i) + 2); };
   assert.ok(/afterHero\(\(\) => loadCountryData\(FC_PAGE\)\);/.test(fnSrc("initCountryPage")), "the first data fetch goes through afterHero");
   const ah = fnSrc("afterHero");
@@ -7064,7 +7082,7 @@ test("the confidence strip is server-rendered with the text the page's script wr
   const S = require("./lib/surfaces.js");
   assert.strictEqual(S.confStripText({ theatres: [1, 2, 3, 4, 5, 6, 7], ott: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], trackedFilms: 956 }), "17 picks this week · 956 films tracked");
   assert.strictEqual(S.confStripText({ theatres: [1], ott: [], trackedFilms: 1 }), "1 picks this week", "no tracked count when it isn't larger");
-  const src = require("fs").readFileSync("index.html", "utf8");
+  const src = homeSource();
   assert.ok(/<div class="conf-strip" id="confStrip"><!--SSR:CONFSTRIP-->[\s\S]*?<!--\/SSR:CONFSTRIP--><\/div>/.test(src));
   assert.ok(src.includes("strip.textContent = `${picks} picks this week${tracked}`;"), "the client's wording, which confStripText copies");
   const surf = require("fs").readFileSync(require("path").join(__dirname, "lib", "surfaces.js"), "utf8");
