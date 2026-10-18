@@ -23,7 +23,7 @@
     + ".fcs-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);color:#FFF7EC;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:5px 11px;margin:-5px 0;font:600 13px/1 system-ui,-apple-system,'Segoe UI',sans-serif;cursor:pointer}"
     // Pages without the purple bar: a floating button in the top-right corner. It takes no space,
     // so nothing on the page moves when it appears.
-    + ".fcs-btn.fcs-float{position:absolute;top:12px;right:12px;z-index:50;margin:0;background:#4038C7;color:#fff;border-color:#4038C7;padding:8px 13px;box-shadow:0 4px 14px rgba(64,56,199,.25)}"
+    + ".fcs-btn.fcs-float{position:absolute;top:12px;right:12px;z-index:50;margin:0;min-height:44px;min-width:44px;justify-content:center;background:#4038C7;color:#fff;border-color:#4038C7;padding:8px 13px;box-shadow:0 4px 14px rgba(64,56,199,.25)}"
     + ".fcs-btn.fcs-float:hover,.fcs-btn.fcs-float:focus-visible{background:#2F28A8}"
     + ".fcs-btn:hover,.fcs-btn:focus-visible{background:rgba(255,255,255,.22)}"
     + ".fcs-btn svg,.fcs-field svg{width:16px;height:16px;flex:none}"

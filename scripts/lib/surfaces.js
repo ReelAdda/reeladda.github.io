@@ -64,6 +64,7 @@ const {
 const { stageFailed } = require("./runhealth.js");
 const { USE_IMDB } = require("./tmdb.js");
 const { ssrCard, ssrEditorNote, ssrSoonCard, writeRssFeed } = require("./weekly.js");
+const { heroDialInner } = require("./meter.js");
 
 // About page lastmod for the sitemap — bump manually when about/index.html changes.
 const ABOUT_LASTMOD = "2026-10-05";
@@ -708,6 +709,7 @@ const HERO_HIDDEN = `<div class="hero" id="hero" style="display:none">
   <div class="hero-card" id="heroCard" data-click="heroTap">
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-grad"></div>
+    <div class="hero-dial" id="heroDial"></div>
     <div class="hero-content">
       <span class="hero-eyebrow"><svg class="ic" aria-hidden="true"><use href="#icTrophy"/></svg> Pick of the Week</span>
       <div class="hero-title" id="heroTitle"></div>
@@ -744,27 +746,22 @@ function ssrHero(data, code = "in") {
     ? ` style="--hero-sm:url(&quot;${e(heroBgSmallUrl(pick.backdrop))}&quot;);--hero-lg:url(&quot;${e(heroBgUrl(pick.backdrop))}&quot;)"`
     : "";
   const meta = [pick.platform, pick.genre, pick.language].filter(Boolean).join(" · ");
+  const verdict = (pick.fcScore && pick.fcScore.verdict) || pick.verdict || "";
+  // The audience-rating dial at the top right and the verdict as a pill (Oct 2026 redesign);
+  // the page's script writes the same two (heroDialInner / verdictPill twins in js/app.js).
   return `<div class="hero" id="hero">
   <div class="hero-card" id="heroCard" data-click="heroTap"${href}>
     <div class="hero-bg" id="heroBg"${bg}></div>
     <div class="hero-grad"></div>
+    <div class="hero-dial" id="heroDial">${heroDialInner(pick)}</div>
     <div class="hero-content">
       <span class="hero-eyebrow"><svg class="ic" aria-hidden="true"><use href="#icTrophy"/></svg> Pick of the Week</span>
       <div class="hero-title" id="heroTitle">${e(pick.title)}</div>
       <div class="hero-meta" id="heroMeta">${e(meta)}</div>
-      <div class="hero-verdict" id="heroVerdict">▸ ${e((pick.fcScore && pick.fcScore.verdict) || pick.verdict || "")}</div>
+      <div class="hero-verdict" id="heroVerdict">${verdict ? `<span class="vpill vp-hero">${e(verdict)}</span>` : ""}</div>
     </div>
   </div>
 </div>`;
-}
-
-// The "N picks this week · M films tracked" line above the hero, exactly as the page's script
-// writes it after hydrating. Rendered here too: hydration now waits until the hero has painted,
-// so an empty strip filled late pushed the hero down — a layout shift (CLS 0.015, Oct 2026).
-function confStripText(data) {
-  const picks = ((data && data.theatres) || []).length + ((data && data.ott) || []).length;
-  const tracked = data && data.trackedFilms && data.trackedFilms > picks ? ` · ${data.trackedFilms} films tracked` : "";
-  return `${picks} picks this week${tracked}`;
 }
 
 // The language filter's options, exactly as the page's script builds them after loading the
@@ -806,10 +803,12 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code, data));
   // The country switcher is rendered from COUNTRIES. It used to be a hardcoded <option>
   // list, which is why adding a country meant editing the same names in four places.
+  // Since the Oct 2026 redesign it is one "India ▾" pill that opens real links to each page.
+  html = replaceBetween(html, "COUNTRYNAME", escHtml(cfg.name));
   html = replaceBetween(html, "COUNTRYOPTS", COUNTRIES.map((c) =>
-    `<option value="${c.code}">${COUNTRY_FLAG[c.code] || ""} ${escHtml(c.name)}</option>`).join("\n    "));
-  // The page's own JS reads its country labels and paths back out of the rendered <option>
-  // list — markers can't go inside a <script>, and one rendered list beats three copies.
+    `<a href="${c.code === "in" ? "/" : `/${c.code}/`}" data-code="${c.code}" data-click="setCountry"${c.code === cfg.code ? ' aria-current="page"' : ""}>${COUNTRY_FLAG[c.code] || ""} ${escHtml(c.name)}</a>`).join(""));
+  // The page's own JS reads its country labels and paths back out of these rendered links —
+  // markers can't go inside a <script>, and one rendered list beats three copies.
   // Analytics and the policy that has to allow it are rendered together: turning GC_SITE off
   // strips the tag AND closes the CSP hole in the same build (see analyticsTag/cspWith).
   const script = homeScript();
@@ -817,7 +816,6 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "APPJS", script ? script.tag : `<script src="/js/app.js"></script>`);
   html = replaceBetween(html, "ANALYTICS", analyticsTag());
   html = replaceBetween(html, "LASTSCAN", escHtml(ssrLastScan(data, cfg)));
-  html = replaceBetween(html, "CONFSTRIP", escHtml(confStripText(data)));
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
   // Homepage share/Discover image: the Pick of the Week, then the lists (see hubOgImage).
   html = replaceBetween(html, "OGIMAGE", ogImageTag(hubOgImage([heroPickOf(data), ...(data.theatres || []), ...(data.ott || [])].filter(Boolean), cfg)));
@@ -872,7 +870,6 @@ function prerenderIndex(data) {
 
 module.exports = {
   choosePick,
-  confStripText,
   PICK_FRESH_DAYS,
   ABOUT_LASTMOD,
   buildDataPage,

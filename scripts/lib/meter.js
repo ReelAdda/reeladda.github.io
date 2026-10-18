@@ -12,6 +12,8 @@
 // ============================================================================
 "use strict";
 
+const { escHtml } = require("./core.js");
+
 const METER_ZONES = ["#4038C7", "#7B4FC4", "#C4589E", "#F2855A", "#FFAD1F"]; // cool → hot
 const METER_EARLY = "#E6E0D2";
 const METER_INK = "#241D52";
@@ -61,4 +63,36 @@ function meterSymbols() {
     .map((l) => `<symbol id="fcm-${l}" viewBox="2.5 7 27 17">${meterInner(l)}</symbol>`).join("");
 }
 
-module.exports = { METER_ZONES, meterInner, meterLevel, meterSvg, meterSymbols };
+// ---- Verdict pills and audience-rating dials (Oct 2026 redesign) ----
+// The verdict as a coloured pill, one colour set on every surface (homepage cards, the language
+// hubs, /new-on-ott/). The homepage's client twin is verdictPill() in js/app.js.
+const VPILL_CSS = ".vpill { display:inline-block; padding:3px 9px; border-radius:6px; font-size:12px; font-weight:800; line-height:1.35; white-space:nowrap; }"
+  + " .vp-must { background:#1E7A4C; color:#FFFFFF; } .vp-worth { background:#FFAD1F; color:#241D52; }"
+  + " .vp-skip { background:#FBE3DF; color:#A52617; } .vp-early { background:#EFE6D6; color:#5E5878; }";
+function verdictPill(label, level = meterLevel(label)) {
+  return `<span class="vpill vp-${level}">${escHtml(label)}</span>`;
+}
+// The number a card's dial shows: the audience rating (TMDB's, out of 10) beside a FilmyChill
+// verdict, exactly when the card used to print "★ 7.5". It is NOT the FilmyChill Score, which
+// is a verdict, not a number — the legend under the lists says so. Null: the dial shows "—".
+function dialRating(item) {
+  if (!item || !item.fcScore || item.rating == null || !item.votes) return null;
+  const r = Number(item.rating);
+  return Number.isFinite(r) ? r : null;
+}
+// A card's dial: a CSS ring (conic-gradient) filled to the rating, coloured by the verdict.
+function ratingDial(item) {
+  const r = dialRating(item);
+  if (r == null) return '<div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div>';
+  const v = r.toFixed(1);
+  return `<div class="dial dial-${meterLevel(item.fcScore.verdict)}" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div>`;
+}
+// The hero's larger dial, labelled; empty when there's no rating (the CSS hides it then).
+function heroDialInner(item) {
+  const r = dialRating(item);
+  if (r == null) return "";
+  const v = r.toFixed(1);
+  return `<div class="dial dial-hero" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div><div class="hero-dial-label">Audience</div>`;
+}
+
+module.exports = { METER_ZONES, VPILL_CSS, dialRating, heroDialInner, meterInner, meterLevel, meterSvg, meterSymbols, ratingDial, verdictPill };

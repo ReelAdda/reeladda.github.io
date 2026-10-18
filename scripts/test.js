@@ -1281,11 +1281,13 @@ test("homepage sprite is exactly meterSymbols(), so cards and film pages can't d
   assert.ok(/<svg class="fcm" aria-hidden="true"><use href="#fcm-\$\{lvl\}"\/><\/svg>/.test(src), "client card uses the sprite");
 });
 
-test("SSR card, film page and share card all carry the meter for the score's verdict", () => {
+test("SSR card carries the verdict pill and rating dial; film page and share card carry the meter", () => {
   const W = require("./lib/weekly.js"), C = require("./lib/cards.js");
   const it = { ...FCS_ITEM };
-  assert.ok(/<use href="#fcm-worth"\/>/.test(W.ssrCard(it, 0, "in")));
-  assert.ok(/class="snone"/.test(W.ssrCard({ ...it, fcScore: undefined }, 0, "in")), "no score: the quiet line, no dial");
+  const card = W.ssrCard(it, 0, "in");
+  assert.ok(/<span class="vpill vp-worth">Worth a watch<\/span>/.test(card) && /class="dial dial-worth"/.test(card), card);
+  const none = W.ssrCard({ ...it, fcScore: undefined }, 0, "in");
+  assert.ok(/class="vpill vp-early"/.test(none) && /class="dial dial-none"/.test(none), "no score: a grey pill and the dashed dial");
   const page = U.buildFilmPage(it, "2026-09-28", new Set(["the-love-hypothesis"]), { code: "in", name: "India" });
   assert.ok(/<div class="fcsb-verdict"><svg class="fcsb-m" width="56" height="35" viewBox="2\.5 7 27 17"/.test(page));
   const svg = C.shareCardSvg(it, { code: "in", name: "India" });
@@ -1319,9 +1321,11 @@ test("phones: headings wrap cleanly, language is one dropdown, badges share a li
   assert.ok(/\.section-head \{ display: flex; align-items: baseline; flex-wrap: wrap;/.test(src));
   assert.ok(/\.section-head h2, \.section-head \.count \{ white-space: nowrap; \}/.test(src));
   const m = src.slice(src.indexOf("---- Phones: films within the first screen"));
-  assert.ok(/#langSel, #sortSel \{ flex: 1 1 calc\(50% - 4px\)/.test(m) && /\.title-row h3 \{ flex-basis: 100%;/.test(m));
-  assert.ok(/-webkit-line-clamp: 3/.test(m) && /className = 'ednote-more'/.test(src));
-  assert.ok(/<span class="fol">Follow<\/span><span class="hide-sm"> Channel<\/span>/.test(src));
+  assert.ok(/#langSel, #sortSel \{ flex: 1 1 0; min-width: 0;/.test(m) && /\.title-row h3 \{ flex-basis: 100%;/.test(m));
+  // Oct 2026 redesign: the editor's note is one short line, so nothing to clamp; the WhatsApp
+  // follow moved to the footer.
+  assert.ok(!/ednote-more/.test(src) && /<p class="ednote">|<!--SSR:EDNOTE-->/.test(src));
+  assert.ok(/<a class="foot-follow" id="channelBtn"[^>]*>[\s\S]*?Follow on WhatsApp<\/a>/.test(src));
 });
 
 // ---- FilmyChill Score on pages that are never rebuilt (lib/scoresweep.js) ----
@@ -1593,7 +1597,7 @@ test("homepage: one language dropdown instead of a row of chips, choice remember
   assert.ok(!/id="chips"/.test(src), "the chip row is gone");
   assert.ok(/`<option value="All">All languages \(\$\{total\}\)<\/option>`/.test(src) && /\$\{esc\(l\)\} \(\$\{counts\[l\]\}\)<\/option>/.test(src), "options carry counts");
   assert.ok(/localStorage\.setItem\('filmychill-lang', activeLang\)/.test(src) && /langSel\.value = activeLang;/.test(src));
-  assert.ok(/#langSel, #sortSel \{ flex: 1 1 calc\(50% - 4px\)/.test(src), "on phones language and sort share a row evenly");
+  assert.ok(/#langSel, #sortSel \{ flex: 1 1 0; min-width: 0;/.test(src), "on phones language and sort share one row");
 });
 
 test("a platform page put up before a theatrical film could stream is a placeholder, not 'Streaming Now'", () => {
@@ -2236,7 +2240,7 @@ test("Pick of the Week is server-rendered and its backdrop preloaded", () => {
     verdict: "Must watch", backdrop: "https://image.tmdb.org/t/p/w780/v.jpg" }] };
   const hero = U.ssrHero(data);
   assert.ok(!/display:none/.test(hero), "visible in the HTML — no reveal, no layout shift");
-  assert.ok(/id="heroTitle">MobLand</.test(hero) && /id="heroVerdict">▸ Must watch</.test(hero));
+  assert.ok(/id="heroTitle">MobLand</.test(hero) && /id="heroVerdict"><span class="vpill vp-hero">Must watch<\/span></.test(hero));
   // Oct 2026: both sizes on the element, the phone one first; the CSS picks by screen width.
   assert.ok(hero.includes('style="--hero-sm:url(&quot;https://image.tmdb.org/t/p/w300/v.jpg&quot;);--hero-lg:url(&quot;https://image.tmdb.org/t/p/w780/v.jpg&quot;)"'), hero);
   assert.strictEqual(U.heroPreload(data),
@@ -2441,7 +2445,7 @@ test("locales render English dates and counts, not another script or grouping", 
 test("the country switcher is rendered from config, and the page reads its maps back from it", () => {
   const src = homeSource();
   assert.ok(/<!--SSR:COUNTRYOPTS-->[\s\S]*?<!--\/SSR:COUNTRYOPTS-->/.test(src), "switcher is build-rendered");
-  assert.ok(/document\.querySelectorAll\('#countrySel option'\)/.test(src),
+  assert.ok(/document\.querySelectorAll\('#countryPill a\[data-code\]'\)/.test(src),
     "labels and paths derive from the rendered list — no second hardcoded copy to go stale");
   // No hand-maintained country map may survive anywhere in the page. A stale SUPPORTED_COUNTRIES
   // map is what made the six new countries appear in the switcher and then refuse to load:
@@ -3009,7 +3013,7 @@ test("ssrCard: trending badge + trailer views render from data fields", () => {
     badge: "New season", freshDate: recent }, 0, "in");
   assert.ok(/<span class="cchip trend">Trending<\/span>/.test(html) && !html.includes("🔥"));
   // No score yet: one quiet line, carrying the one real signal there is — trailer buzz.
-  assert.ok(/class="snone"/.test(html) && /Too early to score · 52M trailer views/.test(html), html);
+  assert.ok(/<span class="vpill vp-early">Too early<\/span><div class="sreason">52M trailer views<\/div>/.test(html), html);
   const scored = U.ssrCard({ title: "HotD", platform: "JioHotstar", rating: 8.2, votes: 900, verdict: "Must watch", kind: "tv",
     slug: "hotd", trailerViews: 52123456, fcScore: { verdict: "Must watch", reason: "Audiences love it.", audience: "Loved", critics: null, basis: "audience" } }, 0, "in");
   assert.ok(!scored.includes("trailer views"), "a scored card keeps to the score");
@@ -3779,7 +3783,7 @@ test("nothing extractable -> null (line is omitted, never hollow)", () => {
 group("take rendering");
 test("ssrCard: the FilmyChill Score replaces the take on the card (the take stays on the film page)", () => {
   const withTake = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix", take: "Critics liked it, especially the performances." }, 0, "in");
-  assert.ok(!/class="take"/.test(withTake) && /class="snone"|class="sline"/.test(withTake), "card shows the score line, not the take");
+  assert.ok(!/class="take"/.test(withTake) && /class="vpill /.test(withTake), "card shows the verdict pill, not the take");
 });
 test("ssrCard escapes HTML inside the take", () => {
   const card = U.ssrCard({ title: "T", slug: "t", poster: null, platform: "Netflix", take: `<script>alert(1)</script>` }, 0, "in");
@@ -4751,10 +4755,11 @@ test("TV runtime (per-episode) stays off the card meta", () => {
 test("unscored card: 'Too early' only when it's just out; otherwise says what's missing", () => {
   const recent = new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10);
   const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: null, votes: 3, released: recent, verdict: "Just released — verdict soon", slug: "t" }, 0, "in");
-  assert.ok(/class="snone"/.test(html) && html.includes("Too early to score"), html);
+  assert.ok(/<span class="vpill vp-early">Too early<\/span>/.test(html), html);
   const old = U.ssrCard({ title: "Old", language: "Hindi", genre: "Drama", kind: "movie", rating: 5.7, votes: 9, released: "2026-03-10", slug: "old" }, 0, "in");
   assert.ok(!old.includes("Too early"), "a March release is not 'too early'");
-  assert.ok(old.includes("Not enough ratings to score · only 9"), "older film: counted, never 'early': " + old);
+  assert.ok(old.includes('<span class="vpill vp-early">Not enough ratings</span><div class="sreason">Only 9 ratings</div>'), "older film: counted, never 'early': " + old);
+  assert.ok(old.includes('class="dial dial-none"'), "no score, no number in the dial (its 5.7 from 9 ratings isn't shown)");
 });
 
 test("early reads: older films score from 15 ratings — shrunk toward average, never Must watch, always labelled", () => {
@@ -4801,10 +4806,12 @@ test("noScoreText: early only within 4 weeks; exact counts; split critics named"
   assert.strictEqual(F.noScoreText({ votes: 0 }, now).label, "Not enough ratings", "no date: never claim 'early'");
   assert.ok(!/Only 111/.test(F.noScoreText({ released: "2026-01-01", votes: 111 }, now).why), "never 'only 111 … needs 15'");
 });
-test("scored card: FilmyChill verdict, its reason, and the audience rating it came from — in one line", () => {
+test("scored card: FilmyChill verdict pill, its reason, and the audience rating in the dial", () => {
   const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: 7.9, votes: 900, verdict: "Must watch", slug: "t", runtime: 128,
     fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" } }, 0, "in");
-  assert.ok(/<div class="sline" aria-label="FilmyChill Score: Must watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-must"\/><\/svg><span class="sv">Must watch<\/span><\/div><div class="sreason">Audiences and critics agree · ★ 7\.9<\/div>/.test(html), html);
+  assert.ok(/<span class="vpill vp-must">Must watch<\/span><div class="sreason">Audiences and critics agree<\/div>/.test(html), html);
+  assert.ok(html.includes('<div class="dial dial-must" style="--p:79%" role="img" aria-label="Audience rating 7.9 out of 10"><span>7.9</span></div>'), "the rating sits in the dial, coloured by the verdict");
+  assert.ok(!/★/.test(html), "and not twice");
   assert.ok(/<div class="meta">Hindi · Action · 2h 8m<\/div>/.test(html), "short details line");
   assert.ok(/<span class="rank">1<\/span>/.test(html) && !/fcs-label|fcs-sig/.test(html), "rank on the poster; no boxed panel, no second ratings line");
 });
@@ -6950,8 +6957,8 @@ test("'Too early' card: Wikipedia views first, then trailer views; a scored card
   const recent = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
   const base = { title: "Drishyam: The Conclusion", slug: "drishyam-the-conclusion", kind: "movie", language: "Hindi", rating: null, votes: 2, released: recent, freshDate: recent };
   const card = U.ssrCard({ ...base, wikiWeeklyViews: 597122, trailerViews: 52123456 }, 0, "in");
-  assert.ok(/Too early to score · 597K Wikipedia views this week</.test(card), card);
-  assert.ok(/Too early to score · 52M trailer views</.test(U.ssrCard({ ...base, wikiWeeklyViews: 52968, trailerViews: 52123456 }, 0, "in")), "under the bar: the trailer figure");
+  assert.ok(/Too early<\/span><div class="sreason">597K Wikipedia views this week</.test(card), card);
+  assert.ok(/Too early<\/span><div class="sreason">52M trailer views</.test(U.ssrCard({ ...base, wikiWeeklyViews: 52968, trailerViews: 52123456 }, 0, "in")), "under the bar: the trailer figure");
   const scored = U.ssrCard({ ...base, wikiWeeklyViews: 597122, fcScore: { verdict: "Worth a watch", reason: "Critics are positive; audience ratings are still coming in.", audience: null, critics: "positive", basis: "critics" } }, 0, "in");
   assert.ok(!scored.includes("Wikipedia views"), "a scored card keeps to the score");
 });
@@ -7156,15 +7163,97 @@ test("the language filter is server-rendered with the options the page's script 
   assert.ok(/if \(!dataReady\) \{ if \(hydrateNow\) hydrateNow\(\); return; \}/.test(r), "render waits for the data");
   assert.ok(/dataReady = true;\n    render\(\);/.test(src), "and runs once it is in");
 });
-test("the confidence strip is server-rendered with the text the page's script writes", () => {
-  const S = require("./lib/surfaces.js");
-  assert.strictEqual(S.confStripText({ theatres: [1, 2, 3, 4, 5, 6, 7], ott: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], trackedFilms: 956 }), "17 picks this week · 956 films tracked");
-  assert.strictEqual(S.confStripText({ theatres: [1], ott: [], trackedFilms: 1 }), "1 picks this week", "no tracked count when it isn't larger");
+test("redesign: dial and pill markup are the same on the server and in the page script (Oct 2026)", () => {
+  const M = require("./lib/meter.js");
   const src = homeSource();
-  assert.ok(/<div class="conf-strip" id="confStrip"><!--SSR:CONFSTRIP-->[\s\S]*?<!--\/SSR:CONFSTRIP--><\/div>/.test(src));
-  assert.ok(src.includes("strip.textContent = `${picks} picks this week${tracked}`;"), "the client's wording, which confStripText copies");
+  const fnSrc = (name) => { const i = src.indexOf(`function ${name}(`); return src.slice(i, src.indexOf("\n}\n", i) + 2); };
+  // Run the page script's twins against the server's on the same items.
+  const vm = require("vm"), ctx = {};
+  vm.createContext(ctx);
+  vm.runInContext([fnSrc("esc"), fnSrc("verdictLevel"), fnSrc("verdictPill"), fnSrc("dialRating"), fnSrc("ratingDial"), fnSrc("heroDialInner")].join("\n")
+    .replace(/^function esc\(s\) \{[^\n]*\n?/, "") + "\n" + src.match(/function esc\(s\) \{[^\n]*/)[0], ctx);
+  const items = [
+    { fcScore: { verdict: "Must watch" }, rating: 8.34, votes: 900 }, { fcScore: { verdict: "Worth a watch" }, rating: 7, votes: 20 },
+    { fcScore: { verdict: "Skip" }, rating: 4.25, votes: 300 }, { fcScore: { verdict: "Worth a watch" }, rating: null, votes: 9 },
+    { rating: 6.3, votes: 10 }, { fcScore: { verdict: "Must watch" }, rating: 9, votes: 0 }, {},
+  ];
+  for (const it of items) {
+    assert.strictEqual(ctx.ratingDial(it), M.ratingDial(it), JSON.stringify(it));
+    assert.strictEqual(ctx.heroDialInner(it), M.heroDialInner(it), JSON.stringify(it));
+  }
+  for (const v of ["Must watch", "Worth a watch", "Skip", "Too early", "A & B"]) assert.strictEqual(ctx.verdictPill(v), M.verdictPill(v), v);
+  assert.strictEqual(M.dialRating({ rating: 7.5, votes: 400 }), null, "no verdict, no number: the dial only ever sits beside a FilmyChill verdict");
+  // The legend says what the number is — never "FilmyChill Score out of 10".
+  assert.ok(src.includes("Ring = audience rating out of 10 · colour = FilmyChill verdict") && !/FilmyChill Score out of 10/i.test(src));
+  assert.ok(/<div class="hero-dial-label">Audience<\/div>/.test(M.heroDialInner({ fcScore: { verdict: "Must watch" }, rating: 8, votes: 50 })));
+});
+test("redesign: verdict pills on the language hubs and /new-on-ott/, same colours as the homepage (Oct 2026)", () => {
+  const M = require("./lib/meter.js");
+  const tpl = homeSource();
+  for (const rule of M.VPILL_CSS.split("}").map((r) => r.trim()).filter(Boolean)) {
+    const sel = rule.split("{")[0].trim(), body = rule.split("{")[1].trim();
+    for (const decl of body.split(";").map((d) => d.trim()).filter(Boolean)) {
+      const [prop, val] = decl.split(":").map((x) => x.trim());
+      assert.ok(new RegExp(sel.replace(/\./g, "\\.") + " \\{[^}]*" + prop + ": " + val.replace(/[#()]/g, "\\$&")).test(tpl), `homepage ${sel} has ${prop}: ${val}`);
+    }
+  }
+  const pk = require("fs").readFileSync(require("path").join(__dirname, "lib", "pagekit.js"), "utf8");
+  const wk = require("fs").readFileSync(require("path").join(__dirname, "lib", "weekly.js"), "utf8");
+  for (const [name, src] of [["pagekit", pk], ["weekly", wk]]) {
+    assert.ok(/\$\{VPILL_CSS\}/.test(src) && /verdictPill\(it\.fcScore\.verdict\)/.test(src), name);
+  }
+  // The legacy "Just released — verdict soon" line stays plain text: settleArchiveVerdicts matches it.
+  assert.ok(/it\.verdict \? `<div class="rm">\$\{e\(it\.verdict\)\}<\/div>`/.test(pk) && /it\.verdict \? `<div class="rm">\$\{e\(it\.verdict\)\}<\/div>`/.test(wk));
+});
+test("redesign: every film page's verdict stamp takes the site-wide verdict colours (Oct 2026)", () => {
+  const ST = require("./lib/stylesheets.js"), fsx = require("fs"), path = require("path");
+  const old = ".fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }\n"
+    + ".fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }\n.fcsb-early { background:#F4F1EA; color:var(--mute); }";
+  const fixed = ST.fixSharedCss(old);
+  for (const want of [".fcsb-must { background:#1E7A4C; color:#FFFFFF; }", ".fcsb-worth { background:#FFAD1F; color:#241D52; }",
+    ".fcsb-skip { background:#FBE3DF; color:#A52617; }", ".fcsb-early { background:#EFE6D6; color:#5E5878; }"]) {
+    assert.ok(fixed.includes(want), want);
+    assert.ok(fsx.readFileSync(path.join(__dirname, "lib", "filmpage.js"), "utf8").includes(want), "new film pages: " + want);
+  }
+  assert.strictEqual(ST.fixSharedCss(fixed), fixed, "idempotent");
+  // Every shared stylesheet on disk that carries the stamp ends up with the new colours.
+  const dir = path.join(__dirname, "..", "css");
+  for (const f of fsx.readdirSync(dir).filter((n) => /^fp-[0-9a-f]{10}\.css$/.test(n))) {
+    const css = ST.fixSharedCss(fsx.readFileSync(path.join(dir, f), "utf8"));
+    if (/\.fcsb-must/.test(css)) assert.ok(css.includes(".fcsb-must { background:#1E7A4C;") && !css.includes("background:var(--indigo); color:#fff; } .fcsb-worth"), f);
+  }
+  assert.strictEqual(require("./lib/pagekit.js").LISTING_VERSION, "<!--listing:4-->", "closed months rebuilt once with the pills");
+});
+test("redesign: quieter top — country pill, one toolbar row, extras under Coming Soon, 44px targets (Oct 2026)", () => {
+  const src = homeSource();
+  assert.ok(/<details class="cpill" id="countryPill">[\s\S]*?<!--SSR:COUNTRYNAME-->[\s\S]*?<!--SSR:COUNTRYOPTS-->/.test(src), "India ▾ pill with the build's country links");
+  assert.ok(!/id="countrySel"/.test(src), "the old select is gone");
+  const tb = src.slice(src.indexOf('<div class="toolbar">'), src.indexOf("<main>"));
+  assert.ok(/id="langSel"/.test(tb) && /id="sortSel"/.test(tb) && /class="share-btn icon-only"[^>]*aria-label="Share this week on WhatsApp"/.test(tb), "toolbar: two selects + icon share");
+  assert.ok(!/tonight-btn|mylistBtn|channelBtn/.test(tb), "mood, My List and Follow left the toolbar");
+  const soon = src.indexOf("<h2>Coming Soon</h2>"), extras = src.indexOf('<div class="extras">');
+  assert.ok(extras > soon && /data-click="openMood"[\s\S]*?id="mylistBtn"/.test(src.slice(extras, extras + 600)), "mood + My List under Coming Soon");
+  for (const sel of [".cpill summary", ".cpill-list a", ".toolbar select", "footer a.foot-follow", ".extras .tonight-btn, .extras .mylist-btn"]) {
+    const i = src.indexOf(sel + " {");
+    assert.ok(i >= 0 && /min-height: 44px/.test(src.slice(i, src.indexOf("}", i))), `${sel}: 44px tall`);
+  }
+  assert.ok(/\.share-btn\.icon-only \{ width: 44px; height: 44px;/.test(src));
+  const S = require("./lib/surfaces.js");
+  const fsx = require("fs"), path = require("path");
+  const tpl = fsx.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  inTempDirSync(() => {
+    const quiet = console.log; console.log = () => {};
+    try { S.renderCountryPage(tpl, { code: "us", name: "United States" }, { theatres: [], ott: [], comingSoon: [] }); } finally { console.log = quiet; }
+    const html = fsx.readFileSync("us/index.html", "utf8");
+    assert.ok(/<!--SSR:COUNTRYNAME-->United States<!--\/SSR:COUNTRYNAME-->/.test(html));
+    assert.ok(html.includes('<a href="/us/" data-code="us" data-click="setCountry" aria-current="page">') && html.includes('<a href="/" data-code="in" data-click="setCountry">'), "real links; this page marked");
+  });
+});
+test("the 'N picks · M films tracked' strip is gone from the homepage (Oct 2026 redesign)", () => {
+  const src = homeSource();
+  assert.ok(!/confStrip|CONFSTRIP|conf-strip/.test(src), "template and script");
   const surf = require("fs").readFileSync(require("path").join(__dirname, "lib", "surfaces.js"), "utf8");
-  assert.ok(surf.includes('html = replaceBetween(html, "CONFSTRIP", escHtml(confStripText(data)));'));
+  assert.ok(!/confStripText|CONFSTRIP/.test(surf), "build");
 });
 test("with a hero on the page, the posters load after it (fetchpriority=low); without one, as before", () => {
   const item = { title: "A", slug: "a", poster: "https://image.tmdb.org/t/p/w342/a.jpg" };

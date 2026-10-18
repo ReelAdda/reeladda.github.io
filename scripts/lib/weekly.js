@@ -19,7 +19,7 @@ const {
 const { rankValue } = require("./score.js");
 const { releaseState } = require("./release.js");
 const { trailerViewsLabel, wikiViewsLabel } = require("./editorial.js");
-const { meterLevel } = require("./meter.js");
+const { VPILL_CSS, ratingDial, verdictPill } = require("./meter.js");
 const { earlyReadLabel, noScoreText } = require("./fcscore.js");
 const { freshLabel } = require("./freshness.js");
 const {
@@ -50,26 +50,29 @@ function ssrCardChips(item) {
   else if (badge) out.push(`<span class="cchip new">${e(badge)}</span>`);
   return out.length ? `<div class="cchips">${out.join("")}</div>` : "";
 }
+// The verdict as a pill with its one-line reason under it (Oct 2026 redesign: the audience
+// rating moved out of this line into the card's dial, ratingDial in lib/meter.js).
 function ssrCardScore(item, code) {
   const e = escHtml, s = item.fcScore;
+  const reason = (text) => (text ? `<div class="sreason">${text}</div>` : "");
   if (s) {
     const bits = [e(String(s.reason || "").replace(/\.$/, ""))];
-    if (item.rating != null && item.votes) bits.push(`★ ${Number(item.rating).toFixed(1)}`);
     if (s.early) bits.push(e(earlyReadLabel(s)));
-    return `<div class="sline" aria-label="FilmyChill Score: ${e(s.verdict)}"><svg class="fcm" aria-hidden="true"><use href="#fcm-${meterLevel(s.verdict)}"/></svg><span class="sv">${e(s.verdict)}</span></div><div class="sreason">${bits.join(" · ")}</div>`;
+    return verdictPill(s.verdict) + reason(bits.filter(Boolean).join(" · "));
   }
   const none = noScoreText(item);
   if (none.label === "Too early") {
-    // One buzz figure beside "Too early": this week's Wikipedia views when notable (what
+    // One buzz figure under "Too early": this week's Wikipedia views when notable (what
     // people are looking up NOW), else trailer views, else the release date.
     const tv = trailerViewsLabel(item.trailerViews);
     const when = freshLabel(item, Date.now(), localeFor(code));
     const buzz = wikiViewsLabel(item.wikiWeeklyViews) || (tv ? tv.replace(/^▶\s*/, "") : "");
-    const extra = buzz || (when ? when.charAt(0).toLowerCase() + when.slice(1) : "");
-    return `<div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score${extra ? ` · ${e(extra)}` : ""}</div>`;
+    const extra = buzz || when || "";
+    return verdictPill("Too early", "early") + reason(e(extra.charAt(0).toUpperCase() + extra.slice(1)));
   }
   const votes = Number(item.votes || 0);
-  return `<div class="snone"><svg class="ic" aria-hidden="true"><use href="#icBars"/></svg>Not enough ratings to score${votes ? ` · only ${votes.toLocaleString("en-IN")}` : ""}</div>`;
+  return verdictPill("Not enough ratings", "early")
+    + reason(votes ? `Only ${votes.toLocaleString("en-IN")} rating${votes === 1 ? "" : "s"}` : "");
 }
 // `lowPriority`: the page has a hero backdrop, its LCP image, so posters wait their turn
 // (fetchpriority="low" keeps Chrome from promoting the on-screen ones above it).
@@ -85,7 +88,8 @@ function ssrCard(item, i, code, { eager = false, lowPriority = false } = {}) {
       <div class="meta">${ssrCardMeta(item)}</div>
       ${ssrCardChips(item)}
       ${ssrCardScore(item, code)}
-    </div>`;
+    </div>
+    ${ratingDial(item)}`;
   // Every country now has its own per-film pages, so always link to this country's page.
   // (`code` defaults to India for safety if a caller omits it.)
   return item.slug
@@ -150,7 +154,10 @@ function isoWeekNum(d = new Date()) {
 // Only scored, current titles are recommended (never an older "still worth it" standout,
 // never a few-ratings early read), and nothing is ever recommended twice. No raw numbers:
 // the verdicts are what the cards show.
-function buildEditorNote(data, cfg, seed = null) {
+// `short` (the homepage, Oct 2026 redesign): the same picks with the verdict-and-reason
+// clauses left out, since each card now shows its own verdict pill — "For a night out, Digger
+// is the ticket. Give Street Fighter a miss."
+function buildEditorNote(data, cfg, seed = null, { short = false } = {}) {
   const th = ((data && data.theatres) || []).map((x) => ({ ...x, _cinema: true }));
   const ott = ((data && data.ott) || []).filter((x) => !x.stillGood).map((x) => ({ ...x, _cinema: false }));
   const s = seed != null ? seed : isoWeekNum() * 31 + ((cfg && cfg.code) || "in").charCodeAt(0);
@@ -179,7 +186,7 @@ function buildEditorNote(data, cfg, seed = null) {
 
   if (flagship) {
     used.add(flagship.title);
-    parts.push(flagship.fcScore && LEVEL[flagship.fcScore.verdict]
+    parts.push(!short && flagship.fcScore && LEVEL[flagship.fcScore.verdict]
       ? pick([
           `This week's pick is ${flagship.title} ${where(flagship)}: ${sentence(flagship)}.`,
           `Our pick this week is ${flagship.title} ${where(flagship)}, and it's ${sentence(flagship)}.`,
@@ -192,7 +199,10 @@ function buildEditorNote(data, cfg, seed = null) {
   const alt = best(otherSide, used);
   if (alt) {
     used.add(alt.title);
-    parts.push(alt._cinema
+    if (short) parts.push(alt._cinema
+      ? pick([`Heading to the cinema? ${alt.title} is the one to book.`, `For a night out, ${alt.title} is the ticket.`], 2)
+      : pick([`Staying in? Put on ${alt.title} ${where(alt)}.`, `On the sofa instead? Put on ${alt.title} ${where(alt)}.`], 2));
+    else parts.push(alt._cinema
       ? pick([
           `Heading to the cinema? ${alt.title} is the one to book: ${sentence(alt)}.`,
           `For a night out, ${alt.title} is the ticket: ${sentence(alt)}.`,
@@ -205,7 +215,9 @@ function buildEditorNote(data, cfg, seed = null) {
 
   // A Skip worth knowing about beats a third recommendation.
   const skip = all.find((x) => x.fcScore && x.fcScore.verdict === "Skip" && !x.fcScore.early && !used.has(x.title));
-  if (skip) {
+  if (skip && short) {
+    parts.push(pick([`Give ${skip.title} a miss.`, `${skip.title} can wait.`], 3));
+  } else if (skip) {
     parts.push(pick([
       `One to give a miss: ${skip.title} — ${why(skip) || "the audience verdict is in"}.`,
       `${skip.title} can wait — ${why(skip) || "the audience verdict is in"}.`,
@@ -213,9 +225,10 @@ function buildEditorNote(data, cfg, seed = null) {
   } else {
     const sameSide = flagship ? (flagship._cinema ? th : ott) : ott;
     const also = best(sameSide, used);
+    const tail = (x) => (short ? "" : `, ${verdictWords(x)}`);
     if (also) parts.push(also._cinema
-      ? `Also in cinemas: ${also.title}, ${verdictWords(also)}.`
-      : `Also streaming: ${also.title} ${where(also)}, ${verdictWords(also)}.`);
+      ? `Also in cinemas: ${also.title}${tail(also)}.`
+      : `Also streaming: ${also.title} ${where(also)}${tail(also)}.`);
   }
 
   if (!parts.length || (!flagship && !alt)) return null; // nothing trustworthy to say
@@ -228,10 +241,10 @@ function ssrEditorNote(data, cfg) {
     const own = fs.readFileSync("editor-note.txt", "utf8").trim();
     if (own) note = own; // the human's line always wins
   }
-  if (!note) note = buildEditorNote(data, cfg);
+  if (!note) note = buildEditorNote(data, cfg, null, { short: true });
   if (!note) return "";
-  const d = data && data.generatedAt ? fmtDateShort(String(data.generatedAt).slice(0, 10), Date.now(), localeFor(cfg.code)) : "";
-  return `<div class="ednote"><div class="ednote-label">Editor's note${d ? ` · ${escHtml(d)}` : ""}</div><p>${escHtml(note)}</p></div>`;
+  // One plain paragraph (Oct 2026 redesign); the date already sits in the "Updated" pill.
+  return `<p class="ednote"><b>Editor's note · </b>${escHtml(note)}</p>`;
 }
 
 function buildOttWeekPage(data, cfg, allCountries) {
@@ -370,7 +383,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
       <div>
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
-        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.fcScore ? " · " + e(it.fcScore.verdict) : ""}${trailerViewsLabel(it.trailerViews) ? " · " + trailerViewsLabel(it.trailerViews) : ""}</div>` : (it.fcScore ? `<div class="rm">${e(it.fcScore.verdict)}</div>` : it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
+        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.fcScore ? " " + verdictPill(it.fcScore.verdict) : ""}${trailerViewsLabel(it.trailerViews) ? " · " + trailerViewsLabel(it.trailerViews) : ""}</div>` : (it.fcScore ? `<div class="rm">${verdictPill(it.fcScore.verdict)}</div>` : it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
       </div>`;
     return it.slug
       ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>`
@@ -436,6 +449,7 @@ ${ogImageTag(hubOgImage(freshItems, cfg))}
   .badge { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); background:var(--marigold); border-radius:5px; padding:3px 7px; font-weight:800; }
   .badge.trend { background:#D93A28; color:#fff; }
   .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
+  ${VPILL_CSS}
   .faq details { border-top:1px solid var(--line); padding:10px 0; }
   .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }
   .faq summary::-webkit-details-marker { display:none; }

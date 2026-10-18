@@ -23,6 +23,7 @@ const { releaseState } = require("./release.js");
 const { freshLabel, THEATRE_WINDOW_FALLBACK_DAYS } = require("./freshness.js");
 const { canonProvider, countryNameFor, streamVocab, streamWindowEstimate } = require("./rules.js");
 const { USE_IMDB } = require("./tmdb.js");
+const { VPILL_CSS, verdictPill } = require("./meter.js");
 
 function img(path, size = "w342") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
@@ -334,8 +335,9 @@ function fitFirst(options, max) {
 // Bumped when the cards' rules change: a closed month counts as final only when it was built
 // by the current rules (lib/hubs.js closedMonthFinal), so a fix reaches it once. v2, 14 Oct
 // 2026: release dates after the streaming start no longer shown as the release. v3, 16 Oct
-// 2026: card posters one URL at w342 (they were "url1,url2", 132 month pages).
-const LISTING_VERSION = "<!--listing:3-->";
+// 2026: card posters one URL at w342 (they were "url1,url2", 132 month pages). v4, 18 Oct
+// 2026: verdicts as coloured pills, the same as the homepage cards.
+const LISTING_VERSION = "<!--listing:4-->";
 function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null }) {
   // ~80 hubs, month archives and week pages ran 61–72 characters; see fitSiteTitle.
   title = fitSiteTitle(title);
@@ -352,7 +354,7 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
       <div>
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
-        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.fcScore ? " · " + e(it.fcScore.verdict) : ""}</div>` : (it.fcScore ? `<div class="rm">${e(it.fcScore.verdict)}</div>` : it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
+        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.fcScore ? " " + verdictPill(it.fcScore.verdict) : ""}</div>` : (it.fcScore ? `<div class="rm">${verdictPill(it.fcScore.verdict)}</div>` : it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
         ${it.hook ? `<div class="rm hk">${e(it.hook)}</div>` : ""}
         ${it.take ? `<div class="rm tk">${e(it.take)}</div>` : ""}
       </div>`;
@@ -417,6 +419,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
   .rm.tk { color:var(--indigo); font-weight:600; }
   .rm.hk { font-style:italic; }
+  ${VPILL_CSS}
   .faq details { border-top:1px solid var(--line); padding:10px 0; }
   .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }
   .faq summary::-webkit-details-marker { display:none; }

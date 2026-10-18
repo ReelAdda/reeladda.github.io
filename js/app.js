@@ -163,9 +163,9 @@ function fcSignals(item) {
 function fcScoreHtml(item) {
   const s = item.fcScore;
   const none = noScoreText(item);
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>${esc(none.label)}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
   const lvl = /^must/i.test(s.verdict) ? 'must' : /^skip/i.test(s.verdict) ? 'skip' : 'worth';
-  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${lvl}"/></svg>${esc(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
+  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${lvl}"/></svg>${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
 }
 
 // CLEANER CARDS (Oct 2026). One card used to stack a coloured badge for everything, a boxed
@@ -188,25 +188,49 @@ function cardChips(item) {
   else if (newForUser.has(item.slug || slugify(item.title))) out.push('<span class="cchip foryou">New for you</span>');
   return out.length ? `<div class="cchips">${out.join('')}</div>` : '';
 }
+// Verdict pills and audience-rating dials (Oct 2026 redesign). Twins of verdictPill,
+// dialRating, ratingDial and heroDialInner in scripts/lib/meter.js: same markup, so the page
+// doesn't change when it re-renders the server's cards. The dial's number is the audience
+// rating (out of 10), shown where the card used to print "★ 7.5" — not the FilmyChill Score,
+// which is a verdict.
+function verdictLevel(v) { return /^must/i.test(v || '') ? 'must' : /^skip/i.test(v || '') ? 'skip' : /^worth/i.test(v || '') ? 'worth' : 'early'; }
+function verdictPill(label, level) { return `<span class="vpill vp-${level || verdictLevel(label)}">${esc(label)}</span>`; }
+function dialRating(item) {
+  if (!item || !item.fcScore || item.rating == null || !item.votes) return null;
+  const r = Number(item.rating);
+  return Number.isFinite(r) ? r : null;
+}
+function ratingDial(item) {
+  const r = dialRating(item);
+  if (r == null) return '<div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div>';
+  const v = r.toFixed(1);
+  return `<div class="dial dial-${verdictLevel(item.fcScore.verdict)}" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div>`;
+}
+function heroDialInner(item) {
+  const r = dialRating(item);
+  if (r == null) return '';
+  const v = r.toFixed(1);
+  return `<div class="dial dial-hero" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div><div class="hero-dial-label">Audience</div>`;
+}
 function cardScore(item) {
   const s = item.fcScore;
+  const reason = (text) => (text ? `<div class="sreason">${text}</div>` : '');
   if (s) {
-    const lvl = /^must/i.test(s.verdict) ? 'must' : /^skip/i.test(s.verdict) ? 'skip' : 'worth';
     const bits = [esc(String(s.reason || '').replace(/\.$/, ''))];
-    if (item.rating != null && item.votes) bits.push('★ ' + Number(item.rating).toFixed(1));
     if (s.early) bits.push('Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings');
-    return `<div class="sline" aria-label="FilmyChill Score: ${esc(s.verdict)}"><svg class="fcm" aria-hidden="true"><use href="#fcm-${lvl}"/></svg><span class="sv">${esc(s.verdict)}</span></div><div class="sreason">${bits.join(' · ')}</div>`;
+    return verdictPill(s.verdict) + reason(bits.filter(Boolean).join(' · '));
   }
   const none = noScoreText(item);
   if (none.label === 'Too early') {
     const tv = trailerViewsLabel(item.trailerViews);
     const when = freshLabel(item);
     const buzz = wikiViewsLabel(item.wikiWeeklyViews) || (tv ? tv.replace(/^▶\s*/, '') : '');
-    const extra = buzz || (when ? when.charAt(0).toLowerCase() + when.slice(1) : '');
-    return `<div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score${extra ? ' · ' + esc(extra) : ''}</div>`;
+    const extra = buzz || when || '';
+    return verdictPill('Too early', 'early') + reason(esc(extra.charAt(0).toUpperCase() + extra.slice(1)));
   }
   const votes = Number(item.votes || 0);
-  return `<div class="snone"><svg class="ic" aria-hidden="true"><use href="#icBars"/></svg>Not enough ratings to score${votes ? ' · only ' + votes.toLocaleString('en-IN') : ''}</div>`;
+  return verdictPill('Not enough ratings', 'early')
+    + reason(votes ? 'Only ' + votes.toLocaleString('en-IN') + ' rating' + (votes === 1 ? '' : 's') : '');
 }
 function card(item, i, listKey) {
   const track = listKey === 'wl' ? trackStatus(item) : null;
@@ -224,6 +248,7 @@ function card(item, i, listKey) {
       ${track ? `<div class="track-status ${track.cls}">${track.label}</div>` : ''}
       ${cardScore(item)}
     </div>
+    ${ratingDial(item)}
   </div>`;
 }
 
@@ -682,9 +707,10 @@ if (WHATSAPP_CHANNEL_URL) {
 // Both maps are read from the country switcher, which the build renders from COUNTRIES
 // (see renderCountryPage). SSR markers can't live inside a <script> — HTML comments break
 // JS there — and a hardcoded copy went stale every time a country was added, so the rendered
-// DOM is the single source. Falls back to India alone if the select is ever missing.
-const COUNTRY_OPTS = [...document.querySelectorAll('#countrySel option')]
-  .map(o => [o.value, o.textContent.trim()]).filter(([v]) => /^[a-z]{2}$/.test(v));
+// DOM is the single source. Falls back to India alone if the list is ever missing.
+// Since the Oct 2026 redesign the switcher is the "India ▾" pill's list of links.
+const COUNTRY_OPTS = [...document.querySelectorAll('#countryPill a[data-code]')]
+  .map(a => [a.dataset.code, a.textContent.trim()]).filter(([v]) => /^[a-z]{2}$/.test(v));
 const COUNTRY_LABELS = Object.fromEntries(COUNTRY_OPTS.length ? COUNTRY_OPTS : [['in', '🇮🇳 India']]);
 // Which countries this build actually has pages for. Read from the same rendered list: when
 // this was a separate hardcoded map, six new countries appeared in the switcher, were rejected
@@ -749,8 +775,6 @@ function answerHeroTap(ok) {
 
 // Reflect this page's country in the switcher + tagline, then load its data.
 function initCountryPage() {
-  const sel = document.getElementById('countrySel');
-  if (sel) sel.value = FC_PAGE;
   const lbl = document.getElementById('countryLabel');
   if (lbl) lbl.textContent = COUNTRY_LABELS[FC_PAGE] || '🌐';
   afterHero(() => loadCountryData(FC_PAGE));
@@ -820,7 +844,10 @@ fetch('/data-' + code + '.json?v=' + Date.now())
       if (pick.backdrop) setHeroBackdrop(pick.backdrop);
       document.getElementById('heroTitle').textContent = pick.title;
       document.getElementById('heroMeta').textContent = [pick.platform, pick.genre, pick.language].filter(Boolean).join(' · ');
-      document.getElementById('heroVerdict').textContent = '▸ ' + ((pick.fcScore && pick.fcScore.verdict) || pick.verdict || '');
+      const verdict = (pick.fcScore && pick.fcScore.verdict) || pick.verdict || '';
+      document.getElementById('heroVerdict').innerHTML = verdict ? `<span class="vpill vp-hero">${esc(verdict)}</span>` : '';
+      const heroDial = document.getElementById('heroDial');
+      if (heroDial) heroDial.innerHTML = heroDialInner(pick);
       openPick = () => {
         const listKey = DATA.theatres.includes(pick) ? 'theatres' : 'ott';
         openDetail(listKey, DATA[listKey].indexOf(pick), 'pick');
@@ -847,19 +874,6 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     dataReady = true;
     render();
 
-    // Confidence strip: the product states its own heartbeat. The build writes the same text
-    // (confStripText in scripts/lib/surfaces.js), so this changes nothing on screen: filled only
-    // here, the empty line grew under a painted page and pushed the hero down (a layout shift).
-    const strip = document.getElementById('confStrip');
-    if (strip) {
-      const picks = DATA.theatres.length + DATA.ott.length;
-      // "Updated today" already lives in the pill above — repeating the cadence here
-      // was two ways of saying one thing. The tracked count is the fact the pill can't
-      // tell: the scale behind this week's list. Exact number, no "+" padding.
-      const tracked = data.trackedFilms && data.trackedFilms > picks ? ` · ${data.trackedFilms} films tracked` : '';
-      strip.textContent = `${picks} picks this week${tracked}`;
-    }
-
     const d = new Date(data.generatedAt);
     const days = Math.floor((new Date() - d) / 86400000);
     document.getElementById('lastScan').textContent = days <= 0 ? 'Updated today' : days === 1 ? 'Updated yesterday' : 'Updated ' + days + ' days ago';
@@ -883,23 +897,11 @@ fetch('/data-' + code + '.json?v=' + Date.now())
   });
 } // end loadCountryData
 
-// Editor's note on phones: clamped to three lines (CSS) so films start sooner; "Read more"
-// appears only when the note is actually cut off.
-(function () {
-  const note = document.querySelector('.ednote'); const p = note && note.querySelector('p');
-  if (!p) return;
-  const b = document.createElement('button');
-  b.type = 'button'; b.className = 'ednote-more'; b.textContent = 'Read more';
-  b.addEventListener('click', function () { const open = note.classList.toggle('open'); b.textContent = open ? 'Show less' : 'Read more'; });
-  note.appendChild(b);
-  requestAnimationFrame(function () { if (p.scrollHeight <= p.clientHeight + 1 && !note.classList.contains('open')) b.style.display = 'none'; });
-})();
-
 // ---- Event wiring (Oct 2026): one listener per event type, actions named in data attributes.
 // The innermost element with the attribute wins, so a button inside a card runs its own action
 // and not the card's (what event.stopPropagation() did inline).
 const ACTIONS = {
-  setCountry: (el) => setCountry(el.value),
+  setCountry: (el) => setCountry(el.value || el.dataset.code),
   setLang: (el) => setLang(el.value),
   openMood: () => openMood(),
   toggleMyList: () => toggleMyList(),
@@ -930,5 +932,7 @@ function runAction(attr, ev) {
   if (fn) fn(el, ev);
 }
 document.addEventListener('click', (ev) => runAction('data-click', ev));
+document.addEventListener('click', (ev) => { const d = document.getElementById('countryPill'); if (d && d.open && !d.contains(ev.target)) d.open = false; });
+document.addEventListener('keydown', (ev) => { const d = document.getElementById('countryPill'); if (ev.key === 'Escape' && d && d.open) { d.open = false; d.querySelector('summary').focus(); } });
 document.addEventListener('change', (ev) => runAction('data-change', ev));
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') runAction('data-enter', ev); });

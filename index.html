@@ -40,7 +40,7 @@
 <meta property="og:image:height" content="630"><!--/SSR:OGIMAGE-->
 <!--SSR:PAGECODE--><meta name="fc-page" content="in"><meta name="fc-stream-word" content="OTT"><meta name="fc-locale" content="en-IN"><!--/SSR:PAGECODE-->
 <meta name="theme-color" content="#4038C7">
-<!--SSR:CSP--><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-HFE34wp2G6O10DOqPM6inRjE+MKBW6VaEEtSY2KZLv4=' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; connect-src 'self' https://filmychill.goatcounter.com; object-src 'none'; base-uri 'self'"><!--/SSR:CSP-->
+<!--SSR:CSP--><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-yZ7yFrP/9IrwVUySkj07qIapAHyusglOOH1O2AiJx6E=' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; connect-src 'self' https://filmychill.goatcounter.com; object-src 'none'; base-uri 'self'"><!--/SSR:CSP-->
 <!--SSR:ANALYTICS--><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script><!--/SSR:ANALYTICS-->
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icon-192.png">
@@ -75,13 +75,29 @@
   /* ---- Header ---- */
   header { text-align: center; padding: 46px 24px 8px; }
   .ic { width: 1em; height: 1em; vertical-align: -0.12em; }
-  .ednote { margin: 18px auto 4px; max-width: 720px; padding: 12px 16px; border-left: 3px solid var(--marigold); background: rgba(255, 173, 31, 0.06); border-radius: 0 10px 10px 0; }
-  .ednote-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--marigold-dark, #94590F); font-weight: 600; margin-bottom: 4px; }
-  .ednote p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink, #1A1633); }
+  /* Editor's note: one plain paragraph, short form (Oct 2026 redesign). */
+  .ednote { margin: 18px auto 4px; max-width: 720px; font-size: 14px; line-height: 1.6; color: var(--ink); }
+  .ednote b { color: var(--marigold-dk); font-weight: 800; }
   .logo { font-family: 'Anton', sans-serif; font-size: clamp(42px, 8vw, 72px); letter-spacing: 2px; line-height: 1; color: var(--indigo); }
   .logo span { color: var(--marigold); -webkit-text-stroke: 1.5px var(--indigo); }
   h1.tagline{margin:0;font-weight:400} .tagline { margin-top: 8px; color: var(--mute); font-size: 13.5px; letter-spacing: 2.5px; text-transform: uppercase; }
-  .updated { margin-top: 16px; display: inline-flex; align-items: center; gap: 8px; background: var(--card);
+  /* Country pill + "Updated" pill share one row (Oct 2026 redesign). The country list opens
+     under the row, centred on the page, so it never runs off a phone's edge. */
+  .hdr-pills { position: relative; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .cpill summary { list-style: none; display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 16px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--ink);
+    cursor: pointer; box-shadow: var(--shadow); }
+  .cpill summary::-webkit-details-marker { display: none; }
+  .cpill summary:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+  .cpill summary .ic { width: 16px; height: 16px; color: var(--indigo); }
+  .cpill-caret { color: var(--mute); font-size: 11px; }
+  .cpill-list { position: absolute; left: 50%; transform: translateX(-50%); top: calc(100% + 8px); z-index: 40;
+    width: min(360px, calc(100vw - 32px)); display: grid; grid-template-columns: 1fr 1fr; gap: 2px; text-align: left;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 8px; box-shadow: 0 16px 40px rgba(36,29,82,.18); }
+  .cpill-list a { display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 8px; font-size: 13.5px; text-decoration: none; color: var(--ink); }
+  .cpill-list a:hover, .cpill-list a:focus-visible { background: var(--bg); }
+  .cpill-list a[aria-current] { font-weight: 800; color: var(--indigo); }
+  .updated { display: inline-flex; align-items: center; gap: 8px; background: var(--card);
     border: 1px solid var(--line); border-radius: 999px; padding: 8px 18px; font-size: 13px; color: var(--mute); box-shadow: var(--shadow); }
   .dot { width: 8px; height: 8px; border-radius: 50%; background: #2EBD6B; }
 
@@ -102,7 +118,15 @@
     letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 12px; border-radius: 6px; }
   .hero-title { font-family: 'Anton', sans-serif; font-size: clamp(26px, 5vw, 44px); letter-spacing: 1px; margin-top: 12px; }
   .hero-meta { margin-top: 6px; font-size: 14px; opacity: 0.85; }
-  .hero-verdict { margin-top: 10px; font-weight: 700; color: var(--marigold); font-size: 15px; }
+  .hero-verdict { margin-top: 10px; }
+  .hero-verdict:empty { display: none; }
+  .vpill.vp-hero { background: #3FD08A; color: #0F2A1D; font-size: 13px; }
+  /* Audience-rating dial, top right of the hero (Oct 2026 redesign). */
+  .hero-dial { position: absolute; top: 18px; right: 18px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .hero-dial:empty { display: none; }
+  .dial.dial-hero { width: 68px; height: 68px; background: conic-gradient(#3FD08A var(--p, 0%), rgba(255,255,255,0.18) 0); }
+  .dial.dial-hero span { width: 54px; height: 54px; background: var(--indigo); color: #fff; font-size: 21px; }
+  .hero-dial-label { font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #E4E1FF; }
 
   /* ---- Toolbar ---- */
   .toolbar { max-width: 1100px; margin: 26px auto 0; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
@@ -128,7 +152,7 @@
   .ritual-row { display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--line);
     border-radius:12px; padding:12px 14px; margin-top:14px; font-size:13.5px; color:var(--mute); }
   .ritual-row b { color: var(--ink); }
-  .ritual-btn { margin-left:auto; background:var(--indigo); color:#fff; border:none; border-radius:999px;
+  .ritual-btn { min-height:44px; margin-left:auto; background:var(--indigo); color:#fff; border:none; border-radius:999px;
     font-size:13px; font-weight:700; padding:9px 16px; cursor:pointer; white-space:nowrap; font-family:inherit; }
   .install-nudge { display:flex; align-items:center; gap:10px; background:rgba(64,56,199,0.08); border:1px solid var(--line);
     border-radius:12px; padding:11px 14px; margin-top:16px; font-size:13px; }
@@ -142,6 +166,18 @@
     padding: 9px 18px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer;
     display: inline-flex; align-items: center; gap: 7px; }
   .share-btn:hover { filter: brightness(1.06); }
+  /* One quiet row (Oct 2026 redesign): outlined pill selects and an icon-only share. */
+  .toolbar select { background: transparent; border: 1px solid #E3D8C4; min-height: 44px; padding: 0 14px; }
+  .share-btn.icon-only { width: 44px; height: 44px; padding: 0; justify-content: center; background: transparent;
+    border: 1px solid #E3D8C4; color: var(--indigo); flex: 0 0 44px; }
+  .share-btn.icon-only .ic { width: 18px; height: 18px; }
+  /* Mood picker and My List, now under Coming Soon. */
+  .extras { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .extras .tonight-btn, .extras .mylist-btn { min-height: 44px; display: inline-flex; align-items: center; gap: 7px; }
+  /* The legend under the lists. The mini ring is the dial in CSS, hollowed by a mask. */
+  .dial-legend { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 30px; font-size: 12.5px; color: var(--mute); text-align: center; }
+  .dial-mini { width: 16px; height: 16px; border-radius: 50%; flex: 0 0 16px; background: conic-gradient(#D18A00 70%, #EFE6D6 0);
+    -webkit-mask: radial-gradient(circle, transparent 4px, #000 4.5px); mask: radial-gradient(circle, transparent 4px, #000 4.5px); }
 
   /* ---- Sections ---- */
   main { max-width: 1100px; margin: 0 auto; padding: 18px 24px 70px; }
@@ -157,13 +193,13 @@
   /* ---- Cards ---- */
   /* Cleaner cards (Oct 2026): poster-led, the rank sits on the poster, no borders. */
   .card { background: var(--card); border: 1px solid transparent; border-radius: 16px; padding: 12px 14px;
-    display: grid; grid-template-columns: 84px 1fr; gap: 14px; cursor: pointer;
+    display: grid; grid-template-columns: 72px 1fr 52px; gap: 14px; cursor: pointer;
     box-shadow: 0 1px 2px rgba(36,29,82,.04), 0 6px 18px rgba(36,29,82,.06);
     transition: transform .18s, box-shadow .18s; position: relative; color: inherit; text-decoration: none; }
   .card:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(64,56,199,0.13); }
   @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
-  .pw { position: relative; width: 84px; height: 124px; }
-  .poster { display: block; width: 84px; height: 124px; object-fit: cover; border-radius: 10px; background: var(--bg); }
+  .pw { position: relative; width: 72px; height: 106px; }
+  .poster { display: block; width: 72px; height: 106px; object-fit: cover; border-radius: 10px; background: var(--bg); }
   .poster.ph { display: flex; align-items: center; justify-content: center; font-family: 'Anton', sans-serif; font-size: 34px; color: #C9C2E6; background: linear-gradient(160deg, #EDEAFB, #DCD8F4); }
   .rank { position: absolute; left: -5px; bottom: -7px; font-family: 'Anton', sans-serif; font-size: 32px; line-height: 1; color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; }
   .grid .card:first-child .rank { color: var(--marigold); }
@@ -173,13 +209,24 @@
   .cchip.trend { background: #FFF0EE; color: #B8301F; }
   .cchip.new { background: #FFF3DC; color: #8A5800; }
   .cchip.foryou { background: transparent; box-shadow: inset 0 0 0 1px var(--indigo); }
-  .sline { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
-  .sline .sv { font-family: 'Anton', sans-serif; font-size: 15px; line-height: 1.1; letter-spacing: .3px; text-transform: uppercase; color: var(--ink); white-space: nowrap; }
-  .sreason { font-size: 12.5px; line-height: 1.4; color: #4A4366; margin-top: 3px; }
-  .snone { display: flex; align-items: center; gap: 6px; margin-top: 9px; font-size: 12.5px; color: var(--mute); }
-  .snone .ic { width: 14px; height: 14px; flex-shrink: 0; }
+  /* Verdict pill + its one-line reason (Oct 2026 redesign). Colours: VPILL_CSS in lib/meter.js. */
+  .vpill { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 12px; font-weight: 800; line-height: 1.35; white-space: nowrap; }
+  .vp-must { background: #1E7A4C; color: #FFFFFF; } .vp-worth { background: #FFAD1F; color: #241D52; }
+  .vp-skip { background: #FBE3DF; color: #A52617; } .vp-early { background: #EFE6D6; color: #5E5878; }
+  .cb .vpill { margin-top: 9px; }
+  .sreason { font-size: 12.5px; line-height: 1.4; color: #4A4366; margin-top: 4px; }
+  /* Audience-rating dial (CSS only): a conic ring filled to the rating, coloured by verdict. */
+  .dial { --dc: #D18A00; width: 48px; height: 48px; border-radius: 50%; align-self: center; justify-self: end;
+    display: grid; place-items: center; background: conic-gradient(var(--dc) var(--p, 0%), #EFE6D6 0); }
+  .dial span { width: 38px; height: 38px; border-radius: 50%; background: #FFFFFF; display: grid; place-items: center;
+    font-family: 'Anton', sans-serif; font-size: 15px; line-height: 1; color: var(--ink); }
+  .dial-must { --dc: #1E7A4C; } .dial-worth { --dc: #D18A00; } .dial-skip { --dc: #D93A28; }
+  .dial-none { background: repeating-conic-gradient(#D9CFBF 0 6%, #FFFFFF 0 12.5%); }
+  .dial-none span { color: #716A8C; }
+  /* Cards with a save button (top right): the dial sits at the bottom, clear of it. */
+  .save-btn ~ .dial { align-self: end; }
   .title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-right: 40px; }
-  .card h3 { font-size: 16.5px; font-weight: 800; line-height: 1.25; padding-right: 34px; }
+  .card h3 { font-size: 16.5px; font-weight: 800; line-height: 1.25; }
   .platform { font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: #fff;
     background: var(--indigo); border-radius: 5px; padding: 3px 9px; font-weight: 700; }
   .new-badge { font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: #fff;
@@ -207,10 +254,11 @@
   .fcs-why { font-size: 12.5px; line-height: 1.45; margin-top: 3px; color: var(--ink); }
   .fcs-sig { font-size: 12px; color: #6B6890; margin-top: 6px; }
   .fcs-tag { display: inline-block; font-size: 11px; font-weight: 700; color: #5A5470; background: rgba(36,29,82,.07); border-radius: 999px; padding: 1px 8px; margin-left: 2px; white-space: nowrap; }
+  .fcs-v .vpill { font-family: 'Inter', sans-serif; text-transform: none; letter-spacing: 0; }
+  .modal .fcs-v .vpill { font-size: 13.5px; padding: 4px 10px; }
   .modal .fcs { margin-top: 12px; } .modal .fcs-v { font-size: 18px; gap: 7px; } .modal .fcm { width: 26px; height: 16px; } .modal .fcs-why { font-size: 14px; }
   .meta.hook { font-style: italic; margin-top: 6px; }
   .tcounter { color: var(--marigold-dk); font-weight: 800; }
-  .conf-strip { margin-top: 10px; font-size: 12px; color: var(--mute); letter-spacing: 0.3px; }
   .track-status { margin-top: 8px; display: inline-block; font-size: 12px; font-weight: 700; border-radius: 8px; padding: 6px 10px; }
   .ts-live { background: rgba(46,189,107,0.13); color: #1E8A4E; }
   .ts-wait { background: rgba(255,173,31,0.16); color: var(--marigold-dk); }
@@ -229,9 +277,6 @@
   .cast-name { font-size: 11.5px; font-weight: 700; margin-top: 5px; line-height: 1.3; }
   .cast-role { font-size: 10.5px; color: var(--mute); line-height: 1.3; margin-top: 1px; }
   .bottom-row { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .score { font-size: 12px; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 4px 9px; color: var(--mute); }
-  .score b { color: var(--ink); }
-  .verdict { font-size: 12.5px; font-weight: 800; color: var(--marigold-dk); }
   
   .soon-ph { height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
     background: linear-gradient(160deg, var(--indigo) 0%, #322B9E 55%, #1D1960 100%); border-radius: 10px 10px 0 0; position: relative; overflow: hidden; }
@@ -270,7 +315,6 @@
   .modal .review { font-size: 14.5px; margin-top: 14px; }
   .credits { margin-top: 14px; font-size: 13px; color: var(--mute); line-height: 1.7; }
   .credits b { color: var(--ink); }
-  .modal .verdict { margin-top: 12px; font-size: 14px; }
   .trailer-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; background: var(--coral);
     color: #fff; font-weight: 800; font-size: 14px; padding: 11px 22px; border-radius: 10px; text-decoration: none; border: none; cursor: pointer; font-family: inherit; }
   .trailer-btn:hover { filter: brightness(1.07); }
@@ -327,20 +371,23 @@
   .foot-in { max-width: 960px; margin: 0 auto; }
   .foot-brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 24px; }
   .foot-brand b { color: var(--indigo); font-size: 16px; }
+  footer a.foot-follow { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; margin-left: auto;
+    border-radius: 999px; background: #1A1633; color: #FFF7EC; font-weight: 700; text-decoration: none; }
+  footer a.foot-follow:hover { text-decoration: none; filter: brightness(1.15); }
   .foot-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 22px 24px; }
   .foot-cols h3 { margin: 0 0 10px; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
   .foot-cols ul { list-style: none; margin: 0; padding: 0; }
   .foot-cols li { margin: 0 0 7px; }
   .foot-cols a { color: var(--ink); }
   .foot-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 8px 16px; margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 12px; }
-  .foot-country summary { cursor: pointer; list-style: none; color: var(--ink); }
+  .foot-country summary { cursor: pointer; list-style: none; color: var(--ink); display: inline-flex; align-items: center; min-height: 44px; }
   .foot-country summary::-webkit-details-marker { display: none; }
   .foot-country summary::after { content: " \25BE"; color: var(--mute); }
   .foot-country[open] summary::after { content: " \25B4"; }
   .foot-country-list { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; max-width: 520px; }
   .foot-credit { margin-top: 10px; font-size: 11.5px; line-height: 1.6; }
   @media (max-width: 520px) { .foot-cols { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 480px) { .card { grid-template-columns: 72px 1fr; gap: 12px; padding: 10px 12px; } .pw, .poster { width: 72px; height: 106px; } .rank { font-size: 28px; } .share-btn { margin-left: 0; } }
+  @media (max-width: 480px) { .card { grid-template-columns: 72px 1fr 52px; gap: 12px; padding: 10px 12px; } .rank { font-size: 28px; } }
   /* ---- Phones: films within the first screen (Sept 2026 review) ----
      Section heads: the subtitle drops to its own line instead of crushing "In Theatres / Top 7".
      Toolbar: language chips scroll sideways in ONE row (was up to three), and Sort / Share /
@@ -350,12 +397,10 @@
     .section-head .sub { flex-basis: 100%; margin-left: 0; }
     .section-head h2, .section-head .count { font-size: 22px; }
     .toolbar { margin-top: 16px; gap: 8px; }
-    /* Three tidy rows: tonight + My List · language + sort · share + follow, each pair
-       splitting the width evenly so edges line up. */
-    #langSel, #sortSel { flex: 1 1 calc(50% - 4px); min-width: 0; font-size: 13px; }
-    .tonight-btn, .mylist-btn { flex: 1 1 auto; justify-content: center; }
-    .share-btn { flex: 1 1 calc(50% - 4px); justify-content: center; padding: 8px 12px; gap: 6px; margin-left: 0; }
-    .share-btn .hide-sm { display: inline; }
+    /* One row: language + sort split the width, share keeps its 44px square. */
+    #langSel, #sortSel { flex: 1 1 0; min-width: 0; font-size: 13px; }
+    #langSel { flex-grow: 1.25; }
+    .extras .tonight-btn, .extras .mylist-btn { flex: 1 1 auto; justify-content: center; }
     main { padding: 6px 16px 60px; }
     .toolbar { padding: 0 16px; }
     .hide-sm { display: none; }
@@ -368,84 +413,63 @@
     .platform, .fresh-badge { font-size: 9.5px; padding: 2px 6px; letter-spacing: .8px; }
     .fresh-badge.foryou { padding: 1px 5px; }
     .ednote { margin-top: 14px; }
-    .ednote p { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-    .ednote.open p { display: block; }
-    .ednote-more { display: inline-block; margin-top: 4px; font-size: 12.5px; font-weight: 700; color: var(--indigo); background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit; }
+    .hero-dial { top: 14px; right: 14px; }
+    .dial.dial-hero { width: 56px; height: 56px; } .dial.dial-hero span { width: 44px; height: 44px; font-size: 18px; }
+    .hero-title { padding-right: 70px; }
   }
-  @media (min-width: 521px) { .ednote-more { display: none; } }
   /* Small phones (360–400px, most Android): keep each toolbar row intact rather than letting
      one button fall onto a row of its own; header selector and "Updated" share a line. */
   @media (max-width: 400px) {
     header { padding-top: 34px; }
-    #countrySel { max-width: 140px; }
-    .updated { margin-top: 10px; padding: 6px 12px; font-size: 12px; gap: 6px; }
-    .tonight-btn { padding: 8px 13px; font-size: 12.5px; }
-    .mylist-btn { padding: 7px 12px; font-size: 12.5px; }
-    #sortSel, #langSel { padding: 7px 10px; font-size: 12.5px; }
-    .share-btn { padding: 7px 10px; }
+    .updated { padding: 6px 12px; font-size: 12px; gap: 6px; }
+    .extras .tonight-btn { padding: 0 13px; font-size: 12.5px; }
+    .extras .mylist-btn { padding: 0 12px; font-size: 12.5px; }
+    #sortSel, #langSel { padding: 0 10px; font-size: 12.5px; }
   }
-  @media (max-width: 340px) { #channelBtn .fol { display: none; } }
 </style>
 </head>
 <body>
 
-<svg style="display:none" aria-hidden="true"><symbol id="waIcon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol><symbol id="icTrophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H5a2 2 0 0 0 0 4h2M17 6h2a2 2 0 0 1 0 4h-2"/></symbol><symbol id="icDice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="8.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="12" cy="12" r=".8" fill="currentColor"/><circle cx="8.5" cy="15.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="15.5" r=".8" fill="currentColor"/></symbol><symbol id="icHourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2c0 5 5 6 5 10s-5 5-5 10M17 2c0 5-5 6-5 10s5 5 5 10"/></symbol><symbol id="icBars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20v-6M12 20V9M19 20v-3"/></symbol><symbol id="icBookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21l-6-4-6 4V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16z"/></symbol><symbol id="icShare" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M8.3 10.8l6.4-3.6M8.3 13.2l6.4 3.6"/></symbol><symbol id="icCal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></symbol><symbol id="icTrend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol><symbol id="icSpark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.3L20 10l-5.9 1.7L12 18l-2.1-6.3L4 10l5.9-1.7L12 2zM19 15l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/></symbol><symbol id="fcm-must" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="25.18" y2="18.54" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></symbol><symbol id="fcm-worth" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="19.56" y2="12.19" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></symbol><symbol id="fcm-skip" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="6.96" y2="18.06" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></symbol><symbol id="fcm-early" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#E6E0D2" stroke-width="5"/><circle cx="16" cy="21" r="2.6" fill="#B8B2C8"/></symbol></svg>
+<svg style="display:none" aria-hidden="true"><symbol id="waIcon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol><symbol id="icTrophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H5a2 2 0 0 0 0 4h2M17 6h2a2 2 0 0 1 0 4h-2"/></symbol><symbol id="icDice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="8.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="12" cy="12" r=".8" fill="currentColor"/><circle cx="8.5" cy="15.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="15.5" r=".8" fill="currentColor"/></symbol><symbol id="icHourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2c0 5 5 6 5 10s-5 5-5 10M17 2c0 5-5 6-5 10s5 5 5 10"/></symbol><symbol id="icBars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20v-6M12 20V9M19 20v-3"/></symbol><symbol id="icBookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21l-6-4-6 4V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16z"/></symbol><symbol id="icGlobe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9"/></symbol><symbol id="icShare" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M8.3 10.8l6.4-3.6M8.3 13.2l6.4 3.6"/></symbol><symbol id="icCal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></symbol><symbol id="icTrend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol><symbol id="icSpark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.3L20 10l-5.9 1.7L12 18l-2.1-6.3L4 10l5.9-1.7L12 2zM19 15l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/></symbol><symbol id="fcm-must" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="25.18" y2="18.54" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></symbol><symbol id="fcm-worth" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="19.56" y2="12.19" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></symbol><symbol id="fcm-skip" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="6.96" y2="18.06" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></symbol><symbol id="fcm-early" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#E6E0D2" stroke-width="5"/><circle cx="16" cy="21" r="2.6" fill="#B8B2C8"/></symbol></svg>
 <header>
   <div class="logo">FILMY<span>CHILL</span></div>
   <h1 class="tagline"><!--SSR:TAGLINE-->New movies &amp; OTT releases this week<!--/SSR:TAGLINE--> · <span id="countryLabel">🌐</span></h1>
-  <select id="countrySel" aria-label="Choose country" data-change="setCountry" style="margin-top:6px;background:rgba(255,255,255,.08);color:inherit;border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:4px 8px;font-size:13px">
-    <!--SSR:COUNTRYOPTS--><option value="in">🇮🇳 India</option>
-    <option value="us">🇺🇸 United States</option>
-    <option value="uk">🇬🇧 United Kingdom</option>
-    <option value="au">🇦🇺 Australia</option>
-    <option value="de">🇩🇪 Germany</option>
-    <option value="ae">🇦🇪 UAE</option>
-    <option value="ca">🇨🇦 Canada</option>
-    <option value="sg">🇸🇬 Singapore</option>
-    <option value="my">🇲🇾 Malaysia</option>
-    <option value="ph">🇵🇭 Philippines</option>
-    <option value="nz">🇳🇿 New Zealand</option>
-    <option value="kr">🇰🇷 South Korea</option>
-    <option value="jp">🇯🇵 Japan</option>
-    <option value="id">🇮🇩 Indonesia</option>
-    <option value="br">🇧🇷 Brazil</option>
-    <option value="mx">🇲🇽 Mexico</option>
-    <option value="es">🇪🇸 Spain</option>
-    <option value="fr">🇫🇷 France</option><!--/SSR:COUNTRYOPTS-->
-  </select>
-  <div class="updated"><div class="dot"></div><span id="lastScan"><!--SSR:LASTSCAN-->Updated 18 Oct<!--/SSR:LASTSCAN--></span></div>
-  <div class="conf-strip" id="confStrip"><!--SSR:CONFSTRIP-->17 picks this week · 1219 films tracked<!--/SSR:CONFSTRIP--></div>
+  <div class="hdr-pills">
+    <details class="cpill" id="countryPill">
+      <summary aria-label="Choose country"><svg class="ic" aria-hidden="true"><use href="#icGlobe"/></svg><span><!--SSR:COUNTRYNAME-->India<!--/SSR:COUNTRYNAME--></span><span class="cpill-caret" aria-hidden="true">▾</span></summary>
+      <nav class="cpill-list" aria-label="Countries"><!--SSR:COUNTRYOPTS--><a href="/" data-code="in" data-click="setCountry" aria-current="page">🇮🇳 India</a><a href="/us/" data-code="us" data-click="setCountry">🇺🇸 United States</a><a href="/uk/" data-code="uk" data-click="setCountry">🇬🇧 United Kingdom</a><a href="/au/" data-code="au" data-click="setCountry">🇦🇺 Australia</a><a href="/de/" data-code="de" data-click="setCountry">🇩🇪 Germany</a><a href="/ae/" data-code="ae" data-click="setCountry">🇦🇪 UAE</a><a href="/ca/" data-code="ca" data-click="setCountry">🇨🇦 Canada</a><a href="/sg/" data-code="sg" data-click="setCountry">🇸🇬 Singapore</a><a href="/my/" data-code="my" data-click="setCountry">🇲🇾 Malaysia</a><a href="/ph/" data-code="ph" data-click="setCountry">🇵🇭 Philippines</a><a href="/nz/" data-code="nz" data-click="setCountry">🇳🇿 New Zealand</a><a href="/kr/" data-code="kr" data-click="setCountry">🇰🇷 South Korea</a><a href="/jp/" data-code="jp" data-click="setCountry">🇯🇵 Japan</a><a href="/id/" data-code="id" data-click="setCountry">🇮🇩 Indonesia</a><a href="/br/" data-code="br" data-click="setCountry">🇧🇷 Brazil</a><a href="/mx/" data-code="mx" data-click="setCountry">🇲🇽 Mexico</a><a href="/es/" data-code="es" data-click="setCountry">🇪🇸 Spain</a><a href="/fr/" data-code="fr" data-click="setCountry">🇫🇷 France</a><!--/SSR:COUNTRYOPTS--></nav>
+    </details>
+    <div class="updated"><div class="dot"></div><span id="lastScan"><!--SSR:LASTSCAN-->Updated 18 Oct<!--/SSR:LASTSCAN--></span></div>
+  </div>
 </header>
 
 <!--SSR:HERO--><div class="hero" id="hero">
   <div class="hero-card" id="heroCard" data-click="heroTap" data-href="/movie/carrie.html">
     <div class="hero-bg" id="heroBg" style="--hero-sm:url(&quot;https://image.tmdb.org/t/p/w300/9yCJtipMeDe8uAdSJKvw8BnYfRz.jpg&quot;);--hero-lg:url(&quot;https://image.tmdb.org/t/p/w780/9yCJtipMeDe8uAdSJKvw8BnYfRz.jpg&quot;)"></div>
     <div class="hero-grad"></div>
+    <div class="hero-dial" id="heroDial"><div class="dial dial-hero" style="--p:83%" role="img" aria-label="Audience rating 8.3 out of 10"><span>8.3</span></div><div class="hero-dial-label">Audience</div></div>
     <div class="hero-content">
       <span class="hero-eyebrow"><svg class="ic" aria-hidden="true"><use href="#icTrophy"/></svg> Pick of the Week</span>
       <div class="hero-title" id="heroTitle">Carrie</div>
       <div class="hero-meta" id="heroMeta">Prime Video · Mystery / Drama · English</div>
-      <div class="hero-verdict" id="heroVerdict">▸ Must watch</div>
+      <div class="hero-verdict" id="heroVerdict"><span class="vpill vp-hero">Must watch</span></div>
     </div>
   </div>
 </div><!--/SSR:HERO-->
 
 <div class="toolbar">
-  <button class="tonight-btn" data-click="openMood"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> What to watch tonight?</button>
-  <button class="mylist-btn" id="mylistBtn" data-click="toggleMyList"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List (<span id="wlCount">0</span>)</button>
   <select id="langSel" aria-label="Filter by language" data-change="setLang"><!--SSR:LANGOPTS--><option value="All">All languages (25)</option><option value="English">English (11)</option><option value="Hindi">Hindi (9)</option><option value="Telugu">Telugu (3)</option><option value="Tamil">Tamil (1)</option><option value="Japanese">Japanese (1)</option><!--/SSR:LANGOPTS--></select>
-  <div id="personalBar"></div>
   <select id="sortSel" aria-label="Sort by">
     <option value="default">Sort: Trending</option>
     <option value="rating">Sort: Highest rated</option>
     <option value="date">Sort: Newest first</option>
   </select>
-  <button class="share-btn" data-click="shareWeek" title="Share this week on WhatsApp" aria-label="Share this week on WhatsApp"><svg class="ic" aria-hidden="true"><use href="#icShare"/></svg><span class="hide-sm"> Share</span><span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span></button>
-  <a class="share-btn" id="channelBtn" style="background:#1A1633; color:#FFF7EC; text-decoration:none" href="https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j" target="_blank" rel="noopener" title="Follow the FilmyChill WhatsApp channel" aria-label="Follow the FilmyChill WhatsApp channel"><span class="fol">Follow</span><span class="hide-sm"> Channel</span><span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span></a>
+  <button class="share-btn icon-only" data-click="shareWeek" title="Share this week on WhatsApp" aria-label="Share this week on WhatsApp"><svg class="ic" aria-hidden="true"><use href="#icShare"/></svg></button>
+  <div id="personalBar"></div>
 </div>
 
 <main>
-  <!--SSR:EDNOTE--><div class="ednote"><div class="ednote-label">Editor's note · 18 Oct</div><p>For a night out, Digger is the ticket: worth a watch — audiences love it; critics are split. One to give a miss: Street Fighter — neither audiences nor critics are sold.</p></div><!--/SSR:EDNOTE-->
+  <!--SSR:EDNOTE--><p class="ednote"><b>Editor's note · </b>For a night out, Digger is the ticket. Give Street Fighter a miss.</p><!--/SSR:EDNOTE-->
   <section id="mylistSection" style="display:none">
     <div class="section-head">
       <h2>My List</h2>
@@ -465,50 +489,57 @@
       <h3>Digger</h3>
       <div class="meta">English · Comedy · 2h 9m</div>
       <div class="cchips"><span class="cchip trend">Trending</span></div>
-      <div class="sline" aria-label="FilmyChill Score: Worth a watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-worth"/></svg><span class="sv">Worth a watch</span></div><div class="sreason">Audiences love it; critics are split · ★ 7.5</div>
-    </div></a><a class="card" href="/movie/street-fighter.html">
+      <span class="vpill vp-worth">Worth a watch</span><div class="sreason">Audiences love it; critics are split</div>
+    </div>
+    <div class="dial dial-worth" style="--p:75%" role="img" aria-label="Audience rating 7.5 out of 10"><span>7.5</span></div></a><a class="card" href="/movie/street-fighter.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/ccxdepKqORLwccbzvO4eAGkN0IC.jpg" alt="Street Fighter poster" width="150" height="200" loading="eager" decoding="async" fetchpriority="low"><span class="rank">2</span></div>
     <div class="cb">
       <h3>Street Fighter</h3>
       <div class="meta">English · Action · 2h</div>
       <div class="cchips"><span class="cchip new">New release</span></div>
-      <div class="sline" aria-label="FilmyChill Score: Skip"><svg class="fcm" aria-hidden="true"><use href="#fcm-skip"/></svg><span class="sv">Skip</span></div><div class="sreason">Neither audiences nor critics are sold · ★ 6.3</div>
-    </div></a><a class="card" href="/movie/jailer-2.html">
+      <span class="vpill vp-skip">Skip</span><div class="sreason">Neither audiences nor critics are sold</div>
+    </div>
+    <div class="dial dial-skip" style="--p:63%" role="img" aria-label="Audience rating 6.3 out of 10"><span>6.3</span></div></a><a class="card" href="/movie/jailer-2.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg" alt="Jailer 2 poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">3</span></div>
     <div class="cb">
       <h3>Jailer 2</h3>
       <div class="meta">Tamil · Action · 2h 43m</div>
       <div class="cchips"><span class="cchip new">New release</span></div>
-      <div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score · 491K Wikipedia views this week</div>
-    </div></a><a class="card" href="/movie/drishyam-the-conclusion.html">
+      <span class="vpill vp-early">Too early</span><div class="sreason">491K Wikipedia views this week</div>
+    </div>
+    <div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div></a><a class="card" href="/movie/drishyam-the-conclusion.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/67FsF2kpgEZ1T5Qos4adgqm9dLf.jpg" alt="Drishyam: The Conclusion poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">4</span></div>
     <div class="cb">
       <h3>Drishyam: The Conclusion</h3>
       <div class="meta">Hindi · Thriller · 2h 28m</div>
       <div class="cchips"><span class="cchip trend">Trending</span></div>
-      <div class="sline" aria-label="FilmyChill Score: Worth a watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-worth"/></svg><span class="sv">Worth a watch</span></div><div class="sreason">Critics are positive; audience ratings are still coming in</div>
-    </div></a><a class="card" href="/movie/ranabaali.html">
+      <span class="vpill vp-worth">Worth a watch</span><div class="sreason">Critics are positive; audience ratings are still coming in</div>
+    </div>
+    <div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div></a><a class="card" href="/movie/ranabaali.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/aIzU9bVUvqphq8rPnvAS5N1Zd5o.jpg" alt="Ranabaali poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">5</span></div>
     <div class="cb">
       <h3>Ranabaali</h3>
       <div class="meta">Telugu · Action · 3h 5m</div>
       <div class="cchips"><span class="cchip new">New release</span></div>
-      <div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score · released 16 Oct</div>
-    </div></a><a class="card" href="/movie/nayyi-navelli.html">
+      <span class="vpill vp-early">Too early</span><div class="sreason">Released 16 Oct</div>
+    </div>
+    <div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div></a><a class="card" href="/movie/nayyi-navelli.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/aZEKuzGt7ObqoKjTM4kcMd0klYy.jpg" alt="Nayyi Navelli poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">6</span></div>
     <div class="cb">
       <h3>Nayyi Navelli</h3>
       <div class="meta">Hindi · Adventure</div>
       <div class="cchips"><span class="cchip new">New release</span></div>
-      <div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score · released 16 Oct</div>
-    </div></a><a class="card" href="/movie/the-social-reckoning.html">
+      <span class="vpill vp-early">Too early</span><div class="sreason">Released 16 Oct</div>
+    </div>
+    <div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div></a><a class="card" href="/movie/the-social-reckoning.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/7jK6NuxVg1XuEV7UdNa6KO03IgZ.jpg" alt="The Social Reckoning poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">7</span></div>
     <div class="cb">
       <h3>The Social Reckoning</h3>
       <div class="meta">English · Drama · 1h 53m</div>
       
-      <div class="sline" aria-label="FilmyChill Score: Worth a watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-worth"/></svg><span class="sv">Worth a watch</span></div><div class="sreason">A solid watch; nobody&#39;s raving · ★ 6.9</div>
-    </div></a><!--/SSR:THEATRES--></div>
+      <span class="vpill vp-worth">Worth a watch</span><div class="sreason">A solid watch; nobody&#39;s raving</div>
+    </div>
+    <div class="dial dial-worth" style="--p:69%" role="img" aria-label="Audience rating 6.9 out of 10"><span>6.9</span></div></a><!--/SSR:THEATRES--></div>
   </section>
 
   <section>
@@ -522,71 +553,81 @@
       <h3>Dragon Ball Super: Beerus</h3>
       <div class="meta">Japanese · Animation · Season 1</div>
       <div class="cchips"><span class="cchip">Netflix</span><span class="cchip new">New show</span></div>
-      <div class="sline" aria-label="FilmyChill Score: Must watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-must"/></svg><span class="sv">Must watch</span></div><div class="sreason">Audiences love it · ★ 9.7</div>
-    </div></a><a class="card" href="/movie/reporting-live.html">
+      <span class="vpill vp-must">Must watch</span><div class="sreason">Audiences love it</div>
+    </div>
+    <div class="dial dial-must" style="--p:97%" role="img" aria-label="Audience rating 9.7 out of 10"><span>9.7</span></div></a><a class="card" href="/movie/reporting-live.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/xVabS4lTi6IMscr2FOucxydE6ZD.jpg" alt="Reporting Live poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">2</span></div>
     <div class="cb">
       <h3>Reporting Live</h3>
       <div class="meta">Hindi · Crime · 1h 56m</div>
       <div class="cchips"><span class="cchip">Netflix</span></div>
-      <div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score · released 9 Oct</div>
-    </div></a><a class="card" href="/movie/tulsa-king.html">
+      <span class="vpill vp-early">Too early</span><div class="sreason">Released 9 Oct</div>
+    </div>
+    <div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div></a><a class="card" href="/movie/tulsa-king.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/rOYLWCdAifpUtPlTf1WHxyaxeMt.jpg" alt="Tulsa King poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">3</span></div>
     <div class="cb">
       <h3>Tulsa King</h3>
       <div class="meta">English · Crime · Season 4</div>
       <div class="cchips"><span class="cchip">JioHotstar</span><span class="cchip new">New season</span></div>
-      <div class="sline" aria-label="FilmyChill Score: Must watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-must"/></svg><span class="sv">Must watch</span></div><div class="sreason">Audiences and critics agree · ★ 8.3</div>
-    </div></a><a class="card" href="/movie/animals.html">
+      <span class="vpill vp-must">Must watch</span><div class="sreason">Audiences and critics agree</div>
+    </div>
+    <div class="dial dial-must" style="--p:83%" role="img" aria-label="Audience rating 8.3 out of 10"><span>8.3</span></div></a><a class="card" href="/movie/animals.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/iISM36voS1E8gX9BM0DVK0kgi3E.jpg" alt="Animals poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">4</span></div>
     <div class="cb">
       <h3>Animals</h3>
       <div class="meta">English · Thriller · 1h 46m</div>
       <div class="cchips"><span class="cchip">Netflix</span><span class="cchip trend">Trending</span></div>
-      <div class="sline" aria-label="FilmyChill Score: Worth a watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-worth"/></svg><span class="sv">Worth a watch</span></div><div class="sreason">Audiences like it more than critics · ★ 7.1</div>
-    </div></a><div class="ott-divider">Still worth it — standouts from earlier weeks</div><a class="card" href="/movie/carrie.html">
+      <span class="vpill vp-worth">Worth a watch</span><div class="sreason">Audiences like it more than critics</div>
+    </div>
+    <div class="dial dial-worth" style="--p:71%" role="img" aria-label="Audience rating 7.1 out of 10"><span>7.1</span></div></a><div class="ott-divider">Still worth it — standouts from earlier weeks</div><a class="card" href="/movie/carrie.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/6mUMquPQBFJGqTACS3Azkwwrx8d.jpg" alt="Carrie poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">5</span></div>
     <div class="cb">
       <h3>Carrie</h3>
       <div class="meta">English · Mystery · Season 1</div>
       <div class="cchips"><span class="cchip">Prime Video</span><span class="cchip trend">Trending</span></div>
-      <div class="sline" aria-label="FilmyChill Score: Must watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-must"/></svg><span class="sv">Must watch</span></div><div class="sreason">Audiences and critics agree · ★ 8.3</div>
-    </div></a><a class="card" href="/movie/lust-stories-3.html">
+      <span class="vpill vp-must">Must watch</span><div class="sreason">Audiences and critics agree</div>
+    </div>
+    <div class="dial dial-must" style="--p:83%" role="img" aria-label="Audience rating 8.3 out of 10"><span>8.3</span></div></a><a class="card" href="/movie/lust-stories-3.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/cLA83DD1qMEBwbRIYXf29RKjMja.jpg" alt="Lust Stories 3 poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">6</span></div>
     <div class="cb">
       <h3>Lust Stories 3</h3>
       <div class="meta">Hindi · Romance · 2h 45m</div>
       <div class="cchips"><span class="cchip">Netflix</span></div>
-      <div class="snone"><svg class="ic" aria-hidden="true"><use href="#icBars"/></svg>Not enough ratings to score · only 10</div>
-    </div></a><a class="card" href="/movie/shaque-trust-no-one.html">
+      <span class="vpill vp-early">Not enough ratings</span><div class="sreason">Only 10 ratings</div>
+    </div>
+    <div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div></a><a class="card" href="/movie/shaque-trust-no-one.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/xddc9KBcqffXjLEYLX8cZzRwYkS.jpg" alt="Shaque: Trust No One poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">7</span></div>
     <div class="cb">
       <h3>Shaque: Trust No One</h3>
       <div class="meta">Hindi · Crime · Season 1</div>
       <div class="cchips"><span class="cchip">Netflix</span></div>
-      <div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score · 14M trailer views</div>
-    </div></a><a class="card" href="/movie/hunkkaar-the-roar.html">
+      <span class="vpill vp-early">Too early</span><div class="sreason">14M trailer views</div>
+    </div>
+    <div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div></a><a class="card" href="/movie/hunkkaar-the-roar.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/uL2qCVBou6WYMRxMbP5olmBpTjD.jpg" alt="Hunkkaar: The Roar poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">8</span></div>
     <div class="cb">
       <h3>Hunkkaar: The Roar</h3>
       <div class="meta">Hindi · Crime · Season 1</div>
       <div class="cchips"><span class="cchip">JioHotstar</span></div>
-      <div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score · 24M trailer views</div>
-    </div></a><a class="card" href="/movie/matchbox-the-movie.html">
+      <span class="vpill vp-early">Too early</span><div class="sreason">24M trailer views</div>
+    </div>
+    <div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div></a><a class="card" href="/movie/matchbox-the-movie.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/lFKA4GMz36dImEy3DQPdPF7G4V9.jpg" alt="Matchbox the Movie poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">9</span></div>
     <div class="cb">
       <h3>Matchbox the Movie</h3>
       <div class="meta">English · Action · 2h 7m</div>
       <div class="cchips"><span class="cchip">Apple TV</span></div>
-      <div class="sline" aria-label="FilmyChill Score: Worth a watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-worth"/></svg><span class="sv">Worth a watch</span></div><div class="sreason">Audiences love it; critics are split · ★ 7.8</div>
-    </div></a><a class="card" href="/movie/mobland.html">
+      <span class="vpill vp-worth">Worth a watch</span><div class="sreason">Audiences love it; critics are split</div>
+    </div>
+    <div class="dial dial-worth" style="--p:78%" role="img" aria-label="Audience rating 7.8 out of 10"><span>7.8</span></div></a><a class="card" href="/movie/mobland.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/5Xc7WpWsgflfgEMoBlf9TmWhfbH.jpg" alt="MobLand poster" width="150" height="200" loading="lazy" fetchpriority="low"><span class="rank">10</span></div>
     <div class="cb">
       <h3>MobLand</h3>
       <div class="meta">English · Crime · Season 2</div>
       <div class="cchips"><span class="cchip">JioHotstar</span></div>
-      <div class="sline" aria-label="FilmyChill Score: Worth a watch"><svg class="fcm" aria-hidden="true"><use href="#fcm-worth"/></svg><span class="sv">Worth a watch</span></div><div class="sreason">Audiences love it; critics are split · ★ 8.5</div>
-    </div></a><!--/SSR:OTT--></div>
+      <span class="vpill vp-worth">Worth a watch</span><div class="sreason">Audiences love it; critics are split</div>
+    </div>
+    <div class="dial dial-worth" style="--p:85%" role="img" aria-label="Audience rating 8.5 out of 10"><span>8.5</span></div></a><!--/SSR:OTT--></div>
   </section>
 
   <section>
@@ -656,7 +697,12 @@
       <svg class="ic" aria-hidden="true"><use href="#icCal"/></svg> <span><b>Make it Friday movie night</b> — a weekly nudge in your own calendar to see what's new</span>
       <button class="ritual-btn" data-click="addFridayRitual">+ Add ritual</button>
     </div>
+    <div class="extras">
+      <button class="tonight-btn" data-click="openMood"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> What to watch tonight?</button>
+      <button class="mylist-btn" id="mylistBtn" data-click="toggleMyList"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List (<span id="wlCount">0</span>)</button>
+    </div>
 </section>
+  <p class="dial-legend"><span class="dial-mini" aria-hidden="true"></span>Ring = audience rating out of 10 · colour = FilmyChill verdict</p>
 </main>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true">
@@ -684,7 +730,7 @@
 
 <footer>
   <div class="foot-in">
-  <div class="foot-brand"><b>FilmyChill</b><span>What's worth watching, refreshed twice a day</span></div>
+  <div class="foot-brand"><b>FilmyChill</b><span>What's worth watching, refreshed twice a day</span><a class="foot-follow" id="channelBtn" href="https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j" target="_blank" rel="noopener" aria-label="Follow the FilmyChill WhatsApp channel"><span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span>Follow on WhatsApp</a></div>
   <!--SSR:MORELINKS--><nav class="foot-cols" aria-label="Site"><div><h3>Discover</h3><ul><li><a href="/new-on-ott/">New on OTT this week</a></li><li><a href="/new-on-ott/today/">New on OTT today</a></li><li><a href="/new-on-ott/2026-10/">This month</a></li><li><a href="/films/">All films</a></li></ul></div><div><h3>Streaming on</h3><ul><li><a href="/streaming/netflix/">Netflix</a></li><li><a href="/streaming/prime-video/">Prime Video</a></li><li><a href="/streaming/jiohotstar/">JioHotstar</a></li><li><a href="/streaming/vi-movies-and-tv/">Vi Movies &amp; TV</a></li></ul></div><div><h3>Languages</h3><ul><li><a href="/hindi/">Hindi</a></li><li><a href="/tamil/">Tamil</a></li><li><a href="/telugu/">Telugu</a></li><li><a href="/malayalam/">Malayalam</a></li><li><a href="/kannada/">Kannada</a></li></ul></div><div><h3>FilmyChill</h3><ul><li><a href="/about/">About</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/data/">Streaming data</a></li><li><a href="/embed/">Embed widget</a></li><li><a href="/week/2026-W42/">Weekly archive</a></li><li><a href="https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j">WhatsApp channel</a></li></ul></div></nav><div class="foot-bar"><span>© 2026 FilmyChill · Vikram Sharma</span><details class="foot-country"><summary>🇮🇳 India</summary><div class="foot-country-list"><a href="/us/">US</a><a href="/uk/">UK</a><a href="/au/">Australia</a><a href="/de/">Germany</a><a href="/ae/">UAE</a><a href="/ca/">Canada</a><a href="/sg/">Singapore</a><a href="/my/">Malaysia</a><a href="/ph/">Philippines</a><a href="/nz/">New Zealand</a><a href="/kr/">South Korea</a><a href="/jp/">Japan</a><a href="/id/">Indonesia</a><a href="/br/">Brazil</a><a href="/mx/">Mexico</a><a href="/es/">Spain</a><a href="/fr/">France</a></div></details></div><!--/SSR:MORELINKS-->
   <div class="foot-credit"><!--SSR:ATTRIBUTION-->Film data and ratings from <a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a> · Where-to-watch data by <a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a><br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>FilmyChill doesn't host or stream any films or shows — it only lists where they're officially available. Trailers play from YouTube.<br><a href="/privacy/">Privacy</a> · <a href="/dmca/">Copyright</a> · <!--/SSR:ATTRIBUTION--></div>
   </div>
@@ -855,9 +901,9 @@ function fcSignals(item) {
 function fcScoreHtml(item) {
   const s = item.fcScore;
   const none = noScoreText(item);
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>${esc(none.label)}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
   const lvl = /^must/i.test(s.verdict) ? 'must' : /^skip/i.test(s.verdict) ? 'skip' : 'worth';
-  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${lvl}"/></svg>${esc(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
+  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${lvl}"/></svg>${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
 }
 
 // CLEANER CARDS (Oct 2026). One card used to stack a coloured badge for everything, a boxed
@@ -880,25 +926,49 @@ function cardChips(item) {
   else if (newForUser.has(item.slug || slugify(item.title))) out.push('<span class="cchip foryou">New for you</span>');
   return out.length ? `<div class="cchips">${out.join('')}</div>` : '';
 }
+// Verdict pills and audience-rating dials (Oct 2026 redesign). Twins of verdictPill,
+// dialRating, ratingDial and heroDialInner in scripts/lib/meter.js: same markup, so the page
+// doesn't change when it re-renders the server's cards. The dial's number is the audience
+// rating (out of 10), shown where the card used to print "★ 7.5" — not the FilmyChill Score,
+// which is a verdict.
+function verdictLevel(v) { return /^must/i.test(v || '') ? 'must' : /^skip/i.test(v || '') ? 'skip' : /^worth/i.test(v || '') ? 'worth' : 'early'; }
+function verdictPill(label, level) { return `<span class="vpill vp-${level || verdictLevel(label)}">${esc(label)}</span>`; }
+function dialRating(item) {
+  if (!item || !item.fcScore || item.rating == null || !item.votes) return null;
+  const r = Number(item.rating);
+  return Number.isFinite(r) ? r : null;
+}
+function ratingDial(item) {
+  const r = dialRating(item);
+  if (r == null) return '<div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div>';
+  const v = r.toFixed(1);
+  return `<div class="dial dial-${verdictLevel(item.fcScore.verdict)}" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div>`;
+}
+function heroDialInner(item) {
+  const r = dialRating(item);
+  if (r == null) return '';
+  const v = r.toFixed(1);
+  return `<div class="dial dial-hero" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div><div class="hero-dial-label">Audience</div>`;
+}
 function cardScore(item) {
   const s = item.fcScore;
+  const reason = (text) => (text ? `<div class="sreason">${text}</div>` : '');
   if (s) {
-    const lvl = /^must/i.test(s.verdict) ? 'must' : /^skip/i.test(s.verdict) ? 'skip' : 'worth';
     const bits = [esc(String(s.reason || '').replace(/\.$/, ''))];
-    if (item.rating != null && item.votes) bits.push('★ ' + Number(item.rating).toFixed(1));
     if (s.early) bits.push('Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings');
-    return `<div class="sline" aria-label="FilmyChill Score: ${esc(s.verdict)}"><svg class="fcm" aria-hidden="true"><use href="#fcm-${lvl}"/></svg><span class="sv">${esc(s.verdict)}</span></div><div class="sreason">${bits.join(' · ')}</div>`;
+    return verdictPill(s.verdict) + reason(bits.filter(Boolean).join(' · '));
   }
   const none = noScoreText(item);
   if (none.label === 'Too early') {
     const tv = trailerViewsLabel(item.trailerViews);
     const when = freshLabel(item);
     const buzz = wikiViewsLabel(item.wikiWeeklyViews) || (tv ? tv.replace(/^▶\s*/, '') : '');
-    const extra = buzz || (when ? when.charAt(0).toLowerCase() + when.slice(1) : '');
-    return `<div class="snone"><svg class="ic" aria-hidden="true"><use href="#icHourglass"/></svg>Too early to score${extra ? ' · ' + esc(extra) : ''}</div>`;
+    const extra = buzz || when || '';
+    return verdictPill('Too early', 'early') + reason(esc(extra.charAt(0).toUpperCase() + extra.slice(1)));
   }
   const votes = Number(item.votes || 0);
-  return `<div class="snone"><svg class="ic" aria-hidden="true"><use href="#icBars"/></svg>Not enough ratings to score${votes ? ' · only ' + votes.toLocaleString('en-IN') : ''}</div>`;
+  return verdictPill('Not enough ratings', 'early')
+    + reason(votes ? 'Only ' + votes.toLocaleString('en-IN') + ' rating' + (votes === 1 ? '' : 's') : '');
 }
 function card(item, i, listKey) {
   const track = listKey === 'wl' ? trackStatus(item) : null;
@@ -916,6 +986,7 @@ function card(item, i, listKey) {
       ${track ? `<div class="track-status ${track.cls}">${track.label}</div>` : ''}
       ${cardScore(item)}
     </div>
+    ${ratingDial(item)}
   </div>`;
 }
 
@@ -1374,9 +1445,10 @@ if (WHATSAPP_CHANNEL_URL) {
 // Both maps are read from the country switcher, which the build renders from COUNTRIES
 // (see renderCountryPage). SSR markers can't live inside a <script> — HTML comments break
 // JS there — and a hardcoded copy went stale every time a country was added, so the rendered
-// DOM is the single source. Falls back to India alone if the select is ever missing.
-const COUNTRY_OPTS = [...document.querySelectorAll('#countrySel option')]
-  .map(o => [o.value, o.textContent.trim()]).filter(([v]) => /^[a-z]{2}$/.test(v));
+// DOM is the single source. Falls back to India alone if the list is ever missing.
+// Since the Oct 2026 redesign the switcher is the "India ▾" pill's list of links.
+const COUNTRY_OPTS = [...document.querySelectorAll('#countryPill a[data-code]')]
+  .map(a => [a.dataset.code, a.textContent.trim()]).filter(([v]) => /^[a-z]{2}$/.test(v));
 const COUNTRY_LABELS = Object.fromEntries(COUNTRY_OPTS.length ? COUNTRY_OPTS : [['in', '🇮🇳 India']]);
 // Which countries this build actually has pages for. Read from the same rendered list: when
 // this was a separate hardcoded map, six new countries appeared in the switcher, were rejected
@@ -1441,8 +1513,6 @@ function answerHeroTap(ok) {
 
 // Reflect this page's country in the switcher + tagline, then load its data.
 function initCountryPage() {
-  const sel = document.getElementById('countrySel');
-  if (sel) sel.value = FC_PAGE;
   const lbl = document.getElementById('countryLabel');
   if (lbl) lbl.textContent = COUNTRY_LABELS[FC_PAGE] || '🌐';
   afterHero(() => loadCountryData(FC_PAGE));
@@ -1512,7 +1582,10 @@ fetch('/data-' + code + '.json?v=' + Date.now())
       if (pick.backdrop) setHeroBackdrop(pick.backdrop);
       document.getElementById('heroTitle').textContent = pick.title;
       document.getElementById('heroMeta').textContent = [pick.platform, pick.genre, pick.language].filter(Boolean).join(' · ');
-      document.getElementById('heroVerdict').textContent = '▸ ' + ((pick.fcScore && pick.fcScore.verdict) || pick.verdict || '');
+      const verdict = (pick.fcScore && pick.fcScore.verdict) || pick.verdict || '';
+      document.getElementById('heroVerdict').innerHTML = verdict ? `<span class="vpill vp-hero">${esc(verdict)}</span>` : '';
+      const heroDial = document.getElementById('heroDial');
+      if (heroDial) heroDial.innerHTML = heroDialInner(pick);
       openPick = () => {
         const listKey = DATA.theatres.includes(pick) ? 'theatres' : 'ott';
         openDetail(listKey, DATA[listKey].indexOf(pick), 'pick');
@@ -1539,19 +1612,6 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     dataReady = true;
     render();
 
-    // Confidence strip: the product states its own heartbeat. The build writes the same text
-    // (confStripText in scripts/lib/surfaces.js), so this changes nothing on screen: filled only
-    // here, the empty line grew under a painted page and pushed the hero down (a layout shift).
-    const strip = document.getElementById('confStrip');
-    if (strip) {
-      const picks = DATA.theatres.length + DATA.ott.length;
-      // "Updated today" already lives in the pill above — repeating the cadence here
-      // was two ways of saying one thing. The tracked count is the fact the pill can't
-      // tell: the scale behind this week's list. Exact number, no "+" padding.
-      const tracked = data.trackedFilms && data.trackedFilms > picks ? ` · ${data.trackedFilms} films tracked` : '';
-      strip.textContent = `${picks} picks this week${tracked}`;
-    }
-
     const d = new Date(data.generatedAt);
     const days = Math.floor((new Date() - d) / 86400000);
     document.getElementById('lastScan').textContent = days <= 0 ? 'Updated today' : days === 1 ? 'Updated yesterday' : 'Updated ' + days + ' days ago';
@@ -1575,23 +1635,11 @@ fetch('/data-' + code + '.json?v=' + Date.now())
   });
 } // end loadCountryData
 
-// Editor's note on phones: clamped to three lines (CSS) so films start sooner; "Read more"
-// appears only when the note is actually cut off.
-(function () {
-  const note = document.querySelector('.ednote'); const p = note && note.querySelector('p');
-  if (!p) return;
-  const b = document.createElement('button');
-  b.type = 'button'; b.className = 'ednote-more'; b.textContent = 'Read more';
-  b.addEventListener('click', function () { const open = note.classList.toggle('open'); b.textContent = open ? 'Show less' : 'Read more'; });
-  note.appendChild(b);
-  requestAnimationFrame(function () { if (p.scrollHeight <= p.clientHeight + 1 && !note.classList.contains('open')) b.style.display = 'none'; });
-})();
-
 // ---- Event wiring (Oct 2026): one listener per event type, actions named in data attributes.
 // The innermost element with the attribute wins, so a button inside a card runs its own action
 // and not the card's (what event.stopPropagation() did inline).
 const ACTIONS = {
-  setCountry: (el) => setCountry(el.value),
+  setCountry: (el) => setCountry(el.value || el.dataset.code),
   setLang: (el) => setLang(el.value),
   openMood: () => openMood(),
   toggleMyList: () => toggleMyList(),
@@ -1622,6 +1670,8 @@ function runAction(attr, ev) {
   if (fn) fn(el, ev);
 }
 document.addEventListener('click', (ev) => runAction('data-click', ev));
+document.addEventListener('click', (ev) => { const d = document.getElementById('countryPill'); if (d && d.open && !d.contains(ev.target)) d.open = false; });
+document.addEventListener('keydown', (ev) => { const d = document.getElementById('countryPill'); if (ev.key === 'Escape' && d && d.open) { d.open = false; d.querySelector('summary').focus(); } });
 document.addEventListener('change', (ev) => runAction('data-change', ev));
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') runAction('data-enter', ev); });
 </script><!--/SSR:APPJS-->

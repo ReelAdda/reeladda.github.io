@@ -305,6 +305,12 @@ function finishFilmPages(files, { root = ".", fcdataClaim = null, fromFacts = nu
 const SHARED_CSS_FIXES = [
   [".poster { width:140px; border-radius:12px; display:block; }",
    ".poster { width:140px; height:auto; aspect-ratio:2/3; object-fit:cover; border-radius:12px; display:block; }"],
+  // The verdict stamp in the site-wide verdict colours (Oct 2026 redesign; VPILL_CSS in
+  // lib/meter.js has the same set for the homepage cards and the list pages).
+  [".fcsb-must { background:var(--indigo); color:#fff; } .fcsb-worth { background:var(--marigold); color:var(--ink); }",
+   ".fcsb-must { background:#1E7A4C; color:#FFFFFF; } .fcsb-worth { background:#FFAD1F; color:#241D52; }"],
+  [".fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }", ".fcsb-skip { background:#FBE3DF; color:#A52617; }"],
+  [".fcsb-early { background:#F4F1EA; color:var(--mute); }", ".fcsb-early { background:#EFE6D6; color:#5E5878; }"],
 ];
 function fixSharedCss(css) {
   let out = css;
@@ -469,6 +475,7 @@ module.exports = {
   repairDeadLinks,
   sitePageFiles,
   compactEarlyScore,
+  fixSharedCss,
   syncDateModified,
   unlinkMissingPages,
 };
