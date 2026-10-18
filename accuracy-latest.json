@@ -2,37 +2,45 @@
  "date": "2026-10-18",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 3,
- "high": 1,
- "correctable": 1,
+ "pagesDisagreeing": 4,
+ "high": 3,
+ "correctable": 4,
  "byField": {
-  "streaming": 1,
-  "genres": 2
+  "platform": 3,
+  "title": 1
  },
  "rows": [
   {
-   "field": "streaming",
+   "field": "platform",
    "severity": "high",
-   "page": "on Netflix",
-   "tmdb": "rent/buy only",
-   "code": "us",
-   "slug": "gone-girl"
+   "page": "WOW, RTL+, RTL+ Max Amazon Channel, Hayu",
+   "tmdb": "WOW, RTL+, Hayu, Magenta TV+",
+   "code": "de",
+   "slug": "chicago-med"
   },
   {
-   "field": "genres",
-   "severity": "low",
-   "page": "Animation / Drama",
-   "tmdb": "Animation, Mystery, Action & Adventure, Sci-Fi & Fantasy",
+   "field": "platform",
+   "severity": "high",
+   "page": "Amazon Prime Video, Starz Amazon Channel",
+   "tmdb": "Starz",
    "code": "ca",
-   "slug": "re-zero-starting-life-in-another-world"
+   "slug": "ocean-s-eleven"
   },
   {
-   "field": "genres",
+   "field": "title",
    "severity": "low",
-   "page": "Romance / Comedy",
-   "tmdb": "Comedy, Drama, Family",
-   "code": "sg",
-   "slug": "modha-rathri"
+   "page": "Massu Engira Maasilamani",
+   "tmdb": "Masss Engira Masilamani",
+   "code": "my",
+   "slug": "massu-engira-maasilamani"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "U-NEXT, HBO Max on U-Next, FOD",
+   "tmdb": "Hulu, HBO Max on U-Next, FOD",
+   "code": "jp",
+   "slug": "batman-ninja"
   }
  ]
 }
