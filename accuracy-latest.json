@@ -2,29 +2,20 @@
  "date": "2026-10-18",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 2,
- "high": 1,
- "correctable": 1,
+ "pagesDisagreeing": 1,
+ "high": 0,
+ "correctable": 0,
  "byField": {
-  "genres": 1,
-  "streaming": 1
+  "runtime": 1
  },
  "rows": [
   {
-   "field": "genres",
-   "severity": "low",
-   "page": "Drama / Mystery",
-   "tmdb": "Mystery, Thriller",
-   "code": "ca",
-   "slug": "black-bag"
-  },
-  {
-   "field": "streaming",
-   "severity": "high",
-   "page": "on Sony Pictures Core Amazon Channel",
-   "tmdb": "rent/buy only",
-   "code": "nz",
-   "slug": "resident-evil-welcome-to-raccoon-city"
+   "field": "runtime",
+   "severity": "medium",
+   "page": "45 min",
+   "tmdb": "77 min",
+   "code": "my",
+   "slug": "kudrat-1968-high-council"
   }
  ]
 }
