@@ -2,54 +2,28 @@
  "date": "2026-10-18",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 5,
- "high": 4,
- "correctable": 3,
+ "pagesDisagreeing": 2,
+ "high": 2,
+ "correctable": 2,
  "byField": {
-  "platform": 3,
-  "language": 1,
-  "lead actor": 1
+  "platform": 2
  },
  "rows": [
   {
    "field": "platform",
    "severity": "high",
-   "page": "Amazon Prime Video, BINGE, Foxtel Now, Stan",
-   "tmdb": "BINGE, Foxtel Now, Stan",
-   "code": "au",
-   "slug": "little-women"
-  },
-  {
-   "field": "language",
-   "severity": "high",
-   "page": "German",
-   "tmdb": "English",
-   "code": "de",
-   "slug": "bloody-tennis"
-  },
-  {
-   "field": "lead actor",
-   "severity": "medium",
-   "page": "Tony Yang",
-   "tmdb": "Tony Yang Yo-Ning, Cecilia Choi, Derek Chang",
-   "code": "my",
-   "slug": "mudborn"
+   "page": "Netflix, Hulu, Paramount+, Philo",
+   "tmdb": "Netflix, Hulu, fuboTV, Paramount+",
+   "code": "us",
+   "slug": "ncis"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "Netflix, Netflix Kids, Sony Pictures Core Amazon Channel",
-   "tmdb": "Sony Pictures Core",
-   "code": "nz",
-   "slug": "little-women"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix, Prime Video, SFR Play",
-   "tmdb": "Netflix, Prime Video",
-   "code": "fr",
-   "slug": "chicago-p-d"
+   "page": "Disney Plus, Crave, Starz Amazon Channel, Crave Amazon Channel",
+   "tmdb": "Disney+, Crave",
+   "code": "ca",
+   "slug": "alien"
   }
  ]
 }
