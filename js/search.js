@@ -20,7 +20,7 @@
   var MAX = 20;
 
   var CSS = ""
-    + ".fcs-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);color:#FFF7EC;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:5px 11px;margin:-5px 0;font:600 13px/1 system-ui,-apple-system,'Segoe UI',sans-serif;cursor:pointer}"
+    + ".fcs-btn{display:inline-flex;align-items:center;gap:6px;min-height:44px;box-sizing:border-box;background:rgba(255,255,255,.12);color:#FFF7EC;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:5px 13px;margin:-13px 0;font:600 13px/1 system-ui,-apple-system,'Segoe UI',sans-serif;cursor:pointer}"
     // Pages without the purple bar: a floating button in the top-right corner. It takes no space,
     // so nothing on the page moves when it appears.
     + ".fcs-btn.fcs-float{position:absolute;top:12px;right:12px;z-index:50;margin:0;min-height:44px;min-width:44px;justify-content:center;background:#4038C7;color:#fff;border-color:#4038C7;padding:8px 13px;box-shadow:0 4px 14px rgba(64,56,199,.25)}"
@@ -28,7 +28,7 @@
     + ".fcs-btn:hover,.fcs-btn:focus-visible{background:rgba(255,255,255,.22)}"
     + ".fcs-btn svg,.fcs-field svg{width:16px;height:16px;flex:none}"
     + ".fcs-top{display:flex;align-items:center;justify-content:space-between;gap:12px}"
-    + ".fcs-field{display:flex;align-items:center;gap:10px;width:100%;max-width:520px;margin:14px auto 4px;box-sizing:border-box;background:#fff;color:#6B6890;border:1.5px solid #E7DFD0;border-radius:12px;padding:11px 14px;font:15px/1.2 system-ui,-apple-system,'Segoe UI',sans-serif;text-align:left;cursor:text}"
+    + ".fcs-field{display:flex;align-items:center;gap:10px;width:100%;max-width:520px;min-height:46px;margin:14px auto 4px;box-sizing:border-box;background:#fff;color:#6B6890;border:1.5px solid #E7DFD0;border-radius:12px;padding:11px 14px;font:15px/1.2 system-ui,-apple-system,'Segoe UI',sans-serif;text-align:left;cursor:text}"
     + ".fcs-field:hover,.fcs-field:focus-visible{border-color:#4038C7}"
     + ".fcs-ov{position:fixed;inset:0;z-index:1000;background:rgba(26,22,51,.55);display:flex;justify-content:center;align-items:flex-start;padding:max(6vh,env(safe-area-inset-top)) 12px 12px}"
     + ".fcs-ov[hidden]{display:none}"

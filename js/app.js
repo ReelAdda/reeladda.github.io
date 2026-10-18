@@ -163,9 +163,8 @@ function fcSignals(item) {
 function fcScoreHtml(item) {
   const s = item.fcScore;
   const none = noScoreText(item);
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
-  const lvl = /^must/i.test(s.verdict) ? 'must' : /^skip/i.test(s.verdict) ? 'skip' : 'worth';
-  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${lvl}"/></svg>${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${ratingDial(item)}${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
+  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${ratingDial(item)}${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
 }
 
 // CLEANER CARDS (Oct 2026). One card used to stack a coloured badge for everything, a boxed

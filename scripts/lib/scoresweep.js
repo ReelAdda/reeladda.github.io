@@ -44,7 +44,8 @@ const AGE_LINES = [28, 60];
 // 5 = one wording rule everywhere (time words only for new films; header tier, prose and the
 // "worth watching?" answer all rewritten to match the score).
 // 6 = the "Watched it? Was it worth it?" vote button (lib/vote.js) added to every old page.
-const SWEEP_WORDING = 6;
+// 7 = the audience-rating ring in place of the Chill-o-meter gauge (Oct 2026 redesign).
+const SWEEP_WORDING = 7;
 
 // Pure: put (or replace) the score section in an existing film page. Returns the new HTML.
 function injectScoreSection(html, section) {

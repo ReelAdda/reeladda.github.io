@@ -243,7 +243,7 @@ ${headExtra || ""}
   li { break-inside: avoid; padding: 5px 0; font-size: 15px; }
   a { color: #4038C7; text-decoration: none; } a:hover { text-decoration: underline; }
   .bm { color: #6B6890; font-size: 12.5px; }
-  .btn { display: inline-block; background: #4038C7; color: #fff; padding: 9px 16px;
+  .btn { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; background: #4038C7; color: #fff; padding: 9px 16px;
          border-radius: 8px; font-size: 14px; margin: 18px 6px 0 0; }
   .pages { margin-top: 20px; font-size: 14px; color: #6B6890; } .pages a { margin: 0 2px; }
   footer { margin-top: 34px; padding-top: 18px; border-top: 1px solid #E7DFD0; font-size: 13px; color: #6B6890; }

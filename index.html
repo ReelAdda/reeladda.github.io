@@ -40,7 +40,7 @@
 <meta property="og:image:height" content="630"><!--/SSR:OGIMAGE-->
 <!--SSR:PAGECODE--><meta name="fc-page" content="in"><meta name="fc-stream-word" content="OTT"><meta name="fc-locale" content="en-IN"><!--/SSR:PAGECODE-->
 <meta name="theme-color" content="#4038C7">
-<!--SSR:CSP--><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-yZ7yFrP/9IrwVUySkj07qIapAHyusglOOH1O2AiJx6E=' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; connect-src 'self' https://filmychill.goatcounter.com; object-src 'none'; base-uri 'self'"><!--/SSR:CSP-->
+<!--SSR:CSP--><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-enrdZ2/JDqaMmuGc8c05PXk1TdCYSDhF0fkCr/5rl5I=' https://gc.zgo.at; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://image.tmdb.org data: https://filmychill.goatcounter.com; frame-src https://www.youtube-nocookie.com; connect-src 'self' https://filmychill.goatcounter.com; object-src 'none'; base-uri 'self'"><!--/SSR:CSP-->
 <!--SSR:ANALYTICS--><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script><!--/SSR:ANALYTICS-->
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icon-192.png">
@@ -76,7 +76,7 @@
   header { text-align: center; padding: 46px 24px 8px; }
   .ic { width: 1em; height: 1em; vertical-align: -0.12em; }
   /* Editor's note: one plain paragraph, short form (Oct 2026 redesign). */
-  .ednote { margin: 18px auto 4px; max-width: 720px; font-size: 14px; line-height: 1.6; color: var(--ink); }
+  .ednote { margin: 18px 0 4px; max-width: 720px; font-size: 14px; line-height: 1.6; color: var(--ink); }
   .ednote b { color: var(--marigold-dk); font-weight: 800; }
   .logo { font-family: 'Anton', sans-serif; font-size: clamp(42px, 8vw, 72px); letter-spacing: 2px; line-height: 1; color: var(--indigo); }
   .logo span { color: var(--marigold); -webkit-text-stroke: 1.5px var(--indigo); }
@@ -144,7 +144,7 @@
     border-radius:12px; padding:10px 14px; margin:10px 0 0; font-size:14px; }
   .personal-note b { color: var(--indigo); }
   .personal-note .pn-cta { margin-left:auto; color:var(--indigo); font-weight:700; cursor:pointer; white-space:nowrap; }
-  .personal-note .pn-x { background:none; border:none; font-size:16px; color:var(--mute); cursor:pointer; padding:0 0 0 6px; }
+  .personal-note .pn-x { background:none; border:none; font-size:18px; color:var(--mute); cursor:pointer; min-width:44px; min-height:44px; margin:-10px -10px -10px 0; }
   .wa-chip { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px;
     background:#fff; border-radius:50%; margin-left:6px; flex:0 0 18px; }
   .wa-ic { width:12px; height:12px; fill:#25D366; }
@@ -246,17 +246,16 @@
   .fcs-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
   .fcs-label { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; line-height: 1.2; font-weight: 700; letter-spacing: 1.1px; text-transform: uppercase; color: #8A5800; white-space: nowrap; }
   .fcs-early .fcs-label { color: #6B6890; }
-  /* Chill-o-meter (scripts/lib/meter.js): sprite viewBox is cropped to the dial, so the
-     22×14 box is the dial's real edge and it centres cleanly against the verdict text. */
-  .fcm { display: block; width: 22px; height: 14px; flex-shrink: 0; }
   .fcs-v { display: inline-flex; align-items: center; gap: 6px; font-family: 'Anton', sans-serif; font-size: 16px; line-height: 1.1; color: var(--ink); letter-spacing: .3px; text-transform: uppercase; white-space: nowrap; }
   .fcs-early .fcs-v { color: #6B6890; }
   .fcs-why { font-size: 12.5px; line-height: 1.45; margin-top: 3px; color: var(--ink); }
   .fcs-sig { font-size: 12px; color: #6B6890; margin-top: 6px; }
   .fcs-tag { display: inline-block; font-size: 11px; font-weight: 700; color: #5A5470; background: rgba(36,29,82,.07); border-radius: 999px; padding: 1px 8px; margin-left: 2px; white-space: nowrap; }
   .fcs-v .vpill { font-family: 'Inter', sans-serif; text-transform: none; letter-spacing: 0; }
+  .fcs-v .dial { width: 40px; height: 40px; align-self: center; } .fcs-v .dial span { width: 31px; height: 31px; font-size: 13px; }
+  .modal .fcs-v .dial { width: 46px; height: 46px; } .modal .fcs-v .dial span { width: 36px; height: 36px; font-size: 15px; }
   .modal .fcs-v .vpill { font-size: 13.5px; padding: 4px 10px; }
-  .modal .fcs { margin-top: 12px; } .modal .fcs-v { font-size: 18px; gap: 7px; } .modal .fcm { width: 26px; height: 16px; } .modal .fcs-why { font-size: 14px; }
+  .modal .fcs { margin-top: 12px; } .modal .fcs-v { font-size: 18px; gap: 7px; } .modal .fcs-why { font-size: 14px; }
   .meta.hook { font-style: italic; margin-top: 6px; }
   .tcounter { color: var(--marigold-dk); font-weight: 800; }
   .track-status { margin-top: 8px; display: inline-block; font-size: 12px; font-weight: 700; border-radius: 8px; padding: 6px 10px; }
@@ -326,8 +325,8 @@
 
 
   /* ---- Watchlist ---- */
-  .save-btn { position: absolute; top: 8px; right: 8px; background: none; border: none; border-radius: 8px;
-    width: 34px; height: 34px; cursor: pointer; color: #C9C2DA; display: flex; align-items: center; justify-content: center;
+  .save-btn { position: absolute; top: 3px; right: 3px; background: none; border: none; border-radius: 10px;
+    width: 44px; height: 44px; cursor: pointer; color: #C9C2DA; display: flex; align-items: center; justify-content: center;
     transition: color .15s, transform .15s; z-index: 2; }
   .save-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .save-btn:hover { color: var(--indigo); transform: scale(1.08); }
@@ -365,10 +364,10 @@
   @media (prefers-reduced-motion: reduce) { .skeleton::after { animation: none; } }
   .error-box { background: var(--card); border: 1px solid var(--coral); border-radius: 14px; padding: 24px;
     text-align: center; color: var(--mute); font-size: 14px; grid-column: 1 / -1; }
-  footer { border-top: 1px solid var(--line); padding: 34px 20px 24px; color: var(--mute); font-size: 13px; line-height: 1.6; }
+  footer { border-top: 1px solid var(--line); padding: 34px 0 24px; color: var(--mute); font-size: 13px; line-height: 1.6; }
   footer a { color: var(--mute); text-decoration: none; }
   footer a:hover { color: var(--ink); text-decoration: underline; }
-  .foot-in { max-width: 960px; margin: 0 auto; }
+  .foot-in { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
   .foot-brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 24px; }
   .foot-brand b { color: var(--indigo); font-size: 16px; }
   footer a.foot-follow { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; margin-left: auto;
@@ -402,7 +401,8 @@
     .toolbar { margin-top: 16px; gap: 8px; }
     /* One row: language + sort split the width, share keeps its 44px square. */
     #langSel, #sortSel { flex: 1 1 0; min-width: 0; font-size: 13px; }
-    #langSel { flex-grow: 1.25; }
+    #langSel { flex-grow: 1.6; }
+    .foot-in { padding: 0 16px; }
     .extras .tonight-btn, .extras .mylist-btn { flex: 1 1 auto; justify-content: center; }
     main { padding: 6px 16px 60px; }
     .toolbar { padding: 0 16px; }
@@ -433,7 +433,7 @@
 </head>
 <body>
 
-<svg style="display:none" aria-hidden="true"><symbol id="waIcon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol><symbol id="icTrophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H5a2 2 0 0 0 0 4h2M17 6h2a2 2 0 0 1 0 4h-2"/></symbol><symbol id="icDice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="8.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="12" cy="12" r=".8" fill="currentColor"/><circle cx="8.5" cy="15.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="15.5" r=".8" fill="currentColor"/></symbol><symbol id="icHourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2c0 5 5 6 5 10s-5 5-5 10M17 2c0 5-5 6-5 10s5 5 5 10"/></symbol><symbol id="icBars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20v-6M12 20V9M19 20v-3"/></symbol><symbol id="icBookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21l-6-4-6 4V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16z"/></symbol><symbol id="icGlobe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9"/></symbol><symbol id="icShare" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M8.3 10.8l6.4-3.6M8.3 13.2l6.4 3.6"/></symbol><symbol id="icCal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></symbol><symbol id="icTrend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol><symbol id="icSpark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.3L20 10l-5.9 1.7L12 18l-2.1-6.3L4 10l5.9-1.7L12 2zM19 15l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/></symbol><symbol id="fcm-must" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="25.18" y2="18.54" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></symbol><symbol id="fcm-worth" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="19.56" y2="12.19" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></symbol><symbol id="fcm-skip" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#4038C7" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#7B4FC4" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#C4589E" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#F2855A" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#FFAD1F" stroke-width="5"/><line x1="16" y1="21" x2="6.96" y2="18.06" stroke="#241D52" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="21" r="2.6" fill="#241D52"/></symbol><symbol id="fcm-early" viewBox="2.5 7 27 17"><path d="M5.01 20.45 A11 11 0 0 1 6.79 14.99" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M7.44 14.1 A11 11 0 0 1 12.08 10.72" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M13.13 10.38 A11 11 0 0 1 18.87 10.38" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M19.92 10.72 A11 11 0 0 1 24.56 14.1" fill="none" stroke="#E6E0D2" stroke-width="5"/><path d="M25.21 14.99 A11 11 0 0 1 26.99 20.45" fill="none" stroke="#E6E0D2" stroke-width="5"/><circle cx="16" cy="21" r="2.6" fill="#B8B2C8"/></symbol></svg>
+<svg style="display:none" aria-hidden="true"><symbol id="waIcon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol><symbol id="icTrophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H5a2 2 0 0 0 0 4h2M17 6h2a2 2 0 0 1 0 4h-2"/></symbol><symbol id="icDice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="8.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="12" cy="12" r=".8" fill="currentColor"/><circle cx="8.5" cy="15.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="15.5" r=".8" fill="currentColor"/></symbol><symbol id="icHourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2c0 5 5 6 5 10s-5 5-5 10M17 2c0 5-5 6-5 10s5 5 5 10"/></symbol><symbol id="icBars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20v-6M12 20V9M19 20v-3"/></symbol><symbol id="icBookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21l-6-4-6 4V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16z"/></symbol><symbol id="icGlobe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9"/></symbol><symbol id="icShare" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M8.3 10.8l6.4-3.6M8.3 13.2l6.4 3.6"/></symbol><symbol id="icCal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></symbol><symbol id="icTrend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol><symbol id="icSpark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.3L20 10l-5.9 1.7L12 18l-2.1-6.3L4 10l5.9-1.7L12 2zM19 15l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/></symbol></svg>
 <header>
   <div class="logo">FILMY<span>CHILL</span></div>
   <h1 class="tagline"><!--SSR:TAGLINE-->New movies &amp; OTT releases this week<!--/SSR:TAGLINE--> · <span id="countryLabel">🌐</span></h1>
@@ -463,9 +463,9 @@
 <div class="toolbar">
   <select id="langSel" aria-label="Filter by language" data-change="setLang"><!--SSR:LANGOPTS--><option value="All">All languages (25)</option><option value="English">English (11)</option><option value="Hindi">Hindi (9)</option><option value="Telugu">Telugu (3)</option><option value="Tamil">Tamil (1)</option><option value="Japanese">Japanese (1)</option><!--/SSR:LANGOPTS--></select>
   <select id="sortSel" aria-label="Sort by">
-    <option value="default">Sort: Trending</option>
-    <option value="rating">Sort: Highest rated</option>
-    <option value="date">Sort: Newest first</option>
+    <option value="default">Trending</option>
+    <option value="rating">Top rated</option>
+    <option value="date">Newest</option>
   </select>
   <button class="share-btn icon-only" data-click="shareWeek" title="Share this week on WhatsApp" aria-label="Share this week on WhatsApp"><svg class="ic" aria-hidden="true"><use href="#icShare"/></svg></button>
   <div id="personalBar"></div>
@@ -904,9 +904,8 @@ function fcSignals(item) {
 function fcScoreHtml(item) {
   const s = item.fcScore;
   const none = noScoreText(item);
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
-  const lvl = /^must/i.test(s.verdict) ? 'must' : /^skip/i.test(s.verdict) ? 'skip' : 'worth';
-  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${lvl}"/></svg>${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${ratingDial(item)}${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
+  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${ratingDial(item)}${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
 }
 
 // CLEANER CARDS (Oct 2026). One card used to stack a coloured badge for everything, a boxed

@@ -311,6 +311,16 @@ const SHARED_CSS_FIXES = [
    ".fcsb-must { background:#1E7A4C; color:#FFFFFF; } .fcsb-worth { background:#FFAD1F; color:#241D52; }"],
   [".fcsb-skip { border:2px solid var(--ink); color:var(--ink); padding:6px 12px; }", ".fcsb-skip { background:#FBE3DF; color:#A52617; }"],
   [".fcsb-early { background:#F4F1EA; color:var(--mute); }", ".fcsb-early { background:#EFE6D6; color:#5E5878; }"],
+  // The Chill-o-meter gauge gave way to the audience-rating ring; a page still carrying the
+  // gauge hides it until the score sweep redraws its card with the ring (SWEEP_WORDING 7).
+  [".fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }", ".fcsb-m { display:none; }"],
+  // 44px touch targets (layout audit, 18 Oct 2026): FAQ questions, buttons, the vote buttons.
+  [".faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }",
+   ".faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:12px; }"],
+  [".btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }",
+   ".btn { display:inline-flex; align-items:center; min-height:44px; box-sizing:border-box; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }"],
+  [".fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px;",
+   ".fcvote-b button { display:inline-flex; align-items:center; gap:6px; min-height:44px; border-radius:999px; padding:8px 16px;"],
 ];
 function fixSharedCss(css) {
   let out = css;
@@ -319,7 +329,14 @@ function fixSharedCss(css) {
 }
 // Inline style corrections for frozen listing pages (month archives): the count badge in a
 // readable dark gold (the light marigold was 1.7:1 on the page background).
-const SITE_CSS_FIXES = [[".cnt { color:var(--marigold); }", ".cnt { color:#8A5800; }"]];
+// And 44px touch targets for their FAQ questions and buttons (layout audit, 18 Oct 2026).
+const SITE_CSS_FIXES = [
+  [".cnt { color:var(--marigold); }", ".cnt { color:#8A5800; }"],
+  [".faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }",
+   ".faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:12px; }"],
+  [".btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }",
+   ".btn { display:inline-flex; align-items:center; min-height:44px; box-sizing:border-box; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }"],
+];
 
 // Every film page on disk, as paths relative to the site root.
 function filmPageFiles(root = ".") {

@@ -421,12 +421,12 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   .rm.hk { font-style:italic; }
   ${VPILL_CSS}
   .faq details { border-top:1px solid var(--line); padding:10px 0; }
-  .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }
+  .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
   .faq summary::-webkit-details-marker { display:none; }
   .faq summary::after { content:"+"; float:right; color:var(--indigo); font-weight:700; }
   .faq details[open] summary::after { content:"–"; }
   .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
-  .btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
+  .btn { display:inline-flex; align-items:center; min-height:44px; box-sizing:border-box; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
   footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
 </style>
 </head>

@@ -7,7 +7,7 @@
 const { writeIfChanged } = require("./writeif.js");
 const { earlyReadLabel, isRecent, noScoreText, notOutYet, scoreNeed } = require("./fcscore.js");
 const { VOTE_CONNECT, VOTE_CSS, voteWidgetHtml } = require("./vote.js");
-const { meterLevel, meterSvg } = require("./meter.js");
+const { ratingDial } = require("./meter.js");
 const fs = require("fs");
 const {
   COUNTRIES,
@@ -661,9 +661,14 @@ const FCSB_CSS = [
   "  .fcsb-label { display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; }",
   "  .fcsb-label svg { width:15px; height:15px; fill:none; stroke:#A66B00; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }",
   "  .fcsb-verdict { display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; margin-top:12px; }",
-  "  .fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }",
+  // The audience-rating ring (Oct 2026 redesign; the homepage cards use the same one): filled to
+  // the rating out of 10, coloured by the verdict; a dashed ring when there is no rating to show.
+  "  .fcsb-verdict .dial { --dc:#D18A00; width:56px; height:56px; border-radius:50%; flex-shrink:0; display:grid; place-items:center; background:conic-gradient(var(--dc) var(--p, 0%), #EFE6D6 0); }",
+  "  .fcsb-verdict .dial span { width:44px; height:44px; border-radius:50%; background:#fff; display:grid; place-items:center; font-family:'Anton',sans-serif; font-size:18px; line-height:1; color:var(--ink); }",
+  "  .fcsb-verdict .dial-must { --dc:#1E7A4C; } .fcsb-verdict .dial-worth { --dc:#D18A00; } .fcsb-verdict .dial-skip { --dc:#D93A28; }",
+  "  .fcsb-verdict .dial-none { background:repeating-conic-gradient(#D9CFBF 0 6%, #FFFFFF 0 12.5%); } .fcsb-verdict .dial-none span { color:#716A8C; }",
   "  .fcsb-stamp { display:inline-block; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }",
-  "  @media (max-width: 420px) { .fcsb-m { width:48px; height:30px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }",
+  "  @media (max-width: 420px) { .fcsb-verdict .dial { width:50px; height:50px; } .fcsb-verdict .dial span { width:40px; height:40px; font-size:16px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }",
   "  .fcsb-must { background:#1E7A4C; color:#FFFFFF; } .fcsb-worth { background:#FFAD1F; color:#241D52; }",
   "  .fcsb-skip { background:#FBE3DF; color:#A52617; }",
   "  .fcsb-early { background:#EFE6D6; color:#5E5878; }",
@@ -801,7 +806,7 @@ function fcScoreSection(item) {
     const lvl = !s ? "early" : /^must/i.test(s.verdict) ? "must" : /^skip/i.test(s.verdict) ? "skip" : "worth";
     return `<section class="fcsb" id="filmychill-score">
     <div class="fcsb-label">FilmyChill score</div>
-    <div class="fcsb-verdict">${meterSvg(s ? meterLevel(s.verdict) : "early", { size: 56, cls: "fcsb-m" })}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
+    <div class="fcsb-verdict">${ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
     <p class="fcsb-why">${e(s ? s.reason : none.why)}</p>
     <div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>
   </section>
@@ -1018,7 +1023,7 @@ ${FCSB_CSS}
   .pill { display:inline-block; background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px; margin:0 6px 6px 0; }
   .frame { position:relative; padding-top:56.25%; border-radius:12px; overflow:hidden; background:#000; margin-top:8px; }
   .frame iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
-  .btn { display:inline-block; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
+  .btn { display:inline-flex; align-items:center; min-height:44px; box-sizing:border-box; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
   footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
   .vprose { font-size:15px; line-height:1.7; margin-top:8px; }
   .answer { font-size:16px; line-height:1.6; margin:14px 0 6px; padding:12px 14px; background:#fff;
@@ -1058,7 +1063,7 @@ ${FCSB_CSS}
   .simcard .sm { font-size:11px; color:var(--mute); padding:0 8px 8px; }
   .faq { margin-top:8px; }
   .faq details { border-top:1px solid var(--line); padding:10px 0; }
-  .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }
+  .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
   .faq summary::-webkit-details-marker { display:none; }
   .faq summary::after { content:"+"; float:right; color:var(--indigo); font-weight:700; }
   .faq details[open] summary::after { content:"–"; }

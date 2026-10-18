@@ -1274,14 +1274,19 @@ test("meter: Indigo sunset zones, needle per verdict, grey dial for too early", 
   assert.ok(/viewBox="2\.5 7 27 17"/.test(M.meterSvg("must")), "cropped to the dial so it centres against text");
 });
 
-test("homepage sprite is exactly meterSymbols(), so cards and film pages can't drift", () => {
-  const M = require("./lib/meter.js");
+test("the gauge is gone from the homepage and film pages: the audience-rating ring everywhere (Oct 2026)", () => {
   const src = homeSource();
-  assert.ok(src.includes(M.meterSymbols()), "regenerate the fcm-* symbols in index.html from meterSymbols()");
-  assert.ok(/<svg class="fcm" aria-hidden="true"><use href="#fcm-\$\{lvl\}"\/><\/svg>/.test(src), "client card uses the sprite");
+  assert.ok(!/fcm-|class="fcm"/.test(src), "no Chill-o-meter sprite or icon left on the homepage");
+  assert.ok(src.includes("<span class=\"fcs-v\">${ratingDial(item)}${verdictPill(s.verdict)}</span>"), "the detail sheet: ring + pill, like the cards");
+
+  const fp = require("fs").readFileSync(require("path").join(__dirname, "lib", "filmpage.js"), "utf8");
+  assert.ok(!/meterSvg|fcsb-m\b/.test(fp), "film pages draw no gauge");
+  assert.strictEqual(require("./lib/stylesheets.js").fixSharedCss(".fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }"), ".fcsb-m { display:none; }",
+    "a page still carrying the gauge hides it until the sweep redraws its card");
+  assert.ok(/const SWEEP_WORDING = 7;/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "scoresweep.js"), "utf8")), "every old page's card is redrawn once");
 });
 
-test("SSR card carries the verdict pill and rating dial; film page and share card carry the meter", () => {
+test("SSR card and film page carry the verdict colours and the rating ring; the share card keeps the meter", () => {
   const W = require("./lib/weekly.js"), C = require("./lib/cards.js");
   const it = { ...FCS_ITEM };
   const card = W.ssrCard(it, 0, "in");
@@ -1289,7 +1294,7 @@ test("SSR card carries the verdict pill and rating dial; film page and share car
   const none = W.ssrCard({ ...it, fcScore: undefined }, 0, "in");
   assert.ok(/class="vpill vp-early"/.test(none) && /class="dial dial-none"/.test(none), "no score: a grey pill and the dashed dial");
   const page = U.buildFilmPage(it, "2026-09-28", new Set(["the-love-hypothesis"]), { code: "in", name: "India" });
-  assert.ok(/<div class="fcsb-verdict"><svg class="fcsb-m" width="56" height="35" viewBox="2\.5 7 27 17"/.test(page));
+  assert.ok(/<div class="fcsb-verdict"><div class="dial dial-worth" style="--p:\d+%" role="img" aria-label="Audience rating [\d.]+ out of 10"><span>[\d.]+<\/span><\/div><span class="fcsb-stamp fcsb-worth">/.test(page), "film page: the same ring as the homepage cards");
   const svg = C.shareCardSvg(it, { code: "in", name: "India" });
   assert.ok(/<svg x="852" y="396" width="44" height="28" viewBox="2\.5 7 27 17">/.test(svg) && /stroke="#FFF7EC"/.test(svg));
 });
@@ -1448,15 +1453,15 @@ test("sweepCandidates: frozen/catalogue only, never-scored first, then the stale
   const man = { in: {
     weekly: { tmdbId: 1, kind: "movie" },
     notid: { catalog: true },
-    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20", w: 6 } },
-    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01", w: 6 } },
+    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20", w: 7 } },
+    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01", w: 7 } },
     never: { tmdbId: 4, catalog: true } } };
   assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug), ["notid", "never", "old"], "a page missing its id is tried (the sweep looks the id up)");
   assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 1).map((x) => x.slug), ["notid"], "budget respected");
   man.in.notid.idLookup = "none";
   assert.ok(!W.sweepCandidates(man, "2026-09-29", 10).some((x) => x.slug === "notid"), "…but not retried once no match was provable");
   man.in.oldWording = { tmdbId: 5, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29" } };
-  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 6 } };
+  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 7 } };
   man.in.scoredOld = { tmdbId: 7, archivedOn: "2026-08-10", fcs: { v: "Skip", at: "2026-09-29", w: 3 } };
   const c = W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug);
   assert.ok(c.includes("oldWording") && c.includes("scoredOld") && !c.includes("newWording"), "anything swept under an older version is redone now");
@@ -1476,7 +1481,7 @@ testAsync("sweepScores: writes the score into the page, records it, stops on rep
     assert.deepStrictEqual(r, { checked: 1, updated: 1, errors: 0 });
     const html = fsx.readFileSync("movie/deadpool.html", "utf8");
     assert.ok(/fcsb-stamp fcsb-must">Must watch</.test(html) && /★ 7\.6 from 9,523 ratings on TMDB/.test(html), "9,523 ratings is not 'Too early'");
-    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 6 });
+    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 7 });
     assert.strictEqual(man.in.deadpool.last, "2026-09-01", "the sweep itself never stamps lastmod (Oct 2026)");
     U.syncFilmLastmods(man, [{ code: "in" }], "2026-09-29");
     assert.strictEqual(man.in.deadpool.last, "2026-09-29", "…the end-of-build pass does, because the score really changed");
@@ -6871,7 +6876,7 @@ test("criticsSettled: five listed reviews settle the critics' side, release week
 });
 test("catalog critics sweep: films deduped across editions, most pages first, read ones skipped", () => {
   const man = {
-    in: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { w: 6 } },
+    in: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { w: 7 } },
           solo: { archivedOn: "2026-09-01", tmdbId: 22, kind: "movie", title: "Solo", released: "2020-01-01" },
           read: { catalog: true, tmdbId: 33, imdb: "tt33", kind: "movie", released: "1990-01-01" },
           noid: { catalog: true, tmdbId: 44, imdb: "", kind: "movie", released: "1980-01-01" },
@@ -6885,10 +6890,10 @@ test("catalog critics sweep: films deduped across editions, most pages first, re
 });
 testAsync("catalog critics sweep: reads Wikipedia's reception, caches it and flags the pages for rescoring", async () => {
   const man = {
-    in: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { v: "Worth a watch", w: 6 } },
-          quiet: { catalog: true, tmdbId: 22, kind: "movie", title: "Quiet", released: "2001-01-01", fcs: { w: 6 } },
-          noimdb: { catalog: true, tmdbId: 33, kind: "movie", title: "None", released: "2002-01-01", fcs: { w: 6 } } },
-    us: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { w: 6 } } },
+    in: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { v: "Worth a watch", w: 7 } },
+          quiet: { catalog: true, tmdbId: 22, kind: "movie", title: "Quiet", released: "2001-01-01", fcs: { w: 7 } },
+          noimdb: { catalog: true, tmdbId: 33, kind: "movie", title: "None", released: "2002-01-01", fcs: { w: 7 } } },
+    us: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { w: 7 } } },
   };
   const ids = { 11: "tt0172684", 22: "tt22", 33: null };
   const api = { tmdb: async (p) => ({ imdb_id: ids[p.split("/")[2]] }), pause: async () => {} };
@@ -6908,7 +6913,7 @@ testAsync("catalog critics sweep: reads Wikipedia's reception, caches it and fla
   assert.ok(takes.tt22 && !takes.tt22.take, "no reception is cached too, so it isn't fetched again every run");
   assert.strictEqual(man.in.kkhh.fcs.w, 0, "pages flagged: the score sweep redoes them first");
   assert.strictEqual(man.us.kkhh.fcs.w, 0);
-  assert.strictEqual(man.in.quiet.fcs.w, 6, "no verdict found: the page is left as it is");
+  assert.strictEqual(man.in.quiet.fcs.w, 7, "no verdict found: the page is left as it is");
   assert.strictEqual(man.in.noimdb.imdb, "", "no IMDb id remembered, so TMDB isn't asked again");
   assert.strictEqual(man.in.kkhh.imdb, "tt0172684");
   assert.strictEqual(saved, takes);
@@ -7224,6 +7229,31 @@ test("redesign: every film page's verdict stamp takes the site-wide verdict colo
   }
   assert.strictEqual(require("./lib/pagekit.js").LISTING_VERSION, "<!--listing:4-->", "closed months rebuilt once with the pills");
 });
+test("layout audit: one content column and 44px targets on every page type (18 Oct 2026)", () => {
+  const fsx = require("fs"), path = require("path");
+  const src = homeSource();
+  // Homepage: the editor's note and the footer sit on the same column as the sections.
+  assert.ok(/\.ednote \{ margin: 18px 0 4px; max-width: 720px;/.test(src), "editor's note left-aligned with the sections, not centred");
+  assert.ok(/\.foot-in \{ max-width: 1100px; margin: 0 auto; padding: 0 24px; \}/.test(src) && /footer \{ border-top: 1px solid var\(--line\); padding: 34px 0 24px;/.test(src), "footer on main's 1100px column and gutter");
+  assert.ok(/\.foot-in \{ padding: 0 16px; \}/.test(src), "and the phone gutter");
+  assert.ok(/\.save-btn \{[^}]*width: 44px; height: 44px;/.test(src) && /\.pn-x \{[^}]*min-width:44px; min-height:44px;/.test(src), "bookmark and close buttons are 44px");
+  assert.ok(/<option value="default">Trending<\/option>/.test(src) && /<select id="sortSel" aria-label="Sort by">/.test(src), "short sort labels, the select itself says 'Sort by'");
+  // Other pages: the sources and the frozen-page fix lists carry the same 44px rules.
+  const read = (p) => fsx.readFileSync(path.join(__dirname, p), "utf8");
+  for (const p of ["lib/filmpage.js", "lib/pagekit.js", "lib/weekly.js"]) {
+    assert.ok(/\.faq summary \{[^}]*min-height:44px;/.test(read(p)), p + ": FAQ questions");
+    assert.ok(/\.btn \{ display:inline-flex; align-items:center; min-height:44px;/.test(read(p)), p + ": buttons");
+  }
+  assert.ok(/\.fcvote-b button \{[^}]*min-height:44px;/.test(read("lib/vote.js")), "vote buttons");
+  assert.ok(/min-height: 44px/.test(read("lib/graph.js").match(/  \.btn \{[^}]*\}/)[0]), "films index pager");
+  assert.ok(/\.fcs-btn\{[^}]*min-height:44px;/.test(read("../js/search.js")), "search button");
+  assert.ok(/\.btn \{ display:inline-flex; align-items:center; min-height:44px;/.test(read("../404.html")), "404 buttons");
+  const ST = require("./lib/stylesheets.js");
+  const frozenFilm = ".faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; }\n.fcvote-b button { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:8px 14px; font:700 13px/1 Inter; }";
+  const fixed = ST.fixSharedCss(frozenFilm);
+  assert.ok(/\.faq summary \{[^}]*min-height:44px;/.test(fixed) && /\.fcvote-b button \{[^}]*min-height:44px;/.test(fixed), "frozen film pages get the 44px rules through their stylesheets");
+  assert.ok(/SITE_CSS_FIXES = \[[\s\S]*?min-height:44px; display:flex;[\s\S]*?\];/.test(read("lib/stylesheets.js")), "frozen list pages too");
+});
 test("redesign: quieter top — country pill, one toolbar row, extras under Coming Soon, 44px targets (Oct 2026)", () => {
   const src = homeSource();
   assert.ok(/<details class="cpill" id="countryPill">[\s\S]*?<!--SSR:COUNTRYNAME-->[\s\S]*?<!--SSR:COUNTRYOPTS-->/.test(src), "India ▾ pill with the build's country links");
@@ -7510,11 +7540,11 @@ test("a country's re-release date never becomes the film's date or year", () => 
 });
 test("pages dated years after the same film elsewhere jump the score sweep's queue", () => {
   const W = require("./lib/scoresweep.js");
-  const man = { in: { a: { tmdbId: 1, released: "1972-03-24", fcs: { w: 6 } } }, my: { a: { tmdbId: 1, released: "2026-02-01", fcs: { w: 6 } } },
-    sg: { b: { tmdbId: 2, released: "2026-01-01", fcs: { w: 6 } } }, uk: { b: { tmdbId: 2, released: "2026-12-30", fcs: { w: 6 } } } };
+  const man = { in: { a: { tmdbId: 1, released: "1972-03-24", fcs: { w: 7 } } }, my: { a: { tmdbId: 1, released: "2026-02-01", fcs: { w: 7 } } },
+    sg: { b: { tmdbId: 2, released: "2026-01-01", fcs: { w: 7 } } }, uk: { b: { tmdbId: 2, released: "2026-12-30", fcs: { w: 7 } } } };
   assert.strictEqual(W.flagYearOutliers(man), 1);
   assert.strictEqual(man.my.a.fcs.w, 0);
-  assert.strictEqual(man.uk.b.fcs.w, 6, "a year apart is a regional difference, not a re-release");
+  assert.strictEqual(man.uk.b.fcs.w, 7, "a year apart is a regional difference, not a re-release");
 });
 test("a new film can't take an address another film already owns in that edition (WAR, Canada)", () => {
   const F = require("./lib/filmpage.js");
