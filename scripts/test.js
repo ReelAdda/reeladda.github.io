@@ -7120,6 +7120,35 @@ test("the data file waits until the hero has painted; hydration reads nothing th
   assert.ok(/setProperty\('--hero-lg'/.test(sh) && /setProperty\('--hero-sm', `url\("\$\{lg\.replace\('\/t\/p\/w780\/', '\/t\/p\/w300\/'\)\}"\)`\)/.test(sh), "hydration writes the same two URLs as the server");
   assert.ok(!/style\.backgroundImage/.test(src), "nothing sets an inline background over the CSS choice");
 });
+test("Pick of the Week answers a tap before the data arrives (Oct 2026)", () => {
+  const S = require("./lib/surfaces.js");
+  const hero = S.ssrHero({ pick: "X", theatres: [{ title: "X", slug: "x-film", backdrop: "https://image.tmdb.org/t/p/w780/x.jpg" }], ott: [] }, "us");
+  assert.ok(/id="heroCard" data-click="heroTap" data-href="\/us\/movie\/x-film\.html"/.test(hero), hero.slice(0, 200));
+  assert.ok(/data-click="heroTap" data-href="\/movie\/x-film\.html"/.test(S.ssrHero({ pick: "X", theatres: [{ title: "X", slug: "x-film" }], ott: [] })), "India's page at the root");
+  assert.ok(!/data-href/.test(S.ssrHero({ pick: "X", theatres: [{ title: "X" }], ott: [] })), "no slug, no fallback link");
+  const src = homeSource();
+  const fnSrc = (name) => { const i = src.indexOf(`function ${name}(`); return src.slice(i, src.indexOf("\n}\n", i) + 2); };
+  assert.ok(!/heroCard'\)\.onclick/.test(src), "no handler that only exists once the data is in");
+  const tap = fnSrc("heroTap");
+  assert.ok(/if \(openPick\) return openPick\(\);/.test(tap) && /heroTapped = true;/.test(tap) && /hydrateNow\(\)/.test(tap), "an early tap is held and starts the download");
+  assert.ok(/location\.href = el\.dataset\.href; \}, 4000\)/.test(tap), "a stalled download falls back to the film's page");
+  assert.ok(/answerHeroTap\(true\);\n  \}\)\n  \.catch\(\(\) => \{\n    answerHeroTap\(false\);/.test(src), "answered on success and on failure");
+  assert.ok(/hydrateNow = go;/.test(fnSrc("afterHero")), "afterHero can be cut short");
+  assert.ok(/addEventListener\('pointerdown', \(\) => \{ if \(hydrateNow\) hydrateNow\(\); \}, \{ once: true/.test(src), "the first touch starts the download");
+});
+test("the language filter is server-rendered with the options the page's script writes (Oct 2026)", () => {
+  const S = require("./lib/surfaces.js");
+  const data = { theatres: [{ language: "Tamil" }, { language: "Hindi" }, { language: "Tamil" }], ott: [{ language: "Hindi" }, { language: "Hindi" }, {}], comingSoon: [{ language: "Kannada & Co" }] };
+  assert.strictEqual(S.langOptions(data), '<option value="All">All languages (7)</option><option value="Hindi">Hindi (3)</option><option value="Tamil">Tamil (2)</option><option value="Kannada &amp; Co">Kannada &amp; Co (1)</option>');
+  assert.strictEqual(S.langOptions({}), '<option value="All">All languages (0)</option>');
+  const src = homeSource();
+  assert.ok(/<select id="langSel"[^>]*><!--SSR:LANGOPTS-->[\s\S]*?<!--\/SSR:LANGOPTS--><\/select>/.test(src), "markers inside the select");
+  assert.ok(src.includes("`<option value=\"All\">All languages (${total})</option>`") && src.includes("`<option value=\"${esc(l)}\">${esc(l)} (${counts[l]})</option>`"), "the client's wording, which langOptions copies");
+  // A filter chosen before the data is in must not redraw the page from empty lists.
+  const r = src.slice(src.indexOf("function render() {"), src.indexOf("function render() {") + 400);
+  assert.ok(/if \(!dataReady\) \{ if \(hydrateNow\) hydrateNow\(\); return; \}/.test(r), "render waits for the data");
+  assert.ok(/dataReady = true;\n    render\(\);/.test(src), "and runs once it is in");
+});
 test("the confidence strip is server-rendered with the text the page's script writes", () => {
   const S = require("./lib/surfaces.js");
   assert.strictEqual(S.confStripText({ theatres: [1, 2, 3, 4, 5, 6, 7], ott: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], trackedFilms: 956 }), "17 picks this week · 956 films tracked");

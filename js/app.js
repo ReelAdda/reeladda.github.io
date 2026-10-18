@@ -18,6 +18,7 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'
 const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j';
 
 let DATA = { theatres: [], ott: [], comingSoon: [] };
+let dataReady = false; // set once this country's data file has loaded
 let activeLang = 'All';
 let sortMode = 'default';
 let myListOnly = false;
@@ -298,6 +299,10 @@ function applyFilters(list) {
 }
 
 function render() {
+  // Before the data is in, the lists on screen are the server-rendered ones: a filter or sort
+  // chosen now is remembered (activeLang, sortMode) and applied when the data lands, instead of
+  // redrawing the page from empty lists (Oct 2026).
+  if (!dataReady) { if (hydrateNow) hydrateNow(); return; }
   const wl = loadWL();
   const mySec = document.getElementById('mylistSection');
   mySec.style.display = wl.length ? 'block' : 'none';
@@ -718,6 +723,30 @@ function setCountry(code) {
   location.href = COUNTRY_PATH[code];
 }
 
+// Starts the data download now instead of waiting for the hero (set by afterHero).
+let hydrateNow = null;
+// Pick of the Week: openPick is set once the data is in; a tap before then is held in
+// heroTapped and answered the moment it arrives (or by the film's page if it never does).
+let openPick = null, heroTapped = false;
+document.addEventListener('pointerdown', () => { if (hydrateNow) hydrateNow(); }, { once: true, capture: true, passive: true });
+function heroTap(el) {
+  if (openPick) return openPick();
+  if (heroTapped) return;
+  heroTapped = true;
+  el.classList.add('hero-loading');
+  if (hydrateNow) hydrateNow();
+  // Still nothing after 4 s (a stalled connection): the film's own page has it all.
+  setTimeout(() => { if (heroTapped && !openPick && el.dataset.href) location.href = el.dataset.href; }, 4000);
+}
+function answerHeroTap(ok) {
+  if (!heroTapped) return;
+  heroTapped = false;
+  const card = document.getElementById('heroCard');
+  if (card) card.classList.remove('hero-loading');
+  if (ok && openPick) openPick();
+  else if (card && card.dataset.href) location.href = card.dataset.href;
+}
+
 // Reflect this page's country in the switcher + tagline, then load its data.
 function initCountryPage() {
   const sel = document.getElementById('countrySel');
@@ -740,6 +769,9 @@ function initCountryPage() {
 function afterHero(fn) {
   let done = false;
   const go = () => { if (!done) { done = true; fn(); } };
+  // A visitor who touches the page wants it now: start at once (Oct 2026). The browser stops
+  // recording LCP at the first input anyway, so this can't cost the hero anything.
+  hydrateNow = go;
   const bg = document.getElementById('heroBg');
   if (!bg || !bg.style.getPropertyValue('--hero-lg')) return go();
   setTimeout(go, 3000);
@@ -789,13 +821,15 @@ fetch('/data-' + code + '.json?v=' + Date.now())
       document.getElementById('heroTitle').textContent = pick.title;
       document.getElementById('heroMeta').textContent = [pick.platform, pick.genre, pick.language].filter(Boolean).join(' · ');
       document.getElementById('heroVerdict').textContent = '▸ ' + ((pick.fcScore && pick.fcScore.verdict) || pick.verdict || '');
-      document.getElementById('heroCard').onclick = () => {
+      openPick = () => {
         const listKey = DATA.theatres.includes(pick) ? 'theatres' : 'ott';
         openDetail(listKey, DATA[listKey].indexOf(pick), 'pick');
       };
     }
 
-    // Language dropdown: counts shown, ordered by this week's volume, choice remembered
+    // Language dropdown: counts shown, ordered by this week's volume, choice remembered.
+    // The build writes the same list (langOptions in scripts/lib/surfaces.js), so it is there
+    // from the first paint; this rewrites it identically and restores the saved choice.
     const allCS = [...all, ...(data.comingSoon || [])];
     const counts = {};
     allCS.forEach(x => { if (x.language) counts[x.language] = (counts[x.language] || 0) + 1; });
@@ -810,6 +844,7 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     langSel.value = activeLang;
 
     computePersonal();
+    dataReady = true;
     render();
 
     // Confidence strip: the product states its own heartbeat. The build writes the same text
@@ -838,8 +873,10 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     };
     openFromHash();
     window.addEventListener('hashchange', openFromHash);
+    answerHeroTap(true);
   })
   .catch(() => {
+    answerHeroTap(false);
     document.getElementById('lastScan').textContent = 'Fresh picks arriving soon';
     document.getElementById('moviesGrid').innerHTML = '<div class="error-box">No data yet — run the workflow in the Actions tab.</div>';
     document.getElementById('ottGrid').innerHTML = '<div class="error-box">No data yet.</div>';
@@ -884,6 +921,7 @@ const ACTIONS = {
   saveFromDetail: (el, ev) => { ev.preventDefault(); toggleSave(el.dataset.list, Number(el.dataset.i)); closeDetail(); },
   triggerInstall: () => triggerInstall(),
   dismissInstall: () => dismissInstall(),
+  heroTap: (el) => heroTap(el),
 };
 function runAction(attr, ev) {
   const el = ev.target && ev.target.closest ? ev.target.closest('[' + attr + ']') : null;

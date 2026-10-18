@@ -89,6 +89,8 @@
   .hero { max-width: 1100px; margin: 28px auto 0; padding: 0 24px; }
   .hero-card { position: relative; border-radius: 20px; overflow: hidden; background: var(--indigo); color: #fff;
     display: flex; align-items: flex-end; min-height: 280px; box-shadow: 0 12px 36px rgba(64,56,199,0.25); cursor: pointer; }
+  /* Tapped before the page's data arrived: show the tap registered while it loads. */
+  .hero-card.hero-loading { cursor: progress; opacity: 0.8; transition: opacity 0.15s; }
   /* The backdrop is the homepage's LCP element, drawn at 45% under a dark gradient — so phones
      get TMDB's 300px file (--hero-sm, ~17 KB) and wider screens the 780px one (--hero-lg,
      ~80 KB). The full-size file on a phone was about 1 s of a 2.7 s LCP (Oct 2026). */
@@ -416,7 +418,7 @@
 </header>
 
 <!--SSR:HERO--><div class="hero" id="hero">
-  <div class="hero-card" id="heroCard">
+  <div class="hero-card" id="heroCard" data-click="heroTap">
     <div class="hero-bg" id="heroBg" style="--hero-sm:url(&quot;https://image.tmdb.org/t/p/w300/9yCJtipMeDe8uAdSJKvw8BnYfRz.jpg&quot;);--hero-lg:url(&quot;https://image.tmdb.org/t/p/w780/9yCJtipMeDe8uAdSJKvw8BnYfRz.jpg&quot;)"></div>
     <div class="hero-grad"></div>
     <div class="hero-content">
@@ -431,7 +433,7 @@
 <div class="toolbar">
   <button class="tonight-btn" data-click="openMood"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> What to watch tonight?</button>
   <button class="mylist-btn" id="mylistBtn" data-click="toggleMyList"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List (<span id="wlCount">0</span>)</button>
-  <select id="langSel" aria-label="Filter by language" data-change="setLang"><option value="All">All languages</option></select>
+  <select id="langSel" aria-label="Filter by language" data-change="setLang"><!--SSR:LANGOPTS--><option value="All">All languages</option><!--/SSR:LANGOPTS--></select>
   <div id="personalBar"></div>
   <select id="sortSel" aria-label="Sort by">
     <option value="default">Sort: Trending</option>

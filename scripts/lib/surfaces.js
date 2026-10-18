@@ -14,6 +14,7 @@ const {
   COUNTRY_PAGE_META,
   LANGUAGE_PAGES,
   escHtml,
+  filmPagePath,
   filmPageUrl,
   ICON_LINKS,
   ldJson,
@@ -704,7 +705,7 @@ const homeCsp = (script) => (script ? HOME_CSP.replace("script-src 'self'", `scr
 // Phones: the hero's own 520px layout in index.html.
 const HERO_PHONE_MAX = 520;
 const HERO_HIDDEN = `<div class="hero" id="hero" style="display:none">
-  <div class="hero-card" id="heroCard">
+  <div class="hero-card" id="heroCard" data-click="heroTap">
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-grad"></div>
     <div class="hero-content">
@@ -728,10 +729,15 @@ const heroBgUrl = (u) => String(u || "").replace(/["'()\\]/g, "");
 // Any URL that isn't a TMDB w780 one is used at every size.
 const heroBgSmallUrl = (u) => heroBgUrl(u).replace("/t/p/w780/", "/t/p/w300/");
 
-function ssrHero(data) {
+// The card answers a tap from the first paint: data-click="heroTap" opens the detail sheet once
+// the page's data is in (a tap before then starts that download and is kept, not dropped), and
+// data-href is the film's own page, where the tap goes if the data can't be had (Oct 2026: the
+// card did nothing until the data file arrived, up to 3 s on a phone).
+function ssrHero(data, code = "in") {
   const pick = heroPickOf(data);
   if (!pick) return HERO_HIDDEN;
   const e = escHtml;
+  const href = pick.slug ? ` data-href="${e(filmPagePath(code, pick.slug))}"` : "";
   // Both sizes as custom properties; the template's CSS picks one by screen width (the same
   // breakpoint as the preloads in heroPreload, so a screen only ever downloads its own size).
   const bg = pick.backdrop
@@ -739,7 +745,7 @@ function ssrHero(data) {
     : "";
   const meta = [pick.platform, pick.genre, pick.language].filter(Boolean).join(" · ");
   return `<div class="hero" id="hero">
-  <div class="hero-card" id="heroCard">
+  <div class="hero-card" id="heroCard" data-click="heroTap"${href}>
     <div class="hero-bg" id="heroBg"${bg}></div>
     <div class="hero-grad"></div>
     <div class="hero-content">
@@ -759,6 +765,18 @@ function confStripText(data) {
   const picks = ((data && data.theatres) || []).length + ((data && data.ott) || []).length;
   const tracked = data && data.trackedFilms && data.trackedFilms > picks ? ` · ${data.trackedFilms} films tracked` : "";
   return `${picks} picks this week${tracked}`;
+}
+
+// The language filter's options, exactly as the page's script builds them after loading the
+// data (same items, same counts, same order). Rendered here too so the filter is filled from the
+// first paint (Oct 2026: it showed only "All languages" until the data file arrived, ~2-3 s).
+function langOptions(data) {
+  const all = [...((data && data.theatres) || []), ...((data && data.ott) || []), ...((data && data.comingSoon) || [])];
+  const counts = {};
+  all.forEach((x) => { if (x && x.language) counts[x.language] = (counts[x.language] || 0) + 1; });
+  const langs = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  return [`<option value="All">All languages (${all.length})</option>`,
+    ...langs.map((l) => `<option value="${escHtml(l)}">${escHtml(l)} (${counts[l]})</option>`)].join("");
 }
 
 function heroPreload(data) {
@@ -803,7 +821,8 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
   // Homepage share/Discover image: the Pick of the Week, then the lists (see hubOgImage).
   html = replaceBetween(html, "OGIMAGE", ogImageTag(hubOgImage([heroPickOf(data), ...(data.theatres || []), ...(data.ott || [])].filter(Boolean), cfg)));
-  html = replaceBetween(html, "HERO", ssrHero(data));
+  html = replaceBetween(html, "HERO", ssrHero(data, cfg.code));
+  html = replaceBetween(html, "LANGOPTS", langOptions(data));
   html = replaceBetween(html, "HEROPRELOAD", heroPreload(data));
   // The first two theatre posters sit above the fold on desktop: load them immediately — after
   // the hero backdrop, when there is one: it is the LCP image, and in a phone's first second
@@ -870,6 +889,7 @@ module.exports = {
   prerenderIndex,
   homeCsp,
   homeScript,
+  langOptions,
   renderCountryPage,
   sectionCounts,
   ssrHero,
