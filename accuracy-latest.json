@@ -1,30 +1,39 @@
 {
- "date": "2026-10-17",
+ "date": "2026-10-18",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 2,
- "high": 2,
- "correctable": 1,
+ "pagesDisagreeing": 3,
+ "high": 3,
+ "correctable": 3,
  "byField": {
-  "release date": 1,
-  "language": 1
+  "streaming": 1,
+  "platform": 1,
+  "release date": 1
  },
  "rows": [
   {
-   "field": "release date",
+   "field": "streaming",
    "severity": "high",
-   "page": "2026-08-05",
-   "tmdb": "2026-11-19",
-   "code": "de",
-   "slug": "transition"
+   "page": "not streaming",
+   "tmdb": "on HBO Max",
+   "code": "uk",
+   "slug": "backrooms"
   },
   {
-   "field": "language",
+   "field": "platform",
    "severity": "high",
-   "page": "Portuguese",
-   "tmdb": "English",
-   "code": "br",
-   "slug": "the-weight"
+   "page": "Netflix, Amazon Prime Video, Foxtel Now, Stan",
+   "tmdb": "Netflix, Foxtel Now, Stan",
+   "code": "au",
+   "slug": "fury"
+  },
+  {
+   "field": "release date",
+   "severity": "high",
+   "page": "2026-12-24",
+   "tmdb": "2027-03-12",
+   "code": "ca",
+   "slug": "shakti-shalini"
   }
  ]
 }
