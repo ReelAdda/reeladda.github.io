@@ -165,23 +165,22 @@ function scoreNeed(item, nowMs = Date.now()) {
 // "too early" there reads as broken (Sept 2026). So: recent → "Too early"; otherwise say
 // plainly what's missing, with the real vote count.
 const EARLY_DAYS = 28;
+// Reviews in but divided (Oct 2026): the label says exactly that, at any age. "Too early" beside a
+// "Critics split" line said nothing was known while saying the reviews were in (Ranabaali).
 function noScoreText(item, nowMs = Date.now()) {
   if (notOutYet(item, nowMs)) return { label: "Not out yet", why: "It hasn't opened yet — the score comes once people have seen it." };
   const recent = isRecent(item, nowMs);
-  if (recent) {
-    // Reviews already in but split (a mixed reception scores nothing on its own, and the
-    // audience half isn't there yet): say so, rather than claim there are no reviews.
-    if (criticsTier(item) === "mixed") return { label: "Too early", why: "Critics are split; audience ratings are still coming in." };
-    return { label: "Too early", why: "Just released — not enough ratings or reviews yet." };
-  }
   const votes = Number((item && item.votes) || 0);
   const n = votes.toLocaleString("en-IN");
   const who = votes === 1 ? "1 person has" : `${n} people have`;
   // Older films can score from 15 ratings; newer ones need 50.
   const need = scoreNeed(item, nowMs);
   if (criticsTier(item) === "mixed") {
-    return { label: "Not enough ratings", why: `Critics are split, and ${votes ? `only ${who}` : "nobody has"} rated it — the score needs ${need} ratings to decide.` };
+    return { label: "Critics split", why: recent
+      ? "Critics are split; audience ratings are still coming in."
+      : `Critics are split, and ${votes ? `only ${who}` : "nobody has"} rated it — the score needs ${need} ratings to decide.` };
   }
+  if (recent) return { label: "Too early", why: "Just released — not enough ratings or reviews yet." };
   // Enough votes but no usable rating (TMDB sometimes has a count and no average): never
   // claim "only 111 people … needs 15".
   if (votes >= need) return { label: "Not enough ratings", why: "There's no usable audience rating for it on TMDB yet, and no settled critics' reception." };
@@ -208,19 +207,21 @@ function itemLists(data) {
 // "Must watch" there and "Worth a watch" everywhere a person could see. Every surface that
 // reads item.verdict — data.json, llms-full.txt, the RSS feed, hub FAQs, the embed widget —
 // now carries the score's verdict, or the page's own "no verdict yet" wording when there is
-// no score (an existing no-verdict phrase is kept, never a verdict the score withholds).
+// no score (never a verdict the score withholds).
 function verdictFor(item, s, nowMs = Date.now()) {
   if (s) return s.verdict;
   if (notOutYet(item, nowMs)) return "";
-  const v = item && item.verdict;
-  if (v && /verdict soon|enough ratings/i.test(v)) return v;
+  // Worked out fresh every build from the same rules as the page (Oct 2026): keeping a phrase an
+  // item already carried left a ten-day-old film "Not enough ratings" in the data files while
+  // its card said "Too early", and a five-year-old one "Just released — verdict soon".
+  if (criticsTier(item) === "mixed") return "Critics split";
   return isRecent(item, nowMs) ? "Just released — verdict soon" : "Not enough ratings";
 }
 
 // Attach item.fcScore to every title that gets a film page, in every market.
 // `toneFor(imdbId, item)` fills the critics tone from the takes cache for titles the takes step
 // left without one; it gets the item so it can keep the same release-week gate.
-function attachFcScores(dataByCode, { toneFor = null, nowMs = Date.now() } = {}) {
+function attachFcScores(dataByCode, { toneFor = null, countFor = null, nowMs = Date.now() } = {}) {
   let scored = 0, total = 0;
   for (const data of Object.values(dataByCode || {})) {
     for (const list of itemLists(data)) {
@@ -230,6 +231,10 @@ function attachFcScores(dataByCode, { toneFor = null, nowMs = Date.now() } = {})
         if (!item.criticsTone && toneFor && item.imdbId) {
           const t = toneFor(item.imdbId, item);
           if (t) item.criticsTone = t;
+        }
+        if (item.criticsTone && item.criticsCount == null && countFor && item.imdbId) {
+          const c = countFor(item.imdbId);
+          if (c) item.criticsCount = c;
         }
         const s = fcScore(item, nowMs);
         if (s) { item.fcScore = s; scored++; } else delete item.fcScore;

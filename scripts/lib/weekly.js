@@ -19,7 +19,7 @@ const {
 const { rankValue } = require("./score.js");
 const { releaseState } = require("./release.js");
 const { trailerViewsLabel, wikiViewsLabel } = require("./editorial.js");
-const { VPILL_CSS, ratingDial, verdictPill } = require("./meter.js");
+const { VPILL_CSS, ratingDial, rowScoreLine, verdictPill } = require("./meter.js");
 const { earlyReadLabel, noScoreText } = require("./fcscore.js");
 const { freshLabel } = require("./freshness.js");
 const {
@@ -61,6 +61,12 @@ function ssrCardScore(item, code) {
     return verdictPill(s.verdict) + reason(bits.filter(Boolean).join(" · "));
   }
   const none = noScoreText(item);
+  if (none.label === "Critics split") {
+    // The reviews are in and divided: say how many, never "too early".
+    const n = Number(item.criticsCount) || 0;
+    return verdictPill("Critics split", "early") + reason(n ? `${n} critic review${n === 1 ? "" : "s"}, divided` : "");
+  }
+  if (none.label === "Not out yet") return verdictPill("Not out yet", "early");
   if (none.label === "Too early") {
     // One buzz figure under "Too early": this week's Wikipedia views when notable (what
     // people are looking up NOW), else trailer views, else the release date.
@@ -383,7 +389,7 @@ function buildOttWeekPage(data, cfg, allCountries) {
       <div>
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
-        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.fcScore ? " " + verdictPill(it.fcScore.verdict) : ""}${trailerViewsLabel(it.trailerViews) ? " · " + trailerViewsLabel(it.trailerViews) : ""}</div>` : (it.fcScore ? `<div class="rm">${verdictPill(it.fcScore.verdict)}</div>` : it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
+        ${rowScoreLine(it, trailerViewsLabel(it.trailerViews) ? " · " + e(trailerViewsLabel(it.trailerViews)) : "")}
       </div>`;
     return it.slug
       ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>`

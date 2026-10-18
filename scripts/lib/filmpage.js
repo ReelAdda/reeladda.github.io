@@ -666,7 +666,7 @@ const FCSB_CSS = [
   "  .fcsb-verdict .dial { --dc:#D18A00; width:56px; height:56px; border-radius:50%; flex-shrink:0; display:grid; place-items:center; background:conic-gradient(var(--dc) var(--p, 0%), #EFE6D6 0); }",
   "  .fcsb-verdict .dial span { width:44px; height:44px; border-radius:50%; background:#fff; display:grid; place-items:center; font-family:'Anton',sans-serif; font-size:18px; line-height:1; color:var(--ink); }",
   "  .fcsb-verdict .dial-must { --dc:#1E7A4C; } .fcsb-verdict .dial-worth { --dc:#D18A00; } .fcsb-verdict .dial-skip { --dc:#D93A28; }",
-  "  .fcsb-verdict .dial-none { background:repeating-conic-gradient(#D9CFBF 0 6%, #FFFFFF 0 12.5%); } .fcsb-verdict .dial-none span { color:#716A8C; }",
+  "  .fcsb-verdict .dial-note { width:64px; text-align:center; font-size:11px; font-weight:700; line-height:1.25; color:#8C85A3; }",
   "  .fcsb-stamp { display:inline-block; padding:8px 14px; border-radius:10px; font-family:'Anton',sans-serif; font-size:28px; line-height:1; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }",
   "  @media (max-width: 420px) { .fcsb-verdict .dial { width:50px; height:50px; } .fcsb-verdict .dial span { width:40px; height:40px; font-size:16px; } .fcsb-stamp { font-size:24px; padding:7px 12px; } }",
   "  .fcsb-must { background:#1E7A4C; color:#FFFFFF; } .fcsb-worth { background:#FFAD1F; color:#241D52; }",
@@ -697,9 +697,13 @@ function compactScoreHtml(label, audience, tail = ", no critics' verdict yet.") 
   const e = escHtml;
   return `<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">FilmyChill score</span> <span class="fcsb-mini-v">${e(label)}</span> — ${e(audience)}${tail} <a href="/about/#score">How scoring works</a></p></section>`;
 }
+// Time words ("so far", "yet") only for a film that's actually new; an older film gets the plain
+// count ("only 12 audience ratings"), never a hint that more are on the way (Oct 2026).
 function audiencePhrase(votes, recent) {
   const n = Number(votes || 0);
-  if (n > 0) return `${n.toLocaleString("en-IN")} audience rating${n === 1 ? "" : "s"} so far`;
+  if (n > 0) return recent
+    ? `${n.toLocaleString("en-IN")} audience rating${n === 1 ? "" : "s"} so far`
+    : `only ${n.toLocaleString("en-IN")} audience rating${n === 1 ? "" : "s"}`;
   return recent ? "no audience ratings yet" : "no audience ratings on TMDB";
 }
 
@@ -788,7 +792,10 @@ function fcScoreSection(item) {
     const s = item.fcScore || null;
     // No score yet: one line instead of a card of empty rows (832 pages led with four
     // "not enough ratings" blocks before the answer, Oct 2026).
-    if (!s) return compactScoreHtml(none.label, audiencePhrase(item.votes, isRecent(item)));
+    // "Critics split" says the reviews are in: the line must not then add "no critics' verdict yet".
+    if (!s) return compactScoreHtml(none.label, audiencePhrase(item.votes, isRecent(item)),
+      none.label === "Critics split" ? ", and the critics' reviews are divided."
+        : isRecent(item) ? undefined : ", and no settled critics' verdict.");
     const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
     const aud = s && s.audience
       ? { tag: s.audience, sub: s.early
@@ -796,6 +803,9 @@ function fcScoreSection(item) {
         : `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB` }
       : item.rating != null && item.votes
         ? { tag: "Too few ratings", sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} rating${Number(item.votes) === 1 ? "" : "s"} — counts from ${scoreNeed(item)}`, none: true }
+        // A count but no average yet (TMDB publishes one later): never "no audience ratings".
+        : Number(item.votes) > 0
+        ? { tag: "Too few ratings", sub: `${votes} rating${Number(item.votes) === 1 ? "" : "s"} ${isRecent(item) ? "so far" : "on TMDB"} — counts from ${scoreNeed(item)}`, none: true }
         : isRecent(item)
           ? { tag: "Not rated yet", sub: "No audience ratings yet", none: true }
           : { tag: "Not rated", sub: "No audience ratings on TMDB", none: true };

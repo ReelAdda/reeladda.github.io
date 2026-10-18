@@ -83,6 +83,74 @@ async function wikiArticleForImdb(imdbId) {
   return ent?.entities?.[qid]?.sitelinks?.enwiki?.title || null;
 }
 
+// Fallback when no Wikidata item carries the IMDb id (Oct 2026: "Shaque (TV series)" has an article
+// whose Wikidata entry lists no IMDb id). Tries the usual article titles for the film and accepts
+// one ONLY when its Wikidata entry agrees on every fact we can check: it is a film (or, for a
+// series, a television series), it came out in the same year (±1, for festival and regional
+// dates), and it carries no IMDb id other than this one. A wrong article would put another film's
+// critics on this page, so anything uncertain is refused.
+const WIKI_FILM_TYPES = new Set(["Q11424", "Q24862", "Q506240", "Q202866", "Q226730", "Q20650540"]);
+const WIKI_TV_TYPES = new Set(["Q5398426", "Q1259759", "Q15416", "Q117467246", "Q21191270", "Q526877"]);
+function wikiTitleCandidates(item) {
+  const title = String((item && item.title) || "").trim();
+  if (!title) return [];
+  const year = String((item && (item.released || item.freshDate)) || "").slice(0, 4);
+  const bases = [title];
+  const head = title.split(/:\s/)[0].trim();
+  if (head && head !== title && head.length >= 3) bases.push(head);
+  const out = [];
+  for (const b of bases) {
+    if (item.kind === "tv") out.push(`${b} (TV series)`, year ? `${b} (${year} TV series)` : null, `${b} (web series)`, b);
+    else out.push(year ? `${b} (${year} film)` : null, `${b} (film)`, b);
+  }
+  return [...new Set(out.filter(Boolean))];
+}
+// `lead`: the article's opening text, the second source for the year when Wikidata has no date
+// yet (new entries often don't): "Shaque is a 2026 Indian Hindi-language … series".
+function wikiEntityMatches(entity, item, imdbId, lead = "") {
+  const claims = (entity && entity.claims) || {};
+  const ids = (claims.P345 || []).map((c) => c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.value).filter(Boolean);
+  if (ids.length && !ids.includes(imdbId)) return false;
+  if (ids.includes(imdbId)) return true; // the entry names this exact title
+  const types = (claims.P31 || []).map((c) => c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.value && c.mainsnak.datavalue.value.id).filter(Boolean);
+  const want = item.kind === "tv" ? WIKI_TV_TYPES : WIKI_FILM_TYPES;
+  if (!types.some((t) => want.has(t))) return false;
+  const year = Number(String(item.released || item.freshDate || "").slice(0, 4));
+  if (!year) return false;
+  const years = [...(claims.P577 || []), ...(claims.P580 || [])]
+    .map((c) => c.mainsnak && c.mainsnak.datavalue && c.mainsnak.datavalue.value && c.mainsnak.datavalue.value.time)
+    .filter(Boolean).map((t) => Number(String(t).slice(1, 5)));
+  if (years.length) return years.some((y) => Math.abs(y - year) <= 1);
+  // No date on Wikidata: the article's opening must give the year and the kind of work.
+  // The opening 300 characters (a sentence split would break on "lit." and "transl.").
+  const first = String(lead || "").slice(0, 300);
+  const kind = item.kind === "tv" ? /\b(?:television|TV|web)\s(?:series|show)|\bseries\b/i : /\bfilm\b/i;
+  return [year - 1, year, year + 1].some((y) => new RegExp(`\\b${y}\\b`).test(first)) && kind.test(first);
+}
+async function wikiArticleByTitle(item, imdbId) {
+  const cands = wikiTitleCandidates(item);
+  if (!cands.length) return null;
+  const q = await fetchJsonKeyless(
+    `https://en.wikipedia.org/w/api.php?action=query&prop=pageprops&ppprop=wikibase_item&redirects=1&format=json&titles=${encodeURIComponent(cands.join("|"))}`,
+    WIKI_HEADERS);
+  const pages = Object.values((q && q.query && q.query.pages) || {}).filter((p) => p && p.pageprops && p.pageprops.wikibase_item);
+  // Keep candidate order: the most specific title first. Redirects resolve to their target.
+  const norm = (t) => String(t || "").replace(/_/g, " ");
+  const redirectTo = new Map(((q && q.query && q.query.redirects) || []).map((r) => [norm(r.from), norm(r.to)]));
+  for (const c of cands) {
+    const page = pages.find((p) => norm(p.title) === (redirectTo.get(c) || c));
+    if (!page) continue;
+    const qid = page.pageprops.wikibase_item;
+    const ent = await fetchJsonKeyless(
+      `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${qid}&props=claims&format=json`, WIKI_HEADERS);
+    const intro = await fetchJsonKeyless(
+      `https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&redirects=1&format=json&titles=${encodeURIComponent(page.title)}`, WIKI_HEADERS);
+    const lead = (Object.values((intro && intro.query && intro.query.pages) || {})[0] || {}).extract || "";
+    if (wikiEntityMatches(ent && ent.entities && ent.entities[qid], item, imdbId, lead)) return norm(page.title);
+  }
+  return null;
+}
+
 // Last 14 full days of pageviews for an article (ends yesterday — today is incomplete).
 async function wikiDailyViews(article) {
   const day = (offset) => {
@@ -175,6 +243,11 @@ function pruneTakes(takes, nowMs) {
 // network — and published critics only (Wikipedia), never TMDB viewer reviews.
 function cachedCriticsTone(imdbId, item = null) {
   return imdbId ? entryCriticsTone(loadTakes()[imdbId], item) : null;
+}
+// How many published critic ratings a cached reading counted (null when unknown).
+function cachedCriticsCount(imdbId) {
+  const e = imdbId ? loadTakes()[imdbId] : null;
+  return e && e.src === "wiki" && e.a && e.a.ratings && e.a.ratings.n ? e.a.ratings.n : null;
 }
 // Pure: the tone one takes-cache entry gives the score, or null. Given the item, it keeps
 // attachTakes' release-week gate: a film in its first week gets no tone from the cache unless
@@ -302,6 +375,12 @@ function analyzeReception(text) {
 // ============================================================================
 const RATINGS_MIN = 3;              // a median of fewer reviews is not a consensus
 const CRITICS_SETTLED_MIN = 5;      // published reviews that count as a settled reception in week one
+const CRITICS_RECHECK_DAYS = 28;    // a new film's unsettled reading is re-read daily for this long
+// Age in days of a group of listings for one film (the earliest date any of them carries).
+function itemsAgeDays(items, nowMs = Date.now()) {
+  const ds = (items || []).map((x) => String((x && (x.released || x.freshDate)) || "").slice(0, 10)).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
+  return ds.length ? (nowMs - Date.parse(ds[0])) / 864e5 : null;
+}
 // "3/5", "3.5 out of 5", "3½/5", "7/10", "4 stars out of 5" — never a date ("1/5/2026") or a
 // percentage.
 const RATING_RE = /(?<![\d./])(\d{1,2}(?:\.\d)?|\d?½)\s*(stars?\s+)?(?:\/|out of)\s*(5|10)\b(?![.,/]?\d|%)/gi;
@@ -904,13 +983,20 @@ async function attachTakes(dataByCode) {
       // mismatch alone marks the entry stale — one refetch per entry (v gets stamped,
       // no loop), and every cached title gains aspect data in a single sweep.
       const stale = !!entry && entry.v !== TAKE_VERSION;
-      const needsFetch = !entry || stale || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
+      // A new film's reading is re-read every day until five reviews settle it (Oct 2026): the
+      // first read of an Indian film's article is often taken on opening day, before the critics'
+      // reviews are added, and was then kept for good — Jailer 2's cache held a tone and no
+      // ratings while its article listed 12. Only for films out under four weeks.
+      const recheck = !!entry && !stale && entry.src === "wiki" && !criticsSettled(entry.a)
+        && entry.checked !== today && itemsAgeDays(items) != null && itemsAgeDays(items) < CRITICS_RECHECK_DAYS;
+      const needsFetch = !entry || stale || recheck || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
       if (needsFetch) {
-        let take = stale ? null : entry?.take || null, src = stale ? null : entry?.src || null, hook = null;
-        let a = stale ? null : entry?.a || null, ta = stale ? null : entry?.ta || null;
+        const fresh = stale || recheck; // read the reception again rather than keep the old analysis
+        let take = fresh ? null : entry?.take || null, src = fresh ? null : entry?.src || null, hook = null;
+        let a = fresh ? null : entry?.a || null, ta = fresh ? null : entry?.ta || null;
         let article = entry?.article || null; // the article LOCATION is a stable fact — survives purges
         if (key.startsWith("tt")) { // real IMDb id -> precise Wikipedia route
-          if (!article) article = await wikiArticleForImdb(key);
+          if (!article) article = await wikiArticleForImdb(key) || await wikiArticleByTitle(items[0], key);
           if (article) {
             const { lead, reception } = await wikiExtract(article);
             hook = extractHook(lead, items[0]);
@@ -926,8 +1012,13 @@ async function attachTakes(dataByCode) {
           const t = ta ? composeTmdbTake(ta, Number(items[0].tmdbId) || 0) : null;
           if (t) { take = t; src = "tmdb"; } else ta = null;
         }
-        entry = { take, src, hook, article: article || undefined, a: a || undefined, ta: ta || undefined, checked: today, v: TAKE_VERSION };
-        takes[key] = entry;
+        if (recheck && src !== "wiki") {
+          // The re-read found nothing (Wikipedia down, article moved): keep the reading we had.
+          entry.checked = today;
+        } else {
+          entry = { take, src, hook, article: article || undefined, a: a || undefined, ta: ta || undefined, checked: today, v: TAKE_VERSION };
+          takes[key] = entry;
+        }
         await sleep(150); // polite pace against Wikimedia
       } else {
         entry.checked = today; // touch so retention pruning keeps live titles
@@ -970,6 +1061,9 @@ async function attachTakes(dataByCode) {
             // The critics half of the FilmyChill Score (lib/fcscore.js): only published
             // critics count, so only a Wikipedia reception tone — never TMDB viewer reviews.
             if (entry.src === "wiki" && entry.a && entry.a.tone) it.criticsTone = entry.a.tone;
+            // How many published critic ratings that reading counted: the "N critic reviews"
+            // evidence beside a critics-based verdict (lib/meter.js evidenceLabel).
+            if (entry.src === "wiki" && entry.a && entry.a.ratings && entry.a.ratings.n) it.criticsCount = entry.a.ratings.n;
             // Disagreement is computed FRESH each run — ratings move, cached text doesn't.
             const counter = audienceCounterpoint(it);
             if (counter) it.takeCounter = counter;
@@ -1100,7 +1194,11 @@ async function attachTrailerStats(dataByCode) {
 }
 
 module.exports = {
+  cachedCriticsCount,
   cachedCriticsTone,
+  itemsAgeDays,
+  wikiEntityMatches,
+  wikiTitleCandidates,
   analyzeReception,
   attachBuzz,
   attachTakes,

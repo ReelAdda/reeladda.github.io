@@ -1233,7 +1233,7 @@ test("film page leads with the score and shows both signals behind it", () => {
   assert.ok(html.indexOf('id="filmychill-score"') < html.indexOf('class="answer"'));
   const early = U.buildFilmPage({ ...FCS_ITEM, released: new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10), rating: null, votes: 5, fcScore: undefined }, "2026-09-28", new Set(), { code: "in" });
   // Oct 2026, answer-first: no score yet -> one line under the answer, not an empty card.
-  assert.ok(early.includes(`<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">FilmyChill score</span> <span class="fcsb-mini-v">Too early</span> — 5 audience ratings so far, no critics' verdict yet.`), "compact line");
+  assert.ok(early.includes(`<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">FilmyChill score</span> <span class="fcsb-mini-v">Critics split</span> — 5 audience ratings so far, and the critics' reviews are divided.`), "compact line: split critics named, never 'no critics' verdict'");
   assert.ok(!/fcsb-rows|fcsb-note/.test(early.slice(early.indexOf("<body"))), "no empty rows, no card note");
   assert.ok(early.indexOf("class=\"answer\"") < early.indexOf("id=\"filmychill-score\""), "the answer comes first");
 });
@@ -1283,7 +1283,7 @@ test("the gauge is gone from the homepage and film pages: the audience-rating ri
   assert.ok(!/meterSvg|fcsb-m\b/.test(fp), "film pages draw no gauge");
   assert.strictEqual(require("./lib/stylesheets.js").fixSharedCss(".fcsb-m { display:block; width:56px; height:35px; flex-shrink:0; }"), ".fcsb-m { display:none; }",
     "a page still carrying the gauge hides it until the sweep redraws its card");
-  assert.ok(/const SWEEP_WORDING = 7;/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "scoresweep.js"), "utf8")), "every old page's card is redrawn once");
+  assert.ok(/const SWEEP_WORDING = 8;/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "scoresweep.js"), "utf8")), "every old page's card is redrawn once");
 });
 
 test("SSR card and film page carry the verdict colours and the rating ring; the share card keeps the meter", () => {
@@ -1292,7 +1292,7 @@ test("SSR card and film page carry the verdict colours and the rating ring; the 
   const card = W.ssrCard(it, 0, "in");
   assert.ok(/<span class="vpill vp-worth">Worth a watch<\/span>/.test(card) && /class="dial dial-worth"/.test(card), card);
   const none = W.ssrCard({ ...it, fcScore: undefined }, 0, "in");
-  assert.ok(/class="vpill vp-early"/.test(none) && /class="dial dial-none"/.test(none), "no score: a grey pill and the dashed dial");
+  assert.ok(/class="vpill vp-early"/.test(none) && /<div class="dial-note">(?:Few ratings|Not rated yet)<\/div>/.test(none) && !/class="dial /.test(none), "no score: a grey pill and the evidence as text, never a ring");
   const page = U.buildFilmPage(it, "2026-09-28", new Set(["the-love-hypothesis"]), { code: "in", name: "India" });
   assert.ok(/<div class="fcsb-verdict"><div class="dial dial-worth" style="--p:\d+%" role="img" aria-label="Audience rating [\d.]+ out of 10"><span>[\d.]+<\/span><\/div><span class="fcsb-stamp fcsb-worth">/.test(page), "film page: the same ring as the homepage cards");
   const svg = C.shareCardSvg(it, { code: "in", name: "India" });
@@ -1453,15 +1453,15 @@ test("sweepCandidates: frozen/catalogue only, never-scored first, then the stale
   const man = { in: {
     weekly: { tmdbId: 1, kind: "movie" },
     notid: { catalog: true },
-    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20", w: 7 } },
-    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01", w: 7 } },
+    fresh: { tmdbId: 2, catalog: true, fcs: { v: "Skip", at: "2026-09-20", w: 8 } },
+    old: { tmdbId: 3, archivedOn: "2026-06-01", fcs: { v: "Skip", at: "2026-07-01", w: 8 } },
     never: { tmdbId: 4, catalog: true } } };
   assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug), ["notid", "never", "old"], "a page missing its id is tried (the sweep looks the id up)");
   assert.deepStrictEqual(W.sweepCandidates(man, "2026-09-29", 1).map((x) => x.slug), ["notid"], "budget respected");
   man.in.notid.idLookup = "none";
   assert.ok(!W.sweepCandidates(man, "2026-09-29", 10).some((x) => x.slug === "notid"), "…but not retried once no match was provable");
   man.in.oldWording = { tmdbId: 5, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29" } };
-  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 7 } };
+  man.in.newWording = { tmdbId: 6, archivedOn: "2026-08-10", fcs: { v: "early", at: "2026-09-29", w: 8 } };
   man.in.scoredOld = { tmdbId: 7, archivedOn: "2026-08-10", fcs: { v: "Skip", at: "2026-09-29", w: 3 } };
   const c = W.sweepCandidates(man, "2026-09-29", 10).map((x) => x.slug);
   assert.ok(c.includes("oldWording") && c.includes("scoredOld") && !c.includes("newWording"), "anything swept under an older version is redone now");
@@ -1481,7 +1481,7 @@ testAsync("sweepScores: writes the score into the page, records it, stops on rep
     assert.deepStrictEqual(r, { checked: 1, updated: 1, errors: 0 });
     const html = fsx.readFileSync("movie/deadpool.html", "utf8");
     assert.ok(/fcsb-stamp fcsb-must">Must watch</.test(html) && /★ 7\.6 from 9,523 ratings on TMDB/.test(html), "9,523 ratings is not 'Too early'");
-    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 7 });
+    assert.deepStrictEqual(man.in.deadpool.fcs, { v: "Must watch", at: "2026-09-29", w: 8 });
     assert.strictEqual(man.in.deadpool.last, "2026-09-01", "the sweep itself never stamps lastmod (Oct 2026)");
     U.syncFilmLastmods(man, [{ code: "in" }], "2026-09-29");
     assert.strictEqual(man.in.deadpool.last, "2026-09-29", "…the end-of-build pass does, because the score really changed");
@@ -1817,7 +1817,7 @@ const afPage = (body) => `<html><head><style>  /* FilmyChill Score (lib/fcscore.
 test("answer-first: a frozen page with no score gets the answer on top and one score line", () => {
   const S = require("./lib/stylesheets.js");
   const out = S.compactEarlyScore(afPage(`${AF_CARD}\n  ${AF_VOTE}\n  ${AF_ANSWER}`));
-  assert.ok(out.includes('<span class="fcsb-mini-v">Not enough ratings</span> — 3 audience ratings so far, no critics\' verdict yet.'), "the card's own facts");
+  assert.ok(out.includes('<span class="fcsb-mini-v">Not enough ratings</span> — only 3 audience ratings, and no settled critics\' verdict.'), "the card's own facts");
   assert.ok(!/fcsb-rows|fcsb-note|fcsb-why/.test(out.slice(out.indexOf("<body"))), "no empty card left");
   const a = out.indexOf('class="answer"'), s = out.indexOf('id="filmychill-score"'), v = out.indexOf('class="fcvote"');
   assert.ok(a < s && s < v, "answer, then the score line, then the vote");
@@ -4764,7 +4764,7 @@ test("unscored card: 'Too early' only when it's just out; otherwise says what's 
   const old = U.ssrCard({ title: "Old", language: "Hindi", genre: "Drama", kind: "movie", rating: 5.7, votes: 9, released: "2026-03-10", slug: "old" }, 0, "in");
   assert.ok(!old.includes("Too early"), "a March release is not 'too early'");
   assert.ok(old.includes('<span class="vpill vp-early">Not enough ratings</span><div class="sreason">Only 9 ratings</div>'), "older film: counted, never 'early': " + old);
-  assert.ok(old.includes('class="dial dial-none"'), "no score, no number in the dial (its 5.7 from 9 ratings isn't shown)");
+  assert.ok(old.includes('<div class="dial-note">Few ratings</div>') && !old.includes('class="dial '), "no score, no ring: its 5.7 from 9 ratings isn't shown");
 });
 
 test("early reads: older films score from 15 ratings — shrunk toward average, never Must watch, always labelled", () => {
@@ -6876,7 +6876,7 @@ test("criticsSettled: five listed reviews settle the critics' side, release week
 });
 test("catalog critics sweep: films deduped across editions, most pages first, read ones skipped", () => {
   const man = {
-    in: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { w: 7 } },
+    in: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { w: 8 } },
           solo: { archivedOn: "2026-09-01", tmdbId: 22, kind: "movie", title: "Solo", released: "2020-01-01" },
           read: { catalog: true, tmdbId: 33, imdb: "tt33", kind: "movie", released: "1990-01-01" },
           noid: { catalog: true, tmdbId: 44, imdb: "", kind: "movie", released: "1980-01-01" },
@@ -6890,10 +6890,10 @@ test("catalog critics sweep: films deduped across editions, most pages first, re
 });
 testAsync("catalog critics sweep: reads Wikipedia's reception, caches it and flags the pages for rescoring", async () => {
   const man = {
-    in: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { v: "Worth a watch", w: 7 } },
-          quiet: { catalog: true, tmdbId: 22, kind: "movie", title: "Quiet", released: "2001-01-01", fcs: { w: 7 } },
-          noimdb: { catalog: true, tmdbId: 33, kind: "movie", title: "None", released: "2002-01-01", fcs: { w: 7 } } },
-    us: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { w: 7 } } },
+    in: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { v: "Worth a watch", w: 8 } },
+          quiet: { catalog: true, tmdbId: 22, kind: "movie", title: "Quiet", released: "2001-01-01", fcs: { w: 8 } },
+          noimdb: { catalog: true, tmdbId: 33, kind: "movie", title: "None", released: "2002-01-01", fcs: { w: 8 } } },
+    us: { kkhh: { catalog: true, tmdbId: 11, kind: "movie", title: "KKHH", released: "1998-10-16", fcs: { w: 8 } } },
   };
   const ids = { 11: "tt0172684", 22: "tt22", 33: null };
   const api = { tmdb: async (p) => ({ imdb_id: ids[p.split("/")[2]] }), pause: async () => {} };
@@ -6913,7 +6913,7 @@ testAsync("catalog critics sweep: reads Wikipedia's reception, caches it and fla
   assert.ok(takes.tt22 && !takes.tt22.take, "no reception is cached too, so it isn't fetched again every run");
   assert.strictEqual(man.in.kkhh.fcs.w, 0, "pages flagged: the score sweep redoes them first");
   assert.strictEqual(man.us.kkhh.fcs.w, 0);
-  assert.strictEqual(man.in.quiet.fcs.w, 7, "no verdict found: the page is left as it is");
+  assert.strictEqual(man.in.quiet.fcs.w, 8, "no verdict found: the page is left as it is");
   assert.strictEqual(man.in.noimdb.imdb, "", "no IMDb id remembered, so TMDB isn't asked again");
   assert.strictEqual(man.in.kkhh.imdb, "tt0172684");
   assert.strictEqual(saved, takes);
@@ -6945,10 +6945,10 @@ test("the score's cache fallback keeps the release-week gate (War was scored fro
   assert.ok(seen.length === 1 && seen[0][0] === "tt9" && seen[0][1] === item, "the fallback is handed the item");
   assert.ok(!item.fcScore && !item.criticsTone, "no week-one score from a cached tone");
 });
-test("'Too early' with split critics says so instead of 'no reviews yet'", () => {
+test("split critics are named as such — never 'Too early', never 'no reviews yet'", () => {
   const F = require("./lib/fcscore.js");
   const now = Date.parse("2026-10-05T00:00:00Z");
-  assert.deepStrictEqual(F.noScoreText({ released: "2026-09-24", votes: 4, criticsTone: "mixed" }, now), { label: "Too early", why: "Critics are split; audience ratings are still coming in." });
+  assert.deepStrictEqual(F.noScoreText({ released: "2026-09-24", votes: 4, criticsTone: "mixed" }, now), { label: "Critics split", why: "Critics are split; audience ratings are still coming in." });
   assert.strictEqual(F.noScoreText({ released: "2026-09-24", votes: 4 }, now).why, "Just released — not enough ratings or reviews yet.");
 });
 test("wikiViewsLabel: shown from 70,000 views a week (the trending level), worded as page views", () => {
@@ -6973,7 +6973,7 @@ test("homepage template mirrors the buzz line and the split-critics wording", ()
   assert.ok(m && Number(m[1]) === EDT.WIKI_BUZZ_MIN, "the same 70,000 bar as the server");
   assert.ok(/const buzz = wikiViewsLabel\(item\.wikiWeeklyViews\) \|\| \(tv \?/.test(src), "cardScore: Wikipedia views before trailer views");
   assert.ok(/if \(!s\) \[wikiViewsLabel\(item\.wikiWeeklyViews\), trailerViewsLabel\(item\.trailerViews\)\]/.test(src), "detail view signals");
-  assert.ok(/item\.criticsTone === 'mixed'\s*\? \{ label: 'Too early', why: 'Critics are split; audience ratings are still coming in\.' \}/.test(src), "noScoreText mirror");
+  assert.ok(/if \(item\.criticsTone === 'mixed'\) return \{ label: 'Critics split', why: recent \? 'Critics are split; audience ratings are still coming in\.'/.test(src), "noScoreText mirror");
   // (The server-side twin, fcScorePanel in lib/weekly.js, was never called and was removed in
   // the Oct 2026 Power-of-Ten audit; the homepage's own panel is the only one.)
 });
@@ -6986,7 +6986,7 @@ test("attachTakes reads every list that gets a film page, through readCritics, w
   assert.ok(body.includes("if (entry.take && (takeConfident(it) || criticsSettled(entry.a))) {"));
   assert.strictEqual(EDT.TAKE_VERSION, 6, "v6 re-reads every listed title once");
   const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
-  assert.ok(/attachFcScores\(dataByCode, \{ toneFor: cachedCriticsTone \}\)/.test(up), "the cache fallback is the gated one");
+  assert.ok(/attachFcScores\(dataByCode, \{ toneFor: cachedCriticsTone, countFor: cachedCriticsCount \}\)/.test(up), "the cache fallback is the gated one, and brings the review count");
 });
 test("About page states the ratings rule and the five-review exception the code applies", () => {
   assert.ok(/no rating, no verdict and no critics' take/.test(ABOUT_SRC), "the gate is still described");
@@ -7175,12 +7175,15 @@ test("redesign: dial and pill markup are the same on the server and in the page 
   // Run the page script's twins against the server's on the same items.
   const vm = require("vm"), ctx = {};
   vm.createContext(ctx);
-  vm.runInContext([fnSrc("esc"), fnSrc("verdictLevel"), fnSrc("verdictPill"), fnSrc("dialRating"), fnSrc("ratingDial"), fnSrc("heroDialInner")].join("\n")
+  vm.runInContext([fnSrc("esc"), fnSrc("noScoreText"), fnSrc("verdictLevel"), fnSrc("verdictPill"), fnSrc("dialRating"), fnSrc("evidenceLabel"), fnSrc("ratingDial"), fnSrc("heroDialInner")].join("\n")
     .replace(/^function esc\(s\) \{[^\n]*\n?/, "") + "\n" + src.match(/function esc\(s\) \{[^\n]*/)[0], ctx);
   const items = [
-    { fcScore: { verdict: "Must watch" }, rating: 8.34, votes: 900 }, { fcScore: { verdict: "Worth a watch" }, rating: 7, votes: 20 },
-    { fcScore: { verdict: "Skip" }, rating: 4.25, votes: 300 }, { fcScore: { verdict: "Worth a watch" }, rating: null, votes: 9 },
-    { rating: 6.3, votes: 10 }, { fcScore: { verdict: "Must watch" }, rating: 9, votes: 0 }, {},
+    { fcScore: { verdict: "Must watch", audience: "Loved", basis: "both" }, rating: 8.34, votes: 900 }, { fcScore: { verdict: "Worth a watch", audience: "Liked", basis: "audience" }, rating: 7, votes: 20 },
+    { fcScore: { verdict: "Skip", audience: "Lukewarm", basis: "both" }, rating: 4.25, votes: 300 },
+    { fcScore: { verdict: "Worth a watch", audience: null, basis: "critics" }, rating: null, votes: 9, criticsCount: 10 },
+    { fcScore: { verdict: "Worth a watch", audience: null, basis: "critics" }, rating: 6.3, votes: 10 },
+    { rating: 6.3, votes: 10, released: "2021-03-01" }, { rating: null, votes: 0, released: "2021-03-01" }, { rating: null, votes: 80, released: "2021-03-01" },
+    { fcScore: { verdict: "Must watch", audience: "Loved", basis: "audience" }, rating: 9, votes: 0 }, {},
   ];
   for (const it of items) {
     assert.strictEqual(ctx.ratingDial(it), M.ratingDial(it), JSON.stringify(it));
@@ -7188,9 +7191,10 @@ test("redesign: dial and pill markup are the same on the server and in the page 
   }
   for (const v of ["Must watch", "Worth a watch", "Skip", "Too early", "A & B"]) assert.strictEqual(ctx.verdictPill(v), M.verdictPill(v), v);
   assert.strictEqual(M.dialRating({ rating: 7.5, votes: 400 }), null, "no verdict, no number: the dial only ever sits beside a FilmyChill verdict");
+  assert.strictEqual(M.dialRating({ fcScore: { verdict: "Worth a watch", audience: null, basis: "critics" }, rating: 6.3, votes: 10 }), null, "a rating the verdict didn't use gets no ring");
   // The legend says what the number is — never "FilmyChill Score out of 10".
-  assert.ok(src.includes("Ring = audience rating out of 10 · colour = FilmyChill verdict") && !/FilmyChill Score out of 10/i.test(src));
-  assert.ok(/<div class="hero-dial-label">Audience<\/div>/.test(M.heroDialInner({ fcScore: { verdict: "Must watch" }, rating: 8, votes: 50 })));
+  assert.ok(src.includes("Ring = audience rating out of 10, shown once enough people have rated · colour = FilmyChill verdict") && !/FilmyChill Score out of 10/i.test(src));
+  assert.ok(/<div class="hero-dial-label">Audience<\/div>/.test(M.heroDialInner({ fcScore: { verdict: "Must watch", audience: "Loved", basis: "audience" }, rating: 8, votes: 50 })));
 });
 test("redesign: verdict pills on the language hubs and /new-on-ott/, same colours as the homepage (Oct 2026)", () => {
   const M = require("./lib/meter.js");
@@ -7205,10 +7209,9 @@ test("redesign: verdict pills on the language hubs and /new-on-ott/, same colour
   const pk = require("fs").readFileSync(require("path").join(__dirname, "lib", "pagekit.js"), "utf8");
   const wk = require("fs").readFileSync(require("path").join(__dirname, "lib", "weekly.js"), "utf8");
   for (const [name, src] of [["pagekit", pk], ["weekly", wk]]) {
-    assert.ok(/\$\{VPILL_CSS\}/.test(src) && /verdictPill\(it\.fcScore\.verdict\)/.test(src), name);
+    assert.ok(/\$\{VPILL_CSS\}/.test(src) && /\$\{rowScoreLine\(it/.test(src), name);
   }
-  // The legacy "Just released — verdict soon" line stays plain text: settleArchiveVerdicts matches it.
-  assert.ok(/it\.verdict \? `<div class="rm">\$\{e\(it\.verdict\)\}<\/div>`/.test(pk) && /it\.verdict \? `<div class="rm">\$\{e\(it\.verdict\)\}<\/div>`/.test(wk));
+  // Archived listings keep their old plain-text line, which settleArchiveVerdicts still updates.
 });
 test("redesign: every film page's verdict stamp takes the site-wide verdict colours (Oct 2026)", () => {
   const ST = require("./lib/stylesheets.js"), fsx = require("fs"), path = require("path");
@@ -7253,6 +7256,82 @@ test("layout audit: one content column and 44px targets on every page type (18 O
   const fixed = ST.fixSharedCss(frozenFilm);
   assert.ok(/\.faq summary \{[^}]*min-height:44px;/.test(fixed) && /\.fcvote-b button \{[^}]*min-height:44px;/.test(fixed), "frozen film pages get the 44px rules through their stylesheets");
   assert.ok(/SITE_CSS_FIXES = \[[\s\S]*?min-height:44px; display:flex;[\s\S]*?\];/.test(read("lib/stylesheets.js")), "frozen list pages too");
+});
+test("evidence rules: the pill and the slot never contradict each other, at any age (Oct 2026)", () => {
+  const M = require("./lib/meter.js"), W = require("./lib/weekly.js"), F = require("./lib/fcscore.js");
+  const day = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+  const strip = (h) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const read = (it) => {
+    const s = F.fcScore(it); if (s) it.fcScore = s;
+    const card = W.ssrCard({ ...it, slug: "x" }, 0, "in");
+    return { pill: (card.match(/<span class="vpill[^>]*>([^<]*)/) || [])[1], ring: /class="dial dial-/.test(card),
+      note: strip((card.match(/<div class="dial-note">([^<]*)<\/div>/) || ["", ""])[1]), reason: strip((card.match(/<div class="sreason">([^<]*)/) || ["", ""])[1]) };
+  };
+  // Critics decided it: the slot names the reviews, never "Few ratings".
+  let r = read({ title: "J2", rating: null, votes: 6, released: day(4), criticsTone: "positive", criticsCount: 12 });
+  assert.deepStrictEqual([r.pill, r.ring, r.note], ["Worth a watch", false, "12 critic reviews"]);
+  // Split reviews: their own label, at any age; never "Too early".
+  r = read({ title: "Ra", rating: null, votes: 0, released: day(2), criticsTone: "mixed", criticsCount: 6 });
+  assert.deepStrictEqual([r.pill, r.note, r.reason], ["Critics split", "Not rated yet", "6 critic reviews, divided"]);
+  r = read({ title: "OldSplit", rating: 5, votes: 3, released: "2021-03-01", criticsTone: "mixed" });
+  assert.strictEqual(r.pill, "Critics split");
+  // A five-year-old film never reads "Too early", "so far" or "yet".
+  for (const votes of [0, 3, 12]) {
+    const it = { title: "Old", rating: votes ? 6.8 : null, votes, released: "2021-03-01" };
+    r = read(it);
+    assert.ok(r.pill !== "Too early" && !/so far|yet\b|just released/i.test(r.reason), JSON.stringify(r));
+    assert.ok(r.note === (votes ? "Few ratings" : "Not rated yet") && !r.ring);
+    assert.strictEqual(F.noScoreText(it).label, "Not enough ratings");
+  }
+  // A rating the verdict didn't count is not drawn as a ring (Lust Stories 3: 6.3 from 10 votes).
+  r = read({ title: "LS3", rating: 6.3, votes: 10, released: day(31), criticsTone: "mixed" });
+  assert.ok(!r.ring && r.pill === "Critics split" && r.note === "Few ratings");
+  // A counted rating is always a ring, with no text beside it.
+  r = read({ title: "Digger", rating: 7.5, votes: 398, released: day(17), criticsTone: "mixed" });
+  assert.ok(r.ring && r.note === "" && r.pill === "Worth a watch");
+  // Not out yet: no evidence slot at all (pre-release ratings aren't evidence).
+  assert.strictEqual(M.ratingDial({ title: "Soon", rating: null, votes: 2, released: day(-10) }), "");
+  // The same rules on the list pages.
+  assert.strictEqual(strip(M.rowScoreLine({ title: "J2", rating: null, votes: 6, released: day(4), criticsTone: "positive", criticsCount: 12, fcScore: { verdict: "Worth a watch", audience: null, basis: "critics" } })), "Worth a watch 12 critic reviews");
+  assert.strictEqual(strip(M.rowScoreLine({ title: "Ra", rating: null, votes: 0, released: day(2), criticsTone: "mixed" })), "Critics split Not rated yet");
+  // The data files' verdict field agrees, and an old film's stale "verdict soon" is corrected.
+  const d = { in: { theatres: [{ title: "A", votes: 0, released: day(2), criticsTone: "mixed" }, { title: "C", votes: 3, released: "2021-01-01", verdict: "Just released — verdict soon" }], ott: [] } };
+  F.attachFcScores(d);
+  assert.deepStrictEqual(d.in.theatres.map((x) => x.verdict), ["Critics split", "Not enough ratings"]);
+});
+test("evidence rules on film pages: no 'no audience ratings' beside a count, no time words for old films (Oct 2026)", () => {
+  const F = require("./lib/fcscore.js"), FA = require("./lib/facts.js");
+  const day = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+  const page = (it) => { const s = F.fcScore(it); if (s) it.fcScore = s; return U.buildFilmPage({ slug: "x", kind: "movie", language: "Hindi", platform: "Theatres", ...it }, "2026-10-18", new Set(), { code: "in", name: "India" }); };
+  const crit = page({ title: "J2", rating: null, votes: 6, released: day(4), criticsTone: "positive", criticsCount: 12 });
+  assert.ok(/<div class="fcsb-verdict"><div class="dial-note">12 critic reviews<\/div><span class="fcsb-stamp fcsb-worth">Worth a watch<\/span>/.test(crit), "critics' verdict: the review count, no ring");
+  assert.ok(/<b>Audience<\/b><small>6 ratings so far — counts from 50<\/small><\/div><span class="fcsb-tag none">Too few ratings</.test(crit) && !/No audience ratings yet/.test(crit), "6 people rated it: never 'no audience ratings'");
+  const old = page({ title: "Old", rating: 6.8, votes: 12, released: "2021-03-01", platform: "Netflix" });
+  assert.ok(old.includes('<span class="fcsb-mini-v">Not enough ratings</span> — only 12 audience ratings, and no settled critics\' verdict.'), "old film: the plain count");
+  assert.strictEqual(FA.extractFacts(old).votes, 12, "the facts reader still reads the count");
+  const split = page({ title: "Ra", rating: null, votes: 0, released: day(2), criticsTone: "mixed" });
+  assert.ok(split.includes('<span class="fcsb-mini-v">Critics split</span> — no audience ratings yet, and the critics\' reviews are divided.'));
+  assert.strictEqual(FA.keyFacts(split).verdict, "no score yet", "Critics split is a no-score state to the facts reader");
+});
+test("critics cache: a new film's unsettled reading is re-read daily; the title fallback refuses anything unverifiable (Oct 2026)", () => {
+  const E = require("./lib/editorial.js");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "editorial.js"), "utf8");
+  assert.ok(/const recheck = !!entry && !stale && entry\.src === "wiki" && !criticsSettled\(entry\.a\)/.test(src) && /itemsAgeDays\(items\) < CRITICS_RECHECK_DAYS/.test(src), "re-read while new and unsettled");
+  assert.ok(/if \(recheck && src !== "wiki"\) \{[\s\S]*?keep the reading we had/.test(src), "a failed re-read keeps the old reading");
+  assert.ok(/it\.criticsCount = entry\.a\.ratings\.n/.test(src), "the review count is attached");
+  const day = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+  assert.ok(E.itemsAgeDays([{ released: day(3) }, { released: day(10) }]) > 9.9, "a film's age is its earliest listing");
+  assert.deepStrictEqual(E.wikiTitleCandidates({ title: "Shaque: Trust No One", kind: "tv", released: "2026-09-23" }),
+    ["Shaque: Trust No One (TV series)", "Shaque: Trust No One (2026 TV series)", "Shaque: Trust No One (web series)", "Shaque: Trust No One", "Shaque (TV series)", "Shaque (2026 TV series)", "Shaque (web series)", "Shaque"]);
+  const ent = (claims) => ({ claims: Object.fromEntries(Object.entries(claims).map(([p, vals]) => [p, vals.map((v) => ({ mainsnak: { datavalue: { value: v } } }))])) });
+  const film2026 = { title: "X", kind: "movie", released: "2026-10-14" };
+  assert.strictEqual(E.wikiEntityMatches(ent({ P31: [{ id: "Q11424" }], P345: ["tt1"] }), film2026, "tt1"), true, "same IMDb id");
+  assert.strictEqual(E.wikiEntityMatches(ent({ P31: [{ id: "Q11424" }], P345: ["tt2"] }), film2026, "tt1"), false, "another title's IMDb id");
+  assert.strictEqual(E.wikiEntityMatches(ent({ P31: [{ id: "Q11424" }], P577: [{ time: "+2013-12-19T00:00:00Z" }] }), film2026, "tt1"), false, "a 2013 film is not this 2026 one");
+  assert.strictEqual(E.wikiEntityMatches(ent({ P31: [{ id: "Q11424" }], P577: [{ time: "+2026-10-14T00:00:00Z" }] }), film2026, "tt1"), true, "same year");
+  assert.strictEqual(E.wikiEntityMatches(ent({ P31: [{ id: "Q4167410" }] }), film2026, "tt1", "X is a 2026 film"), false, "a disambiguation page is never a film");
+  assert.strictEqual(E.wikiEntityMatches(ent({ P31: [{ id: "Q11424" }] }), film2026, "tt1", "X is a 2026 Indian Tamil-language film"), true, "no Wikidata date: the article's opening gives year and kind");
+  assert.strictEqual(E.wikiEntityMatches(ent({ P31: [{ id: "Q5398426" }] }), { ...film2026, kind: "tv" }, "tt1", "X is a Hindi-language television series"), false, "no year anywhere: refused");
 });
 test("redesign: quieter top — country pill, one toolbar row, extras under Coming Soon, 44px targets (Oct 2026)", () => {
   const src = homeSource();
@@ -7540,11 +7619,11 @@ test("a country's re-release date never becomes the film's date or year", () => 
 });
 test("pages dated years after the same film elsewhere jump the score sweep's queue", () => {
   const W = require("./lib/scoresweep.js");
-  const man = { in: { a: { tmdbId: 1, released: "1972-03-24", fcs: { w: 7 } } }, my: { a: { tmdbId: 1, released: "2026-02-01", fcs: { w: 7 } } },
-    sg: { b: { tmdbId: 2, released: "2026-01-01", fcs: { w: 7 } } }, uk: { b: { tmdbId: 2, released: "2026-12-30", fcs: { w: 7 } } } };
+  const man = { in: { a: { tmdbId: 1, released: "1972-03-24", fcs: { w: 8 } } }, my: { a: { tmdbId: 1, released: "2026-02-01", fcs: { w: 8 } } },
+    sg: { b: { tmdbId: 2, released: "2026-01-01", fcs: { w: 8 } } }, uk: { b: { tmdbId: 2, released: "2026-12-30", fcs: { w: 8 } } } };
   assert.strictEqual(W.flagYearOutliers(man), 1);
   assert.strictEqual(man.my.a.fcs.w, 0);
-  assert.strictEqual(man.uk.b.fcs.w, 7, "a year apart is a regional difference, not a re-release");
+  assert.strictEqual(man.uk.b.fcs.w, 8, "a year apart is a regional difference, not a re-release");
 });
 test("a new film can't take an address another film already owns in that edition (WAR, Canada)", () => {
   const F = require("./lib/filmpage.js");

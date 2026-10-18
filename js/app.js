@@ -143,12 +143,10 @@ function noScoreText(item) {
   const rel = String(item.released || item.freshDate || '').slice(0, 10);
   if (/^\d{4}-\d{2}-\d{2}$/.test(rel) && rel > new Date().toISOString().slice(0, 10)) return { label: 'Not out yet', why: "It hasn't opened yet — the score comes once people have seen it." };
   const recent = /^\d{4}-\d{2}-\d{2}$/.test(d) && Date.parse(d) > Date.now() - 28 * 864e5;
-  if (recent) return item.criticsTone === 'mixed'
-    ? { label: 'Too early', why: 'Critics are split; audience ratings are still coming in.' }
-    : { label: 'Too early', why: 'Just released — not enough ratings or reviews yet.' };
   const votes = Number(item.votes || 0), who = votes === 1 ? '1 person has' : votes.toLocaleString('en-IN') + ' people have';
   const need = /^\d{4}-\d{2}-\d{2}$/.test(d) && Date.parse(d) <= Date.now() - 60 * 864e5 ? 15 : 50; // older films: early read from 15
-  if (item.criticsTone === 'mixed') return { label: 'Not enough ratings', why: 'Critics are split, and ' + (votes ? 'only ' + who : 'nobody has') + ' rated it — the score needs ' + need + ' ratings to decide.' };
+  if (item.criticsTone === 'mixed') return { label: 'Critics split', why: recent ? 'Critics are split; audience ratings are still coming in.' : 'Critics are split, and ' + (votes ? 'only ' + who : 'nobody has') + ' rated it — the score needs ' + need + ' ratings to decide.' };
+  if (recent) return { label: 'Too early', why: 'Just released — not enough ratings or reviews yet.' };
   if (votes >= need) return { label: 'Not enough ratings', why: "There's no usable audience rating for it on TMDB yet, and no settled critics' reception." };
   if (votes > 0) return { label: 'Not enough ratings', why: 'Only ' + who + ' rated it — the score needs at least ' + need + '.' };
   return { label: 'Not enough ratings', why: "Nobody has rated it yet, and there's no settled critics' reception." };
@@ -195,19 +193,32 @@ function cardChips(item) {
 function verdictLevel(v) { return /^must/i.test(v || '') ? 'must' : /^skip/i.test(v || '') ? 'skip' : /^worth/i.test(v || '') ? 'worth' : 'early'; }
 function verdictPill(label, level) { return `<span class="vpill vp-${level || verdictLevel(label)}">${esc(label)}</span>`; }
 function dialRating(item) {
-  if (!item || !item.fcScore || item.rating == null || !item.votes) return null;
+  const s = item && item.fcScore;
+  if (!s || !s.audience || item.rating == null || !item.votes) return null;
   const r = Number(item.rating);
   return Number.isFinite(r) ? r : null;
 }
+function evidenceLabel(item) {
+  const s = item && item.fcScore;
+  if (s && s.basis === 'critics') {
+    const n = Number(item.criticsCount) || 0;
+    return n > 0 ? n + ' critic review' + (n === 1 ? '' : 's') : "Critics' verdict";
+  }
+  if (s) return '';
+  if (noScoreText(item).label === 'Not out yet') return '';
+  const votes = Number((item && item.votes) || 0);
+  if (votes >= 50 && item.rating == null) return 'No rating yet';
+  return votes > 0 ? 'Few ratings' : 'Not rated yet';
+}
 function ratingDial(item) {
   const r = dialRating(item);
-  if (r == null) return '<div class="dial dial-none" role="img" aria-label="No rating to show yet"><span>—</span></div>';
+  if (r == null) { const t = evidenceLabel(item); return t ? '<div class="dial-note">' + esc(t) + '</div>' : ''; }
   const v = r.toFixed(1);
   return `<div class="dial dial-${verdictLevel(item.fcScore.verdict)}" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div>`;
 }
 function heroDialInner(item) {
   const r = dialRating(item);
-  if (r == null) return '';
+  if (r == null) { const t = evidenceLabel(item); return t ? '<div class="hero-note">' + esc(t) + '</div>' : ''; }
   const v = r.toFixed(1);
   return `<div class="dial dial-hero" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div><div class="hero-dial-label">Audience</div>`;
 }
@@ -220,6 +231,11 @@ function cardScore(item) {
     return verdictPill(s.verdict) + reason(bits.filter(Boolean).join(' · '));
   }
   const none = noScoreText(item);
+  if (none.label === 'Critics split') {
+    const n = Number(item.criticsCount) || 0;
+    return verdictPill('Critics split', 'early') + reason(n ? n + ' critic review' + (n === 1 ? '' : 's') + ', divided' : '');
+  }
+  if (none.label === 'Not out yet') return verdictPill('Not out yet', 'early');
   if (none.label === 'Too early') {
     const tv = trailerViewsLabel(item.trailerViews);
     const when = freshLabel(item);

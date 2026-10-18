@@ -23,7 +23,7 @@ const { releaseState } = require("./release.js");
 const { freshLabel, THEATRE_WINDOW_FALLBACK_DAYS } = require("./freshness.js");
 const { canonProvider, countryNameFor, streamVocab, streamWindowEstimate } = require("./rules.js");
 const { USE_IMDB } = require("./tmdb.js");
-const { VPILL_CSS, verdictPill } = require("./meter.js");
+const { VPILL_CSS, rowScoreLine } = require("./meter.js");
 
 function img(path, size = "w342") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
@@ -354,7 +354,7 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
       <div>
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
-        ${it.rating != null ? `<div class="rm"><b>★ ${Number(it.rating).toFixed(1)}</b>${it.fcScore ? " " + verdictPill(it.fcScore.verdict) : ""}</div>` : (it.fcScore ? `<div class="rm">${verdictPill(it.fcScore.verdict)}</div>` : it.verdict ? `<div class="rm">${e(it.verdict)}</div>` : "")}
+        ${rowScoreLine(it)}
         ${it.hook ? `<div class="rm hk">${e(it.hook)}</div>` : ""}
         ${it.take ? `<div class="rm tk">${e(it.take)}</div>` : ""}
       </div>`;

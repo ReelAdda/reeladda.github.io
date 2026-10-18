@@ -221,9 +221,14 @@
   .dial span { width: 38px; height: 38px; border-radius: 50%; background: #FFFFFF; display: grid; place-items: center;
     font-family: 'Anton', sans-serif; font-size: 15px; line-height: 1; color: var(--ink); }
   .dial-must { --dc: #1E7A4C; } .dial-worth { --dc: #D18A00; } .dial-skip { --dc: #D93A28; }
-  .dial-none { background: repeating-conic-gradient(#D9CFBF 0 6%, #FFFFFF 0 12.5%); }
-  .dial-none span { color: #716A8C; }
+  /* No counted audience rating: no circle — the evidence as plain text (lib/meter.js). */
+  .dial-note { align-self: center; justify-self: end; width: 58px; text-align: center; font-size: 10.5px; font-weight: 700;
+    line-height: 1.25; color: #8C85A3; }
+  .save-btn ~ .dial-note { align-self: end; margin-bottom: 8px; }
+  .fcs-v .dial-note { width: auto; font-size: 11.5px; text-align: left; }
+  .hero-note { max-width: 96px; text-align: center; font-size: 11px; font-weight: 700; line-height: 1.3; color: #E4E1FF; }
   /* Cards with a save button (top right): the dial sits at the bottom, clear of it. */
+  .rev { color: var(--mute); font-size: 12.5px; font-weight: 600; margin-left: 4px; }
   .save-btn ~ .dial { align-self: end; }
   .title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-right: 40px; }
   .card h3 { font-size: 16.5px; font-weight: 800; line-height: 1.25; }
@@ -705,7 +710,7 @@
       <button class="mylist-btn" id="mylistBtn" data-click="toggleMyList"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List (<span id="wlCount">0</span>)</button>
     </div>
 </section>
-  <p class="dial-legend"><span class="dial-mini" aria-hidden="true"></span>Ring = audience rating out of 10 · colour = FilmyChill verdict</p>
+  <p class="dial-legend"><span class="dial-mini" aria-hidden="true"></span>Ring = audience rating out of 10, shown once enough people have rated · colour = FilmyChill verdict</p>
 </main>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true">

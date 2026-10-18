@@ -193,7 +193,7 @@ function compactEarlyScore(html, root = ".") {
   const n = /from ([\d,]+) ratings?/.exec(aud);
   const phrase = n ? audiencePhrase(Number(n[1].replace(/,/g, "")), false)
     : /No audience ratings yet/.test(aud) ? audiencePhrase(0, true) : audiencePhrase(0, false);
-  out = out.replace(m[0], compactScoreHtml(escDecode(m[1]), phrase));
+  out = out.replace(m[0], compactScoreHtml(escDecode(m[1]), phrase, /yet$/.test(phrase) ? undefined : ", and no settled critics' verdict."));
   out = FCSB_CSS_RE.test(out) ? out.replace(FCSB_CSS_RE, FCSB_CSS) : out.replace("</style>", `${FCSB_CSS}\n</style>`);
   return orderAnswer(out);
 }

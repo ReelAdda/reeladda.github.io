@@ -320,7 +320,7 @@ const {
   stageFailed,
 } = require("./lib/runhealth.js");
 const { attachFcScores } = require("./lib/fcscore.js");
-const { cachedCriticsTone } = require("./lib/editorial.js");
+const { cachedCriticsCount, cachedCriticsTone } = require("./lib/editorial.js");
 const { flagYearOutliers, sweepScores } = require("./lib/scoresweep.js");
 const { refreshRelated } = require("./lib/relrefresh.js");
 const { syncVotes } = require("./lib/votes.js");
@@ -2490,7 +2490,7 @@ async function main() {
     // FilmyChill Score (lib/fcscore.js): audiences + critics, after the takes attach the critics
     // tone and before the data files are written, so cards, film pages and share cards agree.
     {
-      const { scored, total } = attachFcScores(dataByCode, { toneFor: cachedCriticsTone });
+      const { scored, total } = attachFcScores(dataByCode, { toneFor: cachedCriticsTone, countFor: cachedCriticsCount });
       console.log(`FilmyChill Score: ${scored}/${total} listed titles scored (the rest: too early)`);
       // Pick of the Week is re-chosen now that scores exist (see choosePick in lib/surfaces.js).
       // The pick made in buildCountry stays as the fallback when nothing new qualifies.

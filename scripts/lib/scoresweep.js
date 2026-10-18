@@ -18,7 +18,7 @@ const fs = require("fs");
 const { filmPagePath, fmtDateFull, localeFor } = require("./core.js");
 const { fcScore } = require("./fcscore.js");
 const { FCSB_CSS, fcScoreSection, headRatingHtml, orderAnswer } = require("./filmpage.js");
-const { cachedCriticsTone } = require("./editorial.js");
+const { cachedCriticsCount, cachedCriticsTone } = require("./editorial.js");
 const { escHtml } = require("./core.js");
 const { buildVerdictProse } = require("./filmcopy.js");
 const { isRecent } = require("./fcscore.js");
@@ -45,7 +45,9 @@ const AGE_LINES = [28, 60];
 // "worth watching?" answer all rewritten to match the score).
 // 6 = the "Watched it? Was it worth it?" vote button (lib/vote.js) added to every old page.
 // 7 = the audience-rating ring in place of the Chill-o-meter gauge (Oct 2026 redesign).
-const SWEEP_WORDING = 7;
+// 8 = the ring only where the audience rating counts, the evidence as text otherwise, and
+//     "Critics split" as its own wording.
+const SWEEP_WORDING = 8;
 
 // Pure: put (or replace) the score section in an existing film page. Returns the new HTML.
 function injectScoreSection(html, section) {
@@ -293,6 +295,7 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
       // For the no-score wording: "Too early" only if it's actually just out.
       released: e.released || d.release_date || d.first_air_date || null,
       criticsTone: cachedCriticsTone((d.external_ids && d.external_ids.imdb_id) || d.imdb_id || null),
+      criticsCount: cachedCriticsCount((d.external_ids && d.external_ids.imdb_id) || d.imdb_id || null),
     };
     const s = fcScore(item);
     if (s) item.fcScore = s;

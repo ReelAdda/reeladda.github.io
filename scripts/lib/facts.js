@@ -81,7 +81,8 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   const rating = star ? Number(star[1]) : audRow ? Number(audRow[1]) : null;
   // The compact score line ("Too early — 3 audience ratings so far") is the only place a
   // brand-new film's count appears.
-  const compactVotes = /<span class="fcsb-mini-v">[^<]*<\/span> — ([\d,]+) audience ratings? so far/.exec(html);
+  // Older films read "only 12 audience ratings" (no "so far": time words are for new films only).
+  const compactVotes = /<span class="fcsb-mini-v">[^<]*<\/span> — (?:only )?([\d,]+) audience ratings?(?: so far)?/.exec(html);
   const votes = votesHead ? Number(votesHead[1].replace(/,/g, "")) : audRow ? Number(audRow[2].replace(/,/g, ""))
     : compactVotes ? Number(compactVotes[1].replace(/,/g, "")) : 0;
   // Series carry their episode length in the "Good to know" table, not in the JSON-LD.
@@ -205,7 +206,7 @@ function keyFacts(html) {
     rentBuy: cut >= 0 ? pillSet(wtw.slice(cut)) : "",
     // "Too early" and "Not enough ratings" both mean "no score yet"; which one shows depends on
     // the film's age on the day the page is drawn.
-    verdict: ((/class="fcsb-(?:stamp fcsb-[a-z]+|mini-v)">([^<]+)</.exec(html) || [])[1] || "").replace(/^(Too early|Not enough ratings|Not out yet)$/, "no score yet"),
+    verdict: ((/class="fcsb-(?:stamp fcsb-[a-z]+|mini-v)">([^<]+)</.exec(html) || [])[1] || "").replace(/^(Too early|Not enough ratings|Not out yet|Critics split)$/, "no score yet"),
     rating: (/★ ([\d.]+)/.exec(html.slice(Math.max(0, html.indexOf('<div class="head"')))) || [])[1] || "",
     trailer: (/youtube(?:-nocookie)?\.com\/(?:embed\/|watch\?v=)([A-Za-z0-9_-]{6,})/.exec(html) || [])[1] || "",
     digital: (/<!--SW:digital=(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1] || "",
