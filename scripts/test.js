@@ -6749,8 +6749,14 @@ test("workflows: actions pinned to commits, the probe on Node 24, and a live che
   assert.ok(up.indexOf("Live site check") > up.indexOf("Build health check"), "it runs last");
   // 14 Oct 2026: code pushed mid-build made the data push a non-fast-forward.
   const commit = (/- name: Commit updated data[\s\S]*?(?=\n      - name:)/.exec(up) || [""])[0];
-  assert.ok(/git fetch --quiet origin main/.test(commit) && /git rebase origin\/main/.test(commit) && /git rebase --abort/.test(commit), "rejected push: rebase onto the new main and retry");
-  assert.ok(!/--force|-f\b/.test(commit.replace(/git add -f/g, "")), "never force-push main");
+  assert.ok(/git fetch --quiet origin main/.test(commit) && /git worktree add --quiet --detach \.\.\/push-wt origin\/main/.test(commit)
+    && /git -C \.\.\/push-wt cherry-pick "\$data"/.test(commit) && /git -C \.\.\/push-wt cherry-pick --abort/.test(commit), "rejected push: replay the data commit onto the new main in a separate worktree and retry");
+  // 19 Oct 2026: a rebase in the working tree refused to run over tracked files the build had
+  // touched and not committed. Nothing in this step may rebase, reset or stash the working tree.
+  assert.ok(!/git rebase|git reset --hard|git stash/.test(commit), "the published working tree is never rebased, reset or stashed");
+  assert.ok(/git worktree remove --force \.\.\/push-wt/.test(commit), "the temporary worktree is removed");
+  assert.ok(!/git\b[^\n]*\bpush\b[^\n]*(?:--force|\s-f\b|\+HEAD|\+main)/.test(commit), "never force-push main");
+  assert.ok((commit.match(/\bpush origin HEAD:main\b/g) || []).length >= 2, "plain pushes only (first try and the replayed retry)");
 });
 
 testAsync("livecheck: waits for the deploy, then fails loudly on a stylesheet that isn't live", async () => {
@@ -7231,6 +7237,19 @@ test("redesign: every film page's verdict stamp takes the site-wide verdict colo
     if (/\.fcsb-must/.test(css)) assert.ok(css.includes(".fcsb-must { background:#1E7A4C;") && !css.includes("background:var(--indigo); color:#fff; } .fcsb-worth"), f);
   }
   assert.strictEqual(require("./lib/pagekit.js").LISTING_VERSION, "<!--listing:4-->", "closed months rebuilt once with the pills");
+});
+test("hand-written pages on main already carry every site style fix, so a build leaves them unchanged (19 Oct 2026)", () => {
+  // A fix-up the build applies to a tracked page it doesn't commit leaves the tree dirty (it broke
+  // the data push on 19 Oct). Each fix belongs in the page's source too.
+  const fsx = require("fs"), path = require("path");
+  const src = fsx.readFileSync(path.join(__dirname, "lib", "stylesheets.js"), "utf8");
+  const fixes = eval(src.match(/const SITE_CSS_FIXES = (\[[\s\S]*?\n\]);/)[1]);
+  for (const f of ["404.html", "privacy/index.html", "dmca/index.html", "post.html", "about/index.html"]) {
+    const p = path.join(__dirname, "..", f);
+    if (!fsx.existsSync(p)) continue;
+    const h = fsx.readFileSync(p, "utf8");
+    for (const [from] of fixes) assert.ok(!h.includes(from), `${f} still has a rule the build rewrites: ${from.slice(0, 50)}`);
+  }
 });
 test("layout audit: one content column and 44px targets on every page type (18 Oct 2026)", () => {
   const fsx = require("fs"), path = require("path");
