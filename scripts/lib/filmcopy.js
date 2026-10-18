@@ -206,9 +206,6 @@ function buildGoodToKnow(item, cfg = null) {
     rows.push({ label: "Runtime", value: v });
   }
   if (item.cert) {
-    const c = String(item.cert).toUpperCase();
-    // Order matters: check restrictive/age-gated patterns BEFORE bare "U", because "U/A 16+"
-    // starts with "U" but is NOT a universal rating.
     const family = certAudience(item.cert, certRegion(cfg)).label;   // one rule for 18 rating boards
     rows.push({ label: "Watch with family?", value: `${item.cert} · ${family}` });
   }

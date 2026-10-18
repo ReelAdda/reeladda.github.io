@@ -34,6 +34,8 @@
 //              end-of-build finish: icons on every page, country in non-India titles, window lines
 // A lib module may only require modules above it in this list (tests enforce no cycles).
 
+"use strict";
+
 const fs = require("fs");
 const {
   COUNTRIES,
@@ -556,7 +558,7 @@ async function buildTheatres(cfg) {
 
   // Tunable: neutral prior C and smoothing constant M (how many votes before a
   // rating is trusted on its own). Per-country config can override these later.
-  const PRIOR_C = 6.0, SMOOTH_M = 8;
+  const PRIOR_C = 6.0;
   // Best available rating/votes: IMDb when present (more raters for Indian titles),
   // else TMDB. These drive both the quality floor and the ranking score.
   const bestRating = (m) => {
@@ -809,7 +811,11 @@ async function buildTheatres(cfg) {
     if (theatres.length >= targetCount) break;
     if (THEATRE_EXCLUDE_IDS.has(m.id)) continue;
     const item = { ...baseItem(m, "movie"), platform: "Theatres" };
-    try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); withImdb(item); } catch (e) { console.warn(`enrich movie ${m.id}: ${e.message}`); }
+    // A pick whose lookup failed is skipped, like a bench film (Power-of-Ten audit, Oct 2026): listed
+    // half-loaded, its digital-only check below couldn't run and a streaming-only film could show
+    // under In Theatres. Same change in buildCountryLegacy, so the split proof stays a like-for-like test.
+    try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); withImdb(item); }
+    catch (e) { console.warn(`enrich movie ${m.id}: ${e.message} — skipped this run`); continue; }
     if (item.theatrical === false) {
       console.log(`  theatres: dropped ${item.title} — digital-only release, no theatrical run in ${cfg.region}`);
       continue;
@@ -860,7 +866,7 @@ async function buildTheatres(cfg) {
 }
 
 // Top 10 on OTT: international plus fresh regional, scored with the theatre pool's scales.
-async function buildOtt(cfg, { isRegional, pool, todayStr, isSuspicious, looksReRelease, weighted402535 }) {
+async function buildOtt(cfg, { isRegional, todayStr, isSuspicious, looksReRelease, weighted402535 }) {
   // ---------- TOP 10 ON OTT (international + fresh regional, IMDb-ranked, max 10) ----------
   // International from global trending (inherently fresh); regional from per-language
   // discover gated to recent releases so we never resurface all-time classics. Both
@@ -900,7 +906,7 @@ async function buildOtt(cfg, { isRegional, pool, todayStr, isSuspicious, looksRe
         const r = imdbRatings.get(imdbId);
         if (r && r.rating) { c._imdbRating = parseFloat(r.rating); c._imdbVotes = r.votes || 0; }
       }
-    } catch (e) { /* leave _imdbRating null -> falls back to TMDB rating */ }
+    } catch { /* leave _imdbRating null -> falls back to TMDB rating */ }
   };
 
   const buildOttItem = async (c) => {
@@ -1718,7 +1724,11 @@ function assembleCountry(cfg, { theatres, langTheatres }, { ott, ottOverflow, su
     if (theatres.length >= targetCount) break;
     if (THEATRE_EXCLUDE_IDS.has(m.id)) continue;
     const item = { ...baseItem(m, "movie"), platform: "Theatres" };
-    try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); withImdb(item); } catch (e) { console.warn(`enrich movie ${m.id}: ${e.message}`); }
+    // A pick whose lookup failed is skipped, like a bench film (Power-of-Ten audit, Oct 2026): listed
+    // half-loaded, its digital-only check below couldn't run and a streaming-only film could show
+    // under In Theatres. Same change in buildCountryLegacy, so the split proof stays a like-for-like test.
+    try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); withImdb(item); }
+    catch (e) { console.warn(`enrich movie ${m.id}: ${e.message} — skipped this run`); continue; }
     if (item.theatrical === false) {
       console.log(`  theatres: dropped ${item.title} — digital-only release, no theatrical run in ${cfg.region}`);
       continue;
@@ -2786,7 +2796,9 @@ async function main() {
     // Streaming, month-archive and today pages repeated across editions (lib/graph.js).
     try { syncListingHreflang(); } catch (e) { stageFailed(`listing hreflang sync`, e); }
     // Pages rebuilt this run that were only re-stamped are left as they were (lib/writeif.js).
-    console.log(`Page writes: ${WRITE_STATS.written} saved, ${WRITE_STATS.kept} unchanged and left alone`);
+    console.log(`Page writes: ${WRITE_STATS.written} saved, ${WRITE_STATS.kept} unchanged and left alone${WRITE_STATS.refused.length ? `, ${WRITE_STATS.refused.length} REFUSED` : ""}`);
+    // A page that failed the pre-write check kept its published version (lib/writeif.js).
+    if (WRITE_STATS.refused.length) healthIssue(`page check: ${WRITE_STATS.refused.length} page(s) not written because they were broken — e.g. ${WRITE_STATS.refused.slice(0, 3).join("; ")}`);
   }
 
   // Honest lastmods, the manifest, sitemaps, redirects and the run's health file.
@@ -2919,9 +2931,9 @@ module.exports = {
   buildOttMonthPage, writeOttMonthPages, ottMonthPath, ottMonthUrl, backfillCatalog,
   buildScopedMonthPage, writePlatformMonthPages, writeLanguageMonthPages, monthRow,
   announcedDates, buildComingPage, buildTodayPage, writeDatedOttPages, weekRangeFor,
-  recoverTmdbIds, digitalReleaseFor, digitalUpcoming, applyDigitalDatePatch, sweepCandidates, hubOgImage, ogImageTag, peopleIndexFor, buildPersonPage, writePeoplePages, personPageUrl, PEOPLE_MIN,
+  recoverTmdbIds, digitalReleaseFor, digitalUpcoming, applyDigitalDatePatch,  hubOgImage, ogImageTag, peopleIndexFor, buildPersonPage, writePeoplePages, personPageUrl, PEOPLE_MIN,
   verifiedAvailability, buildStreamingPage, writeStreamingPages, streamPagePath, streamPageUrl, STREAM_PAGE_MIN, STREAM_LANG_MIN,
-  backfillStreamClaims, settleDepartedCopy, fitSiteTitle, fitFirst, ssrHero, heroPreload, ssrCard, pruneDeadHubLinks, sweepDeadHubLinks, theatreRunState, visibleText, crossCountryLeak, neutralizeCrossCountry, repairLegacyPages, freshenFrozenCopy, countryNameForms, settleReleasedCopy, patchDueIfPassed, applyArrivalPatch, certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
+  backfillStreamClaims, settleDepartedCopy, fitSiteTitle, fitFirst, ssrHero, heroPreload,  pruneDeadHubLinks, sweepDeadHubLinks, theatreRunState, visibleText, crossCountryLeak, neutralizeCrossCountry, repairLegacyPages, freshenFrozenCopy, countryNameForms, settleReleasedCopy,   certAudience, analyticsTag, cspWith, ensureAnalytics, GC_SITE, filmHubLinks,
   platformMonthPath, platformMonthUrl, languageMonthPath, languageMonthUrl, SCOPED_MONTH_MIN,
   ARRIVAL_BADGE_DAYS, ARRIVAL_MIN_RELEASE_AGE, ARRIVAL_MAX_RELEASE_AGE, SEEN_RETENTION_DAYS,
   socialImage,
@@ -2934,13 +2946,13 @@ module.exports = {
   ssrOttSection, buildMoreLinks, ABOUT_LASTMOD, patchAboutPage, countryListForProse,
   isExcluded, EXCLUDE_TITLES,
   extractHook, audienceCounterpoint,
-  certFor, regionalTheatricalDate, countryListForProse,
+  certFor,  
   extractCastPics,
   prevWeekSlug, writeIndexNowPayload, buildLlmsTxt,
   theatreEligible, THEATRE_EXCLUDE_IDS,
   ssrLastScan, reseedTake, isPoolTake, isLegacyTake, mineViewerAspects, composeTmdbTake, dedupeProviders, rankSimilar, TAKE_VERSION, xDefaultCode, repairXDefaults,
   capTrending, buildEditorNote, ssrEditorNote,
-  platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage, indexNowUrls, poolItems,
+  platformSlug, hubsFor, hubUrl, hubPath, buildPlatformHubPage,  poolItems,
   shortenTitleTag, departureCandidates, applyDeparturePatch, backfillLiveClaims,
   departureOutage, catalogStall, loadStateFile, stageFailed, RUN_HEALTH,
   buildLlmsFullTxt, llmsMachineSection,

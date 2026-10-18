@@ -224,7 +224,7 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
 
   // Verdict close — ISO or human date, both forms the template has produced.
   out = out.replace(new RegExp(` It releases (?:on )?[^;<]+; mark your calendar if it${APOS}s on your list\\.`, "g"),
-    (m) => ` It opened in theatres in ${escHtml(country)} on ${escHtml(opened)}.`);
+    () => ` It opened in theatres in ${escHtml(country)} on ${escHtml(opened)}.`);
 
   // Where-to-watch note.
   const pendingNote = `Not on a subscription service or to rent in ${escHtml(country)} yet.`;
@@ -234,7 +234,7 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
   // whether it may still be in cinemas (see theatreRunState): "opened on…" alone left the
   // one question a reader actually has — can I still see it? — unanswered.
   const run = live ? null : theatreRunState(date, now);
-  const runClause = (a) => run === "open"
+  const runClause = () => run === "open"
     ? ` and may still be showing — check local cinema listings`
     : run === "ended" ? `, and its cinema run has most likely ended` : "";
   const tail = (a) => live
@@ -252,7 +252,7 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
     // one place and "has finished its theatrical run" two paragraphs up.
     const V = streamVocab(cfg);
     out = out.replace(/It (?:had its theatrical run in|opened in theatres in) ([^<"—]+?)(?: on [^<"—]+?)? — check back here for its ((?:OTT|streaming) arrival)\./g,
-      (m, c, arr) => run === "open"
+      (m, c) => run === "open"
         ? `It opened in theatres in ${c} on ${escHtml(opened)} — check back here for its ${V.arrival}.`
         : `It had its theatrical run in ${c} — check back here for its ${V.arrival}.`);
     out = out.replace(new RegExp(`(?:has finished its theatrical run in ([^<".]+?)|opened in theatres in ([^<".]+?) on [^<".]+?(?: and may still be showing — check local cinema listings|, and its cinema run has most likely ended)?)\\. (Its (?:OTT|streaming) release hasn${APOS}t been announced yet — check back soon\\.)`, "g"),

@@ -237,8 +237,7 @@ function departureCandidates(entries, now = new Date(), max = DEPART_MAX_CHECKS)
 
 // Pure: rewrite a live claim into an honest "we could not find it" block. Mirrors
 // applyArrivalPatch — same markers, same shape, opposite direction.
-function applyDeparturePatch(html, { title, was, rentBuy, countryName, cfg, asOf, unconfirmed = false }) {
-  const V = streamVocab(cfg);
+function applyDeparturePatch(html, { title, was, rentBuy, countryName, asOf, unconfirmed = false }) {
   const e = escHtml;
   const start = "<!--SW:pending-->", end = "<!--/SW:pending-->";
   // A page born streaming has an SW:stream block instead (see buildFilmPage). On departure it

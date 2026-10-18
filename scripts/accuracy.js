@@ -140,7 +140,7 @@ async function main({ root = ".", per = Number(process.env.ACCURACY_PER_EDITION 
     try {
       d = await api.tmdb(`/${s.kind}/${s.tmdbId}`, { append_to_response: s.kind === "tv" ? "watch/providers,aggregate_credits" : "watch/providers,release_dates,credits" });
       await api.pause(120);
-    } catch (e) { errors++; continue; }
+    } catch { errors++; continue; }
     const item = extractFacts(fs.readFileSync(file(s.code, s.slug), "utf8"), s.slug);
     if (!item) continue;
     checked++;
@@ -175,7 +175,7 @@ async function runAccuracyPass(manifest, { root = ".", per = 6, api, now = new D
     try {
       d = await api.tmdb(`/${s.kind}/${s.tmdbId}`, { append_to_response: s.kind === "tv" ? "watch/providers,aggregate_credits" : "watch/providers,release_dates,credits" });
       await api.pause(120);
-    } catch (e) { errors++; continue; }
+    } catch { errors++; continue; }
     const item = extractFacts(fs.readFileSync(file(s.code, s.slug), "utf8"), s.slug);
     if (!item) continue;
     checked++;

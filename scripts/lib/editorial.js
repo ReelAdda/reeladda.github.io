@@ -869,10 +869,6 @@ async function tmdbReviewMine(item) {
   return { lean, praised: mined.praised, panned: mined.panned };
 }
 
-async function tmdbReviewTake(item) { // kept for compatibility: mine + compose in one step
-  const ta = await tmdbReviewMine(item);
-  return ta ? composeTmdbTake(ta, Number(item.tmdbId) || 0) : null;
-}
 
 // Attach a critics' take to every theatre + OTT item across all countries. Same
 // dedupe-and-fan-out shape as attachBuzz: each unique title is researched ONCE.

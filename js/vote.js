@@ -20,8 +20,8 @@
   var done = box.querySelector(".fcvote-done");
   var KEY = "fcvote:" + film, AUTH = "fcvote:auth";
   var store = {
-    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+    get: function (k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch { /* storage blocked: the vote still saves */ } }
   };
 
   function show(v, msg) {
@@ -46,7 +46,7 @@
   // Anonymous identity, kept in this browser: signed up once, refreshed when the token expires.
   function identity() {
     var saved = null;
-    try { saved = JSON.parse(store.get(AUTH) || "null"); } catch (e) {}
+    try { saved = JSON.parse(store.get(AUTH) || "null"); } catch { /* unreadable: sign up again */ }
     if (saved && saved.idToken && saved.exp > Date.now() + 60000) return Promise.resolve(saved);
     var keep = function (id, rt, uid, secs) {
       var a = { idToken: id, rt: rt, uid: uid, exp: Date.now() + Number(secs || 3600) * 1000 };

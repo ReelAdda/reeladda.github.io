@@ -2,6 +2,8 @@
 // Run after the build: node scripts/smoke.js          (checks data.json)
 //                      node scripts/smoke.js us uk au de   (checks data-<code>.json too)
 // In CI, pass all country codes so a malformed/empty build fails loudly instead of shipping.
+"use strict";
+
 
 const fs = require("fs");
 const assert = require("assert");

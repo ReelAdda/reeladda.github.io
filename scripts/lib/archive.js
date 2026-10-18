@@ -525,7 +525,7 @@ function settleTimeWords(html, cfg = null, now = Date.now()) {
   // ▸ Must watch", Dridam "(1 votes) ▸ Worth a watch". A handful of votes is not a verdict
   // (the live builder needs 50), so the rating line goes and the verdict says so.
   out = out.replace(/<div class="rating">★ [\d.]+ <span[^>]*>\(([1-9]) votes?\)<\/span><\/div>(\s*)<div class="verdict">▸ (?:Must watch|Worth a watch|Skip[^<]*)<\/div>/,
-    (m, n, gap) => `<div class="verdict">▸ Not enough ratings yet</div>`);
+    () => `<div class="verdict">▸ Not enough ratings yet</div>`);
   // ...or from a rating with no count at all ("★ 7.9 ▸ Must watch": Deool Band 2, Sing
   // Geetham). The rating is TMDB's and stays; the verdict has nothing under it.
   out = out.replace(/(<div class="rating">★ [\d.]+<\/div>\s*)<div class="verdict">▸ (?:Must watch|Worth a watch|Skip[^<]*)<\/div>/,
@@ -594,7 +594,7 @@ function freshenFrozenCopy(html, { countryName, cfg = null, now = Date.now() } =
 
   // Theatrical present tense, any name form of THIS country.
   out = out.replace(new RegExp(`It${A}s in theatres in (?:${names}) now — best caught on the big screen\\.`, "g"),
-    (m) => `It had its theatrical run in ${escHtml(country)} — check back here for its ${V.arrival}.`);
+    () => `It had its theatrical run in ${escHtml(country)} — check back here for its ${V.arrival}.`);
   out = out.replace(new RegExp(`is currently playing in theatres across (?:${names})\\. An? (?:OTT|streaming) release hasn${A}t been announced yet\\.`, "g"),
     (m) => `has finished its theatrical run in ${m.includes("&#39;") ? escHtml(country) : country}. Its ${V.release} hasn${ap(m)}t been announced yet — check back soon.`);
 

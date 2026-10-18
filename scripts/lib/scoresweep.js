@@ -270,7 +270,7 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
       const kind = e.kind === "tv" ? "tv" : "movie";
       d = await api.tmdb(`/${kind}/${e.tmdbId}`, { append_to_response: "external_ids" });
       await api.pause(120);
-    } catch (err) {
+    } catch {
       res.errors++;
       if (res.errors >= 5) break; // TMDB trouble: stop, retry next run
       continue;

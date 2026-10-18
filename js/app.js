@@ -9,6 +9,8 @@
  * Per-page settings come from <meta name="fc-page"> and <meta name="fc-stream-word"> (FC_PAGE,
  * FC_STREAM below), never from the script itself, so this file is the same on every page.
  */
+"use strict";
+
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 // Paste your WhatsApp Channel invite link here (https://whatsapp.com/channel/...).

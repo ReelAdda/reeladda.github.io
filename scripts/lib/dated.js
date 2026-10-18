@@ -1,4 +1,3 @@
-const { writeIfChanged } = require("./writeif.js");
 // ============================================================================
 // dated.js — dated and listing pages: 'Coming to OTT', 'New on OTT today', language landing
 // pages, weekly snapshots, the platform-hub writer and the IndexNow payload.
@@ -6,6 +5,7 @@ const { writeIfChanged } = require("./writeif.js");
 "use strict";
 
 const fs = require("fs");
+const { writeIfChanged } = require("./writeif.js");
 const {
   LANGUAGE_PAGES,
   filmPageUrl,

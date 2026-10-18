@@ -108,7 +108,7 @@ ${ICON_LINKS}
   <p>A compact, self-updating widget showing what's new on streaming in India each week. Paste
   one line of code — it refreshes on its own every week, no maintenance. Free to use; it links
   back to FilmyChill.</p>
-  <pre>${e('<iframe src="https://filmychill.com/embed/week/" width="340" height="420" style="border:0;max-width:100%" loading="lazy" title="New on OTT this week — FilmyChill"></iframe>')}</pre>
+  <pre>${e(snippet)}</pre>
   <h2>Preview</h2>
   <div class="prev">${e('<iframe src="/embed/week/" width="340" height="420" style="border:0" loading="lazy"></iframe>').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')}</div>
   <p style="font-size:14px;color:#716A8C;">Other countries: swap <code>/embed/week/</code> for

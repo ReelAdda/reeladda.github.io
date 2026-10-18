@@ -31,14 +31,6 @@ function releaseState(dateStr, now = Date.now()) {
   return d > t ? "upcoming" : d === t ? "today" : "released";
 }
 
-function releaseState(dateStr, now = Date.now()) {
-  if (!dateStr) return "unknown";
-  const d = String(dateStr).slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return "unknown";
-  const t = todayStr(now);
-  return d > t ? "upcoming" : d === t ? "today" : "released";
-}
-
 // Tense-correct date line for cards and pages: "Releases today" / "Releases 9 Oct" /
 // "Released 31 Jan". TV keeps its own "Latest season" wording (see freshLabel).
 function releaseLabel(dateStr, now = Date.now(), locale = "en-IN") {

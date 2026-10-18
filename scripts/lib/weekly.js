@@ -14,7 +14,6 @@ const {
   fmtRuntime,
   ICON_LINKS,
   ldJson,
-  trim,
   localeFor,
 } = require("./core.js");
 const { rankValue } = require("./score.js");
@@ -33,22 +32,6 @@ const {
 } = require("./pagekit.js");
 const { streamVocab } = require("./rules.js");
 
-// FilmyChill Score panel (lib/fcscore.js) — the card's verdict. Mirrors fcScoreHtml() in
-// index.html so SSR and hydrated cards match; keep the two in step. No score = "too early"
-// (the gate held it back), never a guess; the audience rating stays visible either way.
-function fcScorePanel(item) {
-  const e = escHtml;
-  const s = item.fcScore;
-  const bits = [];
-  if (item.rating != null && item.votes) bits.push(`Audience ★ ${Number(item.rating).toFixed(1)} (${Number(item.votes).toLocaleString()} ratings)`);
-  if (s && s.critics) bits.push(`Critics: ${s.critics}`);
-  // No score yet: show the buzz instead — clearly attention, never a verdict.
-  if (!s) for (const b of [wikiViewsLabel(item.wikiWeeklyViews), trailerViewsLabel(item.trailerViews)]) if (b) bits.push(b);
-  const sig = bits.length ? `<div class="fcs-sig">${e(bits.join(" · "))}</div>` : "";
-  const none = noScoreText(item);
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-early"/></svg>${e(none.label)}</span></div><div class="fcs-why">${e(none.why)}</div></div>${sig}`;
-  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v"><svg class="fcm" aria-hidden="true"><use href="#fcm-${meterLevel(s.verdict)}"/></svg>${e(s.verdict)}</span></div><div class="fcs-why">${e(s.reason)}${s.early ? ` <span class="fcs-tag">${e(earlyReadLabel(s))}</span>` : ""}</div></div>${sig}`;
-}
 
 // CLEANER CARDS (Oct 2026) — server twin of card() in index.html; same markup, so the page
 // doesn't shift when the browser re-renders it. Poster with the rank on it, title, a short
@@ -151,7 +134,6 @@ function ottWeekUrl(code) { return code === "in" ? "https://filmychill.com/new-o
 // exists at the repo root, its text REPLACES the generated note for India — the owner's
 // real opinion wins.
 // ============================================================================
-const EDNOTE_MIN_VOTES = 25;
 function isoWeekNum(d = new Date()) {
   const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
   t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));

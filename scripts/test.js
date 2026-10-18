@@ -11,6 +11,8 @@
 // the site has updated. A test is safety if its group is in SAFETY_GROUPS or its name matches
 // SAFETY_NAME. Locally, without TEST_TIERS, every failure still fails the run.
 
+"use strict";
+
 const assert = require("assert");
 const U = require("./update.js");
 // The homepage as a reader gets it: its template plus its script (js/app.js since the CSP
@@ -1937,7 +1939,7 @@ test("writeIfChanged keeps a page that differs only in its stamps, and writes a 
     fsx.mkdirSync(path.join(root, "css"));
     const css = ".a{color:red}";
     fsx.writeFileSync(path.join(root, "css", "fp-0123456789.css"), css);
-    const page = (day, body, styles) => `<meta http-equiv="Content-Security-Policy" content="style-src ${styles ? "'unsafe-inline'" : "'self' 'unsafe-inline'"}">${styles ? `<style>${css}</style>` : '<link rel="stylesheet" href="/css/fp-0123456789.css">'}`
+    const page = (day, body, styles) => `<title>Film X (2026)</title><meta http-equiv="Content-Security-Policy" content="style-src ${styles ? "'unsafe-inline'" : "'self' 'unsafe-inline'"}">${styles ? `<style>${css}</style>` : '<link rel="stylesheet" href="/css/fp-0123456789.css">'}`
       + `<script type="application/ld+json">{"dateModified":"2026-10-${day}"}</script><div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${day} Oct 2026</div>`
       + `<!--SW:stream--><!--SW:live=2026-10-${day}--><!--SW:checked=2026-10-0${day % 9}--><p>${body}</p><p>Availability as of ${day} Oct 2026 — platforms may change over time.</p>`;
     const f = path.join(root, "p.html");
@@ -1949,7 +1951,16 @@ test("writeIfChanged keeps a page that differs only in its stamps, and writes a 
     const changedCss = page(12, "On Netflix and Prime Video.", true).replace(css, ".a{color:blue}");
     assert.strictEqual(W.writeIfChanged(f, changedCss, { root }), true, "a style change is a change");
     const nf = path.join(root, "new.html");
-    assert.strictEqual(W.writeIfChanged(nf, "<p>x</p>", { root }), true, "new pages are written");
+    assert.strictEqual(W.writeIfChanged(nf, page(12, "A new film.", true), { root }), true, "new pages are written");
+    // A broken page is refused (Power-of-Ten audit, Oct 2026): nothing written, the refusal kept.
+    const before = W.WRITE_STATS.refused.length;
+    assert.strictEqual(W.writeIfChanged(path.join(root, "broken.html"), "<p>x</p>", { root }), false, "an empty page isn't written");
+    assert.ok(!fsx.existsSync(path.join(root, "broken.html")));
+    assert.strictEqual(W.writeIfChanged(f, page(13, "Runtime: undefined min", true), { root }), false, "a leaked undefined isn't published");
+    assert.ok(fsx.readFileSync(f, "utf8").includes("Page updated 12 Oct"), "the published version stays");
+    assert.strictEqual(W.WRITE_STATS.refused.length, before + 2, "both refusals reported");
+    W.WRITE_STATS.refused.length = before;
+    assert.strictEqual(W.writeIfChanged(path.join(root, "feed.xml"), "<x/>", { root }), true, "only HTML pages are checked");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 test("every regenerating page writer goes through writeIfChanged", () => {
@@ -6913,8 +6924,8 @@ test("homepage template mirrors the buzz line and the split-critics wording", ()
   assert.ok(/const buzz = wikiViewsLabel\(item\.wikiWeeklyViews\) \|\| \(tv \?/.test(src), "cardScore: Wikipedia views before trailer views");
   assert.ok(/if \(!s\) \[wikiViewsLabel\(item\.wikiWeeklyViews\), trailerViewsLabel\(item\.trailerViews\)\]/.test(src), "detail view signals");
   assert.ok(/item\.criticsTone === 'mixed'\s*\? \{ label: 'Too early', why: 'Critics are split; audience ratings are still coming in\.' \}/.test(src), "noScoreText mirror");
-  const W = require("fs").readFileSync(require("path").join(__dirname, "lib", "weekly.js"), "utf8");
-  assert.ok(/if \(!s\) for \(const b of \[wikiViewsLabel\(item\.wikiWeeklyViews\), trailerViewsLabel\(item\.trailerViews\)\]\)/.test(W), "server panel twin");
+  // (The server-side twin, fcScorePanel in lib/weekly.js, was never called and was removed in
+  // the Oct 2026 Power-of-Ten audit; the homepage's own panel is the only one.)
 });
 test("attachTakes reads every list that gets a film page, through readCritics, with the five-review exception", () => {
   const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "editorial.js"), "utf8");
@@ -7606,6 +7617,34 @@ test("a check date alone never moves 'Page updated'", () => {
     assert.strictEqual(stored.updated, "2026-10-01", "a recheck isn't an update");
   } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); Q.clearQueue(); }
 });
+group("18 Oct 2026: Power-of-Ten audit — static checks on every script, every build");
+test("every script parses (node --check), including the ones no test loads", () => {
+  const fsx = require("fs"), path = require("path"), { execFileSync } = require("child_process");
+  const dirs = ["scripts", "scripts/lib", "scripts/testdata", "js"];
+  const files = dirs.flatMap((d) => fsx.existsSync(path.join(__dirname, "..", d)) ? fsx.readdirSync(path.join(__dirname, "..", d)).filter((f) => f.endsWith(".js")).map((f) => path.join(__dirname, "..", d, f)) : []);
+  assert.ok(files.length >= 50, `found ${files.length} scripts`);
+  const bad = [];
+  for (const f of files) { try { execFileSync(process.execPath, ["--check", f], { stdio: "pipe" }); } catch (e) { bad.push(`${path.relative(path.join(__dirname, ".."), f)}: ${String(e.stderr || e.message).split("\n").find((l) => /Error/.test(l)) || "syntax error"}`); } }
+  assert.deepStrictEqual(bad, [], bad.join("; "));
+});
+test("\"use strict\" is the first statement of every script (a directive anywhere else is ignored)", () => {
+  const fsx = require("fs"), path = require("path");
+  const dirs = ["scripts", "scripts/lib", "scripts/testdata", "js"];
+  const bad = [];
+  for (const d of dirs) {
+    const dir = path.join(__dirname, "..", d);
+    if (!fsx.existsSync(dir)) continue;
+    for (const f of fsx.readdirSync(dir).filter((x) => x.endsWith(".js"))) {
+      const s = fsx.readFileSync(path.join(dir, f), "utf8");
+      // Strip a shebang and leading comments; what's left must start with the directive.
+      const rest = s.replace(/^#![^\n]*\n/, "").replace(/^(?:\s+|\/\/[^\n]*\n|\/\*[\s\S]*?\*\/)*/, "");
+      // A browser script may instead wrap everything in one function whose body starts with it.
+      if (!/^["']use strict["']/.test(rest) && !/^\(function\s*\(\)\s*\{\s*["']use strict["']/.test(rest)) bad.push(`${d}/${f}`);
+    }
+  }
+  assert.deepStrictEqual(bad, [], `not strict: ${bad.join(", ")} (dated.js and evergreen.js had a require above the directive, Oct 2026)`);
+});
+
 group("18 Oct 2026: buildCountry in four steps, proven equal; build metering; the weekly full check");
 // Runs fn in a temp dir with logs silenced and the first-seen state restored afterwards.
 async function isolatedBuild(fn) {

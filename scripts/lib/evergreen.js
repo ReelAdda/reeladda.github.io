@@ -1,10 +1,10 @@
-const { writeIfChanged } = require("./writeif.js");
 // ============================================================================
 // evergreen.js — evergreen pages: 'Streaming on <platform>' and people pages.
 // ============================================================================
 "use strict";
 
 const fs = require("fs");
+const { writeIfChanged } = require("./writeif.js");
 const {
   escHtml,
   filmPageUrl,
@@ -261,7 +261,7 @@ function peopleIndexFor(cfg) {
   return people;
 }
 
-function buildPersonPage(person, cfg, { availability, now = Date.now() }) {
+function buildPersonPage(person, cfg, { availability }) {
   const code = (cfg && cfg.code) || "in";
   const country = countryNameFor(cfg);
   const url = personPageUrl(code, person.slug);
