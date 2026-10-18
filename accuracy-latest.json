@@ -2,20 +2,55 @@
  "date": "2026-10-18",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
- "high": 0,
- "correctable": 0,
+ "pagesDisagreeing": 3,
+ "high": 2,
+ "correctable": 2,
  "byField": {
-  "runtime": 1
+  "platform": 2,
+  "runtime": 1,
+  "director": 1,
+  "lead actor": 1
  },
  "rows": [
   {
+   "field": "platform",
+   "severity": "high",
+   "page": "Disney Plus, fuboTV",
+   "tmdb": "Disney+",
+   "code": "us",
+   "slug": "monsters-inc"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, HBO Max, HBO Max Amazon Channel",
+   "tmdb": "HBO Max",
+   "code": "de",
+   "slug": "joker"
+  },
+  {
    "field": "runtime",
    "severity": "medium",
-   "page": "45 min",
-   "tmdb": "77 min",
-   "code": "my",
-   "slug": "kudrat-1968-high-council"
+   "page": "87 min",
+   "tmdb": "96 min",
+   "code": "ca",
+   "slug": "night-of-the-living-dead"
+  },
+  {
+   "field": "director",
+   "severity": "medium",
+   "page": "Christopher Ray",
+   "tmdb": "George A. Romero",
+   "code": "ca",
+   "slug": "night-of-the-living-dead"
+  },
+  {
+   "field": "lead actor",
+   "severity": "medium",
+   "page": "Vivica A. Fox",
+   "tmdb": "Judith O'Dea, Duane Jones, Marilyn Eastman",
+   "code": "ca",
+   "slug": "night-of-the-living-dead"
   }
  ]
 }
