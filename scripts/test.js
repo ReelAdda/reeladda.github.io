@@ -16,8 +16,15 @@
 const assert = require("assert");
 const U = require("./update.js");
 // The homepage as a reader gets it: its template plus its script (js/app.js since the CSP
-// change, Oct 2026). Tests about the homepage's client code read both.
-const homeSource = () => { const fs = require("fs"), path = require("path"); return fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8") + "\n" + fs.readFileSync(path.join(__dirname, "..", "js", "app.js"), "utf8"); };
+// change, Oct 2026). Tests about the homepage's client code read both. A built index.html
+// carries a copy of the script inlined between the APPJS markers — a copy of whatever app.js was
+// at the last build, so it is dropped here and js/app.js, the source, is read instead.
+const homeSource = () => {
+  const fs = require("fs"), path = require("path");
+  const tpl = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8")
+    .replace(/<!--SSR:APPJS-->[\s\S]*?<!--\/SSR:APPJS-->/, "<!--SSR:APPJS--><!--/SSR:APPJS-->");
+  return tpl + "\n" + fs.readFileSync(path.join(__dirname, "..", "js", "app.js"), "utf8");
+};
 
 const SAFETY_GROUPS = new Set([
   "escHtml()",
@@ -6664,7 +6671,7 @@ test("syncFilmLastmods: the first run only records; cosmetic edits never move th
 
 test("homepage: no inline script and no inline handler, so its CSP can refuse inline scripts (Oct 2026)", () => {
   const fsx = require("fs");
-  const tpl = fsx.readFileSync("index.html", "utf8"), app = fsx.readFileSync("js/app.js", "utf8");
+  const tpl = fsx.readFileSync("index.html", "utf8").replace(/(<!--SSR:APPJS-->)[\s\S]*?(<!--\/SSR:APPJS-->)/, "$1<script src=\"/js/app.js\"></script>$2"), app = fsx.readFileSync("js/app.js", "utf8");
   // The page script sits between the APPJS markers (inlined by the build); nothing else inline.
   const outside = tpl.replace(/<!--SSR:APPJS-->[\s\S]*?<!--\/SSR:APPJS-->/, "");
   assert.ok(outside !== tpl, "the template carries the APPJS markers");
