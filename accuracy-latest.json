@@ -2,38 +2,54 @@
  "date": "2026-10-18",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 3,
- "high": 3,
+ "pagesDisagreeing": 5,
+ "high": 4,
  "correctable": 3,
  "byField": {
-  "streaming": 1,
-  "platform": 1,
-  "release date": 1
+  "platform": 3,
+  "language": 1,
+  "lead actor": 1
  },
  "rows": [
   {
-   "field": "streaming",
+   "field": "platform",
    "severity": "high",
-   "page": "not streaming",
-   "tmdb": "on HBO Max",
-   "code": "uk",
-   "slug": "backrooms"
+   "page": "Amazon Prime Video, BINGE, Foxtel Now, Stan",
+   "tmdb": "BINGE, Foxtel Now, Stan",
+   "code": "au",
+   "slug": "little-women"
+  },
+  {
+   "field": "language",
+   "severity": "high",
+   "page": "German",
+   "tmdb": "English",
+   "code": "de",
+   "slug": "bloody-tennis"
+  },
+  {
+   "field": "lead actor",
+   "severity": "medium",
+   "page": "Tony Yang",
+   "tmdb": "Tony Yang Yo-Ning, Cecilia Choi, Derek Chang",
+   "code": "my",
+   "slug": "mudborn"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "Netflix, Amazon Prime Video, Foxtel Now, Stan",
-   "tmdb": "Netflix, Foxtel Now, Stan",
-   "code": "au",
-   "slug": "fury"
+   "page": "Netflix, Netflix Kids, Sony Pictures Core Amazon Channel",
+   "tmdb": "Sony Pictures Core",
+   "code": "nz",
+   "slug": "little-women"
   },
   {
-   "field": "release date",
+   "field": "platform",
    "severity": "high",
-   "page": "2026-12-24",
-   "tmdb": "2027-03-12",
-   "code": "ca",
-   "slug": "shakti-shalini"
+   "page": "Netflix, Prime Video, SFR Play",
+   "tmdb": "Netflix, Prime Video",
+   "code": "fr",
+   "slug": "chicago-p-d"
   }
  ]
 }

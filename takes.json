@@ -4096,7 +4096,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-17",
+  "checked": "2026-10-18",
   "v": 6
  },
  "tt44101690": {
@@ -5236,7 +5236,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-17",
+  "checked": "2026-10-18",
   "v": 6
  },
  "tt34206385": {
@@ -6694,7 +6694,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-17",
+  "checked": "2026-10-18",
   "v": 6
  },
  "tt45692999": {
@@ -6873,7 +6873,7 @@
   "src": null,
   "hook": null,
   "article": "Doctor X: Mafia in White",
-  "checked": "2026-10-17",
+  "checked": "2026-10-18",
   "v": 6
  },
  "tt43691434": {
@@ -7125,7 +7125,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-17",
+  "checked": "2026-10-18",
   "v": 6
  },
  "tt35410859": {
@@ -7551,11 +7551,25 @@
   "v": 6
  },
  "tt40855841": {
-  "take": null,
-  "src": null,
+  "take": "The reviews were not kind, and the writing took the worst of it.",
+  "src": "wiki",
   "hook": "Balaji Mohan's directorial debut.",
   "article": "Nayyi Navelli",
-  "checked": "2026-10-17",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [
+    "writing"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "ratings",
+   "ratings": {
+    "n": 4,
+    "median": 2.25
+   }
+  },
+  "checked": "2026-10-18",
   "v": 6
  },
  "tt28773062": {
@@ -17941,6 +17955,2105 @@
    "score": {
     "kind": "mc",
     "value": 80
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt39395275": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Dragon Ball Super: Beerus",
+  "checked": "2026-10-18",
+  "v": 6
+ },
+ "tt0278866": {
+  "take": "Critics loved it — special praise for the writing and animation.",
+  "src": "wiki",
+  "article": "Kim Possible",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "writing",
+    "animation"
+   ],
+   "panned": [],
+   "divided": [
+    "humour"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0810788": {
+  "take": "A well-reviewed outing; the writing and tone stood out for critics.",
+  "src": "wiki",
+  "article": "Burn Notice",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "writing",
+    "tone"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 88
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1606375": {
+  "take": "The critical verdict is rare-air positive.",
+  "src": "wiki",
+  "article": "Downton Abbey",
+  "a": {
+   "tone": "acclaim",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "mc",
+    "value": 100
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1710295": {
+  "take": "Reviewers responded well — the performances came in for particular praise.",
+  "src": "wiki",
+  "article": "Doc McStuffins",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1217209": {
+  "take": "The reviews lean clearly positive.",
+  "src": "wiki",
+  "article": "Brave (2012 film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 78
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2149175": {
+  "take": "A critical darling — reviewers kept coming back to the pacing and writing.",
+  "src": "wiki",
+  "article": "The Americans",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "pacing",
+    "writing"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1690953": {
+  "take": "Critics have been largely positive on this one.",
+  "src": "wiki",
+  "article": "Despicable Me 2",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 75
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2712740": {
+  "take": "Opinion is split — the humour is the bright spot either way.",
+  "src": "wiki",
+  "article": "The Goldbergs (2013 TV series)",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "humour"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 55
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2632424": {
+  "take": "Critics have been largely positive on this one.",
+  "src": "wiki",
+  "article": "The Originals (TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 87
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2294629": {
+  "take": null,
+  "src": null,
+  "article": "Frozen (2013 film)",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt3444938": {
+  "take": "Broadly positive reviews, though the music drew grumbles.",
+  "src": "wiki",
+  "article": "The Tonight Show Starring Jimmy Fallon",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [
+    "music"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt3061050": {
+  "take": null,
+  "src": null,
+  "article": "Clarence (American TV series)",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt3501074": {
+  "take": "Most critics came away happy.",
+  "src": "wiki",
+  "article": "Madam Secretary (TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 67
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1911658": {
+  "take": "A divided response, and the performances carries most of the blame.",
+  "src": "wiki",
+  "article": "Penguins of Madagascar",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [
+    "performances"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 74
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt3228904": {
+  "take": "Critics were won over, largely on the strength of the performances and music.",
+  "src": "wiki",
+  "article": "Empire (2015 TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "music"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 84
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2802144": {
+  "take": "Reviews cut both ways: the visuals impressed, the story frustrated.",
+  "src": "wiki",
+  "article": "Kingsman: The Secret Service",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "visuals"
+   ],
+   "panned": [
+    "story"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 75
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2322441": {
+  "take": null,
+  "src": null,
+  "article": "Fifty Shades of Grey (film)",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2820852": {
+  "take": "The first half and production design is what reviewers walked away talking about.",
+  "src": "wiki",
+  "article": "Furious 7",
+  "a": {
+   "tone": null,
+   "praised": [
+    "first half",
+    "production design"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt4179452": {
+  "take": "Critics kept circling back to the performances and writing — in a good way.",
+  "src": "wiki",
+  "article": "The Last Kingdom (TV series)",
+  "a": {
+   "tone": null,
+   "praised": [
+    "performances",
+    "writing"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 87
+   },
+   "ratings": {
+    "n": 1,
+    "median": 4
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1951266": {
+  "take": "Critics came away positive on the action; on the performances, they part ways.",
+  "src": "wiki",
+  "article": "The Hunger Games: Mockingjay – Part 2",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "action"
+   ],
+   "panned": [],
+   "divided": [
+    "performances"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 70
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt4477976": {
+  "take": "Truly divisive — for every critic who bought in, one checked out.",
+  "src": "wiki",
+  "article": "Superstore (TV series)",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt3460252": {
+  "take": "Critics were won over, largely on the strength of the performances and writing.",
+  "src": "wiki",
+  "article": "The Hateful Eight",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "writing"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 74
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt5574490": {
+  "take": "The reviews lean clearly positive.",
+  "src": "wiki",
+  "article": "Animal Kingdom (TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 76
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2543164": {
+  "take": "Critics loved it — special praise for the runtime and performances.",
+  "src": "wiki",
+  "article": "Arrival (film)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "runtime",
+    "performances"
+   ],
+   "panned": [],
+   "divided": [
+    "writing"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 94
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 4.25
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt3783958": {
+  "take": "Rave reviews across the board, especially for the writing and direction.",
+  "src": "wiki",
+  "article": "La La Land",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "writing",
+    "direction"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 91
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt5788792": {
+  "take": "Near-universal acclaim, with the writing and production design singled out most often.",
+  "src": "wiki",
+  "article": "The Marvelous Mrs. Maisel",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "writing",
+    "production design"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 94
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2771200": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "article": "Beauty and the Beast (2017 film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt5531466": {
+  "take": "Critics liked it, especially the originality and performances.",
+  "src": "wiki",
+  "article": "DuckTales (2017 TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "originality",
+    "performances"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 2,
+    "median": 4.625
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt4378376": {
+  "take": "Reviewers singled out the story for praise.",
+  "src": "wiki",
+  "article": "Babylon Berlin",
+  "a": {
+   "tone": null,
+   "praised": [
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt6644200": {
+  "take": "Critics loved this one, and the writing and second half drew the loudest praise.",
+  "src": "wiki",
+  "article": "A Quiet Place",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "writing",
+    "second half"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 96
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt5057054": {
+  "take": "Critics liked it: the ambition and story won praise, though the second half drew some flak.",
+  "src": "wiki",
+  "article": "Jack Ryan (TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "ambition",
+    "story"
+   ],
+   "panned": [
+    "second half"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 75
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt6146586": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "article": "John Wick: Chapter 3 – Parabellum",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 89
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 4.25
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt10323338": {
+  "take": "Mostly good reviews: praise for the writing and action, real debate over the performances.",
+  "src": "wiki",
+  "article": "9-1-1: Lone Star",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "writing",
+    "action"
+   ],
+   "panned": [],
+   "divided": [
+    "performances"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 77
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 3.25
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt11815682": {
+  "take": "Critics came away raving.",
+  "src": "wiki",
+  "article": "Hacks",
+  "a": {
+   "tone": "acclaim",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt10096842": {
+  "take": "A love-it-or-hate-it reception, right down the middle.",
+  "src": "wiki",
+  "article": "False Positive (film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 47
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt10168312": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "article": "What If...? (TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 89
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt11691774": {
+  "take": "The reviews lean clearly positive.",
+  "src": "wiki",
+  "article": "Only Murders in the Building",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt9376612": {
+  "take": "Critics liked it: the action won praise, though the pacing drew some flak.",
+  "src": "wiki",
+  "article": "Shang-Chi and the Legend of the Ten Rings",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "action"
+   ],
+   "panned": [
+    "pacing"
+   ],
+   "divided": [
+    "performances"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 92
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt11126994": {
+  "take": "Critics loved it — special praise for the performances and animation.",
+  "src": "wiki",
+  "article": "Arcane (TV series)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "performances",
+    "animation"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [
+    "production design"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 5
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt7462410": {
+  "take": "Half the critics point to the music and ambition, the other half to the story.",
+  "src": "wiki",
+  "article": "The Wheel of Time (TV series)",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "music",
+    "ambition"
+   ],
+   "panned": [
+    "story"
+   ],
+   "divided": [
+    "writing"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 81
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 7,
+    "median": 4
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt11280740": {
+  "take": "Near-universal acclaim, with the direction and performances singled out most often.",
+  "src": "wiki",
+  "article": "Severance (TV series)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "direction",
+    "performances"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 95
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 4
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt13560574": {
+  "take": "A well-reviewed outing; the performances and action stood out for critics.",
+  "src": "wiki",
+  "article": "X (2022 film)",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "action"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 94
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt3915174": {
+  "take": "Critics loved this one, and the performances and animation drew the loudest praise.",
+  "src": "wiki",
+  "article": "Puss in Boots: The Last Wish",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "performances",
+    "animation"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 95
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 4,
+    "median": 3.5
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt13345606": {
+  "take": "Critics have been largely positive on this one.",
+  "src": "wiki",
+  "article": "Evil Dead Rise",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 85
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt14186672": {
+  "take": "Truly divisive — for every critic who bought in, one checked out.",
+  "src": "wiki",
+  "article": "Landman (TV series)",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 83
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt8790086": {
+  "take": "Critics found little to love here.",
+  "src": "wiki",
+  "article": "Kraven the Hunter (film)",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 15
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 2
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt13186482": {
+  "take": "Half the critics point to the second half, the other half to the humour.",
+  "src": "wiki",
+  "article": "Mufasa: The Lion King",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "second half"
+   ],
+   "panned": [
+    "humour"
+   ],
+   "divided": [
+    "writing"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 56
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt7068946": {
+  "take": "Genuinely divisive — critics can't settle this one.",
+  "src": "wiki",
+  "article": "The Accountant 2",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 75
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt29567402": {
+  "take": "Opinion is split, and the music is where it splits hardest.",
+  "src": "wiki",
+  "article": "Rabbit Trap",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [
+    "music"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 48
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt26678938": {
+  "take": "Critics are split clean down the middle on this one.",
+  "src": "wiki",
+  "article": "Pretty Lethal",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 59
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0032138": {
+  "take": "Critics loved it — special praise for the story.",
+  "src": "wiki",
+  "article": "The Wizard of Oz",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0052451": {
+  "take": null,
+  "src": null,
+  "article": "Bonanza",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0053502": {
+  "take": "A divided response, and the animation carries most of the blame.",
+  "src": "wiki",
+  "article": "The Flintstones",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [
+    "animation"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0057733": {
+  "take": null,
+  "src": null,
+  "article": "Bewitched",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0060028": {
+  "take": null,
+  "src": null,
+  "article": "Star Trek: The Original Series",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0061266": {
+  "take": null,
+  "src": null,
+  "article": "Ironside (1967 TV series)",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0063350": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "article": "Night of the Living Dead",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 95
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0068098": {
+  "take": "The ambition drew the bulk of the complaints.",
+  "src": "wiki",
+  "article": "M*A*S*H (TV series)",
+  "a": {
+   "tone": null,
+   "praised": [],
+   "panned": [
+    "ambition"
+   ],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0081873": {
+  "take": "A critical darling — reviewers kept coming back to the story.",
+  "src": "wiki",
+  "article": "Hill Street Blues",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0086250": {
+  "take": "The reviews were not kind, and the second half took the worst of it.",
+  "src": "wiki",
+  "article": "Scarface (1983 film)",
+  "a": {
+   "tone": "negative",
+   "praised": [
+    "tone",
+    "atmosphere"
+   ],
+   "panned": [
+    "second half"
+   ],
+   "divided": [
+    "originality"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 77
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0088891": {
+  "take": null,
+  "src": null,
+  "article": "Cavegirl (film)",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0090605": {
+  "take": "A well-reviewed outing, strongest on the action and originality — only the music drew real argument.",
+  "src": "wiki",
+  "article": "Aliens (film)",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "action",
+    "originality"
+   ],
+   "panned": [],
+   "divided": [
+    "music"
+   ],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0094416": {
+  "take": "Reviewers found plenty to like here.",
+  "src": "wiki",
+  "article": "American Experience",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0096542": {
+  "take": null,
+  "src": null,
+  "article": "Baywatch",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0096874": {
+  "take": "Critics are split — praise for the humour, pushback on the originality.",
+  "src": "wiki",
+  "article": "Back to the Future Part II",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "humour"
+   ],
+   "panned": [
+    "originality"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 63
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0107120": {
+  "take": "Critics are split clean down the middle on this one.",
+  "src": "wiki",
+  "article": "Hocus Pocus (1993 film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 42
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0105946": {
+  "take": "Critics highlighted the story and second half, with the performances the weak link.",
+  "src": "wiki",
+  "article": "Babylon 5",
+  "a": {
+   "tone": null,
+   "praised": [
+    "story",
+    "second half"
+   ],
+   "panned": [
+    "performances"
+   ],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0139876": {
+  "take": null,
+  "src": null,
+  "article": "Baashha",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0115355": {
+  "take": null,
+  "src": null,
+  "article": "Silent Witness",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0116630": {
+  "take": "The writing and ambition earned praise; the themes caught flak.",
+  "src": "wiki",
+  "article": "Indian (1996 film)",
+  "a": {
+   "tone": null,
+   "praised": [
+    "writing",
+    "ambition"
+   ],
+   "panned": [
+    "themes"
+   ],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0115341": {
+  "take": null,
+  "src": null,
+  "article": "Sabrina the Teenage Witch (1996 TV series)",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0118437": {
+  "take": null,
+  "src": null,
+  "article": "The Practice",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0157246": {
+  "take": "Reviewers mostly checked out early on this one.",
+  "src": "wiki",
+  "article": "Will & Grace",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 86
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0251497": {
+  "take": null,
+  "src": null,
+  "article": "Big Brother (American TV series)",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0120917": {
+  "take": "A positive reception on balance, with the animation taking the knocks.",
+  "src": "wiki",
+  "article": "The Emperor's New Groove",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [
+    "animation"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 86
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 2
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0292800": {
+  "take": null,
+  "src": null,
+  "article": "The Grim Adventures of Billy & Mandy",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0244365": {
+  "take": "Reviews lean positive: strong marks for the writing and humour, quibbles about the performances.",
+  "src": "wiki",
+  "article": "Star Trek: Enterprise",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "writing",
+    "humour"
+   ],
+   "panned": [
+    "performances"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0285403": {
+  "take": "Near-universal acclaim, with the humour and originality singled out most often.",
+  "src": "wiki",
+  "article": "Scrubs (2001 TV series)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "humour",
+    "originality"
+   ],
+   "panned": [],
+   "divided": [
+    "performances"
+   ],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 3.5
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0294264": {
+  "take": "A divided verdict, with the performances and music the one thing most critics agreed on.",
+  "src": "wiki",
+  "article": "Aalavandhan",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "performances",
+    "music"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1628033": {
+  "take": null,
+  "src": null,
+  "article": "Top Gear (2002 TV series)",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0133240": {
+  "take": "Mostly good reviews — the humour and animation impressed, even if the visuals didn't.",
+  "src": "wiki",
+  "article": "Treasure Planet",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "humour",
+    "animation"
+   ],
+   "panned": [
+    "visuals"
+   ],
+   "divided": [
+    "writing"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 69
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 4
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0367495": {
+  "take": "Reviewers singled out the writing and story for praise.",
+  "src": "wiki",
+  "article": "Anbe Sivam",
+  "a": {
+   "tone": null,
+   "praised": [
+    "writing",
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0362548": {
+  "take": "If critics agreed on one thing, it was the humour and action.",
+  "src": "wiki",
+  "article": "Dhool",
+  "a": {
+   "tone": null,
+   "praised": [
+    "humour",
+    "action"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0300865": {
+  "take": "The lead chemistry and humour drew the most notice from reviewers.",
+  "src": "wiki",
+  "article": "That's So Raven",
+  "a": {
+   "tone": null,
+   "praised": [
+    "lead chemistry",
+    "humour"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0234215": {
+  "take": "A well-reviewed outing; the action and writing stood out for critics.",
+  "src": "wiki",
+  "article": "The Matrix Reloaded",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "action",
+    "writing"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 74
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0361217": {
+  "take": null,
+  "src": null,
+  "article": "Nip/Tuck",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0373733": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "article": "Boys (2003 film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0386950": {
+  "take": "Most critics came away happy.",
+  "src": "wiki",
+  "article": "Mayday (Canadian TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0298148": {
+  "take": "A well-reviewed outing; the story stood out for critics.",
+  "src": "wiki",
+  "article": "Shrek 2",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 89
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0449869": {
+  "take": "The writing and humour drew the most notice from reviewers.",
+  "src": "wiki",
+  "article": "Chandramukhi",
+  "a": {
+   "tone": null,
+   "praised": [
+    "writing",
+    "humour"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0376127": {
+  "take": "Strong marks for the writing and performances, less love for the originality.",
+  "src": "wiki",
+  "article": "Anniyan",
+  "a": {
+   "tone": null,
+   "praised": [
+    "writing",
+    "performances"
+   ],
+   "panned": [
+    "originality"
+   ],
+   "divided": [
+    "story"
+   ],
+   "score": null
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0460091": {
+  "take": null,
+  "src": null,
+  "article": "My Name Is Earl",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0327084": {
+  "take": "Critics came away impressed, by and large.",
+  "src": "wiki",
+  "article": "Over the Hedge",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 75
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0924651": {
+  "take": null,
+  "src": null,
+  "article": "The Graham Norton Show",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0904208": {
+  "take": "Most reviews land firmly on the positive side.",
+  "src": "wiki",
+  "article": "Californication (TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "mc",
+    "value": 72
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0892782": {
+  "take": null,
+  "src": null,
+  "article": "Monsters vs. Aliens",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1537032": {
+  "take": "Critics have been largely positive on this one.",
+  "src": "wiki",
+  "article": "Kanthaswamy",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 1,
+    "median": 2.5
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1708487": {
+  "take": "Critics highlighted the runtime, with the second half the weak link.",
+  "src": "wiki",
+  "article": "Kutty (2010 film)",
+  "a": {
+   "tone": null,
+   "praised": [
+    "runtime"
+   ],
+   "panned": [
+    "second half"
+   ],
+   "divided": [],
+   "score": null,
+   "ratings": {
+    "n": 1,
+    "median": 2.5
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0979432": {
+  "take": "Near-universal acclaim, with the performances and story singled out most often.",
+  "src": "wiki",
+  "article": "Boardwalk Empire",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "performances",
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 94
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1305797": {
+  "take": "Reviews lean positive: strong marks for the performances and direction, quibbles about the second half.",
+  "src": "wiki",
+  "article": "Enthiran",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "direction"
+   ],
+   "panned": [
+    "second half"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 77
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1833403": {
+  "take": "A divided verdict, with the performances and themes the one thing most critics agreed on.",
+  "src": "wiki",
+  "article": "Jake and the Never Land Pirates",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "performances",
+    "themes"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1857670": {
+  "take": "A well-reviewed outing; the performances and music stood out for critics.",
+  "src": "wiki",
+  "article": "Deiva Thirumagal",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "music"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1302011": {
+  "take": "A well-reviewed outing; the originality and tension stood out for critics.",
+  "src": "wiki",
+  "article": "Kung Fu Panda 2",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "originality",
+    "tension"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 82
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1705772": {
+  "take": "The performances won critics over; the writing drew the odd complaint.",
+  "src": "wiki",
+  "article": "Mankatha",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1837642": {
+  "take": "Critics kept circling back to the writing — in a good way.",
+  "src": "wiki",
+  "article": "Revenge (TV series)",
+  "a": {
+   "tone": null,
+   "praised": [
+    "writing"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 69
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2585562": {
+  "take": "Critics came away raving.",
+  "src": "wiki",
+  "article": "Pizza (2012 film)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [],
+   "panned": [
+    "first half"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 3.5
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2187153": {
+  "take": "Critics were broadly positive, with reservations about the atmosphere.",
+  "src": "wiki",
+  "article": "Thuppakki",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [
+    "atmosphere"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 4,
+    "median": 3.25
+   }
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt2215842": {
+  "take": null,
+  "src": null,
+  "article": "Father Brown (2013 TV series)",
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt0481499": {
+  "take": "Critics are split clean down the middle on this one.",
+  "src": "wiki",
+  "article": "The Croods",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 71
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1670345": {
+  "take": "A divided response, and the second half carries most of the blame.",
+  "src": "wiki",
+  "article": "Now You See Me (film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [
+    "second half"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "mc",
+    "value": 50
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt3513388": {
+  "take": "Critics can't settle on this one, but the humour gets its due.",
+  "src": "wiki",
+  "article": "Late Night with Seth Meyers",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "humour"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-18",
+  "v": 6,
+  "cat": true
+ },
+ "tt1877832": {
+  "take": "Critics were broadly positive, with reservations about the story.",
+  "src": "wiki",
+  "article": "X-Men: Days of Future Past",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [
+    "story"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 90
    },
    "toneSrc": "summary"
   },
