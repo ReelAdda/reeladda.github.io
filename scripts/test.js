@@ -6665,17 +6665,48 @@ test("syncFilmLastmods: the first run only records; cosmetic edits never move th
 test("homepage: no inline script and no inline handler, so its CSP can refuse inline scripts (Oct 2026)", () => {
   const fsx = require("fs");
   const tpl = fsx.readFileSync("index.html", "utf8"), app = fsx.readFileSync("js/app.js", "utf8");
-  const scripts = [...tpl.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
+  // The page script sits between the APPJS markers (inlined by the build); nothing else inline.
+  const outside = tpl.replace(/<!--SSR:APPJS-->[\s\S]*?<!--\/SSR:APPJS-->/, "");
+  assert.ok(outside !== tpl, "the template carries the APPJS markers");
+  const scripts = [...outside.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
   for (const [, attrs, body] of scripts) assert.ok(/\bsrc=|type="application\/ld\+json"/.test(attrs) || !body.trim(), `inline script: ${body.slice(0, 60)}`);
-  assert.ok(/<script src="\/js\/app\.js"><\/script>/.test(tpl), "the page loads its script from a file");
   for (const src of [tpl, app]) assert.ok(!/\son(?:click|change|keydown|keyup|input|submit|load|error)="/.test(src), "no inline handlers");
   assert.ok(!/script-src[^;"]*'unsafe-inline'/.test(tpl), "template CSP");
   const S = require("./lib/surfaces.js");
-  assert.ok(!/script-src[^;"]*'unsafe-inline'/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "surfaces.js"), "utf8").match(/const HOME_CSP = "[^"]*"/)[0]), "built homepage CSP");
+  assert.ok(!/'unsafe-inline'/.test(S.homeCsp(null).match(/script-src[^;]*/)[0]), "built homepage CSP");
   // every action named in the markup has a handler
   const names = new Set([...(tpl + app).matchAll(/data-(?:click|change|enter)="([A-Za-z]+)"/g)].map((m) => m[1]));
   for (const n of names) assert.ok(new RegExp(`\\b${n}: \\(`).test(app), `no handler for data action "${n}"`);
-  assert.ok(require("./livecheck.js").homepageAssets(tpl).includes("/js/app.js"), "the live check fetches the script");
+});
+test("homepage: the build inlines js/app.js and the policy allows exactly that script by its hash (Oct 2026)", () => {
+  const fsx = require("fs"), path = require("path"), crypto = require("crypto");
+  const S = require("./lib/surfaces.js");
+  const app = fsx.readFileSync(path.join(__dirname, "..", "js", "app.js"), "utf8");
+  const s = S.homeScript();
+  assert.ok(s, "js/app.js can be inlined (no </script or <!-- in it)");
+  assert.strictEqual(s.tag, `<script>${app}</script>`);
+  assert.strictEqual(s.hash, `'sha256-${crypto.createHash("sha256").update(app, "utf8").digest("base64")}'`);
+  const csp = S.homeCsp(s);
+  assert.ok(csp.includes(`script-src 'self' ${s.hash}`) && !/'unsafe-inline'/.test(csp.match(/script-src[^;]*/)[0]), csp);
+  // A script that would break out of its element falls back to the file.
+  inTempDirSync(() => {
+    fsx.writeFileSync("bad.js", "var a = '</script><b>';");
+    assert.strictEqual(S.homeScript("bad.js"), null);
+    assert.strictEqual(S.homeScript("missing.js"), null);
+    assert.strictEqual(S.homeCsp(null).includes("sha256"), false, "no hash without an inlined script");
+  });
+  // The rendered page: the script inline, its hash in the page's own policy, no src left.
+  const tpl = fsx.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  inTempDirSync(() => {
+    const quiet = console.log; console.log = () => {};
+    try { S.renderCountryPage(tpl, { code: "nz", name: "New Zealand" }, { theatres: [], ott: [], comingSoon: [] }); }
+    finally { console.log = quiet; }
+    const html = fsx.readFileSync("nz/index.html", "utf8");
+    assert.ok(html.includes(`<!--SSR:APPJS--><script>${app}</script><!--/SSR:APPJS-->`), "inlined between the markers");
+    assert.ok(!html.includes('src="/js/app.js"'), "no second copy loaded from the file");
+    const meta = html.match(/http-equiv="Content-Security-Policy" content="([^"]*)"/)[1];
+    assert.ok(meta.includes(s.hash), "the page's policy names the script's hash");
+  });
 });
 test("homepage 'Coming soon' cards stay real links after the page script re-renders them", () => {
   const src = homeSource();
