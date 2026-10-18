@@ -26,7 +26,12 @@ const USE_IMDB = RATINGS_SOURCE === "imdb";
 // this is the one place to count them and to capture them:
 //   setStage(name)        calls and time are counted against the build stage now running;
 //                         meterReport() returns them for the run summary.
-//   startRecording()      every answer from now on is kept (JSON text, by path + params);
+//   startRecording()      every answer from now on is kept (JSON text, by path + params), in the
+//                         order they came: a request made twice keeps both answers, and a replay
+//                         gives them back in that order (Oct 2026: global lists like
+//                         /trending/tv/week are fetched once per edition, and TMDB can reorder
+//                         near-ties between those calls — keeping only the last answer made the
+//                         split proof replay Canada with a list Canada never saw);
 //   stopRecording()       returns that Map and stops keeping.
 //   withReplay(map, fn)   runs fn with tmdb() answering from the map instead of the network
 //                         (a missing entry throws, like a failed call would) and sleep() not
@@ -35,7 +40,7 @@ const USE_IMDB = RATINGS_SOURCE === "imdb";
 // Modules take tmdb and sleep when they load, so the hooks live inside them, not around them.
 // ============================================================================
 const METER = { stage: "start", calls: {}, ms: {}, errors: {} };
-let RECORD = null, REPLAY = null;
+let RECORD = null, REPLAY = null, REPLAY_POS = null;
 const keyOf = (path, params) => path + "?" + JSON.stringify(Object.keys(params || {}).sort().map((k) => [k, String(params[k])]));
 function setStage(name) { METER.stage = name || "start"; }
 function meterReport() {
@@ -44,8 +49,20 @@ function meterReport() {
 function startRecording() { RECORD = new Map(); }
 function stopRecording() { const r = RECORD; RECORD = null; return r || new Map(); }
 async function withReplay(map, fn) {
-  const prev = REPLAY; REPLAY = map;
-  try { return await fn(); } finally { REPLAY = prev; }
+  const prev = REPLAY, prevPos = REPLAY_POS; REPLAY = map; REPLAY_POS = new Map();
+  try { return await fn(); } finally { REPLAY = prev; REPLAY_POS = prevPos; }
+}
+// One recorded answer: a single entry, or the next of a sequence (the last one repeats).
+function nextRecorded(key) {
+  const hit = REPLAY.get(key);
+  if (!Array.isArray(hit)) return hit;
+  const i = REPLAY_POS.get(key) || 0;
+  REPLAY_POS.set(key, i + 1);
+  return hit[Math.min(i, hit.length - 1)];
+}
+function keep(key, entry) {
+  const list = RECORD.get(key);
+  if (list) list.push(entry); else RECORD.set(key, [entry]);
 }
 
 const sleep = (ms) => (REPLAY ? Promise.resolve() : new Promise((r) => setTimeout(r, ms)));
@@ -59,7 +76,7 @@ async function tmdb(path, params = {}) {
   if (REPLAY) {
     // A function answers like TMDB would (tests' fake TMDB); a Map answers from a recording.
     if (typeof REPLAY === "function") return REPLAY(path, params);
-    const hit = REPLAY.get(keyOf(path, params));
+    const hit = nextRecorded(keyOf(path, params));
     if (hit === undefined) throw new Error(`TMDB ${path} failed: not in the recording`);
     if (hit.error) throw new Error(hit.error);
     return JSON.parse(hit.body);
@@ -68,11 +85,11 @@ async function tmdb(path, params = {}) {
   METER.calls[st] = (METER.calls[st] || 0) + 1;
   try {
     const body = await fetchTmdb(path, params);
-    if (RECORD) RECORD.set(keyOf(path, params), { body: JSON.stringify(body) });
+    if (RECORD) keep(keyOf(path, params), { body: JSON.stringify(body) });
     return body;
   } catch (e) {
     METER.errors[st] = (METER.errors[st] || 0) + 1;
-    if (RECORD) RECORD.set(keyOf(path, params), { error: e.message });
+    if (RECORD) keep(keyOf(path, params), { error: e.message });
     throw e;
   } finally { METER.ms[st] = (METER.ms[st] || 0) + (Date.now() - t0); }
 }

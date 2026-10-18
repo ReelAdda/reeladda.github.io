@@ -7955,6 +7955,52 @@ testAsync("the build's split proof replays its own answers through the old code 
   assert.ok(RH.RUN_HEALTH.issues.slice(issues).some((m) => /split proof: 1 edition/.test(m) && /\bus\b/.test(m)), "a difference turns the run red, naming the edition");
   RH.RUN_HEALTH.issues.length = issues;
 }));
+testAsync("split proof: each edition replays its own answers, so TMDB reordering a global list mid-build can't fake a difference (Oct 2026)", () => isolatedBuild(async () => {
+  const T = require("./lib/tmdb.js"), RH = require("./lib/runhealth.js"), { makeMock } = require("./testdata/tmdbmock.js"), { COUNTRIES } = require("./lib/core.js");
+  for (const [id, name] of GENRES) U.gmap[id] = name;
+  // A TMDB whose weekly TV trending list changes after the first edition is built — what
+  // happened on 18 Oct 2026 (McMafia / Mayans M.C. on ca and sg).
+  const base = makeMock();
+  let trendingCalls = 0;
+  const live = async (p, q) => {
+    const body = await base(p, q);
+    if (p === "/trending/tv/week" && trendingCalls++ > 0 && body && Array.isArray(body.results) && body.results.length > 3) {
+      return { ...body, results: body.results.slice(3) }; // the week's top shows drop out of the list
+    }
+    return body;
+  };
+  const cfgs = COUNTRIES.filter((c) => ["in", "us", "nz"].includes(c.code));
+  const seenBefore = JSON.stringify(RH.loadOttSeen()), built = {}, recordings = {};
+  for (const cfg of cfgs) {
+    const rec = new Map();
+    const recordingMock = async (p, q) => { const body = await live(p, q); const k = T.keyOf(p, q); (rec.get(k) || rec.set(k, []).get(k)).push({ body: JSON.stringify(body) }); return body; };
+    built[cfg.code] = U.builtFingerprint(await T.withReplay(recordingMock, () => U.buildCountry(cfg)));
+    recordings[cfg.code] = rec;
+  }
+  const issues = RH.RUN_HEALTH.issues.length;
+  await U.proveSplitBuilder(recordings, seenBefore, built);
+  assert.strictEqual(RH.RUN_HEALTH.issues.length, issues, "per-edition answers: identical, no false alarm");
+  // The old way — one map, the last answer per request — does raise the false alarm here,
+  // so this test really is the 18 Oct failure.
+  const merged = new Map();
+  for (const rec of Object.values(recordings)) for (const [k, v] of rec) merged.set(k, v[v.length - 1]);
+  await U.proveSplitBuilder(merged, seenBefore, built);
+  assert.ok(RH.RUN_HEALTH.issues.slice(issues).some((m) => /split proof/.test(m)), "last-answer-only replay flags a difference that isn't real");
+  RH.RUN_HEALTH.issues.length = issues;
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(/startRecording\(\);\s*const data = await buildCountry\(cfg\);\s*recordings\[cfg\.code\] = stopRecording\(\);/.test(src), "the build records each edition on its own");
+}));
+testAsync("tmdb(): a request recorded twice replays both answers in order, then repeats the last", async () => {
+  const T = require("./lib/tmdb.js");
+  const k = T.keyOf("/trending/tv/week", {});
+  const m = new Map([[k, [{ body: JSON.stringify({ n: 1 }) }, { body: JSON.stringify({ n: 2 }) }]]]);
+  await T.withReplay(m, async () => {
+    assert.deepStrictEqual(await T.tmdb("/trending/tv/week"), { n: 1 });
+    assert.deepStrictEqual(await T.tmdb("/trending/tv/week"), { n: 2 });
+    assert.deepStrictEqual(await T.tmdb("/trending/tv/week"), { n: 2 }, "the last answer repeats");
+  });
+  await T.withReplay(m, async () => assert.deepStrictEqual(await T.tmdb("/trending/tv/week"), { n: 1 }, "each replay starts from the first answer"));
+});
 testAsync("tmdb(): a replay answers from the recording, skips the pauses, and fails on a missing entry", async () => {
   const T = require("./lib/tmdb.js");
   const m = new Map([[T.keyOf("/movie/1", { a: 1 }), { body: JSON.stringify({ id: 1 }) }], [T.keyOf("/movie/9", {}), { error: "TMDB /movie/9 failed: 404" }]]);

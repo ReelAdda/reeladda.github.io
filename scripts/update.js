@@ -2288,6 +2288,7 @@ function assembleCountry(cfg, { theatres, langTheatres }, { ott, ottOverflow, su
 // requires the same data, byte for byte, for every edition. Any difference turns the run red
 // with the first place they part. Costs no API calls: the replay answers from the recording.
 const builtFingerprint = (data) => JSON.stringify(data, (k, v) => (k === "generatedAt" ? undefined : v));
+// `recording`: one Map for every edition (tests), or { code: Map } with each edition's own answers.
 async function proveSplitBuilder(recording, seenBefore, built) {
   const seen = loadOttSeen(), before = JSON.parse(seenBefore);
   const differ = [], failed = [];
@@ -2299,7 +2300,9 @@ async function proveSplitBuilder(recording, seenBefore, built) {
     seen[cfg.code] = JSON.parse(JSON.stringify(before[cfg.code] || {}));
     console.log = console.warn = () => {};
     try {
-      const legacy = builtFingerprint(await withReplay(recording, () => buildCountryLegacy(cfg)));
+      const answers = recording instanceof Map || typeof recording === "function" ? recording : recording[cfg.code];
+      if (!answers) continue;
+      const legacy = builtFingerprint(await withReplay(answers, () => buildCountryLegacy(cfg)));
       if (legacy !== built[cfg.code]) {
         let i = 0; const a = built[cfg.code]; while (i < a.length && a[i] === legacy[i]) i++;
         differ.push(`${cfg.code} (new: …${a.slice(Math.max(0, i - 40), i + 60)}… legacy: …${legacy.slice(Math.max(0, i - 40), i + 60)}…)`);
@@ -2378,13 +2381,15 @@ async function main() {
 
   // Every edition's lists from TMDB; the probe watchlist and India census; archive upkeep; buzz, trailers, critics' takes and scores.
   async function stageBuildData() {
-    // Pass 1: build data for every country. Every TMDB answer is recorded, and the output kept
+    // Pass 1: build data for every country. Every TMDB answer is recorded — each edition on its
+    // own, so the proof replays an edition with exactly the answers it got — and the output kept
     // as built, for the split proof right after (proveSplitBuilder).
     const seenBefore = JSON.stringify(loadOttSeen());
-    const built = {};
-    startRecording();
+    const built = {}, recordings = {};
     for (const cfg of COUNTRIES) {
+      startRecording();
       const data = await buildCountry(cfg);
+      recordings[cfg.code] = stopRecording();
       built[cfg.code] = builtFingerprint(data);
       assignSlugs(data, slugsById, cfg.code);
       dataByCode[cfg.code] = data;
@@ -2392,7 +2397,7 @@ async function main() {
       allSlugSets[cfg.code] = new Set(all.map((x) => x.slug).filter(Boolean));
       builtCountries.push(cfg);
     }
-    await proveSplitBuilder(stopRecording(), seenBefore, built);
+    await proveSplitBuilder(recordings, seenBefore, built);
 
     // Watchlist for the 30-minute probe (scripts/probe.js): films that have opened in theatres
     // but have not yet been observed with a provider anywhere. The probe polls only these, so
