@@ -374,6 +374,9 @@
   footer a.foot-follow { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; margin-left: auto;
     border-radius: 999px; background: #1A1633; color: #FFF7EC; font-weight: 700; text-decoration: none; }
   footer a.foot-follow:hover { text-decoration: none; filter: brightness(1.15); }
+  /* Phones: the brand row wraps, so the button starts its own line, aligned with the text above
+     (margin-left:auto pushed it to the far right there). */
+  @media (max-width: 720px) { footer a.foot-follow { margin-left: 0; margin-top: 8px; } .foot-brand { flex-direction: column; align-items: flex-start; } }
   .foot-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 22px 24px; }
   .foot-cols h3 { margin: 0 0 10px; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
   .foot-cols ul { list-style: none; margin: 0; padding: 0; }
