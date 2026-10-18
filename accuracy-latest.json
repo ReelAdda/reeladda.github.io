@@ -2,45 +2,38 @@
  "date": "2026-10-18",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 4,
- "high": 3,
- "correctable": 4,
+ "pagesDisagreeing": 3,
+ "high": 1,
+ "correctable": 2,
  "byField": {
-  "platform": 3,
-  "title": 1
+  "platform": 1,
+  "title": 1,
+  "director": 1
  },
  "rows": [
   {
    "field": "platform",
    "severity": "high",
-   "page": "WOW, RTL+, RTL+ Max Amazon Channel, Hayu",
-   "tmdb": "WOW, RTL+, Hayu, Magenta TV+",
-   "code": "de",
-   "slug": "chicago-med"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Amazon Prime Video, Starz Amazon Channel",
-   "tmdb": "Starz",
-   "code": "ca",
-   "slug": "ocean-s-eleven"
+   "page": "Sky Go",
+   "tmdb": "Netflix",
+   "code": "uk",
+   "slug": "kraven-the-hunter"
   },
   {
    "field": "title",
    "severity": "low",
-   "page": "Massu Engira Maasilamani",
-   "tmdb": "Masss Engira Masilamani",
-   "code": "my",
-   "slug": "massu-engira-maasilamani"
+   "page": "Heeramandi",
+   "tmdb": "Heeramandi: The Diamond Bazaar",
+   "code": "ca",
+   "slug": "heeramandi"
   },
   {
-   "field": "platform",
-   "severity": "high",
-   "page": "U-NEXT, HBO Max on U-Next, FOD",
-   "tmdb": "Hulu, HBO Max on U-Next, FOD",
-   "code": "jp",
-   "slug": "batman-ninja"
+   "field": "director",
+   "severity": "medium",
+   "page": "Teddy Chan Tak-Sam",
+   "tmdb": "Teddy Chan",
+   "code": "my",
+   "slug": "double-world"
   }
  ]
 }
