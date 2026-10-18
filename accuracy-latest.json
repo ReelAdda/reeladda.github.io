@@ -2,20 +2,29 @@
  "date": "2026-10-18",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
+ "pagesDisagreeing": 2,
  "high": 1,
  "correctable": 1,
  "byField": {
-  "platform": 1
+  "genres": 1,
+  "streaming": 1
  },
  "rows": [
   {
-   "field": "platform",
+   "field": "genres",
+   "severity": "low",
+   "page": "Drama / Mystery",
+   "tmdb": "Mystery, Thriller",
+   "code": "ca",
+   "slug": "black-bag"
+  },
+  {
+   "field": "streaming",
    "severity": "high",
-   "page": "HBO Max, Claro tv+",
-   "tmdb": "HBO Max",
-   "code": "br",
-   "slug": "harry-potter-and-the-philosopher-s-stone"
+   "page": "on Sony Pictures Core Amazon Channel",
+   "tmdb": "rent/buy only",
+   "code": "nz",
+   "slug": "resident-evil-welcome-to-raccoon-city"
   }
  ]
 }
