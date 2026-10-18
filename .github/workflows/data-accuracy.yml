@@ -1,18 +1,29 @@
 name: Data accuracy check
-# Manual: compares a sample of film pages in every edition with TMDB, the site's source
-# (scripts/accuracy.js), and writes each disagreement to this run's summary. Read-only:
-# publishes nothing, commits nothing, and never fails on what it finds.
+# Compares film pages in every edition with TMDB, the site's source (scripts/accuracy.js), and
+# writes each disagreement to this run's summary. Read-only: publishes nothing, commits nothing,
+# and never fails on what it finds.
+#   Weekly (Sunday): EVERY film page, about 15,000 TMDB calls (review, Oct 2026: the
+#     twice-daily build samples 108 pages and found 2-6.5% disagreeing, so a full pass shows
+#     the real number). Report only: corrections still reach pages through the build's normal
+#     facts path, a few at a time, never hundreds in one build.
+#   Manual: a sample, per_edition pages per edition.
 on:
+  schedule:
+    # Off-peak minute on purpose (GitHub delays jobs at :00/:30). Sunday 03:17 UTC, between
+    # the two daily builds.
+    - cron: "17 3 * * 0"
   workflow_dispatch:
     inputs:
       per_edition:
-        description: "Film pages to check per edition (18 editions; 14 = about 250 pages)"
+        description: "Film pages to check per edition (18 editions; 14 = about 250 pages; 100000 = every page)"
         default: "14"
 permissions:
   contents: read
 jobs:
   accuracy:
     runs-on: ubuntu-latest
+    # A full pass is ~15,000 calls at TMDB's polite pace: about an hour.
+    timeout-minutes: 150
     steps:
       # Same pinned actions as update.yml; bump all workflows together.
       - name: Checkout site
@@ -28,4 +39,5 @@ jobs:
         run: node scripts/accuracy.js
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-          ACCURACY_PER_EDITION: ${{ inputs.per_edition }}
+          # Scheduled runs have no inputs: every page. Manual runs use the input.
+          ACCURACY_PER_EDITION: ${{ inputs.per_edition || '100000' }}

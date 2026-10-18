@@ -7301,9 +7301,9 @@ testAsync("accuracy: samples every edition, reads the pages on disk, writes a re
     assert.ok(/1 page\(s\) disagree with TMDB/.test(md) && md.includes("https://filmychill.com/movie/enna-vilai.html"), md);
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
-test("the accuracy workflow is manual, read-only, restores the site first and passes the key", () => {
+test("the accuracy workflow is read-only, restores the site first and passes the key (weekly + manual since 18 Oct)", () => {
   const wf = require("fs").readFileSync(require("path").join(__dirname, "..", ".github", "workflows", "data-accuracy.yml"), "utf8");
-  assert.ok(/on:\s*\n\s*workflow_dispatch:/.test(wf) && !/schedule:/.test(wf), "manual only");
+  assert.ok(/workflow_dispatch:/.test(wf) && /schedule:/.test(wf), "manual, and the weekly full pass");
   assert.ok(/permissions:\s*\n\s*contents: read/.test(wf) && !/contents: write/.test(wf), "read-only");
   assert.ok(wf.indexOf("node scripts/site.js restore") < wf.indexOf("node scripts/accuracy.js"));
   assert.ok(/TMDB_API_KEY: \$\{\{ secrets\.TMDB_API_KEY \}\}/.test(wf));
@@ -7606,6 +7606,73 @@ test("a check date alone never moves 'Page updated'", () => {
     assert.strictEqual(stored.updated, "2026-10-01", "a recheck isn't an update");
   } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); Q.clearQueue(); }
 });
+group("18 Oct 2026: buildCountry in four steps, proven equal; build metering; the weekly full check");
+// Runs fn in a temp dir with logs silenced and the first-seen state restored afterwards.
+async function isolatedBuild(fn) {
+  const fsx = require("fs"), os = require("os"), path = require("path"), RH = require("./lib/runhealth.js");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-bc-")), cwd = process.cwd();
+  const seen = RH.loadOttSeen(), snap = JSON.stringify(seen);
+  const reset = () => { for (const k of Object.keys(seen)) delete seen[k]; Object.assign(seen, JSON.parse(snap)); };
+  const log = console.log, warn = console.warn;
+  process.chdir(root); console.log = console.warn = () => {};
+  try { return await fn(reset); }
+  finally { console.log = log; console.warn = warn; process.chdir(cwd); reset(); fsx.rmSync(root, { recursive: true, force: true }); }
+}
+const GENRES = [[18, "Drama"], [28, "Action"], [35, "Comedy"], [53, "Thriller"], [10749, "Romance"]];
+testAsync("the four-step buildCountry builds exactly what the pre-split code built, for every edition (fake TMDB)", () => isolatedBuild(async (reset) => {
+  const T = require("./lib/tmdb.js"), { makeMock } = require("./testdata/tmdbmock.js"), { COUNTRIES } = require("./lib/core.js");
+  for (const [id, name] of GENRES) U.gmap[id] = name;
+  const mock = makeMock();
+  let ott = 0;
+  for (const cfg of COUNTRIES) {
+    reset();
+    const legacy = U.builtFingerprint(await T.withReplay(mock, () => U.buildCountryLegacy(cfg)));
+    reset();
+    const fresh = await T.withReplay(mock, () => U.buildCountry(cfg));
+    ott += fresh.ott.length;
+    assert.strictEqual(U.builtFingerprint(fresh), legacy, `${cfg.code}: the split changed the edition's data`);
+    assert.ok(fresh.theatres.length && fresh.comingSoon.length, `${cfg.code}: every section ran`);
+  }
+  assert.ok(ott >= 50, "the OTT ranking was exercised across editions");
+}));
+testAsync("the build's split proof replays its own answers through the old code and flags any difference", () => isolatedBuild(async (reset) => {
+  const T = require("./lib/tmdb.js"), RH = require("./lib/runhealth.js"), { makeMock } = require("./testdata/tmdbmock.js"), { COUNTRIES } = require("./lib/core.js");
+  for (const [id, name] of GENRES) U.gmap[id] = name;
+  const mock = makeMock(), recording = new Map();
+  const recordingMock = async (p, q) => { const body = await mock(p, q); recording.set(T.keyOf(p, q), { body: JSON.stringify(body) }); return body; };
+  const cfgs = COUNTRIES.filter((c) => ["in", "us", "nz"].includes(c.code));
+  const seenBefore = JSON.stringify(RH.loadOttSeen()), built = {};
+  for (const cfg of cfgs) built[cfg.code] = U.builtFingerprint(await T.withReplay(recordingMock, () => U.buildCountry(cfg)));
+  const issues = RH.RUN_HEALTH.issues.length;
+  await U.proveSplitBuilder(recording, seenBefore, built);
+  assert.strictEqual(RH.RUN_HEALTH.issues.length, issues, "identical: no issue");
+  built.us = built.us.replace(/"title":"[^"]+"/, '"title":"Changed"');
+  await U.proveSplitBuilder(recording, seenBefore, built);
+  assert.ok(RH.RUN_HEALTH.issues.slice(issues).some((m) => /split proof: 1 edition/.test(m) && /\bus\b/.test(m)), "a difference turns the run red, naming the edition");
+  RH.RUN_HEALTH.issues.length = issues;
+}));
+testAsync("tmdb(): a replay answers from the recording, skips the pauses, and fails on a missing entry", async () => {
+  const T = require("./lib/tmdb.js");
+  const m = new Map([[T.keyOf("/movie/1", { a: 1 }), { body: JSON.stringify({ id: 1 }) }], [T.keyOf("/movie/9", {}), { error: "TMDB /movie/9 failed: 404" }]]);
+  await T.withReplay(m, async () => {
+    assert.deepStrictEqual(await T.tmdb("/movie/1", { a: 1 }), { id: 1 });
+    const t = Date.now(); await T.sleep(5000); assert.ok(Date.now() - t < 100, "no waiting during a replay");
+    await assert.rejects(() => T.tmdb("/movie/9"), /404/, "a recorded failure fails again");
+    await assert.rejects(() => T.tmdb("/movie/2"), /not in the recording/);
+  });
+  assert.strictEqual(T.keyOf("/x", { b: 2, a: 1 }), T.keyOf("/x", { a: 1, b: 2 }), "parameter order doesn't matter");
+  assert.ok(Array.isArray(T.meterReport()), "calls are metered per stage for the run summary");
+});
+test("the weekly accuracy run checks every page and stays read-only", () => {
+  const wf = require("fs").readFileSync(".github/workflows/data-accuracy.yml", "utf8");
+  assert.ok(/schedule:/.test(wf) && /- cron: "17 3 \* \* 0"/.test(wf), "weekly, Sunday");
+  assert.ok(/ACCURACY_PER_EDITION: \$\{\{ inputs\.per_edition \|\| '100000' \}\}/.test(wf), "scheduled runs: every page");
+  assert.ok(/permissions:\s*\n\s*contents: read/.test(wf) && !/git push|git commit/.test(wf), "report only");
+  const A = require("./accuracy.js");
+  const man = { nz: Object.fromEntries(Array.from({ length: 40 }, (_, i) => [`f${i}`, { tmdbId: i + 1, rendered: "x" }])) };
+  assert.strictEqual(A.samplePages(man, { per: 100000 }).length, 40, "a large per-edition count means every page");
+});
+
 group("17 Oct 2026 review: the paths that write a claim onto a page, end to end");
 // Loads a module with TMDB replaced by a stub (the sweeps take tmdb from lib/tmdb.js at load).
 function withTmdbStub(stub, mod, fn) {
