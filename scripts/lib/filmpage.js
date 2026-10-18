@@ -199,11 +199,22 @@ const FILM_HISTORY = {
 // in its description, which is how filmychill.com/movie/insidious-out-of-the-further.html
 // shipped on 14 Sept 2026.
 // ============================================================================
-function filmMetaDescription(item, cfg = null, opts = {}) {
+// Pick the first candidate inside Google's ~155-char display, else trim the shortest.
+// Same degradation ladder as fitTitle, for the same reason: the clause that earns the click
+// must survive truncation, so it goes early and the decoration goes last. The old code
+// appended its payoff line and THEN trimmed to 155, which amputated it on every live page —
+// the "this page updates the day it streams" promise never once reached a SERP.
+function fitDesc(optsList) {
+  const live = optsList.filter(Boolean);
+  return live.find((t) => t.length <= 155) || trim(live[live.length - 1] || "", 155);
+}
+
+// Everything the description branches share, worked out once (Power-of-Ten audit, Oct 2026:
+// filmMetaDescription was one 198-line function nested ten deep; each page state now has its
+// own small function below, and this is the common ground they stand on).
+function descContext(item, cfg, opts) {
   const country = countryNameFor(cfg);
-  const V = streamVocab(cfg);
   const year = (item.released || "").slice(0, 4);
-  const yr = year ? ` (${year})` : "";
   const providers = Array.isArray(item.providers) ? item.providers : [];
   const rentBuy = Array.isArray(item.rentBuy) ? item.rentBuy : [];
   const relState = releaseState(item.released);
@@ -212,188 +223,226 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
   // A frozen page inside the run window: we know when it opened, not that it is still on.
   const runOpen = !runEnded && !!opts.runOpen;
   const now = opts.now ? new Date(opts.now) : new Date();
-
-  // Pick the first candidate inside Google's ~155-char display, else trim the shortest.
-  // Same degradation ladder as fitTitle, for the same reason: the clause that earns the click
-  // must survive truncation, so it goes early and the decoration goes last. The old code
-  // appended its payoff line and THEN trimmed to 155, which amputated it on every live page —
-  // the "this page updates the day it streams" promise never once reached a SERP.
-  const fitDesc = (optsList) => {
-    const live = optsList.filter(Boolean);
-    return live.find((t) => t.length <= 155) || trim(live[live.length - 1] || "", 155);
-  };
-
   const dvotes = item.imdbRating != null ? item.imdbVotes : item.votes;
   const ratingBit = item.rating != null && dvotes >= 10 ? `${Number(item.rating).toFixed(1)}/10` : "";
   const runtimeBit = item.kind === "tv" ? "" : fmtRuntime(item.runtime);
   const stats = [ratingBit, runtimeBit].filter(Boolean).join(", ");
-  const statsClause = stats ? `${stats}, ` : "";
-  const thing = item.kind === "tv" ? "series" : "film";
-  // Title already ending in punctuation must not collect a second colon
-  // ("Abijit Ganguly: Baby: OTT release expected…").
-  // A title already ending in punctuation must not collect a second colon, and a title that
-  // already CONTAINS one ("Insidious: Out of the Further") reads badly with a third — the
-  // highest-impression page on the site is exactly that shape, so it gets a dash instead.
+  // A title already ending in punctuation must not collect a second colon
+  // ("Abijit Ganguly: Baby: OTT release expected…"), and a title that already CONTAINS one
+  // ("Insidious: Out of the Further") reads badly with a third — the highest-impression page
+  // on the site is exactly that shape, so it gets a dash instead.
   const rawTitle = String(item.title || "").trim();
-  const titleSep = /[:.!?\u2014-]$/.test(rawTitle) ? "" : (rawTitle.includes(":") ? " \u2014" : ":");
-  // Quote the window only where doing so is honest: a released theatrical title, nothing
-  // streaming or rentable yet, and a window that has not already lapsed.
+  const titleSep = /[:.!?—-]$/.test(rawTitle) ? "" : (rawTitle.includes(":") ? " —" : ":");
   // A released film with no platform at all. A frozen page's facts can carry no `platform`,
   // where a weekly page says "Theatres"; both mean the same, and the title (filmTitle) already
   // treats them alike. 93 pages titled "Not Announced Yet" had a description promising "where
   // to watch it" because only "Theatres" counted here (The Invite, Oct 2026).
   const inCinemasOnly = item.kind !== "tv" && !providers.length && !rentBuy.length
     && (item.platform === "Theatres" || !item.platform);
+  // Quote the window only where doing so is honest: a released theatrical title, nothing
+  // streaming or rentable yet, and a window that has not already lapsed.
   const est = (inCinemasOnly && !upcoming)
     ? streamWindowShort(item.released, item.language, now) : null;
   const openedOn = item.released ? `${fmtDateShort(item.released, now.getTime(), localeFor(cfg && cfg.code))}` : "";
-  const inCinemas = runEnded ? `theatrical run over in ${country}`
-    : runOpen ? `opened in cinemas in ${country}${openedOn ? ` on ${openedOn}` : ""}`
-    : `in cinemas in ${country} now`;
-  // Name the language only when STREAM_WINDOW_WEEKS actually carries one for it. Everything
-  // else gets the honest generic phrasing rather than an implied dataset we don't have.
-  const windowBasis = est && est.known ? `the usual ${item.language} window` : "the usual window for a release like this";
+  return {
+    item, cfg, opts, country, V: streamVocab(cfg), yr: year ? ` (${year})` : "",
+    providers, rentBuy, upcoming, runEnded, runOpen, now,
+    ratingBit, runtimeBit, statsClause: stats ? `${stats}, ` : "",
+    thing: item.kind === "tv" ? "series" : "film",
+    titleSep, inCinemasOnly, est, openedOn,
+    inCinemas: runEnded ? `theatrical run over in ${country}`
+      : runOpen ? `opened in cinemas in ${country}${openedOn ? ` on ${openedOn}` : ""}`
+      : `in cinemas in ${country} now`,
+    // Name the language only when STREAM_WINDOW_WEEKS actually carries one for it. Everything
+    // else gets the honest generic phrasing rather than an implied dataset we don't have.
+    windowBasis: est && est.known ? `the usual ${item.language} window` : "the usual window for a release like this",
+    // The full date in the edition's locale (India's when there is no edition).
+    fullDate: (d) => fmtDateFull(d, localeFor((cfg && cfg.code) || "in")),
+  };
+}
 
-  let desc;
-  if (item.kind !== "tv" && digitalUpcoming(item)) {
-    const when = fmtDateFull(item.digitalDate, localeFor((cfg && cfg.code) || "in"));
-    const on = item.digitalNote ? ` on ${item.digitalNote}` : "";
-    desc = fitDesc([
-      `${item.title}${yr} starts streaming${on} in ${country} on ${when}. The verdict, runtime and cast — and whether it's worth the wait.`,
-      `${item.title} streams${on} in ${country} from ${when} — verdict, runtime and cast.`,
-      `${item.title} streams${on} in ${country} from ${when}.`,
-    ]);
-  } else if (item.kind !== "tv" && digitalPassed(item)) {
-    const when = fmtDateFull(item.digitalDate, localeFor((cfg && cfg.code) || "in"));
-    const on = item.digitalNote ? ` on ${canonProvider(item.digitalNote)}` : "";
-    desc = fitDesc([
-      `${item.title}${yr} was due to stream${on} in ${country} from ${when} but isn't showing yet. We check twice a day and update this page the moment it lands.`,
-      `${item.title} was due to stream${on} in ${country} from ${when} — not showing yet. We update this page the moment it lands.`,
-      `${item.title} was due to stream${on} in ${country} from ${when}.`,
-    ]);
-  } else if (opts.gone) {
-    // Left every subscription service we track. Say so — never "in cinemas", never a platform.
-    desc = fitDesc([
-      `${item.title}${yr} isn't on a subscription service in ${country} right now. Where it streamed before, the verdict, and whether it's worth tracking down.`,
-      `${item.title}${yr} isn't streaming in ${country} right now — where it was, and the verdict.`,
-      `${item.title} isn't streaming in ${country} right now.`,
-    ]);
-  } else if (upcoming && item.released) {
-    // Pre-release: the date is the draw and it is public anyway, so lead with it. What is held
-    // back is what the searcher wants next — is it any good, how long, when will it stream.
-    const when = fmtDateFull(item.released, localeFor((cfg && cfg.code) || "in"));
-    // Searchers ask about OTT before a film opens; quote the usual window (the page body
-    // carries the same estimate, labelled as one). Cinema releases only.
-    const w = item.kind !== "tv" && !providers.length && !rentBuy.length && item.platform === "Theatres"
-      ? windowDates(item, now.getTime()) : null;
-    const expect = w ? `${V.word === "OTT" ? "Expected on OTT" : "Expected to stream"} ${partOfMonth(w.from)} to ${partOfMonth(w.to)}` : "";
-    desc = fitDesc([
-      expect && `${item.title} opens in cinemas in ${country} on ${when}. ${expect} \u2014 runtime, cast, trailer and early reception.`,
-      expect && `${item.title} opens in ${country} on ${when}. ${expect} \u2014 runtime, cast and trailer.`,
-      expect && `${item.title} opens in ${country} on ${when}. ${expect}.`,
-      `${item.title} opens in cinemas in ${country} on ${when}. Runtime, cast, the trailer and the early reception \u2014 plus when it's likely to reach ${V.word}.`,
-      `${item.title} opens in cinemas in ${country} on ${when}. Runtime, cast, trailer and when it's likely to reach ${V.word}.`,
-      `${item.title} opens in ${country} on ${when} \u2014 runtime, cast, trailer and early reception.`,
-      `${item.title} opens in cinemas in ${country} on ${when}.`,
-    ]);
-  } else if (providers.length) {
-    // NEVER open with the platform name. That one clause is what put
-    // /uk/movie/don-t-say-good-luck.html at position 1.12 with ZERO clicks from 247
-    // impressions: the searcher read "Netflix" in the results page and went to Netflix.
-    // Saying it IS streaming keeps the snippet honest and on-intent; not saying WHERE is the
-    // entire reason to click.
-    desc = fitDesc([
-      `${item.title} is streaming in ${country} \u2014 but is it worth your evening? ${statsClause}the critics' take, the audience counterpoint and every platform carrying it.`,
-      `${item.title} is streaming in ${country} \u2014 but is it worth your evening? ${statsClause}critics' take and every platform carrying it.`,
-      `${item.title} is streaming in ${country}. ${statsClause}verdict, critics' take and where to watch it.`,
-      `${item.title} is streaming in ${country} \u2014 the verdict and where to watch.`,
-    ]);
-  } else if (rentBuy.length) {
-    desc = fitDesc([
-      `${item.title} isn't on any subscription in ${country} yet \u2014 where to rent or buy it, ${statsClause}the critics' take and whether it's worth paying for.`,
-      `${item.title} isn't on a subscription in ${country} yet. Where to rent or buy it, ${statsClause}and whether it's worth paying for.`,
-      `${item.title} in ${country}: where to rent or buy it, ${statsClause}and the verdict.`,
-      `${item.title} \u2014 where to rent or buy it in ${country}, and the verdict.`,
-    ]);
-  } else if (est && item.kind !== "tv") {
-    // Answers the searcher's question first ("Not announced yet"), then the honest estimate in
-    // plain words, then the payoff. Same facts as before, in the order a reader needs them.
-    const w = windowDates(item, now.getTime());
-    const nowMs = now.getTime();
-    const when = w.from.getTime() <= nowMs
-      ? `likely by ${partOfMonth(w.to)}`
-      : `expect ${partOfMonth(w.from)} to ${partOfMonth(w.to)}`;
-    const venue = V.word === "OTT" ? "theatres" : "cinemas";
-    const basis = est.known ? `${item.language} films usually reach ${V.word} ${est.lo}\u2013${est.hi} weeks after ${venue}`
-      : `Films like this usually reach ${V.word} ${est.lo}\u2013${est.hi} weeks after ${venue}`;
-    // Same sentence with short month names, for long titles ("late Oct to mid-Nov").
-    const shortWhen = when.replace(/(January|February|March|April|May|June|July|August|September|October|November|December)/g, (m) => m.slice(0, 3));
-    const statsDot = [ratingBit, runtimeBit].filter(Boolean).join(" \u00b7 ");
-    const pay = "We update this page the day it streams.";
-    desc = fitDesc([
-      `Not announced yet. ${basis}, so ${item.title} is ${when}. ${statsDot ? `${statsDot}. ` : ""}${pay}`,
-      `Not announced yet. ${basis}, so ${item.title} is ${when}. ${pay}`,
-      `Not announced yet. ${basis}, so ${item.title} is ${shortWhen}. ${pay}`,
-      // Shorter, still led by the film's name: without these, a title too long for the forms
-      // above fell through to the title-less ones below, and 30-odd pages shared one snippet.
-      `${item.title}${titleSep} ${titleSep ? "not" : "Not"} announced yet. ${basis}, so expect it ${shortWhen.replace(/^(likely|expect) /, "")}. ${pay}`,
-      `${item.title}${titleSep} ${titleSep ? "not" : "Not"} announced yet; usually ${est.lo}–${est.hi} weeks after ${venue}, so ${shortWhen.replace(/^(likely|expect) /, "")}. ${pay}`,
-      `Not announced yet. ${basis}, so expect it ${when.replace(/^(likely|expect) /, "")}. ${pay}`,
-      `Not announced yet. ${basis}, so expect it ${shortWhen.replace(/^(likely|expect) /, "")}. ${pay}`,
-      `Not announced yet — ${item.title} is ${when}. ${pay}`,
-    ].map((t) => t.replace(" is expect ", " should land "))) ;
-  } else if (est) {
-    // The money branch. "<film> ott release date" is the highest-volume query shape these
-    // pages rank for, and the snippet used to answer it with "coming soon". A dated window,
-    // labelled as a pattern, beats both a non-answer and a competitor's unsourced guess.
-    desc = fitDesc([
-      `${item.title}${titleSep} ${V.word} release expected around ${est.short} (${windowBasis}, not a confirmed date). ${cap(inCinemas)}; ${statsClause}verdict inside.`,
-      `${item.title}${titleSep} ${V.word} release expected around ${est.short} (${windowBasis}, not a confirmed date). ${statsClause}verdict and runtime inside.`,
-      `${item.title}${titleSep} ${V.word} release expected around ${est.short} (a pattern, not a confirmed date). ${cap(inCinemas)}.`,
-      `${item.title}${titleSep} ${V.word} release expected around ${est.short}. ${cap(inCinemas)}.`,
-    ]);
-  } else if (item.platform === "Theatres" || (inCinemasOnly && item.released && !upcoming)) {
-    // No usable window (no release date on file, or the window already lapsed). There is
-    // genuinely nothing to promise about the date, so the payoff clause carries the click.
-    // Released, not streaming, and past the usual window: the honest answer to "when on OTT?"
-    // is that nobody has said — so the snippet says exactly that, first.
-    const lapsed = item.kind !== "tv" && item.released && !upcoming && !providers.length && !rentBuy.length;
-    const usual = hasLanguageWindow(item.language) ? `the usual ${item.language} window` : "the usual window";
-    // Led by the film's own name (Oct 2026): without it, 747 pages shared 93 identical
-    // snippets, and a searcher scanning results could not tell which film a line was about.
-    if (lapsed) {
-      const statsDot = [ratingBit, runtimeBit].filter(Boolean).join(" · ");
-      const platform = V.word === "OTT" ? "OTT platform" : "streaming service";
-      desc = fitDesc([
-        `${item.title}${yr} isn't on any ${platform} in ${country} yet, and it's later than ${usual} — no date has been announced. ${statsDot ? `${statsDot}. ` : ""}We check twice a day and update this page the moment it streams.`,
-        `${item.title}${yr} isn't on any ${platform} in ${country} yet, and no date has been announced. We check twice a day and update this page the moment it streams.`,
-        `${item.title} isn't streaming in ${country} yet, and no date has been announced. We update this page the moment it streams.`,
-        `${item.title} isn't streaming in ${country} yet — no date announced.`,
-      ]);
-      return desc;
-    }
-    const lead = runEnded
-      ? `${item.title} has finished its theatrical run in ${country}`
-      : runOpen ? `${item.title} opened in cinemas in ${country}${openedOn ? ` on ${openedOn}` : ""}`
-      : `${item.title} is in cinemas in ${country}`;
-    desc = fitDesc([
-      `${lead}. We re-check for ${V.article.toLowerCase()} ${V.releaseDate} every single day \u2014 ${statsClause}critics' take and the verdict inside.`,
-      `${lead}. We check daily for ${V.article.toLowerCase()} ${V.releaseDate} \u2014 ${statsClause}critics' take and the verdict.`,
-      `${lead} \u2014 ${statsClause}critics' take and the verdict.`,
-      `${lead}.`,
-    ]);
-  } else {
-    // Availability unknown. The old generic line at least named the film; give it a payoff
-    // clause too, rather than trailing off into a truncated synopsis.
-    desc = fitDesc([
-      `${item.title}${yr}: ${[item.language, item.genre].filter(Boolean).join(" ")} ${thing} \u2014 ${statsClause}the verdict, the critics' take and where to watch it in ${country}.`,
-      `${item.title}${yr}: ${[item.language, item.genre].filter(Boolean).join(" ")} ${thing} \u2014 rating, verdict and where to watch in ${country}.`,
-      `${item.title}${yr} \u2014 rating, verdict and where to watch in ${country}.`,
-    ]);
+// A digital date announced and still ahead.
+function descDigitalUpcoming({ item, yr, country, fullDate }) {
+  const when = fullDate(item.digitalDate);
+  const on = item.digitalNote ? ` on ${item.digitalNote}` : "";
+  return fitDesc([
+    `${item.title}${yr} starts streaming${on} in ${country} on ${when}. The verdict, runtime and cast — and whether it's worth the wait.`,
+    `${item.title} streams${on} in ${country} from ${when} — verdict, runtime and cast.`,
+    `${item.title} streams${on} in ${country} from ${when}.`,
+  ]);
+}
+
+// The announced digital date has passed and it isn't showing yet.
+function descDigitalPassed({ item, yr, country, fullDate }) {
+  const when = fullDate(item.digitalDate);
+  const on = item.digitalNote ? ` on ${canonProvider(item.digitalNote)}` : "";
+  return fitDesc([
+    `${item.title}${yr} was due to stream${on} in ${country} from ${when} but isn't showing yet. We check twice a day and update this page the moment it lands.`,
+    `${item.title} was due to stream${on} in ${country} from ${when} — not showing yet. We update this page the moment it lands.`,
+    `${item.title} was due to stream${on} in ${country} from ${when}.`,
+  ]);
+}
+
+// Left every subscription service we track. Say so — never "in cinemas", never a platform.
+function descGone({ item, yr, country }) {
+  return fitDesc([
+    `${item.title}${yr} isn't on a subscription service in ${country} right now. Where it streamed before, the verdict, and whether it's worth tracking down.`,
+    `${item.title}${yr} isn't streaming in ${country} right now — where it was, and the verdict.`,
+    `${item.title} isn't streaming in ${country} right now.`,
+  ]);
+}
+
+// Pre-release: the date is the draw and it is public anyway, so lead with it. What is held
+// back is what the searcher wants next — is it any good, how long, when will it stream.
+function descUpcoming({ item, country, V, providers, rentBuy, now, fullDate }) {
+  const when = fullDate(item.released);
+  // Searchers ask about OTT before a film opens; quote the usual window (the page body
+  // carries the same estimate, labelled as one). Cinema releases only.
+  const w = item.kind !== "tv" && !providers.length && !rentBuy.length && item.platform === "Theatres"
+    ? windowDates(item, now.getTime()) : null;
+  const expect = w ? `${V.word === "OTT" ? "Expected on OTT" : "Expected to stream"} ${partOfMonth(w.from)} to ${partOfMonth(w.to)}` : "";
+  return fitDesc([
+    expect && `${item.title} opens in cinemas in ${country} on ${when}. ${expect} — runtime, cast, trailer and early reception.`,
+    expect && `${item.title} opens in ${country} on ${when}. ${expect} — runtime, cast and trailer.`,
+    expect && `${item.title} opens in ${country} on ${when}. ${expect}.`,
+    `${item.title} opens in cinemas in ${country} on ${when}. Runtime, cast, the trailer and the early reception — plus when it's likely to reach ${V.word}.`,
+    `${item.title} opens in cinemas in ${country} on ${when}. Runtime, cast, trailer and when it's likely to reach ${V.word}.`,
+    `${item.title} opens in ${country} on ${when} — runtime, cast, trailer and early reception.`,
+    `${item.title} opens in cinemas in ${country} on ${when}.`,
+  ]);
+}
+
+// NEVER open with the platform name. That one clause is what put
+// /uk/movie/don-t-say-good-luck.html at position 1.12 with ZERO clicks from 247
+// impressions: the searcher read "Netflix" in the results page and went to Netflix.
+// Saying it IS streaming keeps the snippet honest and on-intent; not saying WHERE is the
+// entire reason to click.
+function descStreaming({ item, country, statsClause }) {
+  return fitDesc([
+    `${item.title} is streaming in ${country} — but is it worth your evening? ${statsClause}the critics' take, the audience counterpoint and every platform carrying it.`,
+    `${item.title} is streaming in ${country} — but is it worth your evening? ${statsClause}critics' take and every platform carrying it.`,
+    `${item.title} is streaming in ${country}. ${statsClause}verdict, critics' take and where to watch it.`,
+    `${item.title} is streaming in ${country} — the verdict and where to watch.`,
+  ]);
+}
+
+function descRentBuy({ item, country, statsClause }) {
+  return fitDesc([
+    `${item.title} isn't on any subscription in ${country} yet — where to rent or buy it, ${statsClause}the critics' take and whether it's worth paying for.`,
+    `${item.title} isn't on a subscription in ${country} yet. Where to rent or buy it, ${statsClause}and whether it's worth paying for.`,
+    `${item.title} in ${country}: where to rent or buy it, ${statsClause}and the verdict.`,
+    `${item.title} — where to rent or buy it in ${country}, and the verdict.`,
+  ]);
+}
+
+// A film in its streaming window, no date announced. Answers the searcher's question first
+// ("Not announced yet"), then the honest estimate in plain words, then the payoff.
+function descNotAnnounced({ item, V, est, now, ratingBit, runtimeBit, titleSep }) {
+  const w = windowDates(item, now.getTime());
+  const nowMs = now.getTime();
+  const when = w.from.getTime() <= nowMs
+    ? `likely by ${partOfMonth(w.to)}`
+    : `expect ${partOfMonth(w.from)} to ${partOfMonth(w.to)}`;
+  const venue = V.word === "OTT" ? "theatres" : "cinemas";
+  const basis = est.known ? `${item.language} films usually reach ${V.word} ${est.lo}–${est.hi} weeks after ${venue}`
+    : `Films like this usually reach ${V.word} ${est.lo}–${est.hi} weeks after ${venue}`;
+  // Same sentence with short month names, for long titles ("late Oct to mid-Nov").
+  const shortWhen = when.replace(/(January|February|March|April|May|June|July|August|September|October|November|December)/g, (m) => m.slice(0, 3));
+  const statsDot = [ratingBit, runtimeBit].filter(Boolean).join(" · ");
+  const pay = "We update this page the day it streams.";
+  return fitDesc([
+    `Not announced yet. ${basis}, so ${item.title} is ${when}. ${statsDot ? `${statsDot}. ` : ""}${pay}`,
+    `Not announced yet. ${basis}, so ${item.title} is ${when}. ${pay}`,
+    `Not announced yet. ${basis}, so ${item.title} is ${shortWhen}. ${pay}`,
+    // Shorter, still led by the film's name: without these, a title too long for the forms
+    // above fell through to the title-less ones below, and 30-odd pages shared one snippet.
+    `${item.title}${titleSep} ${titleSep ? "not" : "Not"} announced yet. ${basis}, so expect it ${shortWhen.replace(/^(likely|expect) /, "")}. ${pay}`,
+    `${item.title}${titleSep} ${titleSep ? "not" : "Not"} announced yet; usually ${est.lo}–${est.hi} weeks after ${venue}, so ${shortWhen.replace(/^(likely|expect) /, "")}. ${pay}`,
+    `Not announced yet. ${basis}, so expect it ${when.replace(/^(likely|expect) /, "")}. ${pay}`,
+    `Not announced yet. ${basis}, so expect it ${shortWhen.replace(/^(likely|expect) /, "")}. ${pay}`,
+    `Not announced yet — ${item.title} is ${when}. ${pay}`,
+  ].map((t) => t.replace(" is expect ", " should land ")));
+}
+
+// The money branch. "<film> ott release date" is the highest-volume query shape these
+// pages rank for, and the snippet used to answer it with "coming soon". A dated window,
+// labelled as a pattern, beats both a non-answer and a competitor's unsourced guess.
+function descExpectedWindow({ item, V, est, titleSep, windowBasis, inCinemas, statsClause }) {
+  return fitDesc([
+    `${item.title}${titleSep} ${V.word} release expected around ${est.short} (${windowBasis}, not a confirmed date). ${cap(inCinemas)}; ${statsClause}verdict inside.`,
+    `${item.title}${titleSep} ${V.word} release expected around ${est.short} (${windowBasis}, not a confirmed date). ${statsClause}verdict and runtime inside.`,
+    `${item.title}${titleSep} ${V.word} release expected around ${est.short} (a pattern, not a confirmed date). ${cap(inCinemas)}.`,
+    `${item.title}${titleSep} ${V.word} release expected around ${est.short}. ${cap(inCinemas)}.`,
+  ]);
+}
+
+// Released, not streaming, and past the usual window: the honest answer to "when on OTT?"
+// is that nobody has said — so the snippet says exactly that, first. Led by the film's own
+// name (Oct 2026): without it, 747 pages shared 93 identical snippets.
+function descLapsed({ item, yr, country, V, ratingBit, runtimeBit }) {
+  const usual = hasLanguageWindow(item.language) ? `the usual ${item.language} window` : "the usual window";
+  const statsDot = [ratingBit, runtimeBit].filter(Boolean).join(" · ");
+  const platform = V.word === "OTT" ? "OTT platform" : "streaming service";
+  return fitDesc([
+    `${item.title}${yr} isn't on any ${platform} in ${country} yet, and it's later than ${usual} — no date has been announced. ${statsDot ? `${statsDot}. ` : ""}We check twice a day and update this page the moment it streams.`,
+    `${item.title}${yr} isn't on any ${platform} in ${country} yet, and no date has been announced. We check twice a day and update this page the moment it streams.`,
+    `${item.title} isn't streaming in ${country} yet, and no date has been announced. We update this page the moment it streams.`,
+    `${item.title} isn't streaming in ${country} yet — no date announced.`,
+  ]);
+}
+
+// In cinemas with no usable window (no release date on file). There is genuinely nothing to
+// promise about the date, so the payoff clause carries the click.
+function descInCinemas({ item, country, V, runEnded, runOpen, openedOn, statsClause }) {
+  const lead = runEnded
+    ? `${item.title} has finished its theatrical run in ${country}`
+    : runOpen ? `${item.title} opened in cinemas in ${country}${openedOn ? ` on ${openedOn}` : ""}`
+    : `${item.title} is in cinemas in ${country}`;
+  return fitDesc([
+    `${lead}. We re-check for ${V.article.toLowerCase()} ${V.releaseDate} every single day — ${statsClause}critics' take and the verdict inside.`,
+    `${lead}. We check daily for ${V.article.toLowerCase()} ${V.releaseDate} — ${statsClause}critics' take and the verdict.`,
+    `${lead} — ${statsClause}critics' take and the verdict.`,
+    `${lead}.`,
+  ]);
+}
+
+// Availability unknown. The old generic line at least named the film; give it a payoff
+// clause too, rather than trailing off into a truncated synopsis.
+function descGeneric({ item, yr, country, thing, statsClause }) {
+  return fitDesc([
+    `${item.title}${yr}: ${[item.language, item.genre].filter(Boolean).join(" ")} ${thing} — ${statsClause}the verdict, the critics' take and where to watch it in ${country}.`,
+    `${item.title}${yr}: ${[item.language, item.genre].filter(Boolean).join(" ")} ${thing} — rating, verdict and where to watch in ${country}.`,
+    `${item.title}${yr} — rating, verdict and where to watch in ${country}.`,
+  ]);
+}
+
+// Which state the page is in, checked in this order (the first match wins); returns the
+// description for it. The lapsed check sits inside the cinemas state, as it always has.
+function descForState(c) {
+  const { item, opts, upcoming, providers, rentBuy, est, inCinemasOnly } = c;
+  const film = item.kind !== "tv";
+  if (film && digitalUpcoming(item)) return descDigitalUpcoming(c);
+  if (film && digitalPassed(item)) return descDigitalPassed(c);
+  if (opts.gone) return descGone(c);
+  if (upcoming && item.released) return descUpcoming(c);
+  if (providers.length) return descStreaming(c);
+  if (rentBuy.length) return descRentBuy(c);
+  if (est && film) return descNotAnnounced(c);
+  if (est) return descExpectedWindow(c);
+  if (item.platform === "Theatres" || (inCinemasOnly && item.released && !upcoming)) {
+    const lapsed = film && item.released && !upcoming && !providers.length && !rentBuy.length;
+    return lapsed ? { final: descLapsed(c) } : descInCinemas(c);
   }
+  return descGeneric(c);
+}
+
+function filmMetaDescription(item, cfg = null, opts = {}) {
+  const c = descContext(item, cfg, opts);
+  let desc = descForState(c);
+  if (desc && typeof desc === "object") return desc.final;
   // Last-resort guard: five live pages once shipped with an empty description. Never again.
   if (!desc || desc.trim().length < 20) {
-    desc = trim(`${item.title}${yr}: ${[item.language, item.genre, thing].filter(Boolean).join(" ")} \u2014 review, rating and where to watch in ${country}`, 155);
+    desc = trim(`${item.title}${c.yr}: ${[item.language, item.genre, c.thing].filter(Boolean).join(" ")} — review, rating and where to watch in ${c.country}`, 155);
   }
   return desc;
 }
