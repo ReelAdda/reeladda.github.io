@@ -330,6 +330,7 @@ const { migrateBatch, migrateLimit, renderMigrated } = require("./lib/migrate.js
 const { activeMerges, dropMergedEntries, loadMerges, removeMergedPages, retargetMergedLinks, writeMergeStubs } = require("./lib/merges.js");
 const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePageFiles } = require("./lib/stylesheets.js");
 const { addSearchToPages, writeSearchIndexes } = require("./lib/search.js");
+const { GROW_ON, addGrowToPages } = require("./lib/grow.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -2790,6 +2791,13 @@ async function main() {
       const s = addSearchToPages([...filmPageFiles(), ...sitePageFiles()]);
       console.log(`Search: ${x.films} films and ${x.people} people across ${x.editions} editions (${x.written} index file(s) updated); script added to ${s.added} of ${s.pages} pages`);
     } catch (e) { stageFailed("site search", e); }
+
+    // Mediavine Grow (lib/grow.js): its loader and exactly its origins on every page, after the
+    // last page writer, like the search script. GROW_SITE_ID="" takes both off again.
+    try {
+      const g = addGrowToPages([...filmPageFiles(), ...sitePageFiles()]);
+      console.log(`Grow: ${GROW_ON ? "on" : "OFF"} — ${g.changed} of ${g.pages} pages updated`);
+    } catch (e) { stageFailed("grow", e); }
 
     // All countries are built by now, so the filesystem finally shows every cluster's true
     // membership — repair them in one pass before the sitemap is written.

@@ -17,6 +17,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { ensureGrow } = require("./grow.js");
 
 const STAMPS = [
   /<div class="meta" style="margin-top:2px;font-size:12\.5px">Page updated [^<]*<\/div>/g,
@@ -42,6 +43,10 @@ function comparable(html, root = ".") {
     try { s = s.replace(m[0], `<style>${fs.readFileSync(path.join(root, "css", `${m[1]}.css`), "utf8")}</style>`); } catch { /* compare as is */ }
   }
   s = s.replace(/style-src 'self' 'unsafe-inline'/g, "style-src 'unsafe-inline'");
+  // Grow's loader and origins (lib/grow.js) are added after every page writer: a fresh render
+  // has neither yet, and is still the same page. Both sides are compared WITH Grow (adding it is
+  // exact and idempotent; taking it out can't tell a directive Grow created from the page's own).
+  s = ensureGrow(s, true);
   for (const re of STAMPS) s = s.replace(re, "");
   return s;
 }

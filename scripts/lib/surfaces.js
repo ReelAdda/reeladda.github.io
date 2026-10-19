@@ -67,7 +67,7 @@ const { ssrCard, ssrEditorNote, ssrSoonCard, writeRssFeed } = require("./weekly.
 const { heroDialInner } = require("./meter.js");
 
 // About page lastmod for the sitemap — bump manually when about/index.html changes.
-const ABOUT_LASTMOD = "2026-10-05";
+const ABOUT_LASTMOD = "2026-10-19";
 
 // The About page is hand-written, but ONE sentence in it is a fact the config owns: which
 // countries the site covers. It drifted — the page still said "India (plus the US, UK,

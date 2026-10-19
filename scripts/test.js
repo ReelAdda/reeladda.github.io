@@ -7251,6 +7251,41 @@ test("hand-written pages on main already carry every site style fix, so a build 
     for (const [from] of fixes) assert.ok(!h.includes(from), `${f} still has a rule the build rewrites: ${from.slice(0, 50)}`);
   }
 });
+test("Grow: its loader and exactly its origins on every page, off in one setting (Oct 2026)", () => {
+  const G = require("./lib/grow.js"), W = require("./lib/writeif.js");
+  const film = '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; connect-src \'self\' https://firestore.googleapis.com; script-src \'self\'; img-src \'self\' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src \'none\'"><title>X</title></head><body><p>x</p></body></html>';
+  const on = G.ensureGrow(film, true);
+  const csp = /content="([^"]*)"/.exec(on)[1];
+  assert.ok(on.includes('<script src="/js/grow.js" defer></script>\n</body>'), "the loader, last in the body");
+  assert.ok(/script-src 'self' https:\/\/faves\.grow\.me(;|$)/.test(csp), "scripts: only faves.grow.me added");
+  assert.ok(/connect-src 'self' https:\/\/firestore\.googleapis\.com https:\/\/api\.grow\.me https:\/\/some\.growplow\.events/.test(csp), "the page's own origins are kept");
+  assert.ok(/frame-src https:\/\/www\.youtube-nocookie\.com https:\/\/app\.grow\.me/.test(csp) && /object-src 'none'/.test(csp), "nothing else loosened");
+  assert.ok(!/euid|\*|'unsafe-eval'/.test(csp), "never the EUID ad-identity SDK, never a wildcard, never eval");
+  assert.strictEqual(G.ensureGrow(on, true), on, "idempotent");
+  assert.strictEqual(G.ensureGrow(on, false).replace(/\s+/g, " "), film.replace(/\s+/g, " "), "off takes the loader and the origins away again");
+  assert.strictEqual(W.comparable(on), W.comparable(film), "a fresh render without Grow is still the same page (no rewrite of every page)");
+  // A page with no frame-src gets one that starts from its default-src, not a looser one.
+  const list = G.ensureGrow('<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\'"><body></body>', true);
+  assert.ok(/frame-src 'self' https:\/\/app\.grow\.me/.test(list) && /connect-src 'self' https:\/\/api\.grow\.me/.test(list));
+  assert.strictEqual(W.comparable(list), W.comparable('<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\'"><body></body>'));
+  // The loader: a site file (no inline script), started only after load and when idle.
+  const js = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "grow.js"), "utf8");
+  assert.ok(/addEventListener\("load", whenIdle/.test(js) && /requestIdleCallback\(start/.test(js) && js.includes('"https://faves.grow.me/main.js"'), "after load, when idle");
+  assert.ok(js.includes(G.GROW_SITE_ID) || !G.GROW_ON, "the loader carries the configured site");
+  const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(up.indexOf("addGrowToPages(") > up.indexOf("addSearchToPages("), "the pass runs after the last page writer");
+});
+test("Grow is on only while the Privacy and About pages say so (data trust, Oct 2026)", () => {
+  const G = require("./lib/grow.js");
+  const fsx = require("fs"), path = require("path");
+  const priv = fsx.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
+  const about = fsx.readFileSync(path.join(__dirname, "..", "about", "index.html"), "utf8");
+  if (G.GROW_ON) {
+    assert.ok(/id="grow"/.test(priv) && /Mediavine/.test(priv) && /sets cookies/.test(priv) && /optional sign-up with your email/.test(priv), "Privacy describes Grow");
+    assert.ok(!/No cookies — no advertising, analytics or “consent” cookies at all\./.test(priv) && !/No accounts, logins or email collection\./.test(priv), "no promise Grow would break");
+    assert.ok(!/it is the only third-party script on the site/.test(about) && /Grow/.test(about), "About doesn't call GoatCounter the only third-party script");
+  }
+});
 test("layout audit: one content column and 44px targets on every page type (18 Oct 2026)", () => {
   const fsx = require("fs"), path = require("path");
   const src = homeSource();
