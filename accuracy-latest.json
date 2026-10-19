@@ -2,28 +2,9 @@
  "date": "2026-10-19",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 2,
- "high": 2,
- "correctable": 2,
- "byField": {
-  "platform": 2
- },
- "rows": [
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "fuboTV, HBO Max Amazon Channel, Peacock Premium, FXNow",
-   "tmdb": "fuboTV, HBO Max, FXNow",
-   "code": "us",
-   "slug": "alien-covenant"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix, Disney Plus, Sky Go, RTL+",
-   "tmdb": "Netflix, Disney+, WOW, Sky Go",
-   "code": "de",
-   "slug": "homicide-hills"
-  }
- ]
+ "pagesDisagreeing": 0,
+ "high": 0,
+ "correctable": 0,
+ "byField": {},
+ "rows": []
 }
