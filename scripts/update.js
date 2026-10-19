@@ -331,6 +331,7 @@ const { activeMerges, dropMergedEntries, loadMerges, removeMergedPages, retarget
 const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePageFiles } = require("./lib/stylesheets.js");
 const { addSearchToPages, writeSearchIndexes } = require("./lib/search.js");
 const { GROW_ON, addGrowToPages } = require("./lib/grow.js");
+const { GA_ON, addGaToPages } = require("./lib/ga.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -2798,6 +2799,12 @@ async function main() {
       const g = addGrowToPages([...filmPageFiles(), ...sitePageFiles()]);
       console.log(`Grow: ${GROW_ON ? "on" : "OFF"} — ${g.changed} of ${g.pages} pages updated`);
     } catch (e) { stageFailed("grow", e); }
+    // Google Analytics (lib/ga.js) in place of GoatCounter: its tag and sources on every page,
+    // GoatCounter's taken off. GA_ID="" takes GA off again.
+    try {
+      const a = addGaToPages([...filmPageFiles(), ...sitePageFiles()]);
+      console.log(`Analytics: Google Analytics ${GA_ON ? "on" : "OFF"} — ${a.changed} of ${a.pages} pages updated`);
+    } catch (e) { stageFailed("analytics", e); }
 
     // All countries are built by now, so the filesystem finally shows every cluster's true
     // membership — repair them in one pass before the sitemap is written.

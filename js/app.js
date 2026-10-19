@@ -514,13 +514,14 @@ function remindMe(listKey, i) {
 }
 
 // CARD-CLICK EVENTS (Oct 2026). Which section and which position people actually open is the
-// raw material for ranking better later. Sent as GoatCounter events — no cookies, nothing
-// personal, the same counter the site already uses — e.g. path "card/in/ott/3", title
-// "Slow Horses". If the counter is blocked or switched off, this does nothing.
+// raw material for ranking better later. Sent as Google Analytics events (the site's counter
+// since 19 Oct 2026; GoatCounter before) — e.g. item "card/in/ott/3", name "Slow Horses". If
+// analytics is blocked or switched off, this does nothing.
 function fcTrack(path, title) {
   try {
-    if (window.goatcounter && typeof window.goatcounter.count === 'function') {
-      window.goatcounter.count({ path: path, title: String(title || '').slice(0, 100), event: true });
+    // Google Analytics (scripts/lib/ga.js): one "select_content" event per opened card.
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'select_content', { content_type: String(path).split('/')[0], item_id: path, content_name: String(title || '').slice(0, 100) });
     }
   } catch (e) { /* analytics must never break the page */ }
 }

@@ -1669,7 +1669,8 @@ test("privacy page: exists, linked from every footer kind, in the sitemap, and s
   const fsx = require("fs"), path = require("path");
   const priv = fsx.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
   assert.ok(/<link rel="canonical" href="https:\/\/filmychill\.com\/privacy\/">/.test(priv));
-  assert.ok(/sets no cookies/.test(priv) && /GoatCounter/.test(priv) && /Firebase/.test(priv) && /anonymous ID/.test(priv));
+  assert.ok(/Google Analytics/.test(priv) && /without cookies/.test(priv) && /Firebase/.test(priv) && /anonymous ID/.test(priv), "names the counter, its cookieless mode, and the vote store");
+  assert.ok(!/GoatCounter/.test(priv), "GoatCounter is no longer on the site, so not on the page either");
   assert.ok(/<a href="\/privacy\/">Privacy<\/a> · <a href="\/dmca\/">Copyright<\/a> · $/.test(U.footerAttribution(false)), "film, hub and weekly page footers");
   const about = fsx.readFileSync(path.join(__dirname, "..", "about", "index.html"), "utf8");
   assert.ok(/href="\/privacy\/"/.test(about));
@@ -3074,28 +3075,51 @@ test("about: documents the confidence gate the code actually enforces", () => {
   assert.strictEqual(U.takeConfident({ isFresh: true }), false);
   assert.strictEqual(U.takeConfident({ isFresh: false, votes: 9 }), true);
 });
-test("about: the privacy claim matches what the site actually ships", () => {
-  // REWRITTEN Sept 2026. The site now counts page views (GoatCounter, cookieless). The rule
-  // this test protects is unchanged and is the important one: the About page must describe
-  // exactly what ships. A cookie-setting or profiling tracker still fails outright, and if
-  // analytics is ever switched off, the copy has to come back with it.
-  const analyticsShipped = !!U.GC_SITE;
+test("about + privacy: the privacy claims match what the site actually ships", () => {
+  // REWRITTEN 19 Oct 2026: Google Analytics replaced GoatCounter at the owner's decision. The rule
+  // this test protects is unchanged — the pages describe exactly what ships — and the safety part
+  // is now about HOW the tracker runs: advertising features off everywhere, and no cookies for
+  // visitors in Europe and the UK.
+  const A = require("./lib/ga.js"), PK = require("./lib/pagekit.js");
+  const priv = fsAbout.readFileSync(require("path").join(__dirname, "..", "privacy", "index.html"), "utf8");
   assert.ok(/no account to create/.test(ABOUT_SRC), "the standing claims stay");
-  if (analyticsShipped) {
-    assert.ok(/GoatCounter/.test(ABOUT_SRC) && /cookieless/.test(ABOUT_SRC),
-      "the counter must be disclosed by name on the About page");
-    assert.ok(/sets no cookies/.test(ABOUT_SRC) && !/ships no analytics/.test(ABOUT_SRC),
-      "the copy must not still promise no analytics while shipping some");
+  assert.strictEqual(PK.GC_SITE, "", "GoatCounter is off");
+  assert.ok(!/GoatCounter/.test(ABOUT_SRC) && !/ships no analytics/.test(ABOUT_SRC), "About doesn't describe a counter the site no longer runs");
+  if (A.GA_ON) {
+    assert.ok(/Google Analytics/.test(ABOUT_SRC) && /advertising features switched off/.test(ABOUT_SRC) && /without cookies for visitors in Europe and the UK/.test(ABOUT_SRC), "About names it and how it runs");
+    assert.ok(/id="analytics"/.test(priv) && /_ga/.test(priv) && /opt-out/.test(priv), "Privacy explains its cookies and how to opt out");
+    // The setup script does what the pages say.
+    assert.ok(/ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",analytics_storage:"denied",region:\[/.test(A.GA_CODE), "Europe and the UK: no analytics cookies");
+    for (const c of ["DE", "FR", "ES", "IT", "NL", "GB", "CH", "NO"]) assert.ok(A.CONSENT_REGIONS.includes(c), c);
+    assert.ok(/ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",analytics_storage:"granted"\}/.test(A.GA_CODE), "elsewhere: analytics only, ads still denied");
+    assert.ok(/allow_google_signals:false,allow_ad_personalization_signals:false/.test(A.GA_CODE), "Google signals and ad personalisation off");
+    assert.ok(A.GA_CODE.indexOf('"consent","default"') < A.GA_CODE.indexOf('"config"'), "consent defaults are set before the first measurement");
   } else {
-    assert.ok(/ships no analytics/.test(ABOUT_SRC), "analytics off -> the stronger claim returns");
+    assert.ok(!/Google Analytics/.test(ABOUT_SRC), "GA off -> the pages stop describing it");
   }
-  for (const f of ["index.html", "about/index.html"]) {
-    if (!fsAbout.existsSync(f)) continue;
-    const html = fsAbout.readFileSync(f, "utf8");
-    assert.ok(!/google-analytics|googletagmanager|gtag\(|document\.cookie/.test(html),
-      "no cookie-setting or profiling tracker may ever appear in " + f);
-    if (!analyticsShipped) assert.ok(!/goatcounter/i.test(html), "kill switch off -> no tag anywhere: " + f);
-  }
+});
+test("Google Analytics: its tag and exactly its sources on every page, GoatCounter's taken off, off in one setting (Oct 2026)", () => {
+  const A = require("./lib/ga.js"), W = require("./lib/writeif.js");
+  const page = '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' https://gc.zgo.at; img-src \'self\' https://filmychill.goatcounter.com data:; connect-src \'self\' https://filmychill.goatcounter.com; object-src \'none\'"><script data-goatcounter="https://filmychill.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>\n<title>X</title></head><body>x</body></html>';
+  const on = A.ensureGa(page, true);
+  const csp = /content="([^"]*)"/.exec(on)[1];
+  assert.ok(!/goatcounter|gc\.zgo\.at/.test(on), "GoatCounter's tag and sources are gone");
+  assert.ok(on.includes(A.GA_TAG + "\n</head>") && on.indexOf(A.GA_TAG) > on.indexOf("Content-Security-Policy"), "Google's tag in <head>, after the policy");
+  assert.ok(A.GA_TAG.startsWith('<script async src="https://www.googletagmanager.com/gtag/js?id=' + A.GA_ID + '"></script>'), "gtag.js for this property");
+  assert.ok(csp.includes("script-src 'self' " + A.GA_HASH + " https://www.googletagmanager.com;"), "scripts: the setup script's hash and Google's tag host only");
+  assert.strictEqual(A.GA_HASH, "'sha256-" + require("crypto").createHash("sha256").update(A.GA_CODE, "utf8").digest("base64") + "'");
+  assert.ok(/connect-src 'self' https:\/\/\*\.google-analytics\.com https:\/\/\*\.analytics\.google\.com https:\/\/\*\.googletagmanager\.com/.test(csp), "measurement endpoints, as Google lists them");
+  assert.ok(!/script-src[^;]*'unsafe-inline'/.test(csp) && /object-src 'none'/.test(csp), "nothing else loosened");
+  assert.strictEqual(A.ensureGa(on, true), on, "idempotent");
+  const off = A.ensureGa(on, false);
+  assert.ok(!/googletagmanager|google-analytics|gtag/.test(off), "off takes it all away");
+  // As the build leaves a page: Grow then Google Analytics, the order the comparison applies them.
+  const built = A.ensureGa(require("./lib/grow.js").ensureGrow(page, true), true);
+  assert.strictEqual(W.comparable(built), W.comparable(page), "a fresh render is still the same page (no rewrite of every page)");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "app.js"), "utf8");
+  assert.ok(/window\.gtag\('event', 'select_content'/.test(src) && !/window.goatcounter/.test(src), "the homepage's card-open events go to Google Analytics");
+  const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(up.indexOf("addGaToPages(") > up.indexOf("addSearchToPages("), "after the last page writer");
 });
 
 // ---------------- takeConfident() — critics' line confidence gate ----------------
@@ -7265,9 +7289,9 @@ test("Grow: its loader and exactly its origins on every page, off in one setting
     assert.strictEqual(G.ensureGrow(film.replace("</body>", old + "\n</body>"), true), on, "an earlier loader is replaced: " + old.slice(0, 40));
   assert.ok(csp.includes("script-src 'self' " + G.GROW_HASH + " https://faves.grow.me;"), "scripts: the snippet's hash and faves.grow.me, nothing else");
   assert.ok(!/script-src[^;]*'unsafe-inline'/.test(csp), "never 'unsafe-inline' for scripts");
-  assert.ok(/connect-src 'self' https:\/\/firestore\.googleapis\.com https:\/\/api\.grow\.me https:\/\/some\.growplow\.events/.test(csp), "the page's own origins are kept");
+  assert.ok(/connect-src 'self' https:\/\/firestore\.googleapis\.com https:\/\/api\.grow\.me https:\/\/faves\.grow\.me https:\/\/client-rapi-mediavine\.recombee\.com https:\/\/some\.growplow\.events/.test(csp), "the page's own origins are kept; Grow's text and recommendations reachable");
   assert.ok(/frame-src https:\/\/www\.youtube-nocookie\.com https:\/\/app\.grow\.me/.test(csp) && /object-src 'none'/.test(csp), "nothing else loosened");
-  assert.ok(!/euid|\*|'unsafe-eval'/.test(csp.replace(G.GROW_HASH, "")), "never the EUID ad-identity SDK, never a wildcard, never eval");
+  assert.ok(!/euid|uidapi|fonts\.googleapis|\*|'unsafe-eval'/.test(csp.replace(G.GROW_HASH, "")), "never the EUID/UID2 ad-identity SDKs or Google Fonts, never a wildcard, never eval");
   assert.strictEqual(G.ensureGrow(on, true), on, "idempotent");
   assert.strictEqual(G.ensureGrow(on, false).replace(/\s+/g, " "), film.replace(/\s+/g, " "), "off takes the loader and the origins away again");
   assert.strictEqual(W.comparable(on), W.comparable(film), "a fresh render without Grow is still the same page (no rewrite of every page)");

@@ -18,6 +18,7 @@
 const fs = require("fs");
 const path = require("path");
 const { ensureGrow } = require("./grow.js");
+const { ensureGa } = require("./ga.js");
 
 const STAMPS = [
   /<div class="meta" style="margin-top:2px;font-size:12\.5px">Page updated [^<]*<\/div>/g,
@@ -46,7 +47,7 @@ function comparable(html, root = ".") {
   // Grow's loader and origins (lib/grow.js) are added after every page writer: a fresh render
   // has neither yet, and is still the same page. Both sides are compared WITH Grow (adding it is
   // exact and idempotent; taking it out can't tell a directive Grow created from the page's own).
-  s = ensureGrow(s, true);
+  s = ensureGa(ensureGrow(s, true), true); // and Google Analytics (lib/ga.js), the same way
   for (const re of STAMPS) s = s.replace(re, "");
   return s;
 }

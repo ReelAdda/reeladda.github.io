@@ -70,7 +70,9 @@ function ytIdOf(url) {
 // to be allowed explicitly or the browser silently blocks it (see cspWith below). That is why
 // both live in one place instead of being pasted into each template.
 // ============================================================================
-const GC_SITE = process.env.GC_SITE === undefined ? "filmychill" : String(process.env.GC_SITE).trim();
+// Off since 19 Oct 2026: Google Analytics replaced GoatCounter (lib/ga.js). Set GC_SITE="filmychill"
+// in the workflow to bring it back.
+const GC_SITE = process.env.GC_SITE === undefined ? "" : String(process.env.GC_SITE).trim();
 
 function analyticsTag() {
   if (!GC_SITE) return "";

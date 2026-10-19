@@ -21,9 +21,15 @@
 //   img.grow.me, itp.mediavine.com  image resizing
 //   urls.grow.me       its short links
 //   app.grow.me        the hidden login frame (sign-in to save favourites)
-// Deliberately NOT allowed: cdn.prod.euid.eu, the EUID advertising-identity SDK Grow tries to
-// load. Grow gives it 15 s, then carries on without it. Allow it only if the site ever needs it
-// for advertising — and update the Privacy page first.
+//   faves.grow.me (fetch)  the widget's text and translations
+//   client-rapi-mediavine.recombee.com  its recommendation engine (Recombee)
+// (The last two only appear once the site is verified in Grow — seen in a browser, 19 Oct 2026.)
+// Deliberately NOT allowed:
+//   cdn.prod.euid.eu, cdn.prod.uidapi.com — the EUID and UID2 advertising-identity SDKs Grow tries
+//     to load. Grow gives them 15 s, then carries on without them. Allow them only if the site
+//     ever needs them for advertising — and update the Privacy page first.
+//   fonts.googleapis.com — the widget's Lato web font: loading Google Fonts sends each visitor's
+//     IP address to Google, so the widget uses the site's own fonts instead.
 //
 // Kill switch: GROW_SITE_ID="" in the workflow strips the snippet and the origins from every
 // page on the next build.
@@ -33,6 +39,7 @@
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const { mapPolicy, placeInHead, removeTag, withSources } = require("./csp.js");
 
 const GROW_SITE_ID = process.env.GROW_SITE_ID === undefined
   ? "U2l0ZToxZTkwZjRlNS1kNTZiLTQ1M2UtOTA4Yy00NmYxNmIyNTZhOWE="
@@ -50,50 +57,19 @@ const OLD_TAGS = [
 ];
 const GROW_SOURCES = {
   "script-src": [GROW_HASH, "https://faves.grow.me"],
-  "connect-src": ["https://api.grow.me", "https://some.growplow.events", "https://img.grow.me", "https://itp.mediavine.com", "https://urls.grow.me"],
+  "connect-src": ["https://api.grow.me", "https://faves.grow.me", "https://client-rapi-mediavine.recombee.com", "https://some.growplow.events", "https://img.grow.me", "https://itp.mediavine.com", "https://urls.grow.me"],
   "img-src": ["https://img.grow.me", "https://itp.mediavine.com"],
   "frame-src": ["https://app.grow.me"],
 };
 
-function parsePolicy(policy) {
-  return String(policy).split(";").map((p) => p.trim()).filter(Boolean)
-    .map((p) => { const [name, ...vals] = p.split(/\s+/); return [name, vals]; });
-}
-const serialize = (dirs) => dirs.map(([n, v]) => [n, ...v].join(" ")).join("; ");
-
-// Pure: a policy with Grow's sources added (on) or taken out (off). A directive the page doesn't
-// have starts from its default-src, so adding Grow never loosens anything else.
-function growCsp(policy, on = GROW_ON) {
-  const dirs = parsePolicy(policy);
-  const def = (dirs.find(([n]) => n === "default-src") || [null, ["'self'"]])[1];
-  for (const [name, srcs] of Object.entries(GROW_SOURCES)) {
-    let d = dirs.find(([n]) => n === name);
-    if (on) {
-      if (!d) { d = [name, def.filter((x) => x !== "'none'")]; dirs.push(d); }
-      for (const s of srcs) if (!d[1].includes(s)) d[1].push(s);
-    } else if (d) {
-      d[1] = d[1].filter((x) => !srcs.includes(x));
-    }
-  }
-  return serialize(dirs);
-}
-
-const CSP_RE = /(<meta http-equiv="Content-Security-Policy" content=")([^"]*)(">)/;
-const strip = (s, tag) => s.split(`${tag}\n`).join("").split(tag).join("");
+// Pure: a policy with Grow's sources added (on) or taken out (off) (lib/csp.js).
+const growCsp = (policy, on = GROW_ON) => withSources(policy, GROW_SOURCES, on);
 
 // Pure: one page with Grow on (snippet in <head> + sources) or off (neither). Idempotent.
 function ensureGrow(html, on = GROW_ON) {
-  let s = String(html);
-  const m = CSP_RE.exec(s);
-  if (m) s = s.replace(m[0], m[1] + growCsp(m[2], on) + m[3]);
-  for (const t of OLD_TAGS) s = strip(s, t);
-  if (!on) return strip(s, GROW_TAG);
-  if (s.includes(GROW_TAG)) return s;
-  // In <head>, after the policy (the meta must come first to apply to it).
-  const at = s.indexOf("</head>");
-  if (at >= 0) return `${s.slice(0, at)}${GROW_TAG}\n${s.slice(at)}`;
-  const body = s.lastIndexOf("</body>");
-  return body >= 0 ? `${s.slice(0, body)}${GROW_TAG}\n${s.slice(body)}` : s;
+  let s = mapPolicy(String(html), (p) => growCsp(p, on));
+  for (const t of OLD_TAGS) s = removeTag(s, t);
+  return on ? placeInHead(s, GROW_TAG) : removeTag(s, GROW_TAG);
 }
 
 // The pass over every page, after the last page writer of the run. The embed widget renders
