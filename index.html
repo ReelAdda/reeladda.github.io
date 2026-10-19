@@ -174,6 +174,17 @@
   /* Mood picker and My List, now under Coming Soon. */
   .extras { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
   .extras .tonight-btn, .extras .mylist-btn { min-height: 44px; display: inline-flex; align-items: center; gap: 7px; }
+  /* "Most searched" (scripts/lib/searchtop.js POPULAR_CSS, adapted to the homepage). */
+  .popular { margin-top: 40px; }
+  .pop-list { list-style: none; margin: 0; padding: 0; counter-reset: pop; display: grid; gap: 10px; }
+  @media (min-width: 720px) { .pop-list { grid-template-columns: 1fr 1fr; } }
+  .pop-list li { counter-increment: pop; }
+  .pop-list a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 10px 14px;
+    border-radius: 14px; background: var(--card); text-decoration: none; color: inherit;
+    box-shadow: 0 1px 2px rgba(36,29,82,.04), 0 6px 18px rgba(36,29,82,.06); }
+  .pop-list a::before { content: counter(pop); font-family: 'Anton', sans-serif; font-size: 20px; color: var(--marigold-dk); min-width: 20px; }
+  .pop-b { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
+  .pop-t { font-weight: 800; font-size: 15px; } .pop-m { color: var(--mute); font-size: 12.5px; }
   /* The legend under the lists. The mini ring is the dial in CSS, hollowed by a mask. */
   .dial-legend { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 30px; font-size: 12.5px; color: var(--mute); text-align: center; }
   .dial-mini { width: 16px; height: 16px; border-radius: 50%; flex: 0 0 16px; background: conic-gradient(#D18A00 70%, #EFE6D6 0);
@@ -713,6 +724,7 @@
       <button class="mylist-btn" id="mylistBtn" data-click="toggleMyList"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List (<span id="wlCount">0</span>)</button>
     </div>
 </section>
+  <!--SSR:POPULAR--><!--/SSR:POPULAR-->
   <p class="dial-legend"><span class="dial-mini" aria-hidden="true"></span>Ring = audience rating out of 10, shown once enough people have rated · colour = FilmyChill verdict</p>
 </main>
 

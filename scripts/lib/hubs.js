@@ -36,6 +36,7 @@ const {
   weekRangeFor,
   hubPath,
 } = require("./pagekit.js");
+const { popularBlockFor } = require("./searchtop.js");
 const { countryNameFor, streamVocab } = require("./rules.js");
 const { buildOttWeekPage, ottWeekPath, ottWeekUrl } = require("./weekly.js");
 
@@ -546,6 +547,8 @@ function buildPlatformHubPage(data, cfg, hub) {
     faqs, extraLd, homeUrl: `https://filmychill.com${m.path}`, code, altPaths,
     // Up from "new this week" to "everything on it", when that page exists (see writeStreamingPages).
     navLinks: fs.existsSync(streamPagePath(code, hub.slug)) ? [{ href: streamPageUrl(code, hub.slug), label: `Everything on ${hub.name} in ${countryNameFor({ code })}` }] : null,
+    // The most-searched film pages streaming on this platform, not already listed (lib/searchtop.js).
+    popular: popularBlockFor(code, { keep: (pm) => !!(pm.live && (pm.live.providers || []).includes(hub.name)), exclude: new Set(hub.items.map((x) => x && x.slug).filter(Boolean)) }),
   });
 }
 

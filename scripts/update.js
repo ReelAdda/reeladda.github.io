@@ -332,6 +332,7 @@ const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePa
 const { addSearchToPages, writeSearchIndexes } = require("./lib/search.js");
 const { GROW_ON, addGrowToPages } = require("./lib/grow.js");
 const { GA_ON, addGaToPages } = require("./lib/ga.js");
+const { refreshSearchTop } = require("./lib/searchtop.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -2383,6 +2384,12 @@ async function main() {
 
   // Every edition's lists from TMDB; the probe watchlist and India census; archive upkeep; buzz, trailers, critics' takes and scores.
   async function stageBuildData() {
+    // "Most searched" data (lib/searchtop.js): Search Console's latest week of clicks per page.
+    // Dormant without access; the last saved list (or a loaded export) is used meanwhile.
+    try {
+      const r = await refreshSearchTop();
+      console.log(r.ok ? `Most searched: ${r.films} film pages from Search Console (${r.site})` : `Most searched: not refreshed (${r.why}) — using the saved list if it's under two weeks old`);
+    } catch (e) { console.log(`Most searched: not refreshed (${e.message})`); }
     // Pass 1: build data for every country. Every TMDB answer is recorded — each edition on its
     // own, so the proof replays an edition with exactly the answers it got — and the output kept
     // as built, for the split proof right after (proveSplitBuilder).

@@ -32,6 +32,7 @@ const {
   listingPageHtml,
   weekSlug,
 } = require("./pagekit.js");
+const { popularBlockFor } = require("./searchtop.js");
 const { countryNameFor, streamVocab } = require("./rules.js");
 const { ottWeekUrl } = require("./weekly.js");
 
@@ -321,6 +322,8 @@ function buildLanguagePage(data, langName, slug, archive = null) {
       { h2: `More ${langName} from the last six months`, items: backCatalogue },
     ],
     faqs, extraLd, homeUrl: "https://filmychill.com/",
+    // The language's most-searched film pages not already on this page (lib/searchtop.js).
+    popular: popularBlockFor("in", { keep: (m) => m.lang === langName, exclude: new Set([...theatres, ...ott, ...soon, ...backCatalogue].map((x) => x && x.slug).filter(Boolean)) }),
   });
 }
 

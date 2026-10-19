@@ -65,6 +65,7 @@ const { stageFailed } = require("./runhealth.js");
 const { USE_IMDB } = require("./tmdb.js");
 const { ssrCard, ssrEditorNote, ssrSoonCard, writeRssFeed } = require("./weekly.js");
 const { heroDialInner } = require("./meter.js");
+const { popularBlockFor } = require("./searchtop.js");
 
 // About page lastmod for the sitemap — bump manually when about/index.html changes.
 const ABOUT_LASTMOD = "2026-10-19";
@@ -820,6 +821,11 @@ function renderCountryPage(templateHtml, cfg, data) {
   // Homepage share/Discover image: the Pick of the Week, then the lists (see hubOgImage).
   html = replaceBetween(html, "OGIMAGE", ogImageTag(hubOgImage([heroPickOf(data), ...(data.theatres || []), ...(data.ott || [])].filter(Boolean), cfg)));
   html = replaceBetween(html, "HERO", ssrHero(data, cfg.code));
+  // Most searched (lib/searchtop.js): this edition's film pages people find most on Google, other
+  // than the ones the homepage already lists — the site's own links where search demand is.
+  html = replaceBetween(html, "POPULAR", popularBlockFor(cfg.code, {
+    exclude: new Set([...(data.theatres || []), ...(data.ott || []), ...(data.comingSoon || [])].map((x) => x && x.slug).filter(Boolean)),
+  }));
   html = replaceBetween(html, "LANGOPTS", langOptions(data));
   html = replaceBetween(html, "HEROPRELOAD", heroPreload(data));
   // The first two theatre posters sit above the fold on desktop: load them immediately — after

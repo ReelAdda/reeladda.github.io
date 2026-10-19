@@ -24,6 +24,7 @@ const { freshLabel, THEATRE_WINDOW_FALLBACK_DAYS } = require("./freshness.js");
 const { canonProvider, countryNameFor, streamVocab, streamWindowEstimate } = require("./rules.js");
 const { USE_IMDB } = require("./tmdb.js");
 const { VPILL_CSS, rowScoreLine } = require("./meter.js");
+const { POPULAR_CSS } = require("./searchtop.js");
 
 function img(path, size = "w342") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : null;
@@ -340,7 +341,7 @@ function fitFirst(options, max) {
 // 2026: card posters one URL at w342 (they were "url1,url2", 132 month pages). v4, 18 Oct
 // 2026: verdicts as coloured pills, the same as the homepage cards.
 const LISTING_VERSION = "<!--listing:4-->";
-function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null }) {
+function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null, popular = "" }) {
   // ~80 hubs, month archives and week pages ran 61–72 characters; see fitSiteTitle.
   title = fitSiteTitle(title);
   const e = escHtml;
@@ -422,6 +423,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   .rm.tk { color:var(--indigo); font-weight:600; }
   .rm.hk { font-style:italic; }
   ${VPILL_CSS}
+  ${POPULAR_CSS}
   .faq details { border-top:1px solid var(--line); padding:10px 0; }
   .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
   .faq summary::-webkit-details-marker { display:none; }
@@ -441,6 +443,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   <nav class="nav">${navLinks.map((l) => `<a href="${e(l.href)}">${e(l.label)}</a>`).join(" · ")}</nav>` : ""}${frozenNote ? `
   <div class="frozen">${e(frozenNote)}</div>` : ""}
 ${sectionHtml}
+${popular}
 ${faqHtml}
   <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + ${e(V.word)})</a>${prevWeekHref ? `
   <a class="btn" style="background:transparent;color:var(--indigo);border:1.5px solid var(--indigo)" href="${e(prevWeekHref)}">← Previous week</a>` : ""}

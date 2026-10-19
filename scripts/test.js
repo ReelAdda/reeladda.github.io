@@ -6709,8 +6709,9 @@ test("homepage: no inline script and no inline handler, so its CSP can refuse in
   const fsx = require("fs");
   const tpl = fsx.readFileSync("index.html", "utf8").replace(/(<!--SSR:APPJS-->)[\s\S]*?(<!--\/SSR:APPJS-->)/, "$1<script src=\"/js/app.js\"></script>$2"), app = fsx.readFileSync("js/app.js", "utf8");
   // The page script sits between the APPJS markers (inlined by the build); nothing else inline.
-  // Grow's snippet (lib/grow.js) is allowed by its own hash, added to built pages after the writers.
-  const outside = tpl.replace(/<!--SSR:APPJS-->[\s\S]*?<!--\/SSR:APPJS-->/, "").split(require("./lib/grow.js").GROW_TAG).join("");
+  // Grow's snippet (lib/grow.js) and GA's setup script (lib/ga.js) are each allowed by their own hash,
+  // added to built pages after the writers.
+  const outside = tpl.replace(/<!--SSR:APPJS-->[\s\S]*?<!--\/SSR:APPJS-->/, "").split(require("./lib/grow.js").GROW_TAG).join("").split(require("./lib/ga.js").GA_TAG).join("");
   assert.ok(outside !== tpl, "the template carries the APPJS markers");
   const scripts = [...outside.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
   for (const [, attrs, body] of scripts) assert.ok(/\bsrc=|type="application\/ld\+json"/.test(attrs) || !body.trim(), `inline script: ${body.slice(0, 60)}`);
@@ -7313,6 +7314,61 @@ test("Grow is on only while the Privacy and About pages say so (data trust, Oct 
     assert.ok(!/it is the only third-party script on the site/.test(about) && /Grow/.test(about), "About doesn't call GoatCounter the only third-party script");
   }
 });
+test("most searched: pages from Search Console, honest heading, nothing the page already lists (Oct 2026)", () => {
+  const S = require("./lib/searchtop.js");
+  assert.deepStrictEqual(S.filmOfUrl("https://filmychill.com/movie/dorothy.html"), { code: "in", slug: "dorothy" });
+  assert.deepStrictEqual(S.filmOfUrl("https://filmychill.com/sg/movie/the-dark-heaven.html"), { code: "sg", slug: "the-dark-heaven" });
+  for (const u of ["https://filmychill.com/", "https://filmychill.com/kannada/", "https://example.com/movie/x.html"]) assert.strictEqual(S.filmOfUrl(u), null, u);
+  const top = { asOf: "2026-10-19", from: "2026-10-10", to: "2026-10-16", pages: S.groupRows([
+    { keys: ["https://filmychill.com/movie/a.html"], clicks: 9, impressions: 40 }, { keys: ["https://filmychill.com/movie/b.html"], clicks: 5, impressions: 9 },
+    { keys: ["https://filmychill.com/movie/c.html"], clicks: 4, impressions: 9 }, { keys: ["https://filmychill.com/movie/d.html"], clicks: 3, impressions: 9 },
+    { keys: ["https://filmychill.com/movie/e.html"], clicks: 1, impressions: 90 }, { keys: ["https://filmychill.com/movie/gone.html"], clicks: 7, impressions: 9 },
+  ]) };
+  assert.deepStrictEqual(top.pages.in.map((r) => r[0]), ["a", "gone", "b", "c", "d", "e"], "most clicks first");
+  const manifest = { in: { a: { title: "A", lang: "Hindi", released: "2026-10-01", fcs: { v: "Must watch" } }, b: { title: "B", lang: "Tamil", released: "2025-01-01", kind: "tv" },
+    c: { title: "C & Co", lang: "Hindi", released: "2024-03-01", fcs: { v: "Too early" } }, d: { title: "D", lang: "Hindi", released: "2023-01-01" }, e: { title: "E", lang: "Hindi" } } };
+  const items = S.popularItems(top, "in", manifest);
+  assert.deepStrictEqual(items.map((x) => x.slug), ["a", "b", "c", "d"], "a page that no longer exists is skipped; under " + S.MIN_CLICKS + " clicks never counts");
+  assert.deepStrictEqual(S.popularItems(top, "in", manifest, { exclude: new Set(["a"]) }).map((x) => x.slug), ["b", "c", "d"], "nothing the page already lists");
+  assert.deepStrictEqual(S.popularItems(top, "in", manifest, { keep: (m) => m.lang === "Hindi" }).map((x) => x.slug), ["a", "c", "d"], "a hub's own filter");
+  const html = S.popularBlockHtml(items, "in", top);
+  assert.ok(html.includes("<h2 id=\"pop-h\">Most searched this week</h2>") && html.includes("found most on Google in the latest week"), "a week of data: 'this week'");
+  assert.ok(html.includes('<a href="/movie/a.html"><span class="pop-b"><span class="pop-t">A</span><span class="pop-m">Hindi · 2026</span> <span class="vpill vp-must">Must watch</span></span></a>'), html);
+  assert.ok(html.includes('<span class="pop-t">C &amp; Co</span>') && !/Too early/.test(html), "escaped; only real verdicts get a pill");
+  assert.ok(/Tamil · 2025 · Series/.test(html));
+  assert.ok(S.popularBlockHtml(items, "in", { from: "2026-09-20", to: "2026-10-17" }).includes("Most searched in the last 28 days"), "28 days of data never says 'this week'");
+  assert.strictEqual(S.popularBlockHtml(items.slice(0, 2), "in", top), "", "fewer than three: no block");
+  assert.deepStrictEqual(S.fromExport("Top pages,Clicks,Impressions,CTR,Position\nhttps://filmychill.com/movie/x.html,5,9,1%,3\nhttps://filmychill.com/,4,2,1%,1\n", { from: "2026-09-20", to: "2026-10-17", asOf: "2026-10-19" }).pages, { in: [["x", 5, 9]] });
+});
+testAsync("most searched: signs in as the service account, fetches the latest week, and stays dormant without access (Oct 2026)", () => inTempDir(async () => {
+  const S = require("./lib/searchtop.js");
+  const { privateKey, publicKey } = require("crypto").generateKeyPairSync("rsa", { modulusLength: 2048 });
+  const creds = { client_email: "bot@x.iam.gserviceaccount.com", private_key: privateKey.export({ type: "pkcs8", format: "pem" }) };
+  const calls = [];
+  const fakeGoogle = async (url, opts) => {
+    calls.push(url);
+    if (/oauth2\.googleapis\.com\/token/.test(url)) {
+      const jwt = new URLSearchParams(opts.body).get("assertion").split(".");
+      const claim = JSON.parse(Buffer.from(jwt[1], "base64url").toString());
+      const ok = require("crypto").verify("RSA-SHA256", Buffer.from(jwt[0] + "." + jwt[1]), publicKey, Buffer.from(jwt[2], "base64url"));
+      assert.ok(ok && claim.iss === creds.client_email && claim.scope === "https://www.googleapis.com/auth/webmasters.readonly", "a signed, read-only request");
+      return { ok: true, json: async () => ({ access_token: "tok" }) };
+    }
+    assert.strictEqual(opts.headers.authorization, "Bearer tok");
+    const body = JSON.parse(opts.body);
+    assert.deepStrictEqual([body.startDate, body.endDate, body.dimensions], ["2026-10-10", "2026-10-16", ["page"]], "seven days, ending three days back");
+    if (url.includes(encodeURIComponent("sc-domain:filmychill.com"))) return { ok: false, status: 403, json: async () => ({ error: { message: "no access" } }) };
+    return { ok: true, json: async () => ({ rows: [{ keys: ["https://filmychill.com/us/movie/z.html"], clicks: 6, impressions: 50 }] }) };
+  };
+  const r = await S.refreshSearchTop({ env: { FIREBASE_SERVICE_ACCOUNT: JSON.stringify(creds) }, fetchImpl: fakeGoogle, nowMs: Date.parse("2026-10-19T02:00:00Z") });
+  assert.ok(r.ok && r.site === "https://filmychill.com/", "a domain property without access falls back to the URL-prefix property: " + JSON.stringify(r));
+  const saved = JSON.parse(require("fs").readFileSync(S.SEARCH_TOP_FILE, "utf8"));
+  assert.deepStrictEqual(saved.pages, { us: [["z", 6, 50]] });
+  assert.ok(S.loadSearchTop(S.SEARCH_TOP_FILE, Date.parse("2026-10-20")) && !S.loadSearchTop(S.SEARCH_TOP_FILE, Date.parse("2026-11-10")), "older than two weeks isn't 'this week' any more");
+  assert.deepStrictEqual(await S.refreshSearchTop({ env: {}, fetchImpl: fakeGoogle }), { ok: false, why: "no service account" }, "dormant without the secret");
+  const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(/await refreshSearchTop\(\)/.test(up), "the build refreshes it");
+}));
 test("layout audit: one content column and 44px targets on every page type (18 Oct 2026)", () => {
   const fsx = require("fs"), path = require("path");
   const src = homeSource();

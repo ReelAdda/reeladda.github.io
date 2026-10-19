@@ -127,6 +127,8 @@ jobs:
           git add -A -- ott-census.json ott-digital.json 2>/dev/null || true
           # Facts-only rendering: each edition's mode and comparison record (scripts/lib/factsq.js).
           git add -A -- facts-mode.json 2>/dev/null || true
+          # "Most searched" data (scripts/lib/searchtop.js): per-page Search Console clicks.
+          git add -A -- search-top.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit."
