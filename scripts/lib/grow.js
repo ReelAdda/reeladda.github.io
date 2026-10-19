@@ -8,9 +8,12 @@
 // (addGrowToPages), the same way the search script is, so rebuilt, frozen and hand-written pages
 // all carry it.
 //
-// The loader is a site file (/js/grow.js), not Grow's inline snippet: inline scripts are refused
-// by the policy. It starts Grow only after the page has loaded and the browser is idle, so the
-// widget never competes with the first paint or the hero image.
+// The loader is Grow's own script as an external tag carrying the site ID —
+//   <script src="https://faves.grow.me/main.js" data-grow-faves-site-id="…" defer>
+// — not Grow's inline snippet, which the policy refuses. main.js reads the ID from its own tag
+// (document.currentScript), and Grow's installation check reads it from the page's HTML: the
+// first version loaded it from /js/grow.js, which the check couldn't see (19 Oct 2026).
+// Measured: first paint and the hero image are unchanged with the tag deferred like this.
 //
 // Origins, from Grow's own scripts (main.js and its app bundle, Oct 2026):
 //   faves.grow.me      the widget's scripts (and the chunks they import)
@@ -35,7 +38,9 @@ const GROW_SITE_ID = process.env.GROW_SITE_ID === undefined
   ? "U2l0ZToxZTkwZjRlNS1kNTZiLTQ1M2UtOTA4Yy00NmYxNmIyNTZhOWE="
   : String(process.env.GROW_SITE_ID).trim();
 const GROW_ON = !!GROW_SITE_ID;
-const GROW_TAG = '<script src="/js/grow.js" defer></script>';
+const GROW_TAG = `<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="${GROW_SITE_ID}" defer></script>`;
+// The first version's loader, taken off any page that still has it.
+const OLD_TAG = '<script src="/js/grow.js" defer></script>';
 const GROW_SOURCES = {
   "script-src": ["https://faves.grow.me"],
   "connect-src": ["https://api.grow.me", "https://some.growplow.events", "https://img.grow.me", "https://itp.mediavine.com", "https://urls.grow.me"],
@@ -73,6 +78,8 @@ function ensureGrow(html, on = GROW_ON) {
   let s = String(html);
   const m = CSP_RE.exec(s);
   if (m) s = s.replace(m[0], m[1] + growCsp(m[2], on) + m[3]);
+  s = s.split(`${OLD_TAG}
+`).join("").split(OLD_TAG).join("");
   if (on) {
     if (!s.includes(GROW_TAG) && s.includes("</body>")) {
       const at = s.lastIndexOf("</body>");

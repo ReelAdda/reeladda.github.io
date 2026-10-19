@@ -7256,7 +7256,9 @@ test("Grow: its loader and exactly its origins on every page, off in one setting
   const film = '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; connect-src \'self\' https://firestore.googleapis.com; script-src \'self\'; img-src \'self\' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src \'none\'"><title>X</title></head><body><p>x</p></body></html>';
   const on = G.ensureGrow(film, true);
   const csp = /content="([^"]*)"/.exec(on)[1];
-  assert.ok(on.includes('<script src="/js/grow.js" defer></script>\n</body>'), "the loader, last in the body");
+  assert.ok(on.includes('<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="' + G.GROW_SITE_ID + '" defer></script>\n</body>'), "Grow's own tag with the site ID in the HTML (its installation check reads it there), last in the body");
+  assert.ok(!/<script(?![^>]*\bsrc=)[^>]*>[^<]*grow/i.test(on), "never an inline script");
+  assert.strictEqual(G.ensureGrow(film.replace("</body>", '<script src="/js/grow.js" defer></script>\n</body>'), true), on, "the first version's /js/grow.js loader is replaced");
   assert.ok(/script-src 'self' https:\/\/faves\.grow\.me(;|$)/.test(csp), "scripts: only faves.grow.me added");
   assert.ok(/connect-src 'self' https:\/\/firestore\.googleapis\.com https:\/\/api\.grow\.me https:\/\/some\.growplow\.events/.test(csp), "the page's own origins are kept");
   assert.ok(/frame-src https:\/\/www\.youtube-nocookie\.com https:\/\/app\.grow\.me/.test(csp) && /object-src 'none'/.test(csp), "nothing else loosened");
@@ -7268,10 +7270,6 @@ test("Grow: its loader and exactly its origins on every page, off in one setting
   const list = G.ensureGrow('<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\'"><body></body>', true);
   assert.ok(/frame-src 'self' https:\/\/app\.grow\.me/.test(list) && /connect-src 'self' https:\/\/api\.grow\.me/.test(list));
   assert.strictEqual(W.comparable(list), W.comparable('<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\'"><body></body>'));
-  // The loader: a site file (no inline script), started only after load and when idle.
-  const js = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "grow.js"), "utf8");
-  assert.ok(/addEventListener\("load", whenIdle/.test(js) && /requestIdleCallback\(start/.test(js) && js.includes('"https://faves.grow.me/main.js"'), "after load, when idle");
-  assert.ok(js.includes(G.GROW_SITE_ID) || !G.GROW_ON, "the loader carries the configured site");
   const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
   assert.ok(up.indexOf("addGrowToPages(") > up.indexOf("addSearchToPages("), "the pass runs after the last page writer");
 });
