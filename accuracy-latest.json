@@ -2,62 +2,46 @@
  "date": "2026-10-19",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 6,
- "high": 4,
- "correctable": 4,
+ "pagesDisagreeing": 4,
+ "high": 2,
+ "correctable": 2,
  "byField": {
-  "platform": 4,
-  "director": 1,
-  "genres": 1
+  "genres": 1,
+  "platform": 2,
+  "director": 1
  },
  "rows": [
   {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix, Amazon Prime Video, Paramount Plus, Paramount+ Amazon Channel",
-   "tmdb": "Netflix, Paramount+",
-   "code": "uk",
-   "slug": "forrest-gump"
+   "field": "genres",
+   "severity": "low",
+   "page": "Comedy / Drama",
+   "tmdb": "Music, Drama",
+   "code": "in",
+   "slug": "bajrangi-bhaijaan"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "Lionsgate+ Amazon Channels",
-   "tmdb": "Lionsgate+",
-   "code": "au",
-   "slug": "bridge-to-terabithia"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "WOW, Sky Go, RTL+, RTL+ Max Amazon Channel",
-   "tmdb": "WOW, RTL+, RTL+ Max, Magenta TV+",
+   "page": "Amazon Prime Video, RTL+, RTL+ Max Amazon Channel, HBO Max",
+   "tmdb": "RTL+, RTL+ Max, HBO Max",
    "code": "de",
-   "slug": "law-order"
+   "slug": "interstellar"
   },
   {
    "field": "director",
    "severity": "medium",
-   "page": "Nelson Dilipkumar",
-   "tmdb": "Nelson",
-   "code": "my",
-   "slug": "kolamavu-kokila"
+   "page": "Peter Chan Ho-Sun",
+   "tmdb": "Peter Chan",
+   "code": "sg",
+   "slug": "leap"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "Disney Plus, Neon TV, Lionsgate+ Amazon Channels",
-   "tmdb": "Disney+, Neon TV, Lionsgate+",
+   "page": "Amazon Prime Video, HBO Max Amazon Channel, HBO Max",
+   "tmdb": "Netflix, HBO Max",
    "code": "nz",
-   "slug": "mad-men"
-  },
-  {
-   "field": "genres",
-   "severity": "low",
-   "page": "Thriller / Adventure",
-   "tmdb": "Thriller, Drama",
-   "code": "es",
-   "slug": "whalefall"
+   "slug": "it"
   }
  ]
 }
