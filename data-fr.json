@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-19T04:56:55.255Z",
+ "generatedAt": "2026-10-19T05:36:28.938Z",
  "country": "fr",
  "pick": "Carrie",
  "theatres": [
@@ -166,7 +166,8 @@
    ],
    "theatricalHere": true,
    "slug": "minotaur",
-   "trailerViews": 9373
+   "wikiWeeklyViews": 7651,
+   "trailerViews": 9366
   },
   {
    "title": "Iron Boy",
@@ -314,7 +315,8 @@
     }
    ],
    "theatricalHere": true,
-   "slug": "iron-boy"
+   "slug": "iron-boy",
+   "wikiWeeklyViews": 1744
   },
   {
    "title": "Les Misérables",
@@ -479,7 +481,8 @@
    ],
    "theatricalHere": true,
    "slug": "les-mis-rables",
-   "trailerViews": 316675
+   "wikiWeeklyViews": 2973,
+   "trailerViews": 316703
   },
   {
    "title": "A Man of His Time",
@@ -644,7 +647,8 @@
    ],
    "theatricalHere": true,
    "slug": "a-man-of-his-time",
-   "trailerViews": 807,
+   "wikiWeeklyViews": 3092,
+   "trailerViews": 808,
    "take": "Critics have been largely positive on this one.",
    "takeSrc": "wiki",
    "takeArticle": "A Man of His Time",
@@ -822,7 +826,7 @@
    "slug": "street-fighter",
    "wikiWeeklyViews": 336673,
    "trending": true,
-   "trailerViews": 34004017,
+   "trailerViews": 34012351,
    "take": "A divided reception: the performances won praise, the humour took the heat.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1003,7 +1007,7 @@
    "slug": "other-mommy",
    "wikiWeeklyViews": 598954,
    "trending": true,
-   "trailerViews": 15363062,
+   "trailerViews": 15364014,
    "take": "A rough outing with the reviewers.",
    "takeSrc": "wiki",
    "takeArticle": "Other Mommy",
@@ -1179,7 +1183,7 @@
    ],
    "slug": "you-can-see-everything",
    "wikiWeeklyViews": 207191,
-   "trailerViews": 22954
+   "trailerViews": 23073
   }
  ],
  "ott": [
@@ -1196,7 +1200,7 @@
      "score": "9.7/10"
     }
    ],
-   "votes": 241,
+   "votes": 243,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/AojgldgsOlzZV8ahyOzaiAjJWvV.jpg",
    "isRecent": true,
@@ -1347,7 +1351,7 @@
    "ottFreshDate": "2026-10-11",
    "slug": "dragon-ball-super-beerus",
    "wikiWeeklyViews": 81813,
-   "trailerViews": 181439,
+   "trailerViews": 181665,
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences love it.",
@@ -1529,7 +1533,7 @@
    "ottFreshDate": "2026-10-16",
    "slug": "tulsa-king",
    "wikiWeeklyViews": 33306,
-   "trailerViews": 11396076,
+   "trailerViews": 11396179,
    "take": "Critics came away positive, praising the humour and second half while docking points for the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1718,14 +1722,14 @@
    "language": "English",
    "released": "2026-10-07",
    "review": "After her father's sudden, untimely death thrusts her into the unforgiving ecosystem of public high school, Carrie is forced to navigate a viral bullying…",
-   "rating": 8.3,
+   "rating": 8.4,
    "scores": [
     {
      "source": "TMDB",
-     "score": "8.3/10"
+     "score": "8.4/10"
     }
    ],
-   "votes": 352,
+   "votes": 354,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/6mUMquPQBFJGqTACS3Azkwwrx8d.jpg",
    "isRecent": true,
@@ -1881,7 +1885,7 @@
    "slug": "carrie",
    "wikiWeeklyViews": 1145773,
    "trending": true,
-   "trailerViews": 16611118,
+   "trailerViews": 16611697,
    "take": "The originality and themes won critics over; the performances drew the odd complaint.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2234,7 +2238,7 @@
    "stillGood": true,
    "slug": "matchbox-the-movie",
    "wikiWeeklyViews": 157835,
-   "trailerViews": 9048581,
+   "trailerViews": 9048988,
    "take": "A rough outing with the reviewers.",
    "takeSrc": "wiki",
    "takeArticle": "Matchbox: The Movie",
@@ -2261,7 +2265,7 @@
      "score": "7.0/10"
     }
    ],
-   "votes": 482,
+   "votes": 483,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/iISM36voS1E8gX9BM0DVK0kgi3E.jpg",
    "isRecent": false,
@@ -2418,7 +2422,7 @@
    "slug": "animals",
    "wikiWeeklyViews": 563695,
    "trending": true,
-   "trailerViews": 1609940,
+   "trailerViews": 1610150,
    "take": "A rough outing with the reviewers.",
    "takeSrc": "wiki",
    "takeArticle": "Animals (2026 film)",
@@ -2432,186 +2436,185 @@
    }
   },
   {
-   "title": "Ted Lasso",
-   "genre": "Drama / Comedy",
+   "title": "The Simpsons",
+   "genre": "Animation / Comedy",
    "language": "English",
-   "released": "2020-08-14",
-   "review": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience.",
-   "rating": 8.4,
+   "released": "1989-12-17",
+   "review": "Set in Springfield, the average American town, the show focuses on the antics and everyday adventures of the Simpson family; Homer, Marge, Bart, Lisa…",
+   "rating": 8,
    "scores": [
     {
      "source": "TMDB",
-     "score": "8.4/10"
+     "score": "8.0/10"
     }
    ],
-   "votes": 2772,
+   "votes": 11081,
    "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
-   "isRecent": true,
+   "poster": "https://image.tmdb.org/t/p/w342/tf0CUEynk6GfmrlHIQKQ5mfFP5P.jpg",
+   "isRecent": false,
    "isFresh": false,
    "kind": "tv",
-   "tmdbId": 97546,
-   "popularity": 192.6987,
+   "tmdbId": 456,
+   "popularity": 423.41,
    "cert": "12",
-   "trailer": "https://www.youtube.com/watch?v=BwPcMIDFVKw",
+   "trailer": "https://www.youtube.com/watch?v=_jgYEYERYFQ",
    "providers": [
-    "Apple TV"
+    "Disney+"
    ],
    "cast": [
-    "Jason Sudeikis",
-    "Hannah Waddingham",
-    "Jeremy Swift",
-    "Brett Goldstein"
+    "Dan Castellaneta",
+    "Julie Kavner",
+    "Nancy Cartwright",
+    "Yeardley Smith"
    ],
-   "director": "Bill Lawrence",
+   "director": "Matt Groening",
    "runtime": null,
    "imdbVotes": null,
-   "trailerDate": "2024-07-23T16:00:16.000Z",
-   "imdbId": "tt10986410",
-   "seasons": 4,
-   "freshDate": "2026-08-04",
-   "badge": "New on Apple TV",
+   "trailerDate": "2021-09-10T17:00:31.000Z",
+   "rentBuy": [
+    "Apple TV Store"
+   ],
+   "imdbId": "tt0096697",
+   "seasons": 38,
+   "freshDate": "2026-09-27",
+   "badge": null,
    "similar": [
     {
-     "title": "Running Point",
-     "slug": "running-point",
-     "poster": "https://image.tmdb.org/t/p/w342/66EyhDRHAFqE6OQDasY7Nz2LXTw.jpg",
+     "title": "Close Enough",
+     "slug": "close-enough",
+     "poster": "https://image.tmdb.org/t/p/w342/8aNYMcMyhv1m0MKibgCVmJrAeLs.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Four Seasons",
-     "slug": "the-four-seasons",
-     "poster": "https://image.tmdb.org/t/p/w342/w09XeYl096pwES8riRMZwEA9rnh.jpg",
+     "title": "The Cuphead Show!",
+     "slug": "the-cuphead-show",
+     "poster": "https://image.tmdb.org/t/p/w342/l6nGUyxKCi7ODvyfc8qQShliVEd.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Platonic",
-     "slug": "platonic",
-     "poster": "https://image.tmdb.org/t/p/w342/7G8wB9CG82nITeFwRFIRSk0sQJs.jpg",
+     "title": "Animaniacs",
+     "slug": "animaniacs",
+     "poster": "https://image.tmdb.org/t/p/w342/wmPZzLov9OhiknK4jW4qE6mgvHf.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "My Life with the Walter Boys",
-     "slug": "my-life-with-the-walter-boys",
-     "poster": "https://image.tmdb.org/t/p/w342/dQOwpTpBQEqRUcev4423LrU32G6.jpg",
+     "title": "Strange Planet",
+     "slug": "strange-planet",
+     "poster": "https://image.tmdb.org/t/p/w342/zM1UUFXEhlc417nshpi3GyG9TzA.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Never Have I Ever",
-     "slug": "never-have-i-ever",
-     "poster": "https://image.tmdb.org/t/p/w342/hd5fnBixab6IzfUwjC5wfdbX3eM.jpg",
+     "title": "Shifting Gears",
+     "slug": "shifting-gears",
+     "poster": "https://image.tmdb.org/t/p/w342/tZnI8fWCtmJ9doCYSJwoJBITBiV.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Elsbeth",
-     "slug": "elsbeth",
-     "poster": "https://image.tmdb.org/t/p/w342/pU8T64vNT596oG0U4BG7c0QMXOi.jpg",
+     "title": "King of the Hill",
+     "slug": "king-of-the-hill",
+     "poster": "https://image.tmdb.org/t/p/w342/e2xyMapmYgv4AuSoSDv9Y4pQlD6.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Rain Dogs",
-     "slug": "rain-dogs",
-     "poster": "https://image.tmdb.org/t/p/w342/cA3JlHtx24lEnflydTdX6TReAva.jpg",
+     "title": "Kenan & Kel",
+     "slug": "kenan-kel",
+     "poster": "https://image.tmdb.org/t/p/w342/ftRkgMhF1CofVSLMeonh9Hjz7a4.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Unstable",
-     "slug": "unstable",
-     "poster": "https://image.tmdb.org/t/p/w342/yiMhsbuMYygbWnsrPbdp7PiMvvP.jpg",
+     "title": "American Housewife",
+     "slug": "american-housewife",
+     "poster": "https://image.tmdb.org/t/p/w342/uDXPOk3fx1kPM1tQdrTdE2f76p2.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Shoresy",
-     "slug": "shoresy",
-     "poster": "https://image.tmdb.org/t/p/w342/ai5Bf8eRcroeEAAyVrKmrE8wW74.jpg",
+     "title": "Garfield and Friends",
+     "slug": "garfield-and-friends",
+     "poster": "https://image.tmdb.org/t/p/w342/3HyTfZ9sSCoZPYrYHMffhRVm3Af.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "La Máquina",
-     "slug": "la-m-quina",
-     "poster": "https://image.tmdb.org/t/p/w342/hDsIZmWVr4kTJFjgZ8Gwzx6nDJD.jpg",
+     "title": "The Looney Tunes Show",
+     "slug": "the-looney-tunes-show",
+     "poster": "https://image.tmdb.org/t/p/w342/bZWdejWhkgJmXjdQ70DjiJS7v7O.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Ballers",
-     "slug": "ballers",
-     "poster": "https://image.tmdb.org/t/p/w342/WyIazPyjmcFMC42nWEpI0jr56x.jpg",
+     "title": "Married... with Children",
+     "slug": "married-with-children",
+     "poster": "https://image.tmdb.org/t/p/w342/qxdOgESOkBMmfcWUizL01mbdqzl.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The League",
-     "slug": "the-league",
-     "poster": "https://image.tmdb.org/t/p/w342/w6IAasjDdANmalOWkjKcENhirQR.jpg",
+     "title": "Back at the Barnyard",
+     "slug": "back-at-the-barnyard",
+     "poster": "https://image.tmdb.org/t/p/w342/9O988PZT6hOyA9Pqb14YAEA1r6C.jpg",
      "language": "English",
      "kind": "tv"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/nE94ejEbzNCU48bW1oju0dqBONz.jpg",
-   "backdropPath": "/nE94ejEbzNCU48bW1oju0dqBONz.jpg",
-   "posterPath": "/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
-   "fullReview": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience. With cynical players and a doubtful town, will he get them to see the Ted Lasso Way?",
+   "backdrop": "https://image.tmdb.org/t/p/w780/qcSHGC5BfoqBoP99PzDIERYG5Qm.jpg",
+   "backdropPath": "/qcSHGC5BfoqBoP99PzDIERYG5Qm.jpg",
+   "posterPath": "/tf0CUEynk6GfmrlHIQKQ5mfFP5P.jpg",
+   "fullReview": "Set in Springfield, the average American town, the show focuses on the antics and everyday adventures of the Simpson family; Homer, Marge, Bart, Lisa and Maggie, as well as a virtual cast of thousands. Since the beginning, the series has been a pop culture icon, attracting hundreds of celebrities to guest star. The show has also made name for itself in its fearless satirical take on politics, media and American life in general.",
    "castPics": [
     {
-     "name": "Jason Sudeikis",
-     "character": "Ted Lasso",
-     "photo": "https://image.tmdb.org/t/p/w185/uuacnP9DOHMsmj8FhBi0cWWDgrn.jpg"
+     "name": "Dan Castellaneta",
+     "character": "Homer Simpson / Abe Simpson / Barney Gumble / Krusty the Clown / Groundskeeper Willie / Mayor Quimby (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/AmeqWhP4A46AWkM4kVphg6jOTQX.jpg"
     },
     {
-     "name": "Hannah Waddingham",
-     "character": "Rebecca Welton",
-     "photo": "https://image.tmdb.org/t/p/w185/eHAICyhvjiRZCgzKyJCk9hWnnjr.jpg"
+     "name": "Julie Kavner",
+     "character": "Marge Simpson / Patty Bouvier / Selma Bouvier / Jacqueline Bouvier (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/87kSPYlWcHvqOVEkhdqxysiAf6w.jpg"
     },
     {
-     "name": "Jeremy Swift",
-     "character": "Leslie Higgins",
-     "photo": "https://image.tmdb.org/t/p/w185/muRh4WbyEE4S2763bv777ywpKP3.jpg"
+     "name": "Nancy Cartwright",
+     "character": "Bart Simpson / Maggie Simpson / Nelson Muntz / Ralph Wiggum (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/kJQEz3NAwHGdb2sQzAnBf1RmMV4.jpg"
     },
     {
-     "name": "Brett Goldstein",
-     "character": "Roy Kent",
-     "photo": "https://image.tmdb.org/t/p/w185/xYdFNE7EkncE8uiPJzT3RrkqcAQ.jpg"
+     "name": "Yeardley Smith",
+     "character": "Lisa Simpson / Maggie Simpson (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/9AjPwbb3uz4GfgOPBYsy2ILvwkB.jpg"
     },
     {
-     "name": "Brendan Hunt",
-     "character": "Coach Beard",
-     "photo": "https://image.tmdb.org/t/p/w185/7Z8q2WUop3q5BdyaBD6YvweGWrZ.jpg"
+     "name": "Hank Azaria",
+     "character": "Moe Szyslak / Chief Wiggum / Apu / Comic Book Guy / Carl Carlson / Superintendent Chalmers (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/yFDw4b0jucuFWNnGcBPfpYUtn16.jpg"
     },
     {
-     "name": "Juno Temple",
-     "character": "Keeley Jones",
-     "photo": "https://image.tmdb.org/t/p/w185/vwCjlWQLQWbmcUT2Lwn9G0O8r2.jpg"
+     "name": "Harry Shearer",
+     "character": "Ned Flanders / Mr. Burns / Smithers / Principal Skinner / Lenny Leonard (voice)",
+     "photo": "https://image.tmdb.org/t/p/w185/wZpovXxQQqP7kxXPy2yj6QMbM55.jpg"
     }
    ],
-   "platform": "Apple TV",
-   "ottSince": "2026-10-07",
-   "ottFreshDate": "2026-10-07",
+   "platform": "Disney+",
+   "ottSince": "2026-09-27",
+   "ottFreshDate": "2026-09-27",
    "stillGood": true,
-   "slug": "ted-lasso",
-   "trailerViews": 179552,
-   "take": "Near-universal acclaim, with the music singled out most often.",
-   "takeSrc": "wiki",
-   "takeAspects": [
-    "music"
-   ],
-   "takeArticle": "Ted Lasso",
-   "criticsTone": "acclaim",
+   "slug": "the-simpsons",
+   "wikiWeeklyViews": 42996,
+   "trailerViews": 686585,
+   "take": "Early viewer reviews on TMDB lean positive.",
+   "takeSrc": "tmdb",
    "fcScore": {
     "verdict": "Must watch",
-    "reason": "Audiences and critics agree.",
+    "reason": "Audiences love it.",
     "audience": "Loved",
-    "critics": "positive",
-    "basis": "both"
+    "critics": null,
+    "basis": "audience"
    }
   },
   {
@@ -2917,7 +2920,7 @@
    "stillGood": true,
    "slug": "mobland",
    "wikiWeeklyViews": 173044,
-   "trailerViews": 12182041,
+   "trailerViews": 12182229,
    "take": "A love-it-or-hate-it reception, right down the middle.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
@@ -3361,7 +3364,7 @@
    ],
    "theatricalHere": true,
    "slug": "moulin",
-   "trailerViews": 1688,
+   "trailerViews": 1690,
    "verdict": ""
   },
   {
@@ -3517,7 +3520,7 @@
    ],
    "theatricalHere": true,
    "slug": "hope",
-   "trailerViews": 235510,
+   "trailerViews": 235711,
    "criticsTone": "positive",
    "verdict": ""
   },
@@ -3673,7 +3676,7 @@
     }
    ],
    "slug": "the-mongoose",
-   "trailerViews": 602175,
+   "trailerViews": 602236,
    "verdict": ""
   },
   {
@@ -3829,7 +3832,7 @@
    ],
    "theatricalHere": true,
    "slug": "coward",
-   "trailerViews": 157995,
+   "trailerViews": 158008,
    "verdict": ""
   },
   {
@@ -4140,7 +4143,7 @@
    ],
    "theatricalHere": true,
    "slug": "avengers-doomsday",
-   "trailerViews": 49318800,
+   "trailerViews": 49321891,
    "verdict": ""
   }
  ],
@@ -4333,19 +4336,200 @@
  },
  "ottExtra": [
   {
+   "title": "Ted Lasso",
+   "genre": "Drama / Comedy",
+   "language": "English",
+   "released": "2020-08-14",
+   "review": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience.",
+   "rating": 8.4,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "8.4/10"
+    }
+   ],
+   "votes": 2772,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
+   "isRecent": true,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 97546,
+   "popularity": 192.6987,
+   "cert": "12",
+   "trailer": "https://www.youtube.com/watch?v=BwPcMIDFVKw",
+   "providers": [
+    "Apple TV"
+   ],
+   "cast": [
+    "Jason Sudeikis",
+    "Hannah Waddingham",
+    "Jeremy Swift",
+    "Brett Goldstein"
+   ],
+   "director": "Bill Lawrence",
+   "runtime": null,
+   "imdbVotes": null,
+   "trailerDate": "2024-07-23T16:00:16.000Z",
+   "imdbId": "tt10986410",
+   "seasons": 4,
+   "freshDate": "2026-08-04",
+   "badge": "New on Apple TV",
+   "similar": [
+    {
+     "title": "Running Point",
+     "slug": "running-point",
+     "poster": "https://image.tmdb.org/t/p/w342/66EyhDRHAFqE6OQDasY7Nz2LXTw.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Four Seasons",
+     "slug": "the-four-seasons",
+     "poster": "https://image.tmdb.org/t/p/w342/w09XeYl096pwES8riRMZwEA9rnh.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Platonic",
+     "slug": "platonic",
+     "poster": "https://image.tmdb.org/t/p/w342/7G8wB9CG82nITeFwRFIRSk0sQJs.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "My Life with the Walter Boys",
+     "slug": "my-life-with-the-walter-boys",
+     "poster": "https://image.tmdb.org/t/p/w342/dQOwpTpBQEqRUcev4423LrU32G6.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Never Have I Ever",
+     "slug": "never-have-i-ever",
+     "poster": "https://image.tmdb.org/t/p/w342/hd5fnBixab6IzfUwjC5wfdbX3eM.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Elsbeth",
+     "slug": "elsbeth",
+     "poster": "https://image.tmdb.org/t/p/w342/pU8T64vNT596oG0U4BG7c0QMXOi.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Rain Dogs",
+     "slug": "rain-dogs",
+     "poster": "https://image.tmdb.org/t/p/w342/cA3JlHtx24lEnflydTdX6TReAva.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Unstable",
+     "slug": "unstable",
+     "poster": "https://image.tmdb.org/t/p/w342/yiMhsbuMYygbWnsrPbdp7PiMvvP.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Shoresy",
+     "slug": "shoresy",
+     "poster": "https://image.tmdb.org/t/p/w342/ai5Bf8eRcroeEAAyVrKmrE8wW74.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "La Máquina",
+     "slug": "la-m-quina",
+     "poster": "https://image.tmdb.org/t/p/w342/hDsIZmWVr4kTJFjgZ8Gwzx6nDJD.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Ballers",
+     "slug": "ballers",
+     "poster": "https://image.tmdb.org/t/p/w342/WyIazPyjmcFMC42nWEpI0jr56x.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The League",
+     "slug": "the-league",
+     "poster": "https://image.tmdb.org/t/p/w342/w6IAasjDdANmalOWkjKcENhirQR.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/nE94ejEbzNCU48bW1oju0dqBONz.jpg",
+   "backdropPath": "/nE94ejEbzNCU48bW1oju0dqBONz.jpg",
+   "posterPath": "/uRHsiw1wLxPHFXkkv4Ix1s0O6f4.jpg",
+   "fullReview": "Ted Lasso, an American football coach, moves to England when he's hired to manage a soccer team—despite having no experience. With cynical players and a doubtful town, will he get them to see the Ted Lasso Way?",
+   "castPics": [
+    {
+     "name": "Jason Sudeikis",
+     "character": "Ted Lasso",
+     "photo": "https://image.tmdb.org/t/p/w185/uuacnP9DOHMsmj8FhBi0cWWDgrn.jpg"
+    },
+    {
+     "name": "Hannah Waddingham",
+     "character": "Rebecca Welton",
+     "photo": "https://image.tmdb.org/t/p/w185/eHAICyhvjiRZCgzKyJCk9hWnnjr.jpg"
+    },
+    {
+     "name": "Jeremy Swift",
+     "character": "Leslie Higgins",
+     "photo": "https://image.tmdb.org/t/p/w185/muRh4WbyEE4S2763bv777ywpKP3.jpg"
+    },
+    {
+     "name": "Brett Goldstein",
+     "character": "Roy Kent",
+     "photo": "https://image.tmdb.org/t/p/w185/xYdFNE7EkncE8uiPJzT3RrkqcAQ.jpg"
+    },
+    {
+     "name": "Brendan Hunt",
+     "character": "Coach Beard",
+     "photo": "https://image.tmdb.org/t/p/w185/7Z8q2WUop3q5BdyaBD6YvweGWrZ.jpg"
+    },
+    {
+     "name": "Juno Temple",
+     "character": "Keeley Jones",
+     "photo": "https://image.tmdb.org/t/p/w185/vwCjlWQLQWbmcUT2Lwn9G0O8r2.jpg"
+    }
+   ],
+   "platform": "Apple TV",
+   "ottSince": "2026-10-07",
+   "ottFreshDate": "2026-10-07",
+   "slug": "ted-lasso",
+   "take": "Near-universal acclaim, with the music singled out most often.",
+   "takeSrc": "wiki",
+   "takeAspects": [
+    "music"
+   ],
+   "takeArticle": "Ted Lasso",
+   "criticsTone": "acclaim",
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
+    "basis": "both"
+   }
+  },
+  {
    "title": "Crystal Lake",
    "genre": "Drama / Mystery",
    "language": "English",
    "released": "2026-10-15",
    "review": "Single mother Pam Voorhees has been unable to shake her grief after her young, sickly son Jason tragically drowned in the town lake almost a year before.",
-   "rating": 8.5,
+   "rating": 8.4,
    "scores": [
     {
      "source": "TMDB",
-     "score": "8.5/10"
+     "score": "8.4/10"
     }
    ],
-   "votes": 102,
+   "votes": 107,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/3ENhExiD2fcjk5FX0AcAXcvLu9N.jpg",
    "isRecent": true,
@@ -4673,179 +4857,6 @@
     "audience": "Loved",
     "critics": null,
     "basis": "audience"
-   }
-  },
-  {
-   "title": "Avatar: Seven Havens",
-   "genre": "Animation / Action & Adventure",
-   "language": "English",
-   "released": "2026-10-09",
-   "review": "In a world shattered by a devastating cataclysm, a young Earthbender discovers she's the new Avatar after Korra.",
-   "rating": 9.2,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "9.2/10"
-    }
-   ],
-   "votes": 94,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/u62d0BPqsdv2TUDifcMmoePbHPL.jpg",
-   "isRecent": true,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 284833,
-   "popularity": 147.9226,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=nhdh962_ee0",
-   "providers": [
-    "Paramount+"
-   ],
-   "cast": [
-    "Saheli Khan",
-    "Aishwarya 'Aishu' Devan",
-    "Major Curda",
-    "Akshay Khanna"
-   ],
-   "director": "Michael Dante DiMartino",
-   "runtime": null,
-   "imdbVotes": null,
-   "trailerDate": "2026-09-10T15:00:21.000Z",
-   "imdbId": "tt35854736",
-   "seasons": 1,
-   "freshDate": "2026-10-09",
-   "badge": "New show",
-   "similar": [
-    {
-     "title": "Avatar: The Last Airbender",
-     "slug": "avatar-the-last-airbender",
-     "poster": "https://image.tmdb.org/t/p/w342/lzZpWEaqzP0qVA5nkCc5ASbNcSy.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Masters of the Universe: Revolution",
-     "slug": "masters-of-the-universe-revolution",
-     "poster": "https://image.tmdb.org/t/p/w342/m3ru6JG7qQ8nZQiZeviYZWPjsl.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Masters of the Universe: Revelation",
-     "slug": "masters-of-the-universe-revelation",
-     "poster": "https://image.tmdb.org/t/p/w342/y93cJr4fCYt9j5f23j5p3TXv5Ar.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "X-Men '97",
-     "slug": "x-men-97",
-     "poster": "https://image.tmdb.org/t/p/w342/2HKBc5UiFw8JrruHq8S1Y7TnlW0.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Adventure Time: Fionna and Cake",
-     "slug": "adventure-time-fionna-and-cake",
-     "poster": "https://image.tmdb.org/t/p/w342/fi1b6U1kp73xheECzqwzMn8u3mX.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Pacific Rim: The Black",
-     "slug": "pacific-rim-the-black",
-     "poster": "https://image.tmdb.org/t/p/w342/wz2tUYzlUnfQWpBpoerFDbEZdzz.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Eyes of Wakanda",
-     "slug": "eyes-of-wakanda",
-     "poster": "https://image.tmdb.org/t/p/w342/yuOfb1MgnaGPa4guzV0n1IFYVGN.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Lord of the Rings: The Rings of Power",
-     "slug": "the-lord-of-the-rings-the-rings-of-power",
-     "poster": "https://image.tmdb.org/t/p/w342/kf5Hz70tjNAHg4swGDzOr9BfoZ1.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Murder Drones",
-     "slug": "murder-drones",
-     "poster": "https://image.tmdb.org/t/p/w342/z6fAKaN2F9jogQIdcHUHNVsiFNV.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Supernatural Academy",
-     "slug": "supernatural-academy",
-     "poster": "https://image.tmdb.org/t/p/w342/9ZCngZIuBPaocJyiQHlyFecUpru.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Unicorn: Warriors Eternal",
-     "slug": "unicorn-warriors-eternal",
-     "poster": "https://image.tmdb.org/t/p/w342/w0uHVrvCQYAWA4gj4j1GOCFM54a.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Gifted",
-     "slug": "the-gifted",
-     "poster": "https://image.tmdb.org/t/p/w342/nshCqszjTNuqhrB53vrSqWO18sE.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/t2KFGH07Al4XuIZLHRlF1Hj9IJB.jpg",
-   "backdropPath": "/t2KFGH07Al4XuIZLHRlF1Hj9IJB.jpg",
-   "posterPath": "/u62d0BPqsdv2TUDifcMmoePbHPL.jpg",
-   "fullReview": "In a world shattered by a devastating cataclysm, a young Earthbender discovers she's the new Avatar after Korra. But in this dangerous era, that title marks her as humanity's destroyer, not its savior. Hunted by both human and spirit enemies, she and her long-lost twin must uncover their mysterious origins and save the Seven Havens before civilization's last strongholds collapse.",
-   "castPics": [
-    {
-     "name": "Saheli Khan",
-     "character": "Pavi (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/v7KEBCh275MWmT0j5fxm4fslosD.jpg"
-    },
-    {
-     "name": "Aishwarya 'Aishu' Devan",
-     "character": "Nisha (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/eRDnTa8yKo0G79j7Z48jeNODRuj.jpg"
-    },
-    {
-     "name": "Major Curda",
-     "character": "Jae (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/oHkyajLazp64ttgStLcJTY4wTvU.jpg"
-    },
-    {
-     "name": "Akshay Khanna",
-     "character": "Karthik (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/L2JWyOTwPRLHBLV7xUmDOcRHU3.jpg"
-    },
-    {
-     "name": "Sakina Jaffrey",
-     "character": "Agam (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/9U6vixMcwkj8aEffy64UqsklHd.jpg"
-    }
-   ],
-   "platform": "Paramount+",
-   "ottSince": "2026-10-10",
-   "ottFreshDate": "2026-10-09",
-   "slug": "avatar-seven-havens",
-   "take": "The reviews lean clearly positive.",
-   "takeSrc": "wiki",
-   "takeArticle": "Avatar: Seven Havens",
-   "criticsTone": "positive",
-   "fcScore": {
-    "verdict": "Must watch",
-    "reason": "Audiences and critics agree.",
-    "audience": "Loved",
-    "critics": "positive",
-    "basis": "both"
    }
   },
   {
@@ -5202,183 +5213,184 @@
    }
   },
   {
-   "title": "Below",
-   "genre": "Drama / Mystery",
+   "title": "Tenzing",
+   "genre": "Drama / History",
    "language": "English",
-   "released": "2026-10-08",
-   "review": "When a mysterious sea creature terrorizes a small Newfoundland town, a hard-bitten fisherman and his family fight to protect their close-knit community.",
-   "rating": 7.3,
+   "released": "2026-10-09",
+   "review": "A determined man embarks on a high-stakes quest—and defies seemingly impossible odds—to fulfill his dream of being the first to reach the summit of Mount…",
+   "rating": 8.3,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.3/10"
+     "score": "8.3/10"
     }
    ],
-   "votes": 174,
-   "verdict": "Worth a watch",
-   "poster": "https://image.tmdb.org/t/p/w342/vgLqqhMUbljp585qPp1EFCyJtcz.jpg",
-   "isRecent": true,
+   "votes": 82,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/eI0QW02PYqhnmIvLRdn9vrfVVP7.jpg",
+   "isRecent": false,
    "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 285322,
-   "popularity": 107.2203,
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=U57CNxSgoss",
+   "kind": "movie",
+   "tmdbId": 1288069,
+   "popularity": 108.4074,
+   "cert": "TP",
+   "trailer": "https://www.youtube.com/watch?v=KkYCY5YR12U",
    "providers": [
-    "Netflix"
+    "Apple TV"
    ],
    "cast": [
-    "Josh Hartnett",
-    "Mackenzie Davis",
-    "Charlie Heaton",
-    "Ruby Stokes"
+    "Genden Phuntsok",
+    "Tom Hiddleston",
+    "Willem Dafoe",
+    "Samdrup Dorje Lama"
    ],
-   "director": "Jesse McKeown",
-   "runtime": null,
+   "director": "Jennifer Peedom",
+   "runtime": 126,
    "imdbVotes": null,
-   "trailerDate": "2026-09-10T14:00:00.000Z",
-   "imdbId": "tt35934755",
-   "seasons": 1,
-   "freshDate": "2026-10-08",
-   "badge": "New show",
+   "trailerDate": "2026-09-16T14:59:49.000Z",
+   "imdbId": "tt6262770",
+   "seasons": null,
+   "freshDate": "2026-10-09",
+   "badge": null,
    "similar": [
     {
-     "title": "The War Between the Land and the Sea",
-     "slug": "the-war-between-the-land-and-the-sea",
-     "poster": "https://image.tmdb.org/t/p/w342/4wDU61HtpXbcwpgCy1xnodxKRYN.jpg",
+     "title": "Against the Ice",
+     "slug": "against-the-ice",
+     "poster": "https://image.tmdb.org/t/p/w342/6FSGYvPEhIx3ThOikGqHmKxeyNN.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "The Survivors",
-     "slug": "the-survivors",
-     "poster": "https://image.tmdb.org/t/p/w342/y0izOA23nYoCtR1Ft08GLi6lOQX.jpg",
+     "title": "Munich - The Edge of War",
+     "slug": "munich-the-edge-of-war",
+     "poster": "https://image.tmdb.org/t/p/w342/1SOiUTDnwW9gU4GzSIsOCQUlHJF.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "Why Didn't They Ask Evans?",
-     "slug": "why-didn-t-they-ask-evans",
-     "poster": "https://image.tmdb.org/t/p/w342/8T8G7k5Le8e1r2Y2trCcywXTYRo.jpg",
+     "title": "A Call to Spy",
+     "slug": "a-call-to-spy",
+     "poster": "https://image.tmdb.org/t/p/w342/cK5D0ss2LLSZtOZKvgOVTcCdXIE.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "FROM",
-     "slug": "from",
-     "poster": "https://image.tmdb.org/t/p/w342/pRtJagIxpfODzzb0T0NAvZSzErC.jpg",
+     "title": "Gigi & Nate",
+     "slug": "gigi-nate",
+     "poster": "https://image.tmdb.org/t/p/w342/xP1GXV1gms9b5BpHZP7S8qs8FO.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "Sterling Point",
-     "slug": "sterling-point",
-     "poster": "https://image.tmdb.org/t/p/w342/cThLWEGs6BEqY0QZMbU4FAeWwPT.jpg",
+     "title": "I Swear",
+     "slug": "i-swear",
+     "poster": "https://image.tmdb.org/t/p/w342/vUwyhNWBKkSwK8ELvEeBRwV724h.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "Run Away",
-     "slug": "run-away",
-     "poster": "https://image.tmdb.org/t/p/w342/frKxKytEHIA2vXg4RAz14Sc0UmS.jpg",
+     "title": "The Boy in the Woods",
+     "slug": "the-boy-in-the-woods",
+     "poster": "https://image.tmdb.org/t/p/w342/njyE1IbwfBSISTJKnWKyE7rVJcd.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "The Head",
-     "slug": "the-head",
-     "poster": "https://image.tmdb.org/t/p/w342/gFiFKWx8nBjo3iRYcosdJeYUtaX.jpg",
+     "title": "Giant",
+     "slug": "giant",
+     "poster": "https://image.tmdb.org/t/p/w342/RHgGB3VweOIWOvoheOl5OZykQO.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "Chapelwaite",
-     "slug": "chapelwaite",
-     "poster": "https://image.tmdb.org/t/p/w342/v7Oix3Zkhg3ftRxmLmyDBJc9ycp.jpg",
+     "title": "Origin",
+     "slug": "origin",
+     "poster": "https://image.tmdb.org/t/p/w342/dY0m1fypdNPp61kcmLdsk7KIR7C.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "Echoes",
-     "slug": "echoes",
-     "poster": "https://image.tmdb.org/t/p/w342/hz8YGIZETHJhXYWGaHsFPVwU4YU.jpg",
+     "title": "Everest",
+     "slug": "everest",
+     "poster": "https://image.tmdb.org/t/p/w342/2jKOu2bjpLP6NXJcm7Ep14bDGtA.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "Tell Me Lies",
-     "slug": "tell-me-lies",
-     "poster": "https://image.tmdb.org/t/p/w342/tc5c5X1ZbJx5guaQUo1Xqt24S8z.jpg",
+     "title": "Seven Years in Tibet",
+     "slug": "seven-years-in-tibet",
+     "poster": "https://image.tmdb.org/t/p/w342/qm87HHUew8ICtUCM4asO3gFYvby.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "Midnight Mass",
-     "slug": "midnight-mass",
-     "poster": "https://image.tmdb.org/t/p/w342/iYoMZYVD775MtBYJfv6OGY1FsnL.jpg",
+     "title": "The Immortal Life of Henrietta Lacks",
+     "slug": "the-immortal-life-of-henrietta-lacks",
+     "poster": "https://image.tmdb.org/t/p/w342/njFJjXhK94NXAxo9MJrskFpqWMg.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     },
     {
-     "title": "Inside Man",
-     "slug": "inside-man",
-     "poster": "https://image.tmdb.org/t/p/w342/7tZONSnzKylgzHJvtoOGjRmYlgU.jpg",
+     "title": "Alive",
+     "slug": "alive",
+     "poster": "https://image.tmdb.org/t/p/w342/uQACcCZqd7WCTRin9xRIW5gr1bd.jpg",
      "language": "English",
-     "kind": "tv"
+     "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/cn0feYcDvVzVjUDoXa1O8sRgzz.jpg",
-   "backdropPath": "/cn0feYcDvVzVjUDoXa1O8sRgzz.jpg",
-   "posterPath": "/vgLqqhMUbljp585qPp1EFCyJtcz.jpg",
-   "fullReview": "When a mysterious sea creature terrorizes a small Newfoundland town, a hard-bitten fisherman and his family fight to protect their close-knit community.",
+   "backdrop": "https://image.tmdb.org/t/p/w780/6GXqVvL20Y0MpyVP30WoI2NPK69.jpg",
+   "backdropPath": "/6GXqVvL20Y0MpyVP30WoI2NPK69.jpg",
+   "posterPath": "/eI0QW02PYqhnmIvLRdn9vrfVVP7.jpg",
+   "fullReview": "A determined man embarks on a high-stakes quest—and defies seemingly impossible odds—to fulfill his dream of being the first to reach the summit of Mount Everest.",
    "castPics": [
     {
-     "name": "Josh Hartnett",
-     "character": "Calvin Penney",
-     "photo": "https://image.tmdb.org/t/p/w185/5eMo8D7h1XrSu6ZN4UXhPcS6YNG.jpg"
+     "name": "Genden Phuntsok",
+     "character": "Tenzing Norgay",
+     "photo": "https://image.tmdb.org/t/p/w185/2xsreNBuPpBZYJTlpuTapi2ZvP.jpg"
     },
     {
-     "name": "Mackenzie Davis",
-     "character": "Dr. Fonda Howander",
-     "photo": "https://image.tmdb.org/t/p/w185/ekQbEIKh26jbz17P0wwLbo6uNs9.jpg"
+     "name": "Tom Hiddleston",
+     "character": "Edmund Hillary",
+     "photo": "https://image.tmdb.org/t/p/w185/mclHxMm8aPlCPKptP67257F5GPo.jpg"
     },
     {
-     "name": "Charlie Heaton",
-     "character": "Wade Penney",
-     "photo": "https://image.tmdb.org/t/p/w185/8Se6WZuvRmoB990bT29OPgVAyBo.jpg"
+     "name": "Willem Dafoe",
+     "character": "John Hunt",
+     "photo": "https://image.tmdb.org/t/p/w185/ui8e4sgZAwMPi3hzEO53jyBJF9B.jpg"
     },
     {
-     "name": "Ruby Stokes",
-     "character": "Mary Penney",
-     "photo": "https://image.tmdb.org/t/p/w185/82itS42KR0RisdZNRemnGuKowIe.jpg"
+     "name": "Johnny Flynn",
+     "character": "George Mallory",
+     "photo": "https://image.tmdb.org/t/p/w185/tS3HIDFJbD8uSLAvaxZfrPc3aM0.jpg"
     },
     {
-     "name": "Kaleb Horn",
-     "character": "Noah Townsend",
-     "photo": "https://image.tmdb.org/t/p/w185/e8Dw4RNTmmbn5p7pYNP92wO3cA9.jpg"
+     "name": "Lhakpa Tsamchoe",
+     "character": "Kinzom",
+     "photo": "https://image.tmdb.org/t/p/w185/kiodZp3zbkgHEIGfmXQDAug1V57.jpg"
     },
     {
-     "name": "Rohan Campbell",
-     "character": "Jay Penney",
-     "photo": "https://image.tmdb.org/t/p/w185/r1PDcoPF1NDvvxwqkOJTrFaT1za.jpg"
+     "name": "Elizabeth Blackmore",
+     "character": "Mrs Ingram",
+     "photo": "https://image.tmdb.org/t/p/w185/8IFEnd9hBbrQOleqTvjyuTlfQXu.jpg"
     }
    ],
-   "platform": "Netflix",
-   "ottSince": "2026-10-10",
-   "ottFreshDate": "2026-10-08",
-   "slug": "below",
-   "take": "Most critics came away happy.",
+   "theatrical": false,
+   "platform": "Apple TV",
+   "ottSince": "2026-10-18",
+   "ottFreshDate": "2026-10-09",
+   "slug": "tenzing",
+   "take": "Reviewers found plenty to like here.",
    "takeSrc": "wiki",
-   "takeArticle": "Below (miniseries)",
+   "takeArticle": "Tenzing (film)",
    "criticsTone": "positive",
    "fcScore": {
-    "verdict": "Worth a watch",
-    "reason": "Critics are warmer than audiences.",
-    "audience": "Liked",
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
     "critics": "positive",
     "basis": "both"
    }
   }
  ],
- "trackedFilms": 314
+ "trackedFilms": 319
 }

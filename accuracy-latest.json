@@ -2,46 +2,28 @@
  "date": "2026-10-19",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 4,
+ "pagesDisagreeing": 2,
  "high": 2,
  "correctable": 2,
  "byField": {
-  "genres": 1,
-  "platform": 2,
-  "director": 1
+  "platform": 2
  },
  "rows": [
   {
-   "field": "genres",
-   "severity": "low",
-   "page": "Comedy / Drama",
-   "tmdb": "Music, Drama",
-   "code": "in",
-   "slug": "bajrangi-bhaijaan"
+   "field": "platform",
+   "severity": "high",
+   "page": "fuboTV, HBO Max Amazon Channel, Peacock Premium, FXNow",
+   "tmdb": "fuboTV, HBO Max, FXNow",
+   "code": "us",
+   "slug": "alien-covenant"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "Amazon Prime Video, RTL+, RTL+ Max Amazon Channel, HBO Max",
-   "tmdb": "RTL+, RTL+ Max, HBO Max",
+   "page": "Netflix, Disney Plus, Sky Go, RTL+",
+   "tmdb": "Netflix, Disney+, WOW, Sky Go",
    "code": "de",
-   "slug": "interstellar"
-  },
-  {
-   "field": "director",
-   "severity": "medium",
-   "page": "Peter Chan Ho-Sun",
-   "tmdb": "Peter Chan",
-   "code": "sg",
-   "slug": "leap"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Amazon Prime Video, HBO Max Amazon Channel, HBO Max",
-   "tmdb": "Netflix, HBO Max",
-   "code": "nz",
-   "slug": "it"
+   "slug": "homicide-hills"
   }
  ]
 }
