@@ -1,21 +1,63 @@
 {
- "date": "2026-10-18",
+ "date": "2026-10-19",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
- "high": 0,
- "correctable": 1,
+ "pagesDisagreeing": 6,
+ "high": 4,
+ "correctable": 4,
  "byField": {
-  "rent/buy": 1
+  "platform": 4,
+  "director": 1,
+  "genres": 1
  },
  "rows": [
   {
-   "field": "rent/buy",
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, Amazon Prime Video, Paramount Plus, Paramount+ Amazon Channel",
+   "tmdb": "Netflix, Paramount+",
+   "code": "uk",
+   "slug": "forrest-gump"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Lionsgate+ Amazon Channels",
+   "tmdb": "Lionsgate+",
+   "code": "au",
+   "slug": "bridge-to-terabithia"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "WOW, Sky Go, RTL+, RTL+ Max Amazon Channel",
+   "tmdb": "WOW, RTL+, RTL+ Max, Magenta TV+",
+   "code": "de",
+   "slug": "law-order"
+  },
+  {
+   "field": "director",
    "severity": "medium",
-   "page": "CosmoGo",
-   "tmdb": "none",
-   "code": "ca",
-   "slug": "heart-of-the-beast"
+   "page": "Nelson Dilipkumar",
+   "tmdb": "Nelson",
+   "code": "my",
+   "slug": "kolamavu-kokila"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Disney Plus, Neon TV, Lionsgate+ Amazon Channels",
+   "tmdb": "Disney+, Neon TV, Lionsgate+",
+   "code": "nz",
+   "slug": "mad-men"
+  },
+  {
+   "field": "genres",
+   "severity": "low",
+   "page": "Thriller / Adventure",
+   "tmdb": "Thriller, Drama",
+   "code": "es",
+   "slug": "whalefall"
   }
  ]
 }
