@@ -8,12 +8,11 @@
 // (addGrowToPages), the same way the search script is, so rebuilt, frozen and hand-written pages
 // all carry it.
 //
-// The loader is Grow's own script as an external tag carrying the site ID —
-//   <script src="https://faves.grow.me/main.js" data-grow-faves-site-id="…" defer>
-// — not Grow's inline snippet, which the policy refuses. main.js reads the ID from its own tag
-// (document.currentScript), and Grow's installation check reads it from the page's HTML: the
-// first version loaded it from /js/grow.js, which the check couldn't see (19 Oct 2026).
-// Measured: first paint and the hero image are unchanged with the tag deferred like this.
+// The loader is Grow's OWN snippet, byte for byte, in each page's <head>, allowed by its SHA-256
+// hash in script-src: the browser runs exactly that code and still refuses every other inline
+// script ('unsafe-inline' is never added). Grow's installation check looks for its snippet in
+// the page; two earlier versions — a site file (/js/grow.js) and an external main.js tag at the
+// end of <body> — loaded Grow fine but were not recognised by the check (19 Oct 2026).
 //
 // Origins, from Grow's own scripts (main.js and its app bundle, Oct 2026):
 //   faves.grow.me      the widget's scripts (and the chunks they import)
@@ -26,11 +25,12 @@
 // load. Grow gives it 15 s, then carries on without it. Allow it only if the site ever needs it
 // for advertising — and update the Privacy page first.
 //
-// Kill switch: GROW_SITE_ID="" in the workflow strips the loader and the origins from every page
-// on the next build.
+// Kill switch: GROW_SITE_ID="" in the workflow strips the snippet and the origins from every
+// page on the next build.
 // ============================================================================
 "use strict";
 
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
@@ -38,11 +38,18 @@ const GROW_SITE_ID = process.env.GROW_SITE_ID === undefined
   ? "U2l0ZToxZTkwZjRlNS1kNTZiLTQ1M2UtOTA4Yy00NmYxNmIyNTZhOWE="
   : String(process.env.GROW_SITE_ID).trim();
 const GROW_ON = !!GROW_SITE_ID;
-const GROW_TAG = `<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="${GROW_SITE_ID}" defer></script>`;
-// The first version's loader, taken off any page that still has it.
-const OLD_TAG = '<script src="/js/grow.js" defer></script>';
+// Grow's snippet exactly as its dashboard gives it (only the site ID varies).
+const GROW_CODE = '!(function(){window.growMe||((window.growMe=function(e){window.growMe._.push(e);}),(window.growMe._=[]));var e=document.createElement("script");(e.type="text/javascript"),(e.src="https://faves.grow.me/main.js"),(e.defer=!0),e.setAttribute("data-grow-faves-site-id","'
+  + GROW_SITE_ID + '");var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t);})();';
+const GROW_TAG = `<script data-grow-initializer="">${GROW_CODE}</script>`;
+const GROW_HASH = `'sha256-${crypto.createHash("sha256").update(GROW_CODE, "utf8").digest("base64")}'`;
+// Earlier loaders, taken off any page that still has one.
+const OLD_TAGS = [
+  '<script src="/js/grow.js" defer></script>',
+  `<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="${GROW_SITE_ID}" defer></script>`,
+];
 const GROW_SOURCES = {
-  "script-src": ["https://faves.grow.me"],
+  "script-src": [GROW_HASH, "https://faves.grow.me"],
   "connect-src": ["https://api.grow.me", "https://some.growplow.events", "https://img.grow.me", "https://itp.mediavine.com", "https://urls.grow.me"],
   "img-src": ["https://img.grow.me", "https://itp.mediavine.com"],
   "frame-src": ["https://app.grow.me"],
@@ -54,7 +61,7 @@ function parsePolicy(policy) {
 }
 const serialize = (dirs) => dirs.map(([n, v]) => [n, ...v].join(" ")).join("; ");
 
-// Pure: a policy with Grow's origins added (on) or taken out (off). A directive the page doesn't
+// Pure: a policy with Grow's sources added (on) or taken out (off). A directive the page doesn't
 // have starts from its default-src, so adding Grow never loosens anything else.
 function growCsp(policy, on = GROW_ON) {
   const dirs = parsePolicy(policy);
@@ -72,23 +79,21 @@ function growCsp(policy, on = GROW_ON) {
 }
 
 const CSP_RE = /(<meta http-equiv="Content-Security-Policy" content=")([^"]*)(">)/;
+const strip = (s, tag) => s.split(`${tag}\n`).join("").split(tag).join("");
 
-// Pure: one page with Grow on (loader + origins) or off (neither). Idempotent.
+// Pure: one page with Grow on (snippet in <head> + sources) or off (neither). Idempotent.
 function ensureGrow(html, on = GROW_ON) {
   let s = String(html);
   const m = CSP_RE.exec(s);
   if (m) s = s.replace(m[0], m[1] + growCsp(m[2], on) + m[3]);
-  s = s.split(`${OLD_TAG}
-`).join("").split(OLD_TAG).join("");
-  if (on) {
-    if (!s.includes(GROW_TAG) && s.includes("</body>")) {
-      const at = s.lastIndexOf("</body>");
-      s = `${s.slice(0, at)}${GROW_TAG}\n${s.slice(at)}`;
-    }
-  } else {
-    s = s.split(`${GROW_TAG}\n`).join("").split(GROW_TAG).join("");
-  }
-  return s;
+  for (const t of OLD_TAGS) s = strip(s, t);
+  if (!on) return strip(s, GROW_TAG);
+  if (s.includes(GROW_TAG)) return s;
+  // In <head>, after the policy (the meta must come first to apply to it).
+  const at = s.indexOf("</head>");
+  if (at >= 0) return `${s.slice(0, at)}${GROW_TAG}\n${s.slice(at)}`;
+  const body = s.lastIndexOf("</body>");
+  return body >= 0 ? `${s.slice(0, body)}${GROW_TAG}\n${s.slice(body)}` : s;
 }
 
 // The pass over every page, after the last page writer of the run. The embed widget renders
@@ -108,4 +113,4 @@ function addGrowToPages(files, { root = ".", on = GROW_ON } = {}) {
   return res;
 }
 
-module.exports = { GROW_ON, GROW_SITE_ID, GROW_SOURCES, GROW_TAG, addGrowToPages, ensureGrow, growCsp };
+module.exports = { GROW_CODE, GROW_HASH, GROW_ON, GROW_SITE_ID, GROW_SOURCES, GROW_TAG, addGrowToPages, ensureGrow, growCsp };

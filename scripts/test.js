@@ -6685,7 +6685,8 @@ test("homepage: no inline script and no inline handler, so its CSP can refuse in
   const fsx = require("fs");
   const tpl = fsx.readFileSync("index.html", "utf8").replace(/(<!--SSR:APPJS-->)[\s\S]*?(<!--\/SSR:APPJS-->)/, "$1<script src=\"/js/app.js\"></script>$2"), app = fsx.readFileSync("js/app.js", "utf8");
   // The page script sits between the APPJS markers (inlined by the build); nothing else inline.
-  const outside = tpl.replace(/<!--SSR:APPJS-->[\s\S]*?<!--\/SSR:APPJS-->/, "");
+  // Grow's snippet (lib/grow.js) is allowed by its own hash, added to built pages after the writers.
+  const outside = tpl.replace(/<!--SSR:APPJS-->[\s\S]*?<!--\/SSR:APPJS-->/, "").split(require("./lib/grow.js").GROW_TAG).join("");
   assert.ok(outside !== tpl, "the template carries the APPJS markers");
   const scripts = [...outside.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
   for (const [, attrs, body] of scripts) assert.ok(/\bsrc=|type="application\/ld\+json"/.test(attrs) || !body.trim(), `inline script: ${body.slice(0, 60)}`);
@@ -7256,19 +7257,23 @@ test("Grow: its loader and exactly its origins on every page, off in one setting
   const film = '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; connect-src \'self\' https://firestore.googleapis.com; script-src \'self\'; img-src \'self\' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src \'none\'"><title>X</title></head><body><p>x</p></body></html>';
   const on = G.ensureGrow(film, true);
   const csp = /content="([^"]*)"/.exec(on)[1];
-  assert.ok(on.includes('<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="' + G.GROW_SITE_ID + '" defer></script>\n</body>'), "Grow's own tag with the site ID in the HTML (its installation check reads it there), last in the body");
-  assert.ok(!/<script(?![^>]*\bsrc=)[^>]*>[^<]*grow/i.test(on), "never an inline script");
-  assert.strictEqual(G.ensureGrow(film.replace("</body>", '<script src="/js/grow.js" defer></script>\n</body>'), true), on, "the first version's /js/grow.js loader is replaced");
-  assert.ok(/script-src 'self' https:\/\/faves\.grow\.me(;|$)/.test(csp), "scripts: only faves.grow.me added");
+  // Grow's own snippet, byte for byte (its installation check looks for it), in <head> after the policy.
+  assert.ok(G.GROW_TAG.startsWith('<script data-grow-initializer="">!(function(){window.growMe||') && G.GROW_TAG.includes('"data-grow-faves-site-id","' + G.GROW_SITE_ID + '"'), "the dashboard's snippet");
+  assert.ok(on.includes(G.GROW_TAG + "\n</head>") && on.indexOf(G.GROW_TAG) > on.indexOf("Content-Security-Policy"), "in <head>, after the policy");
+  assert.strictEqual(G.GROW_HASH, "'sha256-" + require("crypto").createHash("sha256").update(G.GROW_CODE, "utf8").digest("base64") + "'", "allowed by the exact hash of its code");
+  for (const old of ['<script src="/js/grow.js" defer></script>', '<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="' + G.GROW_SITE_ID + '" defer></script>'])
+    assert.strictEqual(G.ensureGrow(film.replace("</body>", old + "\n</body>"), true), on, "an earlier loader is replaced: " + old.slice(0, 40));
+  assert.ok(csp.includes("script-src 'self' " + G.GROW_HASH + " https://faves.grow.me;"), "scripts: the snippet's hash and faves.grow.me, nothing else");
+  assert.ok(!/script-src[^;]*'unsafe-inline'/.test(csp), "never 'unsafe-inline' for scripts");
   assert.ok(/connect-src 'self' https:\/\/firestore\.googleapis\.com https:\/\/api\.grow\.me https:\/\/some\.growplow\.events/.test(csp), "the page's own origins are kept");
   assert.ok(/frame-src https:\/\/www\.youtube-nocookie\.com https:\/\/app\.grow\.me/.test(csp) && /object-src 'none'/.test(csp), "nothing else loosened");
-  assert.ok(!/euid|\*|'unsafe-eval'/.test(csp), "never the EUID ad-identity SDK, never a wildcard, never eval");
+  assert.ok(!/euid|\*|'unsafe-eval'/.test(csp.replace(G.GROW_HASH, "")), "never the EUID ad-identity SDK, never a wildcard, never eval");
   assert.strictEqual(G.ensureGrow(on, true), on, "idempotent");
   assert.strictEqual(G.ensureGrow(on, false).replace(/\s+/g, " "), film.replace(/\s+/g, " "), "off takes the loader and the origins away again");
   assert.strictEqual(W.comparable(on), W.comparable(film), "a fresh render without Grow is still the same page (no rewrite of every page)");
   // A page with no frame-src gets one that starts from its default-src, not a looser one.
   const list = G.ensureGrow('<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\'"><body></body>', true);
-  assert.ok(/frame-src 'self' https:\/\/app\.grow\.me/.test(list) && /connect-src 'self' https:\/\/api\.grow\.me/.test(list));
+  assert.ok(/frame-src 'self' https:\/\/app\.grow\.me/.test(list) && /connect-src 'self' https:\/\/api\.grow\.me/.test(list) && list.includes(G.GROW_TAG + "\n<body>") === false && list.includes(G.GROW_TAG));
   assert.strictEqual(W.comparable(list), W.comparable('<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\'"><body></body>'));
   const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
   assert.ok(up.indexOf("addGrowToPages(") > up.indexOf("addSearchToPages("), "the pass runs after the last page writer");
