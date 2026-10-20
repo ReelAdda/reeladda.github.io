@@ -1,30 +1,80 @@
 {
- "date": "2026-10-19",
+ "date": "2026-10-20",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 2,
- "high": 2,
- "correctable": 2,
+ "pagesDisagreeing": 6,
+ "high": 4,
+ "correctable": 4,
  "byField": {
-  "streaming": 1,
-  "platform": 1
+  "runtime": 2,
+  "director": 1,
+  "lead actor": 1,
+  "platform": 4
  },
  "rows": [
   {
-   "field": "streaming",
-   "severity": "high",
-   "page": "on fuboTV",
-   "tmdb": "on no subscription service",
+   "field": "runtime",
+   "severity": "medium",
+   "page": "87 min",
+   "tmdb": "96 min",
    "code": "us",
-   "slug": "las-ficheras-bellas-de-noche-ii-parte"
+   "slug": "night-of-the-living-dead"
+  },
+  {
+   "field": "director",
+   "severity": "medium",
+   "page": "Christopher Ray",
+   "tmdb": "George A. Romero",
+   "code": "us",
+   "slug": "night-of-the-living-dead"
+  },
+  {
+   "field": "lead actor",
+   "severity": "medium",
+   "page": "Vivica A. Fox",
+   "tmdb": "Judith O'Dea, Duane Jones, Marilyn Eastman",
+   "code": "us",
+   "slug": "night-of-the-living-dead"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "HBO Max",
-   "tmdb": "Netflix",
+   "page": "Disney Plus, Sky Go",
+   "tmdb": "Disney+",
+   "code": "uk",
+   "slug": "furious"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Amazon Prime Video, Paramount Plus, Paramount+ Amazon Channel, Paramount Plus Premium",
+   "tmdb": "Paramount+",
+   "code": "uk",
+   "slug": "saving-private-ryan"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Disney+, Paramount+, WOW, Sky Go",
+   "tmdb": "Disney+, Paramount+, WOW, Wow Fiction",
+   "code": "de",
+   "slug": "ncis"
+  },
+  {
+   "field": "runtime",
+   "severity": "medium",
+   "page": "110 min",
+   "tmdb": "99 min",
+   "code": "ph",
+   "slug": "hexed"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, HBO Max",
+   "tmdb": "Netflix, WeTV",
    "code": "id",
-   "slug": "sinners"
+   "slug": "hotel-del-luna"
   }
  ]
 }
