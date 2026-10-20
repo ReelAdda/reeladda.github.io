@@ -333,6 +333,7 @@ const { addSearchToPages, writeSearchIndexes } = require("./lib/search.js");
 const { GROW_ON, addGrowToPages } = require("./lib/grow.js");
 const { GA_ON, addGaToPages } = require("./lib/ga.js");
 const { refreshSearchTop } = require("./lib/searchtop.js");
+const { addBrandToPages } = require("./lib/brand.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -2812,6 +2813,11 @@ async function main() {
       const a = addGaToPages([...filmPageFiles(), ...sitePageFiles()]);
       console.log(`Analytics: Google Analytics ${GA_ON ? "on" : "OFF"} — ${a.changed} of ${a.pages} pages updated`);
     } catch (e) { stageFailed("analytics", e); }
+    // The FilmyChill mark beside the header wordmark on every page (lib/brand.js).
+    try {
+      const m = addBrandToPages([...filmPageFiles(), ...sitePageFiles()]);
+      console.log(`Brand mark: ${m.changed} of ${m.pages} pages updated`);
+    } catch (e) { stageFailed("brand mark", e); }
 
     // All countries are built by now, so the filesystem finally shows every cluster's true
     // membership — repair them in one pass before the sitemap is written.

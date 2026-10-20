@@ -7369,6 +7369,27 @@ testAsync("most searched: signs in as the service account, fetches the latest we
   const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
   assert.ok(/await refreshSearchTop\(\)/.test(up), "the build refreshes it");
 }));
+test("brand mark: the ring + play beside the header wordmark on every page shape, idempotent (Oct 2026)", () => {
+  const B = require("./lib/brand.js"), W = require("./lib/writeif.js");
+  const top = '<div class="top"><a href="https://filmychill.com/us/">FILMY<span>CHILL</span></a></div>';
+  const t = B.ensureBrandMark(top);
+  assert.ok(t.startsWith('<div class="top"><a href="https://filmychill.com/us/" style="display:inline-flex;align-items:center"><svg class="brand-mark"') && t.includes("</svg>FILMY<span>CHILL</span></a>"), "top bar: the edition's link kept, mark first, wordmark unchanged");
+  const home = B.ensureBrandMark('<div class="logo">FILMY<span>CHILL</span></div>');
+  assert.ok(home.includes('<div class="logo" style="display:inline-flex;align-items:center"><svg class="brand-mark"') && home.includes('fill="#4038C7"'), "homepage: indigo play on cream");
+  assert.ok(B.MARK_TOP.includes('stroke="#FFAD1F"') && B.MARK_TOP.includes('aria-hidden="true"'), "amber ring, hidden from screen readers (the link text says FilmyChill)");
+  assert.ok(B.MARK_HOME.includes('stroke="#EFE6D6"'), "the same track colour as the card rings");
+  assert.strictEqual(B.ensureBrandMark(t), t, "idempotent");
+  assert.strictEqual(B.ensureBrandMark("<p>no header</p>"), "<p>no header</p>");
+  assert.strictEqual(W.comparable(t), W.comparable(top), "a fresh render without the mark is the same page");
+  // Hand-written pages carry it in their source, so a build leaves them unchanged (19 Oct 2026 lesson).
+  const fsx = require("fs"), path = require("path");
+  for (const f of ["404.html", "privacy/index.html", "dmca/index.html", "about/index.html"]) {
+    const p = path.join(__dirname, "..", f);
+    if (fsx.existsSync(p)) assert.strictEqual(B.ensureBrandMark(fsx.readFileSync(p, "utf8")), fsx.readFileSync(p, "utf8"), f + " already has the mark");
+  }
+  const man = JSON.parse(fsx.readFileSync(path.join(__dirname, "..", "manifest.json"), "utf8"));
+  assert.ok(man.icons.every((i) => i.purpose === "any maskable"), "app icons double as maskable icons");
+});
 test("layout audit: one content column and 44px targets on every page type (18 Oct 2026)", () => {
   const fsx = require("fs"), path = require("path");
   const src = homeSource();
