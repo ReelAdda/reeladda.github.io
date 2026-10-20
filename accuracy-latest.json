@@ -6,52 +6,24 @@
  "high": 2,
  "correctable": 2,
  "byField": {
-  "platform": 1,
-  "release date": 1,
-  "director": 1,
-  "lead actor": 1,
-  "genres": 1
+  "platform": 2
  },
  "rows": [
   {
    "field": "platform",
    "severity": "high",
-   "page": "fuboTV, Paramount Plus Premium, Paramount Plus Essential, Philo",
-   "tmdb": "Paramount+, Kanopy, YouTube TV",
-   "code": "us",
-   "slug": "gladiator"
+   "page": "U-NEXT, HBO Max on U-Next",
+   "tmdb": "Hulu, HBO Max on U-Next",
+   "code": "jp",
+   "slug": "cold-case"
   },
   {
-   "field": "release date",
+   "field": "platform",
    "severity": "high",
-   "page": "2026-09-24",
-   "tmdb": "1987-09-24",
-   "code": "nz",
-   "slug": "a-different-world"
-  },
-  {
-   "field": "director",
-   "severity": "medium",
-   "page": "Felicia Pride",
-   "tmdb": "Bill Cosby",
-   "code": "nz",
-   "slug": "a-different-world"
-  },
-  {
-   "field": "lead actor",
-   "severity": "medium",
-   "page": "Maleah Joi Moon",
-   "tmdb": "Jasmine Guy, Kadeem Hardison, Darryl M. Bell",
-   "code": "nz",
-   "slug": "a-different-world"
-  },
-  {
-   "field": "genres",
-   "severity": "low",
-   "page": "Comedy / Drama",
-   "tmdb": "Comedy, Family",
-   "code": "nz",
-   "slug": "a-different-world"
+   "page": "HBO Max, Claro tv+, Telecine",
+   "tmdb": "HBO Max, Telecine",
+   "code": "br",
+   "slug": "inception"
   }
  ]
 }
