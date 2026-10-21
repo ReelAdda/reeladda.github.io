@@ -488,11 +488,26 @@
   "checked": "2026-07-11"
  },
  "tt34381258": {
-  "take": "Critics liked it, especially the performances and second half.",
+  "take": "Reviewers responded well — the performances and second half came in for particular praise.",
   "src": "wiki",
   "hook": null,
   "article": "Good Boy (2025 Komasa film)",
-  "checked": "2026-07-22"
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "second half"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 88
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6
  },
  "tt37427426": {
   "take": null,
@@ -5926,7 +5941,7 @@
    "divided": [],
    "score": null
   },
-  "checked": "2026-10-20",
+  "checked": "2026-10-21",
   "v": 6
  },
  "tt32639706": {
@@ -6522,7 +6537,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-20",
+  "checked": "2026-10-21",
   "v": 6
  },
  "tt43650242": {
@@ -7302,7 +7317,7 @@
   "src": null,
   "hook": null,
   "article": "Les Misérables (2026 film)",
-  "checked": "2026-10-20",
+  "checked": "2026-10-21",
   "v": 6
  },
  "tt36639956": {
@@ -7324,7 +7339,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-20",
+  "checked": "2026-10-21",
   "v": 6
  },
  "tt10691770": {
@@ -56740,6 +56755,1606 @@
   "take": null,
   "src": null,
   "article": "Happy (2006 film)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt36107185": {
+  "take": "Critics loved it — special praise for the performances and visuals.",
+  "src": "wiki",
+  "hook": "Marine Atlan's directorial debut.",
+  "article": "La Gradiva",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "performances",
+    "visuals"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6
+ },
+ "tt48841911": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-21",
+  "v": 6
+ },
+ "tt26940324": {
+  "take": "A love-it-or-hate-it reception, right down the middle.",
+  "src": "wiki",
+  "article": "Jackpot! (film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 32
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt2396135": {
+  "take": null,
+  "src": null,
+  "article": "Shetland (TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt2955402": {
+  "take": null,
+  "src": null,
+  "article": "Velvet (TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt3810932": {
+  "take": "Reviewers singled out the performances and writing for praise.",
+  "src": "wiki",
+  "article": "Drushyam",
+  "a": {
+   "tone": null,
+   "praised": [
+    "performances",
+    "writing"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "ratings": {
+    "n": 2,
+    "median": 3.5
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt5877882": {
+  "take": null,
+  "src": null,
+  "article": "Sometimes (film)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt13606528": {
+  "take": null,
+  "src": null,
+  "article": "Drag Race España",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt15326968": {
+  "take": "A rough outing with the reviewers.",
+  "src": "wiki",
+  "article": "Naai Sekar Returns",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "ratings",
+   "ratings": {
+    "n": 6,
+    "median": 2.25
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt15302222": {
+  "take": "A love-it-or-hate-it reception, right down the middle.",
+  "src": "wiki",
+  "article": "Bholaa",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 42
+   },
+   "toneSrc": "ratings",
+   "ratings": {
+    "n": 5,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt22263470": {
+  "take": null,
+  "src": null,
+  "article": "Revenant (TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0081858": {
+  "take": null,
+  "src": null,
+  "article": "Falcon Crest",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0242519": {
+  "take": null,
+  "src": null,
+  "article": "Hera Pheri (2000 film)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0805448": {
+  "take": null,
+  "src": null,
+  "article": "Saint Seiya: The Hades Chapter",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0434409": {
+  "take": "Critics are mostly positive — except when it comes to the writing.",
+  "src": "wiki",
+  "article": "V for Vendetta (film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [
+    "performances"
+   ],
+   "divided": [
+    "writing"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 73
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0488584": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1059950": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0765425": {
+  "take": null,
+  "src": null,
+  "article": "Top Chef",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0421030": {
+  "take": "Reviewers responded well — the second half and themes came in for particular praise.",
+  "src": "wiki",
+  "article": "Big Love",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "second half",
+    "themes"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "mc",
+    "value": 75
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0469009": {
+  "take": null,
+  "src": null,
+  "article": "Türkisch für Anfänger",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0405094": {
+  "take": "Critics loved this one, and the emotional weight and tension drew the loudest praise.",
+  "src": "wiki",
+  "article": "The Lives of Others",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "emotional weight",
+    "tension"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 92
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0978215": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0845738": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0813971": {
+  "take": null,
+  "src": null,
+  "article": "Witchblade (2006 TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0810705": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0962826": {
+  "take": "Strong marks for the characters and tone, less love for the pacing.",
+  "src": "wiki",
+  "article": "Black Lagoon (TV series)",
+  "a": {
+   "tone": null,
+   "praised": [
+    "characters",
+    "tone"
+   ],
+   "panned": [
+    "pacing"
+   ],
+   "divided": [
+    "action"
+   ],
+   "score": null
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0498536": {
+  "take": null,
+  "src": null,
+  "article": "Detective Conan: The Private Eyes' Requiem",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0471862": {
+  "take": null,
+  "src": null,
+  "article": "Pournami (film)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0809665": {
+  "take": null,
+  "src": null,
+  "article": "Cobras & Lagartos",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0317919": {
+  "take": "Good word from critics, with the tone and story earning most of the praise.",
+  "src": "wiki",
+  "article": "Mission: Impossible III",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "tone",
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 73
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0806905": {
+  "take": null,
+  "src": null,
+  "article": "Section de recherches",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0417871": {
+  "take": "Critics are split clean down the middle on this one.",
+  "src": "wiki",
+  "article": "Klimt (film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 32
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0439662": {
+  "take": "Reviews cut both ways: the performances and ambition impressed, the pacing frustrated.",
+  "src": "wiki",
+  "article": "Fanaa (2006 film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "performances",
+    "ambition"
+   ],
+   "panned": [
+    "pacing"
+   ],
+   "divided": [
+    "writing"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 4
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0432637": {
+  "take": "Critics liked it, especially the action and performances.",
+  "src": "wiki",
+  "article": "Krrish",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "action",
+    "performances"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 88
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 2.5
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0757116": {
+  "take": null,
+  "src": null,
+  "article": "Páginas da Vida (Brazilian TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0808506": {
+  "take": "A well-reviewed outing; the pacing and visuals stood out for critics.",
+  "src": "wiki",
+  "article": "The Girl Who Leapt Through Time (2006 film)",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "pacing",
+    "visuals"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 84
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0428646": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0468492": {
+  "take": "Critics loved it — special praise for the humour and originality.",
+  "src": "wiki",
+  "article": "The Host (2006 film)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "humour",
+    "originality"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 93
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0488414": {
+  "take": "Reviewers were close to unanimous — this one landed.",
+  "src": "wiki",
+  "article": "Omkara (2006 film)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [],
+   "panned": [
+    "pacing"
+   ],
+   "divided": [
+    "performances"
+   ],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 2.5
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1480296": {
+  "take": "Strong marks for the music and editing, less love for the humour.",
+  "src": "wiki",
+  "article": "Thimiru",
+  "a": {
+   "tone": null,
+   "praised": [
+    "music",
+    "editing"
+   ],
+   "panned": [
+    "humour"
+   ],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0496199": {
+  "take": null,
+  "src": null,
+  "article": "La hija del mariachi (2006 TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0449545": {
+  "take": null,
+  "src": null,
+  "article": "Curious George (TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0464071": {
+  "take": "Critics were rough on it, mostly over the humour.",
+  "src": "wiki",
+  "article": "Sillunu Oru Kaadhal",
+  "a": {
+   "tone": "negative",
+   "praised": [
+    "performances"
+   ],
+   "panned": [
+    "humour"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0451460": {
+  "take": null,
+  "src": null,
+  "article": "Handy Manny",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0473333": {
+  "take": null,
+  "src": null,
+  "article": "The Backwoods",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0780362": {
+  "take": null,
+  "src": null,
+  "article": "Jane Eyre (2006 TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0805669": {
+  "take": null,
+  "src": null,
+  "article": "Ugly Betty",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0899258": {
+  "take": "Mostly good reviews — the characters and performances impressed, even if the action didn't.",
+  "src": "wiki",
+  "article": "D.Gray-man (TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "characters",
+    "performances"
+   ],
+   "panned": [
+    "action"
+   ],
+   "divided": [
+    "story"
+   ],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0877057": {
+  "take": null,
+  "src": null,
+  "article": "Death Note (2006 TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0994314": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "article": "Code Geass Lelouch of the Rebellion",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 3.5
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1224144": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1424037": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0885520": {
+  "take": null,
+  "src": null,
+  "article": "Eternal Summer (2006 film)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0851578": {
+  "take": "Critics loved this one, and the visuals drew the loudest praise.",
+  "src": "wiki",
+  "article": "Paprika (2006 film)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "visuals"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [
+    "animation"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 87
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0461642": {
+  "take": null,
+  "src": null,
+  "article": "7 Dwarves: The Forest Is Not Enough",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0891396": {
+  "take": null,
+  "src": null,
+  "article": "Minuscule (TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1281973": {
+  "take": "Critics are split — the twists won praise, the originality is the fault line.",
+  "src": "wiki",
+  "article": "Bigg Boss (Hindi TV series)",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "twists"
+   ],
+   "panned": [],
+   "divided": [
+    "originality"
+   ],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0461694": {
+  "take": null,
+  "src": null,
+  "article": "Four Minutes",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0485863": {
+  "take": null,
+  "src": null,
+  "article": "A Battle of Wits (2006 film)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0424095": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "article": "Flushed Away",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 72
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0472043": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "article": "Apocalypto",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 65
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0419468": {
+  "take": null,
+  "src": null,
+  "article": "Baabul (2006 film)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0770214": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "article": "Kabul Express",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1105263": {
+  "take": "Reviewers praised the writing and themes but flagged the first half.",
+  "src": "wiki",
+  "article": "Bleach: Memories of Nobody",
+  "a": {
+   "tone": null,
+   "praised": [
+    "writing",
+    "themes"
+   ],
+   "panned": [
+    "first half"
+   ],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0929261": {
+  "take": null,
+  "src": null,
+  "article": "The Restless (2006 film)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0478829": {
+  "take": null,
+  "src": null,
+  "article": "Vitus (film)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0924274": {
+  "take": null,
+  "src": null,
+  "article": "Rakhi (2006 film)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0439654": {
+  "take": null,
+  "src": null,
+  "article": "My Wife Is a Gangster 3",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0940902": {
+  "take": null,
+  "src": null,
+  "article": "Notruf Hafenkante",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0780568": {
+  "take": null,
+  "src": null,
+  "article": "My Führer – The Really Truest Truth about Adolf Hitler",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0843335": {
+  "take": null,
+  "src": null,
+  "article": "Desamuduru",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0454921": {
+  "take": "Critics came away positive, praising the performances and emotional weight while docking points for the ambition.",
+  "src": "wiki",
+  "article": "The Pursuit of Happyness",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "emotional weight"
+   ],
+   "panned": [
+    "ambition"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 67
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0988824": {
+  "take": "Critics are split, with the visuals drawing most complaints.",
+  "src": "wiki",
+  "article": "Naruto: Shippūden",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [
+    "visuals"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0808306": {
+  "take": null,
+  "src": null,
+  "article": "Honeymoon Travels Pvt. Ltd.",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0983213": {
+  "take": "The music and emotional weight drew the most notice from reviewers.",
+  "src": "wiki",
+  "article": "5 Centimeters per Second",
+  "a": {
+   "tone": null,
+   "praised": [
+    "music",
+    "emotional weight"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1037116": {
+  "take": "Critics kept circling back to the story — in a good way.",
+  "src": "wiki",
+  "article": "One Piece Movie: The Desert Princess and the Pirates: Adventures in Alabasta",
+  "a": {
+   "tone": null,
+   "praised": [
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "ratings": {
+    "n": 1,
+    "median": 3.5
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0985073": {
+  "take": null,
+  "src": null,
+  "article": "Paraíso Tropical",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1260351": {
+  "take": null,
+  "src": null,
+  "article": "Doraemon: Nobita's New Great Adventure into the Underworld",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0996011": {
+  "take": null,
+  "src": null,
+  "article": "Una familia de diez",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0978537": {
+  "take": null,
+  "src": null,
+  "article": "Ijon Tichy: Space Pilot",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0948103": {
+  "take": "Rave reviews across the board, especially for the writing and humour.",
+  "src": "wiki",
+  "article": "Gurren Lagann",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "writing",
+    "humour"
+   ],
+   "panned": [
+    "story"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 100
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 4
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0924213": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "article": "Chotta Mumbai",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0454065": {
+  "take": "Reviewers found plenty to like here.",
+  "src": "wiki",
+  "article": "The Aerial",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0922037": {
+  "take": null,
+  "src": null,
+  "article": "La que se avecina",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1020913": {
+  "take": null,
+  "src": null,
+  "article": "Diners, Drive-Ins and Dives",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0833553": {
+  "take": "Critics are split — praise for the performances and direction, pushback on the writing.",
+  "src": "wiki",
+  "article": "Ta Ra Rum Pum",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "performances",
+    "direction"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [
+    "story"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 50
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1496380": {
+  "take": null,
+  "src": null,
+  "article": "Chennai 600028",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0800956": {
+  "take": null,
+  "src": null,
+  "article": "Life in a... Metro",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1024810": {
+  "take": null,
+  "src": null,
+  "article": "El Internado",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0976026": {
+  "take": "Broadly positive reviews, though the second half drew grumbles.",
+  "src": "wiki",
+  "article": "Cheeni Kum",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [
+    "second half"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 5,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0479751": {
+  "take": "A well-reviewed outing; the performances and humour stood out for critics.",
+  "src": "wiki",
+  "article": "Sivaji: The Boss",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "humour"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 82
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0833476": {
+  "take": "A love-it-or-hate-it reception, right down the middle.",
+  "src": "wiki",
+  "article": "Jhoom Barabar Jhoom",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 43
+   },
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 3,
+    "median": 2
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1772685": {
+  "take": "Most reviews land firmly on the positive side.",
+  "src": "wiki",
+  "article": "Coffee Prince (South Korean TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1233451": {
+  "take": null,
+  "src": null,
+  "article": "Newly Rich, Newly Poor (2007 TV series)",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0907134": {
+  "take": null,
+  "src": null,
+  "article": "Saneamento Básico",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0796307": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "article": "Under the Same Moon",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 72
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0944233": {
+  "take": null,
+  "src": null,
+  "article": "Shankar Dada Zindabad",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0372873": {
+  "take": "A rough outing with the reviewers.",
+  "src": "wiki",
+  "article": "D-War",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 28
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0988982": {
+  "take": "The action and animation drew the most notice from reviewers.",
+  "src": "wiki",
+  "article": "Naruto Shippuden the Movie",
+  "a": {
+   "tone": null,
+   "praised": [
+    "action",
+    "animation"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0871510": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "article": "Chak De! India",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 89
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0924317": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "article": "Yamadonga",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 1,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt3355694": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0923811": {
+  "take": null,
+  "src": null,
+  "article": "Evangelion: 1.0 You Are (Not) Alone",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1285297": {
+  "take": null,
+  "src": null,
+  "article": "Un gancho al corazón",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1676673": {
+  "take": null,
+  "src": null,
+  "article": "Lee San, Wind of the Palace",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0920464": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "article": "Manorama Six Feet Under",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 4,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0880502": {
+  "take": "Critics came away impressed, by and large.",
+  "src": "wiki",
+  "article": "The Edge of Heaven (film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 90
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1077248": {
+  "take": null,
+  "src": null,
+  "article": "Johnny Gaddaar",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1214961": {
+  "take": "Critics have been largely positive on this one.",
+  "src": "wiki",
+  "article": "Happy Days (2007 film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1202625": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1118804": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0861739": {
+  "take": "Reviewers came away cold on this one.",
+  "src": "wiki",
+  "article": "Elite Squad",
+  "a": {
+   "tone": "negative",
+   "praised": [
+    "production design",
+    "ambition"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 51
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1133480": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0995031": {
+  "take": null,
+  "src": null,
+  "article": "Bhool Bhulaiyaa",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0985636": {
+  "take": "A drubbing from reviewers, with the writing the main casualty.",
+  "src": "wiki",
+  "article": "Laaga Chunari Mein Daag",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [
+    "writing"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 50
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0799922": {
+  "take": "The themes won critics over; the twists drew the odd complaint.",
+  "src": "wiki",
+  "article": "Wizards of Waverly Place",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "themes"
+   ],
+   "panned": [
+    "twists"
+   ],
+   "divided": [
+    "humour"
+   ],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0954914": {
+  "take": "If critics agreed on one thing, it was the first half and performances.",
+  "src": "wiki",
+  "article": "Athidhi",
+  "a": {
+   "tone": null,
+   "praised": [
+    "first half",
+    "performances"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt0498525": {
+  "take": null,
+  "src": null,
+  "article": "Lissi und der wilde Kaiser",
+  "checked": "2026-10-21",
+  "v": 6,
+  "cat": true
+ },
+ "tt1093370": {
+  "take": "Most reviews land firmly on the positive side.",
+  "src": "wiki",
+  "article": "Jab We Met",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 3.75
+   }
+  },
   "checked": "2026-10-21",
   "v": 6,
   "cat": true

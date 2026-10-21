@@ -2,63 +2,20 @@
  "date": "2026-10-21",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 6,
- "high": 2,
- "correctable": 3,
+ "pagesDisagreeing": 1,
+ "high": 0,
+ "correctable": 0,
  "byField": {
-  "genres": 2,
-  "lead actor": 1,
-  "platform": 2,
-  "title": 1
+  "genres": 1
  },
  "rows": [
   {
    "field": "genres",
    "severity": "low",
-   "page": "Science Fiction / Horror",
-   "tmdb": "Thriller",
-   "code": "uk",
-   "slug": "her-private-hell"
-  },
-  {
-   "field": "genres",
-   "severity": "low",
-   "page": "Comedy / Drama",
-   "tmdb": "Music, Drama",
-   "code": "ca",
-   "slug": "bajrangi-bhaijaan"
-  },
-  {
-   "field": "lead actor",
-   "severity": "medium",
-   "page": "Majestie lewton ll",
-   "tmdb": "Ron Pardo, Kallan Holley, Devan Cohen",
-   "code": "sg",
-   "slug": "paw-patrol"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Amazon Prime Video, HBO Max Amazon Channel, HBO Max",
-   "tmdb": "HBO Max",
-   "code": "nz",
-   "slug": "interstellar"
-  },
-  {
-   "field": "title",
-   "severity": "low",
-   "page": "The Apothecary Diaries: The Deceased Empress' Treasure",
-   "tmdb": "The Apothecary Diaries: The Late Lady's Treasure",
-   "code": "jp",
-   "slug": "the-apothecary-diaries-the-deceased-empress-treasure"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix, Amazon Prime Video, Hulu, U-NEXT",
-   "tmdb": "Prime Video, Hulu, HBO Max on U-Next",
-   "code": "jp",
-   "slug": "harry-potter-and-the-philosopher-s-stone"
+   "page": "Drama / Family",
+   "tmdb": "Drama, Action, Thriller",
+   "code": "us",
+   "slug": "irumudi"
   }
  ]
 }
