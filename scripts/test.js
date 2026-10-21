@@ -7338,7 +7338,7 @@ test("most searched: pages from Search Console, honest heading, nothing the page
   assert.ok(/Tamil · 2025 · Series/.test(html));
   assert.ok(S.popularBlockHtml(items, "in", { from: "2026-09-20", to: "2026-10-17" }).includes("Most searched in the last 28 days"), "28 days of data never says 'this week'");
   assert.strictEqual(S.popularBlockHtml(items.slice(0, 2), "in", top), "", "fewer than three: no block");
-  assert.deepStrictEqual(S.fromExport("Top pages,Clicks,Impressions,CTR,Position\nhttps://filmychill.com/movie/x.html,5,9,1%,3\nhttps://filmychill.com/,4,2,1%,1\n", { from: "2026-09-20", to: "2026-10-17", asOf: "2026-10-19" }).pages, { in: [["x", 5, 9]] });
+  assert.deepStrictEqual(S.fromExport("Top pages,Clicks,Impressions,CTR,Position\nhttps://filmychill.com/movie/x.html,5,9,1%,3\nhttps://filmychill.com/,4,2,1%,1\n", { from: "2026-09-20", to: "2026-10-17", asOf: "2026-10-19" }).pages, { in: [["x", 5, 9, 3]] });
 });
 testAsync("most searched: signs in as the service account, fetches the latest week, and stays dormant without access (Oct 2026)", () => inTempDir(async () => {
   const S = require("./lib/searchtop.js");
@@ -7356,19 +7356,63 @@ testAsync("most searched: signs in as the service account, fetches the latest we
     }
     assert.strictEqual(opts.headers.authorization, "Bearer tok");
     const body = JSON.parse(opts.body);
-    assert.deepStrictEqual([body.startDate, body.endDate, body.dimensions], ["2026-10-10", "2026-10-16", ["page"]], "seven days, ending three days back");
+    assert.deepStrictEqual([body.startDate, body.endDate], ["2026-10-10", "2026-10-16"], "seven days, ending three days back");
     if (url.includes(encodeURIComponent("sc-domain:filmychill.com"))) return { ok: false, status: 403, json: async () => ({ error: { message: "no access" } }) };
-    return { ok: true, json: async () => ({ rows: [{ keys: ["https://filmychill.com/us/movie/z.html"], clicks: 6, impressions: 50 }] }) };
+    if (body.dimensions.join() === "page,query") return { ok: true, json: async () => ({ rows: [{ keys: ["https://filmychill.com/us/movie/z.html", "z movie review"], clicks: 1, impressions: 300, position: 4.2 }] }) };
+    assert.deepStrictEqual(body.dimensions, ["page"]);
+    return { ok: true, json: async () => ({ rows: [{ keys: ["https://filmychill.com/us/movie/z.html"], clicks: 6, impressions: 500, position: 4.24 }] }) };
   };
-  const r = await S.refreshSearchTop({ env: { FIREBASE_SERVICE_ACCOUNT: JSON.stringify(creds) }, fetchImpl: fakeGoogle, nowMs: Date.parse("2026-10-19T02:00:00Z") });
+  const r = await S.refreshSearchTop({ env: { FIREBASE_SERVICE_ACCOUNT: JSON.stringify(creds) }, fetchImpl: fakeGoogle, nowMs: Date.parse("2026-10-19T02:00:00Z"), manifest: { us: { z: { title: "Zed" } } } });
   assert.ok(r.ok && r.site === "https://filmychill.com/", "a domain property without access falls back to the URL-prefix property: " + JSON.stringify(r));
   const saved = JSON.parse(require("fs").readFileSync(S.SEARCH_TOP_FILE, "utf8"));
-  assert.deepStrictEqual(saved.pages, { us: [["z", 6, 50]] });
+  assert.deepStrictEqual(saved.pages, { us: [["z", 6, 500, 4.2]] }, "position saved with the page totals");
+  assert.ok(!JSON.stringify(saved).includes("z movie review"), "searches are never saved");
+  assert.deepStrictEqual(r.opportunities.map((o) => [o.label, o.kind, o.queries.map((q) => q.q)]), [["Zed (US)", "snippet", ["z movie review"]]], "the report gets each page's searches");
+  const pub = require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8");
+  assert.ok(/facts-mode\|search-top\)\\\.json/.test(pub), "search-top.json is build data, not published on the site");
   assert.ok(S.loadSearchTop(S.SEARCH_TOP_FILE, Date.parse("2026-10-20")) && !S.loadSearchTop(S.SEARCH_TOP_FILE, Date.parse("2026-11-10")), "older than two weeks isn't 'this week' any more");
   assert.deepStrictEqual(await S.refreshSearchTop({ env: {}, fetchImpl: fakeGoogle }), { ok: false, why: "no service account" }, "dormant without the secret");
   const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
   assert.ok(/await refreshSearchTop\(\)/.test(up), "the build refreshes it");
+  assert.ok(/reportOpportunities\(r\.opportunities/.test(up), "and reports the opportunities");
 }));
+test("search opportunities: page 2 is a ranking problem, page 1 unclicked a snippet problem, normal pages aren't listed (Oct 2026)", () => {
+  const S = require("./lib/searchtop.js");
+  const U = (p) => "https://filmychill.com" + p;
+  const pages = [
+    { keys: [U("/movie/clay.html")], clicks: 1, impressions: 2087, position: 7.4 },    // page 1, 0.05%: snippet
+    { keys: [U("/au/movie/deep.html")], clicks: 0, impressions: 900, position: 14.6 }, // page 2: ranking
+    { keys: [U("/movie/fine.html")], clicks: 40, impressions: 1000, position: 2.6 },   // 4% at #2.6 — under the #1-3 floor (8%): snippet
+    { keys: [U("/movie/ok.html")], clicks: 30, impressions: 1000, position: 5 },       // 3% at #5: normal
+    { keys: [U("/movie/ok2.html")], clicks: 20, impressions: 1000, position: 8 },      // 2% at #8: normal
+    { keys: [U("/movie/small.html")], clicks: 0, impressions: 150, position: 30 },     // too few impressions to judge
+    { keys: [U("/movie/dorothy.html")], clicks: 239, impressions: 1384, position: 52.9 }, // avg on page 6 but 17% clicked: not a problem
+    { keys: [U("/us/movie/verde.html")], clicks: 1, impressions: 300, position: 4 },  // merged away: said so
+    { keys: [U("/kannada/")], clicks: 2, impressions: 400, position: 9 },              // a hub, by its path
+  ];
+  const queries = [
+    { keys: [U("/movie/clay.html"), "clayface"], clicks: 0, impressions: 1500, position: 8.1 },
+    { keys: [U("/movie/clay.html"), "clayface review"], clicks: 1, impressions: 90, position: 2 },
+    { keys: [U("/movie/clay.html"), "clayface cast"], clicks: 0, impressions: 300, position: 6 },
+    { keys: [U("/movie/clay.html"), "clayface | ott"], clicks: 0, impressions: 10, position: 6 },
+    { keys: [U("/movie/clay.html"), "clayface trailer"], clicks: 0, impressions: 5, position: 9 },
+  ];
+  const manifest = { in: { clay: { title: "Clayface" }, fine: {} }, au: { deep: { title: "Deep" } } };
+  const list = S.opportunities(pages, queries, { manifest });
+  assert.deepStrictEqual(list.map((o) => [o.label, o.kind]), [["Clayface", "snippet"], ["/movie/fine.html", "snippet"], ["Deep (AU)", "ranking"], ["/kannada/", "snippet"], ["/us/movie/verde.html (not a current page — merged or removed)", "snippet"]], "most impressions first");
+  assert.deepStrictEqual(list[0].queries.map((q) => q.q), ["clayface", "clayface cast", "clayface review"], "the three biggest searches");
+  const lines = [], dir = require("fs").mkdtempSync(require("path").join(require("os").tmpdir(), "opp-"));
+  const summary = require("path").join(dir, "summary.md");
+  S.reportOpportunities(S.opportunities(pages, [...queries, { keys: [U("/au/movie/deep.html"), "deep | sea"], clicks: 0, impressions: 50, position: 15 }], { manifest }), { from: "2026-10-12", to: "2026-10-18", log: (s) => lines.push(s), summaryFile: summary });
+  assert.ok(lines[0] === "Search opportunities (2026-10-12 to 2026-10-18): 5 — 1 ranking, 4 snippet", lines[0]);
+  assert.ok(lines.some((l) => l.includes("Deep (AU) — 900 seen, 0 clicks (0.0%) — Ranking — page 2 of Google (avg #14.6)")), lines.join("\n"));
+  const md = require("fs").readFileSync(summary, "utf8");
+  assert.ok(md.includes("| [Clayface](https://filmychill.com/movie/clay.html) | 2087 | 1 | 0.0% | Snippet — page 1 (avg #7.4) but rarely clicked | \"clayface\" #8.1, \"clayface cast\" #6, \"clayface review\" #2 |"), md);
+  assert.ok(md.includes('"deep \\| sea" #15'), "a search with a pipe can't break the table");
+  const none = []; S.reportOpportunities([], { log: (s) => none.push(s), summaryFile: "" });
+  assert.ok(/none/.test(none[0]));
+  assert.deepStrictEqual(S.fromExport("Top pages,Clicks,Impressions,CTR,Position\nhttps://filmychill.com/movie/x.html,5,9,1%,3.25\n", { from: "a", to: "b", asOf: "c" }).pages, { in: [["x", 5, 9, 3.3]] }, "an export's position too");
+});
 test("brand mark: the ring + play beside the header wordmark on every page shape, idempotent (Oct 2026)", () => {
   const B = require("./lib/brand.js"), W = require("./lib/writeif.js");
   const top = '<div class="top"><a href="https://filmychill.com/us/">FILMY<span>CHILL</span></a></div>';
