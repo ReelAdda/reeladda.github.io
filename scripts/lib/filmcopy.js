@@ -298,7 +298,33 @@ function buildFaqs(item, countryName = "India", cfg = null) {
     const art = /^[aeiou]/i.test(String(item.language)) ? "an" : "a"; // "an English film", "a Tamil film"
     faqs.push({ q: `What language is ${item.title} in?`, a: `${item.title} is ${art} ${item.language} ${item.kind === "tv" ? "series" : "film"}${item.genre ? ` (${item.genre})` : ""}.` });
   }
+  faqs.push(...olderTitleFaqs(item, cfg, Date.parse(today)));
   return faqs;
+}
+
+// Older titles (out for OLDER_TITLE_DAYS or more — the back catalogue): the questions people
+// search about a film they've already heard of. Oct 2026: Search Console listed ~1,200 such
+// pages as "crawled, not indexed"; these answers are specific to the film, unlike the template
+// around them. Each restates a fact the page already shows (seasons, runtime, cast, director,
+// release date) — never a new claim — so it can't disagree with the page, and none mentions a
+// platform, which the sweeps change. Appended after the existing questions, whose wording the
+// sweeps and archive patches match on and which stay exactly as they were.
+const OLDER_TITLE_DAYS = 120;
+function olderTitleFaqs(item, cfg, nowMs) {
+  const rel = /^\d{4}-\d{2}-\d{2}/.test(item.released || "") ? Date.parse(`${item.released.slice(0, 10)}T00:00:00Z`) : NaN;
+  if (!Number.isFinite(rel) || (nowMs - rel) / 864e5 < OLDER_TITLE_DAYS) return [];
+  const t = item.title, tv = item.kind === "tv", out = [];
+  const mins = Number(item.runtime) > 0 ? Math.round(Number(item.runtime)) : 0;
+  const seasons = Number(item.seasons) > 0 ? Math.round(Number(item.seasons)) : 0;
+  if (tv && seasons) out.push({ q: `How many seasons does ${t} have?`, a: `${t} has ${seasons} season${seasons === 1 ? "" : "s"}${mins ? `, with episodes of about ${mins} minutes` : ""}.` });
+  if (!tv && mins) out.push({ q: `How long is ${t}?`, a: `${t} runs ${fmtRuntime(mins)} (${mins} minutes).` });
+  const cast = (Array.isArray(item.cast) ? item.cast : []).map((c) => (typeof c === "string" ? c : c && c.name)).filter(Boolean).slice(0, 4);
+  if (cast.length) {
+    const names = cast.length > 1 ? `${cast.slice(0, -1).join(", ")} and ${cast[cast.length - 1]}` : cast[0];
+    out.push({ q: `Who is in the cast of ${t}?`, a: `${t} stars ${names}${item.director ? `, directed by ${item.director}` : ""}.` });
+  }
+  out.push({ q: tv ? `When did ${t} first air?` : `When did ${t} come out?`, a: `${t} ${tv ? "first aired" : "was released"} on ${fmtDateFull(item.released.slice(0, 10), localeFor(cfg && cfg.code))}.` });
+  return out;
 }
 
 module.exports = {

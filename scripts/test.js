@@ -1052,11 +1052,11 @@ testAsync("catalogue pages are written in past tense, and thin-vote pages carry 
   const cwd = process.cwd();
   try {
     process.chdir(tmp);
-    const cfg = { code: "sg", name: "Singapore", region: "SG", watchRegion: "SG", ottRegionalLangs: [], priorityLangs: [] };
+    const cfg = { code: "sg", name: "Singapore", region: "SG", watchRegion: "SG", ottRegionalLangs: ["hi"], priorityLangs: [] };
     const old = new Date(Date.now() - 900 * 864e5).toISOString().slice(0, 10);
     const disc = [
       { id: 1, title: "Well Loved", release_date: old, vote_average: 8.4, vote_count: 900, poster_path: "/a.jpg", overview: "A.", genre_ids: [18], original_language: "en" },
-      { id: 2, title: "Barely Rated", release_date: old, vote_average: 8.9, vote_count: 20, poster_path: "/b.jpg", overview: "B.", genre_ids: [18], original_language: "en" },
+      { id: 2, title: "Barely Rated", release_date: old, vote_average: 8.9, vote_count: 20, poster_path: "/b.jpg", overview: "B.", genre_ids: [18], original_language: "hi" },
     ];
     const api = { pause: async () => {}, tmdb: async () => ({ results: disc }), enrich: async () => ({ providers: ["Netflix"], runtime: 100 }) };
     const baseItem = (m, kind) => ({ title: m.title, released: m.release_date, kind, tmdbId: m.id, language: "English", genre: "Drama",
@@ -1102,6 +1102,53 @@ const _catApi = (pagesByKey, { enrich } = {}) => {
     enrich: async (kind, id) => { calls.enrich.push(id); return enrich ? enrich(id) : { providers: ["Netflix"], runtime: 100 }; } };
 };
 const _catCfg = (langs = []) => ({ code: "sg", name: "Singapore", region: "SG", watchRegion: "SG", ottRegionalLangs: langs, priorityLangs: [] });
+
+testAsync("catalogue bar per language: Indian films keep 15 ratings, every other language needs 200 (Oct 2026)", async () => {
+  const CAT = require("./lib/catalog.js");
+  for (const l of ["hi", "ta", "te", "ml", "kn", "pa", "mr", "bn"]) assert.strictEqual(CAT.minVotesFor(l), 15, l);
+  for (const l of ["en", "ko", "ja", "es", "de", "zh", "tl", "ms", "id", "pt", "fr"]) assert.strictEqual(CAT.minVotesFor(l), 200, l);
+  await _catRun(async (fsx) => {
+    const m = (id, title, votes, lang) => ({ ..._catM(id, title, 10), vote_count: votes, original_language: lang });
+    const api = _catApi({ "en:movie": [[m(1, "Obscure English", 150, "en"), m(2, "Known English", 900, "en")]], "hi:movie": [[m(3, "Small Hindi", 20, "hi")]] });
+    const seen = [];
+    const tmdb = api.tmdb;
+    api.tmdb = async (p, q) => { seen.push(`${q.with_original_language}:${q["vote_count.gte"]}`); return tmdb(p, q); };
+    await U.backfillCatalog(_catCfg(["hi"]), {}, { state: {}, baseItem: _catBase, withImdb: (x) => x, batch: 5, api });
+    assert.ok(seen.includes("en:200") && seen.includes("hi:15"), "TMDB is asked with each language's own bar: " + seen.join(" "));
+    assert.ok(fsx.existsSync("sg/movie/known-english.html") && fsx.existsSync("sg/movie/small-hindi.html"), "200+ English and a 20-rating Hindi film are built");
+    assert.ok(!fsx.existsSync("sg/movie/obscure-english.html"), "an English title under 200 ratings isn't");
+  });
+  // The bar change re-walks only the queues it affects; Indian queues keep their place.
+  const state = { _meta: { bar: CAT.CATALOG_BAR_VERSION - 1 }, in: { cursor: 2, built: 9, q: { "en:movie": { page: 6, done: true, empty: 0 }, "hi:movie": { page: 6, done: false, empty: 1 } } } };
+  assert.strictEqual(CAT.reopenForBar(state), 1);
+  assert.deepStrictEqual(state.in.q["en:movie"], { page: 1, done: false, empty: 0 }, "English re-walks from page 1 under the new bar");
+  assert.deepStrictEqual(state.in.q["hi:movie"], { page: 6, done: false, empty: 1 }, "Hindi keeps its place: its bar didn't change");
+  assert.strictEqual(CAT.reopenForBar(state), 0, "once");
+});
+test("older-title FAQs: seasons, length, cast and release date, only on the back catalogue, after the existing questions (Oct 2026)", () => {
+  const F = require("./lib/filmcopy.js");
+  const AU = { code: "au", name: "Australia" };
+  const series = { title: "Knots Landing", kind: "tv", released: "1979-12-27", seasons: 14, runtime: 44, language: "English", genre: "Drama / Soap",
+    cast: ["Michele Lee", "Ted Shackelford", "Kevin Dobson", "William Devane", "Nicollette Sheridan"], director: "Michael Filerman", providers: ["Amazon Prime Video"] };
+  const faqs = F.buildFaqs(series, "Australia", AU);
+  const qs = faqs.map((f) => f.q);
+  assert.deepStrictEqual(qs.slice(qs.indexOf("What language is Knots Landing in?")), ["What language is Knots Landing in?", "How many seasons does Knots Landing have?", "Who is in the cast of Knots Landing?", "When did Knots Landing first air?"], "appended after the existing questions: " + qs.join(" | "));
+  const a = Object.fromEntries(faqs.map((f) => [f.q, f.a]));
+  assert.strictEqual(a["How many seasons does Knots Landing have?"], "Knots Landing has 14 seasons, with episodes of about 44 minutes.");
+  assert.strictEqual(a["Who is in the cast of Knots Landing?"], "Knots Landing stars Michele Lee, Ted Shackelford, Kevin Dobson and William Devane, directed by Michael Filerman.");
+  assert.ok(/^Knots Landing first aired on 27 Dec(ember)? 1979\.$/.test(a["When did Knots Landing first air?"]), a["When did Knots Landing first air?"]);
+  for (const f of faqs.slice(qs.indexOf("How many seasons does Knots Landing have?"))) assert.ok(!/Prime|Netflix|stream/i.test(f.a), "no platform claims: the sweeps change those");
+  const film = F.buildFaqs({ title: "Ready Player One", kind: "movie", released: "2018-03-29", runtime: 140, cast: ["Tye Sheridan"] }, "Australia", AU).map((f) => [f.q, f.a]);
+  assert.ok(film.some(([q, ans]) => q === "How long is Ready Player One?" && ans === "Ready Player One runs 2h 20m (140 minutes)."), JSON.stringify(film));
+  assert.ok(film.some(([q, ans]) => q === "Who is in the cast of Ready Player One?" && ans === "Ready Player One stars Tye Sheridan."));
+  assert.ok(film.some(([q]) => q === "When did Ready Player One come out?"));
+  // New releases (and anything not out yet) are untouched.
+  const recent = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+  const fresh = F.buildFaqs({ title: "New One", kind: "movie", released: recent, runtime: 120, cast: ["A"], language: "Hindi" }, "India").map((f) => f.q);
+  assert.ok(!fresh.some((q) => /How long|cast of|come out/.test(q)), fresh.join(" | "));
+  assert.ok(!F.buildFaqs({ title: "Soon", released: "2099-01-01", runtime: 100, cast: ["A"] }, "India").some((f) => /How long|cast of|come out/.test(f.q)));
+});
+
 
 testAsync("catalogue: a failed TMDB call never retires a queue", async () => {
   await _catRun(async () => {

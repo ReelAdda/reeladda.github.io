@@ -36,6 +36,14 @@
 // already hide the star and verdict. The gates that keep a page honest are unchanged: a
 // real poster, a real synopsis, and a real subscription listing in this country.
 const CATALOG_MIN_VOTES = 15;
+// 200 for every other language (Oct 2026). Indian films keep 15, for the reason above. Elsewhere
+// a title with a few dozen TMDB votes (Knots Landing, 47) is one IMDb, JustWatch and Wikipedia
+// already answer, and Search Console listed ~1,200 such pages as "crawled, not indexed": the
+// backfill now spends its batch on titles people search for. Already-built pages are unaffected.
+const CATALOG_MIN_VOTES_OTHER = 200;
+const INDIAN_LANGS = new Set(["hi", "ta", "te", "ml", "kn", "bn", "mr", "pa", "gu", "or", "as", "ur", "bho", "sa", "kok", "mai", "sd", "tcy"]);
+// The bar for one queue language (TMDB's original-language code).
+const minVotesFor = (lang) => (INDIAN_LANGS.has(String(lang || "")) ? CATALOG_MIN_VOTES : CATALOG_MIN_VOTES_OTHER);
 // Bumped whenever the eligibility bar changes. A queue retired under an older bar is
 // re-opened once (see reopenForBar), because "TMDB ran out of results" at 80 votes says
 // nothing about what exists at 15.
@@ -45,7 +53,12 @@ const CATALOG_MIN_VOTES = 15;
 // a run that stopped mid-page (batch reached) still advanced the page, so the unbuilt rest
 // of that page, often its most popular titles, was never built. Re-walking from page 1
 // recovers both; titles that already have a page cost nothing but the discover call.
-const CATALOG_BAR_VERSION = 3;
+// 4 (Oct 2026): the per-language bar (CATALOG_MIN_VOTES_OTHER). A queue at page N under the
+// old bar has walked past only part of what the higher bar leaves on its first N pages, so
+// the queues whose bar changed (not the Indian ones) re-walk from page 1 once.
+const CATALOG_BAR_VERSION = 4;
+// Which queues the latest bar change affects, by queue key ("<lang>:<kind>").
+const lastBarChange = (key) => !INDIAN_LANGS.has(String(key).split(":")[0]);
 const CATALOG_MIN_AGE_DAYS = 120;    // younger than this belongs to the weekly pipeline
 const CATALOG_MAX_PAGE = 20;         // discover past ~20 pages is long-tail noise, not catalogue
 const CATALOG_BATCH_DEFAULT = 25;    // pages built per country per run (each costs one enrich call)
@@ -158,10 +171,13 @@ function catalogSlug(m, { slugOf, have = new Set() }) {
 function reopenForBar(state) {
   const meta = (state._meta = state._meta || {});
   if (meta.bar === CATALOG_BAR_VERSION) return 0;
+  // One version behind: only the queues the latest change touches. Further behind: all of them.
+  const affects = meta.bar === CATALOG_BAR_VERSION - 1 ? lastBarChange : () => true;
   let reopened = 0;
   for (const [code, cs] of Object.entries(state)) {
     if (code === "_meta" || !cs || !cs.q) continue;
-    for (const qs of Object.values(cs.q)) {
+    for (const [key, qs] of Object.entries(cs.q)) {
+      if (!affects(key)) continue;
       if (qs.done) reopened++;
       qs.done = false; qs.page = 1; qs.empty = 0;
     }
@@ -201,7 +217,7 @@ function catalogProgress(state, code) {
 }
 
 module.exports = {
-  CATALOG_MIN_VOTES, CATALOG_MIN_AGE_DAYS, CATALOG_MAX_PAGE, CATALOG_BATCH_DEFAULT, CATALOG_BAR_VERSION, reopenForBar,
+  CATALOG_MIN_VOTES, CATALOG_MIN_VOTES_OTHER, INDIAN_LANGS, minVotesFor, CATALOG_MIN_AGE_DAYS, CATALOG_MAX_PAGE, CATALOG_BATCH_DEFAULT, CATALOG_BAR_VERSION, reopenForBar,
   catalogQueues, nextQueue, markQueue, noteBuilt, catalogEligible, catalogSlug,
   catalogProgress, queueState, countryState, isSkipped, noteReject, CATALOG_SKIP_STRIKES,
 };

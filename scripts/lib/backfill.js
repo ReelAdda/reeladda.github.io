@@ -7,8 +7,8 @@ const fs = require("fs");
 const { filmPageUrl, slugify, xDefaultCode } = require("./core.js");
 const {
   CATALOG_BATCH_DEFAULT,
-  CATALOG_MIN_VOTES,
   catalogEligible,
+  minVotesFor,
   catalogProgress,
   catalogQueues,
   catalogSlug,
@@ -102,7 +102,7 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
   const handled = new Set();   // tmdb ids built or ruled out this run
 
   const eligibleNow = (m) => !handled.has(skipId(m)) && !isSkipped(state, code, m) &&
-    catalogEligible(m, { kind: m.kind, have, slugOf: slugify, excludeIds: EXCLUDE_IDS });
+    catalogEligible(m, { kind: m.kind, have, slugOf: slugify, excludeIds: EXCLUDE_IDS, minVotes: minVotesFor(m.queueLang) });
   function skipId(m) { return `${m.kind}:${m.id}`; }
 
   // The current page of a queue, walking past pages that have nothing left to build.
@@ -127,7 +127,7 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
           with_watch_monetization_types: "flatrate",   // in-region subscription only: the page must be actionable
           with_original_language: q.lang,
           sort_by: "popularity.desc",                  // the catalogue people actually search for, first
-          "vote_count.gte": String(CATALOG_MIN_VOTES),
+          "vote_count.gte": String(minVotesFor(q.lang)),
           [dateField]: ageCutoff,
           include_adult: "false",
           page: String(qs.page),
@@ -139,9 +139,9 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
         console.warn(`  catalog discover ${code}/${q.key} p${qs.page}: ${e.message} (queue kept, retried next run)`);
         return null;
       }
-      const results = ((d && d.results) || []).map((m) => ({ ...m, kind: q.kind }));
+      const results = ((d && d.results) || []).map((m) => ({ ...m, kind: q.kind, queueLang: q.lang }));
       if (!results.length) { markQueue(state, code, q.key, { results: 0 }); return null; }   // TMDB is out of pages
-      const eligible = results.filter((m) => catalogEligible(m, { kind: q.kind, have, slugOf: slugify, excludeIds: EXCLUDE_IDS }));
+      const eligible = results.filter((m) => catalogEligible(m, { kind: q.kind, have, slugOf: slugify, excludeIds: EXCLUDE_IDS, minVotes: minVotesFor(q.lang) }));
       // "Known" = already has a page, or already ruled out: handled, so not a sign of a barren queue.
       const known = results.filter((m) => have.has(slugify(m.title || m.name || "")) || isSkipped(state, code, m)).length;
       const fresh = eligible.filter(eligibleNow);
