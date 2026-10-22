@@ -3154,13 +3154,20 @@ test("Google Analytics: its tag and exactly its sources on every page, GoatCount
   assert.ok(on.includes(A.GA_TAG + "\n</head>") && on.indexOf(A.GA_TAG) > on.indexOf("Content-Security-Policy"), "Google's tag in <head>, after the policy");
   assert.ok(A.GA_CODE.includes('s.src="https://www.googletagmanager.com/gtag/js?id=' + A.GA_ID + '"'), "gtag.js for this property");
   // Automated browsers (navigator.webdriver) aren't measured: the whole setup, gtag.js included, is skipped.
-  assert.ok(A.GA_TAG === "<script>" + A.GA_CODE + "</script>" && A.GA_CODE.startsWith("if(!navigator.webdriver){") && A.GA_CODE.endsWith("}"), "one inline script, all of it behind the automation check");
+  assert.ok(A.GA_TAG === "<script>" + A.GA_CODE + "</script>" && A.GA_CODE.startsWith("if(!navigator.webdriver&&") && A.GA_CODE.indexOf("){") < A.GA_CODE.indexOf("dataLayer") && A.GA_CODE.endsWith("}"), "one inline script, all of it behind the bot checks");
   // Run as a browser would: `window` is the global object.
-  const run = (webdriver) => { const added = []; const g = { navigator: { webdriver }, Date, document: { createElement: () => ({}), head: { appendChild: (x) => added.push(x.src) } } };
+  const WIN = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+  const MAC = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+  const run = (webdriver, ua = WIN, [width, height] = [1920, 1080]) => { const added = []; const g = { navigator: { webdriver, userAgent: ua }, screen: { width, height }, Date, document: { createElement: () => ({}), head: { appendChild: (x) => added.push(x.src) } } };
     g.window = g; require("vm").runInNewContext(A.GA_CODE, g);
     return { added, events: (g.dataLayer || []).length, gtag: typeof g.gtag }; };
-  assert.deepStrictEqual(run(false), { added: ["https://www.googletagmanager.com/gtag/js?id=" + A.GA_ID], events: 4, gtag: "function" }, "a person: consent, js and config queued, gtag.js loaded");
-  assert.deepStrictEqual(run(true), { added: [], events: 0, gtag: "undefined" }, "an automated browser: nothing loaded, nothing sent");
+  const measured = { added: ["https://www.googletagmanager.com/gtag/js?id=" + A.GA_ID], events: 4, gtag: "function" }, skipped = { added: [], events: 0, gtag: "undefined" };
+  assert.deepStrictEqual(run(false), measured, "a person: consent, js and config queued, gtag.js loaded");
+  assert.deepStrictEqual(run(true), skipped, "an automated browser: nothing loaded, nothing sent");
+  // The Singapore cluster's signature (Windows + a 1280×1200 screen), with or without webdriver.
+  assert.deepStrictEqual(run(false, WIN, [1280, 1200]), skipped, "Windows at 1280×1200: skipped even without webdriver");
+  for (const [ua, size, why] of [[MAC, [1280, 1200], "a Mac at that size"], [WIN, [1280, 1024], "a real 1280×1024 monitor"], [WIN, [1920, 1200], "a real 1920×1200 monitor"], [WIN, [1200, 1280], "rotated"]])
+    assert.deepStrictEqual(run(false, ua, size), measured, why + " is still measured");
   // Every earlier tag moves to the current one: old tag and old hash gone, current tag once, one hash.
   assert.ok(!A.OLD_GA_TAGS.includes(A.GA_TAG) && !A.OLD_GA_HASHES.includes(A.GA_HASH), "the current tag is never on the old list");
   A.OLD_GA_TAGS.forEach((old, i) => {

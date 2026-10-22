@@ -46,9 +46,17 @@ const SETUP = `gtag("consent","default",{${ADS_OFF},analytics_storage:"denied",r
 // loaded at all. Scrapers built to hide it still get through — nothing on the page can catch those
 // reliably — and crawlers that don't run JavaScript never reached GA4 anyway. The setup script
 // loads gtag.js itself, so one inline script does both.
-const GA_CODE = "if(!navigator.webdriver){window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};"
+// Second check, the cluster's own signature (GA4, Oct 2026): every session Windows + Chrome with a
+// 1280×1200 screen, from Singapore — a window size set in a script, not a monitor anyone owns
+// (screens are 1280×1024, 1920×1080, 1920×1200…). Skipped too, whether or not it sets webdriver.
+// If the operator changes the size, GA4 shows a new single odd resolution; add it here.
+const BOT_SCREENS = [[1280, 1200]];
+const GA_GATE = "!navigator.webdriver&&!(/Windows/.test(navigator.userAgent)&&("
+  + BOT_SCREENS.map(([w, h]) => `screen.width===${w}&&screen.height===${h}`).join("||") + "))";
+const tagCode = (gate) => `if(${gate}){window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};`
   + SETUP
   + `var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}";document.head.appendChild(s);}`;
+const GA_CODE = tagCode(GA_GATE);
 const GA_TAG = `<script>${GA_CODE}</script>`;
 const hashOf = (code) => `'sha256-${crypto.createHash("sha256").update(code, "utf8").digest("base64")}'`;
 const GA_HASH = hashOf(GA_CODE);
@@ -56,8 +64,9 @@ const GA_HASH = hashOf(GA_CODE);
 // its hash, so a page never carries two tags or still allows a script it no longer has. When the
 // tag changes again, add the outgoing version here (a test checks the current one isn't listed).
 //   1. Google's two-tag snippet as given (Oct 2026, before the automation check).
-const OLD_GA_CODES = ["window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}" + SETUP];
-const OLD_GA_TAGS = [`<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}"></script>\n<script>${OLD_GA_CODES[0]}</script>`];
+//   2. The automation check alone (Oct 2026, before the 1280×1200 check).
+const OLD_GA_CODES = ["window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}" + SETUP, tagCode("!navigator.webdriver")];
+const OLD_GA_TAGS = [`<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}"></script>\n<script>${OLD_GA_CODES[0]}</script>`, `<script>${OLD_GA_CODES[1]}</script>`];
 const OLD_GA_HASHES = OLD_GA_CODES.map(hashOf);
 const GA_SOURCES = {
   "script-src": [GA_HASH, "https://www.googletagmanager.com"],
