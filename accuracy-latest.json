@@ -2,78 +2,20 @@
  "date": "2026-10-22",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 8,
- "high": 5,
- "correctable": 5,
+ "pagesDisagreeing": 1,
+ "high": 0,
+ "correctable": 1,
  "byField": {
-  "platform": 5,
-  "director": 2,
-  "lead actor": 1
+  "release date": 1
  },
  "rows": [
   {
-   "field": "platform",
-   "severity": "high",
-   "page": "Philo, Night Flight Plus, Fandor, Darkroom",
-   "tmdb": "fuboTV, Philo, Night Flight Plus, Fandor",
+   "field": "release date",
+   "severity": "medium",
+   "page": "2026-11-06",
+   "tmdb": "2026-11-04 / 2026-11-11",
    "code": "us",
-   "slug": "poison-for-the-fairies"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix, WOW, Sky Go, Wow Fiction Amazon Channel",
-   "tmdb": "WOW, Sky Go, RTL+, RTL+ Max",
-   "code": "de",
-   "slug": "pagan-peak"
-  },
-  {
-   "field": "director",
-   "severity": "medium",
-   "page": "Benny Chan",
-   "tmdb": "Benny Chan Muk-sing",
-   "code": "my",
-   "slug": "shaolin"
-  },
-  {
-   "field": "director",
-   "severity": "medium",
-   "page": "Yu Je-won",
-   "tmdb": "Yoo Je-won",
-   "code": "ph",
-   "slug": "love-next-door"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix",
-   "tmdb": "HBO Max",
-   "code": "ph",
-   "slug": "raiders-of-the-lost-ark"
-  },
-  {
-   "field": "lead actor",
-   "severity": "medium",
-   "page": "Majestie lewton ll",
-   "tmdb": "Ron Pardo, Kallan Holley, Devan Cohen",
-   "code": "nz",
-   "slug": "paw-patrol"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "U-NEXT, HBO Max on U-Next",
-   "tmdb": "Hulu, HBO Max on U-Next",
-   "code": "jp",
-   "slug": "dune-part-two"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix",
-   "tmdb": "Prime Video",
-   "code": "jp",
-   "slug": "oppenheimer"
+   "slug": "ghost-soldier"
   }
  ]
 }
