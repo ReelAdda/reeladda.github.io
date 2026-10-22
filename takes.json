@@ -908,12 +908,29 @@
   "checked": "2026-07-14"
  },
  "tt27419466": {
-  "take": "Critics are split — praise for the originality and themes, pushback on the music.",
+  "take": "Critics can't agree — high marks for the originality, complaints about the music.",
   "src": "wiki",
   "hook": null,
   "article": "Moana (2026 film)",
-  "checked": "2026-07-30",
-  "v": 3
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "originality"
+   ],
+   "panned": [
+    "music"
+   ],
+   "divided": [
+    "animation"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 33
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6
  },
  "tt36103784": {
   "take": null,
@@ -6557,7 +6574,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-21",
+  "checked": "2026-10-22",
   "v": 6
  },
  "tt43650242": {
@@ -6583,7 +6600,7 @@
    "score": null,
    "toneSrc": "summary"
   },
-  "checked": "2026-10-09",
+  "checked": "2026-10-22",
   "v": 6
  },
  "movie:1776596": {
@@ -56816,7 +56833,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-21",
+  "checked": "2026-10-22",
   "v": 6
  },
  "tt26940324": {
@@ -70737,6 +70754,1831 @@
   "take": null,
   "src": null,
   "article": "O Rico e Lázaro",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt26933824": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Nobody Wants This",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 95
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 4.5
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6
+ },
+ "tt21952924": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Phony (TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 89
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6
+ },
+ "movie:1802710": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-22",
+  "v": 6
+ },
+ "movie:1406492": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-22",
+  "v": 6
+ },
+ "tt35450621": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Karma (2026 film)",
+  "checked": "2026-10-22",
+  "v": 6
+ },
+ "tt9145880": {
+  "take": "A divided verdict, with the themes the one thing most critics agreed on.",
+  "src": "wiki",
+  "article": "Love Alarm",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "themes"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 2.25
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt15553922": {
+  "take": null,
+  "src": null,
+  "article": "Juvenile Justice (TV series)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6908274": {
+  "take": null,
+  "src": null,
+  "article": "Mirage (2018 film)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt11777040": {
+  "take": null,
+  "src": null,
+  "article": "Time to Hunt (film)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt32093575": {
+  "take": "The reviews were not kind, and the writing took the worst of it.",
+  "src": "wiki",
+  "article": "Scary Movie (2026 film)",
+  "a": {
+   "tone": "negative",
+   "praised": [
+    "first half",
+    "second half"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 23
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt47597050": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt0050974": {
+  "take": null,
+  "src": null,
+  "article": "Sissi – Fateful Years of an Empress",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt0093409": {
+  "take": "Reviewers found plenty to like here.",
+  "src": "wiki",
+  "article": "Lethal Weapon",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 81
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt0114814": {
+  "take": "A well-reviewed outing; the performances and tone stood out for critics.",
+  "src": "wiki",
+  "article": "The Usual Suspects",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "tone"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "mc",
+    "value": 76
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt0318871": {
+  "take": "Critics loved it — special praise for the performances and characters.",
+  "src": "wiki",
+  "article": "Berserk (1997 TV series)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "performances",
+    "characters"
+   ],
+   "panned": [
+    "first half"
+   ],
+   "divided": [
+    "second half"
+   ],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt1051252": {
+  "take": "Most critics came away happy.",
+  "src": "wiki",
+  "article": "Poovellam Un Vaasam",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt0378194": {
+  "take": "Reviewers were close to unanimous — this one landed.",
+  "src": "wiki",
+  "article": "Kill Bill: Volume 2",
+  "a": {
+   "tone": "acclaim",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 84
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt0485301": {
+  "take": "Critics were not impressed with this one.",
+  "src": "wiki",
+  "article": "Torchwood",
+  "a": {
+   "tone": "negative",
+   "praised": [
+    "ambition"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt1039960": {
+  "take": "Reviewers singled out the performances and music for praise.",
+  "src": "wiki",
+  "article": "Estômago",
+  "a": {
+   "tone": null,
+   "praised": [
+    "performances",
+    "music"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt1512685": {
+  "take": "A well-reviewed outing; the writing and runtime stood out for critics.",
+  "src": "wiki",
+  "article": "Julia's Eyes",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "writing",
+    "runtime"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 90
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt2178941": {
+  "take": null,
+  "src": null,
+  "article": "Barbara (2012 film)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt2355765": {
+  "take": "The reviews lean clearly positive.",
+  "src": "wiki",
+  "article": "Ordinary (film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt2521668": {
+  "take": null,
+  "src": null,
+  "article": "The Returned (French TV series)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt2585808": {
+  "take": null,
+  "src": null,
+  "article": "La Patrona",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt2800240": {
+  "take": "Broadly positive reviews, though the humour drew grumbles.",
+  "src": "wiki",
+  "article": "Serial (Bad) Weddings",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [
+    "humour"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt4864932": {
+  "take": "Opinion is split — the action is the bright spot either way.",
+  "src": "wiki",
+  "article": "Baaghi (2016 film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "action"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 14
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 5,
+    "median": 2
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5165344": {
+  "take": "Genuinely divisive — critics can't settle this one.",
+  "src": "wiki",
+  "article": "Rustom (film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 45
+   },
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5462886": {
+  "take": null,
+  "src": null,
+  "article": "You Are Wanted",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6728390": {
+  "take": null,
+  "src": null,
+  "article": "Kuroko's Basketball The Movie: Last Game",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6495756": {
+  "take": null,
+  "src": null,
+  "article": "Ingobernable",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6522398": {
+  "take": null,
+  "src": null,
+  "article": "Katamarayudu",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6496236": {
+  "take": null,
+  "src": null,
+  "article": "Danur",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5996836": {
+  "take": null,
+  "src": null,
+  "article": "The Great Father",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6170954": {
+  "take": "Critics are split clean down the middle on this one.",
+  "src": "wiki",
+  "article": "Naam Shabana",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 29
+   },
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6472622": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6491190": {
+  "take": "Reviewers responded well — the story came in for particular praise.",
+  "src": "wiki",
+  "article": "A Força do Querer",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6814252": {
+  "take": null,
+  "src": null,
+  "article": "House of the Disappeared",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5902484": {
+  "take": "Opinion is split — the performances and story is the bright spot either way.",
+  "src": "wiki",
+  "article": "Kaatru Veliyidai",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "performances",
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 3.5
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6747242": {
+  "take": null,
+  "src": null,
+  "article": "8 Thottakkal",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt4610114": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6725484": {
+  "take": "A divided verdict, with the humour the one thing most critics agreed on.",
+  "src": "wiki",
+  "article": "Can't Help Falling in Love (film)",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "humour"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5882416": {
+  "take": "Critics' sore spot here is the performances.",
+  "src": "wiki",
+  "article": "Kartini (film)",
+  "a": {
+   "tone": null,
+   "praised": [],
+   "panned": [
+    "performances"
+   ],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6692188": {
+  "take": null,
+  "src": null,
+  "article": "El Chapo (TV series)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6848094": {
+  "take": null,
+  "src": null,
+  "article": "The Sheriff in Town",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6548966": {
+  "take": "Critics highlighted the humour and action, with the characters the weak link.",
+  "src": "wiki",
+  "article": "Fairy Tail: Dragon Cry",
+  "a": {
+   "tone": null,
+   "praised": [
+    "humour",
+    "action"
+   ],
+   "panned": [
+    "characters"
+   ],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5754602": {
+  "take": null,
+  "src": null,
+  "article": "4 Blocks",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5628740": {
+  "take": null,
+  "src": null,
+  "article": "Yu-Gi-Oh! VRAINS",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6426714": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt3823116": {
+  "take": null,
+  "src": null,
+  "article": "Richard the Stork",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6882872": {
+  "take": null,
+  "src": null,
+  "article": "Lahoriye",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7995922": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5546156": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5474042": {
+  "take": null,
+  "src": null,
+  "article": "Half Girlfriend (film)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6221000": {
+  "take": "The writing and direction drew the most notice from reviewers.",
+  "src": "wiki",
+  "article": "Godha (film)",
+  "a": {
+   "tone": null,
+   "praised": [
+    "writing",
+    "direction"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5447136": {
+  "take": null,
+  "src": null,
+  "article": "Adventures of Omanakuttan",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6797204": {
+  "take": null,
+  "src": null,
+  "article": "Beautiful Accident",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6367558": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "article": "L'Amant double",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 70
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5776208": {
+  "take": "Critics were not impressed with this one.",
+  "src": "wiki",
+  "article": "Resident Evil: Vendetta",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 43
+   },
+   "toneSrc": "ratings",
+   "ratings": {
+    "n": 3,
+    "median": 2.25
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6175760": {
+  "take": null,
+  "src": null,
+  "article": "My Sassy Girl (TV series)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6731862": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6734984": {
+  "take": "Word from reviewers is solidly good.",
+  "src": "wiki",
+  "article": "DJ: Duvvada Jagannadham",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 2.75
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7013254": {
+  "take": "Reviewers singled out the costumes for praise.",
+  "src": "wiki",
+  "article": "Sweet 20 (2017 film)",
+  "a": {
+   "tone": null,
+   "praised": [
+    "costumes"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6904062": {
+  "take": "The reviews were not kind.",
+  "src": "wiki",
+  "article": "Real (2017 film)",
+  "a": {
+   "tone": "negative",
+   "praised": [
+    "performances"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6620238": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "article": "Ondu Motteya Kathe",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6996016": {
+  "take": "The writing is what reviewers walked away talking about.",
+  "src": "wiki",
+  "article": "Ninnu Kori",
+  "a": {
+   "tone": null,
+   "praised": [
+    "writing"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "ratings": {
+    "n": 1,
+    "median": 3.5
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7222086": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6336356": {
+  "take": "Most reviews land firmly on the positive side.",
+  "src": "wiki",
+  "article": "Mary and the Witch's Flower",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 89
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7263328": {
+  "take": "Critics loved this one, and the writing and story drew the loudest praise.",
+  "src": "wiki",
+  "article": "Classroom of the Elite (TV series)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "writing",
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6595896": {
+  "take": "The reviews were not kind, and the performances took the worst of it.",
+  "src": "wiki",
+  "article": "Pokémon the Movie: I Choose You!",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [
+    "performances"
+   ],
+   "divided": [
+    "story"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 33
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 2
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7124904": {
+  "take": null,
+  "src": null,
+  "article": "Tomorrow Is Ours",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6608138": {
+  "take": "Critics were won over, largely on the strength of the humour and story.",
+  "src": "wiki",
+  "article": "Kita Kita",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "humour",
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 4
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5311972": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7128254": {
+  "take": "Most critics came away happy.",
+  "src": "wiki",
+  "article": "Goutham Nanda",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 3,
+    "median": 2.5
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7164010": {
+  "take": null,
+  "src": null,
+  "article": "En tierras salvajes",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5818818": {
+  "take": "Critics mostly approved — the writing was the common complaint.",
+  "src": "wiki",
+  "article": "The Divine Order",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [
+    "writing"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 85
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7022748": {
+  "take": null,
+  "src": null,
+  "article": "Strongest Deliveryman",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6502580": {
+  "take": "Critics can't settle on this one, but the humour and story gets its due.",
+  "src": "wiki",
+  "article": "Chunkzz",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "humour",
+    "story"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "ratings",
+   "ratings": {
+    "n": 5,
+    "median": 2.5
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7249874": {
+  "take": null,
+  "src": null,
+  "article": "Lie (film)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt2411144": {
+  "take": "Genuinely divisive — critics can't settle this one.",
+  "src": "wiki",
+  "article": "The Queen of Spain",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 30
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt3896102": {
+  "take": "A rough outing with the reviewers.",
+  "src": "wiki",
+  "article": "Tad the Lost Explorer and the Secret of King Midas",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 33
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt3532216": {
+  "take": "Most critics came away happy.",
+  "src": "wiki",
+  "article": "American Made (film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 85
+   },
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt28306432": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5631456": {
+  "take": null,
+  "src": null,
+  "article": "Just Like Our Parents",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6467482": {
+  "take": null,
+  "src": null,
+  "article": "La Mante",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5790534": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6861726": {
+  "take": "Broadly positive reviews, though the writing drew grumbles.",
+  "src": "wiki",
+  "article": "Jai Lava Kusa",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [
+    "writing"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 7,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7368796": {
+  "take": "Reviewers singled out the performances and writing for praise.",
+  "src": "wiki",
+  "article": "Caer en tentación",
+  "a": {
+   "tone": null,
+   "praised": [
+    "performances",
+    "writing"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6193454": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5534436": {
+  "take": null,
+  "src": null,
+  "article": "Dhaka Attack",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5586052": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "article": "The Invisibles (2017 film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7326322": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7243750": {
+  "take": null,
+  "src": null,
+  "article": "RV: Resurrected Victims",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5639354": {
+  "take": "Critics practically lined up to praise this one.",
+  "src": "wiki",
+  "article": "A Fantastic Woman",
+  "a": {
+   "tone": "acclaim",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 94
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7322850": {
+  "take": null,
+  "src": null,
+  "article": "Raja the Great",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7261848": {
+  "take": null,
+  "src": null,
+  "article": "Papá a toda madre",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5258850": {
+  "take": null,
+  "src": null,
+  "article": "See You up There",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6471264": {
+  "take": null,
+  "src": null,
+  "article": "Fack ju Göhte 3",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7541708": {
+  "take": "A divided verdict, with the direction and originality the one thing most critics agreed on.",
+  "src": "wiki",
+  "article": "Posesif",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "direction",
+    "originality"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 4
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7322816": {
+  "take": null,
+  "src": null,
+  "article": "Vunnadhi Okate Zindagi",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6692354": {
+  "take": "Most critics came away happy.",
+  "src": "wiki",
+  "article": "Ittefaq (2017 film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 91
+   },
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6276768": {
+  "take": null,
+  "src": null,
+  "article": "Wilder (TV series)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt8434720": {
+  "take": null,
+  "src": null,
+  "article": "A Love So Beautiful",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7469726": {
+  "take": null,
+  "src": null,
+  "article": "Shaadi Mein Zaroor Aana",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7519174": {
+  "take": "The critical consensus tilts firmly positive.",
+  "src": "wiki",
+  "article": "Of Fathers and Sons",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 95
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5923026": {
+  "take": "Good word from critics, with the second half and tension earning most of the praise.",
+  "src": "wiki",
+  "article": "Marlina the Murderer in Four Acts",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "second half",
+    "tension"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 98
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7060460": {
+  "take": "A critical darling — reviewers kept coming back to the performances and writing.",
+  "src": "wiki",
+  "article": "Theeran Adhigaaram Ondru",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "performances",
+    "writing"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 2,
+    "median": 3.75
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6190050": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7856872": {
+  "take": null,
+  "src": null,
+  "article": "Apocalipse",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7243686": {
+  "take": null,
+  "src": null,
+  "article": "The Swindlers (2017 film)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5723272": {
+  "take": "Critics came away impressed, by and large.",
+  "src": "wiki",
+  "article": "In the Fade",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 77
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6506146": {
+  "take": null,
+  "src": null,
+  "article": "The 3rd Eye (2017 film)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5753856": {
+  "take": "A critical darling — reviewers kept coming back to the writing and tone.",
+  "src": "wiki",
+  "article": "Dark (TV series)",
+  "a": {
+   "tone": "acclaim",
+   "praised": [
+    "writing",
+    "tone"
+   ],
+   "panned": [
+    "originality"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 90
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 4.5
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6712014": {
+  "take": "A divided verdict, with the humour the one thing most critics agreed on.",
+  "src": "wiki",
+  "article": "Fukrey Returns",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "humour"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 11
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 11,
+    "median": 2
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7684228": {
+  "take": "Reviewers found plenty to like here.",
+  "src": "wiki",
+  "article": "Malli Raava",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 2,
+    "median": 3
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7221634": {
+  "take": null,
+  "src": null,
+  "article": "Maayavan",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6175820": {
+  "take": null,
+  "src": null,
+  "article": "This Crazy Heart",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7777974": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6157626": {
+  "take": null,
+  "src": null,
+  "article": "Legend of the Demon Cat",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7018644": {
+  "take": "Reviewers found plenty to like here.",
+  "src": "wiki",
+  "article": "Grown-ish",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 95
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7742120": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5862312": {
+  "take": null,
+  "src": null,
+  "article": "Verónica (2017 Spanish film)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7711342": {
+  "take": "Critics largely gave this one a pass.",
+  "src": "wiki",
+  "article": "Agnyaathavaasi",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 17
+   },
+   "toneSrc": "lead",
+   "ratings": {
+    "n": 1,
+    "median": 2.5
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6470762": {
+  "take": null,
+  "src": null,
+  "article": "Mazinger Z: Infinity",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt4477536": {
+  "take": "The critics' patience ran thin here.",
+  "src": "wiki",
+  "article": "Fifty Shades Freed (film)",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 11
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6818140": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6772418": {
+  "take": null,
+  "src": null,
+  "article": "La leyenda del Charro Negro",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7843946": {
+  "take": null,
+  "src": null,
+  "article": "Dilan 1990",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6727296": {
+  "take": "Half the critics point to the performances, the other half to the tension.",
+  "src": "wiki",
+  "article": "Bhaagamathie",
+  "a": {
+   "tone": "mixed",
+   "praised": [
+    "performances"
+   ],
+   "panned": [
+    "tension"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 83
+   },
+   "toneSrc": "ratings",
+   "ratings": {
+    "n": 4,
+    "median": 3.25
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6890582": {
+  "take": "Most reviews land firmly on the positive side.",
+  "src": "wiki",
+  "article": "Psychokinesis (film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 80
+   },
+   "toneSrc": "ratings",
+   "ratings": {
+    "n": 5,
+    "median": 4
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6153538": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7589670": {
+  "take": null,
+  "src": null,
+  "article": "Chalo",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7705790": {
+  "take": "Reviewers responded well — the performances and direction came in for particular praise.",
+  "src": "wiki",
+  "article": "Tholi Prema (2018 film)",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "performances",
+    "direction"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "ratings",
+   "ratings": {
+    "n": 4,
+    "median": 3.5
+   }
+  },
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7483318": {
+  "take": null,
+  "src": null,
+  "article": "Kalakalappu 2",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7920500": {
+  "take": null,
+  "src": null,
+  "article": "Skam France",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt7853242": {
+  "take": null,
+  "src": null,
+  "article": "Love per Square Foot",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt5089068": {
+  "take": null,
+  "src": null,
+  "article": "Luna (2017 film)",
+  "checked": "2026-10-22",
+  "v": 6,
+  "cat": true
+ },
+ "tt6878882": {
+  "take": "The critical verdict is rare-air positive.",
+  "src": "wiki",
+  "article": "Operation Red Sea",
+  "a": {
+   "tone": "acclaim",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 80
+   },
+   "toneSrc": "lead"
+  },
   "checked": "2026-10-22",
   "v": 6,
   "cat": true

@@ -2,20 +2,46 @@
  "date": "2026-10-22",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
- "high": 0,
- "correctable": 1,
+ "pagesDisagreeing": 4,
+ "high": 3,
+ "correctable": 3,
  "byField": {
-  "release date": 1
+  "platform": 2,
+  "streaming": 1,
+  "genres": 1
  },
  "rows": [
   {
-   "field": "release date",
-   "severity": "medium",
-   "page": "2026-11-06",
-   "tmdb": "2026-11-04 / 2026-11-11",
-   "code": "us",
-   "slug": "ghost-soldier"
+   "field": "platform",
+   "severity": "high",
+   "page": "Disney Plus, ITVX Premium",
+   "tmdb": "Disney+",
+   "code": "uk",
+   "slug": "king-of-the-hill"
+  },
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "on HBO Max, HBO Max Amazon Channel",
+   "tmdb": "rent/buy only",
+   "code": "au",
+   "slug": "dc-s-legends-of-tomorrow"
+  },
+  {
+   "field": "genres",
+   "severity": "low",
+   "page": "Horror",
+   "tmdb": "Thriller",
+   "code": "ae",
+   "slug": "baramulla"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, Prime Video, Tivify, AMC Channels",
+   "tmdb": "Netflix, Prime Video, AMC Channels",
+   "code": "es",
+   "slug": "fall"
   }
  ]
 }
