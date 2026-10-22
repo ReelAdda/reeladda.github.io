@@ -3152,7 +3152,27 @@ test("Google Analytics: its tag and exactly its sources on every page, GoatCount
   const csp = /content="([^"]*)"/.exec(on)[1];
   assert.ok(!/goatcounter|gc\.zgo\.at/.test(on), "GoatCounter's tag and sources are gone");
   assert.ok(on.includes(A.GA_TAG + "\n</head>") && on.indexOf(A.GA_TAG) > on.indexOf("Content-Security-Policy"), "Google's tag in <head>, after the policy");
-  assert.ok(A.GA_TAG.startsWith('<script async src="https://www.googletagmanager.com/gtag/js?id=' + A.GA_ID + '"></script>'), "gtag.js for this property");
+  assert.ok(A.GA_CODE.includes('s.src="https://www.googletagmanager.com/gtag/js?id=' + A.GA_ID + '"'), "gtag.js for this property");
+  // Automated browsers (navigator.webdriver) aren't measured: the whole setup, gtag.js included, is skipped.
+  assert.ok(A.GA_TAG === "<script>" + A.GA_CODE + "</script>" && A.GA_CODE.startsWith("if(!navigator.webdriver){") && A.GA_CODE.endsWith("}"), "one inline script, all of it behind the automation check");
+  // Run as a browser would: `window` is the global object.
+  const run = (webdriver) => { const added = []; const g = { navigator: { webdriver }, Date, document: { createElement: () => ({}), head: { appendChild: (x) => added.push(x.src) } } };
+    g.window = g; require("vm").runInNewContext(A.GA_CODE, g);
+    return { added, events: (g.dataLayer || []).length, gtag: typeof g.gtag }; };
+  assert.deepStrictEqual(run(false), { added: ["https://www.googletagmanager.com/gtag/js?id=" + A.GA_ID], events: 4, gtag: "function" }, "a person: consent, js and config queued, gtag.js loaded");
+  assert.deepStrictEqual(run(true), { added: [], events: 0, gtag: "undefined" }, "an automated browser: nothing loaded, nothing sent");
+  // Every earlier tag moves to the current one: old tag and old hash gone, current tag once, one hash.
+  assert.ok(!A.OLD_GA_TAGS.includes(A.GA_TAG) && !A.OLD_GA_HASHES.includes(A.GA_HASH), "the current tag is never on the old list");
+  A.OLD_GA_TAGS.forEach((old, i) => {
+    const withOld = page.replace("</head>", old + "\n</head>").replace("script-src 'self'", "script-src 'self' " + A.OLD_GA_HASHES[i]);
+    for (const up of [A.ensureGa(withOld, true), A.ensureGa(A.ensureGa(withOld, true), true)]) {
+      assert.ok(!up.includes(old) && up.split(A.GA_TAG).length === 2, "old tag " + i + " replaced, the current one exactly once");
+      const src = /script-src[^;]*/.exec(up)[0];
+      assert.ok(!src.includes(A.OLD_GA_HASHES[i]) && src.includes(A.GA_HASH) && (src.match(/sha256-/g) || []).length === 1, "only the current hash is allowed: " + src);
+    }
+    const off = A.ensureGa(withOld, false);
+    assert.ok(!off.includes(old) && !off.includes(A.GA_TAG) && !/sha256-/.test(off), "switched off: no GA tag or hash of any version");
+  });
   assert.ok(csp.includes("script-src 'self' " + A.GA_HASH + " https://www.googletagmanager.com;"), "scripts: the setup script's hash and Google's tag host only");
   assert.strictEqual(A.GA_HASH, "'sha256-" + require("crypto").createHash("sha256").update(A.GA_CODE, "utf8").digest("base64") + "'");
   assert.ok(/connect-src 'self' https:\/\/\*\.google-analytics\.com https:\/\/\*\.analytics\.google\.com https:\/\/\*\.googletagmanager\.com/.test(csp), "measurement endpoints, as Google lists them");

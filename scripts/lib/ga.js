@@ -36,13 +36,29 @@ const GA_ON = !!GA_ID;
 const CONSENT_REGIONS = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU",
   "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE", "IS", "LI", "NO", "GB", "CH"];
 const ADS_OFF = 'ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied"';
-const GA_CODE = "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}"
-  + `gtag("consent","default",{${ADS_OFF},analytics_storage:"denied",region:${JSON.stringify(CONSENT_REGIONS)}});`
+const SETUP = `gtag("consent","default",{${ADS_OFF},analytics_storage:"denied",region:${JSON.stringify(CONSENT_REGIONS)}});`
   + `gtag("consent","default",{${ADS_OFF},analytics_storage:"granted"});`
   + 'gtag("js",new Date());'
   + `gtag("config","${GA_ID}",{allow_google_signals:false,allow_ad_personalization_signals:false});`;
-const GA_TAG = `<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}"></script>\n<script>${GA_CODE}</script>`;
-const GA_HASH = `'sha256-${crypto.createHash("sha256").update(GA_CODE, "utf8").digest("base64")}'`;
+// Automated browsers aren't measured (Oct 2026). A cluster of sessions from one city with ~0s
+// engagement was much of the property's traffic. Browsers driven by plain automation (Puppeteer,
+// Playwright, Selenium as they come) set navigator.webdriver, and for them Google's script isn't
+// loaded at all. Scrapers built to hide it still get through — nothing on the page can catch those
+// reliably — and crawlers that don't run JavaScript never reached GA4 anyway. The setup script
+// loads gtag.js itself, so one inline script does both.
+const GA_CODE = "if(!navigator.webdriver){window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};"
+  + SETUP
+  + `var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}";document.head.appendChild(s);}`;
+const GA_TAG = `<script>${GA_CODE}</script>`;
+const hashOf = (code) => `'sha256-${crypto.createHash("sha256").update(code, "utf8").digest("base64")}'`;
+const GA_HASH = hashOf(GA_CODE);
+// Every earlier version of the tag, as [tag, inline code]. ensureGa takes each off every page with
+// its hash, so a page never carries two tags or still allows a script it no longer has. When the
+// tag changes again, add the outgoing version here (a test checks the current one isn't listed).
+//   1. Google's two-tag snippet as given (Oct 2026, before the automation check).
+const OLD_GA_CODES = ["window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}" + SETUP];
+const OLD_GA_TAGS = [`<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}"></script>\n<script>${OLD_GA_CODES[0]}</script>`];
+const OLD_GA_HASHES = OLD_GA_CODES.map(hashOf);
 const GA_SOURCES = {
   "script-src": [GA_HASH, "https://www.googletagmanager.com"],
   "connect-src": ["https://*.google-analytics.com", "https://*.analytics.google.com", "https://*.googletagmanager.com"],
@@ -60,7 +76,8 @@ function withoutGoatCounter(html) {
 // way. Idempotent.
 function ensureGa(html, on = GA_ON) {
   let s = withoutGoatCounter(html);
-  s = mapPolicy(s, (p) => withSources(p, GA_SOURCES, on));
+  for (const t of OLD_GA_TAGS) s = removeTag(s, t);
+  s = mapPolicy(s, (p) => withSources(withSources(p, { "script-src": OLD_GA_HASHES }, false), GA_SOURCES, on));
   return on ? placeInHead(s, GA_TAG) : removeTag(s, GA_TAG);
 }
 
@@ -81,4 +98,4 @@ function addGaToPages(files, { root = ".", on = GA_ON } = {}) {
   return res;
 }
 
-module.exports = { CONSENT_REGIONS, GA_CODE, GA_HASH, GA_ID, GA_ON, GA_SOURCES, GA_TAG, addGaToPages, ensureGa, withoutGoatCounter };
+module.exports = { CONSENT_REGIONS, GA_CODE, GA_HASH, GA_ID, GA_ON, GA_SOURCES, GA_TAG, OLD_GA_HASHES, OLD_GA_TAGS, addGaToPages, ensureGa, withoutGoatCounter };
