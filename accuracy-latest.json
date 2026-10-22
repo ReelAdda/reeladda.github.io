@@ -2,46 +2,55 @@
  "date": "2026-10-22",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 4,
+ "pagesDisagreeing": 5,
  "high": 3,
- "correctable": 3,
+ "correctable": 4,
  "byField": {
-  "platform": 2,
-  "streaming": 1,
-  "genres": 1
+  "rent/buy": 1,
+  "release date": 1,
+  "streaming": 2,
+  "lead actor": 1
  },
  "rows": [
   {
-   "field": "platform",
+   "field": "rent/buy",
+   "severity": "medium",
+   "page": "none",
+   "tmdb": "Amazon Video, Apple TV Store, Google Play Movies, YouTube, Fandango At Home",
+   "code": "us",
+   "slug": "kill-trip"
+  },
+  {
+   "field": "release date",
    "severity": "high",
-   "page": "Disney Plus, ITVX Premium",
-   "tmdb": "Disney+",
-   "code": "uk",
-   "slug": "king-of-the-hill"
+   "page": "2026-07-23",
+   "tmdb": "2026-09-18",
+   "code": "us",
+   "slug": "pacific"
   },
   {
    "field": "streaming",
    "severity": "high",
-   "page": "on HBO Max, HBO Max Amazon Channel",
+   "page": "on Amazon Prime Video",
    "tmdb": "rent/buy only",
-   "code": "au",
-   "slug": "dc-s-legends-of-tomorrow"
+   "code": "uk",
+   "slug": "28-days-later"
   },
   {
-   "field": "genres",
-   "severity": "low",
-   "page": "Horror",
-   "tmdb": "Thriller",
-   "code": "ae",
-   "slug": "baramulla"
-  },
-  {
-   "field": "platform",
+   "field": "streaming",
    "severity": "high",
-   "page": "Netflix, Prime Video, Tivify, AMC Channels",
-   "tmdb": "Netflix, Prime Video, AMC Channels",
-   "code": "es",
-   "slug": "fall"
+   "page": "on Mewatch",
+   "tmdb": "on no subscription service",
+   "code": "sg",
+   "slug": "love-the-way-you-are"
+  },
+  {
+   "field": "lead actor",
+   "severity": "medium",
+   "page": "Majestie lewton ll",
+   "tmdb": "Ron Pardo, Kallan Holley, Devan Cohen",
+   "code": "my",
+   "slug": "paw-patrol"
   }
  ]
 }

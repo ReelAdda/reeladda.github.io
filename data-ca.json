@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-22T17:26:05.807Z",
+ "generatedAt": "2026-10-22T18:14:01.418Z",
  "country": "ca",
  "pick": "Crystal Lake",
  "theatres": [
@@ -72,30 +72,9 @@
      "kind": "movie"
     },
     {
-     "title": "The Humans",
-     "slug": "the-humans",
-     "poster": "https://image.tmdb.org/t/p/w342/gQsDWmkvzzJxlrc3HCqkfQRH11.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Topside",
      "slug": "topside",
      "poster": "https://image.tmdb.org/t/p/w342/mcDGQ2nBftKijYVNFcm0rWsaPiU.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Starling Girl",
-     "slug": "the-starling-girl",
-     "poster": "https://image.tmdb.org/t/p/w342/ysgnrkXwfFCxaBwviG2yNvzpfw5.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Gimme Shelter",
-     "slug": "gimme-shelter",
-     "poster": "https://image.tmdb.org/t/p/w342/eEvqFlmn7d8prqRVaFJ5pjJFHuB.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -107,9 +86,23 @@
      "kind": "movie"
     },
     {
+     "title": "Gimme Shelter",
+     "slug": "gimme-shelter",
+     "poster": "https://image.tmdb.org/t/p/w342/eEvqFlmn7d8prqRVaFJ5pjJFHuB.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "This Boy's Life",
      "slug": "this-boy-s-life",
      "poster": "https://image.tmdb.org/t/p/w342/pRMSZfen1Cv1eqwDbtxCBpBqxnU.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Sleepwalking",
+     "slug": "sleepwalking",
+     "poster": "https://image.tmdb.org/t/p/w342/sQ2YMtrzHBEVNW6fGwd45DzmHOG.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -124,6 +117,13 @@
      "title": "The Ice Storm",
      "slug": "the-ice-storm",
      "poster": "https://image.tmdb.org/t/p/w342/3a6uLta7K8Dzojps4RoJAPHD0km.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Angela's Ashes",
+     "slug": "angela-s-ashes",
+     "poster": "https://image.tmdb.org/t/p/w342/3Zzcys11nAPP14sKW9l97fIHhkK.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -167,7 +167,7 @@
    "theatricalHere": true,
    "slug": "fjord",
    "wikiWeeklyViews": 46636,
-   "trailerViews": 1371328,
+   "trailerViews": 1371709,
    "take": "Reviews lean positive: strong marks for the tension, quibbles about the writing.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -348,7 +348,7 @@
    "theatricalHere": true,
    "slug": "digger",
    "wikiWeeklyViews": 308880,
-   "trailerViews": 5204600,
+   "trailerViews": 5205168,
    "take": "Critics can't agree — high marks for the direction and humour, complaints about the writing.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -644,7 +644,7 @@
     {
      "name": "Guitarricadelafuente",
      "character": "Sebastián",
-     "photo": "https://image.tmdb.org/t/p/w185/q0N5rMfVMkFPHw1qVs9RIWf8ZvA.jpg"
+     "photo": "https://image.tmdb.org/t/p/w185/A2Jfhf7lRBmMlQPGFZwEddT8MdS.jpg"
     },
     {
      "name": "Miguel Bernardeau",
@@ -677,7 +677,7 @@
    "digitalNote": "Netflix",
    "slug": "la-bola-negra",
    "wikiWeeklyViews": 87228,
-   "trailerViews": 3945114,
+   "trailerViews": 3946526,
    "take": "Near-universal acclaim, with the ambition and emotional weight singled out most often.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -855,7 +855,7 @@
    "theatricalHere": true,
    "slug": "street-fighter",
    "wikiWeeklyViews": 1015833,
-   "trailerViews": 34690415,
+   "trailerViews": 34698581,
    "take": "A divided reception: the performances won praise, the humour took the heat.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1036,7 +1036,7 @@
    "slug": "you-can-see-everything",
    "wikiWeeklyViews": 1351707,
    "trending": true,
-   "trailerViews": 35429,
+   "trailerViews": 35522,
    "take": "Critics loved this one, and the second half and ambition drew the loudest praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1251,7 +1251,7 @@
      "score": "8.6/10"
     }
    ],
-   "votes": 196,
+   "votes": 198,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/3ENhExiD2fcjk5FX0AcAXcvLu9N.jpg",
    "isRecent": true,
@@ -1401,7 +1401,7 @@
    "slug": "crystal-lake",
    "wikiWeeklyViews": 676025,
    "trending": true,
-   "trailerViews": 21716529,
+   "trailerViews": 21718471,
    "take": "Critics came away positive, praising the ambition while docking points for the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1589,7 +1589,7 @@
    "ottFreshDate": "2026-10-16",
    "slug": "tulsa-king",
    "wikiWeeklyViews": 78130,
-   "trailerViews": 11410210,
+   "trailerViews": 11410394,
    "take": "Critics came away positive, praising the humour and second half while docking points for the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1741,7 +1741,7 @@
    "ottSince": "2026-10-18",
    "ottFreshDate": "2026-10-18",
    "slug": "basant-kaur",
-   "trailerViews": 163554
+   "trailerViews": 163564
   },
   {
    "title": "Reporting Live",
@@ -1911,7 +1911,7 @@
    "ottFreshDate": "2026-10-09",
    "stillGood": true,
    "slug": "reporting-live",
-   "trailerViews": 10841
+   "trailerViews": 10846
   },
   {
    "title": "Meri Girlfriend Da Viyaah",
@@ -2056,7 +2056,7 @@
    "ottFreshDate": "2026-10-09",
    "stillGood": true,
    "slug": "meri-girlfriend-da-viyaah",
-   "trailerViews": 169848
+   "trailerViews": 169840
   },
   {
    "title": "Carrie",
@@ -2071,7 +2071,7 @@
      "score": "8.3/10"
     }
    ],
-   "votes": 411,
+   "votes": 412,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/6mUMquPQBFJGqTACS3Azkwwrx8d.jpg",
    "isRecent": false,
@@ -2226,7 +2226,7 @@
    "stillGood": true,
    "slug": "carrie",
    "wikiWeeklyViews": 327,
-   "trailerViews": 16739660,
+   "trailerViews": 16741644,
    "take": "The originality and themes won critics over; the performances drew the odd complaint.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2415,7 +2415,7 @@
    "stillGood": true,
    "slug": "mobland",
    "wikiWeeklyViews": 176766,
-   "trailerViews": 12231915,
+   "trailerViews": 12232609,
    "take": "A love-it-or-hate-it reception, right down the middle.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
@@ -2571,7 +2571,7 @@
    "ottFreshDate": "2026-10-03",
    "stillGood": true,
    "slug": "the-last-treatment",
-   "trailerViews": 5775
+   "trailerViews": 5789
   },
   {
    "title": "South Park",
@@ -2912,7 +2912,7 @@
    "slug": "slow-horses",
    "wikiWeeklyViews": 301149,
    "trending": true,
-   "trailerViews": 5835181,
+   "trailerViews": 5835490,
    "take": "Critics loved this one; reception has been close to universal acclaim.",
    "takeSrc": "wiki",
    "takeArticle": "Slow Horses",
@@ -3232,7 +3232,7 @@
     }
    ],
    "slug": "the-mongoose",
-   "trailerViews": 615511,
+   "trailerViews": 615737,
    "verdict": ""
   },
   {
@@ -3388,7 +3388,7 @@
    ],
    "theatricalHere": true,
    "slug": "crawlers",
-   "trailerViews": 1676681,
+   "trailerViews": 1677658,
    "verdict": ""
   },
   {
@@ -3544,7 +3544,7 @@
    ],
    "theatricalHere": true,
    "slug": "ramayana-rise-of-a-legend",
-   "trailerViews": 19829156,
+   "trailerViews": 19834856,
    "verdict": ""
   },
   {
@@ -3700,7 +3700,7 @@
    ],
    "theatricalHere": true,
    "slug": "godzilla-minus-zero",
-   "trailerViews": 6444286,
+   "trailerViews": 6447789,
    "criticsTone": "positive",
    "verdict": ""
   },
@@ -3998,7 +3998,7 @@
    ],
    "theatricalHere": true,
    "slug": "avengers-doomsday",
-   "trailerViews": 49834885,
+   "trailerViews": 49842279,
    "verdict": ""
   },
   {
@@ -4007,7 +4007,7 @@
    "genre": "Science Fiction / Adventure",
    "language": "English",
    "review": "Nearly two decades after he seized control of the Imperium, Paul Atreides is now a ruthless Emperor, and must face…",
-   "poster": "https://image.tmdb.org/t/p/w342/xKCdkfKmEqS0mKpWgHTeWuISHS3.jpg",
+   "poster": "https://image.tmdb.org/t/p/w342/iF5N1Q5Ofv50Hhov0wjQyAuBIjK.jpg",
    "kind": "movie",
    "tmdbId": 1170608,
    "popularity": 122.6492,
@@ -4154,7 +4154,7 @@
    ],
    "theatricalHere": true,
    "slug": "dune-part-three",
-   "trailerViews": 39030619,
+   "trailerViews": 39034706,
    "verdict": ""
   }
  ],
@@ -5498,86 +5498,86 @@
      "badge": null,
      "similar": [
       {
-       "title": "RRR",
-       "slug": "rrr",
-       "poster": "https://image.tmdb.org/t/p/w342/wE0I6efAW4cDDmZQWtwZMOW44EJ.jpg",
+       "title": "Sye Raa Narasimha Reddy",
+       "slug": "sye-raa-narasimha-reddy",
+       "poster": "https://image.tmdb.org/t/p/w342/uEheujJysophwGaqHWPu1UCPthl.jpg",
        "language": "Telugu",
        "kind": "movie"
       },
       {
-       "title": "Firebrand",
-       "slug": "firebrand",
-       "poster": "https://image.tmdb.org/t/p/w342/kXAc1LaxL64udWr9SOAHQwOBEG0.jpg",
+       "title": "A Call to Spy",
+       "slug": "a-call-to-spy",
+       "poster": "https://image.tmdb.org/t/p/w342/cK5D0ss2LLSZtOZKvgOVTcCdXIE.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "Medieval",
-       "slug": "medieval",
-       "poster": "https://image.tmdb.org/t/p/w342/eeUNWsdoiOijOZAMaWFDA5Pb1n8.jpg",
+       "title": "Mary",
+       "slug": "mary",
+       "poster": "https://image.tmdb.org/t/p/w342/wpApuf1xky92ug8n5mP5aP7DiDy.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "Prizefighter: The Life of Jem Belcher",
-       "slug": "prizefighter-the-life-of-jem-belcher",
-       "poster": "https://image.tmdb.org/t/p/w342/x3PIk93PTbxT88ohfeb26L1VpZw.jpg",
+       "title": "Tenzing",
+       "slug": "tenzing",
+       "poster": "https://image.tmdb.org/t/p/w342/a3G0yDUDoEJwzmHeIIrZmUCx8bW.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "The Uprising",
-       "slug": "the-uprising",
-       "poster": "https://image.tmdb.org/t/p/w342/7TUl15TOsIvndKlgMWTtLgtEzZP.jpg",
+       "title": "Victoria & Abdul",
+       "slug": "victoria-abdul",
+       "poster": "https://image.tmdb.org/t/p/w342/uIzQ8zZ0rqjqqJUIpeeovtTryAa.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "The Secrets We Keep",
-       "slug": "the-secrets-we-keep",
-       "poster": "https://image.tmdb.org/t/p/w342/nI9tlSTnSn3YWIQl8ir3I0CgNnz.jpg",
+       "title": "Peterloo",
+       "slug": "peterloo",
+       "poster": "https://image.tmdb.org/t/p/w342/lUQD6QBwNgSiiOAcNcTOd4qGRId.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "Napoleon",
-       "slug": "napoleon",
-       "poster": "https://image.tmdb.org/t/p/w342/ytFOXyghxLzAM4KZyazDdEkM66q.jpg",
+       "title": "Jimmy's Hall",
+       "slug": "jimmy-s-hall",
+       "poster": "https://image.tmdb.org/t/p/w342/lo5MjmuMTTcgGVsup5RvjtDj4T7.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "Outlaws - For Greater Glory",
-       "slug": "outlaws-for-greater-glory",
-       "poster": "https://image.tmdb.org/t/p/w342/7jgh0ej04j98q2NFpSZLlpDazUo.jpg",
+       "title": "The Count of Monte Cristo",
+       "slug": "the-count-of-monte-cristo",
+       "poster": "https://image.tmdb.org/t/p/w342/ifMgDAUXVQLY4DeOu3VTTi55jSP.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "Outlaw King",
-       "slug": "outlaw-king",
-       "poster": "https://image.tmdb.org/t/p/w342/rT49ousKUWN3dV7UlhaC9onTNdl.jpg",
+       "title": "Rob Roy",
+       "slug": "rob-roy",
+       "poster": "https://image.tmdb.org/t/p/w342/kWI2rF6RAnRtEjfBlZgsXumgOm5.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "The Patriot",
-       "slug": "the-patriot",
-       "poster": "https://image.tmdb.org/t/p/w342/fWZd815QxUCUcrWQZwUkAp9ljG.jpg",
+       "title": "The Way West",
+       "slug": "the-way-west",
+       "poster": "https://image.tmdb.org/t/p/w342/cexs9SGcB9JGfBBO1mKeFS1dzc8.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "Free State of Jones",
-       "slug": "free-state-of-jones",
-       "poster": "https://image.tmdb.org/t/p/w342/fTB6p9QwPRKIuK5LtB5CZXlkx5b.jpg",
+       "title": "Henry V",
+       "slug": "henry-v",
+       "poster": "https://image.tmdb.org/t/p/w342/eAisr20DvaKJeHvjDN0oHSx0l7u.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "The Kill Team",
-       "slug": "the-kill-team",
-       "poster": "https://image.tmdb.org/t/p/w342/wLRZbtrbV51oQuvqNeK6vhb6btV.jpg",
+       "title": "Mutiny on the Bounty",
+       "slug": "mutiny-on-the-bounty",
+       "poster": "https://image.tmdb.org/t/p/w342/GD98ozz6F6tSu8BWGulpseEKhv.jpg",
        "language": "English",
        "kind": "movie"
       }
@@ -5985,7 +5985,7 @@
      "score": "8.0/10"
     }
    ],
-   "votes": 1255,
+   "votes": 1256,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/xyFAzP7RKK8cARCSalIZ9A9T0jV.jpg",
    "isRecent": true,
@@ -7162,5 +7162,5 @@
    "hook": "Sreeti Mukerji's directorial debut."
   }
  ],
- "trackedFilms": 1348
+ "trackedFilms": 1353
 }
