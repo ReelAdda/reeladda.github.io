@@ -1,56 +1,30 @@
 {
- "date": "2026-10-22",
- "checked": 108,
- "errors": 0,
- "pagesDisagreeing": 5,
- "high": 3,
- "correctable": 4,
+ "date": "2026-10-23",
+ "checked": 107,
+ "errors": 1,
+ "pagesDisagreeing": 2,
+ "high": 2,
+ "correctable": 2,
  "byField": {
-  "rent/buy": 1,
-  "release date": 1,
-  "streaming": 2,
-  "lead actor": 1
+  "streaming": 1,
+  "platform": 1
  },
  "rows": [
   {
-   "field": "rent/buy",
-   "severity": "medium",
-   "page": "none",
-   "tmdb": "Amazon Video, Apple TV Store, Google Play Movies, YouTube, Fandango At Home",
-   "code": "us",
-   "slug": "kill-trip"
-  },
-  {
-   "field": "release date",
-   "severity": "high",
-   "page": "2026-07-23",
-   "tmdb": "2026-09-18",
-   "code": "us",
-   "slug": "pacific"
-  },
-  {
    "field": "streaming",
    "severity": "high",
-   "page": "on Amazon Prime Video",
-   "tmdb": "rent/buy only",
-   "code": "uk",
-   "slug": "28-days-later"
-  },
-  {
-   "field": "streaming",
-   "severity": "high",
-   "page": "on Mewatch",
+   "page": "on Netflix",
    "tmdb": "on no subscription service",
    "code": "sg",
-   "slug": "love-the-way-you-are"
+   "slug": "a-love-so-beautiful"
   },
   {
-   "field": "lead actor",
-   "severity": "medium",
-   "page": "Majestie lewton ll",
-   "tmdb": "Ron Pardo, Kallan Holley, Devan Cohen",
-   "code": "my",
-   "slug": "paw-patrol"
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix",
+   "tmdb": "Prime Video",
+   "code": "ph",
+   "slug": "despicable-me-4"
   }
  ]
 }
