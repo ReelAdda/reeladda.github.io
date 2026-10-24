@@ -2856,7 +2856,7 @@ async function main() {
     // only if its content did.
     try {
       const l = syncFilmLastmods(pagesManifest, builtCountries, todayStr());
-      console.log(`Film lastmod: ${l.changed} of ${l.pages} pages changed content${l.seeded ? `, ${l.seeded} fingerprinted for the first time` : ""}`);
+      console.log(`Film lastmod: ${l.changed} of ${l.pages} pages changed content${l.seeded ? `, ${l.seeded} fingerprinted for the first time` : ""}${l.restamped ? `; ${l.restamped} page(s) now show the same updated date as the sitemap` : ""}`);
     } catch (e) { stageFailed("film lastmod", e); }
     fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
 

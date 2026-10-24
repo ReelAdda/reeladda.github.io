@@ -6,7 +6,7 @@
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const { LANGUAGE_PAGES, xDefaultCode } = require("./core.js");
+const { LANGUAGE_PAGES, fmtDateFull, localeFor, xDefaultCode } = require("./core.js");
 const { monthKey } = require("./history.js");
 const { browsePath } = require("./graph.js");
 const {
@@ -115,8 +115,30 @@ function contentFingerprint(html, { legacy = false } = {}) {
 // recorded without moving its date (the first run of this pass must not stamp 11,000 pages
 // today, the exact problem it fixes). Only existing entries are touched — every film page
 // has one, and entries drive other sweeps, so this never invents them. Mutates the manifest.
-function syncFilmLastmods(pagesManifest, countries, today, { root = "." } = {}) {
-  const res = { pages: 0, changed: 0, seeded: 0 };
+// Pure: a page's visible "Page updated" line and its dateModified set to `date` (Oct 2026). The
+// sitemap's lastmod moves when content does (below), but a later render that differed only in
+// that date was kept unwritten (lib/writeif.js ignores stamps), so ~11% of film pages told
+// readers one date and the sitemap another (Meesaya Murukku 2: "updated 17 Oct", sitemap 23 Oct).
+function restampUpdated(html, date, code) {
+  const shown = fmtDateFull(date, localeFor(code));
+  return String(html)
+    .replace(/(<div class="meta" style="margin-top:2px;font-size:12\.5px">Page updated )[^<]*(<\/div>)/, `$1${shown}$2`)
+    .replace(/"dateModified":"\d{4}-\d{2}-\d{2}([^"]*)"/, `"dateModified":"${date}$1"`);
+}
+const pageDate = (html) => (/"dateModified":"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1] || "";
+// Pages whose shown date had already drifted from their lastmod before this fix are corrected
+// at most this many per build (only the date text changes; the lastmod doesn't move).
+const RESTAMP_BACKLOG_PER_RUN = 1000;
+
+function syncFilmLastmods(pagesManifest, countries, today, { root = ".", backlog = RESTAMP_BACKLOG_PER_RUN } = {}) {
+  const res = { pages: 0, changed: 0, seeded: 0, restamped: 0 };
+  let backlogLeft = backlog;
+  const align = (file, html, e) => {
+    // The page shows the date its content last changed, the same date the sitemap gives.
+    if (!e.last || !pageDate(html) || pageDate(html) === e.last) return;
+    const next = restampUpdated(html, e.last, file.code);
+    if (next !== html) { fs.writeFileSync(file.path, next); res.restamped++; }
+  };
   for (const c of countries || []) {
     const dir = path.join(root, c.code === "in" ? "movie" : `${c.code}/movie`);
     let files;
@@ -130,9 +152,11 @@ function syncFilmLastmods(pagesManifest, countries, today, { root = "." } = {}) 
       try { html = fs.readFileSync(path.join(dir, f), "utf8"); } catch { continue; }
       res.pages++;
       const fp = contentFingerprint(html);
+      const file = { path: path.join(dir, f), code: c.code };
       if (!e.fp) { e.fp = fp; res.seeded++; continue; }
       if (e.fp !== fp && e.fp === contentFingerprint(html, { legacy: true })) { e.fp = fp; continue; } // same page, new rule
-      if (e.fp !== fp) { e.fp = fp; e.last = today; res.changed++; }
+      if (e.fp !== fp) { e.fp = fp; e.last = today; res.changed++; align(file, html, e); continue; }
+      if (backlogLeft > 0 && e.last && pageDate(html) && pageDate(html) !== e.last) { backlogLeft--; align(file, html, e); }
     }
   }
   return res;
@@ -409,6 +433,7 @@ module.exports = {
   contentFingerprint,
   pageLastmodTracker,
   pruneDeadHubLinks,
+  restampUpdated,
   sweepDeadHubLinks,
   syncFilmLastmods,
   writeMultiCountrySitemap,

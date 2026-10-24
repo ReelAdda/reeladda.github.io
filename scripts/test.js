@@ -6776,7 +6776,7 @@ test("syncFilmLastmods: the first run only records; cosmetic edits never move th
     const write = (body, head = "") => fsx.writeFileSync(p, `<html><head><title>F</title>${head}</head><body><p>${body}</p></body></html>`);
     const man = { in: { f: { last: "2026-09-01" } } };
     write("In cinemas now");
-    assert.deepStrictEqual(U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-04", { root }), { pages: 1, changed: 0, seeded: 1 });
+    assert.deepStrictEqual(U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-04", { root }), { pages: 1, changed: 0, seeded: 1, restamped: 0 });
     assert.strictEqual(man.in.f.last, "2026-09-01", "the first run must not stamp every page today");
     write("In cinemas now", '<link rel="icon" href="/icon-192.png">');
     U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-05", { root });
@@ -6784,6 +6784,40 @@ test("syncFilmLastmods: the first run only records; cosmetic edits never move th
     write("Streaming on Netflix");
     U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-06", { root });
     assert.strictEqual(man.in.f.last, "2026-10-06", "a streaming arrival is");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("updated dates: the page shows the date its sitemap entry gives, never an older or newer one (Oct 2026)", () => {
+  const S = require("./lib/sitemap.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const page = (shown, iso, body) => `<html><head><title>F</title><script type="application/ld+json">{"@type":"Movie","dateModified":"${iso}","datePublished":"2026-09-25"}</script></head><body><div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${shown}</div><p>${body}</p></body></html>`;
+  // Pure restamp, in each edition's own date format.
+  const r = S.restampUpdated(page("17 Oct 2026", "2026-10-17", "x"), "2026-10-23", "in");
+  assert.ok(r.includes("Page updated 23 Oct 2026") && r.includes('"dateModified":"2026-10-23"') && r.includes('"datePublished":"2026-09-25"'), r);
+  assert.ok(S.restampUpdated(page("Oct 17, 2026", "2026-10-17", "x"), "2026-10-23", "us").includes("Page updated Oct 23, 2026"), "US format");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-stamp-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie"));
+    const p = (n) => path.join(root, "movie", `${n}.html`);
+    const fp = (html) => S.contentFingerprint(html);
+    // a: content changes this run -> the sitemap date AND the shown date are today.
+    fsx.writeFileSync(p("a"), page("17 Oct 2026", "2026-10-17", "Too early"));
+    // b: content unchanged, but the shown date lags its lastmod (the Meesaya Murukku 2 case).
+    fsx.writeFileSync(p("b"), page("17 Oct 2026", "2026-10-17", "Same"));
+    // c: content unchanged, shown date already right -> untouched.
+    fsx.writeFileSync(p("c"), page("20 Oct 2026", "2026-10-20", "Same"));
+    const man = { in: { a: { last: "2026-10-17", fp: "old" }, b: { last: "2026-10-23", fp: fp(fsx.readFileSync(p("b"), "utf8")) }, c: { last: "2026-10-20", fp: fp(fsx.readFileSync(p("c"), "utf8")) } } };
+    const before = fsx.readFileSync(p("c"), "utf8");
+    const res = S.syncFilmLastmods(man, [{ code: "in" }], "2026-10-25", { root });
+    assert.strictEqual(man.in.a.last, "2026-10-25");
+    assert.ok(fsx.readFileSync(p("a"), "utf8").includes("Page updated 25 Oct 2026"), "a changed page shows today, like its sitemap entry");
+    assert.strictEqual(man.in.b.last, "2026-10-23", "the restamp never moves the lastmod");
+    assert.ok(fsx.readFileSync(p("b"), "utf8").includes("Page updated 23 Oct 2026") && fsx.readFileSync(p("b"), "utf8").includes('"dateModified":"2026-10-23"'), "the lagging page catches up to its lastmod");
+    assert.strictEqual(fsx.readFileSync(p("c"), "utf8"), before, "an aligned page isn't rewritten");
+    assert.strictEqual(res.restamped, 2);
+    assert.strictEqual(fp(fsx.readFileSync(p("b"), "utf8")), man.in.b.fp, "the date isn't content: the fingerprint is unchanged");
+    // The backlog is capped per build.
+    fsx.writeFileSync(p("b"), page("17 Oct 2026", "2026-10-17", "Same"));
+    assert.strictEqual(S.syncFilmLastmods(man, [{ code: "in" }], "2026-10-26", { root, backlog: 0 }).restamped, 0, "backlog cap respected");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
 
