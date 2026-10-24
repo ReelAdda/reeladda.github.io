@@ -1,4 +1,6 @@
 {
  "_about": "Page changes switched on for a share of films at a time (scripts/lib/rollout.js). Stages: 10, 25, 50, 100 — move up only after checking Search Console. 0 turns a change off.",
- "features": {}
+ "features": {
+  "honest-not-announced": { "percent": 25, "since": "2026-10-25", "what": "'hasn't been announced' -> 'No OTT release date in our sources yet'; titles 'Awaiting Date' (lib/honest.js)" }
+ }
 }

@@ -494,7 +494,8 @@ function refreshExpectedTitle(html, cfg = null, item = null) {
 // whose "Where to watch" lists platforms it streams on: the title the page's own facts call
 // for, in the form the end-of-build pass leaves it. Repairs the titles written while
 // frozenFilmFacts couldn't see the platforms (above); a no-op on every consistent page.
-const NOT_YET_TITLE = /Not Announced|\bExpected [A-Z][a-z]{2}|Not Yet Confirmed|\(Unconfirmed\)/;
+// "Awaiting Date" is the honest wording of "Not Announced" (lib/honest.js, Oct 2026).
+const NOT_YET_TITLE = /Not Announced|Awaiting Date|\bExpected [A-Z][a-z]{2}|Not Yet Confirmed|\(Unconfirmed\)/;
 function fixNotYetTitle(html, cfg = null) {
   const cur = /<title>([\s\S]*?)<\/title>/.exec(html);
   if (!cur || !NOT_YET_TITLE.test(cur[1])) return { html, changed: false };

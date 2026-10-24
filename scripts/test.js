@@ -6786,6 +6786,74 @@ test("syncFilmLastmods: the first run only records; cosmetic edits never move th
     assert.strictEqual(man.in.f.last, "2026-10-06", "a streaming arrival is");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
+test("honest wording: no page claims a date 'hasn't been announced' — it says what our sources show, reversibly (Oct 2026)", () => {
+  const H = require("./lib/honest.js");
+  const W = require("./lib/writeif.js");
+  // Every phrase as the live pages carry it (India in cinemas, India past the window, the UK), in both escapings.
+  const page = [
+    "<title>Maa Inti Bangaram (2026) OTT Release Date: Not Announced Yet</title>",
+    '<meta property="og:title" content="The Invite (2026) Streaming Date in the UK: Not Announced">',
+    '<meta name="description" content="Meesaya Murukku 2: not announced yet; usually 4–7 weeks after theatres, so by mid-Nov. We update this page the day it streams.">',
+    '<meta name="description" content="Not announced yet. Tamil films usually reach OTT 4–7 weeks after theatres, so expect it early Nov.">',
+    '<meta name="description" content="Maa Inti Bangaram isn&#39;t streaming in India yet, and no date has been announced. We update this page the moment it streams.">',
+    "<p>Old isn't streaming in India yet — no date announced.</p>",
+    '<script type="application/ld+json">{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"When is X releasing on OTT? (OTT release date)","acceptedAnswer":{"@type":"Answer","text":"An OTT release date for X hasn\'t been officially announced yet. This page updates automatically the day it starts streaming."}}]}</script>',
+    "<p>An OTT release date for X hasn&#39;t been officially announced yet. This page updates automatically.</p>",
+    "<p>A streaming release date for The Invite hasn't been officially announced yet.</p>",
+    "<p><b>X</b> is in cinemas in India now. Its OTT release date hasn't been announced — this page updates the day it lands on streaming.</p>",
+    "<p>X opened in theatres in India on 25 Sept. Its OTT release hasn&#39;t been announced yet — check back soon.</p>",
+    "<p>X is currently playing in theatres across India. An OTT release hasn't been announced yet.</p>",
+    "<p>X opened in theatres in the UK on 3 Jul. A streaming release date hasn't been announced yet.</p>",
+    "<p>Not streaming yet. No platform has announced a streaming release date. We re-check every day.</p>",
+    "<p>That's the usual pattern, not a confirmed date — no platform has announced one. We re-check.</p>",
+  ].join("\n");
+  const h = H.honestWording(page);
+  const untrue = /hasn('|&#39;)t been (officially )?announced|[Nn]ot announced yet|no date has been announced|— no date announced|[Nn]o platform has announced|Not Announced/;
+  assert.ok(!untrue.test(h), "nothing claims it hasn't been announced: " + (h.match(untrue) || [])[0]);
+  for (const want of [
+    "<title>Maa Inti Bangaram (2026) OTT Release Date: Awaiting Date</title>",
+    "Streaming Date in the UK: Awaiting Date",
+    "Meesaya Murukku 2: no date in our sources yet; usually",
+    'content="No date in our sources yet. Tamil films',
+    "and no date has appeared in our sources.",
+    "— no date in our sources.",
+    "We haven't found an announced OTT release date for X yet. This page updates automatically the day it starts streaming.",
+    "We haven&#39;t found an announced OTT release date for X yet.",
+    "We haven't found an announced streaming release date for The Invite yet.",
+    "No OTT release date in our sources yet — this page updates the day it lands on streaming.",
+    "We haven&#39;t seen an announced OTT release date yet — check back soon.",
+    "We haven't seen an announced OTT release date yet.",
+    "No streaming release date in our sources yet.",
+    "We haven't seen an announced streaming release date from any platform.",
+    "we haven't seen one announced.",
+  ]) assert.ok(h.includes(want), "missing: " + want);
+  assert.ok(!/announced ott/i.test(h.replace(/announced OTT/g, "")), "OTT stays upper case");
+  assert.strictEqual(H.honestWording(h), h, "idempotent");
+  assert.strictEqual(H.plainWording(h), page, "exactly reversible — the share can go back to 0");
+  assert.strictEqual(H.plainWording(page), page, "the original wording is left alone");
+  JSON.parse(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/.exec(h)[1]);
+  // The page comparison treats either wording as the same page (no rewrite every run).
+  assert.strictEqual(W.comparable(page), W.comparable(h));
+  // The build pass: films in the share get the new wording, the rest the original — both ways.
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-honest-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie"));
+    fsx.writeFileSync(path.join(root, "movie", "in.html"), page);
+    fsx.writeFileSync(path.join(root, "movie", "out.html"), h);
+    const r = H.applyHonestWording(["movie/in.html", "movie/out.html"], { root, included: (slug) => slug === "in" });
+    assert.strictEqual(fsx.readFileSync(path.join(root, "movie", "in.html"), "utf8"), h, "in the share: honest wording");
+    assert.strictEqual(fsx.readFileSync(path.join(root, "movie", "out.html"), "utf8"), page, "outside it (or rolled back): the original");
+    assert.deepStrictEqual(r, { pages: 2, honest: 1, changed: 2 });
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+  // "Awaiting Date" titles are still recognised as not-streaming titles (retitled the day it streams; audited).
+  assert.ok(require("./lib/archive.js").NOT_YET_TITLE.test("X (2026) OTT Release Date: Awaiting Date"));
+  // Rolled out in stages, and run after the last page writer.
+  const cfg = JSON.parse(fsx.readFileSync(path.join(__dirname, "..", "rollout.json"), "utf8"));
+  assert.ok(cfg.features[H.HONEST_FEATURE] && cfg.features[H.HONEST_FEATURE].percent > 0 && cfg.features[H.HONEST_FEATURE].percent <= 100);
+  const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
+  assert.ok(up.indexOf("applyHonestWording(filmPageFiles())") > up.indexOf("addBrandToPages("), "after the last writer");
+});
 test("IndexNow: every page whose content changed today is announced, not only the current lists (Oct 2026)", () => {
   const S = require("./lib/sitemap.js");
   const fsx = require("fs"), os = require("os"), path = require("path");
