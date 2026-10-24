@@ -2399,13 +2399,13 @@ async function main() {
         reportOpportunities(r.opportunities, { from: r.from, to: r.to });
       }
     } catch (e) { console.log(`Most searched: not refreshed (${e.message})`); }
-    // Search health (lib/searchtop.js): a new sharp drop in Google impressions turns the run red;
-    // a continuing one is a note each run, so it's tracked without alarming every day.
+    // Search health (lib/searchtop.js): logged and shown as a warning in the run summary — never a
+    // failed build (a Google drop isn't something the build broke).
     try {
       const h = await checkSearchHealth();
       const line = searchHealthLine(h);
       console.log(line);
-      if (h.state === "drop") healthIssue(`${line}. Check Search Console (Performance, Pages, Manual actions) — nothing in the build changed this by itself`);
+      if (h.state === "drop") healthNote(`${line}. Check Search Console (Performance, Pages, Manual actions)`);
       else if (h.state === "down") healthNote(line);
     } catch (e) { console.log(`Search health: not checked (${e.message})`); }
     // Pass 1: build data for every country. Every TMDB answer is recorded — each edition on its

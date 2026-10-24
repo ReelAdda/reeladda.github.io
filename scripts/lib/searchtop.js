@@ -151,7 +151,7 @@ function reportOpportunities(list, { from, to, log = console.log, summaryFile = 
 // nothing in the build said so. Search Console's final data runs 2–3 days behind, so the latest
 // FINAL day is compared with the average of the seven before it.
 //   drop    — the latest day is under DROP_RATIO of normal and the day before wasn't: a new drop.
-//             A build issue (the run goes red, GitHub emails you).
+//             Logged and shown as a warning in the run summary; it never fails the build.
 //   down    — still under DROP_RATIO: a note each run, so it's tracked without alarming every day.
 //   ok      — otherwise.
 // ---------------------------------------------------------------------------------------------

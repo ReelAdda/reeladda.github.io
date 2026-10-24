@@ -7623,7 +7623,8 @@ test("search health: the 22 Oct 2026 drop raises an issue once, then a note whil
   assert.strictEqual(S.searchHealth(real.slice(0, 5)).state, "unknown", "too little data to judge");
   assert.ok(/not checked/.test(S.searchHealthLine({ state: "unknown", why: "no service account" })));
   const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
-  assert.ok(/h\.state === "drop"\) healthIssue/.test(up) && /h\.state === "down"\) healthNote/.test(up), "the build raises it");
+  assert.ok(/h\.state === "drop"\) healthNote/.test(up) && /h\.state === "down"\) healthNote/.test(up), "the build logs it as a warning");
+  assert.ok(!/h\.state === "drop"\) healthIssue/.test(up), "a Google drop never fails the build");
 });
 test("search opportunities: page 2 is a ranking problem, page 1 unclicked a snippet problem, normal pages aren't listed (Oct 2026)", () => {
   const S = require("./lib/searchtop.js");
