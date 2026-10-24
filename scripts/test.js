@@ -7756,7 +7756,7 @@ test("lean page: every fact once, the answer first, facts read back identically,
   assert.strictEqual(H.leanTrim(`<p>Not streaming yet — X is in its theatrical run in India, released 2026-10-16. Hindi releases…</p>`), "<p>Not streaming yet. Hindi releases…</p>");
   assert.strictEqual(W.comparable(pend), W.comparable(H.leanTrim(pend)));
   const repo = JSON.parse(require("fs").readFileSync(require("path").join(__dirname, "..", "rollout.json"), "utf8"));
-  assert.strictEqual(R.percentOf(repo, "lean-page", Date.parse("2026-10-26T00:00:00Z")), 10, "starts at 10%");
+  assert.strictEqual(R.percentOf(repo, "lean-page", Date.parse("2026-10-26T00:00:00Z")), 25, "starts at 25%");
   assert.strictEqual(R.percentOf(repo, "lean-page", Date.parse("2026-11-12T00:00:00Z")), 100, "finishes by itself");
 });
 test("audit: intent, repetition, borrowed text, cross-edition verdicts and shared addresses are reported (Oct 2026)", () => {
