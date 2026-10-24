@@ -15,6 +15,10 @@
 
 const assert = require("assert");
 const U = require("./update.js");
+// Staged page changes (lib/rollout.js) are OFF in tests unless a test switches one on, so no
+// test changes outcome on the day rollout.json's schedule moves a stage.
+const ROLLOUT_OFF = { features: {} };
+require("./lib/rollout.js").useRolloutConfig(ROLLOUT_OFF);
 // The homepage as a reader gets it: its template plus its script (js/app.js since the CSP
 // change, Oct 2026). Tests about the homepage's client code read both. A built index.html
 // carries a copy of the script inlined between the APPJS markers — a copy of whatever app.js was
@@ -7670,6 +7674,36 @@ test("rollout: a feature reaches its share of films, every edition together, gro
   const cfg = JSON.parse(require("fs").readFileSync(require("path").join(__dirname, "..", "rollout.json"), "utf8"));
   assert.ok(cfg.features && typeof cfg.features === "object");
   assert.ok(/\|rollout[|)]/.test(require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8")), "rollout.json is build data, not published");
+});
+test("rollout schedule: stages advance by date; titles match the search for the films in the share (Oct 2026)", () => {
+  const R = require("./lib/rollout.js");
+  const cfg = { features: { f: { percent: 25, schedule: [{ from: "2026-10-28", percent: 50 }, { from: "2026-11-01", percent: 100 }] } } };
+  const at = (d) => R.percentOf(cfg, "f", Date.parse(`${d}T12:00:00Z`));
+  assert.deepStrictEqual([at("2026-10-25"), at("2026-10-28"), at("2026-10-31"), at("2026-11-01"), at("2027-01-01")], [25, 50, 50, 100, 100]);
+  assert.strictEqual(R.percentOf({ features: { f: { percent: 0, schedule: [] } } }, "f"), 0, "0 with no schedule is off");
+  // The repo's schedule: both changes reach 100% by themselves, in stages.
+  const repo = JSON.parse(require("fs").readFileSync(require("path").join(__dirname, "..", "rollout.json"), "utf8"));
+  for (const k of ["honest-not-announced", "intent-titles"]) assert.strictEqual(R.percentOf(repo, k, Date.parse("2026-11-15T00:00:00Z")), 100, k + " completes");
+  // Titles (lib/filmpage.js filmTitleTag), with the feature at 100%.
+  const F = require("./lib/filmpage.js");
+  try {
+    R.useRolloutConfig({ features: { "intent-titles": { percent: 100 } } });
+    const day = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+    const PH = { code: "ph", name: "Philippines", region: "PH", streamWord: "streaming" };
+    const cinema = F.filmTitleTag({ title: "Clayface", slug: "clayface", kind: "movie", released: day(3), language: "English" }, PH);
+    assert.ok(/^Clayface( \(\d{4}\))? Release Date in the Philippines: /.test(cinema) && cinema.length <= 60, "overseas cinema run leads with the local release date: " + cinema);
+    const later = F.filmTitleTag({ title: "Clayface", slug: "clayface", kind: "movie", released: day(40), language: "English" }, PH);
+    assert.ok(/Streaming Date in the Philippines/.test(later), "after four weeks it's the streaming date again: " + later);
+    const IN = { code: "in", name: "India", region: "IN" };
+    const india = F.filmTitleTag({ title: "Street Fighter", slug: "street-fighter", kind: "movie", released: day(8), language: "English" }, IN);
+    assert.ok(/OTT Release Date/.test(india), "India keeps the OTT question in a cinema run: " + india);
+    const old = F.filmTitleTag({ title: "KILL", slug: "kill", kind: "movie", released: "2024-07-05", providers: ["Prime Video"], language: "Hindi" }, IN);
+    assert.ok(!/OTT Release Date/.test(old) && /Where to Watch/.test(old), "streaming for over a year: no 'OTT Release Date': " + old);
+    const recent = F.filmTitleTag({ title: "War Machine", slug: "war-machine", kind: "movie", released: day(250), providers: ["Netflix"], language: "English" }, IN);
+    assert.ok(/OTT Release Date/.test(recent), "under a year it keeps it: " + recent);
+    R.useRolloutConfig({ features: {} });
+    assert.ok(/Streaming Date in the Philippines/.test(F.filmTitleTag({ title: "Clayface", slug: "clayface", kind: "movie", released: day(3), language: "English" }, PH)), "outside the rollout: the original title");
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
 });
 test("search health: the 22 Oct 2026 drop raises an issue once, then a note while it lasts (Oct 2026)", () => {
   const S = require("./lib/searchtop.js");

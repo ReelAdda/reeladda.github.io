@@ -30,6 +30,7 @@ const {
 const { readHistory, cinemaWindowDays, observationStarts, monthKey, monthLabel } = require("./history.js");
 const { filmScore } = require("./score.js");
 const { browsePath, filmIndexFor, filmPageExists, relatedFilms, sameFilmPageExists } = require("./graph.js");
+const { inRollout } = require("./rollout.js");
 const { cap, whyWatch } = require("./whywatch.js");
 const { skipIf } = require("./skipif.js");
 const { watchFit } = require("./watchfit.js");
@@ -452,6 +453,12 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
 const MON3 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 // An overseas page this recent is never treated as an empty shell (see isShellPage).
 const RECENT_RELEASE_DAYS = 180;
+// Titles that match the search (filmTitleTag; rollout feature INTENT_TITLES): overseas, a film's
+// first CINEMA_TITLE_DAYS lead with its local release date; past STREAMING_DATE_TITLE_DAYS (a year), a
+// streaming film's title drops "OTT Release Date".
+const INTENT_TITLES = "intent-titles";
+const CINEMA_TITLE_DAYS = 28;
+const STREAMING_DATE_TITLE_DAYS = 365;
 const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 function windowDates(item, nowMs) {
   const est = streamWindowShort(item.released, item.language, new Date(nowMs));
@@ -546,6 +553,24 @@ function filmTitleTag(item, cfg = null) {
   // A film that left streaming (lib/factsq.js state "gone") isn't awaiting a release date.
   if (item.kind !== "tv" && !providers.length && item.released && releaseState(item.released) !== "upcoming" && item.state !== "gone") {
     const left = expectedMonthsLeft(item, Date.now());
+    // FIRST WEEKS IN CINEMAS, OUTSIDE INDIA (Oct 2026, rollout "intent-titles"). Overseas, the
+    // searches in a film's cinema run are "<film> release date <country>" ("clayface release
+    // date philippines": ~65 a day at #8.8, 0 clicks; "you can see everything singapore release
+    // date"), and the title answered only the streaming date. It now leads with the local release
+    // date — the same date the page's body states as the cinema opening — then the window.
+    const code0 = (cfg && cfg.code) || "in";
+    const daysOut = (Date.now() - Date.parse(`${String(item.released).slice(0, 10)}T00:00:00Z`)) / 864e5;
+    if (code0 !== "in" && daysOut >= 0 && daysOut <= CINEMA_TITLE_DAYS && inRollout(INTENT_TITLES, item.slug)) {
+      const d = fmtDateShort(item.released, Date.now(), localeFor(code0));
+      const next = left ? `${V.word === "OTT" ? "OTT" : "Streaming"} ${left}` : "";
+      return fitTitle([
+        next ? `${item.title}${yr} Release Date in ${country}: ${d} · ${next}` : null,
+        next ? `${item.title} Release Date in ${country}: ${d} · ${next}` : null,
+        `${item.title}${yr} Release Date in ${country}: ${d}`,
+        `${item.title} Release Date in ${country}: ${d}`,
+        `${item.title} — Release Date in ${country}`,
+      ].filter(Boolean));
+    }
     if (V.word === "OTT") {
       // India is the home edition, so no country in its title; fitTitle adds it for the UAE.
       if (left) {
@@ -587,7 +612,12 @@ function filmTitleTag(item, cfg = null) {
   }
   // "OTT" is Indian-market phrasing; TV has no OTT release date to speak of; and with no
   // provider on file there is no date to report.
-  const canAnswerDate = V.word === "OTT" && item.kind !== "tv" && providers.length > 0;
+  // A film streaming for months isn't searched for its "OTT release date" (KILL 2024, Jawan 2023
+  // were titled that way): past STREAMING_DATE_TITLE_DAYS it's "Review & Where to Watch" (rollout
+  // "intent-titles").
+  const longOut = item.released && (Date.now() - Date.parse(`${String(item.released).slice(0, 10)}T00:00:00Z`)) / 864e5 > STREAMING_DATE_TITLE_DAYS
+    && inRollout(INTENT_TITLES, item.slug);
+  const canAnswerDate = V.word === "OTT" && item.kind !== "tv" && providers.length > 0 && !longOut;
   return canAnswerDate
     ? fitTitle([
         `${item.title}${yr} ${V.titleFragment}, Review & Where to Watch | FilmyChill`,

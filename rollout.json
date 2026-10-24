@@ -1,6 +1,15 @@
 {
- "_about": "Page changes switched on for a share of films at a time (scripts/lib/rollout.js). Stages: 10, 25, 50, 100 — move up only after checking Search Console. 0 turns a change off.",
+ "_about": "Page changes switched on for a share of films at a time (scripts/lib/rollout.js). Stages: 10, 25, 50, 100 — 'percent' is the share now; a 'schedule' moves it up on the dates given. Set percent and schedule to 0 to turn a change off.",
  "features": {
-  "honest-not-announced": { "percent": 25, "since": "2026-10-25", "what": "'hasn't been announced' -> 'No OTT release date in our sources yet'; titles 'Awaiting Date' (lib/honest.js)" }
+  "honest-not-announced": {
+   "percent": 25, "since": "2026-10-24",
+   "schedule": [{ "from": "2026-10-28", "percent": 50 }, { "from": "2026-11-01", "percent": 100 }],
+   "what": "'hasn't been announced' -> 'No OTT release date in our sources yet'; titles 'Awaiting Date' (lib/honest.js)"
+  },
+  "intent-titles": {
+   "percent": 25, "since": "2026-10-25",
+   "schedule": [{ "from": "2026-10-29", "percent": 50 }, { "from": "2026-11-02", "percent": 100 }],
+   "what": "overseas cinema run: 'Release Date in <country>: <date> · Streaming <window>'; out a year+: no 'OTT Release Date' in the title (lib/filmpage.js filmTitleTag)"
+  }
  }
 }

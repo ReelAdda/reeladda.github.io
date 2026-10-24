@@ -26,10 +26,17 @@ function bucketOf(feature, slug) {
   return crypto.createHash("sha1").update(`${feature}:${slug}`).digest().readUInt32BE(0) % 100;
 }
 
-// Pure: the share a config gives a feature, 0–100.
-function percentOf(config, feature) {
+// Pure: the share a config gives a feature on a day, 0–100. A feature may carry a schedule —
+// [{ "from": "2026-10-28", "percent": 50 }, …] — and then the latest stage that has started
+// applies (the stages advance by themselves; editing "percent" or the schedule still overrides).
+function percentOf(config, feature, nowMs = Date.now()) {
   const f = config && config.features && config.features[feature];
-  const p = Number(f && f.percent);
+  if (!f) return 0;
+  let p = Number(f.percent);
+  const today = new Date(nowMs).toISOString().slice(0, 10);
+  for (const s of (Array.isArray(f.schedule) ? f.schedule : []).slice().sort((a, b) => String(a.from).localeCompare(String(b.from)))) {
+    if (s && /^\d{4}-\d{2}-\d{2}$/.test(String(s.from)) && s.from <= today && Number.isFinite(Number(s.percent))) p = Number(s.percent);
+  }
   return Number.isFinite(p) ? Math.max(0, Math.min(100, p)) : 0;
 }
 
@@ -39,11 +46,13 @@ function loadRollout(file = ROLLOUT_FILE) {
 }
 function rolloutConfig() { return cached || (cached = loadRollout()); }
 function resetRolloutCache() { cached = null; }
+// Tests and previews: use this config instead of rollout.json (null goes back to the file).
+function useRolloutConfig(config) { cached = config || null; }
 
 // Is this film's page in the rollout of this feature? `config` for tests; the build reads the file.
-function inRollout(feature, slug, config = rolloutConfig()) {
+function inRollout(feature, slug, config = rolloutConfig(), nowMs = Date.now()) {
   if (!slug) return false;
-  return bucketOf(feature, String(slug)) < percentOf(config, feature);
+  return bucketOf(feature, String(slug)) < percentOf(config, feature, nowMs);
 }
 
 // For the build log: "not-announced-wording 25%, ..." or "none".
@@ -52,4 +61,4 @@ function rolloutSummary(config = rolloutConfig()) {
   return f.length ? f.join(", ") : "none";
 }
 
-module.exports = { ROLLOUT_FILE, bucketOf, inRollout, loadRollout, percentOf, resetRolloutCache, rolloutConfig, rolloutSummary };
+module.exports = { ROLLOUT_FILE, bucketOf, inRollout, loadRollout, percentOf, resetRolloutCache, rolloutConfig, rolloutSummary, useRolloutConfig };
