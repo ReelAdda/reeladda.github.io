@@ -3162,7 +3162,8 @@ test("Google Analytics: its tag and exactly its sources on every page, GoatCount
   // Run as a browser would: `window` is the global object.
   const WIN = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
   const MAC = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
-  const run = (webdriver, ua = WIN, [width, height] = [1920, 1080]) => { const added = []; const g = { navigator: { webdriver, userAgent: ua }, screen: { width, height }, Date, document: { createElement: () => ({}), head: { appendChild: (x) => added.push(x.src) } } };
+  // The page has loaded and the phone is idle: gtag.js is appended after the load event (it waits for it).
+  const run = (webdriver, ua = WIN, [width, height] = [1920, 1080]) => { const added = []; const g = { navigator: { webdriver, userAgent: ua }, screen: { width, height }, Date, setTimeout: (f) => f(), addEventListener: (ev, f) => { if (ev === "load") f(); }, document: { readyState: "loading", createElement: () => ({}), head: { appendChild: (x) => added.push(x.src) } } };
     g.window = g; require("vm").runInNewContext(A.GA_CODE, g);
     return { added, events: (g.dataLayer || []).length, gtag: typeof g.gtag }; };
   const measured = { added: ["https://www.googletagmanager.com/gtag/js?id=" + A.GA_ID], events: 4, gtag: "function" }, skipped = { added: [], events: 0, gtag: "undefined" };

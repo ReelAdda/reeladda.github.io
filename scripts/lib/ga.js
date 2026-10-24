@@ -53,10 +53,22 @@ const SETUP = `gtag("consent","default",{${ADS_OFF},analytics_storage:"denied",r
 const BOT_SCREENS = [[1280, 1200]];
 const GA_GATE = "!navigator.webdriver&&!(/Windows/.test(navigator.userAgent)&&("
   + BOT_SCREENS.map(([w, h]) => `screen.width===${w}&&screen.height===${h}`).join("||") + "))";
+// v2/v3: gtag.js appended straight away. Kept for OLD_GA_CODES (the tags being replaced).
 const tagCode = (gate) => `if(${gate}){window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};`
   + SETUP
   + `var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}";document.head.appendChild(s);}`;
-const GA_CODE = tagCode(GA_GATE);
+// Loaded after the page, when the phone is idle (Oct 2026). On a mid-range phone gtag.js was
+// ~230–450 ms of main-thread work during load (Street Fighter: 677 ms of blocking with it and
+// Grow, 0 without both), right when a reader first taps. The consent defaults and config are
+// queued at once as before; only the script's download and run move to after the load event
+// (requestIdleCallback, 3 s at most; setTimeout where there's no idle callback). The page view
+// is still sent.
+const tagCodeDeferred = (gate) => `if(${gate}){window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};`
+  + SETUP
+  + `var go=function(){var s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}";document.head.appendChild(s);};`
+  + `var idle=function(){window.requestIdleCallback?requestIdleCallback(go,{timeout:3000}):setTimeout(go,1500);};`
+  + `document.readyState==="complete"?idle():window.addEventListener("load",idle);}`;
+const GA_CODE = tagCodeDeferred(GA_GATE);
 const GA_TAG = `<script>${GA_CODE}</script>`;
 const hashOf = (code) => `'sha256-${crypto.createHash("sha256").update(code, "utf8").digest("base64")}'`;
 const GA_HASH = hashOf(GA_CODE);
@@ -65,8 +77,9 @@ const GA_HASH = hashOf(GA_CODE);
 // tag changes again, add the outgoing version here (a test checks the current one isn't listed).
 //   1. Google's two-tag snippet as given (Oct 2026, before the automation check).
 //   2. The automation check alone (Oct 2026, before the 1280×1200 check).
-const OLD_GA_CODES = ["window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}" + SETUP, tagCode("!navigator.webdriver")];
-const OLD_GA_TAGS = [`<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}"></script>\n<script>${OLD_GA_CODES[0]}</script>`, `<script>${OLD_GA_CODES[1]}</script>`];
+//   3. Both bot checks, gtag.js loaded at once (Oct 2026, before loading it after the page).
+const OLD_GA_CODES = ["window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}" + SETUP, tagCode("!navigator.webdriver"), tagCode(GA_GATE)];
+const OLD_GA_TAGS = [`<script async src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}"></script>\n<script>${OLD_GA_CODES[0]}</script>`, `<script>${OLD_GA_CODES[1]}</script>`, `<script>${OLD_GA_CODES[2]}</script>`];
 const OLD_GA_HASHES = OLD_GA_CODES.map(hashOf);
 const GA_SOURCES = {
   "script-src": [GA_HASH, "https://www.googletagmanager.com"],
