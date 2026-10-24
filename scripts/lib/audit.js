@@ -18,6 +18,14 @@ const { NOT_YET_TITLE } = require("./archive.js");
 const { filmIndexFor, isClose, relatedFilms } = require("./graph.js");
 
 const DAY = 864e5;
+// Intent/value thresholds (auditIntegrity): a page stating its rating this often is repeating
+// itself; a page whose TMDB synopsis is more than this share of its words carries little of ours.
+const RATING_REPEAT_MAX = 4;
+const SYNOPSIS_SHARE_MAX = 0.25;
+// Near-identical editions (runAudit): films compared per build (a rotating sample), and the
+// share of shared 5-word phrases above which two editions of a film read as the same page.
+const SIMILARITY_SAMPLE = 150;
+const SIMILARITY_MAX = 0.9;
 const daysSince = (iso, now) => (iso ? (now - Date.parse(`${String(iso).slice(0, 10)}T00:00:00Z`)) / DAY : null);
 
 // Pure checks over one market's data. Each finding: { check, url, detail }.
@@ -69,6 +77,20 @@ function auditIntegrity(html, { entry = null, now = Date.now() } = {}) {
   const mod = (/"dateModified":"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1];
   if (entry && entry.last && mod && daysSince(mod, Date.parse(`${entry.last}T00:00:00Z`)) > 1)
     out.push({ check: "page-updated-behind-lastmod", detail: `page ${mod}, sitemap ${entry.last}` });
+  // ---- Intent and value (Oct 2026; Phase 1 audit). Each page should answer its searcher first
+  // and carry more of FilmyChill's own text than borrowed text.
+  const pub = (/"datePublished":"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1];
+  if (pub && daysSince(pub, now) < 0 && !/Release Date|Releases|Coming/.test(title)) out.push({ check: "upcoming-title-without-date", detail: title.slice(0, 70) });
+  const body = html.slice(Math.max(0, html.indexOf("<body"))).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ");
+  const rating = /★ ([\d.]+)/.exec(head);
+  if (rating) {
+    const n = (body.replace(/<[^>]+>/g, " ").match(new RegExp(`(?:★ ?|\\b)${rating[1].replace(".", "\\.")}(?:/10)?\\b`, "g")) || []).length;
+    if (n >= RATING_REPEAT_MAX) out.push({ check: "rating-repeated", detail: `${rating[1]} stated ${n} times` });
+  }
+  const story = ((/<h2>Story<\/h2><p>([\s\S]*?)<\/p>/.exec(html) || [])[1] || "").replace(/<[^>]+>/g, " ");
+  const words = (s) => s.split(/\s+/).filter(Boolean).length;
+  const total = words(body.replace(/<[^>]+>/g, " "));
+  if (total && words(story) / total > SYNOPSIS_SHARE_MAX) out.push({ check: "mostly-borrowed-text", detail: `synopsis ${Math.round(words(story) / total * 100)}% of ${total} words` });
   if (/<!--SW:pending-->/.test(html) && !/the last time we could check/.test(html)) {
     const rel = (/"datePublished":"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1];
     const av = shownDate((/Availability as of ([^<]+)/.exec(html) || [])[1]);
@@ -116,8 +138,41 @@ function auditManifest(pagesManifest) {
     const set = [...new Set(list.map((x) => x.lang))];
     if (set.length > 1) out.push({ check: "language-differs-across-editions", url: `${list[0].code}/${list[0].slug}`, detail: set.join(" / ") });
   }
+  // One film, different verdicts across editions (lib/migrate.js shareScore aligns them), and
+  // one address shared by different films (kept apart in hreflang by lib/graph.js).
+  const verdicts = new Map(), bySlug = new Map();
+  for (const [code, m] of Object.entries(pagesManifest || {})) {
+    for (const [slug, e] of Object.entries(m || {})) {
+      if (!e || !e.tmdbId) continue;
+      const k = `${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`;
+      const v = e.fcs && e.fcs.v;
+      if (v && /^(Must watch|Worth a watch|Skip)$/.test(v)) { if (!verdicts.has(k)) verdicts.set(k, []); verdicts.get(k).push({ code, slug, v }); }
+      if (!bySlug.has(slug)) bySlug.set(slug, new Map());
+      bySlug.get(slug).set(k, (bySlug.get(slug).get(k) || []).concat(code));
+    }
+  }
+  for (const list of verdicts.values()) {
+    const set = [...new Set(list.map((x) => x.v))];
+    if (set.length > 1) out.push({ check: "verdict-differs-across-editions", url: `${list[0].code}/${list[0].slug}`, detail: list.map((x) => `${x.code} ${x.v}`).join(", ").slice(0, 120) });
+  }
+  for (const [slug, films] of bySlug) {
+    if (films.size > 1) out.push({ check: "address-shared-by-different-films", url: slug, detail: [...films.entries()].map(([k, c]) => `${k} [${c.join(",")}]`).join(" | ").slice(0, 140) });
+  }
   return out;
 }
+
+// Pure: the share of 5-word phrases two texts have in common (0–1).
+function textSimilarity(a, b) {
+  const sh = (t) => { const w = String(t).toLowerCase().split(/\s+/).filter(Boolean); const s = new Set(); for (let i = 0; i + 5 <= w.length; i++) s.add(w.slice(i, i + 5).join(" ")); return s; };
+  const A = sh(a), B = sh(b);
+  if (!A.size || !B.size) return 0;
+  let n = 0; for (const x of A) if (B.has(x)) n++;
+  return n / (A.size + B.size - n);
+}
+const pageText = (html) => {
+  const m = /<main[\s\S]*?<\/main>/.exec(html);
+  return (m ? m[0] : html).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+};
 
 // Pure checks over one rendered film page. `released` from the manifest when known.
 function auditPage(html, { released = null, now = Date.now() } = {}) {
@@ -175,7 +230,35 @@ function runAudit({ dataByCode = {}, pagesManifest = {}, countries = [], now = D
     }
   }
   findings.push(...auditManifest(pagesManifest));
+  // Near-identical editions: a rotating sample of films with 2+ editions (a different slice each
+  // day), each edition compared with the first. Hygiene, not a cause of the 22 Oct drop: single-
+  // edition films fell just as far.
+  const groups = new Map();
+  for (const [code, m] of Object.entries(pagesManifest || {})) for (const [slug, e] of Object.entries(m || {})) {
+    if (!e || !e.tmdbId) continue;
+    const k = `${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push({ code, slug });
+  }
+  const multi = [...groups.values()].filter((g) => g.length > 1);
+  const offset = multi.length ? (Math.floor(now / DAY) * SIMILARITY_SAMPLE) % multi.length : 0;
+  for (let i = 0; i < Math.min(SIMILARITY_SAMPLE, multi.length); i++) {
+    const g = multi[(offset + i) % multi.length];
+    const read = (x) => { try { return pageText(fs.readFileSync(filmPagePath(x.code, x.slug).replace(/^\//, ""), "utf8")); } catch { return ""; } };
+    const first = read(g[0]);
+    if (!first) continue;
+    for (const x of g.slice(1)) {
+      const sim = textSimilarity(first, read(x));
+      if (sim > SIMILARITY_MAX) { findings.push({ check: "editions-near-identical", url: filmPagePath(x.code, x.slug), detail: `${Math.round(sim * 100)}% the same as ${filmPagePath(g[0].code, g[0].slug)}` }); break; }
+    }
+  }
   const LABEL = {
+    "upcoming-title-without-date": "upcoming film page(s) whose title doesn't give the release date",
+    "rating-repeated": "film page(s) stating the same rating 4+ times (older-title pages, item 3.3)",
+    "mostly-borrowed-text": "film page(s) where TMDB's synopsis is over a quarter of the text",
+    "verdict-differs-across-editions": "film(s) with a different FilmyChill verdict on different editions",
+    "address-shared-by-different-films": "web address(es) used by different films in different editions (kept apart in hreflang)",
+    "editions-near-identical": `film(s) whose editions are over ${Math.round(SIMILARITY_MAX * 100)}% the same text (sample of ${SIMILARITY_SAMPLE} today)`,
     "title-not-streaming-page-streaming": "film page(s) titled not streaming / not announced while the page says it streams",
     "title-vs-description": "film page(s) titled not announced whose description promises where to watch",
     "description-streaming-page-not": "film page(s) whose description says streaming while the page says not",
@@ -205,4 +288,4 @@ function runAudit({ dataByCode = {}, pagesManifest = {}, countries = [], now = D
   return { findings, byCheck };
 }
 
-module.exports = { FALSE_CLAIMS, auditData, auditIntegrity, auditManifest, auditPage, runAudit, shownDate };
+module.exports = { FALSE_CLAIMS, auditData, auditIntegrity, auditManifest, auditPage, runAudit, shownDate, textSimilarity };

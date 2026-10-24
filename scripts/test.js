@@ -7711,6 +7711,23 @@ test("rollout schedule: stages advance by date; titles match the search for the 
     assert.ok(/Streaming Date in the Philippines/.test(F.filmTitleTag({ title: "Clayface", slug: "clayface", kind: "movie", released: day(3), language: "English" }, PH)), "outside the rollout: the original title");
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }
 });
+test("audit: intent, repetition, borrowed text, cross-edition verdicts and shared addresses are reported (Oct 2026)", () => {
+  const A = require("./lib/audit.js");
+  const now = Date.parse("2026-10-24T00:00:00Z");
+  const page = ({ title, pub = "2026-09-01", head = "", body = "", story = "" }) => `<html><head><title>${title}</title><script type="application/ld+json">{"datePublished":"${pub}"}</script></head><body><div class="head">${head}</div><section id="filmychill-score"></section>${body}<h2>Story</h2><p>${story}</p></body></html>`;
+  const checks = (h) => A.auditIntegrity(h, { now }).map((f) => f.check);
+  assert.ok(checks(page({ title: "Shakti Shalini — Where to Watch", pub: "2026-12-24" })).includes("upcoming-title-without-date"));
+  assert.ok(!checks(page({ title: "Shakti Shalini (2026) — Release Date in India: 24 Dec", pub: "2026-12-24" })).includes("upcoming-title-without-date"));
+  assert.ok(checks(page({ title: "KILL", head: "★ 7.2", body: "<p>7.2/10</p><p>★ 7.2</p><p>rates 7.2/10</p><p>7.2</p>" })).includes("rating-repeated"));
+  assert.ok(!checks(page({ title: "KILL", head: "★ 7.2", body: "<p>It rates 7.2/10 from 9,000 ratings.</p>" })).includes("rating-repeated"));
+  const long = Array.from({ length: 60 }, (_, i) => "word" + i).join(" ");
+  assert.ok(checks(page({ title: "X", story: long, body: "<p>short</p>" })).includes("mostly-borrowed-text"));
+  const man = { in: { "law-order": { tmdbId: 1588472, kind: "movie", fcs: { v: "Skip" } }, moana: { tmdbId: 7, fcs: { v: "Worth a watch" } } },
+    us: { "law-order": { tmdbId: 549, kind: "tv", fcs: { v: "Worth a watch" } } }, ae: { moana: { tmdbId: 7, fcs: { v: "Must watch" } } } };
+  const m = A.auditManifest(man).map((f) => f.check);
+  assert.ok(m.includes("verdict-differs-across-editions") && m.includes("address-shared-by-different-films"));
+  assert.ok(A.textSimilarity("a b c d e f g h", "a b c d e f g h") === 1 && A.textSimilarity("a b c d e f", "p q r s t u") === 0);
+});
 test("one score per film: a page takes the freshest count any edition holds, and its score follows (Oct 2026)", () => {
   const M = require("./lib/migrate.js");
   // Rage of Stars: three editions held 231 ratings ("Worth a watch"), others 233 ("Skip").
