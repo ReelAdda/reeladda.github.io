@@ -6905,6 +6905,20 @@ test("honest wording: no page claims a date 'hasn't been announced' — it says 
   const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
   assert.ok(up.indexOf("applyHonestWording(filmPageFiles())") > up.indexOf("addBrandToPages("), "after the last writer");
 });
+test("sitemap-new.xml: current new releases and real platform arrivals, nothing else (Oct 2026)", () => {
+  const S = require("./lib/sitemap.js");
+  const T = "2026-10-24";
+  assert.ok(S.isNewReleaseEntry({ released: "2026-10-16", kind: "movie" }, T), "released last week (Street Fighter)");
+  assert.ok(S.isNewReleaseEntry({ released: "2026-12-15", kind: "movie" }, T), "due within 60 days");
+  assert.ok(!S.isNewReleaseEntry({ released: "2027-03-12", kind: "movie" }, T), "too far ahead");
+  assert.ok(!S.isNewReleaseEntry({ released: "2026-06-19", kind: "movie" }, T), "released months ago");
+  assert.ok(!S.isNewReleaseEntry({ released: "1979-12-27", catalog: true, archivedOn: "2026-10-20", live: { since: "2026-10-20" } }, T), "a catalogue page's build day is not an arrival");
+  assert.ok(S.isNewReleaseEntry({ released: "1979-12-27", catalog: true, archivedOn: "2026-09-01", live: { since: "2026-10-20" } }, T), "but a real arrival after the page existed is news");
+  assert.ok(S.isNewReleaseEntry({ released: "2026-06-19", archivedOn: "2026-07-10", live: { since: "2026-10-14" } }, T), "a new release that just reached a platform");
+  assert.ok(!S.isNewReleaseEntry(null, T) && !S.isNewReleaseEntry({ catalog: true }, T));
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "sitemap.js"), "utf8");
+  assert.ok(/children\.unshift\(\{ file: NEW_RELEASES_SITEMAP/.test(src), "listed first in the sitemap index");
+});
 test("IndexNow: every page whose content changed today is announced, not only the current lists (Oct 2026)", () => {
   const S = require("./lib/sitemap.js");
   const fsx = require("fs"), os = require("os"), path = require("path");

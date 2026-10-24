@@ -225,6 +225,25 @@ function extendIndexNowWithChanged(today, { root = ".", payloadFile = INDEXNOW_P
   return { added, total: urls.length };
 }
 
+// Pure: does a film page belong in sitemap-new.xml? A new-release page (not back catalogue)
+// released in the last NEW_RELEASE_PAST_DAYS or due in the next NEW_RELEASE_AHEAD_DAYS, or any
+// film page whose film arrived on a platform here in the last NEW_ARRIVAL_DAYS.
+const NEW_RELEASES_SITEMAP = "sitemap-new.xml";
+const NEW_RELEASE_PAST_DAYS = 45, NEW_RELEASE_AHEAD_DAYS = 60, NEW_ARRIVAL_DAYS = 14;
+function isNewReleaseEntry(e, today) {
+  if (!e) return false;
+  const t = Date.parse(`${today}T00:00:00Z`);
+  const days = (d) => (/^\d{4}-\d{2}-\d{2}/.test(d || "") ? (t - Date.parse(`${d.slice(0, 10)}T00:00:00Z`)) / 864e5 : null);
+  // A catalogue page records its build day as `since` (it was already streaming): only an arrival
+  // seen after the page existed is news.
+  const since = e.live && e.live.since ? days(e.live.since) : null;
+  const realArrival = since != null && (!e.catalog || (!!e.archivedOn && e.live.since > e.archivedOn));
+  if (since != null && since >= 0 && since <= NEW_ARRIVAL_DAYS && realArrival) return true;
+  if (e.catalog) return false;
+  const rel = days(e.released);
+  return rel != null && rel <= NEW_RELEASE_PAST_DAYS && rel >= -NEW_RELEASE_AHEAD_DAYS;
+}
+
 function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const today = new Date().toISOString().slice(0, 10);
   const pages = pageLastmodTracker(today);
@@ -287,6 +306,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const regionOf = (code) => (countries.find((c) => c.code === code) || {}).region || code.toUpperCase();
   let filmCount = 0;
   const filmUrls = [];
+  const newReleaseUrls = [];   // also listed in sitemap-new.xml (see isNewReleaseEntry)
   const filmUrlsBy = {};
   for (const c of countries) {
     const dir = dirFor(c.code);
@@ -309,6 +329,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       const entry = `  <url><loc>${filmUrlFor(c.code, slug)}</loc><lastmod>${filmLastmod(c.code, slug)}</lastmod><priority>0.5</priority>${img}${alts ? alts + "\n  " : (img ? "\n  " : "")}</url>`;
       filmUrls.push(entry);
       (filmUrlsBy[c.code] = filmUrlsBy[c.code] || []).push(entry);
+      if (isNewReleaseEntry(pagesManifest && pagesManifest[c.code] && pagesManifest[c.code][slug], today)) newReleaseUrls.push(entry);
       filmCount++;
     }
   }
@@ -445,6 +466,14 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   fs.writeFileSync("sitemap-pages.xml", urlset(pageEntries));
   pages.save();
   children.push({ file: "sitemap-pages.xml", lastmod: newest(pageEntries) });
+  // The pages that earn the clicks, in a sitemap of their own (Oct 2026): new releases are 9% of
+  // film pages and ~76% of Google clicks, and Google crawls only ~100–300 of the site's ~22,000
+  // pages a day. Google doesn't use IndexNow, so this is how it is pointed at them first. The same
+  // URLs stay in their edition's sitemap too (a URL may appear in more than one).
+  if (newReleaseUrls.length) {
+    fs.writeFileSync(NEW_RELEASES_SITEMAP, urlset(newReleaseUrls));
+    children.unshift({ file: NEW_RELEASES_SITEMAP, lastmod: newest(newReleaseUrls) });
+  } else fs.rmSync(NEW_RELEASES_SITEMAP, { force: true });
   for (const c of countries) {
     const entries = filmUrlsBy[c.code] || [];
     if (!entries.length) continue;
@@ -465,6 +494,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
 module.exports = {
   contentFingerprint,
   extendIndexNowWithChanged,
+  isNewReleaseEntry,
   pageLastmodTracker,
   pruneDeadHubLinks,
   restampUpdated,
