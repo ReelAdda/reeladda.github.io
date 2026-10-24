@@ -332,6 +332,7 @@ const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePa
 const { addSearchToPages, writeSearchIndexes } = require("./lib/search.js");
 const { GROW_ON, addGrowToPages } = require("./lib/grow.js");
 const { GA_ON, addGaToPages } = require("./lib/ga.js");
+const { rolloutSummary } = require("./lib/rollout.js");
 const { checkSearchHealth, refreshSearchTop, reportOpportunities, searchHealthLine } = require("./lib/searchtop.js");
 const { addBrandToPages } = require("./lib/brand.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
@@ -2385,6 +2386,8 @@ async function main() {
 
   // Every edition's lists from TMDB; the probe watchlist and India census; archive upkeep; buzz, trailers, critics' takes and scores.
   async function stageBuildData() {
+    // Staged page changes (lib/rollout.js): what share of films each one is switched on for.
+    console.log(`Rollout: ${rolloutSummary()}`);
     // "Most searched" data (lib/searchtop.js): Search Console's latest week of clicks per page.
     // Dormant without access; the last saved list (or a loaded export) is used meanwhile.
     try {

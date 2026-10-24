@@ -7451,13 +7451,36 @@ testAsync("most searched: signs in as the service account, fetches the latest we
   assert.ok(!JSON.stringify(saved).includes("z movie review"), "searches are never saved");
   assert.deepStrictEqual(r.opportunities.map((o) => [o.label, o.kind, o.queries.map((q) => q.q)]), [["Zed (US)", "snippet", ["z movie review"]]], "the report gets each page's searches");
   const pub = require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8");
-  assert.ok(/facts-mode\|search-top\)\\\.json/.test(pub), "search-top.json is build data, not published on the site");
+  assert.ok(/\|search-top[|)]/.test(pub), "search-top.json is build data, not published on the site");
   assert.ok(S.loadSearchTop(S.SEARCH_TOP_FILE, Date.parse("2026-10-20")) && !S.loadSearchTop(S.SEARCH_TOP_FILE, Date.parse("2026-11-10")), "older than two weeks isn't 'this week' any more");
   assert.deepStrictEqual(await S.refreshSearchTop({ env: {}, fetchImpl: fakeGoogle }), { ok: false, why: "no service account" }, "dormant without the secret");
   const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
   assert.ok(/await refreshSearchTop\(\)/.test(up), "the build refreshes it");
   assert.ok(/reportOpportunities\(r\.opportunities/.test(up), "and reports the opportunities");
 }));
+test("rollout: a feature reaches its share of films, every edition together, growing without flipping (Oct 2026)", () => {
+  const R = require("./lib/rollout.js");
+  const slugs = Array.from({ length: 4000 }, (_, i) => `film-${i}`);
+  const at = (p) => ({ features: { f: { percent: p } } });
+  const share = (p) => slugs.filter((s) => R.inRollout("f", s, at(p))).length / slugs.length;
+  assert.strictEqual(share(0), 0, "0% changes nothing");
+  assert.strictEqual(share(100), 1, "100% is every film");
+  for (const p of [10, 25, 50]) assert.ok(Math.abs(share(p) - p / 100) < 0.03, `${p}% is about ${p}%: ${share(p)}`);
+  const in10 = slugs.filter((s) => R.inRollout("f", s, at(10)));
+  assert.ok(in10.every((s) => R.inRollout("f", s, at(25)) && R.inRollout("f", s, at(50))), "a film that's in stays in as the share grows");
+  assert.strictEqual(R.inRollout("f", "jailer-2", at(37)), R.inRollout("f", "jailer-2", at(37)), "the same film, the same answer — in every edition, on every build");
+  const g10 = slugs.filter((s) => R.inRollout("g", s, { features: { g: { percent: 10 } } }));
+  assert.ok(g10.filter((s) => in10.includes(s)).length < in10.length / 2, "different changes pick different films");
+  assert.strictEqual(R.inRollout("unknown", "x", at(100)), false, "a feature that isn't listed is off");
+  assert.strictEqual(R.inRollout("f", "", at(100)), false);
+  assert.strictEqual(R.percentOf({ features: { f: { percent: 250 } } }, "f"), 100);
+  assert.strictEqual(R.rolloutSummary({ features: {} }), "none");
+  assert.strictEqual(R.rolloutSummary(at(25)), "f 25%");
+  // The repo's own file: valid, nothing switched on yet, and never published on the site.
+  const cfg = JSON.parse(require("fs").readFileSync(require("path").join(__dirname, "..", "rollout.json"), "utf8"));
+  assert.ok(cfg.features && typeof cfg.features === "object");
+  assert.ok(/\|rollout[|)]/.test(require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8")), "rollout.json is build data, not published");
+});
 test("search health: the 22 Oct 2026 drop raises an issue once, then a note while it lasts (Oct 2026)", () => {
   const S = require("./lib/searchtop.js");
   // Final Search Console data, 13–23 Oct 2026 (the real series).
