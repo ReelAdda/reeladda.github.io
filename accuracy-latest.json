@@ -2,20 +2,37 @@
  "date": "2026-10-24",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
- "high": 1,
- "correctable": 1,
+ "pagesDisagreeing": 3,
+ "high": 3,
+ "correctable": 3,
  "byField": {
-  "platform": 1
+  "platform": 2,
+  "release date": 1
  },
  "rows": [
   {
    "field": "platform",
    "severity": "high",
-   "page": "Shudder, AMC+",
-   "tmdb": "AMC+",
-   "code": "nz",
-   "slug": "fear-the-walking-dead"
+   "page": "fuboTV, HBO Max, Peacock",
+   "tmdb": "HBO Max, Peacock",
+   "code": "us",
+   "slug": "harry-potter-and-the-prisoner-of-azkaban"
+  },
+  {
+   "field": "release date",
+   "severity": "high",
+   "page": "2026-12-24",
+   "tmdb": "2026-10-01 / 2026-10-30 / 2026-12-31",
+   "code": "de",
+   "slug": "eurotrash"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Disney+, RTL+, RTL+ Max, Filmtastic",
+   "tmdb": "Disney+, RTL+, Filmtastic, Magenta TV+",
+   "code": "de",
+   "slug": "john-wick-chapter-3-parabellum"
   }
  ]
 }
