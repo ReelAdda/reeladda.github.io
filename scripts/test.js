@@ -7458,6 +7458,25 @@ testAsync("most searched: signs in as the service account, fetches the latest we
   assert.ok(/await refreshSearchTop\(\)/.test(up), "the build refreshes it");
   assert.ok(/reportOpportunities\(r\.opportunities/.test(up), "and reports the opportunities");
 }));
+test("search health: the 22 Oct 2026 drop raises an issue once, then a note while it lasts (Oct 2026)", () => {
+  const S = require("./lib/searchtop.js");
+  // Final Search Console data, 13–23 Oct 2026 (the real series).
+  const real = [["2026-10-13", 1862], ["2026-10-14", 2387], ["2026-10-15", 2701], ["2026-10-16", 3464], ["2026-10-17", 4323], ["2026-10-18", 5162],
+    ["2026-10-19", 4929], ["2026-10-20", 4837], ["2026-10-21", 3838], ["2026-10-22", 666], ["2026-10-23", 118]].map(([d, i]) => ({ keys: [d], impressions: i, clicks: Math.round(i / 50) }));
+  const upTo = (d) => real.filter((r) => r.keys[0] <= d);
+  assert.strictEqual(S.searchHealth(upTo("2026-10-21")).state, "ok", "21 Oct: 3,838 against a ~3,700 week is normal");
+  const drop = S.searchHealth(upTo("2026-10-22"));
+  assert.strictEqual(drop.state, "drop", "22 Oct: a new sharp drop");
+  assert.ok(/SHARP DROP — 666 impressions/.test(S.searchHealthLine(drop)) && /% of the previous week's average/.test(S.searchHealthLine(drop)), S.searchHealthLine(drop));
+  assert.strictEqual(S.searchHealth(upTo("2026-10-23")).state, "down", "23 Oct: still down — a note, not a second alarm");
+  // Recovery reads as normal again once a day is back near the week's level.
+  const back = [...upTo("2026-10-23"), { keys: ["2026-10-24"], impressions: 3000, clicks: 50 }];
+  assert.strictEqual(S.searchHealth(back).state, "ok");
+  assert.strictEqual(S.searchHealth(real.slice(0, 5)).state, "unknown", "too little data to judge");
+  assert.ok(/not checked/.test(S.searchHealthLine({ state: "unknown", why: "no service account" })));
+  const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(/h\.state === "drop"\) healthIssue/.test(up) && /h\.state === "down"\) healthNote/.test(up), "the build raises it");
+});
 test("search opportunities: page 2 is a ranking problem, page 1 unclicked a snippet problem, normal pages aren't listed (Oct 2026)", () => {
   const S = require("./lib/searchtop.js");
   const U = (p) => "https://filmychill.com" + p;

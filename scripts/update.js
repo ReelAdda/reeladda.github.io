@@ -332,7 +332,7 @@ const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePa
 const { addSearchToPages, writeSearchIndexes } = require("./lib/search.js");
 const { GROW_ON, addGrowToPages } = require("./lib/grow.js");
 const { GA_ON, addGaToPages } = require("./lib/ga.js");
-const { refreshSearchTop, reportOpportunities } = require("./lib/searchtop.js");
+const { checkSearchHealth, refreshSearchTop, reportOpportunities, searchHealthLine } = require("./lib/searchtop.js");
 const { addBrandToPages } = require("./lib/brand.js");
 const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
@@ -2395,6 +2395,15 @@ async function main() {
         reportOpportunities(r.opportunities, { from: r.from, to: r.to });
       }
     } catch (e) { console.log(`Most searched: not refreshed (${e.message})`); }
+    // Search health (lib/searchtop.js): a new sharp drop in Google impressions turns the run red;
+    // a continuing one is a note each run, so it's tracked without alarming every day.
+    try {
+      const h = await checkSearchHealth();
+      const line = searchHealthLine(h);
+      console.log(line);
+      if (h.state === "drop") healthIssue(`${line}. Check Search Console (Performance, Pages, Manual actions) — nothing in the build changed this by itself`);
+      else if (h.state === "down") healthNote(line);
+    } catch (e) { console.log(`Search health: not checked (${e.message})`); }
     // Pass 1: build data for every country. Every TMDB answer is recorded — each edition on its
     // own, so the proof replays an edition with exactly the answers it got — and the output kept
     // as built, for the split proof right after (proveSplitBuilder).

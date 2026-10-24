@@ -145,6 +145,55 @@ function reportOpportunities(list, { from, to, log = console.log, summaryFile = 
   try { fs.appendFileSync(summaryFile, md + "\n"); } catch { /* a nicety */ }
 }
 
+// ---------------------------------------------------------------------------------------------
+// Search health: Google impressions per day, so a sudden drop is noticed within a day or two.
+// On 22 Oct 2026 impressions fell from ~4,800 a day to 666 (Google visits ~58 a day to 3) and
+// nothing in the build said so. Search Console's final data runs 2–3 days behind, so the latest
+// FINAL day is compared with the average of the seven before it.
+//   drop    — the latest day is under DROP_RATIO of normal and the day before wasn't: a new drop.
+//             A build issue (the run goes red, GitHub emails you).
+//   down    — still under DROP_RATIO: a note each run, so it's tracked without alarming every day.
+//   ok      — otherwise.
+// ---------------------------------------------------------------------------------------------
+const DROP_RATIO = 0.4;
+
+// Pure: daily rows ({ keys: [date], impressions, clicks }, final data, oldest first) -> the verdict.
+function searchHealth(rows) {
+  const days = (rows || []).map((r) => ({ date: r.keys[0], imp: Math.round(r.impressions || 0), clicks: Math.round(r.clicks || 0) }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  if (days.length < 9) return { state: "unknown", why: `only ${days.length} day(s) of data` };
+  const ratioAt = (i) => { const prev = days.slice(i - 7, i); const avg = prev.reduce((n, d) => n + d.imp, 0) / prev.length; return { avg, ratio: avg ? days[i].imp / avg : 1 }; };
+  const last = days.length - 1;
+  const now = ratioAt(last), before = ratioAt(last - 1);
+  const d = days[last];
+  const base = { date: d.date, impressions: d.imp, clicks: d.clicks, normal: Math.round(now.avg), ratio: now.ratio };
+  if (now.ratio < DROP_RATIO) return { ...base, state: before.ratio < DROP_RATIO ? "down" : "drop" };
+  return { ...base, state: "ok" };
+}
+
+function searchHealthLine(h) {
+  if (!h || h.state === "unknown") return `Search health: not checked (${(h && h.why) || "no data"})`;
+  const pct = Math.round(h.ratio * 100);
+  const head = { drop: "SHARP DROP", down: "still down", ok: "normal" }[h.state];
+  return `Search health (Google, ${h.date}): ${head} — ${h.impressions} impressions, ${h.clicks} clicks; ${pct}% of the previous week's average (${h.normal} a day)`;
+}
+
+// Fetch the last 17 days of final data and judge the latest day. Dormant without access.
+async function checkSearchHealth({ env = process.env, fetchImpl = fetch, nowMs = Date.now() } = {}) {
+  if (!env.FIREBASE_SERVICE_ACCOUNT) return { state: "unknown", why: "no service account" };
+  let creds;
+  try { creds = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT); } catch { return { state: "unknown", why: "the service account isn't valid JSON" }; }
+  const token = await accessToken(creds, { fetchImpl, nowMs });
+  const sites = env.GSC_SITE ? [env.GSC_SITE] : ["sc-domain:filmychill.com", "https://filmychill.com/"];
+  let why = "";
+  for (const site of sites) {
+    const r = await querySearch(fetchImpl, token, site, { startDate: isoDay(nowMs - 17 * 864e5), endDate: isoDay(nowMs), dimensions: ["date"] });
+    if (r.ok) return searchHealth(r.j.rows);
+    why = `${site}: ${r.err}`;
+  }
+  return { state: "unknown", why };
+}
+
 async function querySearch(fetchImpl, token, site, body) {
   const r = await fetchImpl(`https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(site)}/searchAnalytics/query`, {
     method: "POST",
@@ -252,4 +301,4 @@ function fromExport(pagesCsv, { from, to, asOf }) {
   return { asOf, from, to, site: "export", pages: groupRows(rows) };
 }
 
-module.exports = { MIN_CLICKS, OPP_MIN_IMPRESSIONS, POPULAR_CSS, SEARCH_TOP_FILE, accessToken, filmOfUrl, fromExport, groupRows, loadSearchTop, opportunities, popularBlockFor, popularBlockHtml, popularItems, rangeLabel, refreshSearchTop, reportOpportunities, resetPopularCache };
+module.exports = { DROP_RATIO, checkSearchHealth, searchHealth, searchHealthLine, MIN_CLICKS, OPP_MIN_IMPRESSIONS, POPULAR_CSS, SEARCH_TOP_FILE, accessToken, filmOfUrl, fromExport, groupRows, loadSearchTop, opportunities, popularBlockFor, popularBlockHtml, popularItems, rangeLabel, refreshSearchTop, reportOpportunities, resetPopularCache };
