@@ -6786,6 +6786,29 @@ test("syncFilmLastmods: the first run only records; cosmetic edits never move th
     assert.strictEqual(man.in.f.last, "2026-10-06", "a streaming arrival is");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
 });
+test("IndexNow: every page whose content changed today is announced, not only the current lists (Oct 2026)", () => {
+  const S = require("./lib/sitemap.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-indexnow-"));
+  try {
+    const B = "https://filmychill.com/";
+    fsx.writeFileSync(path.join(root, "indexnow-payload.json"), JSON.stringify({ host: "filmychill.com", key: "k", urlList: [B, `${B}ph/new-on-ott/`] }));
+    fsx.writeFileSync(path.join(root, "sitemap.xml"), `<sitemapindex><sitemap><loc>${B}sitemap-films-ph.xml</loc></sitemap><sitemap><loc>${B}sitemap-pages.xml</loc></sitemap></sitemapindex>`);
+    // One of the 17 pages Bing flagged: a catalogue page that changed but sits in no current list.
+    fsx.writeFileSync(path.join(root, "sitemap-films-ph.xml"), `<urlset><url><loc>${B}ph/movie/breaking-bad.html</loc><lastmod>2026-10-25</lastmod><priority>0.5</priority></url><url><loc>${B}ph/movie/old.html</loc><lastmod>2026-10-01</lastmod></url></urlset>`);
+    fsx.writeFileSync(path.join(root, "sitemap-pages.xml"), `<urlset><url><loc>${B}ph/new-on-ott/</loc><lastmod>2026-10-25</lastmod></url><url><loc>${B}people/x/</loc><lastmod>2026-10-25</lastmod></url></urlset>`);
+    const r = S.extendIndexNowWithChanged("2026-10-25", { root });
+    const p = JSON.parse(fsx.readFileSync(path.join(root, "indexnow-payload.json"), "utf8"));
+    assert.deepStrictEqual(p.urlList, [B, `${B}ph/new-on-ott/`, `${B}ph/movie/breaking-bad.html`, `${B}people/x/`], "current lists first, then every page that changed today, once each; unchanged pages left out");
+    assert.deepStrictEqual(r, { added: 2, total: 4 });
+    assert.strictEqual(p.key, "k", "the rest of the payload is kept");
+    S.extendIndexNowWithChanged("2026-10-25", { root, max: 4 });
+    assert.strictEqual(JSON.parse(fsx.readFileSync(path.join(root, "indexnow-payload.json"), "utf8")).urlList.length, 4, "never over IndexNow's limit");
+    assert.strictEqual(S.extendIndexNowWithChanged("2026-10-25", { root: path.join(root, "nope") }).why, "no payload");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+  const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(up.indexOf("extendIndexNowWithChanged(todayStr())") > up.indexOf("writeMultiCountrySitemap(builtCountries, pagesManifest);"), "after the sitemaps are written");
+});
 test("updated dates: the page shows the date its sitemap entry gives, never an older or newer one (Oct 2026)", () => {
   const S = require("./lib/sitemap.js");
   const fsx = require("fs"), os = require("os"), path = require("path");

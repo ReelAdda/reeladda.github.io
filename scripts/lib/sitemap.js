@@ -193,6 +193,38 @@ function pageLastmodTracker(today, file = PAGE_LASTMODS_FILE) {
   };
 }
 
+// IndexNow for every page that changed (Oct 2026). The payload written mid-build lists the
+// current lists and hubs (at most 900), so a page that changed but sat in no current list —
+// a catalogue film whose status moved, a film that just left the lists — was never announced:
+// Bing Webmaster Tools flagged 17 such pages (Breaking Bad PH, Goodfellas UK, Dorothy SG…).
+// After the sitemaps are written, every URL whose lastmod is today (its content changed this
+// run — the same honest signal Google gets) joins the payload. IndexNow takes up to 10,000 URLs
+// per request; the current lists keep their place first.
+const INDEXNOW_PAYLOAD_FILE = "indexnow-payload.json";
+const INDEXNOW_MAX = 10000;
+function extendIndexNowWithChanged(today, { root = ".", payloadFile = INDEXNOW_PAYLOAD_FILE, max = INDEXNOW_MAX } = {}) {
+  let payload;
+  try { payload = JSON.parse(fs.readFileSync(path.join(root, payloadFile), "utf8")); } catch { return { added: 0, total: 0, why: "no payload" }; }
+  const urls = Array.isArray(payload.urlList) ? payload.urlList : [];
+  const have = new Set(urls);
+  let index = "";
+  try { index = fs.readFileSync(path.join(root, "sitemap.xml"), "utf8"); } catch { return { added: 0, total: urls.length, why: "no sitemap" }; }
+  const files = [...index.matchAll(/<loc>https:\/\/filmychill\.com\/([^<]+\.xml)<\/loc>/g)].map((m) => m[1]);
+  let added = 0;
+  for (const f of files) {
+    let xml;
+    try { xml = fs.readFileSync(path.join(root, f), "utf8"); } catch { continue; }
+    for (const m of xml.matchAll(/<loc>([^<]+)<\/loc><lastmod>([^<]+)<\/lastmod>/g)) {
+      if (urls.length >= max) break;
+      if (m[2].slice(0, 10) !== today || have.has(m[1])) continue;
+      urls.push(m[1]); have.add(m[1]); added++;
+    }
+  }
+  payload.urlList = urls;
+  fs.writeFileSync(path.join(root, payloadFile), JSON.stringify(payload, null, 1));
+  return { added, total: urls.length };
+}
+
 function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const today = new Date().toISOString().slice(0, 10);
   const pages = pageLastmodTracker(today);
@@ -431,6 +463,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
 
 module.exports = {
   contentFingerprint,
+  extendIndexNowWithChanged,
   pageLastmodTracker,
   pruneDeadHubLinks,
   restampUpdated,

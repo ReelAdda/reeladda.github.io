@@ -335,7 +335,7 @@ const { GA_ON, addGaToPages } = require("./lib/ga.js");
 const { rolloutSummary } = require("./lib/rollout.js");
 const { checkSearchHealth, refreshSearchTop, reportOpportunities, searchHealthLine } = require("./lib/searchtop.js");
 const { addBrandToPages } = require("./lib/brand.js");
-const { contentFingerprint, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
+const { contentFingerprint, extendIndexNowWithChanged, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
 // cinema-date backfill in main()). One call per film; the backlog clears in a run or two.
@@ -2869,6 +2869,12 @@ async function main() {
     try { sweepDeadHubLinks(COUNTRIES); } catch (e) { stageFailed(`dead hub links`, e); }
 
     writeMultiCountrySitemap(builtCountries, pagesManifest);
+    // IndexNow (Bing, DuckDuckGo, Yahoo, Yandex): every page whose content changed this run, not
+    // only the current lists (lib/sitemap.js extendIndexNowWithChanged).
+    try {
+      const x = extendIndexNowWithChanged(todayStr());
+      console.log(`IndexNow payload: +${x.added} changed page(s), ${x.total} URL(s) in all${x.why ? ` (${x.why})` : ""}`);
+    } catch (e) { stageFailed("indexnow changed pages", e, { optional: true }); }
     // After the sitemap, so a redirect page is never listed in it.
     try {
       const n = writeMergeStubs(merges);
