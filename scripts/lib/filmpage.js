@@ -29,7 +29,7 @@ const {
 } = require("./core.js");
 const { readHistory, cinemaWindowDays, observationStarts, monthKey, monthLabel } = require("./history.js");
 const { filmScore } = require("./score.js");
-const { browsePath, filmIndexFor, filmPageExists, relatedFilms } = require("./graph.js");
+const { browsePath, filmIndexFor, filmPageExists, relatedFilms, sameFilmPageExists } = require("./graph.js");
 const { cap, whyWatch } = require("./whywatch.js");
 const { skipIf } = require("./skipif.js");
 const { watchFit } = require("./watchfit.js");
@@ -1323,7 +1323,7 @@ function generatePages(data, cfg, allSlugSets) {
       // the UK in March and in India in August belongs to one cluster, but the run-scoped
       // check only ever saw the countries featuring it that week — so the sets came out
       // asymmetric and Google discarded them ("no return tags"). Disk is the source of truth.
-      .filter((c) => c.code === code || filmPageExists(c.code, item.slug)
+      .filter((c) => c.code === code || sameFilmPageExists(c.code, item.slug, item.tmdbId ? `${item.kind || "movie"}:${item.tmdbId}` : null)
         || (allSlugSets && allSlugSets[c.code] && allSlugSets[c.code].has(item.slug)))
       .map((c) => ({ code: c.code, region: c.region }));
     item._alts = cluster.length > 1 ? cluster : [];

@@ -282,6 +282,35 @@ function filmPageExists(code, slug) {
   return !!slug && fs.existsSync(`${filmPageDir(code)}/${slug}.html`);
 }
 
+// FILM IDENTITY (Oct 2026). A slug isn't a film: /movie/law-order.html is the Malayalam film
+// "L&O" (2026) while /us/movie/law-order.html is the TV series Law & Order (1990), and 101 slugs
+// were shared like that — 24, Supergirl, The Bear, Coolie, Mayday… Hreflang told Google each pair
+// was one page in two regions. The build registers who each page is (kind:tmdbId, from the
+// pages manifest); editions join a cluster only when they are the same film. A page whose
+// identity isn't known is treated as the same film (the old behaviour) rather than split off.
+let identityOf = null;
+function setFilmIdentity(fn) { identityOf = typeof fn === "function" ? fn : null; }
+function filmIdentity(code, slug) { return identityOf ? identityOf(code, slug) || null : null; }
+// Pure-ish: of the editions `codes` that have an indexable page for `slug`, the ones in the same
+// cluster as `code` — grouped by film; an edition whose film isn't known joins the largest group.
+// One rule for the page tags (syncHreflangClusters) and the sitemap, so the two always agree.
+function sameFilmCodes(slug, code, codes) {
+  const groups = new Map();
+  const unknown = [];
+  for (const c of codes) { const k = filmIdentity(c, slug); if (!k) { unknown.push(c); continue; } if (!groups.has(k)) groups.set(k, []); groups.get(k).push(c); }
+  const largest = [...groups.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))[0];
+  const key = filmIdentity(code, slug);
+  if (!largest) return [...codes];
+  if (!key) return [...largest[1], ...unknown];
+  return key === largest[0] ? [...groups.get(key), ...unknown] : [...groups.get(key)];
+}
+// The same film in another edition: a page exists there and, where both are known, it is the same film.
+function sameFilmPageExists(code, slug, key) {
+  if (!filmPageExists(code, slug)) return false;
+  const other = filmIdentity(code, slug);
+  return !key || !other || other === key;
+}
+
 // ============================================================================
 // HREFLANG SYNC — repairs clusters across the whole archive.
 //
@@ -338,18 +367,31 @@ function syncHreflangClusters(onChange = null) {
       bySlug.get(slug).push(c.code);
     }
   }
-  let fixed = 0, clusters = 0;
+  let fixed = 0, clusters = 0, split = 0, noindexed = 0;
   for (const [slug, codes] of bySlug) {
-    if (codes.length > 1) clusters++;
+    const pages = [];
     for (const code of codes) {
       const path = `${filmPageDir(code)}/${slug}.html`;
       let html;
       try { html = fs.readFileSync(path, "utf8"); } catch { continue; }
-      const { html: out, changed } = patchHreflang(html, codes, slug);
-      if (changed) { fs.writeFileSync(path, out); fixed++; if (onChange) onChange(code, slug); }
+      // A noindexed page is no one's alternate and lists none (Google: alternates must be
+      // indexable, canonical pages).
+      const hidden = /<meta name="robots" content="[^"]*noindex/.test(html.slice(0, 4096));
+      if (hidden) noindexed++;
+      pages.push({ code, path, html, hidden, key: filmIdentity(code, slug) });
+    }
+    // Group the indexable pages by film (sameFilmCodes: the same rule as the sitemap).
+    const visible = pages.filter((x) => !x.hidden).map((x) => x.code);
+    if (new Set(pages.filter((x) => !x.hidden && x.key).map((x) => x.key)).size > 1) split++;
+    const membersOf = (p) => (p.hidden ? [] : sameFilmCodes(slug, p.code, visible));
+    for (const p of pages) {
+      const members = membersOf(p);
+      if (members.length > 1) clusters++;
+      const { html: out, changed } = patchHreflang(p.html, members.length > 1 ? members : [], slug);
+      if (changed) { fs.writeFileSync(p.path, out); fixed++; if (onChange) onChange(p.code, slug); }
     }
   }
-  console.log(`  hreflang sync: ${clusters} multi-country cluster(s), ${fixed} page(s) corrected`);
+  console.log(`  hreflang sync: ${fixed} page(s) corrected; ${split} slug(s) shared by different films kept apart; ${noindexed} noindexed page(s) left out of clusters`);
   return fixed;
 }
 
@@ -445,8 +487,12 @@ module.exports = {
   buildBrowsePage,
   filmIndexFor,
   filmPageDir,
+  filmIdentity,
   filmPageExists,
   hashKey,
+  sameFilmCodes,
+  sameFilmPageExists,
+  setFilmIdentity,
   hreflangBlockFor,
   patchHreflang,
   relatedFilms,

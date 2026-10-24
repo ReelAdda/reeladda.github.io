@@ -29,7 +29,7 @@ const { archivePatchHtml, retitleFrozen, rewriteMetaDescription } = require("./a
 const { applyDeparturePatch, duePassPage } = require("./lifecycle.js");
 const { applyPatch, modeOf, queuedFacts } = require("./factsq.js");
 const { buildFilmPage } = require("./filmpage.js");
-const { filmPageExists } = require("./graph.js");
+const { sameFilmPageExists } = require("./graph.js");
 const { countryNameFor } = require("./rules.js");
 const { availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, readFacts, writeFacts } = require("./facts.js");
 const { writeIfChanged } = require("./writeif.js");
@@ -42,7 +42,8 @@ const dirFor = (code) => (code === "in" ? "movie" : `${code}/movie`);
 // Pure-ish (reads which editions have the film): a frozen page from its facts.
 function renderFrozen(item, cfg, { asOf, knownSlugs, availability = "", untracked = false }) {
   const code = cfg.code;
-  const cluster = COUNTRIES.filter((c) => c.code === code || filmPageExists(c.code, item.slug)).map((c) => ({ code: c.code, region: c.region }));
+  const key = item.tmdbId ? `${item.kind || "movie"}:${item.tmdbId}` : null; // only editions of the same film (lib/graph.js)
+  const cluster = COUNTRIES.filter((c) => c.code === code || sameFilmPageExists(c.code, item.slug, key)).map((c) => ({ code: c.code, region: c.region }));
   const it = { ...item, _alts: cluster.length > 1 ? cluster : [], ...(untracked ? { untracked: true } : {}) };
   const html = buildFilmPage(it, asOf, knownSlugs, cfg, null);
   const countryName = countryNameFor(cfg);

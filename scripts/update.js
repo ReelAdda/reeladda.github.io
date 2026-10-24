@@ -86,6 +86,7 @@ const {
   patchHreflang,
   relatedFilms,
   relatedScore,
+  setFilmIdentity,
   syncHreflangClusters,
   syncListingHreflang,
   writeBrowseIndex,
@@ -2346,6 +2347,15 @@ async function main() {
   // function). These are the only values the stages share; everything else stays inside
   // the stage that uses it.
   let pageTemplate = null, merges = [], slugsById = null, pagesManifest = null;
+  // Which film each page is (kind:tmdbId), so editions of different films that share a slug are
+  // never linked as one page's regional versions (lib/graph.js). The run's manifest once it's
+  // loaded; the one on disk before that.
+  let manifestOnDisk = null;
+  setFilmIdentity((code, slug) => {
+    const man = pagesManifest || manifestOnDisk || (manifestOnDisk = loadPagesManifest());
+    const e = man && man[code] && man[code][slug];
+    return e && e.tmdbId ? `${e.kind || "movie"}:${e.tmdbId}` : null;
+  });
   const builtCountries = [], dataByCode = {}, allSlugSets = {};
   const factsModes = loadModes(), factsResults = {};   // facts-only rendering (lib/factsq.js)
 

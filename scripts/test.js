@@ -5604,6 +5604,38 @@ test("IndexNow list stays within the per-request cap", () => {
   assert.ok(urls.length <= 900, "one IndexNow request must not exceed the cap");
   assert.strictEqual(new Set(urls).size, urls.length, "no duplicate URLs wasted in the ping");
 });
+test("hreflang: editions are linked only when they are the same film; noindexed pages are no one's alternate (Oct 2026)", () => {
+  const G = require("./lib/graph.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-identity-"));
+  const cwd = process.cwd();
+  const page = (slug, c, robots = "max-image-preview:large") => `<head><meta name="robots" content="${robots}">\n<link rel="canonical" href="https://filmychill.com/${c === "in" ? "" : c + "/"}movie/${slug}.html"></head>`;
+  // law-order: India + UAE are the Malayalam film; US + AU are the TV series (the real clash).
+  const ids = { "in/law-order": "movie:1588472", "ae/law-order": "movie:1588472", "us/law-order": "tv:549", "au/law-order": "tv:549", "in/film": "movie:1", "uk/film": "movie:1", "us/film": "movie:1" };
+  try {
+    process.chdir(tmp);
+    for (const d of ["movie", "ae/movie", "us/movie", "au/movie", "uk/movie"]) fsx.mkdirSync(d, { recursive: true });
+    for (const k of Object.keys(ids)) { const [c, s] = k.split("/"); fsx.writeFileSync(`${c === "in" ? "" : c + "/"}movie/${s}.html`, page(s, c)); }
+    fsx.writeFileSync("us/movie/film.html", page("film", "us", "noindex,follow,max-image-preview:large"));   // an empty shell
+    G.setFilmIdentity((c, s) => ids[`${c}/${s}`] || null);
+    U.syncHreflangClusters();
+    const alts = (f) => [...fsx.readFileSync(f, "utf8").matchAll(/hreflang="([^"]+)"/g)].map((m) => m[1]).filter((h) => h !== "x-default").sort();
+    assert.deepStrictEqual(alts("movie/law-order.html"), ["en-AE", "en-IN"], "the Malayalam film links only its own UAE edition");
+    assert.deepStrictEqual(alts("us/movie/law-order.html"), ["en-AU", "en-US"], "the TV series links only its own editions");
+    assert.deepStrictEqual(alts("movie/film.html"), ["en-GB", "en-IN"], "a noindexed edition is left out of the cluster");
+    assert.deepStrictEqual(alts("us/movie/film.html"), [], "and lists no alternates itself");
+    assert.strictEqual(U.syncHreflangClusters(), 0, "idempotent");
+    // Pages drawn during the build use the same rule.
+    assert.ok(G.sameFilmPageExists("ae", "law-order", "movie:1588472") && !G.sameFilmPageExists("us", "law-order", "movie:1588472"));
+    assert.ok(G.sameFilmPageExists("uk", "film", null), "no identity known: treated as the same film, as before");
+    // The sitemap uses the same grouping, so tags and sitemap always agree.
+    assert.deepStrictEqual(G.sameFilmCodes("law-order", "us", ["in", "ae", "us", "au"]).sort(), ["au", "us"]);
+    assert.deepStrictEqual(G.sameFilmCodes("law-order", "in", ["in", "ae", "us", "au"]).sort(), ["ae", "in"]);
+    assert.ok(/sameFilmCodes\(slug, c\.code/.test(fsx.readFileSync(path.join(cwd, "scripts", "lib", "sitemap.js"), "utf8")), "the sitemap groups by film too");
+  } finally { G.setFilmIdentity(null); process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
+  const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(/setFilmIdentity\(\(code, slug\) =>/.test(up), "the build registers each page's film");
+});
 test("syncHreflangClusters: links a cluster, is idempotent, and survives a CRLF checkout", () => {
   // This used to call syncHreflangClusters() against the REAL site and assert only that a
   // counter was >= 0 — always true. It walked every country directory on each `npm test`,

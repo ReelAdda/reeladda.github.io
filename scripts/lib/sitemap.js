@@ -8,7 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const { LANGUAGE_PAGES, fmtDateFull, localeFor, xDefaultCode } = require("./core.js");
 const { monthKey } = require("./history.js");
-const { browsePath } = require("./graph.js");
+const { browsePath, sameFilmCodes } = require("./graph.js");
 const {
   comingPath,
   comingUrl,
@@ -294,7 +294,8 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".html")).sort()) {
       const slug = f.slice(0, -5);
       if (noIndexed.has(`${c.code}/${slug}`)) continue; // empty-shell country page
-      const codes = [...(slugCodes[slug] || [])];
+      // Only editions of the same film (lib/graph.js sameFilmCodes), as on the pages themselves.
+      const codes = sameFilmCodes(slug, c.code, [...(slugCodes[slug] || [])]);
       const alts = codes.length > 1
         ? "\n" + codes.map((cc) =>
             `    <xhtml:link rel="alternate" hreflang="${cc === "in" ? "en-IN" : "en-" + regionOf(cc)}" href="${filmUrlFor(cc, slug)}"/>`).join("\n")
