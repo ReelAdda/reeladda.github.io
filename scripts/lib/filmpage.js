@@ -451,6 +451,22 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
 // The expected streaming window as it still applies today: months already gone are dropped,
 // so a Sep–Oct window read on 3 Oct says "Oct". Null once the whole window has passed.
 const MON3 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+// LEAN PAGE (Oct 2026, rollout feature LEAN_PAGE): every fact once. The rating lives in the
+// FilmyChill Score ring (no header rating line); the rating count once in the score box; the
+// platform in the answer box, which leads the page; runtime, genre and language in the header
+// line; one "skip if" list; prose sentences that only restate those are left out; the
+// certificate in "Good to know" only; the synopsis ("Story") after the cast. Measured on three
+// pages: rating shown 5x -> 1x, count 4-6x -> 1x, runtime 2-3x -> 1x, ~20% fewer words.
+const LEAN_PAGE = "lean-page";
+const leanPage = (item) => !!(item && item.slug && inRollout(LEAN_PAGE, item.slug));
+// A sentence that only restates the rating, count, platform or runtime shown elsewhere.
+// (The cinema opening and "check back" lines restate the answer box at the top.)
+const RESTATES = /\d(?:\.\d)?\/10|\bratings?\b|you can stream it|is streaming in|clocks in at|runs about|runs a manageable|\b\d+[ -]minutes?\b|episodes run|\b\d+h(?: \d+m)? of |opened in (?:theatres|cinemas)|opens in (?:theatres|cinemas)|is in (?:theatres|cinemas)|check back here|in theatres in [^.]* now|best caught on the big screen|theatrical run|have rated it|treat that \d/i;
+const leanText = (s) => String(s || "").split(/(?<=\.)\s+/).filter((x) => x && !RESTATES.test(x)).join(" ");
+const LEAN_MARK = "<!--FC:lean-->";
+// Machine-readable rating and count for lib/facts.js (the visible copies were the header line and
+// the audience row, which the lean layout no longer carries). A comment: never shown, not content.
+const audienceMark = (item) => `<!--FC:audience=${item.rating != null ? Number(item.rating) : ""}|${Number(item.votes) || 0}-->`;
 // An overseas page this recent is never treated as an empty shell (see isShellPage).
 const RECENT_RELEASE_DAYS = 180;
 // Titles that match the search (filmTitleTag; rollout feature INTENT_TITLES): overseas, a film's
@@ -744,6 +760,9 @@ function audiencePhrase(votes, recent) {
 // way as its score changes. Idempotent; a page with no answer line or no score is left alone.
 const SCORE_SECTION_RE = /<section class="fcsb[^"]*" id="filmychill-score">[\s\S]*?<\/section>(?:\s*<p class="fcsb-note">[\s\S]*?<\/p>)?/;
 function orderAnswer(html) {
+  // A lean page (LEAN_PAGE) keeps its answer (and its "Included with…" line) above the score,
+  // whatever the score: the platform is the first thing a reader is told.
+  if (html.includes(LEAN_MARK)) return html;
   const ans = /\n?[ \t]*<p class="answer">[\s\S]*?<\/p>/.exec(html);
   const sec = SCORE_SECTION_RE.exec(html);
   if (!ans || !sec) return html;
@@ -829,10 +848,13 @@ function fcScoreSection(item) {
       none.label === "Critics split" ? ", and the critics' reviews are divided."
         : isRecent(item) ? undefined : ", and no settled critics' verdict.");
     const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
+    // Lean layout (LEAN_PAGE): the ring carries the rating and the count is said once — in the
+    // "Based on N ratings" chip on an early read, else here.
+    const lean = leanPage(item);
     const aud = s && s.audience
       ? { tag: s.audience, sub: s.early
-        ? `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — few ratings, so weighted toward an average film`
-        : `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB` }
+        ? (lean ? "Few ratings, so weighted toward an average film" : `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — few ratings, so weighted toward an average film`)
+        : (lean ? `From ${votes} ratings on TMDB` : `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB`) }
       : item.rating != null && item.votes
         ? { tag: "Too few ratings", sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} rating${Number(item.votes) === 1 ? "" : "s"} — counts from ${scoreNeed(item)}`, none: true }
         // A count but no average yet (TMDB publishes one later): never "no audience ratings".
@@ -866,6 +888,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // the score it showed, and the FAQ, share-card text and panel would all repeat it.
   if (item && item.fcScore && notOutYet(item)) item = { ...item, fcScore: null };
   const e = escHtml;
+  const lean = leanPage(item);   // every fact once (LEAN_PAGE)
   const code = (cfg && cfg.code) || "in";
   const country = countryNameFor(cfg); // "the US", not the config's "United States" — reads right in titles and prose
   const homeUrl = code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`;
@@ -1123,20 +1146,20 @@ ${FCSB_CSS}
 </head>
 <body>
 <div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
-<div class="wrap">
+<div class="wrap">${lean ? LEAN_MARK + audienceMark(item) : ""}
   <div class="head">
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="140" height="210">` : "<div></div>"}
     <div>
       <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
-      <div class="meta">${[item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert].filter(Boolean).map(e).join(" · ")}</div>
-      ${headRatingHtml(item)}
+      <div class="meta">${(lean
+        ? [item.language, item.genre, item.runtime ? (item.kind === "tv" ? `${item.runtime} min episodes` : item.runtime + " min") : null]
+        : [item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert]).filter(Boolean).map(e).join(" · ")}</div>
+      ${lean ? "" : headRatingHtml(item)}
       ${item.released ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
     </div>
   </div>
-  ${orderAnswer(`${fcScoreSection(item)}
-  ${voteWidgetHtml(item, code)}
-  ${(() => {
+  ${(() => { const answerBlock = (() => {
     // Lead answer line. The GSC data showed pages ranking on page 1 for "where to watch [film]"
     // and "[film] ott release date" but pulling <1% CTR, and answer engines had nothing at the
     // top to lift. This puts the direct answer FIRST, in one snippet-shaped sentence, before the
@@ -1157,9 +1180,18 @@ ${FCSB_CSS}
     } else {
       ans = `Where to watch <b>${e(item.title)}</b> in ${e(country)} isn't confirmed yet — this page updates the moment a platform lists it.`;
     }
-    return `<p class="answer">${ans}</p>`;
-  })()}`)}
-  ${verdictProse ? `<h2>What the audience says</h2><p class="vprose">${e(verdictProse)}</p>` : ""}
+    // Lean: how it's available, in one line under the answer (subscription vs rent/buy).
+    const rent = (item.rentBuy || []).map(String).filter((x) => !provs.includes(x));
+    const how = lean && provs.length
+      ? `\n  <p class="ansub" style="margin:-2px 0 10px;padding:0 14px;font-size:13px;line-height:1.5;color:var(--mute)">Included with subscription${rent.length ? ` · Rent or buy: ${e(rent.slice(0, 3).join(", "))}` : ""}</p>` : "";
+    return `<p class="answer">${ans}</p>${how}`;
+  })();
+    // Lean: the answer leads, then the score. Otherwise orderAnswer decides (below a full card).
+    return lean
+      ? `${answerBlock}\n  ${fcScoreSection(item)}\n  ${voteWidgetHtml(item, code)}`
+      : orderAnswer(`${fcScoreSection(item)}\n  ${voteWidgetHtml(item, code)}\n  ${answerBlock}`);
+  })()}
+  ${(lean ? leanText(verdictProse) : verdictProse) ? `<h2>What the audience says</h2><p class="vprose">${e(lean ? leanText(verdictProse) : verdictProse)}</p>` : ""}
   ${item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
   ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
   ${(() => {
@@ -1178,7 +1210,14 @@ ${FCSB_CSS}
     // Fit line (see whyWatch). Sits after the reception blocks and before the synopsis:
     // by this point the reader knows if it's good — this answers whether it's for them.
     const ww = whyWatch(item);
-    return ww ? `<h2>${e(ww.heading)}</h2><p class="whywatch">${e(ww.text)}</p>` : "";
+    if (!ww) return "";
+    if (!lean) return `<h2>${e(ww.heading)}</h2><p class="whywatch">${e(ww.text)}</p>`;
+    // Lean: the runtime is in the header line, so neither the heading ("Should you spend 1h 45m
+    // on it?") nor the text repeats it, the rating or the platform.
+    const text = leanText(ww.text);
+    if (!text) return "";
+    const heading = /\d+\s?(?:h|m|min)\b/.test(ww.heading) ? "Is it for you?" : ww.heading;
+    return `<h2>${e(heading)}</h2><p class="whywatch">${e(text)}</p>`;
   })()}
   ${(() => {
     // Skip block (see lib/skipif.js). Sits immediately after the fit line, because the two
@@ -1187,6 +1226,10 @@ ${FCSB_CSS}
     // reader learns to discount. Returns null on most films, and that is intended.
     const skip = skipIf(item);
     if (!skip) return "";
+    // Lean: one "not for you if" list — the house format's "Skip if" row says it when present.
+    const wfSkip = lean ? watchFit(item) : null;
+    if (wfSkip && wfSkip.skipIf) return "";
+    if (lean) { const kept = skip.filter((r) => !RESTATES.test(r) && !/number you can lean on/i.test(r)); if (!kept.length) return ""; skip.length = 0; skip.push(...kept); }
     return `<div class="skipif"><h3>Don't watch this if\u2026</h3><ul>`
       + skip.map((r) => `<li>${e(r)}</li>`).join("")
       + `</ul></div>`;
@@ -1199,14 +1242,19 @@ ${FCSB_CSS}
     const wf = watchFit(item);
     if (!wf) return "";
     const rows = [
-      wf.why ? `<dt>Why</dt><dd>${e(wf.why)}</dd>` : "",
+      // Lean: a "Why" that only restates the rating ("7.2/10 from 550 ratings…") goes.
+      wf.why && !(lean && RESTATES.test(wf.why)) ? `<dt>Why</dt><dd>${e(wf.why)}</dd>` : "",
       wf.skipIf ? `<dt class="skip">Skip if</dt><dd>${e(wf.skipIf)}</dd>` : "",
       wf.bestFor ? `<dt>Best for</dt><dd>${e(cap(wf.bestFor))}</dd>` : "",
     ].join("");
     return `<div class="fit"><dl>${rows}</dl></div>`;
   })()}
-  ${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
-  ${goodToKnow.length ? `<h2>Good to know</h2><table class="gtk">${goodToKnow.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : ""}
+  ${synopsis && !lean ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
+  ${(() => {
+    // Lean: rows the header line already gives (runtime, genre, language) are left out.
+    const rows = lean ? goodToKnow.filter((r) => !/^(Runtime|Genre|Language)$/.test(r.label)) : goodToKnow;
+    return rows.length ? `<h2>Good to know</h2><table class="gtk">${rows.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : "";
+  })()}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
   ${(item.castPics && item.castPics.length) ? `<h2>Cast</h2><div class="cast-strip">${item.castPics.map((c) => {
     // A name links to its people page when one exists (5+ films here) — see writePeoplePages.
@@ -1215,6 +1263,7 @@ ${FCSB_CSS}
     return `<div class="cast-card"><img src="${e(c.photo)}" alt="${e(c.name)}" width="72" height="72" loading="lazy"><div class="cast-name">${nm}</div>${c.character ? `<div class="cast-role">${e(c.character)}</div>` : ""}</div>`;
   }).join("")}</div>`
     : cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
+  ${synopsis && lean ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${(() => {
     // ---- "When is X coming to streaming/OTT?" ----------------------------------
     // The single highest-intent question on a theatrical film page, and the one the

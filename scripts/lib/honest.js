@@ -98,4 +98,26 @@ function applyHonestWording(files, { root = ".", included = (slug) => inRollout(
   return res;
 }
 
-module.exports = { HONEST_FEATURE, applyHonestWording, honestWording, plainWording };
+// LEAN TRIM (Oct 2026, lib/filmpage.js LEAN_PAGE). On a lean page the answer box already says when
+// and where the film opened, so the "when does it stream" section starts at its own news. That
+// section's opening clause is what the date updates (lib/pagekit.js settlePendingEstimate) match and
+// keep current, so the builder keeps writing it and this trims it after them, like the honest
+// wording. Idempotent; lib/writeif.js compares pages through it, so either form is the same page.
+const PENDING_LEAD = /<p>Not streaming yet — [^<]*? (?:opened in theatres in|is in its theatrical run in) [^<]*?\. (?=[^<])/g;
+function leanTrim(html) { return String(html).replace(PENDING_LEAD, "<p>Not streaming yet. "); }
+function applyLeanTrim(files, { root = ".", included = (slug) => inRollout("lean-page", slug) } = {}) {
+  const res = { pages: 0, changed: 0 };
+  for (const rel of files) {
+    const m = /(?:^|\/)movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
+    if (!m || !included(m[1])) continue;
+    const file = path.join(root, rel);
+    let html;
+    try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
+    res.pages++;
+    const next = leanTrim(html);
+    if (next !== html) { fs.writeFileSync(file, next); res.changed++; }
+  }
+  return res;
+}
+
+module.exports = { HONEST_FEATURE, applyHonestWording, applyLeanTrim, honestWording, leanTrim, plainWording };

@@ -336,7 +336,7 @@ const { GA_ON, addGaToPages } = require("./lib/ga.js");
 const { rolloutSummary } = require("./lib/rollout.js");
 const { checkSearchHealth, refreshSearchTop, reportOpportunities, searchHealthLine } = require("./lib/searchtop.js");
 const { addBrandToPages } = require("./lib/brand.js");
-const { applyHonestWording } = require("./lib/honest.js");
+const { applyHonestWording, applyLeanTrim } = require("./lib/honest.js");
 const { contentFingerprint, extendIndexNowWithChanged, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -2851,6 +2851,11 @@ async function main() {
       const h = applyHonestWording(filmPageFiles());
       console.log(`Honest wording: ${h.honest} film page(s) in the new wording, ${h.changed} updated this run`);
     } catch (e) { stageFailed("honest wording", e); }
+    // Lean pages: the "not streaming yet" section doesn't repeat the opening the answer box gives.
+    try {
+      const t = applyLeanTrim(filmPageFiles());
+      if (t.changed) console.log(`Lean pages: ${t.changed} "not streaming yet" lead(s) trimmed`);
+    } catch (e) { stageFailed("lean trim", e); }
 
     // All countries are built by now, so the filesystem finally shows every cluster's true
     // membership — repair them in one pass before the sitemap is written.

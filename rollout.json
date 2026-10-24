@@ -45,6 +45,25 @@
     }
    ],
    "what": "one rating, count and FilmyChill Score per film across editions: the freshest TMDB count any edition holds (lib/migrate.js shareScore)"
+  },
+  "lean-page": {
+   "percent": 10,
+   "since": "2026-10-25",
+   "schedule": [
+    {
+     "from": "2026-11-04",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-07",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-10",
+     "percent": 100
+    }
+   ],
+   "what": "every fact once: rating only in the score ring, count once, platform in the answer box first, runtime/genre/language in the header, one skip list, Story after the cast (lib/filmpage.js LEAN_PAGE)"
   }
  }
 }

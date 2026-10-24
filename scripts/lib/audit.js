@@ -82,7 +82,7 @@ function auditIntegrity(html, { entry = null, now = Date.now() } = {}) {
   const pub = (/"datePublished":"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1];
   if (pub && daysSince(pub, now) < 0 && !/Release Date|Releases|Coming/.test(title)) out.push({ check: "upcoming-title-without-date", detail: title.slice(0, 70) });
   const body = html.slice(Math.max(0, html.indexOf("<body"))).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ");
-  const rating = /★ ([\d.]+)/.exec(head);
+  const rating = /★ ([\d.]+)/.exec(head) || /<!--FC:audience=([\d.]+)\|/.exec(html);   // lean pages: the marker
   if (rating) {
     const n = (body.replace(/<[^>]+>/g, " ").match(new RegExp(`(?:★ ?|\\b)${rating[1].replace(".", "\\.")}(?:/10)?\\b`, "g")) || []).length;
     if (n >= RATING_REPEAT_MAX) out.push({ check: "rating-repeated", detail: `${rating[1]} stated ${n} times` });

@@ -7712,6 +7712,53 @@ test("rollout schedule: stages advance by date; titles match the search for the 
     assert.ok(/Streaming Date in the Philippines/.test(F.filmTitleTag({ title: "Clayface", slug: "clayface", kind: "movie", released: day(3), language: "English" }, PH)), "outside the rollout: the original title");
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }
 });
+test("lean page: every fact once, the answer first, facts read back identically, rolled out in stages (Oct 2026)", () => {
+  const R = require("./lib/rollout.js");
+  const F = require("./lib/filmpage.js");
+  const X = require("./lib/facts.js");
+  const UK = { code: "uk", name: "United Kingdom", region: "GB", streamWord: "streaming" };
+  const item = { title: "Ready Player One", slug: "ready-player-one", kind: "movie", tmdbId: 333339, released: "2018-03-29", language: "English", genre: "Adventure / Action",
+    runtime: 140, cert: "12A", rating: 7.6, votes: 17494, providers: ["Netflix"], rentBuy: ["Apple TV Store", "Netflix"], platform: "Netflix",
+    review: "When the creator of a virtual reality world dies, a contest begins.", cast: ["Tye Sheridan"], director: "Steven Spielberg",
+    fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" } };
+  const visible = (h) => h.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g, " ").split(/<details/)[0].replace(/<[^>]+>/g, " ");
+  try {
+    R.useRolloutConfig(ROLLOUT_OFF);
+    const classic = F.buildFilmPage(item, "2026-10-24", new Set(), UK);
+    R.useRolloutConfig({ features: { "lean-page": { percent: 100 } } });
+    const lean = F.buildFilmPage(item, "2026-10-24", new Set(), UK);
+    const t = visible(lean);
+    const n = (re) => (t.match(re) || []).length;
+    assert.strictEqual(n(/(?<![\d.])7\.6(?!\d)/g), 1, "the rating is shown once (the score ring)");
+    assert.strictEqual(n(/17,494 ratings/g), 1, "the count once");
+    assert.strictEqual(n(/\b140 min\b/g), 1, "the runtime once (header line)");
+    assert.ok(!/class="rating /.test(lean), "no header rating line");
+    assert.ok(lean.indexOf('class="answer"') < lean.indexOf('id="filmychill-score"'), "the answer leads, above the score");
+    assert.ok(/Included with subscription · Rent or buy: Apple TV Store</.test(lean), "subscription and rent/buy kept apart; the platform the answer names isn't repeated, nor listed under rent/buy");
+    assert.ok(lean.indexOf("<h2>Story</h2>") > lean.indexOf("<h2>Cast</h2>"), "Story after the cast, headed plainly");
+    assert.ok(!/<td>Runtime<\/td>|<td>Genre<\/td>|<td>Language<\/td>/.test(lean) && /Watch with family\?/.test(lean), "Good to know keeps only what the header doesn't give");
+    assert.ok(!/· 12A</.test(lean.slice(lean.indexOf('<div class="meta">'), lean.indexOf('<div class="meta">') + 200)), "the certificate leaves the header line");
+    assert.strictEqual(F.orderAnswer(lean), lean, "the sweeps' reordering leaves a lean page alone");
+    // Facts read back the same from both layouts (lib/facts.js reads the marker first).
+    const a = X.extractFacts(classic, item.slug), b = X.extractFacts(lean, item.slug);
+    for (const f of ["rating", "votes", "runtime", "cert", "review", "providers", "rentBuy", "released"]) assert.deepStrictEqual(b[f], a[f], f);
+    assert.deepStrictEqual(X.keyFacts(lean).rating, X.keyFacts(classic).rating);
+    // Outside the share: the page as before.
+    R.useRolloutConfig(ROLLOUT_OFF);
+    assert.strictEqual(F.buildFilmPage(item, "2026-10-24", new Set(), UK), classic);
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
+  // The trim pass: the "when does it stream" section doesn't repeat the opening the answer gives;
+  // pages compare equal either way, and it's idempotent.
+  const H = require("./lib/honest.js"), W = require("./lib/writeif.js");
+  const pend = `<p>Not streaming yet — Clayface opened in theatres in the Philippines on Oct 21, 2026. English releases typically reach streaming about 5–9 weeks after opening.</p>`;
+  assert.strictEqual(H.leanTrim(pend), "<p>Not streaming yet. English releases typically reach streaming about 5–9 weeks after opening.</p>");
+  assert.strictEqual(H.leanTrim(H.leanTrim(pend)), H.leanTrim(pend));
+  assert.strictEqual(H.leanTrim(`<p>Not streaming yet — X is in its theatrical run in India, released 2026-10-16. Hindi releases…</p>`), "<p>Not streaming yet. Hindi releases…</p>");
+  assert.strictEqual(W.comparable(pend), W.comparable(H.leanTrim(pend)));
+  const repo = JSON.parse(require("fs").readFileSync(require("path").join(__dirname, "..", "rollout.json"), "utf8"));
+  assert.strictEqual(R.percentOf(repo, "lean-page", Date.parse("2026-10-26T00:00:00Z")), 10, "starts at 10%");
+  assert.strictEqual(R.percentOf(repo, "lean-page", Date.parse("2026-11-12T00:00:00Z")), 100, "finishes by itself");
+});
 test("audit: intent, repetition, borrowed text, cross-edition verdicts and shared addresses are reported (Oct 2026)", () => {
   const A = require("./lib/audit.js");
   const now = Date.parse("2026-10-24T00:00:00Z");
