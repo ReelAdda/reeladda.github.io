@@ -3586,7 +3586,7 @@ test("descriptions: never empty, never a complete answer, always a reason to cli
 });
 test("empty-shell country pages are noindexed; real localised pages are not", () => {
   const UK = { code: "uk", name: "United Kingdom", region: "GB", streamWord: "streaming" };
-  const shell = { title: "Shell", slug: "shell", kind: "movie", tmdbId: 70, released: "2026-05-01", language: "English" };
+  const shell = { title: "Shell", slug: "shell", kind: "movie", tmdbId: 70, released: "2025-01-01", language: "English" };
   assert.ok(/content="noindex,follow/.test(U.buildFilmPage(shell, "2026-09-14", new Set(), UK)),
     "a country page with no availability at all leaves the index");
   // India is the x-default and is never shelled, whatever it carries.
@@ -3597,6 +3597,25 @@ test("empty-shell country pages are noindexed; real localised pages are not", ()
     const page = U.buildFilmPage({ ...shell, ...real }, "2026-09-14", new Set(), UK);
     assert.ok(!/noindex/.test(page), "real localised page wrongly noindexed: " + JSON.stringify(real));
   }
+  // Oct 2026: a recent release with nothing streaming yet answers "when does it stream here?" — even
+  // frozen, when the "in cinemas" flag is gone. GREEN (US, released 5 Sept) was noindexed by this
+  // rule, and Verde (US, ~1,500 impressions) had been merged into it.
+  const green = { title: "GREEN", slug: "green", kind: "movie", tmdbId: 71, released: "2026-09-05", language: "Spanish" };
+  const US = { code: "us", name: "United States", region: "US", streamWord: "streaming" };
+  assert.ok(!/noindex/.test(U.buildFilmPage(green, "2026-10-24", new Set(), US)), "a recent release stays indexed");
+  assert.ok(/content="noindex,follow/.test(U.buildFilmPage(green, "2027-04-01", new Set(), US)), "past 180 days with nothing here, it's a shell");
+  assert.ok(/content="noindex,follow/.test(U.buildFilmPage({ ...green, released: "1984-12-22" }, "2026-10-24", new Set(), US)), "an old film with nothing here stays out (The Terminator, Korea)");
+  // A merge that points at a noindexed page is reported every build.
+  const M = require("./lib/merges.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-merge-"));
+  try {
+    fsx.mkdirSync(path.join(root, "us", "movie"), { recursive: true });
+    fsx.writeFileSync(path.join(root, "us", "movie", "green.html"), '<html><head><meta name="robots" content="noindex,follow,max-image-preview:large"></head></html>');
+    fsx.writeFileSync(path.join(root, "us", "movie", "ok.html"), '<html><head><meta name="robots" content="max-image-preview:large"></head></html>');
+    assert.deepStrictEqual(M.noindexedSurvivors([{ code: "us", dup: "verde", to: "green" }, { code: "us", dup: "x", to: "ok" }], { root }), ["us/movie/verde.html -> us/movie/green.html"]);
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+  assert.ok(/noindexedSurvivors\(merges\)/.test(require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8")), "the build checks every merge");
 });
 test("frozen archive pages get the new description, and stop contradicting their own body", () => {
   // Film pages freeze when a film leaves the weekly lists; a full PAGES_ONLY rebuild on

@@ -134,4 +134,17 @@ function writeMergeStubs(active, { root = "." } = {}) {
   return n;
 }
 
-module.exports = { MERGES_FILE, activeMerges, dropMergedEntries, loadMerges, mergeStubHtml, removeMergedPages, retargetMergedLinks, writeMergeStubs };
+// Merged pages whose surviving page is noindexed (Oct 2026): the old address redirects there,
+// Google follows and finds a page it may not index, and the old page's traffic is lost — Verde
+// (US, ~1,500 impressions) into GREEN (US). The build reports any, so it can't go unnoticed.
+function noindexedSurvivors(active, { root = "." } = {}) {
+  const out = [];
+  for (const { code, dup, to } of active) {
+    let h;
+    try { h = fs.readFileSync(path.join(root, filmRel(code, to)), "utf8"); } catch { continue; }
+    if (/<meta name="robots" content="[^"]*noindex/.test(h.slice(0, 4096))) out.push(`${filmRel(code, dup)} -> ${filmRel(code, to)}`);
+  }
+  return out;
+}
+
+module.exports = { MERGES_FILE, noindexedSurvivors, activeMerges, dropMergedEntries, loadMerges, mergeStubHtml, removeMergedPages, retargetMergedLinks, writeMergeStubs };

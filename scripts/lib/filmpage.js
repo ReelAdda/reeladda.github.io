@@ -450,6 +450,8 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
 // The expected streaming window as it still applies today: months already gone are dropped,
 // so a Sep–Oct window read on 3 Oct says "Oct". Null once the whole window has passed.
 const MON3 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+// An overseas page this recent is never treated as an empty shell (see isShellPage).
+const RECENT_RELEASE_DAYS = 180;
 const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 function windowDates(item, nowMs) {
   const est = streamWindowShort(item.released, item.language, new Date(nowMs));
@@ -872,8 +874,16 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // release date ahead of it is a real localised answer and stays indexed:
   // /sg/movie/the-rope-curse-4-kuntilanak earns Singapore clicks at position 6.7 and must
   // never be caught by this rule.
+  // A RECENT RELEASE is never a shell (Oct 2026). Frozen pages don't keep the "in cinemas" flag
+  // (item.platform is empty once a film leaves the lists), so every released, not-yet-streaming
+  // overseas page was read as empty and noindexed — 122 pages that answer "when does it stream
+  // here?", 60 of which had earned impressions (Pacific US, Victorian Psycho UK, OK Madam Bon
+  // Voyage SG), and GREEN US, the page Verde (US, ~1,500 impressions) was merged into. Within
+  // RECENT_RELEASE_DAYS of release the page carries a dated, local answer: the streaming window.
+  const relMs = /^\d{4}-\d{2}-\d{2}/.test(item.released || "") ? Date.parse(`${item.released.slice(0, 10)}T00:00:00Z`) : NaN;
+  const recentRelease = Number.isFinite(relMs) && (asOfDate.getTime() - relMs) / 864e5 <= RECENT_RELEASE_DAYS;
   const isShellPage = code !== "in" && !providers.length && !(item.rentBuy || []).length
-    && item.platform !== "Theatres" && !upcoming;
+    && item.platform !== "Theatres" && !upcoming && !recentRelease;
   const robotsTag = isShellPage
     ? `<meta name="robots" content="noindex,follow,max-image-preview:large">`
     : `<meta name="robots" content="max-image-preview:large">`;

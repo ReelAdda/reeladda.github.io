@@ -327,7 +327,7 @@ const { syncVotes } = require("./lib/votes.js");
 const { runAudit } = require("./lib/audit.js");
 const { WRITE_STATS } = require("./lib/writeif.js");
 const { migrateBatch, migrateLimit, renderMigrated } = require("./lib/migrate.js");
-const { activeMerges, dropMergedEntries, loadMerges, removeMergedPages, retargetMergedLinks, writeMergeStubs } = require("./lib/merges.js");
+const { activeMerges, dropMergedEntries, loadMerges, noindexedSurvivors, removeMergedPages, retargetMergedLinks, writeMergeStubs } = require("./lib/merges.js");
 const { filmPageFiles, finishFilmPages, finishSitePages, repairDeadLinks, sitePageFiles } = require("./lib/stylesheets.js");
 const { addSearchToPages, writeSearchIndexes } = require("./lib/search.js");
 const { GROW_ON, addGrowToPages } = require("./lib/grow.js");
@@ -2886,6 +2886,8 @@ async function main() {
     try {
       const n = writeMergeStubs(merges);
       if (n < merges.length) healthNote(`merges: ${merges.length - n} surviving page(s) went missing during the build; their old URL has no redirect this run`);
+      const hidden = noindexedSurvivors(merges);
+      if (hidden.length) healthNote(`merges: ${hidden.length} merged page(s) redirect to a page marked noindex, so Google drops both — e.g. ${hidden.slice(0, 3).join("; ")}`);
     } catch (e) { stageFailed("merge stubs", e); }
     fs.writeFileSync(RUN_HEALTH_FILE, JSON.stringify(RUN_HEALTH, null, 1));
     console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.` +
