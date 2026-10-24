@@ -83,7 +83,11 @@ jobs:
           # ~2 months (~9 months at this rate). Raise again once Search Console's Sitemaps
           # screen shows the film sitemaps' indexed share climbing, or after moving to R2.
           # Oct 2026: 18 markets make it ~180 a day; the site was 247 MB when they launched.
-          CATALOG_BATCH: "5"
+          # 2 per country per run (24 Oct 2026): ~72 a day. Google impressions fell ~95% on
+          # 22 Oct while it re-judged the site (no manual action, nothing broken; pages dropped
+          # as they were recrawled). Slower growth while it settles; raise again once Google
+          # traffic is back and "Crawled - currently not indexed" stops climbing.
+          CATALOG_BATCH: "2"
         run: node scripts/update.js
 
       # Smoke test validates the SHAPE + freshness of EVERY country's data file.
