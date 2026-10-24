@@ -1,29 +1,21 @@
 {
- "date": "2026-10-23",
- "checked": 107,
- "errors": 1,
- "pagesDisagreeing": 2,
- "high": 0,
- "correctable": 0,
+ "date": "2026-10-24",
+ "checked": 108,
+ "errors": 0,
+ "pagesDisagreeing": 1,
+ "high": 1,
+ "correctable": 1,
  "byField": {
-  "genres": 2
+  "platform": 1
  },
  "rows": [
   {
-   "field": "genres",
-   "severity": "low",
-   "page": "Thriller / Horror",
-   "tmdb": "Thriller",
-   "code": "ca",
-   "slug": "whalefall"
-  },
-  {
-   "field": "genres",
-   "severity": "low",
-   "page": "Thriller / Drama",
-   "tmdb": "Drama, Mystery, Horror",
-   "code": "fr",
-   "slug": "good-boy"
+   "field": "platform",
+   "severity": "high",
+   "page": "Shudder, AMC+",
+   "tmdb": "AMC+",
+   "code": "nz",
+   "slug": "fear-the-walking-dead"
   }
  ]
 }
