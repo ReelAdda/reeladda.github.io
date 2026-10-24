@@ -3510,7 +3510,15 @@ test("released, not streaming: the title answers 'OTT release date' honestly —
   const tv = U.filmTitleTag({ title: "Show", kind: "tv", language: "Tamil", released: ago(20) }, IN);
   assert.ok(!/Release Date/.test(tv), "series have no OTT release date");
   const d = U.filmMetaDescription({ title: "Hi!", kind: "movie", language: "Tamil", released: ago(20), platform: "Theatres" }, IN);
-  assert.ok(/^Not announced yet\. Tamil films usually reach OTT 4\u20137 weeks after theatres, so /.test(d) && /We update this page the day it streams\.$/.test(d) && d.length <= 155, d);
+  // Led by "Not announced yet", or \u2014 on dates whose month names make that too long ("early
+  // November to late November") \u2014 by the film's name (descNotAnnounced's shorter forms).
+  assert.ok(/^(?:Hi!:? )?[Nn]ot announced yet\. Tamil films usually reach OTT 4\u20137 weeks after theatres, so /.test(d) && /We update this page the day it streams\.$/.test(d) && d.length <= 155, d);
+  // The answer leads either way, on every day of the year (this test once passed or failed by date).
+  for (let back = 0; back < 366; back += 3) {
+    const at = Date.now() - back * 864e5;
+    const dd = U.filmMetaDescription({ title: "Hi!", kind: "movie", language: "Tamil", released: new Date(at - 20 * 864e5).toISOString().slice(0, 10), platform: "Theatres" }, IN, { now: at });
+    assert.ok(/^(?:Hi!:? )?[Nn]ot announced yet\. Tamil films usually reach OTT/.test(dd) && dd.length <= 155, new Date(at).toISOString().slice(0, 10) + ": " + dd);
+  }
   const dl = U.filmMetaDescription({ title: "Old", kind: "movie", language: "Tamil", released: ago(120), platform: "Theatres" }, IN);
   // Oct 2026: led by the film's name — 747 pages used to share 93 identical snippets.
   assert.ok(/^Old \(\d{4}\) isn't on any OTT platform in India yet/.test(dl) && /no date has been announced/.test(dl) && dl.length <= 155, dl);
