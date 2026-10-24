@@ -5545,6 +5545,12 @@ test("IMDb pair is used when present, never mixed with the TMDB pair", () => {
 });
 
 group("embeddable widget — the backlink mechanism");
+test("embed snippet: a plain 'Powered by FilmyChill' link outside the iframe (Oct 2026)", () => {
+  const html = U.buildEmbedInstructions();
+  const pre = (/<pre>([\s\S]*?)<\/pre>/.exec(html) || [])[1] || "";
+  assert.ok(pre.includes("&lt;/iframe&gt;\n&lt;p") && pre.includes("Powered by &lt;a href=&quot;https://filmychill.com/&quot;&gt;FilmyChill&lt;/a&gt;"), "credit after the iframe, in the host page: " + pre);
+  assert.ok(!/rel=&quot;(?:nofollow|sponsored)/.test(pre) && !/ott|movies|watch/i.test((/Powered by[\s\S]*?&lt;\/a&gt;/.exec(pre) || [""])[0].replace(/filmychill\.com/gi, "")), "branded anchor text only");
+});
 test("widget shows this week's picks, freshest first, capped", () => {
   const items = U.embedItems({ ott: [
     { title: "New1", slug: "n1" }, { title: "New2", slug: "n2" },

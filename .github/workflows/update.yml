@@ -76,8 +76,11 @@ jobs:
           # one enrich call, so CATALOG_BATCH is the cost dial: start small, read one run's
           # log, then raise it. Set CATALOG to "0" to pause the backfill without losing the
           # queue cursor in catalog-manifest.json.
-          # "0" since 24 Oct 2026: paused while Google re-judges the site after its 22 Oct drop
-          # (see CATALOG_BATCH below). New releases are a separate pipeline and unaffected.
+          # OFF FOR GOOD (decided 24 Oct 2026). Back-catalogue titles were ~80% of film pages and
+          # ~14% of Google clicks; FilmyChill's value is new releases (always built, always kept).
+          # The ~14,650 catalogue pages already built stay as they are. Older films get pages only
+          # when something new happens to them, or in curated collections — a separate project,
+          # not this switch. Don't set this back to "1" without that decision.
           CATALOG: "0"
           # 5 per country per run (Sept 2026): ~140 new pages a day across 14 markets, down
           # from ~700. Google had indexed only ~1 in 8 pages, so adding more mostly grew the

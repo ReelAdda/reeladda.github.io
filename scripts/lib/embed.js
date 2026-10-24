@@ -88,7 +88,10 @@ function buildEmbedPage(data, cfg, updatedHuman) {
 
 // The copy-paste snippet we show people, plus a tiny explainer page at /embed/.
 function buildEmbedInstructions() {
-  const snippet = `<iframe src="https://filmychill.com/embed/week/" width="340" height="420" style="border:0;max-width:100%" loading="lazy" title="New on OTT this week — FilmyChill"></iframe>`;
+  // The credit line sits OUTSIDE the iframe, in the host page (Oct 2026): links inside an iframe
+  // belong to the framed page, so the widget alone credited FilmyChill to no one. Plain, branded
+  // anchor text — never keyword-stuffed (Google's link-spam policy names widget links).
+  const snippet = `<iframe src="https://filmychill.com/embed/week/" width="340" height="420" style="border:0;max-width:100%" loading="lazy" title="New on OTT this week — FilmyChill"></iframe>\n<p style="font:12px sans-serif;margin:4px 0 0">Powered by <a href="https://filmychill.com/">FilmyChill</a></p>`;
   const e = escHtml;
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
