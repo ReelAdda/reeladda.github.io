@@ -36,6 +36,7 @@ const { writeIfChanged } = require("./writeif.js");
 const { fcScore } = require("./fcscore.js");
 const { applyTruth } = require("./truth.js");
 const { langName } = require("./rules.js");
+const { inRollout } = require("./rollout.js");
 
 const dirFor = (code) => (code === "in" ? "movie" : `${code}/movie`);
 
@@ -144,6 +145,49 @@ function migrateBatch(manifest, cfg, { limit = 0, today }) {
   return res;
 }
 
+// ONE SCORE PER FILM (Oct 2026). TMDB's rating and count are the same worldwide, but each
+// edition captured them on a different day, so 4% of films shown in 2+ editions carried
+// different ratings and 2% different verdicts (Moana: "Must watch" in the UAE at 919 ratings,
+// "Worth a watch" elsewhere at 961; Primetime: no rating in the UK, 6.9 elsewhere). A frozen
+// page now takes the freshest count any edition holds for the same film (most ratings), and its
+// FilmyChill Score is worked out again from that count with the critics' reading it already
+// had. Pages in this week's lists were just rebuilt from TMDB and already hold the newest.
+const ONE_SCORE = "one-score";
+const TIER_TONE = { positive: "positive", mixed: "mixed", negative: "negative" };
+let bestAudience = null;
+function bestAudienceFor(key) {
+  if (!bestAudience) {
+    bestAudience = new Map();
+    let man = {};
+    try { man = JSON.parse(fs.readFileSync("pages-manifest.json", "utf8")); } catch { /* none */ }
+    for (const c of COUNTRIES) {
+      let facts;
+      try { facts = readFacts(c.code); } catch { continue; }
+      for (const [slug, rec] of facts) {
+        const e = (man[c.code] || {})[slug];
+        const it = rec && rec.item;
+        if (!e || !e.tmdbId || !it || it.rating == null || !(Number(it.votes) > 0)) continue;
+        const k = `${e.kind || it.kind || "movie"}:${e.tmdbId}`;
+        const cur = bestAudience.get(k);
+        if (!cur || Number(it.votes) > cur.votes) bestAudience.set(k, { rating: Number(it.rating), votes: Number(it.votes) });
+      }
+    }
+  }
+  return bestAudience.get(key) || null;
+}
+function resetBestAudience() { bestAudience = null; }
+// Pure: the item with the fresher rating and count, its score worked out again; the same item
+// when there's nothing fresher or no score comes out of it.
+function shareScore(item, best) {
+  if (!item || !best || !(best.votes > (Number(item.votes) || 0))) return item;
+  const tone = TIER_TONE[item.fcScore && item.fcScore.critics] || null;
+  const next = { ...item, rating: best.rating, votes: best.votes };
+  const s = fcScore({ ...next, criticsTone: tone });
+  if (!s) return item;
+  next.fcScore = s;
+  return next;
+}
+
 // Every migrated page of one edition, rendered from facts (lib/factsq.js has the full story).
 //   shadow mode (the default): the facts are read back from the page, so whatever the sweeps
 //     patched this run carries through, exactly as before. Each page is ALSO drawn the
@@ -214,6 +258,11 @@ function renderMigrated(manifest, cfg, { today, mode = null, modes = null, liste
       if (!read) { res.lost.push(`${code}/${slug}`); continue; }   // left as is; reported
       now = withTruth(read, e, true);
     }
+    // One score per film (rollout ONE_SCORE): the freshest TMDB count any edition holds for it.
+    if (e.tmdbId && inRollout(ONE_SCORE, slug)) {
+      const shared = shareScore(now, bestAudienceFor(`${e.kind || now.kind || "movie"}:${e.tmdbId}`));
+      if (shared !== now) { now = shared; res.fields.sharedScore = (res.fields.sharedScore || 0) + 1; }
+    }
     let r = rec;
     if (JSON.stringify(now) !== JSON.stringify(rec.item)) {
       // Only a visible change moves "Page updated"; a new check date alone doesn't.
@@ -263,4 +312,4 @@ function migrateLimit() {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
 }
 
-module.exports = { migrateBatch, migrateLimit, renderFrozen, renderMigrated, tryMigrate };
+module.exports = { migrateBatch, migrateLimit, renderFrozen, renderMigrated, resetBestAudience, shareScore, tryMigrate };

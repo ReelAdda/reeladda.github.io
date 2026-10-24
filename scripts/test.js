@@ -7705,6 +7705,24 @@ test("rollout schedule: stages advance by date; titles match the search for the 
     assert.ok(/Streaming Date in the Philippines/.test(F.filmTitleTag({ title: "Clayface", slug: "clayface", kind: "movie", released: day(3), language: "English" }, PH)), "outside the rollout: the original title");
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }
 });
+test("one score per film: a page takes the freshest count any edition holds, and its score follows (Oct 2026)", () => {
+  const M = require("./lib/migrate.js");
+  // Rage of Stars: three editions held 231 ratings ("Worth a watch"), others 233 ("Skip").
+  const stale = { title: "Rage of Stars", kind: "movie", released: "2026-08-01", rating: 6.5, votes: 231, fcScore: { verdict: "Worth a watch", reason: "x", audience: "Decent", critics: null, basis: "audience" } };
+  const out = M.shareScore(stale, { rating: 6.4, votes: 233 });
+  assert.strictEqual(out.rating, 6.4); assert.strictEqual(out.votes, 233);
+  assert.ok(out.fcScore && out.fcScore.verdict, "the score is worked out again from the fresher count");
+  assert.strictEqual(M.shareScore(stale, { rating: 6.6, votes: 200 }), stale, "an older count never replaces a newer one");
+  assert.strictEqual(M.shareScore(stale, null), stale, "nothing to share: unchanged");
+  // The critics' reading the page had is kept in the new score.
+  const withCritics = { ...stale, fcScore: { ...stale.fcScore, critics: "positive", basis: "both" } };
+  assert.strictEqual(M.shareScore(withCritics, { rating: 8.4, votes: 4000 }).fcScore.critics, "positive");
+  // Rolled out in stages, finishing by itself.
+  const R = require("./lib/rollout.js");
+  const repo = JSON.parse(require("fs").readFileSync(require("path").join(__dirname, "..", "rollout.json"), "utf8"));
+  assert.strictEqual(R.percentOf(repo, "one-score", Date.parse("2026-11-10T00:00:00Z")), 100);
+  assert.ok(/inRollout\(ONE_SCORE, slug\)/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "migrate.js"), "utf8")));
+});
 test("search health: the 22 Oct 2026 drop raises an issue once, then a note while it lasts (Oct 2026)", () => {
   const S = require("./lib/searchtop.js");
   // Final Search Console data, 13–23 Oct 2026 (the real series).
