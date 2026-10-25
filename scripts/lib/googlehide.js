@@ -89,4 +89,44 @@ function applyGoogleHide(files, manifest, { root = ".", hidden = googleHidden, e
   return res;
 }
 
-module.exports = { GOOGLEBOT_TAG, HIDE_FEATURE, HIDE_FILE, NOINDEX_META, addGooglebotNoindex, applyGoogleHide, googleEligible, googleHidden, loadHidden, removeGooglebotNoindex, useHiddenList };
+// PEOPLE PAGES (25 Oct 2026). The same Google-only tag on actor pages with no impressions in the
+// window: google-hidden.json "paths" lists them by address ("people/abhay-deol/",
+// "uk/people/x/"). lib/sitemap.js leaves a tagged people page out, as it does a film page.
+function peoplePageFiles(root = ".") {
+  const out = [];
+  const add = (base) => {
+    let names;
+    try { names = fs.readdirSync(path.join(root, base)); } catch { return; }
+    if (fs.existsSync(path.join(root, base, "index.html"))) out.push(`${base}/index.html`);
+    for (const n of names) if (fs.existsSync(path.join(root, base, n, "index.html"))) out.push(`${base}/${n}/index.html`);
+  };
+  add("people");
+  let tops = [];
+  try { tops = fs.readdirSync(root); } catch { /* none */ }
+  for (const t of tops) if (/^[a-z]{2}$/.test(t)) add(`${t}/people`);
+  return out;
+}
+function pathHidden(rel, { list = hiddenConfig() } = {}) {
+  const key = String(rel).replace(/\\/g, "/").replace(/index\.html$/, "");
+  const xs = list && list.paths;
+  if (!Array.isArray(xs)) return false;
+  if (!setCache.has(xs)) setCache.set(xs, new Set(xs));
+  return setCache.get(xs).has(key) && inRollout(HIDE_FEATURE, key);
+}
+function applyGoogleHidePaths(files, { root = ".", hidden = pathHidden } = {}) {
+  const res = { pages: 0, hidden: 0, changed: 0 };
+  for (const rel of files) {
+    const file = path.join(root, rel);
+    let html;
+    try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
+    res.pages++;
+    const on = hidden(rel);
+    if (on) res.hidden++;
+    const next = on ? addGooglebotNoindex(html) : removeGooglebotNoindex(html);
+    if (next !== html) { fs.writeFileSync(file, next); res.changed++; }
+  }
+  return res;
+}
+
+module.exports = {
+  applyGoogleHidePaths, pathHidden, peoplePageFiles, GOOGLEBOT_TAG, HIDE_FEATURE, HIDE_FILE, NOINDEX_META, addGooglebotNoindex, applyGoogleHide, googleEligible, googleHidden, loadHidden, removeGooglebotNoindex, useHiddenList };

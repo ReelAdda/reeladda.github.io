@@ -329,9 +329,21 @@ function buildPersonPage(person, cfg, { availability }) {
   });
 }
 
+// NO NEW PEOPLE PAGES (25 Oct 2026, the owner's decision). 1,727 of 1,917 had no Search Console
+// impression in 90 days (450 impressions, 4 clicks between them): Wikipedia and IMDb own an
+// actor's name. The pages that exist keep being kept current (and are dropped, as before, once
+// a person falls below PEOPLE_MIN); a person who qualifies now gets no page. Film pages link a
+// cast member only when the page exists (lib/filmpage.js), so nothing links to a page that isn't.
+function existingPeople(base) {
+  try {
+    return new Set(fs.readdirSync(base).filter((d) => fs.existsSync(`${base}/${d}/index.html`)));
+  } catch { return new Set(); }
+}
+
 function writePeoplePages(data, cfg, manifest) {
   const code = cfg.code;
-  const people = [...peopleIndexFor(cfg).values()].filter((p) => p.films.size >= PEOPLE_MIN);
+  const have = existingPeople(PEOPLE_BASE(code));
+  const people = [...peopleIndexFor(cfg).values()].filter((p) => p.films.size >= PEOPLE_MIN && have.has(p.slug));
   const avail = new Map();
   for (const [platform, items] of verifiedAvailability(data, (manifest || {})[code] || {}, filmIndexFor(cfg))) {
     for (const x of items) { if (!avail.has(x.slug)) avail.set(x.slug, []); avail.get(x.slug).push(platform); }

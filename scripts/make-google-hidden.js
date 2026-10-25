@@ -53,6 +53,29 @@ function hiddenList(manifest, shown, { nowMs = Date.now() } = {}) {
   return out;
 }
 
+// Pure: people pages (by address, "people/x/", "uk/people/x/") with no impressions.
+function hiddenPeople(sitemapUrls, shown) {
+  return [...new Set(sitemapUrls)]
+    .filter((u) => /^https:\/\/filmychill\.com\/(?:[a-z]{2}\/)?people\/(?:[^/]+\/)?$/.test(u) && !shown.has(u))
+    .map((u) => u.slice(SITE.length)).sort();
+}
+
+// --people: add the people pages to the existing list, leaving the film list as it was frozen.
+async function addPeople(token, from, to) {
+  const shown = await pagesWithImpressions(token, from, to);
+  const idx = await (await fetch(`${SITE}sitemap.xml`)).text();
+  const urls = [];
+  for (const m of idx.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+    const x = await (await fetch(m[1])).text();
+    for (const n of x.matchAll(/<url><loc>([^<]+)<\/loc>/g)) urls.push(n[1]);
+  }
+  const file = JSON.parse(fs.readFileSync(HIDE_FILE, "utf8"));
+  file.paths = hiddenPeople(urls, shown);
+  file.pathsFrom = from; file.pathsTo = to;
+  fs.writeFileSync(HIDE_FILE, JSON.stringify(file, null, 1) + "\n");
+  console.log(`${HIDE_FILE}: ${file.paths.length} people page(s) added; film list unchanged (${file.total})`);
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const keyFile = args.find((a) => a.endsWith(".json"));
@@ -61,6 +84,7 @@ async function main() {
   const to = args.includes("--to") ? args[args.indexOf("--to") + 1] : new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10);
   const from = new Date(Date.parse(`${to}T00:00:00Z`) - (days - 1) * 864e5).toISOString().slice(0, 10);
   const token = await accessToken(JSON.parse(fs.readFileSync(keyFile, "utf8")));
+  if (args.includes("--people")) return addPeople(token, from, to);
   const shown = await pagesWithImpressions(token, from, to);
   const manifest = JSON.parse(fs.readFileSync("pages-manifest.json", "utf8"));
   const pages = hiddenList(manifest, shown);
@@ -73,4 +97,4 @@ async function main() {
 }
 
 if (require.main === module) main().catch((e) => { console.error(e.message); process.exit(1); });
-module.exports = { hiddenList };
+module.exports = { hiddenList, hiddenPeople };

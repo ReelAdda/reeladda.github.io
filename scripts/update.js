@@ -337,7 +337,7 @@ const { rolloutSummary } = require("./lib/rollout.js");
 const { checkSearchHealth, refreshSearchTop, reportOpportunities, searchHealthLine } = require("./lib/searchtop.js");
 const { addBrandToPages } = require("./lib/brand.js");
 const { applyHonestWording, applyLeanTrim } = require("./lib/honest.js");
-const { applyGoogleHide } = require("./lib/googlehide.js");
+const { applyGoogleHide, applyGoogleHidePaths, peoplePageFiles } = require("./lib/googlehide.js");
 const { contentFingerprint, extendIndexNowWithChanged, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -2862,6 +2862,8 @@ async function main() {
     try {
       const g = applyGoogleHide(filmPageFiles(), pagesManifest);
       console.log(`Google-hidden catalogue: ${g.hidden} of ${g.eligible} listed page(s) hidden from Google, ${g.changed} updated this run`);
+      const p = applyGoogleHidePaths(peoplePageFiles());
+      console.log(`Google-hidden people pages: ${p.hidden} of ${p.pages} hidden from Google, ${p.changed} updated this run`);
     } catch (e) { stageFailed("google hide", e); }
 
     // All countries are built by now, so the filesystem finally shows every cluster's true

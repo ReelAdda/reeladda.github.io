@@ -470,9 +470,10 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   for (const c of countries) {
     const base = PEOPLE_BASE(c.code);
     if (!fs.existsSync(base)) continue;
-    if (fs.existsSync(`${base}/index.html`)) peopleUrls.push(`  <url><loc>${peopleIndexUrl(c.code)}</loc><lastmod>${lm(peopleIndexUrl(c.code), `${base}/index.html`)}</lastmod><priority>0.4</priority></url>`);
+    // A people page hidden from Google (lib/googlehide.js) stays out, like a noindexed film page.
+    if (fs.existsSync(`${base}/index.html`) && !isNoIndex(`${base}/index.html`)) peopleUrls.push(`  <url><loc>${peopleIndexUrl(c.code)}</loc><lastmod>${lm(peopleIndexUrl(c.code), `${base}/index.html`)}</lastmod><priority>0.4</priority></url>`);
     for (const d of fs.readdirSync(base).sort()) {
-      if (fs.existsSync(`${base}/${d}/index.html`)) peopleUrls.push(`  <url><loc>${personPageUrl(c.code, d)}</loc><lastmod>${lm(personPageUrl(c.code, d), `${base}/${d}/index.html`)}</lastmod><priority>0.5</priority></url>`);
+      if (fs.existsSync(`${base}/${d}/index.html`) && !isNoIndex(`${base}/${d}/index.html`)) peopleUrls.push(`  <url><loc>${personPageUrl(c.code, d)}</loc><lastmod>${lm(personPageUrl(c.code, d), `${base}/${d}/index.html`)}</lastmod><priority>0.5</priority></url>`);
     }
   }
 

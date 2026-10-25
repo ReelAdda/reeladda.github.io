@@ -7042,6 +7042,46 @@ test("google-hide: never-shown catalogue pages get a Google-only noindex, revers
   for (const f of ["graph.js", "sitemap.js"]) assert.ok(fsx.readFileSync(path.join(__dirname, "lib", f), "utf8").includes('require("./googlehide.js").NOINDEX_META'), `${f} honours the googlebot tag`);
   assert.ok(/\|google-hidden[|)]/.test(fsx.readFileSync(path.join(__dirname, "site.js"), "utf8")), "the list is build data, not published");
 });
+test("people pages: never-shown ones hidden from Google; no new people page is ever created (Oct 2026)", () => {
+  const G = require("./lib/googlehide.js");
+  const R = require("./lib/rollout.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const list = { pages: {}, paths: ["people/", "uk/people/nobody/"] };
+  const head = (t) => `<html><head><title>${t}</title><meta name="description" content="d">\n<meta name="robots" content="max-image-preview:large">\n</head><body>${"x".repeat(400)}</body></html>`;
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-ppl-"));
+  try {
+    for (const d of ["people", "people/star", "uk/people/nobody", "uk/people/known"]) {
+      fsx.mkdirSync(path.join(root, d), { recursive: true });
+      fsx.writeFileSync(path.join(root, d, "index.html"), head(d));
+    }
+    const files = G.peoplePageFiles(root).sort();
+    assert.deepStrictEqual(files, ["people/index.html", "people/star/index.html", "uk/people/known/index.html", "uk/people/index.html", "uk/people/nobody/index.html"].filter((f) => fsx.existsSync(path.join(root, f))).sort());
+    R.useRolloutConfig({ features: { "google-hide": { percent: 100 } } });
+    const r = G.applyGoogleHidePaths(files, { root, hidden: (rel) => G.pathHidden(rel, { list }) });
+    const tagged = (f) => fsx.readFileSync(path.join(root, f), "utf8").includes(G.GOOGLEBOT_TAG);
+    assert.ok(tagged("people/index.html") && tagged("uk/people/nobody/index.html"), "the listed ones");
+    assert.ok(!tagged("people/star/index.html") && !tagged("uk/people/known/index.html"), "a people page Google showed stays visible");
+    assert.strictEqual(r.hidden, 2);
+    R.useRolloutConfig({ features: {} });
+    G.applyGoogleHidePaths(files, { root, hidden: (rel) => G.pathHidden(rel, { list }) });
+    assert.ok(!tagged("uk/people/nobody/index.html"), "share back to 0: the tag goes");
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); fsx.rmSync(root, { recursive: true, force: true }); }
+  // The list: people addresses with no impressions, nothing else.
+  const { hiddenPeople } = require("./make-google-hidden.js");
+  const B = "https://filmychill.com/";
+  assert.deepStrictEqual(hiddenPeople([`${B}people/`, `${B}people/a/`, `${B}uk/people/b/`, `${B}movie/x.html`, `${B}streaming/netflix/`], new Set([`${B}people/a/`])), ["people/", "uk/people/b/"]);
+  const file = JSON.parse(fsx.readFileSync(path.join(__dirname, "..", G.HIDE_FILE), "utf8"));
+  assert.ok(Array.isArray(file.paths) && file.paths.every((p) => /^(?:[a-z]{2}\/)?people\/(?:[^/]+\/)?$/.test(p)));
+  // No new people pages: the writer keeps only those already on disk; the sitemap skips tagged ones.
+  const ev = fsx.readFileSync(path.join(__dirname, "lib", "evergreen.js"), "utf8");
+  assert.ok(/p\.films\.size >= PEOPLE_MIN && have\.has\(p\.slug\)/.test(ev), "only existing people pages are written");
+  const sm = fsx.readFileSync(path.join(__dirname, "lib", "sitemap.js"), "utf8");
+  assert.ok(/!isNoIndex\(`\$\{base\}\/\$\{d\}\/index\.html`\)/.test(sm) && /!isNoIndex\(`\$\{base\}\/index\.html`\)/.test(sm), "hidden people pages stay out of the sitemap");
+  const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
+  assert.ok(up.indexOf("applyGoogleHidePaths(peoplePageFiles())") > up.indexOf("writePeoplePages(") && up.indexOf("applyGoogleHidePaths(peoplePageFiles())") < up.indexOf("writeMultiCountrySitemap(builtCountries, pagesManifest);"));
+  // Film pages link a cast member only when the page exists, so no link points at a page never built.
+  assert.ok(/fs\.existsSync\(personPagePath\(code, ps\)\)/.test(fsx.readFileSync(path.join(__dirname, "lib", "filmpage.js"), "utf8")));
+});
 test("updated dates: the page shows the date its sitemap entry gives, never an older or newer one (Oct 2026)", () => {
   const S = require("./lib/sitemap.js");
   const fsx = require("fs"), os = require("os"), path = require("path");
