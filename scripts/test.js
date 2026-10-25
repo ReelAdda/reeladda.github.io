@@ -5148,9 +5148,34 @@ test("each country's footer points at the other seven, not its own", () => {
   assert.ok(!us.includes('href="/us/"'));
   assert.ok(us.includes('href="/uk/"'));
 });
-test("footer reaches that country's own browse index", () => {
-  assert.ok(U.buildMoreLinks("in", null).includes('href="/films/"'));
-  assert.ok(U.buildMoreLinks("us", null).includes('href="/us/films/"'));
+test("retired (25 Oct 2026): month archives and A–Z pages are removed, never rebuilt, and nothing links to them", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const H = require("./lib/hubs.js");
+  // The footer no longer offers the A–Z pages.
+  assert.ok(!/href="\/(?:us\/)?films\/"/.test(U.buildMoreLinks("in", null) + U.buildMoreLinks("us", null)), "no 'All films' link");
+  // The cleanup removes exactly the retired pages, per edition, and leaves every live page alone.
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-retire-"));
+  try {
+    const mk = (rel) => { fsx.mkdirSync(path.join(root, rel), { recursive: true }); fsx.writeFileSync(path.join(root, rel, "index.html"), "x"); };
+    for (const rel of ["films", "films/2", "new-on-ott", "new-on-ott/2026-09", "new-on-netflix", "new-on-netflix/2026-08", "hindi", "hindi/2026-10",
+      "uk/films", "uk/new-on-ott", "uk/new-on-ott/2026-09", "uk/new-on-prime-video/2026-10", "streaming/netflix", "week/2026-W43", "us/films"]) mk(rel);
+    assert.strictEqual(H.pruneRetiredListings("in", root), 4, "India: films/, two month pages, Hindi's month");
+    assert.strictEqual(H.pruneRetiredListings("uk", root), 3);
+    const gone = ["films", "new-on-ott/2026-09", "new-on-netflix/2026-08", "hindi/2026-10", "uk/films", "uk/new-on-ott/2026-09", "uk/new-on-prime-video/2026-10"];
+    for (const g of gone) assert.ok(!fsx.existsSync(path.join(root, g)), `${g} removed`);
+    for (const k of ["new-on-ott/index.html", "new-on-netflix/index.html", "hindi/index.html", "uk/new-on-ott/index.html", "streaming/netflix/index.html", "week/2026-W43/index.html", "us/films/index.html"])
+      assert.ok(fsx.existsSync(path.join(root, k)), `${k} kept (the US is pruned in its own edition's step)`);
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+  // Not rebuilt: the country build prunes first and calls none of the writers; no page carries the old buttons.
+  const src = (f) => fsx.readFileSync(path.join(__dirname, "lib", f), "utf8");
+  const sur = src("surfaces.js");
+  const body = sur.slice(sur.indexOf("function writeCountrySurfaces"));
+  assert.ok(!/writeOttMonthPages|writePlatformMonthPages|writeLanguageMonthPages|writeBrowseIndex/.test(body), "no writer runs");
+  assert.ok(body.indexOf("pruneRetiredListings(cfg.code)") < body.indexOf("platform hubs") && body.indexOf("pruneRetiredListings(cfg.code)") < body.indexOf("country page"), "pruned before anything links");
+  assert.ok(!/Browse every film/.test(src("filmpage.js")), "film pages lost the A–Z button");
+  assert.ok(/fs\.existsSync\(ottMonthPath\(code, m\)\)/.test(src("filmpage.js")) && /fs\.existsSync\(ottMonthPath\(code, thisMonth\)\)/.test(sur), "month links only when the page exists");
+  const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
+  assert.ok(/repairDeadLinks\(\[\.\.\.filmPageFiles\(\), \.\.\.sitePageFiles\(\)\]\)/.test(up), "the dead-link pass still unlinks anything older");
 });
 
 group("hreflang clusters — regional variants, not duplicates");
@@ -5613,11 +5638,10 @@ test("only a clean YYYY-MM-DD passes; everything else coerces to a valid date", 
 });
 
 group("indexing — fresh pages get announced");
-test("IndexNow ping includes the crawl paths into the archive", () => {
+test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
-  assert.ok(urls.includes("https://filmychill.com/films/"), "the browse index is the door to the archive — it must be pinged");
-  assert.ok(urls.includes("https://filmychill.com/us/films/"));
-  assert.ok(urls.includes("https://filmychill.com/data/"), "the citable data page too");
+  assert.ok(!urls.some((u) => /\/films\//.test(u)), "the A–Z pages are retired (25 Oct 2026)");
+  assert.ok(urls.includes("https://filmychill.com/data/"), "the citable data page");
 });
 test("IndexNow list stays within the per-request cap", () => {
   const many = Array.from({ length: 400 }, (_, i) => ({ title: "F" + i, slug: "f" + i }));

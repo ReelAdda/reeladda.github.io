@@ -23,7 +23,6 @@ const {
 const { readHistory, cinemaWindowDays, observationStarts, windowStats, monthKey } = require("./history.js");
 const { DIGITAL_FILE, PUBLISH_MIN, digitalStats, digitalWindow } = require("./indiadata.js");
 const { writeEmbed } = require("./embed.js");
-const { browsePath, filmIndexFor, writeBrowseIndex } = require("./graph.js");
 const { normalizeUpcoming } = require("./release.js");
 const {
   comingPath,
@@ -35,10 +34,8 @@ const {
 const { freshnessWindowLabel } = require("./freshness.js");
 const {
   hubsFor,
-  writeLanguageMonthPages,
-  writeOttMonthPages,
+  pruneRetiredListings,
   writeOttWeekPage,
-  writePlatformMonthPages,
 } = require("./hubs.js");
 const { refreshDuePages } = require("./lifecycle.js");
 const {
@@ -370,7 +367,6 @@ function buildMoreLinks(code, data = null) {
     fs.existsSync(todayPath(code)) ? li(todayUrl(code).replace("https://filmychill.com", ""), `New on ${V.word} today`) : "",
     fs.existsSync(comingPath(code)) ? li(comingUrl(code).replace("https://filmychill.com", ""), `Coming to ${V.word}`) : "",
     fs.existsSync(ottMonthPath(code, thisMonth)) ? li(`${base}/new-on-ott/${thisMonth}/`, "This month") : "",
-    li(browsePath(code, 1), "All films"),
   ].filter(Boolean);
 
   // Evergreen platform pages first (they link into the catalogue); this week's platform hubs
@@ -415,22 +411,6 @@ function streamingPagesFor(code) {
     })
     .sort((a, b) => b.n - a.n)
     .slice(0, 6);
-}
-
-// The newest catalogue pages for this country: a fresh set of links from the homepage every
-// run, so Google meets new catalogue pages within a crawl or two instead of weeks later.
-let _manifestCache = null;
-function newlyAddedFor(code, max = 12) {
-  if (!_manifestCache) {
-    try { _manifestCache = JSON.parse(fs.readFileSync("pages-manifest.json", "utf8")); } catch { _manifestCache = {}; }
-  }
-  const m = _manifestCache[code] || {};
-  const dir = code === "in" ? "movie" : `${code}/movie`;
-  return Object.entries(m)
-    .filter(([slug, e]) => e && e.catalog && e.live && fs.existsSync(`${dir}/${slug}.html`))
-    .sort((a, b) => String(b[1].archivedOn || "").localeCompare(String(a[1].archivedOn || "")) || a[0].localeCompare(b[0]))
-    .slice(0, max)
-    .map(([slug, e]) => ({ title: e.title || slug, href: `/${dir}/${slug}.html` }));
 }
 
 // ============================================================================
@@ -621,20 +601,14 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
     try { fn(); }
     catch (e) { stageFailed(`${name} [${cfg.code}]`, e); }
   };
-  // Month archive FIRST: the footer's "everything new this month" link is only written when
-  // the page it points at exists, so building it after the country page would delay the link
-  // by a full run (and permanently, on a month's first build).
-  step("month archive", () => writeOttMonthPages(cfg));
-  // Hubs before platform months: a month page links its platform's hub only if the hub
-  // exists, so the hub set must already be this run's (created and pruned) when they're built.
+  // Month archives and the A–Z pages are retired (lib/hubs.js pruneRetiredListings): removed
+  // FIRST, so every page written after this sees them gone and links none of them.
+  step("retired listings", () => { const n = pruneRetiredListings(cfg.code); if (n) console.log(`  retired listings [${cfg.code}]: ${n} month/A–Z page set(s) removed`); });
   step("platform hubs", () => writePlatformHubPages(data, cfg));
-  step("platform months", () => writePlatformMonthPages(cfg));
-  if (cfg.code === "in") step("language months", () => writeLanguageMonthPages());
   if (template) step("country page", () => renderCountryPage(template, cfg, data));
   step("weekly page", () => writeOttWeekPage(data, cfg, allCountries));
   step("rss feed", () => writeRssFeed(data, cfg));
   step("due-date pass", () => refreshDuePages(cfg, countryNameFor(cfg)));
-  step("browse index", () => writeBrowseIndex(filmIndexFor(cfg), cfg, stamp, analyticsTag(), newlyAddedFor(cfg.code)));
   step("embed widget", () => writeEmbed(data, cfg, stamp)); // /embed/week/ per country + /embed/ (India)
   if (cfg.code === "in") step("data page", () => writeDataPage(stamp)); // site-wide, built once
 }

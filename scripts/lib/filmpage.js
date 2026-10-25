@@ -29,7 +29,7 @@ const {
 } = require("./core.js");
 const { readHistory, cinemaWindowDays, observationStarts, monthKey, monthLabel } = require("./history.js");
 const { filmScore } = require("./score.js");
-const { browsePath, filmIndexFor, filmPageExists, relatedFilms, sameFilmPageExists } = require("./graph.js");
+const { filmIndexFor, filmPageExists, relatedFilms, sameFilmPageExists } = require("./graph.js");
 const { inRollout } = require("./rollout.js");
 const { cap, whyWatch } = require("./whywatch.js");
 const { skipIf } = require("./skipif.js");
@@ -1360,7 +1360,6 @@ ${FCSB_CSS}
     return lp && fs.existsSync(`${lp[1]}/index.html`) ? `<a class="btn" href="/${e(lp[1])}/">New ${e(lp[0])} movies &amp; OTT this week →</a>` : "";
   })()}
   <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">See this week's top picks on FilmyChill →</a>
-  <a class="btn" href="${e(browsePath(code, 1))}">Browse every film we've covered →</a>
 </div>
 <footer>
   <nav><a href="${e(homeUrl)}">This week in ${e(country)}</a> · <a href="${code === "in" ? "/new-on-ott/" : `/${e(code)}/new-on-ott/`}">New on ${e(streamVocab(cfg).word === "OTT" ? "OTT" : "streaming")}</a>${code === "in" ? ` · ${LANGUAGE_PAGES.map(([n, s]) => `<a href="/${s}/">${n}</a>`).join(" · ")}` : ""} · <a href="/about/">About</a></nav>

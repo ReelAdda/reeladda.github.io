@@ -384,6 +384,35 @@ function writeLanguageMonthPages(records = null, index = null) {
   return written;
 }
 
+// ============================================================================
+// RETIRED, 25 Oct 2026 (the owner's decision): month archives and the "every film" A–Z pages.
+// Of 204 month pages 182 had no Search Console impression in 90 days, of 162 A–Z pages 132:
+// a closed month is a record nobody searches for, and the A–Z list is navigation, not content.
+// They are no longer written, the ones on disk are removed first thing each build (the site
+// branch is restored before a build, so a page left there would live on), and nothing links to
+// them: film pages and footers link a month page only when it exists, the "Browse every film"
+// and "All films" links are gone, and the dead-link pass (lib/stylesheets.js repairDeadLinks)
+// unlinks anything older. ott-history.jsonl, the record they were built from, is kept.
+// The builders stay (tested) so this can be undone by calling them again.
+// ============================================================================
+function pruneRetiredListings(code, root = ".") {
+  const path = require("path");
+  const base = code === "in" ? "" : code;
+  const rm = (rel) => { fs.rmSync(path.join(root, rel), { recursive: true, force: true }); return 1; };
+  let n = 0;
+  if (fs.existsSync(path.join(root, base, "films"))) n += rm(path.join(base, "films"));
+  const months = (dir) => {
+    let names = [];
+    try { names = fs.readdirSync(path.join(root, dir)); } catch { return; }
+    for (const m of names) if (/^\d{4}-\d{2}$/.test(m)) n += rm(path.join(dir, m));
+  };
+  let tops = [];
+  try { tops = fs.readdirSync(path.join(root, base || ".")); } catch { /* none */ }
+  for (const t of tops) if (t.startsWith("new-on-")) months(path.join(base, t));
+  if (code === "in") for (const [, slug] of LANGUAGE_PAGES) months(slug);
+  return n;
+}
+
 function writeOttMonthPages(cfg, records = null, index = null) {
   const code = (cfg && cfg.code) || "in";
   const recs = records || readHistory();
@@ -582,6 +611,7 @@ module.exports = {
   ottMonthUrl,
   platformMonthPath,
   platformMonthUrl,
+  pruneRetiredListings,
   SCOPED_MONTH_MIN,
   writeLanguageMonthPages,
   writeOttMonthPages,

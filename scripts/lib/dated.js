@@ -14,7 +14,7 @@ const {
   localeFor,
 } = require("./core.js");
 const { readHistory } = require("./history.js");
-const { browsePath, filmIndexFor } = require("./graph.js");
+const { filmIndexFor } = require("./graph.js");
 const { normalizeUpcoming } = require("./release.js");
 const {
   buildPlatformHubPage,
@@ -408,9 +408,6 @@ function indexNowUrls(builtCountries, dataByCode = {}) {
     "https://filmychill.com/data/", "https://filmychill.com/llms-full.txt"];
   for (const cfg of builtCountries) {
     if (cfg.code !== "in") urls.push(`https://filmychill.com/${cfg.code}/`, `https://filmychill.com/${cfg.code}/new-on-ott/`);
-    // Browse index (page 1 per country): the crawl path into the archive. Announcing it on
-    // every run keeps the door Google walks through freshly stamped.
-    urls.push(`https://filmychill.com${browsePath(cfg.code, 1)}`);
     const d = dataByCode[cfg.code];
     if (!d) continue;
     for (const h of hubsFor(d)) urls.push(hubUrl(cfg.code, h.slug));
