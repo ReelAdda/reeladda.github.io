@@ -6835,10 +6835,14 @@ test("syncFilmLastmods: the first run only records; cosmetic edits never move th
   try {
     fsx.mkdirSync(path.join(root, "movie"));
     const p = path.join(root, "movie", "f.html");
-    const write = (body, head = "") => fsx.writeFileSync(p, `<html><head><title>F</title>${head}</head><body><p>${body}</p></body></html>`);
+    // The date follows the page's facts (lib/facts.js keyFacts): here, its platforms.
+    const write = (body, head = "") => {
+      const pill = (/Streaming on (\w+)/.exec(body) || [])[1];
+      fsx.writeFileSync(p, `<html><head><title>F</title>${head}</head><body><h1>F</h1><h2>Where to watch in India</h2><div>${pill ? `<span class="pill">${pill}</span>` : ""}</div><p>${body}</p></body></html>`);
+    };
     const man = { in: { f: { last: "2026-09-01" } } };
     write("In cinemas now");
-    assert.deepStrictEqual(U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-04", { root }), { pages: 1, changed: 0, seeded: 1, restamped: 0 });
+    assert.deepStrictEqual(U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-04", { root }), { pages: 1, changed: 0, seeded: 1, restamped: 0, reseeded: 0 });
     assert.strictEqual(man.in.f.last, "2026-09-01", "the first run must not stamp every page today");
     write("In cinemas now", '<link rel="icon" href="/icon-192.png">');
     U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-05", { root });
@@ -6847,6 +6851,17 @@ test("syncFilmLastmods: the first run only records; cosmetic edits never move th
     U.syncFilmLastmods(man, [{ code: "in" }], "2026-10-06", { root });
     assert.strictEqual(man.in.f.last, "2026-10-06", "a streaming arrival is");
   } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("lastmod: layout and wording changes (lean page, honest wording, titles) never move it; a fact does (Oct 2026)", () => {
+  const S = require("./lib/sitemap.js");
+  const H = require("./lib/honest.js");
+  const base = (title, extra, pills) => `<html><head><title>${title}</title><script type="application/ld+json">{"@type":"Movie","datePublished":"2026-09-25"}</script></head><body><h1>X</h1>${extra}<h2>Where to watch in India</h2><div>${pills}</div><h2>Story</h2><p>A tale.</p><div class="cast-name">A B</div></body></html>`;
+  const before = base("X (2026) OTT Release Date: Not Announced Yet", "<p>Its OTT release date hasn't been announced — this page updates.</p><p>Not streaming yet — X opened in theatres in India on 25 Sept. We re-check.</p>", "");
+  const after = H.leanTrim(H.honestWording(base("X (2026) OTT Release Date: Awaiting Date", "<!--FC:lean--><p>Its OTT release date hasn't been announced — this page updates.</p><p>Not streaming yet — X opened in theatres in India on 25 Sept. We re-check.</p>", "")));
+  assert.notStrictEqual(before, after);
+  assert.strictEqual(S.factsFingerprint(after), S.factsFingerprint(before), "same facts, same date");
+  assert.notStrictEqual(S.contentFingerprint(after), S.contentFingerprint(before), "(the old rule would have moved it)");
+  assert.notStrictEqual(S.factsFingerprint(base("X", "", '<span class="pill">SonyLIV</span>')), S.factsFingerprint(base("X", "", "")), "a platform arriving is a fact");
 });
 test("honest wording: no page claims a date 'hasn't been announced' — it says what our sources show, reversibly (Oct 2026)", () => {
   const H = require("./lib/honest.js");
@@ -6956,7 +6971,7 @@ test("IndexNow: every page whose content changed today is announced, not only th
 test("updated dates: the page shows the date its sitemap entry gives, never an older or newer one (Oct 2026)", () => {
   const S = require("./lib/sitemap.js");
   const fsx = require("fs"), os = require("os"), path = require("path");
-  const page = (shown, iso, body) => `<html><head><title>F</title><script type="application/ld+json">{"@type":"Movie","dateModified":"${iso}","datePublished":"2026-09-25"}</script></head><body><div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${shown}</div><p>${body}</p></body></html>`;
+  const page = (shown, iso, body) => `<html><head><title>F</title><script type="application/ld+json">{"@type":"Movie","dateModified":"${iso}","datePublished":"2026-09-25"}</script></head><body><div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${shown}</div><h1>${body}</h1><p>${body}</p></body></html>`;
   // Pure restamp, in each edition's own date format.
   const r = S.restampUpdated(page("17 Oct 2026", "2026-10-17", "x"), "2026-10-23", "in");
   assert.ok(r.includes("Page updated 23 Oct 2026") && r.includes('"dateModified":"2026-10-23"') && r.includes('"datePublished":"2026-09-25"'), r);
@@ -6965,14 +6980,14 @@ test("updated dates: the page shows the date its sitemap entry gives, never an o
   try {
     fsx.mkdirSync(path.join(root, "movie"));
     const p = (n) => path.join(root, "movie", `${n}.html`);
-    const fp = (html) => S.contentFingerprint(html);
+    const fp = (html) => S.factsFingerprint(html);
     // a: content changes this run -> the sitemap date AND the shown date are today.
     fsx.writeFileSync(p("a"), page("17 Oct 2026", "2026-10-17", "Too early"));
     // b: content unchanged, but the shown date lags its lastmod (the Meesaya Murukku 2 case).
     fsx.writeFileSync(p("b"), page("17 Oct 2026", "2026-10-17", "Same"));
     // c: content unchanged, shown date already right -> untouched.
     fsx.writeFileSync(p("c"), page("20 Oct 2026", "2026-10-20", "Same"));
-    const man = { in: { a: { last: "2026-10-17", fp: "old" }, b: { last: "2026-10-23", fp: fp(fsx.readFileSync(p("b"), "utf8")) }, c: { last: "2026-10-20", fp: fp(fsx.readFileSync(p("c"), "utf8")) } } };
+    const man = { in: { a: { last: "2026-10-17", fp: "old", fpv: 2 }, b: { last: "2026-10-23", fp: fp(fsx.readFileSync(p("b"), "utf8")), fpv: 2 }, c: { last: "2026-10-20", fp: fp(fsx.readFileSync(p("c"), "utf8")), fpv: 2 } } };
     const before = fsx.readFileSync(p("c"), "utf8");
     const res = S.syncFilmLastmods(man, [{ code: "in" }], "2026-10-25", { root });
     assert.strictEqual(man.in.a.last, "2026-10-25");
@@ -8356,7 +8371,7 @@ test("a US-style availability date no longer moves a page's lastmod; stored fing
   const r = Sm.syncFilmLastmods(man, [{ code: "us" }], "2026-10-17", { root });
   assert.strictEqual(man.us.x.last, "2026-10-01", "an old-rule fingerprint of the same page doesn't restamp it");
   assert.strictEqual(r.changed, 0);
-  assert.strictEqual(man.us.x.fp, Sm.contentFingerprint(b), "...and is upgraded to the new rule");
+  assert.strictEqual(man.us.x.fp, Sm.factsFingerprint(b), "...and is upgraded to the new (facts) rule");
   fs.writeFileSync(path.join(root, "us", "movie", "x.html"), a);
   Sm.syncFilmLastmods(man, [{ code: "us" }], "2026-10-18", { root });
   assert.strictEqual(man.us.x.last, "2026-10-01", "only the availability month changed: no new lastmod");

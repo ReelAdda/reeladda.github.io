@@ -130,8 +130,23 @@ const pageDate = (html) => (/"dateModified":"(\d{4}-\d{2}-\d{2})/.exec(html) || 
 // at most this many per build (only the date text changes; the lastmod doesn't move).
 const RESTAMP_BACKLOG_PER_RUN = 1000;
 
+// FACTS, NOT TEMPLATE (Oct 2026). A film page's date now moves only when one of its FACTS changes —
+// status, platforms, rent/buy, release date, verdict, rating, cast, story, trailer, an announced
+// streaming date, certificate, runtime (lib/facts.js keyFacts, without the availability check date).
+// It used to move on any visible text change, so template work moved every date at once: 13,391 of
+// 21,358 sitemap dates became 22 Oct with the older-title FAQ, and the lean layout, honest wording
+// and new titles would have moved them again. Google trusts lastmod only if it means a content
+// change; the new-release sitemap depends on that trust. "Page updated" follows (restampUpdated).
+const FP_VERSION = 2;
+function factsFingerprint(html) {
+  const { keyFacts } = require("./facts.js");   // here, not at the top: facts.js loads the page builders
+  const k = keyFacts(html);
+  delete k.availability;
+  return crypto.createHash("sha1").update(JSON.stringify(k)).digest("hex").slice(0, 12);
+}
+
 function syncFilmLastmods(pagesManifest, countries, today, { root = ".", backlog = RESTAMP_BACKLOG_PER_RUN } = {}) {
-  const res = { pages: 0, changed: 0, seeded: 0, restamped: 0 };
+  const res = { pages: 0, changed: 0, seeded: 0, restamped: 0, reseeded: 0 };
   let backlogLeft = backlog;
   const align = (file, html, e) => {
     // The page shows the date its content last changed, the same date the sitemap gives.
@@ -151,10 +166,17 @@ function syncFilmLastmods(pagesManifest, countries, today, { root = ".", backlog
       let html;
       try { html = fs.readFileSync(path.join(dir, f), "utf8"); } catch { continue; }
       res.pages++;
-      const fp = contentFingerprint(html);
+      const fp = factsFingerprint(html);
       const file = { path: path.join(dir, f), code: c.code };
-      if (!e.fp) { e.fp = fp; res.seeded++; continue; }
-      if (e.fp !== fp && e.fp === contentFingerprint(html, { legacy: true })) { e.fp = fp; continue; } // same page, new rule
+      if (!e.fp) { e.fp = fp; e.fpv = FP_VERSION; res.seeded++; continue; }
+      if (e.fpv !== FP_VERSION) {
+        // The switch to facts fingerprints: no date moves for the new rule itself — only if the
+        // page's content changed this very run (judged by the old rule it was recorded with).
+        const changedNow = e.fp !== contentFingerprint(html) && e.fp !== contentFingerprint(html, { legacy: true });
+        e.fp = fp; e.fpv = FP_VERSION; res.reseeded++;
+        if (changedNow) { e.last = today; res.changed++; align(file, html, e); }
+        continue;
+      }
       if (e.fp !== fp) { e.fp = fp; e.last = today; res.changed++; align(file, html, e); continue; }
       if (backlogLeft > 0 && e.last && pageDate(html) && pageDate(html) !== e.last) { backlogLeft--; align(file, html, e); }
     }
@@ -493,6 +515,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
 
 module.exports = {
   contentFingerprint,
+  factsFingerprint,
   extendIndexNowWithChanged,
   isNewReleaseEntry,
   pageLastmodTracker,
