@@ -485,7 +485,11 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const urlset = (entries) => `<?xml version="1.0" encoding="UTF-8"?>\n<urlset ${NS}>\n${entries.join("\n")}\n</urlset>\n`;
   const newest = (entries) => entries.reduce((mx, x) => { const d = (/<lastmod>([^<]+)<\/lastmod>/.exec(x) || [])[1] || ""; return d > mx ? d : mx; }, "") || today;
   const children = [];
-  const pageEntries = [...countryUrls, ...langUrls, ...hubUrls, ...datedUrls, ...streamUrls, ...peopleUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...scopedMonthUrls, ...aboutUrls, ...ottUrls];
+  // No page that asks not to be indexed (robots, or Google's own tag from lib/googlehide.js:
+  // people pages, the embed instructions) is offered, whichever list above added it.
+  const locFile = (loc) => { const p = loc.replace("https://filmychill.com/", ""); return p === "" || p.endsWith("/") ? `${p}index.html` : p; };
+  const pageEntries = [...countryUrls, ...langUrls, ...hubUrls, ...datedUrls, ...streamUrls, ...peopleUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...scopedMonthUrls, ...aboutUrls, ...ottUrls]
+    .filter((x) => { const m = /<loc>([^<]+)<\/loc>/.exec(x); return !m || !isNoIndex(locFile(m[1])); });
   fs.writeFileSync("sitemap-pages.xml", urlset(pageEntries));
   pages.save();
   children.push({ file: "sitemap-pages.xml", lastmod: newest(pageEntries) });

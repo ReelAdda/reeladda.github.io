@@ -459,8 +459,8 @@ function writeOttWeekPage(data, cfg, allCountries) {
 // gets its page minted and pruned on alternate runs, which is a worse signal to a crawler
 // than never having had the page. The create bar is the higher one because a three-title
 // hub is thin content and this pipeline mints hubs automatically.
-const HUB_MIN_NEW = 4;
-const HUB_MIN_KEEP = 3;
+const HUB_MIN_NEW = 6;   // 4 until 25 Oct 2026: hubs of 3-4 titles ran ~200 words (the thin-content audit)
+const HUB_MIN_KEEP = 5;
 const HUB_MAX_PER_COUNTRY = 5;
 
 // `existingSlugs` is the set of hub pages already on disk for this country. Pass it and a

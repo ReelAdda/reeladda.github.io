@@ -4749,20 +4749,20 @@ test("platformSlug: clean, collision-safe slugs incl. overrides", () => {
   assert.strictEqual(U.platformSlug("Amazon Prime Video"), "prime-video");
   assert.strictEqual(U.platformSlug("Disney+"), "disney-plus");
 });
-test("hubsFor: groups by every provider, min-4 to create, cap 5, keeps rank order", () => {
+test("hubsFor: groups by every provider, min-6 to create, cap 5, keeps rank order", () => {
   const mk = (slug, provs) => ({ title: slug, slug, platform: provs[0], providers: provs });
   const hubs = U.hubsFor({ ott: [mk("a", ["Netflix", "JioHotstar"]), mk("b", ["Netflix"]), mk("c", ["Netflix"]),
-    mk("h", ["Netflix"]), mk("d", ["JioHotstar"]), mk("e", ["JioHotstar"]), mk("i", ["JioHotstar"]),
-    mk("f", ["Zee5"]), mk("g", ["Zee5"])] });
-  assert.deepStrictEqual(hubs.map((h) => h.name).sort(), ["JioHotstar", "Netflix"]);
-  assert.deepStrictEqual(hubs.find((h) => h.name === "Netflix").items.map((x) => x.slug), ["a", "b", "c", "h"]);
+    mk("h", ["Netflix"]), mk("j", ["Netflix"]), mk("k", ["Netflix"]), mk("d", ["JioHotstar"]), mk("e", ["JioHotstar"]), mk("i", ["JioHotstar"]),
+    mk("l", ["JioHotstar"]), mk("m", ["JioHotstar"]), mk("f", ["Zee5"]), mk("g", ["Zee5"]), mk("n", ["Zee5"]), mk("o", ["Zee5"])] });
+  assert.deepStrictEqual(hubs.map((h) => h.name).sort(), ["JioHotstar", "Netflix"], "Zee5's four titles don't make a hub (25 Oct 2026: too thin)");
+  assert.deepStrictEqual(hubs.find((h) => h.name === "Netflix").items.map((x) => x.slug), ["a", "b", "c", "h", "j", "k"]);
 });
 test("hubsFor: reads ottExtra, not just the capped homepage list", () => {
   const mk = (slug, provs) => ({ title: slug, slug, tmdbId: slug.charCodeAt(0), platform: provs[0], providers: provs });
-  const data = { ott: [mk("a", ["Netflix"]), mk("b", ["Netflix"])],
-                 ottExtra: [mk("c", ["Netflix"]), mk("d", ["Netflix"])] };
+  const data = { ott: [mk("a", ["Netflix"]), mk("b", ["Netflix"]), mk("c", ["Netflix"])],
+                 ottExtra: [mk("d", ["Netflix"]), mk("e", ["Netflix"]), mk("f", ["Netflix"])] };
   assert.deepStrictEqual(U.hubsFor(data).map((h) => h.name), ["Netflix"]);
-  assert.strictEqual(U.hubsFor({ ott: data.ott }).length, 0, "two titles alone must not mint a hub");
+  assert.strictEqual(U.hubsFor({ ott: data.ott }).length, 0, "three titles alone must not mint a hub");
 });
 test("hubsFor: provider variants collapse to one service", () => {
   // "Apple TV" + "Apple TV Amazon Channel" is one destination to a viewer. Split across two
@@ -4770,19 +4770,19 @@ test("hubsFor: provider variants collapse to one service", () => {
   // a URL named after a billing tier.
   const mk = (slug, provs) => ({ title: slug, slug, tmdbId: slug.charCodeAt(0), platform: provs[0], providers: provs });
   const hubs = U.hubsFor({ ott: [mk("a", ["Apple TV"]), mk("b", ["Apple TV Amazon Channel"]),
-    mk("c", ["Apple TV+"]), mk("d", ["Apple TV"])] });
+    mk("c", ["Apple TV+"]), mk("d", ["Apple TV"]), mk("e", ["Apple TV+"]), mk("f", ["Apple TV Amazon Channel"])] });
   assert.deepStrictEqual(hubs.map((h) => h.name), ["Apple TV"]);
-  assert.strictEqual(hubs[0].items.length, 4);
+  assert.strictEqual(hubs[0].items.length, 6);
   assert.strictEqual(U.platformSlug("Amazon Prime Video with Ads"), "prime-video");
   assert.strictEqual(U.platformSlug("Netflix Standard with Ads"), "netflix");
 });
 test("hubsFor: an existing hub survives on the lower keep threshold", () => {
   const mk = (slug, provs) => ({ title: slug, slug, tmdbId: slug.charCodeAt(0), platform: provs[0], providers: provs });
-  const data = { ott: [mk("a", ["Netflix"]), mk("b", ["Netflix"]), mk("c", ["Netflix"])] };
-  assert.strictEqual(U.hubsFor(data).length, 0, "3 titles must not CREATE a hub");
-  assert.strictEqual(U.hubsFor(data, new Set(["netflix"])).length, 1, "3 titles must KEEP an existing hub");
-  const two = { ott: [mk("a", ["Netflix"]), mk("b", ["Netflix"])] };
-  assert.strictEqual(U.hubsFor(two, new Set(["netflix"])).length, 0, "2 titles must not survive either");
+  const five = { ott: ["a", "b", "c", "d", "e"].map((s) => mk(s, ["Netflix"])) };
+  assert.strictEqual(U.hubsFor(five).length, 0, "5 titles must not CREATE a hub");
+  assert.strictEqual(U.hubsFor(five, new Set(["netflix"])).length, 1, "5 titles must KEEP an existing hub");
+  const four = { ott: ["a", "b", "c", "d"].map((s) => mk(s, ["Netflix"])) };
+  assert.strictEqual(U.hubsFor(four, new Set(["netflix"])).length, 0, "4 titles must not survive either");
 });
 test("hubsFor: a title on the same provider twice is counted once", () => {
   const dup = { title: "a", slug: "a", tmdbId: 1, platform: "Netflix", providers: ["Netflix"] };
@@ -4792,15 +4792,15 @@ test("hubsFor: a title on the same provider twice is counted once", () => {
 });
 test("buildPlatformHubPage: title, country-scoped links, ItemList + FAQ, no emoji", () => {
   const mk = (slug, r) => ({ title: slug.toUpperCase(), slug, kind: "movie", platform: "Netflix", providers: ["Netflix"], rating: r, votes: 100, language: "English", genre: "Drama" });
-  const data = { generatedAt: "2026-07-19T04:00:00Z", ott: [mk("aaa", 8.2), mk("bbb", 7.1), mk("ccc", 6.4), mk("ddd", 6.1)] };
+  const data = { generatedAt: "2026-07-19T04:00:00Z", ott: [mk("aaa", 8.2), mk("bbb", 7.1), mk("ccc", 6.4), mk("ddd", 6.1), mk("eee", 6.0), mk("fff", 5.9)] };
   const html = U.buildPlatformHubPage(data, { code: "us", name: "United States" }, U.hubsFor(data)[0]);
   assert.ok(/New on Netflix/.test(html) && html.includes('href="/us/movie/aaa.html"'));
-  assert.ok(html.includes('"ItemList"') && html.includes('"numberOfItems":4'));
+  assert.ok(html.includes('"ItemList"') && html.includes('"numberOfItems":6'));
   assert.ok(!/[\u{1F300}-\u{1FAFF}]/u.test(html));
 });
 test("indexNowUrls: hubs, this week's film pages, llms-full ride the ping; deduped", () => {
   const urls = U.indexNowUrls([{ code: "in" }], { in: { theatres: [{ slug: "the-odyssey" }],
-    ott: [{ slug: "p", title: "P", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "b", title: "B", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "c", title: "C", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "d", title: "D", platform: "JioHotstar", providers: ["JioHotstar"] }] } });
+    ott: [{ slug: "p", title: "P", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "b", title: "B", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "c", title: "C", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "d", title: "D", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "e", title: "E", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "f", title: "F", platform: "JioHotstar", providers: ["JioHotstar"] }] } });
   assert.ok(urls.includes("https://filmychill.com/movie/the-odyssey.html") && urls.includes("https://filmychill.com/new-on-jiohotstar/") && urls.includes("https://filmychill.com/llms-full.txt"));
   assert.strictEqual(new Set(urls).size, urls.length);
 });
@@ -7063,7 +7063,7 @@ test("google-hide: never-shown catalogue pages get a Google-only noindex, revers
       const r = G.applyGoogleHide(["uk/movie/old.html", "movie/old.html"], man, { root, hidden: (code) => code === "uk", eligible: () => true });
       assert.ok(fsx.readFileSync(path.join(root, "uk", "movie", "old.html"), "utf8").includes(G.GOOGLEBOT_TAG));
       assert.strictEqual(fsx.readFileSync(path.join(root, "movie", "old.html"), "utf8"), page, "rolled back: the tag goes");
-      assert.deepStrictEqual(r, { pages: 2, eligible: 2, hidden: 1, changed: 2 });
+      assert.deepStrictEqual(r, { pages: 2, eligible: 2, hidden: 1, nearCopies: 0, changed: 2 });
     } finally { fsx.rmSync(root, { recursive: true, force: true }); }
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }
   // The frozen list: catalogue only, released over a year ago, never a page Google showed.
@@ -7084,12 +7084,42 @@ test("google-hide: never-shown catalogue pages get a Google-only noindex, revers
   assert.strictEqual(R.percentOf({ features: { f: { percent: 0, schedule: [{ from: "2026-10-28", percent: 50 }] } } }, "f", Date.parse("2026-10-28T01:00:00Z")), 50, "day-only stages still start at midnight");
   // Wiring: after the last writer, before the hreflang and sitemap passes, which read the tag.
   const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
-  const at = up.indexOf("applyGoogleHide(filmPageFiles(), pagesManifest)");
+  const at = up.indexOf("applyGoogleHide(films, pagesManifest");
   assert.ok(at > up.indexOf("applyLeanTrim(filmPageFiles())") && at < up.indexOf("syncHreflangClusters();") && at < up.indexOf("writeMultiCountrySitemap(builtCountries, pagesManifest);"));
   for (const f of ["graph.js", "sitemap.js"]) assert.ok(fsx.readFileSync(path.join(__dirname, "lib", f), "utf8").includes('require("./googlehide.js").NOINDEX_META'), `${f} honours the googlebot tag`);
   assert.ok(/\|google-hidden[|)]/.test(fsx.readFileSync(path.join(__dirname, "site.js"), "utf8")), "the list is build data, not published");
 });
-test("people pages: never-shown ones hidden from Google; no new people page is ever created (Oct 2026)", () => {
+test("near-copy editions (option B): one edition per group of near-identical ones stays visible to Google (Oct 2026)", () => {
+  const G = require("./lib/googlehide.js");
+  const R = require("./lib/rollout.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const words = (n, seed) => Array.from({ length: n }, (_, i) => `w${(i * seed) % 997}x${i}`).join(" ");
+  const shared = words(400, 7);
+  const page = (body) => `<html><head><title>T</title><meta name="description" content="d">\n<meta name="robots" content="max-image-preview:large">\n</head><body><div class="top">FILMYCHILL</div><p>${body}</p><footer>f</footer></body></html>`;
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-copy-"));
+  try {
+    const put = (rel, body) => { fsx.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true }); fsx.writeFileSync(path.join(root, rel), page(body)); };
+    put("my/movie/f.html", `${shared} malaysia`);
+    put("sg/movie/f.html", `${shared} singapore`);       // a near-copy of Malaysia's
+    put("uk/movie/f.html", `${words(400, 13)} uk`);      // its own platform, dates, words: not a copy
+    put("movie/g.html", `${shared} india`);              // a different film with the same words: never compared
+    const man = { my: { f: { tmdbId: 1, kind: "movie" } }, sg: { f: { tmdbId: 1, kind: "movie" } }, uk: { f: { tmdbId: 1, kind: "movie" } }, in: { g: { tmdbId: 2, kind: "movie" } } };
+    const files = ["my/movie/f.html", "sg/movie/f.html", "uk/movie/f.html", "movie/g.html"];
+    R.useRolloutConfig({ features: { "google-hide": { percent: 100 } } });
+    const top = { pages: { sg: [["f", 3, 40, 9]] } };   // Singapore has the clicks: it stays
+    assert.deepStrictEqual([...G.nearCopyEditions(files, man, { root, top })], ["my/f"]);
+    assert.deepStrictEqual([...G.nearCopyEditions(files, man, { root, top: { pages: {} }, order: ["in", "uk", "my", "sg"] })], ["sg/f"], "no data: the earlier market stays");
+    assert.deepStrictEqual([...G.nearCopyEditions(files, man, { root, top, skip: (code) => code === "sg" })], [], "an edition already hidden is never the one kept");
+    const r = G.applyGoogleHide(files, man, { root, hidden: () => false, eligible: () => false, extra: new Set(["my/f"]) });
+    assert.ok(fsx.readFileSync(path.join(root, "my/movie/f.html"), "utf8").includes(G.GOOGLEBOT_TAG) && r.nearCopies === 1);
+    G.applyGoogleHide(files, man, { root, hidden: () => false, eligible: () => false, extra: new Set() });
+    assert.ok(!fsx.readFileSync(path.join(root, "my/movie/f.html"), "utf8").includes(G.GOOGLEBOT_TAG), "no longer a copy: visible again");
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); fsx.rmSync(root, { recursive: true, force: true }); }
+  const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
+  assert.ok(/nearCopyEditions\(films, pagesManifest, \{ skip: \(code, slug, entry\) => googleHidden\(code, slug, entry\) \}\)/.test(up) && /applyGoogleHide\(films, pagesManifest, \{ extra: copies \}\)/.test(up));
+  assert.strictEqual(G.NEAR_COPY, 0.9);
+});
+test("people pages and /embed/: all hidden from Google; no new people page is ever created (Oct 2026)", () => {
   const G = require("./lib/googlehide.js");
   const R = require("./lib/rollout.js");
   const fsx = require("fs"), os = require("os"), path = require("path");
@@ -7097,18 +7127,18 @@ test("people pages: never-shown ones hidden from Google; no new people page is e
   const head = (t) => `<html><head><title>${t}</title><meta name="description" content="d">\n<meta name="robots" content="max-image-preview:large">\n</head><body>${"x".repeat(400)}</body></html>`;
   const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-ppl-"));
   try {
-    for (const d of ["people", "people/star", "uk/people/nobody", "uk/people/known"]) {
+    for (const d of ["people", "people/star", "uk/people/nobody", "uk/people/known", "embed", "streaming/netflix"]) {
       fsx.mkdirSync(path.join(root, d), { recursive: true });
       fsx.writeFileSync(path.join(root, d, "index.html"), head(d));
     }
     const files = G.peoplePageFiles(root).sort();
-    assert.deepStrictEqual(files, ["people/index.html", "people/star/index.html", "uk/people/known/index.html", "uk/people/index.html", "uk/people/nobody/index.html"].filter((f) => fsx.existsSync(path.join(root, f))).sort());
+    assert.deepStrictEqual(files, ["embed/index.html", "people/index.html", "people/star/index.html", "uk/people/known/index.html", "uk/people/index.html", "uk/people/nobody/index.html"].filter((f) => fsx.existsSync(path.join(root, f))).sort());
     R.useRolloutConfig({ features: { "google-hide": { percent: 100 } } });
     const r = G.applyGoogleHidePaths(files, { root, hidden: (rel) => G.pathHidden(rel, { list }) });
     const tagged = (f) => fsx.readFileSync(path.join(root, f), "utf8").includes(G.GOOGLEBOT_TAG);
-    assert.ok(tagged("people/index.html") && tagged("uk/people/nobody/index.html"), "the listed ones");
-    assert.ok(!tagged("people/star/index.html") && !tagged("uk/people/known/index.html"), "a people page Google showed stays visible");
-    assert.strictEqual(r.hidden, 2);
+    for (const f of files) assert.ok(tagged(f), `${f}: every people page (listed or not, 25 Oct 2026) and the embed instructions`);
+    assert.ok(!tagged("streaming/netflix/index.html"), "nothing else");
+    assert.strictEqual(r.hidden, files.length);
     R.useRolloutConfig({ features: {} });
     G.applyGoogleHidePaths(files, { root, hidden: (rel) => G.pathHidden(rel, { list }) });
     assert.ok(!tagged("uk/people/nobody/index.html"), "share back to 0: the tag goes");
@@ -8319,8 +8349,8 @@ test("repairDeadLinks writes only the pages it changes, after the people pages",
 test("hubs: a service's channel titles join its own hub instead of a second one", () => {
   const H = require("./lib/hubs.js");
   const it = (id, providers) => ({ title: "T" + id, tmdbId: id, kind: "movie", providers, platform: providers[0] });
-  const hubs = H.hubsFor({ ott: [it(1, ["Paramount+"]), it(2, ["Paramount Plus Apple TV channel"]), it(3, ["Paramount+ Amazon Channel"]), it(4, ["Paramount Plus Premium"])] });
-  assert.deepStrictEqual(hubs.map((h) => [h.name, h.slug, h.items.length]), [["Paramount+", "paramount-plus", 4]]);
+  const hubs = H.hubsFor({ ott: [it(1, ["Paramount+"]), it(2, ["Paramount Plus Apple TV channel"]), it(3, ["Paramount+ Amazon Channel"]), it(4, ["Paramount Plus Premium"]), it(5, ["Paramount+"]), it(6, ["Paramount Plus Apple TV channel"])] });
+  assert.deepStrictEqual(hubs.map((h) => [h.name, h.slug, h.items.length]), [["Paramount+", "paramount-plus", 6]]);
 });
 
 group("12 Oct 2026: 'not streaming yet' titles on pages that stream");

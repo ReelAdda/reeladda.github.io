@@ -337,7 +337,7 @@ const { rolloutSummary } = require("./lib/rollout.js");
 const { checkSearchHealth, refreshSearchTop, reportOpportunities, searchHealthLine } = require("./lib/searchtop.js");
 const { addBrandToPages } = require("./lib/brand.js");
 const { applyHonestWording, applyLeanTrim } = require("./lib/honest.js");
-const { applyGoogleHide, applyGoogleHidePaths, peoplePageFiles } = require("./lib/googlehide.js");
+const { applyGoogleHide, applyGoogleHidePaths, googleHidden, nearCopyEditions, peoplePageFiles } = require("./lib/googlehide.js");
 const { contentFingerprint, extendIndexNowWithChanged, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -2860,10 +2860,13 @@ async function main() {
     // Catalogue pages Google never showed, hidden from Google only (lib/googlehide.js; rollout.json
     // "google-hide"). Before the hreflang and sitemap passes: both read the tag.
     try {
-      const g = applyGoogleHide(filmPageFiles(), pagesManifest);
-      console.log(`Google-hidden catalogue: ${g.hidden} of ${g.eligible} listed page(s) hidden from Google, ${g.changed} updated this run`);
+      const films = filmPageFiles();
+      // Editions that are near-copies of a sister edition (option B): one per group stays visible.
+      const copies = nearCopyEditions(films, pagesManifest, { skip: (code, slug, entry) => googleHidden(code, slug, entry) });
+      const g = applyGoogleHide(films, pagesManifest, { extra: copies });
+      console.log(`Google-hidden film pages: ${g.hidden - g.nearCopies} of ${g.eligible} listed catalogue page(s) + ${g.nearCopies} near-copy edition(s) hidden from Google, ${g.changed} updated this run`);
       const p = applyGoogleHidePaths(peoplePageFiles());
-      console.log(`Google-hidden people pages: ${p.hidden} of ${p.pages} hidden from Google, ${p.changed} updated this run`);
+      console.log(`Google-hidden people and embed pages: ${p.hidden} of ${p.pages} hidden from Google, ${p.changed} updated this run`);
     } catch (e) { stageFailed("google hide", e); }
 
     // All countries are built by now, so the filesystem finally shows every cluster's true
