@@ -147,6 +147,15 @@ function buildOttMonthPage(recs, cfg, { month, months = [], index = [], now = Da
     if (!slug || !fs.existsSync(platformMonthPath(code, slug, month))) continue;
     navLinks.push({ href: platformMonthUrl(code, slug, month), label: `${name} only` });
   }
+  // And into the per-language cut (India only, as writeLanguageMonthPages). Language months
+  // linked only to each other, so the current one had no link in at all (SEO audit, 25 Oct
+  // 2026: /hindi/2026-10/ and /telugu/2026-10/ were in the sitemap with nothing pointing at
+  // them). Same rule as the writer, so the link exists exactly when the page does.
+  if (code === "in") {
+    for (const [langName, langSlug] of LANGUAGE_PAGES) {
+      if (recs.filter((r) => r && r.lang === langName).length >= SCOPED_MONTH_MIN) navLinks.push({ href: languageMonthUrl(langSlug, month), label: `${langName} only` });
+    }
+  }
   const isCurrent = month === monthKey(new Date(now).toISOString());
   const linkable = sections.flatMap((sec) => sec.items).filter((x) => x.slug);
   const extraLd = [{

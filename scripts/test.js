@@ -2781,6 +2781,16 @@ test("buildOttMonthPage: groups by platform, links only pages that exist, counts
   assert.ok(!/Beta[\s\S]{0,300}Started streaming/.test(html), "a same-day arrival doesn't repeat itself");
   assert.ok(/September 2026 →/.test(html) && /This week&#39;s OTT releases/.test(html), "month nav is present");
 });
+test("buildOttMonthPage: India's month links each language month that has a page, so none is orphaned (SEO audit, Oct 2026)", () => {
+  const IN = { code: "in", name: "India", region: "IN", streamWord: "OTT" };
+  const recs = [1, 2, 3, 4].map((id) => ({ c: "in", k: "movie", id, t: `H${id}`, p: "Netflix", first: "2026-10-0" + id, rel: "2026-09-01", lang: "Hindi", g: "Drama" }))
+    .concat([{ c: "in", k: "movie", id: 9, t: "T1", p: "Netflix", first: "2026-10-05", rel: "2026-09-01", lang: "Telugu", g: "Drama" }]);
+  const opts = { month: "2026-10", months: [{ month: "2026-10", n: 5 }], index: [], now: Date.parse("2026-10-25T00:00:00Z") };
+  const html = U.buildOttMonthPage(recs, IN, opts);
+  assert.ok(/href="https:\/\/filmychill\.com\/hindi\/2026-10\/"/.test(html), "Hindi has 4 arrivals: its month page exists and is linked");
+  assert.ok(!/telugu\/2026-10/.test(html), "Telugu has 1: no page, so no link (never a 404)");
+  assert.ok(!/hindi\/2026-10/.test(U.buildOttMonthPage(recs.map((r) => ({ ...r, c: "uk" })), { code: "uk", name: "United Kingdom", region: "GB", streamWord: "streaming" }, opts)), "language months are India-only");
+});
 
 test("buildOttMonthPage: a closed month says so; the current month says it is still filling", () => {
   const now = Date.parse("2026-09-18T00:00:00Z");
@@ -7758,9 +7768,18 @@ test("lean page: every fact once, the answer first, facts read back identically,
     const a = X.extractFacts(classic, item.slug), b = X.extractFacts(lean, item.slug);
     for (const f of ["rating", "votes", "runtime", "cert", "review", "providers", "rentBuy", "released"]) assert.deepStrictEqual(b[f], a[f], f);
     assert.deepStrictEqual(X.keyFacts(lean).rating, X.keyFacts(classic).rating);
+    // The poster is fetched first: a connection to TMDB's image server opened from the <head>, the
+    // poster at high priority (SEO audit, 25 Oct 2026) — with the lean layout, never without it.
+    const poster = { ...item, poster: "https://image.tmdb.org/t/p/w342/rpo.jpg" };
+    const leanP = F.buildFilmPage(poster, "2026-10-24", new Set(), UK);
+    assert.ok(leanP.indexOf('<link rel="preconnect" href="https://image.tmdb.org">') > 0 && leanP.indexOf('<link rel="preconnect"') < leanP.indexOf("</head>"), "preconnect in the head");
+    assert.ok(/<img class="poster" src="https:\/\/image\.tmdb\.org\/t\/p\/w342\/rpo\.jpg" alt="Ready Player One poster" width="140" height="210" fetchpriority="high">/.test(leanP), "poster first");
+    assert.strictEqual(X.extractFacts(leanP, item.slug).poster, poster.poster, "facts still read the poster");
     // Outside the share: the page as before.
     R.useRolloutConfig(ROLLOUT_OFF);
     assert.strictEqual(F.buildFilmPage(item, "2026-10-24", new Set(), UK), classic);
+    const classicP = F.buildFilmPage(poster, "2026-10-24", new Set(), UK);
+    assert.ok(!/preconnect|fetchpriority/.test(classicP), "nothing new outside the share");
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }
   // The trim pass: the "when does it stream" section doesn't repeat the opening the answer gives;
   // pages compare equal either way, and it's idempotent.

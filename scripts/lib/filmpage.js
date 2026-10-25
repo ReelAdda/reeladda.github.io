@@ -467,6 +467,12 @@ const LEAN_MARK = "<!--FC:lean-->";
 // Machine-readable rating and count for lib/facts.js (the visible copies were the header line and
 // the audience row, which the lean layout no longer carries). A comment: never shown, not content.
 const audienceMark = (item) => `<!--FC:audience=${item.rating != null ? Number(item.rating) : ""}|${Number(item.votes) || 0}-->`;
+// The poster is the first image a phone draws (SEO audit, 25 Oct 2026): it comes from TMDB's
+// image server, so the browser opens that connection while it reads the <head>, and the poster
+// itself is fetched ahead of the rest (fetchpriority="high" on the <img>). With the lean layout,
+// so each page is rewritten once, in the same batches.
+const posterFirst = (item, lean) => (lean && /^https:\/\/image\.tmdb\.org\//.test(String(item.poster || ""))
+  ? '\n<link rel="preconnect" href="https://image.tmdb.org">' : "");
 // An overseas page this recent is never treated as an empty shell (see isShellPage).
 const RECENT_RELEASE_DAYS = 180;
 // Titles that match the search (filmTitleTag; rollout feature INTENT_TITLES): overseas, a film's
@@ -1044,7 +1050,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(titleTag)}</title>
 <meta name="description" content="${e(desc)}">
-${ICON_LINKS}
+${ICON_LINKS}${posterFirst(item, lean)}
 ${robotsTag}
 <link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl(xDefaultCode(alts.map((a) => a.code)), item.slug))}"/>` : ""}
 <meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">
@@ -1148,7 +1154,7 @@ ${FCSB_CSS}
 <div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
 <div class="wrap">${lean ? LEAN_MARK + audienceMark(item) : ""}
   <div class="head">
-    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="140" height="210">` : "<div></div>"}
+    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="140" height="210"${lean ? ' fetchpriority="high"' : ""}>` : "<div></div>"}
     <div>
       <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
       <div class="meta">${(lean
