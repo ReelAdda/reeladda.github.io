@@ -437,7 +437,7 @@ function writeOttWeekPage(data, cfg, allCountries) {
   const p = ottWeekPath(cfg.code);
   const dir = p.slice(0, p.lastIndexOf("/"));
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  writeIfChanged(p, buildOttWeekPage(data, cfg, allCountries));
+  writeIfChanged(p, buildOttWeekPage(data, cfg, allCountries, filmIndexFor(cfg)));   // with the release calendar (lib/weekly.js)
   console.log(`  OTT-week page: /${p.replace(/index\.html$/, "")}`);
 }
 

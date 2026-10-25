@@ -253,7 +253,31 @@ function ssrEditorNote(data, cfg) {
   return `<p class="ednote"><b>Editor's note · </b>${escHtml(note)}</p>`;
 }
 
-function buildOttWeekPage(data, cfg, allCountries) {
+// RELEASE CALENDAR (25 Oct 2026). Every film page released in the last RECENT_DAYS or still to
+// open, as plain links at the foot of this page. Retiring the A–Z pages (lib/hubs.js
+// pruneRetiredListings) left 146 such pages with no link in at all and 82 more linked only from
+// pages hidden from Google: films in cinemas or coming soon, which drop off the capped homepage
+// lists within days. This is their one permanent link from a page Google sees, and a useful
+// list in its own right ("what's out and what's coming"), not a link dump: recent and upcoming
+// releases only, each with its language and date.
+const CALENDAR_RECENT_DAYS = 180;
+function releaseCalendar(index, { now = Date.now(), exclude = new Set() } = {}) {
+  const day = (d) => Date.parse(`${String(d || "").slice(0, 10)}T00:00:00Z`);
+  const today = day(new Date(now).toISOString());
+  const soon = [], recent = [];
+  for (const f of index || []) {
+    if (!f || !f.slug || !f.title || exclude.has(f.slug)) continue;
+    const t = day(f.released);
+    if (!Number.isFinite(t)) continue;
+    if (t > today) soon.push(f);
+    else if ((today - t) / 864e5 <= CALENDAR_RECENT_DAYS) recent.push(f);
+  }
+  soon.sort((a, b) => String(a.released).localeCompare(String(b.released)) || a.title.localeCompare(b.title));
+  recent.sort((a, b) => String(b.released).localeCompare(String(a.released)) || a.title.localeCompare(b.title));
+  return { soon, recent };
+}
+
+function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null) {
   const e = escHtml;
   // JSON-LD goes through core.js ldJson, so a title containing "</script>" can never break
   // out of its <script type="application/ld+json"> block.
@@ -409,6 +433,18 @@ function buildOttWeekPage(data, cfg, allCountries) {
     ${carriedItems.map(rowFor).join("\n")}
   </section>` : "");
 
+  const cal = calendarIndex ? releaseCalendar(calendarIndex, { now: Date.parse(gen) || Date.now(), exclude: new Set(items.map((x) => x.slug).filter(Boolean)) }) : { soon: [], recent: [] };
+  const calRow = (f, verb) => `<li><a href="${e(filmPagePath(code, f.slug))}">${e(f.title)}</a> <span class="rm">${e([f.language, `${verb} ${fmtDateShort(f.released, Date.parse(gen) || Date.now(), localeFor(code))}`].filter(Boolean).join(" · "))}</span></li>`;
+  const calendarHtml = cal.soon.length || cal.recent.length ? `
+  <section>
+    <h2>Out recently and coming soon in ${e(countryName)} <span class="cnt">${cal.soon.length + cal.recent.length}</span></h2>
+    <p class="rm" style="margin:0 0 10px">Every film and series FilmyChill covers that opened in ${e(countryName)} in the last six months or opens soon — in cinemas, streaming or on its way.</p>${cal.soon.length ? `
+    <h3 class="calh">Coming soon</h3>
+    <ul class="cal">${cal.soon.map((f) => calRow(f, "opens")).join("")}</ul>` : ""}${cal.recent.length ? `
+    <h3 class="calh">Released recently</h3>
+    <ul class="cal">${cal.recent.map((f) => calRow(f, "released")).join("")}</ul>` : ""}
+  </section>` : "";
+
   const faqHtml = faqs.length ? `
   <section>
     <h2>Quick answers</h2>
@@ -456,6 +492,9 @@ ${ogImageTag(hubOgImage(freshItems, cfg))}
   .badge.trend { background:#D93A28; color:#fff; }
   .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
   ${VPILL_CSS}
+  .calh { font-size:14.5px; margin:16px 0 6px; } .cal { list-style:none; padding:0; margin:0; columns:2; column-gap:24px; }
+  .cal li { break-inside:avoid; padding:4px 0; font-size:14.5px; } .cal a { color:var(--indigo); text-decoration:none; } .cal .rm { font-size:12.5px; }
+  @media (max-width:560px) { .cal { columns:1; } }
   .faq details { border-top:1px solid var(--line); padding:10px 0; }
   .faq summary { font-size:14.5px; font-weight:700; cursor:pointer; list-style:none; min-height:44px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
   .faq summary::-webkit-details-marker { display:none; }
@@ -473,6 +512,7 @@ ${ogImageTag(hubOgImage(freshItems, cfg))}
   <div class="upd">Updated ${e(updatedHuman)} · refreshed twice daily</div>
   <p class="lead">Every movie and web series that started streaming in ${e(countryName)} in the last 45 days, grouped by platform and ranked by rating — so you know what's actually worth your time.</p>
 ${sections}
+${calendarHtml}
 ${faqHtml}
   <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + ${e(V.word)})</a>
 </div>
@@ -540,6 +580,7 @@ function writeRssFeed(data, cfg) {
 module.exports = {
   buildEditorNote,
   buildOttWeekPage,
+  releaseCalendar,
   buildRssFeed,
   ottWeekPath,
   ottWeekUrl,

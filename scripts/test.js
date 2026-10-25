@@ -5638,6 +5638,29 @@ test("only a clean YYYY-MM-DD passes; everything else coerces to a valid date", 
 });
 
 group("indexing — fresh pages get announced");
+test("release calendar: every recent or upcoming film page gets a link from the weekly page (Oct 2026)", () => {
+  const W = require("./lib/weekly.js");
+  const now = Date.parse("2026-10-25T06:00:00Z");
+  const idx = [
+    { slug: "soon-b", title: "Soon B", language: "Telugu", released: "2026-11-14" },
+    { slug: "soon-a", title: "Soon A", language: "Hindi", released: "2026-10-30" },
+    { slug: "new", title: "New", language: "Tamil", released: "2026-10-16" },
+    { slug: "spring", title: "Spring", language: "English", released: "2026-05-01" },
+    { slug: "old", title: "Old", language: "English", released: "2024-01-01" },
+    { slug: "listed", title: "Listed", language: "Hindi", released: "2026-10-10" },
+  ];
+  const cal = W.releaseCalendar(idx, { now, exclude: new Set(["listed"]) });
+  assert.deepStrictEqual(cal.soon.map((x) => x.slug), ["soon-a", "soon-b"], "soonest first");
+  assert.deepStrictEqual(cal.recent.map((x) => x.slug), ["new", "spring"], "newest first; nothing older than six months; nothing already on the page");
+  const data = { generatedAt: "2026-10-25T06:00:00Z", ott: [{ title: "Listed", slug: "listed", platform: "Netflix", tmdbId: 1, language: "Hindi" }] };
+  const html = W.buildOttWeekPage(data, { code: "in", name: "India", region: "IN", streamWord: "OTT" }, null, idx);
+  for (const s of ["soon-a", "soon-b", "new", "spring"]) assert.ok(html.includes(`href="/movie/${s}.html"`), s);
+  assert.ok(!html.includes('href="/movie/old.html"'));
+  assert.strictEqual((html.match(/href="\/movie\/listed\.html"/g) || []).length, 1, "a title already on the page isn't repeated");
+  assert.ok(/Out recently and coming soon in India/.test(html) && /opens 30 Oct/.test(html));
+  assert.ok(!/Out recently and coming soon/.test(W.buildOttWeekPage(data, { code: "in", name: "India", region: "IN", streamWord: "OTT" }, null)), "no index, no section");
+  assert.ok(/buildOttWeekPage\(data, cfg, allCountries, filmIndexFor\(cfg\)\)/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "hubs.js"), "utf8")), "the build passes the edition's film pages");
+});
 test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
   assert.ok(!urls.some((u) => /\/films\//.test(u)), "the A–Z pages are retired (25 Oct 2026)");
