@@ -337,6 +337,7 @@ const { rolloutSummary } = require("./lib/rollout.js");
 const { checkSearchHealth, refreshSearchTop, reportOpportunities, searchHealthLine } = require("./lib/searchtop.js");
 const { addBrandToPages } = require("./lib/brand.js");
 const { applyHonestWording, applyLeanTrim } = require("./lib/honest.js");
+const { applyGoogleHide } = require("./lib/googlehide.js");
 const { contentFingerprint, extendIndexNowWithChanged, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -2856,6 +2857,12 @@ async function main() {
       const t = applyLeanTrim(filmPageFiles());
       if (t.changed) console.log(`Lean pages: ${t.changed} "not streaming yet" lead(s) trimmed`);
     } catch (e) { stageFailed("lean trim", e); }
+    // Catalogue pages Google never showed, hidden from Google only (lib/googlehide.js; rollout.json
+    // "google-hide"). Before the hreflang and sitemap passes: both read the tag.
+    try {
+      const g = applyGoogleHide(filmPageFiles(), pagesManifest);
+      console.log(`Google-hidden catalogue: ${g.hidden} of ${g.eligible} listed page(s) hidden from Google, ${g.changed} updated this run`);
+    } catch (e) { stageFailed("google hide", e); }
 
     // All countries are built by now, so the filesystem finally shows every cluster's true
     // membership — repair them in one pass before the sitemap is written.

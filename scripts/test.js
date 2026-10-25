@@ -6978,6 +6978,68 @@ test("IndexNow: every page whose content changed today is announced, not only th
   const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
   assert.ok(up.indexOf("extendIndexNowWithChanged(todayStr())") > up.indexOf("writeMultiCountrySitemap(builtCountries, pagesManifest);"), "after the sitemaps are written");
 });
+test("google-hide: never-shown catalogue pages get a Google-only noindex, reversibly, in stages (Oct 2026)", () => {
+  const G = require("./lib/googlehide.js");
+  const R = require("./lib/rollout.js");
+  const W = require("./lib/writeif.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  // The tag: after the robots tag, Google only, exactly reversible, idempotent.
+  const page = '<html><head><title>T</title><meta name="description" content="d">\n<meta name="robots" content="max-image-preview:large">\n<link rel="canonical" href="x"></head><body>' + "x".repeat(400) + "</body></html>";
+  const hid = G.addGooglebotNoindex(page);
+  assert.ok(hid.includes('<meta name="robots" content="max-image-preview:large">\n<meta name="googlebot" content="noindex">'), hid.slice(0, 200));
+  assert.ok(!/<meta name="robots" content="[^"]*noindex/.test(hid), "Bing (robots) is not told noindex");
+  assert.strictEqual(G.addGooglebotNoindex(hid), hid, "idempotent");
+  assert.strictEqual(G.removeGooglebotNoindex(hid), page, "exactly reversible");
+  assert.ok(G.NOINDEX_META.test(hid) && !G.NOINDEX_META.test(page));
+  assert.strictEqual(W.comparable(hid), W.comparable(page), "a fresh render without the tag is the same page (no rewrite every run)");
+  // Who is hidden: listed, still catalogue, not a fresh arrival — and in the share.
+  const list = { pages: { uk: ["old"], in: ["old"] } };
+  const cat = { catalog: true, archivedOn: "2026-09-10", released: "1999-01-01", live: { since: "2026-09-10" } };
+  const today = "2026-10-26";
+  try {
+    R.useRolloutConfig({ features: { "google-hide": { percent: 100 } } });
+    assert.ok(G.googleHidden("uk", "old", cat, { list, today }));
+    assert.ok(!G.googleHidden("uk", "other", cat, { list, today }), "not listed");
+    assert.ok(!G.googleHidden("us", "old", cat, { list, today }), "listed for another edition only");
+    assert.ok(!G.googleHidden("uk", "old", { ...cat, catalog: false }, { list, today }), "no longer a catalogue page");
+    assert.ok(!G.googleHidden("uk", "old", { ...cat, live: { since: "2026-10-20" } }, { list, today }), "a real arrival after the page existed is news: visible");
+    R.useRolloutConfig({ features: { "google-hide": { percent: 0 } } });
+    assert.ok(!G.googleHidden("uk", "old", cat, { list, today }) && G.googleEligible("uk", "old", cat, { list, today }), "0% = dry run: counted, not hidden");
+    // The pass: in the share gets the tag; out of it (or rolled back) loses it.
+    const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-ghide-"));
+    try {
+      fsx.mkdirSync(path.join(root, "uk", "movie"), { recursive: true });
+      fsx.mkdirSync(path.join(root, "movie"));
+      fsx.writeFileSync(path.join(root, "uk", "movie", "old.html"), page);
+      fsx.writeFileSync(path.join(root, "movie", "old.html"), hid);
+      const man = { uk: { old: cat }, in: { old: cat } };
+      const r = G.applyGoogleHide(["uk/movie/old.html", "movie/old.html"], man, { root, hidden: (code) => code === "uk", eligible: () => true });
+      assert.ok(fsx.readFileSync(path.join(root, "uk", "movie", "old.html"), "utf8").includes(G.GOOGLEBOT_TAG));
+      assert.strictEqual(fsx.readFileSync(path.join(root, "movie", "old.html"), "utf8"), page, "rolled back: the tag goes");
+      assert.deepStrictEqual(r, { pages: 2, eligible: 2, hidden: 1, changed: 2 });
+    } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
+  // The frozen list: catalogue only, released over a year ago, never a page Google showed.
+  const { hiddenList } = require("./make-google-hidden.js");
+  const now = Date.parse("2026-10-25T00:00:00Z");
+  const man = { in: { a: { catalog: true, released: "2010-01-01" }, b: { catalog: true, released: "2010-01-01" }, c: { catalog: false, released: "2010-01-01" }, d: { catalog: true, released: "2026-03-01" } }, uk: { a: { catalog: true, released: "2010-01-01" } } };
+  assert.deepStrictEqual(hiddenList(man, new Set(["https://filmychill.com/movie/b.html"]), { nowMs: now }), { in: ["a"], uk: ["a"] });
+  const file = JSON.parse(fsx.readFileSync(path.join(__dirname, "..", G.HIDE_FILE), "utf8"));
+  assert.strictEqual(Object.values(file.pages).reduce((n, xs) => n + xs.length, 0), file.total);
+  // Stages: 0 now (dry run), 10% at the 26 Oct evening build, 100% at the 27 Oct morning build.
+  const repo = JSON.parse(fsx.readFileSync(path.join(__dirname, "..", "rollout.json"), "utf8"));
+  assert.strictEqual(R.percentOf(repo, "google-hide", Date.parse("2026-10-25T13:52:00Z")), 0);
+  assert.strictEqual(R.percentOf(repo, "google-hide", Date.parse("2026-10-26T01:52:00Z")), 0, "not the morning build");
+  assert.strictEqual(R.percentOf(repo, "google-hide", Date.parse("2026-10-26T13:52:00Z")), 10);
+  assert.strictEqual(R.percentOf(repo, "google-hide", Date.parse("2026-10-27T01:52:00Z")), 100);
+  assert.strictEqual(R.percentOf({ features: { f: { percent: 0, schedule: [{ from: "2026-10-28", percent: 50 }] } } }, "f", Date.parse("2026-10-28T01:00:00Z")), 50, "day-only stages still start at midnight");
+  // Wiring: after the last writer, before the hreflang and sitemap passes, which read the tag.
+  const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
+  const at = up.indexOf("applyGoogleHide(filmPageFiles(), pagesManifest)");
+  assert.ok(at > up.indexOf("applyLeanTrim(filmPageFiles())") && at < up.indexOf("syncHreflangClusters();") && at < up.indexOf("writeMultiCountrySitemap(builtCountries, pagesManifest);"));
+  for (const f of ["graph.js", "sitemap.js"]) assert.ok(fsx.readFileSync(path.join(__dirname, "lib", f), "utf8").includes('require("./googlehide.js").NOINDEX_META'), `${f} honours the googlebot tag`);
+  assert.ok(/\|google-hidden[|)]/.test(fsx.readFileSync(path.join(__dirname, "site.js"), "utf8")), "the list is build data, not published");
+});
 test("updated dates: the page shows the date its sitemap entry gives, never an older or newer one (Oct 2026)", () => {
   const S = require("./lib/sitemap.js");
   const fsx = require("fs"), os = require("os"), path = require("path");

@@ -21,6 +21,7 @@ const { ensureGrow } = require("./grow.js");
 const { ensureGa } = require("./ga.js");
 const { ensureBrandMark } = require("./brand.js");
 const { honestWording, leanTrim } = require("./honest.js");
+const { removeGooglebotNoindex } = require("./googlehide.js");
 
 const STAMPS = [
   /<div class="meta" style="margin-top:2px;font-size:12\.5px">Page updated [^<]*<\/div>/g,
@@ -53,6 +54,7 @@ function comparable(html, root = ".") {
   s = ensureBrandMark(s); // and the header mark (lib/brand.js)
   s = honestWording(s); // and the streaming-date wording (lib/honest.js): either wording is the same page
   s = leanTrim(s);      // and the lean page's trimmed "not streaming yet" lead (lib/honest.js)
+  s = removeGooglebotNoindex(s); // and the Google-only noindex (lib/googlehide.js), added after the writers
   for (const re of STAMPS) s = s.replace(re, "");
   return s;
 }

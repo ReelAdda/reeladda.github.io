@@ -29,13 +29,14 @@ function bucketOf(feature, slug) {
 // Pure: the share a config gives a feature on a day, 0–100. A feature may carry a schedule —
 // [{ "from": "2026-10-28", "percent": 50 }, …] — and then the latest stage that has started
 // applies (the stages advance by themselves; editing "percent" or the schedule still overrides).
+// "from" is a day, or a UTC time on it ("2026-10-26T12:00") to pick one of the day's two builds.
 function percentOf(config, feature, nowMs = Date.now()) {
   const f = config && config.features && config.features[feature];
   if (!f) return 0;
   let p = Number(f.percent);
-  const today = new Date(nowMs).toISOString().slice(0, 10);
+  const now = new Date(nowMs).toISOString();
   for (const s of (Array.isArray(f.schedule) ? f.schedule : []).slice().sort((a, b) => String(a.from).localeCompare(String(b.from)))) {
-    if (s && /^\d{4}-\d{2}-\d{2}$/.test(String(s.from)) && s.from <= today && Number.isFinite(Number(s.percent))) p = Number(s.percent);
+    if (s && /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2})?$/.test(String(s.from)) && s.from <= now && Number.isFinite(Number(s.percent))) p = Number(s.percent);
   }
   return Number.isFinite(p) ? Math.max(0, Math.min(100, p)) : 0;
 }

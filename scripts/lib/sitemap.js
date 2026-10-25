@@ -312,7 +312,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   const noIndexed = new Set(); // "code/slug" — excluded from the sitemap AND from hreflang
   const isNoIndex = (path) => {
     try {
-      return /<meta name="robots" content="[^"]*noindex/.test(fs.readFileSync(path, "utf8").slice(0, 2048));
+      return require("./googlehide.js").NOINDEX_META.test(fs.readFileSync(path, "utf8").slice(0, 2048)); // robots or googlebot (lib/googlehide.js)
     } catch { return false; }
   };
   const slugCodes = {}; // slug -> Set(codes)

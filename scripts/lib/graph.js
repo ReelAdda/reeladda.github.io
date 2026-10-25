@@ -376,7 +376,7 @@ function syncHreflangClusters(onChange = null) {
       try { html = fs.readFileSync(path, "utf8"); } catch { continue; }
       // A noindexed page is no one's alternate and lists none (Google: alternates must be
       // indexable, canonical pages).
-      const hidden = /<meta name="robots" content="[^"]*noindex/.test(html.slice(0, 4096));
+      const hidden = require("./googlehide.js").NOINDEX_META.test(html.slice(0, 4096)); // robots or googlebot (lib/googlehide.js)
       if (hidden) noindexed++;
       pages.push({ code, path, html, hidden, key: filmIdentity(code, slug) });
     }
