@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-25T10:16:29.545Z",
+ "generatedAt": "2026-10-25T11:38:35.880Z",
  "country": "es",
  "pick": "VisionQuest",
  "theatres": [
@@ -168,7 +168,7 @@
    "slug": "clayface",
    "wikiWeeklyViews": 906817,
    "trending": true,
-   "trailerViews": 316228,
+   "trailerViews": 316711,
    "take": "Genuinely divisive — critics can't settle this one.",
    "takeSrc": "wiki",
    "takeArticle": "Clayface (film)",
@@ -336,7 +336,7 @@
    "theatricalHere": true,
    "slug": "the-invite",
    "wikiWeeklyViews": 82010,
-   "trailerViews": 9314268,
+   "trailerViews": 9314773,
    "take": "Wall-to-wall praise from the critics on this one.",
    "takeSrc": "wiki",
    "takeArticle": "The Invite",
@@ -814,7 +814,7 @@
    "theatricalHere": true,
    "slug": "wildwood",
    "wikiWeeklyViews": 311285,
-   "trailerViews": 19738082,
+   "trailerViews": 19739274,
    "take": "The critical verdict is rare-air positive.",
    "takeSrc": "wiki",
    "takeArticle": "Wildwood (film)",
@@ -991,7 +991,7 @@
    "slug": "you-can-see-everything",
    "wikiWeeklyViews": 1304165,
    "trending": true,
-   "trailerViews": 50006,
+   "trailerViews": 50077,
    "take": "Critics loved this one, and the second half and ambition drew the loudest praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1173,7 +1173,7 @@
    "theatricalHere": true,
    "slug": "street-fighter",
    "wikiWeeklyViews": 731196,
-   "trailerViews": 35047589,
+   "trailerViews": 35053769,
    "take": "A divided reception: the performances won praise, the humour took the heat.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1348,7 +1348,7 @@
    "ottFreshDate": "2026-10-20",
    "slug": "cyberpunk-edgerunners",
    "wikiWeeklyViews": 93294,
-   "trailerViews": 7737296,
+   "trailerViews": 7737689,
    "take": "Critics kept circling back to the action and visuals — in a good way.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1535,7 +1535,7 @@
    "ottFreshDate": "2026-10-16",
    "slug": "tulsa-king",
    "wikiWeeklyViews": 80975,
-   "trailerViews": 11423492,
+   "trailerViews": 11423658,
    "take": "Critics came away positive, praising the humour and second half while docking points for the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1605,6 +1605,13 @@
      "kind": "tv"
     },
     {
+     "title": "Witnesses",
+     "slug": "witnesses",
+     "poster": "https://image.tmdb.org/t/p/w342/8SEvbZLKw2cg7ZDdSriz5UsJzaH.jpg",
+     "language": "French",
+     "kind": "tv"
+    },
+    {
      "title": "Cross",
      "slug": "cross",
      "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
@@ -1622,13 +1629,6 @@
      "title": "Fool Me Once",
      "slug": "fool-me-once",
      "poster": "https://image.tmdb.org/t/p/w342/Ertv4WLEyHgi8zN4ldOKgPcGAZ.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "I Will Find You",
-     "slug": "i-will-find-you",
-     "poster": "https://image.tmdb.org/t/p/w342/pb9oYHHNzauiCQZT03MpDAg46GI.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1668,9 +1668,9 @@
      "kind": "tv"
     },
     {
-     "title": "Imperfect Women",
-     "slug": "imperfect-women",
-     "poster": "https://image.tmdb.org/t/p/w342/pIR9b3gFNyhhV9QRHexJyZcEhut.jpg",
+     "title": "Ridley",
+     "slug": "ridley",
+     "poster": "https://image.tmdb.org/t/p/w342/gdvihv6BhxYDWquoQbZctlVSBwS.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1691,7 +1691,7 @@
    "ottFreshDate": "2026-10-23",
    "slug": "lupin",
    "wikiWeeklyViews": 48891,
-   "trailerViews": 6747266,
+   "trailerViews": 6748129,
    "take": "Reviewers responded well — the performances and writing came in for particular praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1876,7 +1876,7 @@
    "ottFreshDate": "2026-10-08",
    "stillGood": true,
    "slug": "therapy-done-right",
-   "trailerViews": 650195,
+   "trailerViews": 650261,
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences love it.",
@@ -2050,7 +2050,7 @@
    "slug": "crystal-lake",
    "wikiWeeklyViews": 510793,
    "trending": true,
-   "trailerViews": 21807910,
+   "trailerViews": 21809098,
    "take": "Critics came away positive, praising the ambition while docking points for the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2233,7 +2233,7 @@
    "ottFreshDate": "2026-10-12",
    "stillGood": true,
    "slug": "the-final-problem",
-   "trailerViews": 217451
+   "trailerViews": 217501
   },
   {
    "title": "VisionQuest",
@@ -2404,7 +2404,7 @@
    "slug": "visionquest",
    "wikiWeeklyViews": 470589,
    "trending": true,
-   "trailerViews": 23425524,
+   "trailerViews": 23429732,
    "take": "Most reviews land firmly on the positive side.",
    "takeSrc": "wiki",
    "takeArticle": "VisionQuest",
@@ -2430,7 +2430,7 @@
      "score": "8.6/10"
     }
    ],
-   "votes": 1083,
+   "votes": 1084,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/5Xc7WpWsgflfgEMoBlf9TmWhfbH.jpg",
    "isRecent": false,
@@ -2590,7 +2590,7 @@
    "stillGood": true,
    "slug": "mobland",
    "wikiWeeklyViews": 184672,
-   "trailerViews": 12276886,
+   "trailerViews": 12277457,
    "take": "A love-it-or-hate-it reception, right down the middle.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
@@ -2771,7 +2771,7 @@
    "ottFreshDate": "2026-10-02",
    "stillGood": true,
    "slug": "i-would-rather-die",
-   "trailerViews": 120726
+   "trailerViews": 120747
   },
   {
    "title": "Slow Horses",
@@ -2786,7 +2786,7 @@
      "score": "8.1/10"
     }
    ],
-   "votes": 1074,
+   "votes": 1075,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
    "isRecent": false,
@@ -2941,7 +2941,7 @@
    "stillGood": true,
    "slug": "slow-horses",
    "wikiWeeklyViews": 367225,
-   "trailerViews": 5853472,
+   "trailerViews": 5853797,
    "take": "Critics loved this one; reception has been close to universal acclaim.",
    "takeSrc": "wiki",
    "takeArticle": "Slow Horses",
@@ -3108,7 +3108,7 @@
     }
    ],
    "slug": "the-mongoose",
-   "trailerViews": 630568,
+   "trailerViews": 630825,
    "verdict": ""
   },
   {
@@ -3263,7 +3263,7 @@
     }
    ],
    "slug": "the-awakening",
-   "trailerViews": 8536,
+   "trailerViews": 8666,
    "verdict": ""
   },
   {
@@ -3419,7 +3419,7 @@
    ],
    "theatricalHere": true,
    "slug": "hope",
-   "trailerViews": 350645,
+   "trailerViews": 351074,
    "criticsTone": "positive",
    "verdict": ""
   },
@@ -3576,7 +3576,7 @@
    ],
    "theatricalHere": true,
    "slug": "onslaught",
-   "trailerViews": 18054724,
+   "trailerViews": 18055027,
    "criticsTone": "mixed",
    "verdict": ""
   },
@@ -4024,7 +4024,7 @@
    ],
    "theatricalHere": true,
    "slug": "avengers-doomsday",
-   "trailerViews": 50447721,
+   "trailerViews": 50459120,
    "verdict": ""
   },
   {
@@ -4180,7 +4180,7 @@
    ],
    "theatricalHere": true,
    "slug": "dune-part-three",
-   "trailerViews": 39240424,
+   "trailerViews": 39243841,
    "verdict": ""
   }
  ],
@@ -4924,7 +4924,7 @@
      "score": "8.3/10"
     }
    ],
-   "votes": 178,
+   "votes": 180,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/eI0QW02PYqhnmIvLRdn9vrfVVP7.jpg",
    "isRecent": false,
@@ -5236,5 +5236,5 @@
    "slug": "where-the-mask-ends"
   }
  ],
- "trackedFilms": 442
+ "trackedFilms": 443
 }
