@@ -7069,8 +7069,8 @@ test("google-hide: never-shown catalogue pages get a Google-only noindex, revers
   // The frozen list: catalogue only, released over a year ago, never a page Google showed.
   const { hiddenList } = require("./make-google-hidden.js");
   const now = Date.parse("2026-10-25T00:00:00Z");
-  const man = { in: { a: { catalog: true, released: "2010-01-01" }, b: { catalog: true, released: "2010-01-01" }, c: { catalog: false, released: "2010-01-01" }, d: { catalog: true, released: "2026-03-01" } }, uk: { a: { catalog: true, released: "2010-01-01" } } };
-  assert.deepStrictEqual(hiddenList(man, new Set(["https://filmychill.com/movie/b.html"]), { nowMs: now }), { in: ["a"], uk: ["a"] });
+  const man = { in: { a: { catalog: true, released: "2010-01-01" }, b: { catalog: true, released: "2010-01-01" }, c: { catalog: false, released: "2010-01-01" }, d: { catalog: true, released: "2026-09-01" }, e: { catalog: true, released: "2026-03-01" } }, uk: { a: { catalog: true, released: "2010-01-01" } } };
+  assert.deepStrictEqual(hiddenList(man, new Set(["https://filmychill.com/movie/b.html"]), { nowMs: now }), { in: ["a", "d", "e"], uk: ["a"] }, "every never-shown catalogue page, whatever its age (d, e)");
   const file = JSON.parse(fsx.readFileSync(path.join(__dirname, "..", G.HIDE_FILE), "utf8"));
   assert.strictEqual(Object.values(file.pages).reduce((n, xs) => n + xs.length, 0), file.total);
   // The 25 Oct dry run found all 11,887 eligible; then switched to 100% in one go (user's call).

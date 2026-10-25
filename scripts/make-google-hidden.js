@@ -17,7 +17,7 @@ const { accessToken } = require("./lib/searchtop.js");
 const { HIDE_FILE } = require("./lib/googlehide.js");
 
 const SITE = "https://filmychill.com/";
-const RECENT_DAYS = 365;
+const RECENT_DAYS = 0;   // 365 for the first list; from 25 Oct 2026 any age (the owner: every catalogue page Google never showed goes)
 
 async function pagesWithImpressions(token, from, to) {
   const seen = new Set();
