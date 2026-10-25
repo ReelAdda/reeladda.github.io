@@ -62,19 +62,9 @@
    "what": "every fact once: rating only in the score ring, count once, platform in the answer box first, runtime/genre/language in the header, one skip list, Story after the cast (lib/filmpage.js LEAN_PAGE)"
   },
   "google-hide": {
-   "percent": 0,
+   "percent": 100,
    "since": "2026-10-25",
-   "schedule": [
-    {
-     "from": "2026-10-26T12:00",
-     "percent": 10
-    },
-    {
-     "from": "2026-10-27T00:00",
-     "percent": 100
-    }
-   ],
-   "what": "catalogue pages Google never showed (google-hidden.json, 90 days to 23 Oct): googlebot noindex, out of the sitemaps and hreflang; Bing and visitors keep them (lib/googlehide.js). 0% = dry run (build logs the count); 10% at the 26 Oct evening build, 100% at the 27 Oct morning build"
+   "what": "catalogue pages Google never showed (google-hidden.json, 90 days to 23 Oct): googlebot noindex, out of the sitemaps and hreflang; Bing and visitors keep them (lib/googlehide.js). Dry run 25 Oct confirmed all 11,887 eligible; switched to 100% at once on 25 Oct at the user's request."
   }
  }
 }

@@ -7026,12 +7026,14 @@ test("google-hide: never-shown catalogue pages get a Google-only noindex, revers
   assert.deepStrictEqual(hiddenList(man, new Set(["https://filmychill.com/movie/b.html"]), { nowMs: now }), { in: ["a"], uk: ["a"] });
   const file = JSON.parse(fsx.readFileSync(path.join(__dirname, "..", G.HIDE_FILE), "utf8"));
   assert.strictEqual(Object.values(file.pages).reduce((n, xs) => n + xs.length, 0), file.total);
-  // Stages: 0 now (dry run), 10% at the 26 Oct evening build, 100% at the 27 Oct morning build.
+  // The 25 Oct dry run found all 11,887 eligible; then switched to 100% in one go (user's call).
   const repo = JSON.parse(fsx.readFileSync(path.join(__dirname, "..", "rollout.json"), "utf8"));
-  assert.strictEqual(R.percentOf(repo, "google-hide", Date.parse("2026-10-25T13:52:00Z")), 0);
-  assert.strictEqual(R.percentOf(repo, "google-hide", Date.parse("2026-10-26T01:52:00Z")), 0, "not the morning build");
-  assert.strictEqual(R.percentOf(repo, "google-hide", Date.parse("2026-10-26T13:52:00Z")), 10);
-  assert.strictEqual(R.percentOf(repo, "google-hide", Date.parse("2026-10-27T01:52:00Z")), 100);
+  assert.strictEqual(R.percentOf(repo, "google-hide", Date.parse("2026-10-25T13:52:00Z")), 100);
+  // Stages may name a UTC time, to pick one of a day's two builds.
+  const timed = { features: { f: { percent: 0, schedule: [{ from: "2026-10-26T12:00", percent: 10 }, { from: "2026-10-27T00:00", percent: 100 }] } } };
+  assert.strictEqual(R.percentOf(timed, "f", Date.parse("2026-10-26T01:52:00Z")), 0, "not the morning build");
+  assert.strictEqual(R.percentOf(timed, "f", Date.parse("2026-10-26T13:52:00Z")), 10);
+  assert.strictEqual(R.percentOf(timed, "f", Date.parse("2026-10-27T01:52:00Z")), 100);
   assert.strictEqual(R.percentOf({ features: { f: { percent: 0, schedule: [{ from: "2026-10-28", percent: 50 }] } } }, "f", Date.parse("2026-10-28T01:00:00Z")), 50, "day-only stages still start at midnight");
   // Wiring: after the last writer, before the hreflang and sitemap passes, which read the tag.
   const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
