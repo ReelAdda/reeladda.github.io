@@ -1,10 +1,39 @@
 {
- "date": "2026-10-24",
- "checked": 108,
- "errors": 0,
- "pagesDisagreeing": 0,
- "high": 0,
- "correctable": 0,
- "byField": {},
- "rows": []
+ "date": "2026-10-25",
+ "checked": 107,
+ "errors": 1,
+ "pagesDisagreeing": 3,
+ "high": 2,
+ "correctable": 2,
+ "byField": {
+  "release date": 1,
+  "platform": 1,
+  "lead actor": 1
+ },
+ "rows": [
+  {
+   "field": "release date",
+   "severity": "high",
+   "page": "2026-12-04",
+   "tmdb": "2027-01-08",
+   "code": "in",
+   "slug": "golmaal-5"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Sky Go, Now TV",
+   "tmdb": "Sky Go",
+   "code": "uk",
+   "slug": "babylon-berlin"
+  },
+  {
+   "field": "lead actor",
+   "severity": "medium",
+   "page": "Kunal Khemu",
+   "tmdb": "Kunal Kemmu, Daisy Shah, Zaid Darbar",
+   "code": "ca",
+   "slug": "alliance"
+  }
+ ]
 }
