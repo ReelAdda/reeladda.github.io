@@ -1,10 +1,39 @@
 {
- "date": "2026-10-25",
- "checked": 107,
- "errors": 1,
- "pagesDisagreeing": 0,
- "high": 0,
- "correctable": 0,
- "byField": {},
- "rows": []
+ "date": "2026-10-26",
+ "checked": 108,
+ "errors": 0,
+ "pagesDisagreeing": 3,
+ "high": 2,
+ "correctable": 2,
+ "byField": {
+  "runtime": 1,
+  "platform": 1,
+  "streaming": 1
+ },
+ "rows": [
+  {
+   "field": "runtime",
+   "severity": "medium",
+   "page": "110 min",
+   "tmdb": "103 min",
+   "code": "uk",
+   "slug": "hexed"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Prime Video, Tivify",
+   "tmdb": "Prime Video",
+   "code": "es",
+   "slug": "rec-genesis"
+  },
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "on SFR Play",
+   "tmdb": "rent/buy only",
+   "code": "fr",
+   "slug": "see-you-up-there"
+  }
+ ]
 }
