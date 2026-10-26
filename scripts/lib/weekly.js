@@ -277,7 +277,7 @@ function releaseCalendar(index, { now = Date.now(), exclude = new Set() } = {}) 
   return { soon, recent };
 }
 
-function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null) {
+function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platformLinks = []) {
   const e = escHtml;
   // JSON-LD goes through core.js ldJson, so a title containing "</script>" can never break
   // out of its <script type="application/ld+json"> block.
@@ -445,6 +445,13 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null) {
     <ul class="cal">${cal.recent.map((f) => calRow(f, "released")).join("")}</ul>` : ""}
   </section>` : "";
 
+  const platformHtml = (platformLinks || []).length ? `
+  <section>
+    <h2>Browse by platform</h2>
+    <p class="rm" style="margin:0 0 10px">Everything FilmyChill has confirmed streaming on each service in ${e(countryName)}, rechecked daily.</p>
+    <ul class="cal">${platformLinks.map((l) => `<li><a href="${e(l.href)}">${e(l.name)}</a>${l.n ? ` <span class="rm">${l.n} titles</span>` : ""}</li>`).join("")}</ul>
+  </section>` : "";
+
   const faqHtml = faqs.length ? `
   <section>
     <h2>Quick answers</h2>
@@ -512,6 +519,7 @@ ${ogImageTag(hubOgImage(freshItems, cfg))}
   <div class="upd">Updated ${e(updatedHuman)} · refreshed twice daily</div>
   <p class="lead">Every movie and web series that started streaming in ${e(countryName)} in the last 45 days, grouped by platform and ranked by rating — so you know what's actually worth your time.</p>
 ${sections}
+${platformHtml}
 ${calendarHtml}
 ${faqHtml}
   <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + ${e(V.word)})</a>

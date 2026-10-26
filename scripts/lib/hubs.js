@@ -32,6 +32,7 @@ const {
   LISTING_VERSION,
   ottMonthPath,
   platformSlug,
+  STREAM_BASE,
   streamPagePath,
   weekRangeFor,
   hubPath,
@@ -433,11 +434,28 @@ function writeOttMonthPages(cfg, records = null, index = null) {
   return written;
 }
 
+// Every platform list this edition has (written and pruned by lib/evergreen.js writeStreamingPages),
+// biggest first, for the weekly page's "Browse by platform" links. Footers carry only the top few,
+// which left 136 platform and platform-language lists with no link from a page Google sees
+// (26 Oct 2026 click-depth audit). A platform page links its language pages itself.
+function platformListLinks(code, root = ".") {
+  const path = require("path");
+  const base = STREAM_BASE(code);
+  let dirs = [];
+  try { dirs = fs.readdirSync(path.join(root, base)); } catch { return []; }
+  return dirs.filter((d) => fs.existsSync(path.join(root, base, d, "index.html"))).map((d) => {
+    const html = fs.readFileSync(path.join(root, base, d, "index.html"), "utf8");
+    const n = Number((/(\d+) titles? ·/.exec(html) || [])[1] || 0);
+    const name = ((/<h1>[^<]*? on ([^<]+?) in [^<]*<\/h1>/.exec(html) || [])[1] || d).replace(/&amp;/g, "&");
+    return { href: `/${base}/${d}/`, name, n };
+  }).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
+}
+
 function writeOttWeekPage(data, cfg, allCountries) {
   const p = ottWeekPath(cfg.code);
   const dir = p.slice(0, p.lastIndexOf("/"));
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  writeIfChanged(p, buildOttWeekPage(data, cfg, allCountries, filmIndexFor(cfg)));   // with the release calendar (lib/weekly.js)
+  writeIfChanged(p, buildOttWeekPage(data, cfg, allCountries, filmIndexFor(cfg), platformListLinks(cfg.code)));   // with the release calendar (lib/weekly.js)
   console.log(`  OTT-week page: /${p.replace(/index\.html$/, "")}`);
 }
 
@@ -611,6 +629,7 @@ module.exports = {
   ottMonthUrl,
   platformMonthPath,
   platformMonthUrl,
+  platformListLinks,
   pruneRetiredListings,
   SCOPED_MONTH_MIN,
   writeLanguageMonthPages,

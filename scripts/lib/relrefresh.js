@@ -61,4 +61,94 @@ function refreshRelated(pagesManifest, countries) {
   return res;
 }
 
-module.exports = { REL_VERSION, refreshRelated, replaceRelated };
+// ============================================================================
+// EVERY NEW TITLE GETS LINKS (26 Oct 2026, the owner: "genuine new titles must have proper links
+// so Google can crawl them and they build authority"). A link audit of the pages Google sees found
+// 2,249 titles released in the last FRESH_DAYS days or still to come: 79% had 3+ links in from
+// pages Google can see, but 208 had one (the weekly page's release calendar) and one had none —
+// mostly regional films in smaller editions, off the capped homepage and hub lists within days.
+//
+// Each build, a new title with fewer than FRESH_MIN_LINKS links in (counted from the pages on disk
+// that Google can see) is added to the "If you liked this" section of its closest older film
+// pages in the same edition: same rules as the section itself (lib/graph.js relatedScore, close
+// neighbours only — a related language or shared people), visible pages only, frozen pages only
+// (live pages recompute the section every build), at most one new title per host page per build,
+// and recorded in the host's facts so the render keeps it. Very old titles are left as they are.
+// ============================================================================
+const FRESH_DAYS = 60;
+const FRESH_MIN_LINKS = 3;
+
+function ensureFreshLinks(pagesManifest, countries, { root = ".", now = Date.now(), hidden = null, files = null } = {}) {
+  const path = require("path");
+  const { relatedScore, isClose } = require("./graph.js");
+  const { filmPageFiles, sitePageFiles } = require("./stylesheets.js");
+  const G = require("./googlehide.js");
+  const isHidden = hidden || ((code, slug, entry) => G.googleHidden(code, slug, entry));
+  const B = "https://filmychill.com/";
+  const res = { fresh: 0, weak: 0, added: 0, stillWeak: 0 };
+  // Links in, from every page on disk Google can see.
+  const inbound = new Map();
+  const all = files || [...filmPageFiles(root), ...sitePageFiles(root)];
+  for (const rel of all) {
+    let h; try { h = fs.readFileSync(path.join(root, rel), "utf8"); } catch { continue; }
+    if (G.NOINDEX_META.test(h.slice(0, 4096))) continue;
+    const self = "/" + String(rel).replace(/\\/g, "/").replace(/index\.html$/, "");
+    const seen = new Set();
+    for (const m of h.matchAll(/<a\b[^>]*href="([^"#?]+)/g)) {
+      let l = m[1]; if (l.startsWith(B)) l = "/" + l.slice(B.length);
+      if (!l.startsWith("/") || l === self || seen.has(l)) continue;
+      seen.add(l); inbound.set(l, (inbound.get(l) || 0) + 1);
+    }
+  }
+  const day = (d) => Date.parse(`${String(d || "").slice(0, 10)}T00:00:00Z`);
+  for (const cfg of countries || []) {
+    const code = cfg.code;
+    const m = (pagesManifest || {})[code] || {};
+    const index = filmIndexFor(cfg);
+    const visible = index.filter((f) => !isHidden(code, f.slug, m[f.slug]));
+    const fresh = visible.filter((f) => { const t = day(f.released); return Number.isFinite(t) && (now - t) / 864e5 <= FRESH_DAYS; });
+    const hosts = visible.filter((f) => { const e = m[f.slug]; return e && (e.archivedOn || e.catalog); });
+    const used = new Set();
+    for (const t of fresh) {
+      res.fresh++;
+      const href = filmPagePath(code, t.slug);
+      let have = inbound.get(href) || 0;
+      if (have >= FRESH_MIN_LINKS) continue;
+      res.weak++;
+      const picks = hosts
+        .filter((h) => h.slug !== t.slug && !used.has(h.slug) && isClose(h, t))
+        .map((h) => ({ h, s: relatedScore(h, t) }))
+        .filter((x) => x.s > 0)
+        .sort((a, b) => b.s - a.s || (a.h.slug < b.h.slug ? -1 : 1));
+      for (const { h } of picks) {
+        if (have >= FRESH_MIN_LINKS) break;
+        const file = path.join(root, filmPagePath(code, h.slug).replace(/^\//, ""));
+        let html; try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
+        const sec = SECTION_RE.exec(html);
+        const current = sec ? [...sec[0].matchAll(/href="\/(?:[a-z]{2}\/)?movie\/([^"/]+)\.html"/g)].map((x) => x[1]) : [];
+        if (current.includes(t.slug)) continue;
+        const bySlug = new Map(index.map((f) => [f.slug, f]));
+        const items = [t, ...current.map((s) => bySlug.get(s)).filter(Boolean)];
+        if (items.length > 6) {
+          // Make room by dropping an OLDER title's card, never another new title's (which would
+          // take a link from one new title to give it to another).
+          let drop = -1;
+          for (let i = items.length - 1; i > 0; i--) { const tt = day(items[i].released); if (!(Number.isFinite(tt) && (now - tt) / 864e5 <= FRESH_DAYS)) { drop = i; break; } }
+          if (drop < 0) continue;
+          items.splice(drop, 1);
+        }
+        const list = items.slice(0, 6)
+          .map((f) => ({ title: f.title, slug: f.slug, poster: f.poster || "", language: f.language || "", kind: f.kind || "movie" }));
+        queueFacts(code, h.slug, { similar: list });   // the render keeps it (lib/factsq.js)
+        const next = replaceRelated(html, simGridHtml(list, code));
+        if (next !== html) fs.writeFileSync(file, next);
+        used.add(h.slug); have++; res.added++;
+        inbound.set(href, have);
+      }
+      if (have < FRESH_MIN_LINKS) res.stillWeak++;
+    }
+  }
+  return res;
+}
+
+module.exports = { FRESH_DAYS, FRESH_MIN_LINKS, REL_VERSION, ensureFreshLinks, refreshRelated, replaceRelated };

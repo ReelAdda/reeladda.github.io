@@ -323,7 +323,7 @@ const {
 const { attachFcScores } = require("./lib/fcscore.js");
 const { cachedCriticsCount, cachedCriticsTone } = require("./lib/editorial.js");
 const { flagYearOutliers, sweepScores } = require("./lib/scoresweep.js");
-const { refreshRelated } = require("./lib/relrefresh.js");
+const { ensureFreshLinks, FRESH_MIN_LINKS, refreshRelated } = require("./lib/relrefresh.js");
 const { syncVotes } = require("./lib/votes.js");
 const { runAudit } = require("./lib/audit.js");
 const { WRITE_STATS } = require("./lib/writeif.js");
@@ -2696,6 +2696,11 @@ async function main() {
         const r = refreshRelated(pagesManifest, COUNTRIES);
         if (r.checked) console.log(`Related-films refresh: ${r.checked} old pages checked, ${r.updated} updated`);
       } catch (e) { stageFailed("related-films refresh", e); }
+      // Every new title gets links in from related pages Google can see (lib/relrefresh.js).
+      try {
+        const f = ensureFreshLinks(pagesManifest, COUNTRIES);
+        console.log(`New-title links: ${f.fresh} new title(s), ${f.weak} under ${FRESH_MIN_LINKS} links in, ${f.added} link(s) added, ${f.stillWeak} still short (no close related page)`);
+      } catch (e) { stageFailed("new-title links", e); }
       // Visitors' votes (lib/votes.js): read new ones, keep per-film totals, report privately.
       // Dormant until the FIREBASE_SERVICE_ACCOUNT secret exists.
       try {

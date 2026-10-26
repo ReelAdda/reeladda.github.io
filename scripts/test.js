@@ -5659,7 +5659,59 @@ test("release calendar: every recent or upcoming film page gets a link from the 
   assert.strictEqual((html.match(/href="\/movie\/listed\.html"/g) || []).length, 1, "a title already on the page isn't repeated");
   assert.ok(/Out recently and coming soon in India/.test(html) && /opens 30 Oct/.test(html));
   assert.ok(!/Out recently and coming soon/.test(W.buildOttWeekPage(data, { code: "in", name: "India", region: "IN", streamWord: "OTT" }, null)), "no index, no section");
-  assert.ok(/buildOttWeekPage\(data, cfg, allCountries, filmIndexFor\(cfg\)\)/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "hubs.js"), "utf8")), "the build passes the edition's film pages");
+  assert.ok(/buildOttWeekPage\(data, cfg, allCountries, filmIndexFor\(cfg\), platformListLinks\(cfg\.code\)\)/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "hubs.js"), "utf8")), "the build passes the edition's film pages");
+});
+test("new titles: each gets 3 links in from related pages Google sees, without taking links from another new title (Oct 2026)", () => {
+  const R = require("./lib/relrefresh.js");
+  const fsx = require("fs");
+  const ld = (name, lang, date, genre = "Drama") => `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"${name}","genre":"${genre}","inLanguage":"${lang}","datePublished":"${date}"}</script>`;
+  const page = (name, lang, date, sims = [], head = "", genre = "Drama") => `<html><head><title>${name}</title><meta name="description" content="d">${head}${ld(name, lang, date, genre)}</head><body><h1>${name}</h1><h2>If you liked this</h2><div class="simgrid">${sims.map((s) => `<a class="simcard" href="/movie/${s}.html">${s}</a>`).join("")}</div><h2>Frequently asked</h2></body></html>`;
+  inTempDirSync(() => {
+    fsx.mkdirSync("movie");
+    const put = (slug, html) => fsx.writeFileSync(`movie/${slug}.html`, html);
+    put("new-film", page("New Film", "Tamil", "2026-10-20"));
+    put("other-new", page("Other New", "Tamil", "2026-10-18"));
+    put("h1", page("H1", "Tamil", "2015-01-01", ["o1", "o2", "o3", "o4", "o5", "o6"]));
+    put("h2", page("H2", "Tamil", "2016-01-01", ["o1"]));
+    put("h3", page("H3", "Tamil", "2017-01-01", ["other-new", "x2", "x3", "x4", "x5", "x6"].map((s, i) => (i ? s : s))));
+    put("h4", page("H4", "Tamil", "2018-01-01", ["o1"], '\n<meta name="googlebot" content="noindex">'));
+    put("full", page("Full", "Tamil", "2019-01-01", ["other-new", "new-a", "new-b", "new-c", "new-d", "new-e"]));
+    for (const s of ["o1", "o2", "o3", "o4", "o5", "o6", "x2", "x3", "x4", "x5", "x6"]) put(s, page(s.toUpperCase(), "Tamil", "2001-01-01"));
+    for (const s of ["new-a", "new-b", "new-c", "new-d", "new-e"]) put(s, page(s, "Tamil", "2026-10-10"));
+    put("korean", page("Korean", "Korean", "2014-01-01", [], "", "Thriller"));
+    const man = { in: { h1: { archivedOn: "2026-01-01" }, h2: { archivedOn: "2026-01-01" }, h3: { catalog: true }, h4: { catalog: true }, full: { archivedOn: "2026-01-01" }, korean: { archivedOn: "2026-01-01" } } };
+    const now = Date.parse("2026-10-26T07:00:00Z");
+    const hidden = (code, slug) => /^new-[a-e]$/.test(slug);   // only there to fill "full"; not link targets here
+    const r = R.ensureFreshLinks(man, [{ code: "in" }], { root: ".", now, hidden });
+    // The section runs to the next heading (cards hold their own <div>s).
+    const sims = (slug) => [...(/<div class="simgrid">([\s\S]*?)<h2>/.exec(fsx.readFileSync(`movie/${slug}.html`, "utf8")) || ["", ""])[1].matchAll(/movie\/([^".]+)\.html/g)].map((m) => m[1]);
+    assert.ok(sims("h1").includes("new-film") || sims("h2").includes("new-film") || sims("h3").includes("new-film"), "the new title joins its close neighbours' sections");
+    const hosts = ["h1", "h2", "h3"].filter((h) => sims(h).includes("new-film"));
+    assert.ok(hosts.length >= 1);
+    assert.ok(sims("h3").includes("other-new"), "making room never drops another new title: " + sims("h3").join(","));
+    assert.ok(!sims("h4").includes("new-film"), "a page Google doesn't see isn't a host (googlebot tag)");
+    assert.ok(!sims("full").includes("new-film"), "a section of only new titles is left alone");
+    assert.ok(!sims("korean").includes("new-film"), "not a close neighbour (different language, no shared genre): never a host");
+    assert.ok(sims("h1").length <= 6, "never more than six cards");
+    assert.ok(r.added >= 1 && r.fresh >= 2);
+    const again = R.ensureFreshLinks(man, [{ code: "in" }], { root: ".", now, hidden });
+    assert.ok(again.added <= r.added, "settles: each host takes at most one new title per build");
+  });
+  const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(up.indexOf("ensureFreshLinks(pagesManifest, COUNTRIES)") > up.indexOf("refreshRelated(pagesManifest, COUNTRIES)"), "right after the related-films refresh, before the frozen render");
+});
+test("weekly page: 'Browse by platform' links every platform list the edition has (Oct 2026)", () => {
+  const W = require("./lib/weekly.js");
+  const H = require("./lib/hubs.js");
+  const fsx = require("fs");
+  const data = { generatedAt: "2026-10-26T06:00:00Z", ott: [] };
+  const html = W.buildOttWeekPage(data, { code: "in", name: "India", region: "IN", streamWord: "OTT" }, null, null, [{ href: "/streaming/netflix/", name: "Netflix", n: 394 }, { href: "/streaming/aha/", name: "Aha", n: 14 }]);
+  assert.ok(/Browse by platform/.test(html) && html.includes('href="/streaming/netflix/"') && html.includes('href="/streaming/aha/"') && /394 titles/.test(html));
+  inTempDirSync(() => {
+    for (const [d, n, name] of [["netflix", 394, "Netflix"], ["aha", 14, "Aha"]]) { fsx.mkdirSync(`streaming/${d}`, { recursive: true }); fsx.writeFileSync(`streaming/${d}/index.html`, `<h1>Movies &amp; Series on ${name} in India</h1><div class="upd">${n} titles · availability confirmed</div>`); }
+    fsx.mkdirSync("streaming/gone", { recursive: true });
+    assert.deepStrictEqual(H.platformListLinks("in"), [{ href: "/streaming/netflix/", name: "Netflix", n: 394 }, { href: "/streaming/aha/", name: "Aha", n: 14 }], "biggest first; a folder with no page isn't linked");
+  });
 });
 test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
