@@ -43,12 +43,10 @@ const {
   cspWith,
   footerAttribution,
   hubOgImage,
-  isoWeekOf,
   ogImageTag,
   ottMonthPath,
   STREAM_BASE,
   weekRangeFor,
-  weekSlug,
 } = require("./pagekit.js");
 const {
   countryListForProse,
@@ -381,7 +379,6 @@ function buildMoreLinks(code, data = null) {
     li("/privacy/", "Privacy"),
     li("/data/", "Streaming data"),
     code === "in" ? li("/embed/", "Embed widget") : "",
-    code === "in" ? li(`/week/${weekSlug(isoWeekOf())}/`, "Weekly archive") : "",
     li("https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j", "WhatsApp channel"),
   ].filter(Boolean);
 

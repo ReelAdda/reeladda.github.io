@@ -134,6 +134,7 @@ const {
   writeIndexNowPayload,
   writeLanguagePages,
   writeWeekPage,
+  pruneWeekPages,
 } = require("./lib/dated.js");
 const {
   analyzeReception,
@@ -2576,13 +2577,12 @@ async function main() {
       // generatePages so this run's films are already in the browse listing and card lookups.
       writeCountrySurfaces(cfg, dataByCode[cfg.code], { template: pageTemplate, allCountries: builtCountries });
     }
-    // India-only surfaces: language landing pages (/tamil/, /hindi/, ...) and the
-    // permanent weekly snapshot (/week/<year>-W<ww>/). Both are pure re-renders of
-    // this run's India data — zero extra API calls.
-    if (dataByCode.in) {
-      writeLanguagePages(dataByCode.in);
-      writeWeekPage(dataByCode.in);
-    }
+    // India-only surfaces: language landing pages (/tamil/, /hindi/, ...), a pure re-render of
+    // this run's India data — zero extra API calls. The weekly snapshots (/week/<year>-W<ww>/) are
+    // retired (lib/dated.js pruneWeekPages): removed every build, never written again.
+    if (dataByCode.in) writeLanguagePages(dataByCode.in);
+    try { const n = pruneWeekPages(); if (n) console.log(`Week snapshots retired: ${n} page(s) removed`); }
+    catch (e) { stageFailed("week snapshots", e); }
     writeIndexNowPayload(builtCountries, dataByCode); // fresh URL list for the workflow's IndexNow ping
     writeLlmsTxt(dataByCode); // AI-answer-engine site map with this week's actual picks
     // Keep the About page's country sentence in step with the config (see patchAboutPage).

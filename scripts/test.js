@@ -4072,9 +4072,10 @@ test("no divider when nothing is stillGood, and none when everything is", () => 
   assert.ok(!U.ssrOttSection([{ title: "A", slug: "a" }], "in").includes("ott-divider"));
   assert.ok(!U.ssrOttSection([{ title: "A", slug: "a", stillGood: true }], "in").includes("ott-divider"));
 });
-test("India footer links languages + week snapshot + about; other countries about only", () => {
+test("India footer links languages + about (never a retired week snapshot); other countries about only", () => {
   const indiaLinks = U.buildMoreLinks("in");
-  assert.ok(indiaLinks.includes('href="/tamil/"') && indiaLinks.includes('href="/week/') && indiaLinks.includes('href="/about/"'));
+  assert.ok(indiaLinks.includes('href="/tamil/"') && indiaLinks.includes('href="/about/"'));
+  assert.ok(!indiaLinks.includes('href="/week/'), "week snapshots are retired (26 Oct 2026)");
   const usLinks = U.buildMoreLinks("us");
   assert.ok(usLinks.includes('href="/about/"') && !usLinks.includes("/tamil/"));
 });
@@ -4365,15 +4366,14 @@ test("week page links to the previous snapshot only when it exists", () => {
   const without = U.buildWeekPage(data, "2026-W28", false);
   assert.ok(!/Previous week/.test(without)); // first-ever snapshot has no phantom link
 });
-test("IndexNow payload covers every country, all language pages, and the CURRENT week", () => {
+test("IndexNow payload covers every country and all language pages; never a retired week snapshot", () => {
   const fs = require("fs");
   U.writeIndexNowPayload([{ code: "in" }, { code: "us" }, { code: "ae" }, { code: "sg" }]);
   const p = JSON.parse(fs.readFileSync("indexnow-payload.json", "utf8"));
   assert.strictEqual(p.host, "filmychill.com");
   assert.ok(p.urlList.includes("https://filmychill.com/") && p.urlList.includes("https://filmychill.com/ae/new-on-ott/"));
   assert.ok(p.urlList.includes("https://filmychill.com/tamil/"));
-  const wk = "https://filmychill.com/week/" + U.weekSlug(U.isoWeekOf()) + "/";
-  assert.ok(p.urlList.includes(wk), "current week " + wk);
+  assert.ok(!p.urlList.some((u) => /\/week\//.test(u)), "week snapshots are retired (26 Oct 2026)");
   assert.ok(!p.urlList.includes("https://filmychill.com/in/")); // India is the root, never /in/
   fs.unlinkSync("indexnow-payload.json");
 });
@@ -4538,7 +4538,20 @@ test("definitional summary, build timestamp, and all key surfaces present", () =
   for (const url of ["https://filmychill.com/", "https://filmychill.com/new-on-ott/", "https://filmychill.com/tamil/", "https://filmychill.com/about/", "https://filmychill.com/ae/"]) {
     assert.ok(md.includes(url), "missing " + url);
   }
-  assert.ok(md.includes("/week/" + U.weekSlug(U.isoWeekOf()) + "/"));
+  assert.ok(!md.includes("/week/"), "week snapshots are retired (26 Oct 2026)");
+});
+test("week snapshots: removed every build, never written, nothing links to them (26 Oct 2026)", () => {
+  const D = require("./lib/dated.js");
+  const fsx = require("fs");
+  inTempDirSync(() => {
+    for (const w of ["2026-W42", "2026-W43"]) { fsx.mkdirSync(`week/${w}`, { recursive: true }); fsx.writeFileSync(`week/${w}/index.html`, "x"); }
+    fsx.mkdirSync("new-on-ott", { recursive: true }); fsx.writeFileSync("new-on-ott/index.html", "x");
+    assert.strictEqual(D.pruneWeekPages(), 2);
+    assert.ok(!fsx.existsSync("week") && fsx.existsSync("new-on-ott/index.html"), "only the snapshots go");
+    assert.strictEqual(D.pruneWeekPages(), 0, "nothing left to remove");
+  });
+  const up = fsx.readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(!/^\s*writeWeekPage\(/m.test(up) && /pruneWeekPages\(\)/.test(up), "the build removes them and writes none");
 });
 
 // ---------------- share images on listing surfaces ----------------

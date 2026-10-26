@@ -390,6 +390,21 @@ function buildWeekPage(data, slug, prevExists = false) {
   });
 }
 
+// RETIRED, 26 Oct 2026 (the owner's decision), like the month archives (lib/hubs.js
+// pruneRetiredListings): 17 snapshots earned 61 impressions and 1 click in 90 days, the current
+// one repeated the homepage and /new-on-ott/, and past weeks are records nobody searches for.
+// Removed first thing each build (the site branch is restored before a build); nothing links to
+// them any more (footer, llms.txt and the IndexNow list dropped them; the dead-link pass unlinks
+// anything older). buildWeekPage/writeWeekPage stay, tested, so this can be undone.
+function pruneWeekPages(root = ".") {
+  const path = require("path");
+  const dir = path.join(root, "week");
+  let n = 0;
+  try { n = fs.readdirSync(dir).filter((d) => fs.existsSync(path.join(dir, d, "index.html"))).length; } catch { return 0; }
+  fs.rmSync(dir, { recursive: true, force: true });
+  return n;
+}
+
 function writeWeekPage(data) {
   const slug = weekSlug(isoWeekOf());
   const dir = `week/${slug}`;
@@ -414,7 +429,6 @@ function indexNowUrls(builtCountries, dataByCode = {}) {
     for (const it of [...(d.theatres || []), ...(d.ott || [])]) if (it.slug) urls.push(filmPageUrl(cfg.code, it.slug));
   }
   for (const [, slug] of LANGUAGE_PAGES) urls.push(`https://filmychill.com/${slug}/`);
-  urls.push(`https://filmychill.com/week/${weekSlug(isoWeekOf())}/`);
   return [...new Set(urls)].slice(0, 900);
 }
 function writeIndexNowPayload(builtCountries, dataByCode = {}) {
@@ -445,4 +459,5 @@ module.exports = {
   writeLanguagePages,
   writePlatformHubPages,
   writeWeekPage,
+  pruneWeekPages,
 };

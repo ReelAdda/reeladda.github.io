@@ -11,7 +11,6 @@ const {
   filmPagePath,
   filmPageUrl,
 } = require("./core.js");
-const { isoWeekOf, weekSlug } = require("./pagekit.js");
 
 // ============================================================================
 // llms.txt — a curated markdown map of the site for AI answer engines
@@ -63,7 +62,6 @@ ${ott}
 
 - [This week's full picks — India](https://filmychill.com/): theatres + OTT, ranked, updated twice daily
 - [New OTT releases this week](https://filmychill.com/new-on-ott/): grouped by platform (Netflix, Prime Video, JioHotstar, ...)
-- [Weekly snapshot archive](https://filmychill.com/week/${weekSlug(isoWeekOf())}/): permanent record of each week's list
 - [About & methodology](https://filmychill.com/about/): how picks are chosen, data sources, editorial rules
 
 ## Language pages (India)
