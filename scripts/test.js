@@ -5855,6 +5855,38 @@ test("frozen pages: title rules switched on per film reach them (the slug is rea
     assert.ok(/OTT Release Date/.test((/<title>([^<]*)/.exec(A.retitleFrozen(page, { code: "in", name: "India", region: "IN" }).html) || [])[1]), "outside the share: as before");
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }
 });
+test("IndexNow: each hidden page is announced once, in the room under the 10,000 limit (27 Oct 2026)", () => {
+  const S = require("./lib/sitemap.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-inh-"));
+  try {
+    const B = "https://filmychill.com/";
+    const pay = (urls) => fsx.writeFileSync(path.join(root, "indexnow-payload.json"), JSON.stringify({ host: "filmychill.com", key: "k", urlList: urls }));
+    const read = () => JSON.parse(fsx.readFileSync(path.join(root, "indexnow-payload.json"), "utf8")).urlList;
+    const hidden = ["a", "b", "c", "d", "e"].map((s) => `${B}movie/${s}.html`);
+    fsx.writeFileSync(path.join(root, S.HIDDEN_URLS_FILE), JSON.stringify(hidden));
+    pay([B, `${B}new-on-ott/`, `${B}movie/new.html`]);
+    let r = S.extendIndexNowWithHidden({ root, max: 6 });
+    assert.deepStrictEqual([r.added, r.pending], [3, 2], "only the room left under the limit");
+    assert.strictEqual(read().length, 6);
+    pay([B]);
+    r = S.extendIndexNowWithHidden({ root, max: 6 });
+    assert.deepStrictEqual([r.added, r.pending], [2, 0], "the rest next run, none twice");
+    assert.deepStrictEqual(read(), [B, `${B}movie/d.html`, `${B}movie/e.html`]);
+    pay([B]);
+    assert.strictEqual(S.extendIndexNowWithHidden({ root, max: 6 }).added, 0, "all announced: nothing more");
+    // A page no longer hidden leaves the record; hidden again, it is announced again.
+    fsx.writeFileSync(path.join(root, S.HIDDEN_URLS_FILE), JSON.stringify(hidden.slice(1)));
+    S.extendIndexNowWithHidden({ root, max: 6 });
+    fsx.writeFileSync(path.join(root, S.HIDDEN_URLS_FILE), JSON.stringify(hidden));
+    pay([B]);
+    assert.deepStrictEqual(S.extendIndexNowWithHidden({ root, max: 6 }).added, 1);
+    assert.ok(read().includes(`${B}movie/a.html`));
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+  const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(up.indexOf("extendIndexNowWithHidden()") > up.indexOf("extendIndexNowWithChanged(todayStr())"), "after the changed pages, in the room left");
+  assert.ok(/\|hidden-urls\|indexnow-hidden\)/.test(require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8")), "build data, not published");
+});
 test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
   assert.ok(!urls.some((u) => /\/films\//.test(u)), "the A–Z pages are retired (25 Oct 2026)");

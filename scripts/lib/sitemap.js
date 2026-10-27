@@ -247,6 +247,34 @@ function extendIndexNowWithChanged(today, { root = ".", payloadFile = INDEXNOW_P
   return { added, total: urls.length };
 }
 
+// HIDDEN PAGES TO INDEXNOW (27 Oct 2026). Bing acts on an IndexNow ping within days, against weeks
+// for a sitemap recrawl, and IndexNow is meant for exactly this: telling search engines a page's
+// status changed. Each hidden page (hidden-urls.json, from the sitemap pass) is announced ONCE —
+// indexnow-hidden.json records which — in whatever room the run's payload has left under
+// IndexNow's 10,000-per-request limit, so ~14,400 go out over two runs, and pages hidden later
+// (the monthly roll) go out the run after. A page no longer hidden leaves the record, so if it is
+// hidden again it is announced again.
+const HIDDEN_URLS_FILE = "hidden-urls.json";
+const INDEXNOW_HIDDEN_FILE = "indexnow-hidden.json";
+function extendIndexNowWithHidden({ root = ".", payloadFile = INDEXNOW_PAYLOAD_FILE, max = INDEXNOW_MAX } = {}) {
+  let payload, hidden;
+  try { payload = JSON.parse(fs.readFileSync(path.join(root, payloadFile), "utf8")); } catch { return { added: 0, pending: 0, why: "no payload" }; }
+  try { hidden = JSON.parse(fs.readFileSync(path.join(root, HIDDEN_URLS_FILE), "utf8")); } catch { return { added: 0, pending: 0, why: "no hidden list" }; }
+  let sent = [];
+  try { sent = JSON.parse(fs.readFileSync(path.join(root, INDEXNOW_HIDDEN_FILE), "utf8")).sent || []; } catch { /* first run */ }
+  const now = new Set(hidden);
+  const done = new Set(sent.filter((u) => now.has(u)));   // un-hidden pages leave the record
+  const urls = Array.isArray(payload.urlList) ? payload.urlList : [];
+  const have = new Set(urls);
+  const pending = hidden.filter((u) => !done.has(u) && !have.has(u));
+  const take = pending.slice(0, Math.max(0, max - urls.length));
+  for (const u of take) { urls.push(u); done.add(u); }
+  payload.urlList = urls;
+  fs.writeFileSync(path.join(root, payloadFile), JSON.stringify(payload, null, 1));
+  fs.writeFileSync(path.join(root, INDEXNOW_HIDDEN_FILE), JSON.stringify({ sent: [...done] }));
+  return { added: take.length, pending: pending.length - take.length, total: urls.length };
+}
+
 // Pure: does a film page belong in sitemap-new.xml? A new-release page (not back catalogue)
 // released in the last NEW_RELEASE_PAST_DAYS or due in the next NEW_RELEASE_AHEAD_DAYS, or any
 // film page whose film arrived on a platform here in the last NEW_ARRIVAL_DAYS.
@@ -521,6 +549,9 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   // that date the file is deleted: by then Bing has dropped them.
   if (today <= BING_REMOVAL_UNTIL) fs.writeFileSync(BING_SITEMAP, urlset(bingOnly.slice(0, 50000)));
   else fs.rmSync(BING_SITEMAP, { force: true });
+  // The hidden pages as a plain list, every run (build data, not published): the IndexNow step
+  // announces each one once, so Bing recrawls it and sees the tag (extendIndexNowWithHidden).
+  fs.writeFileSync(HIDDEN_URLS_FILE, JSON.stringify(bingOnly.map((x) => (/<loc>([^<]+)<\/loc>/.exec(x) || [])[1]).filter(Boolean)));
   for (const c of countries) {
     const entries = filmUrlsBy[c.code] || [];
     if (!entries.length) continue;
@@ -541,6 +572,9 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
 module.exports = {
   BING_SITEMAP,
   BING_REMOVAL_UNTIL,
+  extendIndexNowWithHidden,
+  HIDDEN_URLS_FILE,
+  INDEXNOW_HIDDEN_FILE,
   contentFingerprint,
   factsFingerprint,
   extendIndexNowWithChanged,
