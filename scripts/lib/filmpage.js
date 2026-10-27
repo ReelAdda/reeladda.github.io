@@ -773,6 +773,60 @@ const FCSB_CSS = [
   "  .fcsb-note { font-size:13px; color:var(--mute); line-height:1.5; margin:8px 0 0; }",
 ].join("\n");
 
+// THE 27 OCT 2026 REDESIGN (lean pages; the owner approved the mock-up). Same palette and fonts:
+// the backdrop behind the title (.hero), the answer as a card over it with the next episode
+// (.anscard, .nextep), a bigger score ring with the two halves as tiles, Good to know as tiles,
+// the episode timeline (.eplist), the franchise row with "You're here" (.frrow), cards for the
+// fit rows and the FAQ. Styling and wrappers only: every element lib/facts.js and the archive
+// patchers read keeps its markup.
+const REDESIGN_CSS = [
+  "  /* Redesign, 27 Oct 2026 */",
+  "  .hero { margin:-20px -16px 0; padding:22px 16px 66px; background-color:#2B2486; background-size:cover; background-position:center 30%; color:#fff; }",
+  "  .hero .head { align-items:end; } .hero h1 { color:#fff; font-size:27px; line-height:1.15; } .hero .meta { color:rgba(255,255,255,.86); }",
+  "  .hero .poster { box-shadow:0 12px 30px rgba(10,6,40,.5); }",
+  "  .anscard { position:relative; margin:-50px 0 4px; background:#fff; border-radius:18px; box-shadow:0 8px 26px rgba(64,56,199,.14); padding:2px 0 4px; }",
+  "  .anscard .answer { margin:0; border:0; background:none; border-radius:0; padding:14px 16px 6px; font-size:17px; }",
+  "  .anscard .ansub { padding:0 16px !important; margin:0 0 10px !important; }",
+  "  .nextep { margin:0 12px 12px; background:var(--cream); border-radius:12px; padding:10px 12px; font-size:14px; line-height:1.5; }",
+  "  .fcsb-verdict .dial { width:84px; height:84px; } .fcsb-verdict .dial span { width:68px; height:68px; font-size:28px; }",
+  "  .fcsb-rows { grid-template-columns:1fr 1fr; } .fcsb-row { flex-direction:column; align-items:flex-start; background:#F7F5FF; border-radius:12px; padding:10px; }",
+  "  h2 { font-size:18px; margin:26px 0 10px; }",
+  "  .fit { border-left:0; background:#fff; border-radius:16px; padding:14px 16px; }",
+  "  .gtk { display:block; } .gtk tbody { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }",
+  "  .gtk tr { display:flex; flex-direction:column; gap:3px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px; }",
+  "  .gtk td { border:0; padding:0; width:auto !important; text-align:left !important; } .gtk td:first-child { font-size:12px; } .gtk td:last-child { font-size:15px; font-weight:700; }",
+  "  .eplist { list-style:none; margin:8px 0 0; padding:4px 14px; background:#fff; border-radius:16px; }",
+  "  .eplist li { display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-top:1px solid #F0EEF9; } .eplist li:first-child { border-top:0; }",
+  "  .epn { width:26px; height:26px; flex-shrink:0; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:700; background:var(--indigo); color:#fff; }",
+  "  .eplist .next .epn { background:var(--marigold); color:#241D52; } .eplist .soon .epn { background:#fff; color:var(--mute); border:1.5px solid #C9C4EC; }",
+  "  .eplist b { display:block; font-size:14.5px; } .eplist small { color:var(--mute); font-size:12.5px; } .eplist .soon b { color:var(--mute); }",
+  "  .eptag { margin-left:auto; font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; background:var(--marigold); color:#241D52; white-space:nowrap; }",
+  "  .frrow { display:flex; gap:10px; overflow-x:auto; padding:4px 0 8px; }",
+  "  .frcard { flex:0 0 104px; text-decoration:none; color:var(--ink); }",
+  "  .frcard img, .frcard .nop { width:104px; aspect-ratio:2/3; object-fit:cover; border-radius:10px; display:block; background:var(--line); }",
+  "  .frcard b { display:block; font-size:12.5px; margin-top:6px; line-height:1.25; } .frcard small { color:var(--mute); font-size:11px; }",
+  "  .frcard.here img, .frcard.here .nop { outline:2px solid var(--marigold); outline-offset:-2px; }",
+  "  .frhere { display:inline-block; margin-top:6px; font-size:10.5px; font-weight:700; background:var(--marigold); color:#241D52; border-radius:999px; padding:2px 8px; }",
+  "  .simcard { border:0; box-shadow:0 2px 10px rgba(64,56,199,.07); }",
+  "  .frame { border-radius:16px; }",
+  "  .faq { background:#fff; border-radius:16px; padding:2px 16px; } .faq details:first-child { border-top:0; }",
+].join("\n");
+
+// The franchise row: the siblings and this title in release order, this one marked.
+function franchiseRowHtml(fr, item, code) {
+  const e = escHtml;
+  const yr = (x) => String(x.released || "").slice(0, 4);
+  const self = { slug: item.slug, title: item.title, released: item.released, poster: item.poster, here: true };
+  const all = [...fr.items, self].sort((a, b) => String(a.released || "").localeCompare(String(b.released || "")));
+  const card = (x) => {
+    const img = x.poster ? `<img src="${e(cardPoster(x.poster))}" alt="${e(x.title)} poster" loading="lazy">` : `<span class="nop"></span>`;
+    return x.here
+      ? `<div class="frcard here">${img}<span class="frhere">You're here</span><b>${e(x.title)}</b><small>${e(yr(x))}</small></div>`
+      : `<a class="frcard" href="${e(filmPagePath(code, x.slug))}">${img}<b>${e(x.title)}</b><small>${e(yr(x))}</small></a>`;
+  };
+  return `<h2>${e(fr.heading)}</h2><div class="frrow">${all.map(card).join("")}</div>`;
+}
+
 // The score line for a page with no score yet. `label` and `audience` come from the item on a
 // live render, or from the page's own card on a frozen one (see compactEarlyScore).
 function compactScoreHtml(label, audience, tail = ", no critics' verdict yet.") {
@@ -1193,11 +1247,13 @@ ${FCSB_CSS}
   .faq details[open] summary::after { content:"–"; }
   .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
   @media (max-width:420px){ .head { grid-template-columns:110px 1fr; } .poster { width:110px; } h1 { font-size:20px; } }
+${REDESIGN_CSS}
 </style>
 </head>
 <body>
 <div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
 <div class="wrap">${lean ? LEAN_MARK + audienceMark(item) : ""}${SER.seriesMark(item)}
+  ${lean ? `<div class="hero"${/^https:\/\/image\.tmdb\.org\//.test(String(item.backdrop || "")) ? ` style="background-image:linear-gradient(rgba(27,22,95,.84),rgba(27,22,95,.94)),url('${e(item.backdrop)}')"` : ""}>` : ""}
   <div class="head">
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="140" height="210"${lean ? ' fetchpriority="high"' : ""}>` : "<div></div>"}
     <div>
@@ -1209,7 +1265,7 @@ ${FCSB_CSS}
       ${item.released ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
     </div>
-  </div>
+  </div>${lean ? "\n  </div>" : ""}
   ${(() => { const answerBlock = (() => {
     // Lead answer line. The GSC data showed pages ranking on page 1 for "where to watch [film]"
     // and "[film] ott release date" but pulling <1% CTR, and answer engines had nothing at the
@@ -1235,7 +1291,13 @@ ${FCSB_CSS}
     const rent = (item.rentBuy || []).map(String).filter((x) => !provs.includes(x));
     const how = lean && provs.length
       ? `\n  <p class="ansub" style="margin:-2px 0 10px;padding:0 14px;font-size:13px;line-height:1.5;color:var(--mute)">Included with subscription${rent.length ? ` · Rent or buy: ${e(rent.slice(0, 3).join(", "))}` : ""}</p>` : "";
-    return `<p class="answer">${ans}</p>${how}`;
+    // Lean (the 27 Oct 2026 redesign): the answer is a card over the hero, with the next
+    // episode of a series on air under it. The answer's own markup is unchanged inside.
+    if (!lean) return `<p class="answer">${ans}</p>${how}`;
+    const nx = item.kind === "tv" && item.episodes && item.episodes.next;
+    const nextEp = nx && nx.date >= new Date().toISOString().slice(0, 10)
+      ? `\n  <p class="nextep"><b>Next episode:</b> E${nx.e}${nx.name ? ` “${e(nx.name)}”` : ""} · ${e(fmtDateFull(nx.date, localeFor(code)))}</p>` : "";
+    return `<div class="anscard"><p class="answer">${ans}</p>${how}${nextEp}</div>`;
   })();
     // Lean: the answer leads, then the score. Otherwise orderAnswer decides (below a full card).
     return lean
@@ -1398,7 +1460,7 @@ ${FCSB_CSS}
   })()}
   ${SER.episodesHtml(item, fmtFull)}
   ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
-  ${franchise ? simGridHtml(franchise.items, code).replace("<h2>If you liked this</h2>", `<h2>${e(franchise.heading)}</h2>`).replace("class=\"simgrid\"", "class=\"simgrid franchise\"") : ""}
+  ${franchise ? franchiseRowHtml(franchise, item, code) : ""}
   ${simGridHtml(similar, code, linkable)}
   ${faqs.length ? `<h2>Frequently asked</h2><div class="faq">${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("")}</div>` : ""}
   ${(() => {

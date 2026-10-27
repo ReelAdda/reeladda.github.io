@@ -76,7 +76,9 @@ async function seriesFactsFor(kind, id, tmdb, now = Date.now()) {
     if (sn) { try { season = await tmdb(`/tv/${id}/season/${sn}`); } catch { /* the count alone */ } }
     episodes = episodesFrom(d, season);
   }
-  return { episodes, franchise: franchiseFrom(d) };
+  // The backdrop rides along: older pages lost it (their facts never kept it), and the hero shows it.
+  const bp = d && /^\/[\w.-]+$/.test(String(d.backdrop_path || "")) ? d.backdrop_path : null;
+  return { episodes, franchise: franchiseFrom(d), backdropPath: bp };
 }
 
 // ---- the page ---------------------------------------------------------------------------------
@@ -129,14 +131,18 @@ function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10)) 
   if (!ep || !ep.count) return "";
   const e = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const summary = [`${ep.count} episode${ep.count === 1 ? "" : "s"}${ep.seasons > 1 ? ` across ${ep.seasons} seasons` : ""}`, ep.limited ? "limited series" : null].filter(Boolean).join(" · ");
-  const next = ep.next && ep.next.date >= today
+  const nextNo = ep.next && ep.next.date >= today && (!ep.season || ep.next.s === ep.season) ? ep.next.e : null;
+  // With no episode list, the next episode is said in words (the answer card says it too).
+  const next = !(ep.list || []).length && ep.next && ep.next.date >= today
     ? `<p class="epnext"><b>Next episode:</b> ${ep.next.s > 1 || ep.seasons > 1 ? `S${ep.next.s} ` : ""}E${ep.next.e}${ep.next.name ? ` — ${e(ep.next.name)}` : ""}, ${e(fmt(ep.next.date))}</p>` : "";
-  const rows = (ep.list || []).map((x) => {
-    const out = x.date && x.date <= today;
-    return `<tr${out ? "" : ' class="soon"'}><td>${x.e}</td><td>${e(x.name || `Episode ${x.e}`)}</td><td>${x.date ? e(fmt(x.date)) : "TBA"}</td><td>${x.runtime ? `${x.runtime} min` : ""}</td></tr>`;
+  // A timeline: aired episodes filled, the next one marked, the rest outlined.
+  const items = (ep.list || []).map((x) => {
+    const state = x.e === nextNo ? "next" : x.date && x.date <= today ? "out" : "soon";
+    const meta = [x.date ? fmt(x.date) : "Date to be announced", x.runtime ? `${x.runtime} min` : null].filter(Boolean).join(" · ");
+    return `<li class="${state}"><span class="epn">${x.e}</span><div><b>${e(x.name || `Episode ${x.e}`)}</b><small>${e(meta)}</small></div>${state === "next" ? '<span class="eptag">Next</span>' : ""}</li>`;
   }).join("");
-  return `<h2>Episodes</h2><p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""}</p>${next}`
-    + (rows ? `<div class="eptable"><table><thead><tr><th>#</th><th>Title</th><th>Released</th><th>Length</th></tr></thead><tbody>${rows}</tbody></table></div><p class="epnote">Dates are each episode's original release date.</p>` : "");
+  return `<h2>Episodes</h2><p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""} · original release dates</p>${next}`
+    + (items ? `<ol class="eplist">${items}</ol>` : "");
 }
 
 // Pure: series FAQs, only from what the guide holds.
@@ -201,7 +207,8 @@ async function sweepSeries(manifest, { budget = 300, tmdb, queueFacts, hidden = 
     if (got.episodes) res.episodes++;
     if (got.franchise) res.franchise++;
     for (const [code, slug, e] of byTitle.get(key)) {
-      queueFacts(code, slug, { episodes: got.episodes || undefined, franchise: got.franchise || undefined });
+      queueFacts(code, slug, { episodes: got.episodes || undefined, franchise: got.franchise || undefined,
+        ...(got.backdropPath ? { backdropPath: got.backdropPath, backdrop: `https://image.tmdb.org/t/p/w780${got.backdropPath}` } : {}) });
       e.srv = SERIES_SWEEP_VERSION; e.srAt = today;
       if (got.episodes && got.episodes.next) e.epNext = got.episodes.next.date; else delete e.epNext;
     }

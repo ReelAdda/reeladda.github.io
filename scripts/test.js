@@ -5924,7 +5924,8 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
   inTempDirSync(() => {
     const html = F.buildFilmPage(item, "2026-10-27", new Set(["visionquest"]), IN);
     assert.ok(/<title>VisionQuest(?: \(2026\))?: Episode Schedule &amp; Where to Watch/.test(html), (/<title>[^<]*/.exec(html) || [])[0]);
-    assert.ok(/<h2>Episodes<\/h2><p>8 episodes · limited series/.test(html) && /Next episode:<\/b> E7 — Forever/.test(html) && /<td>No Strings<\/td>/.test(html));
+    assert.ok(/<h2>Episodes<\/h2><p>8 episodes · limited series/.test(html) && /<li class="out"><span class="epn">1<\/span><div><b>No Strings<\/b>/.test(html)
+      && /<li class="next"><span class="epn">7<\/span><div><b>Forever<\/b><small>[^<]*62 min<\/small><\/div><span class="eptag">Next<\/span>/.test(html), "a timeline: aired, then the next one marked");
     assert.ok(/How many episodes does VisionQuest have\?/.test(html) && /When is the next episode of VisionQuest\?/.test(html));
     assert.ok(/<td>Episodes<\/td><td>8 · limited series<\/td>/.test(html) && /<td>Episode length<\/td><td>48–62 min<\/td>/.test(html) && /<td>Part of<\/td><td>The Marvel Cinematic Universe<\/td>/.test(html));
     const back = X.extractFacts(html, "visionquest");
@@ -5936,9 +5937,27 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     fsx.writeFileSync("movie/wandavision.html", sibPage);
     F.resetFranchiseIndex();   // a build reads the pages on disk once; here they changed mid-test
     const withRow = F.buildFilmPage({ ...item, slug: "vq2" }, "2026-10-27", new Set(["wandavision"]), IN);
-    assert.ok(/<h2>More from the Marvel Cinematic Universe<\/h2><div class="simgrid franchise">/.test(withRow) && withRow.includes('href="/movie/wandavision.html"'));
+    assert.ok(/<h2>More from the Marvel Cinematic Universe<\/h2><div class="frrow">/.test(withRow) && withRow.includes('href="/movie/wandavision.html"'));
+    assert.ok(withRow.indexOf("WandaVision") < withRow.indexOf("You're here"), "release order, this title marked: " + (/<div class="frrow">[\s\S]*?<\/div><\/div>/.exec(withRow) || [""])[0].slice(0, 300));
     assert.ok(!X.extractFacts(withRow, "vq2").similar.some((s) => s.slug === "wandavision"), "franchise cards aren't read as similar titles");
   });
+  // The redesign (lean pages): hero, the answer as a card with the next episode, styles in place —
+  // and the facts still read the same from it.
+  const R = require("./lib/rollout.js");
+  try {
+    R.useRolloutConfig({ features: { "lean-page": { percent: 100 } } });
+    inTempDirSync(() => {
+      const lean = F.buildFilmPage({ ...item, backdrop: "https://image.tmdb.org/t/p/w780/bd.jpg" }, "2026-10-27", new Set(), IN);
+      assert.ok(/<div class="hero" style="background-image:linear-gradient\([^"]*url\('https:\/\/image\.tmdb\.org\/t\/p\/w780\/bd\.jpg'\)">\s*<div class="head">/.test(lean), "the head inside the hero");
+      assert.ok(/<div class="anscard"><p class="answer">[\s\S]*?<p class="nextep"><b>Next episode:<\/b> E7 “Forever” · /.test(lean), "the answer card, with the next episode");
+      assert.ok(lean.indexOf('class="anscard"') < lean.indexOf('id="filmychill-score"'), "the answer still leads");
+      assert.ok(/Redesign, 27 Oct 2026/.test(lean) && /\.eplist li/.test(lean) && /\.frrow/.test(lean));
+      const f = X.extractFacts(lean, "visionquest");
+      assert.deepStrictEqual([f.title, f.providers, f.rating, f.votes, f.released], ["VisionQuest", ["JioHotstar"], 8.7, 184, "2026-10-13"], "facts read the same from the new layout");
+      const noBd = F.buildFilmPage({ ...item, backdrop: "javascript:x" }, "2026-10-27", new Set(), IN);
+      assert.ok(/<div class="hero">\s*<div class="head">/.test(noBd), "no TMDB backdrop: the plain indigo hero, never another URL");
+    });
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
   // The sweep: one TMDB title per film across editions, within budget, visible pages only.
   const calls = []; const queued = [];
   const fakeTmdb = async (p) => { calls.push(p); return p.includes("/season/") ? season : tv; };

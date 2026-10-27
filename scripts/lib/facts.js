@@ -117,6 +117,10 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   };
   if (tmdbId) item.tmdbId = tmdbId;
   if (ld.numberOfSeasons) item.seasons = ld.numberOfSeasons;
+  // The backdrop: the structured data's second image (w1280), for the redesign's hero.
+  const ldImg = Array.isArray(ld.image) ? ld.image : [];
+  const bdm = /^https:\/\/image\.tmdb\.org\/t\/p\/w\d+(\/[^"/]+)$/.exec(String(ldImg[1] || ""));
+  if (bdm) { item.backdropPath = bdm[1]; item.backdrop = `https://image.tmdb.org/t/p/w780${bdm[1]}`; }
   // Episode guide and franchise, from the page's marker (lib/series.js).
   const ser = require("./series.js").readSeriesMark(html);
   if (ser.episodes) item.episodes = ser.episodes;
