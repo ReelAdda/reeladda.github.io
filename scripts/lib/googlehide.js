@@ -28,6 +28,13 @@ const { inRollout } = require("./rollout.js");
 const HIDE_FEATURE = "google-hide";
 const HIDE_FILE = "google-hidden.json";
 const GOOGLEBOT_TAG = '<meta name="googlebot" content="noindex">';
+// SAME RULES FOR BING (27 Oct 2026, the owner: "I want Bing to follow the same quality parameters
+// I set for Google"). A hidden page carries Bing's own tag too, so Bing and the engines built on
+// its index (Yahoo, DuckDuckGo, Ecosia) drop it as Google does. Kept as crawler-named tags rather
+// than one robots noindex: "robots noindex" means an empty page to the rest of the build (people
+// counts, merges, audits), and these pages aren't empty.
+const BINGBOT_TAG = '<meta name="bingbot" content="noindex">';
+const HIDE_TAG = `${GOOGLEBOT_TAG}\n${BINGBOT_TAG}`;
 // The head tag any noindex check must honour (robots for every crawler, googlebot for Google).
 const NOINDEX_META = /<meta name="(?:robots|googlebot)" content="[^"]*noindex/;
 
@@ -71,16 +78,20 @@ function googleHidden(code, slug, entry, opts = {}) {
   return googleEligible(code, slug, entry, opts) && inRollout(HIDE_FEATURE, slug);
 }
 
-// Pure: the page with the tag (after the robots tag, else the description). Idempotent.
+// Pure: the page with the hide tags (Google's and Bing's, after the robots tag, else the
+// description). Idempotent; a page carrying only Google's tag (hidden before 27 Oct) gains Bing's.
 function addGooglebotNoindex(html) {
   const s = String(html);
-  if (s.includes(GOOGLEBOT_TAG)) return s;
-  const m = /<meta name="robots" content="[^"]*">/.exec(s) || /<meta name="description" content="[^"]*">/.exec(s);
-  return m ? s.slice(0, m.index + m[0].length) + "\n" + GOOGLEBOT_TAG + s.slice(m.index + m[0].length) : s;
+  if (s.includes(HIDE_TAG)) return s;
+  const clean = removeGooglebotNoindex(s);
+  const m = /<meta name="robots" content="[^"]*">/.exec(clean) || /<meta name="description" content="[^"]*">/.exec(clean);
+  return m ? clean.slice(0, m.index + m[0].length) + "\n" + HIDE_TAG + clean.slice(m.index + m[0].length) : s;
 }
-// Pure: the page without it — the exact inverse.
+// Pure: the page without them — the exact inverse (either form).
 function removeGooglebotNoindex(html) {
-  return String(html).split("\n" + GOOGLEBOT_TAG).join("").split(GOOGLEBOT_TAG).join("");
+  let s = String(html);
+  for (const t of [BINGBOT_TAG, GOOGLEBOT_TAG]) s = s.split("\n" + t).join("").split(t).join("");
+  return s;
 }
 
 // The pass over film pages, after the last page writer and before the hreflang and sitemap
@@ -223,4 +234,4 @@ function nearCopyEditions(files, manifest, { root = ".", threshold = NEAR_COPY, 
 
 module.exports = {
   NEAR_COPY, WEEKLY_HIDE_DAYS, listedHidden, mainText, nearCopyEditions, similarity, shingleSet,
-  applyGoogleHidePaths, pathHidden, peoplePageFiles, GOOGLEBOT_TAG, HIDE_FEATURE, HIDE_FILE, NOINDEX_META, addGooglebotNoindex, applyGoogleHide, googleEligible, googleHidden, loadHidden, removeGooglebotNoindex, useHiddenList };
+  applyGoogleHidePaths, pathHidden, peoplePageFiles, BINGBOT_TAG, HIDE_TAG, GOOGLEBOT_TAG, HIDE_FEATURE, HIDE_FILE, NOINDEX_META, addGooglebotNoindex, applyGoogleHide, googleEligible, googleHidden, loadHidden, removeGooglebotNoindex, useHiddenList };

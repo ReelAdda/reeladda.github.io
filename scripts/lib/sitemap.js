@@ -252,6 +252,7 @@ function extendIndexNowWithChanged(today, { root = ".", payloadFile = INDEXNOW_P
 // film page whose film arrived on a platform here in the last NEW_ARRIVAL_DAYS.
 const NEW_RELEASES_SITEMAP = "sitemap-new.xml";
 const BING_SITEMAP = "sitemap-bing.xml";   // Bing Webmaster Tools only; never in sitemap.xml or robots.txt
+const BING_REMOVAL_UNTIL = "2026-12-15";     // the removal list is deleted after this day
 const NEW_RELEASE_PAST_DAYS = 45, NEW_RELEASE_AHEAD_DAYS = 60, NEW_ARRIVAL_DAYS = 14;
 function isNewReleaseEntry(e, today) {
   if (!e) return false;
@@ -316,8 +317,8 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       return require("./googlehide.js").NOINDEX_META.test(fs.readFileSync(path, "utf8").slice(0, 2048)); // robots or googlebot (lib/googlehide.js)
     } catch { return false; }
   };
-  // Pages hidden from Google only (the googlebot tag, no robots noindex): Bing still indexes them,
-  // so they go in sitemap-bing.xml, which only Bing Webmaster Tools is given (see below).
+  // Pages hidden by lib/googlehide.js (Google's and Bing's tags, no robots noindex): listed in
+  // sitemap-bing.xml for a while so Bing recrawls them and drops them (see below).
   const googleOnlyHidden = (path) => {
     try { const h = fs.readFileSync(path, "utf8").slice(0, 2048); return h.includes('<meta name="googlebot" content="noindex">') && !/<meta name="robots" content="[^"]*noindex/.test(h); } catch { return false; }
   };
@@ -513,12 +514,13 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     fs.writeFileSync(NEW_RELEASES_SITEMAP, urlset(newReleaseUrls));
     children.unshift({ file: NEW_RELEASES_SITEMAP, lastmod: newest(newReleaseUrls) });
   } else fs.rmSync(NEW_RELEASES_SITEMAP, { force: true });
-  // BING ONLY (27 Oct 2026). Pages hidden from Google alone (lib/googlehide.js) lost their sitemap
-  // and, with links to them trimmed from pages Google sees, most of their links in. Bing still
-  // indexes them (its traffic held steady through Google's 22 Oct drop), so they are listed here.
-  // Deliberately NOT in sitemap.xml or robots.txt, which Google reads: this file is submitted in
-  // Bing Webmaster Tools only. 50,000 URLs is a sitemap's limit; past it, the oldest go.
-  fs.writeFileSync(BING_SITEMAP, urlset(bingOnly.slice(0, 50000)));
+  // BING REMOVAL LIST (27 Oct 2026). Hidden pages now carry Bing's noindex too (lib/googlehide.js:
+  // the owner wants Bing held to the same rules as Google). With no sitemap and few links in, Bing
+  // would take months to recrawl them and see the tag, so until BING_REMOVAL_UNTIL they are listed
+  // here, a file submitted in Bing Webmaster Tools only (never in sitemap.xml or robots.txt). After
+  // that date the file is deleted: by then Bing has dropped them.
+  if (today <= BING_REMOVAL_UNTIL) fs.writeFileSync(BING_SITEMAP, urlset(bingOnly.slice(0, 50000)));
+  else fs.rmSync(BING_SITEMAP, { force: true });
   for (const c of countries) {
     const entries = filmUrlsBy[c.code] || [];
     if (!entries.length) continue;
@@ -538,6 +540,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
 
 module.exports = {
   BING_SITEMAP,
+  BING_REMOVAL_UNTIL,
   contentFingerprint,
   factsFingerprint,
   extendIndexNowWithChanged,

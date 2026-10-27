@@ -5826,6 +5826,21 @@ testAsync("keep lean: the monthly hide roll, the weekly health report, and the p
   assert.ok(/unlistedPages\(\[\.\.\.filmPageFiles\(\), \.\.\.sitePageFiles\(\)\]\)/.test(up) && /weeklyHealth\(\{ manifest: pagesManifest \}\)/.test(up));
   assert.ok(/git add -A -- google-hidden\.json site-health\.json/.test(fsx.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8")), "the roll and the report are committed back");
 });
+test("same rules for Bing: hidden pages carry Bing's noindex too; the Bing list is a temporary removal list (27 Oct 2026)", () => {
+  const G = require("./lib/googlehide.js");
+  const S = require("./lib/sitemap.js");
+  const page = '<html><head><title>T</title><meta name="description" content="d">\n<meta name="robots" content="max-image-preview:large">\n</head><body></body></html>';
+  const hid = G.addGooglebotNoindex(page);
+  assert.ok(hid.includes('<meta name="googlebot" content="noindex">\n<meta name="bingbot" content="noindex">'), "both crawlers told");
+  assert.ok(!/<meta name="robots" content="[^"]*noindex/.test(hid), "not a robots noindex: to the build the page isn't empty");
+  const old = page.replace('large">', `large">\n${G.GOOGLEBOT_TAG}`);
+  assert.strictEqual(G.addGooglebotNoindex(old), hid, "a page hidden before 27 Oct gains Bing's tag, once");
+  assert.strictEqual(G.removeGooglebotNoindex(hid), page, "exactly reversible");
+  assert.strictEqual(G.addGooglebotNoindex(hid), hid, "idempotent");
+  assert.ok(G.NOINDEX_META.test(hid), "the build still reads it as hidden");
+  assert.strictEqual(S.BING_REMOVAL_UNTIL, "2026-12-15");
+  assert.ok(/if \(today <= BING_REMOVAL_UNTIL\) fs\.writeFileSync\(BING_SITEMAP/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "sitemap.js"), "utf8")), "deleted after the removal window");
+});
 test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
   assert.ok(!urls.some((u) => /\/films\//.test(u)), "the A–Z pages are retired (25 Oct 2026)");
