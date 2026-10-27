@@ -2,64 +2,24 @@
  "_about": "Page changes switched on for a share of films at a time (scripts/lib/rollout.js). Stages: 10, 25, 50, 100 — 'percent' is the share now; a 'schedule' moves it up on the dates given. Set percent and schedule to 0 to turn a change off.",
  "features": {
   "honest-not-announced": {
-   "percent": 25,
+   "percent": 100,
    "since": "2026-10-24",
-   "schedule": [
-    {
-     "from": "2026-10-28",
-     "percent": 50
-    },
-    {
-     "from": "2026-11-01",
-     "percent": 100
-    }
-   ],
-   "what": "'hasn't been announced' -> 'No OTT release date in our sources yet'; titles 'Awaiting Date' (lib/honest.js)"
+   "what": "'hasn't been announced' -> 'No OTT release date in our sources yet'; titles 'Awaiting Date' (lib/honest.js) — switched to 100% at once on 27 Oct at the owner's request"
   },
   "intent-titles": {
-   "percent": 25,
+   "percent": 100,
    "since": "2026-10-25",
-   "schedule": [
-    {
-     "from": "2026-10-29",
-     "percent": 50
-    },
-    {
-     "from": "2026-11-02",
-     "percent": 100
-    }
-   ],
-   "what": "overseas cinema run: 'Release Date in <country>: <date> · Streaming <window>'; out a year+: no 'OTT Release Date' in the title (lib/filmpage.js filmTitleTag)"
+   "what": "overseas cinema run: 'Release Date in <country>: <date> · Streaming <window>'; out a year+: no 'OTT Release Date' in the title (lib/filmpage.js filmTitleTag) — switched to 100% at once on 27 Oct at the owner's request"
   },
   "one-score": {
-   "percent": 25,
+   "percent": 100,
    "since": "2026-10-25",
-   "schedule": [
-    {
-     "from": "2026-10-30",
-     "percent": 50
-    },
-    {
-     "from": "2026-11-03",
-     "percent": 100
-    }
-   ],
-   "what": "one rating, count and FilmyChill Score per film across editions: the freshest TMDB count any edition holds (lib/migrate.js shareScore)"
+   "what": "one rating, count and FilmyChill Score per film across editions: the freshest TMDB count any edition holds (lib/migrate.js shareScore) — switched to 100% at once on 27 Oct at the owner's request"
   },
   "lean-page": {
-   "percent": 25,
+   "percent": 100,
    "since": "2026-10-25",
-   "schedule": [
-    {
-     "from": "2026-10-28",
-     "percent": 50
-    },
-    {
-     "from": "2026-10-31",
-     "percent": 100
-    }
-   ],
-   "what": "every fact once: rating only in the score ring, count once, platform in the answer box first, runtime/genre/language in the header, one skip list, Story after the cast (lib/filmpage.js LEAN_PAGE)"
+   "what": "every fact once: rating only in the score ring, count once, platform in the answer box first, runtime/genre/language in the header, one skip list, Story after the cast (lib/filmpage.js LEAN_PAGE) — switched to 100% at once on 27 Oct at the owner's request"
   },
   "google-hide": {
    "percent": 100,
