@@ -3373,8 +3373,7 @@
     "lastCheck": "2026-10-23",
     "misses": 0
    },
-   "fpv": 2,
-   "archivedOn": "2026-10-26"
+   "fpv": 2
   },
   "saga-of-tanya-the-evil": {
    "last": "2026-10-25",
@@ -31747,7 +31746,7 @@
    }
   },
   "fbi": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -31756,22 +31755,13 @@
    "lang": "English",
    "kind": "tv",
    "title": "FBI",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Amazon Prime Video"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "fcs": {
     "v": "Worth a watch",
     "at": "2026-10-18",
     "w": 8
    },
    "rel": 3,
-   "fp": "d14fbba4b820",
+   "fp": "bf295f0d8077",
    "rendered": "2026-10-12",
    "imdb": "tt7491982",
    "fpv": 2,
@@ -34541,7 +34531,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "b06a8add3a89",
+   "fp": "8801a598779a",
    "rendered": "2026-10-12",
    "pv": 13,
    "imdb": "tt34890576",
@@ -52706,14 +52696,14 @@
    "rel": 3
   },
   "matargashti": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 339474,
    "released": "2026-10-21",
    "lang": "Hindi",
    "kind": "tv",
    "title": "Matargashti",
    "rendered": "2026-10-25",
-   "fp": "069778f3b860",
+   "fp": "b8d376bb765d",
    "fpv": 2
   },
   "least-eligible-bachelor": {
@@ -52837,7 +52827,24 @@
    "title": "Love in Disguise",
    "rendered": "2026-10-26",
    "fp": "72d0da40d645",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt45246384",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "haindava": {
    "last": "2026-10-26",
@@ -56318,7 +56325,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "0b7ed0076747",
+   "fp": "de584244d11c",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "fcs": {
@@ -60279,7 +60286,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Avengers: Doomsday",
-   "fp": "b39ca1c49ea7",
+   "fp": "b593cb8a8479",
    "rendered": "2026-10-12",
    "fpv": 2
   },
@@ -107172,7 +107179,7 @@
     "w": 8
    },
    "rel": 2,
-   "fp": "aa6d736c18cc",
+   "fp": "c66df98429d6",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "truth": {
@@ -122868,7 +122875,7 @@
     "language": "English",
     "runtime": 96,
     "genre": "Fantasy / Music",
-    "director": "Maggie Kang, Chris Appelhans",
+    "director": "Chris Appelhans, Maggie Kang",
     "cast": [
      "Arden Cho",
      "May Hong",
@@ -146893,7 +146900,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-25",
    "truth": {
     "at": "2026-10-27",
     "providers": [
@@ -146950,7 +146956,7 @@
     "at": "2026-10-21",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "truth": {
     "at": "2026-10-27",
     "providers": [
@@ -146971,7 +146977,8 @@
      "Park Jun-myun"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27"
   },
   "crystal-lake": {
    "last": "2026-10-27",
@@ -151635,7 +151642,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "5ee6ec060a4f",
+   "fp": "f43f093fc6cf",
    "fcs": {
     "v": "early",
     "at": "2026-10-21",
@@ -182502,7 +182509,7 @@
    }
   },
   "the-patrick-star-show": {
-   "last": "2026-10-23",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182514,13 +182521,11 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "Paramount Plus",
-     "Paramount+ Amazon Channel",
-     "Paramount Plus Apple TV channel",
-     "Paramount Plus Premium"
+     "Paramount+"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182528,13 +182533,38 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "39ff667e0d40",
+   "fp": "c249e90e3044",
    "rendered": "2026-10-14",
    "imdb": "tt12915960",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Paramount+"
+    ],
+    "rentBuy": [
+     "Apple TV Store",
+     "Amazon Video",
+     "Fetch TV"
+    ],
+    "released": "2021-07-09",
+    "title": "The Patrick Star Show",
+    "language": "English",
+    "runtime": 11,
+    "genre": "Family / Comedy",
+    "director": "Luke Brookshier, Marc Ceccarelli",
+    "cast": [
+     "Bill Fagerbakke",
+     "Thomas F. Wilson",
+     "Cree Summer",
+     "Jill Talley",
+     "Dana Snyder",
+     "Tom Kenny"
+    ]
+   }
   },
   "major-crimes": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182546,11 +182576,11 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "HBO Max",
-     "HBO Max Amazon Channel"
+     "HBO Max"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182558,10 +182588,33 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "b58cb26cbc9c",
+   "fp": "2f159998707a",
    "rendered": "2026-10-13",
    "imdb": "tt1936532",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "HBO Max"
+    ],
+    "rentBuy": [
+     "Apple TV Store"
+    ],
+    "released": "2012-08-13",
+    "title": "Major Crimes",
+    "language": "English",
+    "runtime": 43,
+    "genre": "Crime / Drama",
+    "director": "James Duff",
+    "cast": [
+     "Mary McDonnell",
+     "G.W. Bailey",
+     "Tony Denison",
+     "Michael Paul Chan",
+     "Raymond Cruz",
+     "Phillip P. Keene"
+    ]
+   }
   },
   "mtv-video-music-awards": {
    "last": "2026-10-25",
@@ -182580,8 +182633,9 @@
      "Paramount Plus Apple TV channel",
      "Paramount Plus Premium"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 1,
+    "rentBuy": []
    },
    "rel": 3,
    "fcs": {
@@ -182592,10 +182646,28 @@
    "fp": "93bd15e71632",
    "rendered": "2026-10-13",
    "imdb": "tt14811264",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [],
+    "rentBuy": [],
+    "released": "1984-09-14",
+    "title": "MTV Video Music Awards",
+    "language": "English",
+    "runtime": 180,
+    "genre": "Talk",
+    "cast": [
+     "Kurt Loder",
+     "John Norris",
+     "Sway Calloway",
+     "Taylor Swift",
+     "Madonna",
+     "LL Cool J"
+    ]
+   }
   },
   "succession": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182608,11 +182680,11 @@
     "since": "2026-09-27",
     "providers": [
      "Foxtel Now",
-     "HBO Max",
-     "HBO Max Amazon Channel"
+     "HBO Max"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182620,13 +182692,38 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "1351b2fd2f45",
+   "fp": "8ec40bc19949",
    "rendered": "2026-10-13",
    "imdb": "tt7660850",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Foxtel Now",
+     "HBO Max"
+    ],
+    "rentBuy": [
+     "Apple TV Store",
+     "Amazon Video",
+     "Fetch TV"
+    ],
+    "released": "2018-06-03",
+    "title": "Succession",
+    "language": "English",
+    "genre": "Drama / Comedy",
+    "director": "Jesse Armstrong",
+    "cast": [
+     "Jeremy Strong",
+     "Kieran Culkin",
+     "Sarah Snook",
+     "Brian Cox",
+     "Matthew Macfadyen",
+     "Alan Ruck"
+    ]
+   }
   },
   "the-tom-and-jerry-show": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182639,11 +182736,11 @@
     "since": "2026-09-27",
     "providers": [
      "Foxtel Now",
-     "HBO Max",
-     "HBO Max Amazon Channel"
+     "HBO Max"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182651,10 +182748,33 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "518033c65123",
+   "fp": "41c8e3e15213",
    "rendered": "2026-10-14",
    "imdb": "tt3559124",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Foxtel Now",
+     "HBO Max"
+    ],
+    "rentBuy": [
+     "Apple TV Store"
+    ],
+    "released": "2014-04-09",
+    "title": "The Tom and Jerry Show",
+    "language": "English",
+    "runtime": 7,
+    "genre": "Family / Animation",
+    "cast": [
+     "Kath Soucie",
+     "Rick Zieff",
+     "Grey DeLisle",
+     "Joey D'Auria",
+     "Gary Cole",
+     "Sam Kwasman"
+    ]
+   }
   },
   "longmire": {
    "last": "2026-10-22",
@@ -182672,8 +182792,11 @@
      "HBO Max",
      "HBO Max Amazon Channel"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 1,
+    "rentBuy": [
+     "Apple TV Store"
+    ]
    },
    "rel": 3,
    "fcs": {
@@ -182684,10 +182807,30 @@
    "fp": "737db0683a69",
    "rendered": "2026-10-13",
    "imdb": "tt1836037",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [],
+    "rentBuy": [
+     "Apple TV Store"
+    ],
+    "released": "2012-06-03",
+    "title": "Longmire",
+    "language": "English",
+    "genre": "Western / Crime",
+    "director": "John Coveny, Hunt Baldwin",
+    "cast": [
+     "Robert Taylor",
+     "Katee Sackhoff",
+     "Lou Diamond Phillips",
+     "Cassidy Freeman",
+     "Adam Bartley",
+     "Louanne Stephens"
+    ]
+   }
   },
   "sleepy-hollow": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182699,10 +182842,11 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "Disney Plus"
+     "Disney+"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182710,13 +182854,36 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "8912119c0c3b",
+   "fp": "41c3cf2d5413",
    "rendered": "2026-10-13",
    "imdb": "tt2647544",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Disney+"
+    ],
+    "rentBuy": [
+     "Apple TV Store"
+    ],
+    "released": "2013-09-16",
+    "title": "Sleepy Hollow",
+    "language": "English",
+    "runtime": 45,
+    "genre": "Drama / Mystery",
+    "director": "Alex Kurtzman, Roberto Orci",
+    "cast": [
+     "Tom Mison",
+     "Lyndie Greenwood",
+     "Nicole Beharie",
+     "Katia Winter",
+     "Orlando Jones",
+     "John Noble"
+    ]
+   }
   },
   "mayor-of-kingstown": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182728,13 +182895,11 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "Paramount Plus",
-     "Paramount+ Amazon Channel",
-     "Paramount Plus Apple TV channel",
-     "Paramount Plus Premium"
+     "Paramount+"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182742,13 +182907,37 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "91e8ac947c89",
+   "fp": "92194fa15688",
    "rendered": "2026-10-13",
    "imdb": "tt11712058",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Paramount+"
+    ],
+    "rentBuy": [
+     "Apple TV Store",
+     "Amazon Video",
+     "Fetch TV"
+    ],
+    "released": "2021-11-14",
+    "title": "Mayor of Kingstown",
+    "language": "English",
+    "genre": "Drama / Crime",
+    "director": "Taylor Sheridan, Hugh Dillon",
+    "cast": [
+     "Jeremy Renner",
+     "Hugh Dillon",
+     "Tobi Bamtefa",
+     "Taylor Handley",
+     "Derek Webster",
+     "Hamish Allan-Headley"
+    ]
+   }
   },
   "grown-ups-2": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182763,8 +182952,9 @@
      "Foxtel Now",
      "Stan"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182772,13 +182962,39 @@
     "at": "2026-10-21",
     "w": 8
    },
-   "fp": "4d8bd7bf0b29",
+   "fp": "14772fd1d183",
    "rendered": "2026-10-12",
    "imdb": "tt2191701",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Foxtel Now",
+     "Stan"
+    ],
+    "rentBuy": [
+     "Apple TV Store",
+     "Amazon Video",
+     "YouTube"
+    ],
+    "released": "2013-09-26",
+    "title": "Grown Ups 2",
+    "language": "English",
+    "runtime": 101,
+    "genre": "Comedy",
+    "director": "Dennis Dugan",
+    "cast": [
+     "Adam Sandler",
+     "Kevin James",
+     "Chris Rock",
+     "David Spade",
+     "Salma Hayek Pinault",
+     "Maya Rudolph"
+    ]
+   }
   },
   "men-in-black-ii": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182790,13 +183006,14 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "Disney Plus",
+     "Disney+",
      "BINGE",
      "Foxtel Now",
      "Stan"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182804,13 +183021,41 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "fp": "bc0e950eb135",
+   "fp": "1abe59d5fd79",
    "rendered": "2026-10-13",
    "imdb": "tt0120912",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Disney+",
+     "BINGE",
+     "Foxtel Now",
+     "Stan"
+    ],
+    "rentBuy": [
+     "Apple TV Store",
+     "Amazon Video",
+     "Fetch TV"
+    ],
+    "released": "2002-07-03",
+    "title": "Men in Black II",
+    "language": "English",
+    "runtime": 88,
+    "genre": "Action / Comedy",
+    "director": "Barry Sonnenfeld",
+    "cast": [
+     "Tommy Lee Jones",
+     "Will Smith",
+     "Rip Torn",
+     "Lara Flynn Boyle",
+     "Johnny Knoxville",
+     "Rosario Dawson"
+    ]
+   }
   },
   "blue-moon": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182822,10 +183067,11 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "Amazon Prime Video"
+     "Prime Video"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182833,13 +183079,38 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "fp": "2a9affcebab3",
+   "fp": "bd2f92df969d",
    "rendered": "2026-10-12",
    "fpv": 2,
-   "imdb": "tt32536315"
+   "imdb": "tt32536315",
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "rentBuy": [
+     "JustWatch TV Store",
+     "Apple TV Store",
+     "Amazon Video"
+    ],
+    "released": "2026-01-22",
+    "title": "Blue Moon",
+    "language": "English",
+    "runtime": 101,
+    "genre": "History / Drama",
+    "director": "Richard Linklater",
+    "cast": [
+     "Ethan Hawke",
+     "Bobby Cannavale",
+     "Andrew Scott",
+     "Margaret Qualley",
+     "Patrick Kennedy",
+     "Jonah Lees"
+    ]
+   }
   },
   "madagascar-3-europe-s-most-wanted": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182851,13 +183122,14 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "Amazon Prime Video",
+     "Prime Video",
      "BINGE",
-     "Paramount Plus",
-     "Paramount+ Amazon Channel"
+     "Paramount+",
+     "Foxtel Now"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182865,13 +183137,41 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "a0c30ef1afad",
+   "fp": "a78a3d811e7c",
    "rendered": "2026-10-13",
    "imdb": "tt1277953",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Prime Video",
+     "BINGE",
+     "Paramount+",
+     "Foxtel Now"
+    ],
+    "rentBuy": [
+     "Apple TV Store",
+     "Amazon Video",
+     "YouTube"
+    ],
+    "released": "2012-09-13",
+    "title": "Madagascar 3: Europe's Most Wanted",
+    "language": "English",
+    "runtime": 93,
+    "genre": "Animation / Family",
+    "director": "Eric Darnell, Conrad Vernon",
+    "cast": [
+     "Ben Stiller",
+     "Chris Rock",
+     "David Schwimmer",
+     "Jada Pinkett Smith",
+     "Sacha Baron Cohen",
+     "Cedric the Entertainer"
+    ]
+   }
   },
   "wreck-it-ralph": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -182883,10 +183183,11 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "Disney Plus"
+     "Disney+"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -182894,10 +183195,35 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "0624ae383b92",
+   "fp": "b56045d7d87b",
    "rendered": "2026-10-14",
    "imdb": "tt1772341",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Disney+"
+    ],
+    "rentBuy": [
+     "Apple TV Store",
+     "Amazon Video",
+     "YouTube"
+    ],
+    "released": "2012-12-26",
+    "title": "Wreck-It Ralph",
+    "language": "English",
+    "runtime": 101,
+    "genre": "Family / Animation",
+    "director": "Rich Moore",
+    "cast": [
+     "John C. Reilly",
+     "Sarah Silverman",
+     "Jack McBrayer",
+     "Jane Lynch",
+     "Alan Tudyk",
+     "Rich Moore"
+    ]
+   }
   },
   "marty-supreme": {
    "last": "2026-10-27",
@@ -182914,8 +183240,9 @@
     "providers": [
      "Stan"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -192293,8 +192620,9 @@
     "providers": [
      "Prime Video"
     ],
-    "lastCheck": "2026-10-20",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "imdb": "tt34384900",
    "fcs": {
@@ -192304,7 +192632,28 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-25"
+   "archivedOn": "2026-10-25",
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "rentBuy": [],
+    "released": "2026-10-07",
+    "title": "Love of Your Life",
+    "language": "English",
+    "runtime": 109,
+    "genre": "Romance / Drama",
+    "director": "Rachel Morrison",
+    "cast": [
+     "Margaret Qualley",
+     "Gabriel Basso",
+     "Aaron Pierre",
+     "Patrick Schwarzenegger",
+     "Catherine Keener",
+     "Tamara Lawrance"
+    ]
+   }
   },
   "ramayana-rise-of-a-legend": {
    "last": "2026-10-25",
@@ -199919,23 +200268,13 @@
    "title": "The Strange Little Cat",
    "archivedOn": "2026-08-25",
    "pv": 13,
-   "live": {
-    "since": "2026-08-25",
-    "providers": [
-     "MUBI",
-     "MUBI Amazon Channel"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "rel": 3,
    "fcs": {
     "v": "early",
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "a2d86e187c4e",
+   "fp": "34da21250527",
    "rendered": "2026-10-14",
    "imdb": "tt2586000",
    "fpv": 2,
@@ -238220,7 +238559,6 @@
      "Kim Young-min"
     ]
    },
-   "archivedOn": "2026-10-22",
    "fpv": 2
   },
   "the-bridge": {
@@ -246461,7 +246799,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "18df3c0ea524",
+   "fp": "e2f5b42bd84a",
    "rendered": "2026-10-23",
    "fpv": 2
   },
@@ -247366,7 +247704,24 @@
    "title": "Love in Disguise",
    "rendered": "2026-10-27",
    "fp": "db63ccecc08d",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt45246384",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   }
  },
  "ae": {
@@ -300586,8 +300941,7 @@
     "w": 8
    },
    "rel": 3,
-   "fpv": 2,
-   "archivedOn": "2026-10-26"
+   "fpv": 2
   },
   "rowdy-janardhana": {
    "last": "2026-10-23",
@@ -301234,7 +301588,24 @@
    "title": "Love in Disguise",
    "rendered": "2026-10-26",
    "fp": "db63ccecc08d",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt45246384",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "cosmic-samson": {
    "last": "2026-10-26",
@@ -303721,7 +304092,7 @@
    "title": "Clayface",
    "tmdbId": 1400940,
    "rel": 2,
-   "fp": "3fe4897562d8",
+   "fp": "df772052965d",
    "fcs": {
     "v": "early",
     "at": "2026-10-20",
@@ -331856,26 +332227,13 @@
    "lang": "English",
    "kind": "movie",
    "title": "Arrival",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Netflix"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": [
-     "JustWatch TV Store",
-     "Apple TV Store",
-     "CosmoGo"
-    ]
-   },
    "rel": 3,
    "fcs": {
     "v": "Must watch",
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "fa17154de50d",
+   "fp": "cd83b0de2fca",
    "rendered": "2026-10-12",
    "imdb": "tt2543164",
    "fpv": 2,
@@ -349859,7 +350217,26 @@
    },
    "rel": 3,
    "archivedOn": "2026-10-25",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2026-10-23",
+    "title": "Kung Fu Soccer",
+    "language": "Chinese",
+    "runtime": 106,
+    "genre": "Action / Comedy",
+    "director": "Stephen Chow",
+    "cast": [
+     "Zhang Xiaofei",
+     "Dilraba Dilmurat",
+     "Zhang Yixing",
+     "Carina Lau",
+     "Hu Yu'an",
+     "Sisley Choi Si-pui"
+    ]
+   }
   },
   "allied": {
    "last": "2026-10-23",
@@ -355544,8 +355921,7 @@
     "w": 8
    },
    "rel": 3,
-   "fpv": 2,
-   "archivedOn": "2026-10-26"
+   "fpv": 2
   },
   "the-real-housewives-of-beverly-hills": {
    "last": "2026-10-22",
@@ -356668,14 +357044,14 @@
    }
   },
   "matargashti": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 339474,
    "released": "2026-10-21",
    "lang": "Hindi",
    "kind": "tv",
    "title": "Matargashti",
    "rendered": "2026-10-25",
-   "fp": "069778f3b860",
+   "fp": "b8d376bb765d",
    "fpv": 2
   },
   "golmaal-5": {
@@ -356717,7 +357093,24 @@
    "title": "Love in Disguise",
    "rendered": "2026-10-26",
    "fp": "589bc93bfece",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt45246384",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "hexed": {
    "last": "2026-10-27",
@@ -359227,7 +359620,7 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "fp": "d9fd5cd7d2da",
+   "fp": "66b4eeb7024c",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "fpv": 2
@@ -385180,7 +385573,7 @@
    "fpv": 2
   },
   "beverly-hills-90210": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -385189,22 +385582,13 @@
    "lang": "English",
    "kind": "tv",
    "title": "Beverly Hills, 90210",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Mewatch"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "rel": 3,
    "fcs": {
     "v": "Worth a watch",
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "9a230f52f6ed",
+   "fp": "310cc5da3e38",
    "rendered": "2026-10-12",
    "imdb": "tt0098749",
    "fpv": 2,
@@ -389336,8 +389720,9 @@
     "providers": [
      "Netflix"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -389348,7 +389733,28 @@
    "fp": "217f7b3e9f0b",
    "rendered": "2026-10-14",
    "imdb": "tt13212006",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2020-09-02",
+    "title": "The Rope Curse 2",
+    "language": "Chinese",
+    "runtime": 104,
+    "genre": "Horror",
+    "director": "Liao Shih-han",
+    "cast": [
+     "Hsu An-chih",
+     "Vera Chen Hsueh-chen",
+     "Lee Kang-sheng",
+     "Chen Bo-zheng",
+     "Yen Cheng-kuo",
+     "Jason Tsou"
+    ]
+   }
   },
   "man-in-love": {
    "last": "2026-10-22",
@@ -389365,8 +389771,9 @@
     "providers": [
      "Netflix"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -389377,10 +389784,31 @@
    "fp": "dd36ffb9f3d7",
    "rendered": "2026-10-13",
    "imdb": "tt14428606",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2021-04-01",
+    "title": "Man in Love",
+    "language": "Chinese",
+    "runtime": 115,
+    "genre": "Romance / Drama",
+    "director": "Yin Chen-hao",
+    "cast": [
+     "Roy Chiu",
+     "Hsu Wei-ning",
+     "Tsai Chen-nan",
+     "Chung Hsin-ling",
+     "Lan Wei-hua",
+     "Peace Yang"
+    ]
+   }
   },
   "the-viral-factor": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -389392,11 +389820,12 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "Disney Plus",
+     "Disney+",
      "Mewatch"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -389404,10 +389833,34 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "7f338a3e91f0",
+   "fp": "1edcadb921fe",
    "rendered": "2026-10-14",
    "imdb": "tt2063011",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Disney+",
+     "Mewatch"
+    ],
+    "rentBuy": [
+     "Apple TV Store"
+    ],
+    "released": "2012-01-19",
+    "title": "The Viral Factor",
+    "language": "Chinese",
+    "runtime": 122,
+    "genre": "Action / Crime",
+    "director": "Dante Lam Chiu-yin",
+    "cast": [
+     "Jay Chou",
+     "Nicholas Tse Ting-fung",
+     "Lin Peng",
+     "Michelle Bai",
+     "Andy On Chi-kit",
+     "Liu Kai-chi"
+    ]
+   }
   },
   "the-bridge-curse": {
    "last": "2026-10-22",
@@ -389424,8 +389877,9 @@
     "providers": [
      "Netflix"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -389436,7 +389890,28 @@
    "fp": "7561fdebbf49",
    "rendered": "2026-10-14",
    "imdb": "tt11242242",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2020-07-13",
+    "title": "The Bridge Curse",
+    "language": "Chinese",
+    "runtime": 87,
+    "genre": "Horror / Thriller",
+    "director": "Lester Hsi",
+    "cast": [
+     "JC Lin",
+     "Vera Yen",
+     "Summer Meng",
+     "Chang Ning",
+     "Chiao Yuan-yuan",
+     "Joe Hsieh"
+    ]
+   }
   },
   "the-dumpling-queen": {
    "last": "2026-10-22",
@@ -389453,8 +389928,9 @@
     "providers": [
      "Mewatch"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -389465,7 +389941,28 @@
    "fp": "2eb6d9aa9628",
    "rendered": "2026-10-14",
    "fpv": 2,
-   "imdb": "tt29429728"
+   "imdb": "tt29429728",
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Mewatch"
+    ],
+    "rentBuy": [],
+    "released": "2025-06-26",
+    "title": "The Dumpling Queen",
+    "language": "Chinese",
+    "runtime": 120,
+    "genre": "Drama",
+    "director": "Andrew Lau Wai-keung",
+    "cast": [
+     "Ma Li",
+     "Kara Wai Ying-hung",
+     "Zhu Yawen",
+     "Wong Cho-Lam",
+     "Fiona Sit Hoi-Kei",
+     "Michael Tse Tin-wah"
+    ]
+   }
   },
   "counterattack": {
    "last": "2026-10-22",
@@ -389480,11 +389977,12 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "Disney Plus",
+     "Disney+",
      "Mewatch"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -389495,7 +389993,7 @@
    "fp": "d61b3e96e958",
    "rendered": "2026-10-12",
    "truth": {
-    "at": "2026-10-18",
+    "at": "2026-10-27",
     "providers": [
      "Disney+",
      "Mewatch"
@@ -389534,8 +390032,9 @@
     "providers": [
      "Netflix"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -389547,7 +390046,7 @@
    "rendered": "2026-10-11",
    "imdb": "tt8726116",
    "truth": {
-    "at": "2026-10-19",
+    "at": "2026-10-27",
     "providers": [
      "Netflix"
     ],
@@ -389584,8 +390083,9 @@
     "providers": [
      "Netflix"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -389596,10 +390096,31 @@
    "fp": "6fae7f04d81b",
    "rendered": "2026-10-14",
    "imdb": "tt32121131",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2024-09-12",
+    "title": "Upstream",
+    "language": "Chinese",
+    "runtime": 121,
+    "genre": "Drama",
+    "director": "Xu Zheng",
+    "cast": [
+     "Xu Zheng",
+     "Xin Zhilei",
+     "Wang Xiao",
+     "Jia Bing",
+     "Feng Bing",
+     "Ding Yongdai"
+    ]
+   }
   },
   "more-than-blue": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -389611,10 +390132,11 @@
    "live": {
     "since": "2026-09-27",
     "providers": [
-     "Disney Plus"
+     "Disney+"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -389622,10 +390144,33 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "6a376ccae19b",
+   "fp": "5b0ef6278782",
    "rendered": "2026-10-13",
    "imdb": "tt9081562",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Disney+"
+    ],
+    "rentBuy": [
+     "Apple TV Store"
+    ],
+    "released": "2018-11-30",
+    "title": "More Than Blue",
+    "language": "Chinese",
+    "runtime": 106,
+    "genre": "Romance / Drama",
+    "director": "Gavin Lin",
+    "cast": [
+     "Jasper Liu",
+     "Ivy Chen",
+     "Bryan Chang",
+     "Annie Chen",
+     "Emma Wu",
+     "Bruce He"
+    ]
+   }
   },
   "love-never-ends": {
    "last": "2026-10-27",
@@ -389642,8 +390187,9 @@
     "providers": [
      "Mewatch"
     ],
-    "lastCheck": "2026-09-27",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "rel": 3,
    "fcs": {
@@ -389654,7 +390200,7 @@
    "fp": "2a5d07490865",
    "rendered": "2026-10-13",
    "truth": {
-    "at": "2026-10-18",
+    "at": "2026-10-27",
     "providers": [
      "Mewatch"
     ],
@@ -389667,7 +390213,7 @@
     "director": "Han Yan",
     "cast": [
      "Ni Dahong",
-     "Kara Wai Ying-Hung",
+     "Kara Wai Ying-hung",
      "Tony Leung Ka-fai",
      "Cecilia Yip Tung",
      "Cheng Guo",
@@ -399433,8 +399979,9 @@
     "providers": [
      "Netflix"
     ],
-    "lastCheck": "2026-10-20",
-    "misses": 0
+    "lastCheck": "2026-10-27",
+    "misses": 0,
+    "confirmed": true
    },
    "imdb": "tt35934755",
    "fcs": {
@@ -399444,7 +399991,27 @@
    },
    "rel": 3,
    "archivedOn": "2026-10-22",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2026-10-08",
+    "title": "Below",
+    "language": "English",
+    "genre": "Drama / Mystery",
+    "director": "Jesse McKeown",
+    "cast": [
+     "Josh Hartnett",
+     "Mackenzie Davis",
+     "Charlie Heaton",
+     "Ruby Stokes",
+     "Kaleb Horn",
+     "Rohan Campbell"
+    ]
+   }
   },
   "all-pass": {
    "last": "2026-10-20",
@@ -403613,7 +404180,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-26",
    "imdb": "tt6262770"
   },
   "snow-white-and-the-seven-dwarfs": {
@@ -409942,7 +410508,24 @@
    "title": "Love in Disguise",
    "rendered": "2026-10-26",
    "fp": "8273b4dc889a",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt45246384",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   }
  },
  "my": {
@@ -412407,7 +412990,7 @@
    "rendered": "2026-10-14",
    "imdb": "tt7605074",
    "truth": {
-    "at": "2026-10-23",
+    "at": "2026-10-27",
     "providers": [],
     "rentBuy": [],
     "released": "2019-02-05",
@@ -419077,7 +419660,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt24226474",
    "truth": {
-    "at": "2026-10-23",
+    "at": "2026-10-27",
     "providers": [
      "Netflix",
      "Sun Nxt"
@@ -432851,7 +433434,7 @@
    "fpv": 2
   },
   "eternal-summer": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -432860,22 +433443,13 @@
    "lang": "Chinese",
    "kind": "movie",
    "title": "Eternal Summer",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Netflix"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "rel": 3,
    "fcs": {
     "v": "Skip",
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "bdf37911394f",
+   "fp": "adf9329588de",
    "rendered": "2026-10-12",
    "imdb": "tt0885520",
    "fpv": 2,
@@ -437411,7 +437985,28 @@
    "fp": "5d89c3ab57c5",
    "rendered": "2026-10-13",
    "imdb": "tt15783462",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2022-02-01",
+    "title": "Nice View",
+    "language": "Chinese",
+    "runtime": 106,
+    "genre": "Drama / Family",
+    "director": "Wen Muye",
+    "cast": [
+     "Jackson Yee",
+     "Tian Yu",
+     "Helen Chen",
+     "Qi Xi",
+     "Gong Lei",
+     "Xu Juncong"
+    ]
+   }
   },
   "kill-me-love-me": {
    "last": "2026-10-25",
@@ -437919,7 +438514,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "1c53f923e6db",
+   "fp": "6d1af7ec5fae",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -454711,7 +455306,24 @@
    "title": "Love in Disguise",
    "rendered": "2026-10-26",
    "fp": "db63ccecc08d",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt45246384",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "final-table": {
    "last": "2026-10-27",
@@ -473917,22 +474529,13 @@
    "lang": "English",
    "kind": "tv",
    "title": "Spartacus",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Netflix"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "rel": 3,
    "fcs": {
     "v": "Must watch",
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "19ca78471df7",
+   "fp": "a91a8c96c895",
    "rendered": "2026-10-13",
    "imdb": "tt1442449",
    "fpv": 2,
@@ -475863,24 +476466,13 @@
    "lang": "English",
    "kind": "movie",
    "title": "Godzilla x Kong: The New Empire",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "HBO Max"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": [
-     "Apple TV Store"
-    ]
-   },
    "rel": 3,
    "fcs": {
     "v": "Worth a watch",
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "528c99942d2c",
+   "fp": "999a58e16543",
    "rendered": "2026-10-12",
    "imdb": "tt14539740",
    "fpv": 2,
@@ -477100,7 +477692,7 @@
    }
   },
   "woman-is-the-future-of-man": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -477109,22 +477701,13 @@
    "lang": "Korean",
    "kind": "movie",
    "title": "Woman Is the Future of Man",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "MUBI"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "rel": 3,
    "fcs": {
     "v": "Skip",
     "at": "2026-10-20",
     "w": 8
    },
-   "fp": "1fece3a467d5",
+   "fp": "0875639b4d7d",
    "rendered": "2026-10-14",
    "imdb": "tt0403692",
    "fpv": 2,
@@ -477251,7 +477834,7 @@
    }
   },
   "samjin-company-english-class": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -477260,22 +477843,13 @@
    "lang": "Korean",
    "kind": "movie",
    "title": "Samjin Company English Class",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Viu"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "rel": 3,
    "fcs": {
     "v": "Worth a watch",
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "cdb99bf71699",
+   "fp": "89b94bb0c116",
    "rendered": "2026-10-13",
    "imdb": "tt13210996",
    "fpv": 2,
@@ -477604,7 +478178,7 @@
    "fpv": 2
   },
   "reborn-rookie": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -477613,22 +478187,13 @@
    "lang": "Korean",
    "kind": "tv",
    "title": "Reborn Rookie",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Viu"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "rel": 3,
    "fcs": {
     "v": "Worth a watch",
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "72b5e5c4ae74",
+   "fp": "4e02f2d8f4c5",
    "rendered": "2026-10-13",
    "imdb": "tt42206645",
    "fpv": 2,
@@ -482253,7 +482818,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "27800fa6d89e",
+   "fp": "fcb77b05b571",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -483348,7 +483913,7 @@
    "rel": 3,
    "imdb": "tt10377864",
    "truth": {
-    "at": "2026-10-23",
+    "at": "2026-10-27",
     "providers": [],
     "rentBuy": [],
     "released": "2026-10-14",
@@ -487212,7 +487777,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt12515958",
    "truth": {
-    "at": "2026-10-23",
+    "at": "2026-10-27",
     "providers": [
      "Viu"
     ],
@@ -496019,7 +496584,7 @@
    "rendered": "2026-10-19",
    "fp": "ee7799947016",
    "truth": {
-    "at": "2026-10-23",
+    "at": "2026-10-27",
     "providers": [
      "Netflix"
     ],
@@ -511746,7 +512311,7 @@
    "rendered": "2026-10-14",
    "imdb": "tt0157246",
    "truth": {
-    "at": "2026-10-24",
+    "at": "2026-10-27",
     "providers": [],
     "rentBuy": [
      "Amazon Video"
@@ -512804,7 +513369,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "3cfd9f9a810c",
+   "fp": "cd0bafba72c1",
    "rendered": "2026-10-12",
    "pv": 13,
    "imdb": "tt34890576",
@@ -522774,7 +523339,7 @@
    }
   },
   "charlie-s-angels": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -522783,22 +523348,13 @@
    "lang": "English",
    "kind": "tv",
    "title": "Charlie's Angels",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Sony Pictures Core Amazon Channel"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "rel": 3,
    "fcs": {
     "v": "Worth a watch",
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "cc236e5bda57",
+   "fp": "6088a39f8aa9",
    "rendered": "2026-10-12",
    "imdb": "tt0073972",
    "fpv": 2,
@@ -522937,22 +523493,13 @@
    "lang": "English",
    "kind": "tv",
    "title": "The Smurfs",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "FilmBox+"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "rel": 3,
    "fcs": {
     "v": "Worth a watch",
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "4e21024f354b",
+   "fp": "158dc896cbf9",
    "rendered": "2026-10-14",
    "imdb": "tt0081933",
    "fpv": 2,
@@ -536147,7 +536694,21 @@
     "w": 8
    },
    "rel": 3,
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2027-01-05",
+    "title": "Mouthwashing : The Film",
+    "language": "Hindi",
+    "genre": "Horror / Thriller",
+    "cast": [
+     "Aksh",
+     "Umair M",
+     "Qandeel"
+    ]
+   }
   },
   "film-1788009": {
    "last": "2026-10-25",
@@ -558977,24 +559538,13 @@
    "lang": "English",
    "kind": "movie",
    "title": "The Truman Show",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Netflix"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": [
-     "wavve"
-    ]
-   },
    "rel": 3,
    "fcs": {
     "v": "Must watch",
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "700e0d5106fe",
+   "fp": "15579b65ce64",
    "rendered": "2026-10-14",
    "imdb": "tt0120382",
    "fpv": 2,
@@ -582251,7 +582801,7 @@
    "kind": "movie",
    "title": "Clayface",
    "rendered": "2026-10-23",
-   "fp": "091f76bb3095",
+   "fp": "e51581e2619b",
    "fpv": 2
   },
   "lupin": {
@@ -627634,7 +628184,7 @@
     "at": "2026-10-21",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fpv": 2,
    "truth": {
     "at": "2026-10-27",
@@ -627655,7 +628205,8 @@
      "Ryu Seung-soo",
      "Park Jun-myun"
     ]
-   }
+   },
+   "archivedOn": "2026-10-27"
   },
   "after-the-song": {
    "last": "2026-10-22",
@@ -630016,9 +630567,8 @@
    "kind": "tv",
    "title": "Final Table",
    "rendered": "2026-10-25",
-   "fp": "298c27aecc8e",
+   "fp": "a56d7c9ffce2",
    "fpv": 2,
-   "archivedOn": "2026-10-26",
    "pv": 13,
    "live": {
     "since": "2026-10-25",
@@ -652899,7 +653449,7 @@
    }
   },
   "fury": {
-   "last": "2026-10-22",
+   "last": "2026-10-27",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -652908,22 +653458,13 @@
    "lang": "English",
    "kind": "movie",
    "title": "Fury",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Netflix"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": []
-   },
    "rel": 3,
    "fcs": {
     "v": "Must watch",
     "at": "2026-10-20",
     "w": 8
    },
-   "fp": "e22a678ee9d2",
+   "fp": "7b5fe9bd9c40",
    "rendered": "2026-10-12",
    "imdb": "tt2713180",
    "fpv": 2,
@@ -653165,24 +653706,13 @@
    "lang": "English",
    "kind": "movie",
    "title": "Corpse Bride",
-   "live": {
-    "since": "2026-09-27",
-    "providers": [
-     "Catchplay"
-    ],
-    "lastCheck": "2026-10-27",
-    "misses": 1,
-    "rentBuy": [
-     "Apple TV Store"
-    ]
-   },
    "rel": 3,
    "fcs": {
     "v": "Must watch",
     "at": "2026-10-20",
     "w": 8
    },
-   "fp": "1bfb0925e790",
+   "fp": "4971001f2371",
    "rendered": "2026-10-12",
    "imdb": "tt0121164",
    "fpv": 2,
@@ -653197,7 +653727,7 @@
     "language": "English",
     "runtime": 77,
     "genre": "Romance / Fantasy",
-    "director": "Tim Burton, Mike Johnson",
+    "director": "Mike Johnson, Tim Burton",
     "cast": [
      "Johnny Depp",
      "Helena Bonham Carter",
@@ -658448,7 +658978,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "f82b9c9bd411",
+   "fp": "7d50ce0a8fbf",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -663086,7 +663616,26 @@
    "rel": 3,
    "archivedOn": "2026-10-25",
    "imdb": "tt27419420",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2026-10-14",
+    "title": "Street Fighter",
+    "language": "English",
+    "runtime": 120,
+    "genre": "Action / Fantasy",
+    "director": "Kitao Sakurai",
+    "cast": [
+     "Andrew Koji",
+     "Noah Centineo",
+     "Callina Liang",
+     "David Dastmalchian",
+     "Andrew Schulz",
+     "Joe Anoa'i"
+    ]
+   }
   },
   "itaewon-class": {
    "last": "2026-10-22",
@@ -675874,13 +676423,13 @@
    "imdb": "tt33307555"
   },
   "hope": {
-   "last": "2026-10-23",
+   "last": "2026-10-27",
    "tmdbId": 1058424,
    "released": "2026-10-08",
    "lang": "Korean",
    "kind": "movie",
    "title": "Hope",
-   "fp": "08675a452057",
+   "fp": "dbb9000f8abb",
    "pv": 13,
    "fcs": {
     "v": "Worth a watch",
@@ -682503,7 +683052,7 @@
    "kind": "movie",
    "title": "Clayface",
    "rendered": "2026-10-15",
-   "fp": "487be1fb9694",
+   "fp": "2081b37abcc8",
    "pv": 13,
    "rel": 2,
    "truth": {
@@ -694684,7 +695233,6 @@
     "misses": 0,
     "confirmed": true
    },
-   "archivedOn": "2026-10-18",
    "imdb": "tt39328047",
    "truth": {
     "at": "2026-10-23",
@@ -695373,7 +695921,7 @@
    "fp": "a852bca89153",
    "imdb": "tt2861424",
    "truth": {
-    "at": "2026-10-23",
+    "at": "2026-10-27",
     "providers": [
      "Netflix",
      "HBO Max"
@@ -703703,7 +704251,25 @@
    },
    "rel": 3,
    "imdb": "",
-   "fpv": 2
+   "fpv": 2,
+   "truth": {
+    "at": "2026-10-27",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2026-10-16",
+    "title": "metamorfosis",
+    "language": "Spanish",
+    "genre": "Drama / Animation",
+    "director": "Mayra Allaix",
+    "cast": [
+     "Joaquín Torres",
+     "Imanuel Kelmazón",
+     "Juan Manuel Moreira",
+     "Gabriela Rosello Caics",
+     "Florencia Restrepo",
+     "Francisco \"Caco\" Galluzzo"
+    ]
+   }
   },
   "kraken": {
    "last": "2026-10-25",
@@ -704978,7 +705544,24 @@
    "title": "Love in Disguise",
    "rendered": "2026-10-27",
    "fp": "db63ccecc08d",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt45246384",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   }
  },
  "es": {
@@ -714950,8 +715533,7 @@
      "Johnny Flynn"
     ]
    },
-   "fpv": 2,
-   "archivedOn": "2026-10-26"
+   "fpv": 2
   },
   "the-boarding-school": {
    "last": "2026-10-25",
@@ -719604,7 +720186,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "459212389d2a",
+   "fp": "238d922304eb",
    "rendered": "2026-10-24",
    "fpv": 2
   },
@@ -720161,7 +720743,24 @@
    "title": "Love in Disguise",
    "rendered": "2026-10-26",
    "fp": "db63ccecc08d",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt45246384",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "double-freedom": {
    "last": "2026-10-26",
@@ -734418,7 +735017,7 @@
    "kind": "movie",
    "title": "Clayface",
    "rendered": "2026-10-22",
-   "fp": "34728e72e1c9",
+   "fp": "2b762e9c3075",
    "fpv": 2
   },
   "into-the-night": {
@@ -735255,16 +735854,15 @@
    "imdb": "tt37799273"
   },
   "yaga": {
-   "last": "2026-10-26",
+   "last": "2026-10-27",
    "tmdbId": 314360,
    "released": "2026-10-23",
    "lang": "English",
    "kind": "tv",
    "title": "YAGA",
    "rendered": "2026-10-25",
-   "fp": "f9d6546be657",
+   "fp": "78f892f6b3b0",
    "fpv": 2,
-   "archivedOn": "2026-10-25",
    "pv": 13,
    "live": {
     "since": "2026-10-25",
@@ -735291,7 +735889,24 @@
    "title": "Love in Disguise",
    "rendered": "2026-10-26",
    "fp": "db63ccecc08d",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt45246384",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   }
  }
 }
