@@ -5751,7 +5751,7 @@ test("links from visible pages go to visible pages; hidden pages are listed for 
   assert.ok(/const items = every\.filter\(\(x\) => !listedHidden\(code, x\.slug\)\);/.test(src("evergreen.js")), "platform lists list visible titles only");
   assert.ok(/relatedFilms\(seed, index, 6, inRollout\(VISIBLE_SIMILAR, slug\)/.test(src("relrefresh.js")) && require("./lib/relrefresh.js").REL_VERSION === 3, "older pages redone once, in stages");
   const repo = JSON.parse(fsx.readFileSync(path.join(__dirname, "..", "rollout.json"), "utf8"));
-  assert.strictEqual(R.percentOf(repo, "visible-similar", Date.parse("2026-10-27T13:00:00Z")), 25);
+  assert.strictEqual(R.percentOf(repo, "visible-similar", Date.parse("2026-10-27T13:00:00Z")), 100, "all at once (the owner, 27 Oct)");
   assert.strictEqual(R.percentOf(repo, "visible-similar", Date.parse("2026-10-31T02:00:00Z")), 100);
   // Bing-only sitemap: written, never offered to Google.
   const S = require("./lib/sitemap.js");
