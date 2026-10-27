@@ -5841,6 +5841,20 @@ test("same rules for Bing: hidden pages carry Bing's noindex too; the Bing list 
   assert.strictEqual(S.BING_REMOVAL_UNTIL, "2026-12-15");
   assert.ok(/if \(today <= BING_REMOVAL_UNTIL\) fs\.writeFileSync\(BING_SITEMAP/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "sitemap.js"), "utf8")), "deleted after the removal window");
 });
+test("frozen pages: title rules switched on per film reach them (the slug is read from the page) (27 Oct 2026)", () => {
+  const A = require("./lib/archive.js");
+  const R = require("./lib/rollout.js");
+  const page = `<html><head><title>Jaat (2025) OTT Release Date, Review &amp; Where to Watch</title><link rel="canonical" href="https://filmychill.com/movie/jaat.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"Jaat","datePublished":"2025-04-10","inLanguage":"Hindi"}</script></head><body><h2>Where to watch in India</h2><div><span class="pill">Netflix</span></div><h2>Story</h2></body></html>`;
+  assert.strictEqual(A.frozenFilmFacts(page).item.slug, "jaat");
+  assert.strictEqual(A.frozenFilmFacts(page.replace("/movie/jaat.html", "/uk/movie/jaat.html")).item.slug, "jaat");
+  try {
+    R.useRolloutConfig({ features: { "intent-titles": { percent: 100 } } });
+    const t = (/<title>([^<]*)/.exec(A.retitleFrozen(page, { code: "in", name: "India", region: "IN" }).html) || [])[1];
+    assert.ok(/^Jaat \(2025\) — Review/.test(t) && !/OTT Release Date/.test(t), "out over a year: no 'OTT Release Date' — " + t);
+    R.useRolloutConfig({ features: {} });
+    assert.ok(/OTT Release Date/.test((/<title>([^<]*)/.exec(A.retitleFrozen(page, { code: "in", name: "India", region: "IN" }).html) || [])[1]), "outside the share: as before");
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
+});
 test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
   assert.ok(!urls.some((u) => /\/films\//.test(u)), "the A–Z pages are retired (25 Oct 2026)");

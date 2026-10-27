@@ -394,6 +394,10 @@ function frozenFilmFacts(html) {
     runOpen,
     item: {
       title: ld.name,
+      // The page's own slug, from its address: title rules switched on per film (lib/rollout.js
+      // inRollout, e.g. "intent-titles") decide by slug, and without it every frozen page counted
+      // as outside every rollout — Jaat (2025) kept "OTT Release Date" at 100% (27 Oct 2026).
+      slug: (/\/movie\/([^/"]+)\.html"/.exec((/<link rel="canonical" href="[^"]*"/.exec(html) || [""])[0]) || [])[1] || undefined,
       kind: ld["@type"] === "TVSeries" ? "tv" : "movie",
       language: ld.inLanguage || "",
       genre: ld.genre || "",
@@ -450,7 +454,7 @@ function stripAggregateRating(html) {
 // cinema-run state and the "in cinemas" platform inferred from the page's own markers.
 // Reading platforms back from the page is how Cocoon's "Queer Cinemab" became "Not
 // Announced" (review, Oct 2026).
-const RECORD_FIELDS = ["title", "kind", "language", "genre", "released", "runtime", "providers", "rentBuy"];
+const RECORD_FIELDS = ["slug", "title", "kind", "language", "genre", "released", "runtime", "providers", "rentBuy"];
 function withRecord(parsed, item) {
   if (!item) return parsed;
   const out = { ...parsed };
