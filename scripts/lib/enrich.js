@@ -221,7 +221,7 @@ function isPreListed({ kind, hasProviders, theatricalDate, theatrical, language,
 
 async function enrich(kind, id, region = "IN") {
   const extra = kind === "movie" ? "release_dates" : "content_ratings";
-  const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,external_ids,recommendations,${extra}` });
+  const d = await tmdb(`/${kind}/${id}`, { append_to_response: `videos,credits,watch/providers,external_ids,recommendations,keywords,${extra}` });
 
   const digital = kind === "movie" ? digitalReleaseFor(d, region) : null;
   const cert = certFor(kind, d, region);
@@ -302,8 +302,21 @@ async function enrich(kind, id, region = "IN") {
   const regionalRelease = regionalRaw && !isReRelease(regionalRaw, d.release_date) ? regionalRaw : null;
   const theatrical = kind === "movie" ? theatreEligible(d, region, providers) : null;
 
+  // Episode guide and franchise (lib/series.js): the keywords ride on this same call; a series
+  // on air or just finished costs one more call, for its season's episodes.
+  const S = require("./series.js");
+  let episodes = null;
+  if (kind === "tv") {
+    const sn = S.seasonToFetch(d);
+    let season = null;
+    if (sn) { try { season = await tmdb(`/tv/${id}/season/${sn}`); } catch { /* the count alone */ } }
+    episodes = S.episodesFrom(d, season);
+  }
+  const franchise = S.franchiseFrom(d);
 
   return {
+    ...(episodes ? { episodes } : {}),
+    ...(franchise ? { franchise } : {}),
     cert, trailer, providers, cast, director, runtime, imdbScore, imdbVotes,
     ...(trailerDate ? { trailerDate } : {}),
     ...(rentBuy.length ? { rentBuy } : {}),

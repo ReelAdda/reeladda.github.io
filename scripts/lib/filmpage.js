@@ -470,6 +470,16 @@ const LEAN_MARK = "<!--FC:lean-->";
 // Machine-readable rating and count for lib/facts.js (the visible copies were the header line and
 // the audience row, which the lean layout no longer carries). A comment: never shown, not content.
 const audienceMark = (item) => `<!--FC:audience=${item.rating != null ? Number(item.rating) : ""}|${Number(item.votes) || 0}-->`;
+// The edition's film index for franchise rows, read once per build (lib/graph.js filmIndexFor
+// reads every page on disk; a frozen page's render has no index of its own).
+const _franchiseIdx = new Map();
+function franchiseIndexFor(code) {
+  const key = `${process.cwd()}|${code}`;
+  if (!_franchiseIdx.has(key)) _franchiseIdx.set(key, filmIndexFor({ code }));
+  return _franchiseIdx.get(key);
+}
+// Tests: read the pages on disk again.
+function resetFranchiseIndex() { _franchiseIdx.clear(); }
 // The poster is the first image a phone draws (SEO audit, 25 Oct 2026): it comes from TMDB's
 // image server, so the browser opens that connection while it reads the <head>, and the poster
 // itself is fetched ahead of the rest (fetchpriority="high" on the <img>). With the lean layout,
@@ -642,6 +652,19 @@ function filmTitleTag(item, cfg = null) {
   // A film streaming for months isn't searched for its "OTT release date" (KILL 2024, Jawan 2023
   // were titled that way): past STREAMING_DATE_TITLE_DAYS it's "Review & Where to Watch" (rollout
   // "intent-titles").
+  // A SERIES ON AIR (lib/series.js, 27 Oct 2026): the searches while it runs are "episode 5 release
+  // date", "how many episodes", "<show> episode schedule" — every competing page led with the
+  // schedule. While a next episode is due the title says the page has it.
+  const epNext = item.kind === "tv" && item.episodes && item.episodes.next && item.episodes.next.date;
+  if (epNext && epNext >= new Date().toISOString().slice(0, 10)) {
+    return fitTitle([
+      `${item.title}${yr}: Episode Schedule & Where to Watch in ${country} | FilmyChill`,
+      `${item.title}${yr}: Episode Schedule & Where to Watch in ${country}`,
+      `${item.title}: Episode Schedule & Where to Watch in ${country}`,
+      `${item.title}${yr}: Episode Schedule & Where to Watch`,
+      `${item.title}: Episode Schedule`,
+    ]);
+  }
   const longOut = item.released && (Date.now() - Date.parse(`${String(item.released).slice(0, 10)}T00:00:00Z`)) / 864e5 > STREAMING_DATE_TITLE_DAYS
     && inRollout(INTENT_TITLES, item.slug);
   const canAnswerDate = V.word === "OTT" && item.kind !== "tv" && providers.length > 0 && !longOut;
@@ -1022,8 +1045,14 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
 
   // --- Enriched, deterministic sections (original content -> SEO value) ---
   const verdictProse = buildVerdictProse(item, country, localeFor(code));
-  const goodToKnow = buildGoodToKnow(item, cfg);
+  // Episodes and franchise (lib/series.js) lead "Good to know"; series FAQs follow "where to watch".
+  const SER = require("./series.js");
+  const fmtFull = (dt) => fmtDateFull(dt, localeFor(code));
+  const goodToKnow = [...SER.seriesKnowRows(item), ...buildGoodToKnow(item, cfg)];
   const faqs = buildFaqs(item, country, cfg);
+  faqs.splice(Math.min(2, faqs.length), 0, ...SER.episodeFaqs(item, fmtFull));
+  // "More in this series": other titles of the franchise with a page Google can see here.
+  const franchise = SER.franchiseSiblings(item, franchiseIndexFor(code), { visible: (s) => !require("./googlehide.js").listedHidden(code, s) });
   // On-site titles outrank off-site ones in the strip: a recommendation the reader can
   // actually open beats a dead card, and each one is a contextual internal link on a
   // page that otherwise has almost none (742 of 1,044 film pages had zero inlinks).
@@ -1035,8 +1064,9 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const related = Array.isArray(filmIndex) && filmIndex.length ? relatedFilms(item, filmIndex, 6, visOpt) : [];
   const simAll = Array.isArray(item.similar) ? item.similar : [];
   const onSite = (s) => knownSlugs && knownSlugs.has(s.slug);
-  const similar = related.length >= 3 ? related
-    : [...simAll.filter(onSite), ...simAll.filter((s) => !onSite(s))].slice(0, 6);
+  const inFranchise = new Set(franchise ? franchise.items.map((x) => x.slug) : []);
+  const similar = (related.length >= 3 ? related
+    : [...simAll.filter(onSite), ...simAll.filter((s) => !onSite(s))].slice(0, 6)).filter((s) => !inFranchise.has(s.slug));
   const linkable = related.length >= 3 ? () => true : onSite;
 
   // FAQPage schema — only when we have at least 2 Q&As (Google wants a real list).
@@ -1142,6 +1172,14 @@ ${FCSB_CSS}
   .gtk td { padding:9px 0; border-top:1px solid var(--line); font-size:14px; vertical-align:top; }
   .gtk td:first-child { color:var(--mute); width:46%; }
   .gtk td:last-child { font-weight:600; text-align:right; }
+  .epnext { background:var(--cream, #FFF7EC); border-left:4px solid var(--marigold, #FFAD1F); padding:8px 12px; border-radius:6px; font-size:14px; }
+  .eptable { overflow-x:auto; margin-top:8px; }
+  .eptable table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  .eptable th { text-align:left; color:var(--mute); font-weight:600; font-size:12px; padding:6px 8px 6px 0; border-bottom:1px solid var(--line); }
+  .eptable td { padding:8px 8px 8px 0; border-bottom:1px solid var(--line); vertical-align:top; }
+  .eptable td:first-child { color:var(--mute); width:28px; }
+  .eptable tr.soon td { color:var(--mute); }
+  .epnote { color:var(--mute); font-size:12px; margin-top:6px; }
   .simgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:8px; }
   .simcard { display:block; background:#fff; border:1px solid var(--line); border-radius:10px; overflow:hidden; text-decoration:none; color:var(--ink); }
   .simcard img { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; background:var(--line); }
@@ -1159,7 +1197,7 @@ ${FCSB_CSS}
 </head>
 <body>
 <div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
-<div class="wrap">${lean ? LEAN_MARK + audienceMark(item) : ""}
+<div class="wrap">${lean ? LEAN_MARK + audienceMark(item) : ""}${SER.seriesMark(item)}
   <div class="head">
     ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="140" height="210"${lean ? ' fetchpriority="high"' : ""}>` : "<div></div>"}
     <div>
@@ -1358,7 +1396,9 @@ ${FCSB_CSS}
     }
     return "";
   })()}
+  ${SER.episodesHtml(item, fmtFull)}
   ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
+  ${franchise ? simGridHtml(franchise.items, code).replace("<h2>If you liked this</h2>", `<h2>${e(franchise.heading)}</h2>`).replace("class=\"simgrid\"", "class=\"simgrid franchise\"") : ""}
   ${simGridHtml(similar, code, linkable)}
   ${faqs.length ? `<h2>Frequently asked</h2><div class="faq">${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("")}</div>` : ""}
   ${(() => {
@@ -1432,6 +1472,7 @@ function generatePages(data, cfg, allSlugSets) {
 
 module.exports = {
   VISIBLE_SIMILAR,
+  resetFranchiseIndex,
   simGridHtml,
   headRatingHtml,
   FCSB_CSS,

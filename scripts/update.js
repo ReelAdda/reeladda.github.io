@@ -340,6 +340,7 @@ const { addBrandToPages } = require("./lib/brand.js");
 const { applyHonestWording, applyLeanTrim } = require("./lib/honest.js");
 const { applyGoogleHide, applyGoogleHidePaths, googleHidden, nearCopyEditions, peoplePageFiles } = require("./lib/googlehide.js");
 const { healthLine, rollHiddenList, weeklyHealth } = require("./lib/keeplean.js");
+const { sweepSeries } = require("./lib/series.js");
 const { unlistedPages } = require("./lib/pagetypes.js");
 const { contentFingerprint, extendIndexNowWithChanged, extendIndexNowWithHidden, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
@@ -360,7 +361,7 @@ const PICK_MIN_VOTES = 20;
 const HISTORY_WRITE_FAILURES = [];
 const { indiaCinemaCensus, runDigitalBackfill } = require("./lib/indiadata.js");
 const { isReRelease } = require("./lib/enrich.js");
-const { decideModes, loadModes, saveModes } = require("./lib/factsq.js");
+const { decideModes, loadModes, queueFacts, saveModes } = require("./lib/factsq.js");
 const { FALSE_CLAIMS } = require("./lib/audit.js");
 const {
   ABOUT_LASTMOD,
@@ -2697,6 +2698,12 @@ async function main() {
         for (const m of Object.values(pagesManifest)) for (const e of Object.values(m || {})) if (e && !e.tmdbId && e.idLookup === "none") unidentified++;
         if (unidentified) healthNote(`${unidentified} old film page(s) have no FilmyChill Score: their film couldn't be matched on TMDB`);
       } catch (e) { stageFailed("score sweep", e); }
+      // Episode guides and franchise links for pages already built (lib/series.js), before the render.
+      try {
+        const t = require("./lib/tmdb.js");
+        const s = await sweepSeries(pagesManifest, { tmdb: t.tmdb, queueFacts, pause: t.sleep, hidden: (code, slug, e) => googleHidden(code, slug, e) });
+        console.log(`Series and franchise data: ${s.fetched} of ${s.due} title(s) fetched (${s.episodes} with an episode guide, ${s.franchise} in a franchise)${s.failed ? `, ${s.failed} failed` : ""}`);
+      } catch (e) { stageFailed("series sweep", e, { optional: true }); }
       // "If you liked this" on frozen/back-catalogue pages, redone once per rules version
       // (lib/relrefresh.js). Local only — no API calls.
       try {

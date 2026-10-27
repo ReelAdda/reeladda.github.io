@@ -46,6 +46,8 @@ function filmIndexFor(cfg) {
       // People, for "same actor / same director" neighbours (already in the page's JSON-LD).
       cast: personNames(ld.actor).slice(0, 8),
       director: personNames(ld.director || ld.creator).slice(0, 3),
+      // Its franchise, from the page's own marker (lib/series.js), for "More in this series".
+      franchise: require("./series.js").readSeriesMark(html).franchise || null,
     });
   }
   return out;

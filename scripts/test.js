@@ -5892,6 +5892,65 @@ test("descriptions: a sentence starts with a capital when no rating leads it (Vi
   const d = F.filmMetaDescription({ title: "VisionQuest", slug: "visionquest", kind: "tv", providers: ["JioHotstar"], platform: "JioHotstar", released: "2026-10-13", language: "English" }, { code: "in", name: "India", region: "IN" });
   assert.ok(!/[?.] [a-z]/.test(d), d);
 });
+testAsync("series and franchise: episode guide, franchise row, Good to know, FAQs, title — kept in the facts (27 Oct 2026)", async () => {
+  const S = require("./lib/series.js");
+  const F = require("./lib/filmpage.js");
+  const X = require("./lib/facts.js");
+  const fsx = require("fs");
+  // TMDB shapes (VisionQuest, Oct 2026).
+  const tv = { number_of_episodes: 8, number_of_seasons: 1, type: "Miniseries",
+    next_episode_to_air: { season_number: 1, episode_number: 7, name: "Forever", air_date: "2099-11-04" },
+    last_episode_to_air: { season_number: 1, episode_number: 6, air_date: "2026-10-28" },
+    keywords: { results: [{ name: "marvel cinematic universe (mcu)" }, { name: "parallel universe" }] } };
+  const season = { season_number: 1, episodes: [{ episode_number: 1, name: "No Strings", air_date: "2026-10-14", runtime: 48 }, { episode_number: 7, name: "Forever", air_date: "2099-11-04", runtime: 62 }] };
+  const ep = S.episodesFrom(tv, season);
+  assert.deepStrictEqual([ep.count, ep.limited, ep.next.e, ep.list.length], [8, true, 7, 2]);
+  assert.strictEqual(S.seasonToFetch(tv), 1);
+  assert.strictEqual(S.seasonToFetch({ last_episode_to_air: { season_number: 3, air_date: "2019-01-01" } }), null, "a long-finished show: no guide fetched");
+  assert.deepStrictEqual(S.franchiseFrom(tv), { c: null, u: ["marvel cinematic universe (mcu)"] }, "a theme keyword ('parallel universe') isn't a franchise");
+  assert.deepStrictEqual(S.franchiseFrom({ belongs_to_collection: { id: 9, name: "Dhoom Collection" }, keywords: { keywords: [] } }), { c: { id: 9, name: "Dhoom Collection" }, u: [] });
+  assert.strictEqual(S.franchiseFrom({ keywords: { keywords: [] } }), null);
+  // Siblings: same franchise, visible, nearest in release order; nothing when none qualifies.
+  const fr = { c: { id: 9, name: "Dhoom Collection" }, u: [] };
+  const index = [{ slug: "dhoom", title: "Dhoom", released: "2004-08-27", franchise: fr }, { slug: "dhoom-2", title: "Dhoom 2", released: "2006-11-24", franchise: fr },
+    { slug: "dhoom-3", title: "Dhoom 3", released: "2013-12-20", franchise: fr }, { slug: "other", title: "Other", released: "2010-01-01", franchise: null }];
+  const sib = S.franchiseSiblings({ slug: "dhoom-3", released: "2013-12-20", franchise: fr }, index, { visible: (s) => s !== "dhoom" });
+  assert.deepStrictEqual([sib.heading, sib.items.map((x) => x.slug)], ["More in the Dhoom series", ["dhoom-2"]], "hidden pages never listed");
+  assert.strictEqual(S.franchiseSiblings({ slug: "dhoom-3", franchise: fr }, index, { visible: () => false }), null, "no sibling page: no row");
+  // The page: section, FAQs, Good to know, title; and the facts read it all back.
+  const item = { title: "VisionQuest", slug: "visionquest", kind: "tv", language: "English", genre: "Drama", released: "2026-10-13", providers: ["JioHotstar"], platform: "JioHotstar",
+    rating: 8.7, votes: 184, review: "Vision must confront his nature.", episodes: ep, franchise: S.franchiseFrom(tv), cast: [], castPics: [] };
+  const IN = { code: "in", name: "India", region: "IN" };
+  inTempDirSync(() => {
+    const html = F.buildFilmPage(item, "2026-10-27", new Set(["visionquest"]), IN);
+    assert.ok(/<title>VisionQuest(?: \(2026\))?: Episode Schedule &amp; Where to Watch/.test(html), (/<title>[^<]*/.exec(html) || [])[0]);
+    assert.ok(/<h2>Episodes<\/h2><p>8 episodes · limited series/.test(html) && /Next episode:<\/b> E7 — Forever/.test(html) && /<td>No Strings<\/td>/.test(html));
+    assert.ok(/How many episodes does VisionQuest have\?/.test(html) && /When is the next episode of VisionQuest\?/.test(html));
+    assert.ok(/<td>Episodes<\/td><td>8 · limited series<\/td>/.test(html) && /<td>Episode length<\/td><td>48–62 min<\/td>/.test(html) && /<td>Part of<\/td><td>The Marvel Cinematic Universe<\/td>/.test(html));
+    const back = X.extractFacts(html, "visionquest");
+    assert.deepStrictEqual(back.episodes, ep, "the guide survives a frozen render");
+    assert.deepStrictEqual(back.franchise, item.franchise);
+    // The franchise row reads siblings from pages on disk, and isn't mistaken for "If you liked this".
+    fsx.mkdirSync("movie");
+    const sibPage = F.buildFilmPage({ ...item, slug: "wandavision", title: "WandaVision", released: "2021-01-15", episodes: null }, "2026-10-27", new Set(), IN);
+    fsx.writeFileSync("movie/wandavision.html", sibPage);
+    F.resetFranchiseIndex();   // a build reads the pages on disk once; here they changed mid-test
+    const withRow = F.buildFilmPage({ ...item, slug: "vq2" }, "2026-10-27", new Set(["wandavision"]), IN);
+    assert.ok(/<h2>More from the Marvel Cinematic Universe<\/h2><div class="simgrid franchise">/.test(withRow) && withRow.includes('href="/movie/wandavision.html"'));
+    assert.ok(!X.extractFacts(withRow, "vq2").similar.some((s) => s.slug === "wandavision"), "franchise cards aren't read as similar titles");
+  });
+  // The sweep: one TMDB title per film across editions, within budget, visible pages only.
+  const calls = []; const queued = [];
+  const fakeTmdb = async (p) => { calls.push(p); return p.includes("/season/") ? season : tv; };
+  const man = { in: { vq: { tmdbId: 1, kind: "tv" }, hid: { tmdbId: 2, kind: "movie" } }, uk: { vq: { tmdbId: 1, kind: "tv" } } };
+  const r = await S.sweepSeries(man, { tmdb: fakeTmdb, queueFacts: (c, s, p) => queued.push([c, s, Object.keys(p).filter((k) => p[k] !== undefined)]), hidden: (c, s) => s === "hid", now: Date.parse("2026-10-27T06:00:00Z") });
+  assert.deepStrictEqual([r.due, r.fetched, r.episodes], [1, 1, 1]);
+  assert.deepStrictEqual(calls, ["/tv/1", "/tv/1/season/1"], "one details call (+ its season) for both editions");
+  assert.deepStrictEqual(queued.map((q) => q[0] + "/" + q[1]).sort(), ["in/vq", "uk/vq"]);
+  assert.ok(man.in.vq.srv === S.SERIES_SWEEP_VERSION && man.in.vq.epNext === "2099-11-04");
+  assert.ok(!S.seriesSweepDue(man.in.vq, Date.parse("2026-10-28T06:00:00Z")) && S.seriesSweepDue(man.in.vq, Date.parse("2026-10-31T06:00:00Z")), "an airing series is refreshed every 3 days");
+  assert.ok(/keywords,/.test(fsx.readFileSync(require("path").join(__dirname, "lib", "enrich.js"), "utf8")), "the keywords ride on the details call already made");
+});
 test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
   assert.ok(!urls.some((u) => /\/films\//.test(u)), "the A–Z pages are retired (25 Oct 2026)");

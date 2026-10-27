@@ -63,7 +63,10 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   const rentBuy = cut >= 0 ? pills(wtw.slice(cut)) : [];
   const yt = (ld.trailer && (ld.trailer.url || ld.trailer.contentUrl || ld.trailer.embedUrl) || "").match(/(?:embed\/|watch\?v=|vi\/)([A-Za-z0-9_-]{6,})/)
     || /youtube(?:-nocookie)?\.com\/(?:embed\/|watch\?v=)([A-Za-z0-9_-]{6,})/.exec(html);
-  const similar = [...html.matchAll(/<(?:a class="simcard" href="([^"]+)"|div class="simcard" style="cursor:default")>(?:<img src="([^"]*)"[^>]*>)?<div class="st">([\s\S]*?)<\/div><div class="sm">([\s\S]*?)<\/div><\/(?:a|div)>/g)]
+  // "If you liked this" only: the franchise row (lib/series.js) uses the same cards and isn't it.
+  const simAt = html.indexOf("<h2>If you liked this</h2>");
+  const simHtml = simAt < 0 ? "" : html.slice(simAt, (html.indexOf("<h2", simAt + 4) + 1 || html.length + 1) - 1);
+  const similar = [...simHtml.matchAll(/<(?:a class="simcard" href="([^"]+)"|div class="simcard" style="cursor:default")>(?:<img src="([^"]*)"[^>]*>)?<div class="st">([\s\S]*?)<\/div><div class="sm">([\s\S]*?)<\/div><\/(?:a|div)>/g)]
     .map((m) => {
       const sm = text(m[4]);
       return { title: text(m[3]), slug: m[1] ? (/\/([^/]+)\.html$/.exec(m[1]) || [])[1] : slugGuess(text(m[3])),
@@ -114,6 +117,10 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   };
   if (tmdbId) item.tmdbId = tmdbId;
   if (ld.numberOfSeasons) item.seasons = ld.numberOfSeasons;
+  // Episode guide and franchise, from the page's marker (lib/series.js).
+  const ser = require("./series.js").readSeriesMark(html);
+  if (ser.episodes) item.episodes = ser.episodes;
+  if (ser.franchise) item.franchise = ser.franchise;
   const headCert = certOf(headMeta(html));
   if (cert || ld.contentRating || headCert) item.cert = (cert || ld.contentRating || headCert).trim();
   const director = [].concat(ld.director || []).map((d) => d && d.name).filter(Boolean).join(", ");
