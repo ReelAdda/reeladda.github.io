@@ -50,6 +50,15 @@ function googleEligible(code, slug, entry, { list = hiddenConfig(), today = new 
   const { isNewReleaseEntry } = require("./sitemap.js");
   return !isNewReleaseEntry(entry, today);
 }
+// Is this film page on the hide list and in the share? For page builders that have no manifest entry
+// at hand (lib/graph.js related films, lib/evergreen.js platform lists): links from pages Google
+// sees go to pages Google sees (27 Oct 2026: 42% of internal links pointed at hidden pages).
+function listedHidden(code, slug, { list = hiddenConfig() } = {}) {
+  const xs = list && list.pages && list.pages[code];
+  if (!Array.isArray(xs)) return false;
+  if (!setCache.has(xs)) setCache.set(xs, new Set(xs));
+  return setCache.get(xs).has(slug) && inRollout(HIDE_FEATURE, slug);
+}
 // Is this page hidden from Google on this build? (Eligible, and in the rollout share.)
 function googleHidden(code, slug, entry, opts = {}) {
   return googleEligible(code, slug, entry, opts) && inRollout(HIDE_FEATURE, slug);
@@ -206,5 +215,5 @@ function nearCopyEditions(files, manifest, { root = ".", threshold = NEAR_COPY, 
 }
 
 module.exports = {
-  NEAR_COPY, mainText, nearCopyEditions, similarity, shingleSet,
+  NEAR_COPY, listedHidden, mainText, nearCopyEditions, similarity, shingleSet,
   applyGoogleHidePaths, pathHidden, peoplePageFiles, GOOGLEBOT_TAG, HIDE_FEATURE, HIDE_FILE, NOINDEX_META, addGooglebotNoindex, applyGoogleHide, googleEligible, googleHidden, loadHidden, removeGooglebotNoindex, useHiddenList };

@@ -135,7 +135,16 @@ function isClose(item, cand) {
 // ranking is the same handful of popular titles for every film, which would funnel every new
 // link into a dozen pages and leave the rest orphaned exactly as they are now. Candidates are
 // taken from a wider band and rotated per source film, so links spread across the archive.
-function relatedFilms(item, index, n = 6) {
+// `visible(c)`: is candidate c a page Google can see? When given, and at least three close
+// neighbours are visible, only visible pages are picked: a link from a page Google sees to one it
+// has been told to ignore spends a crawl and passes nothing on (27 Oct 2026 audit: 16,668 of the
+// links in these sections led to hidden pages). Fewer than three, and the hidden ones still count:
+// a reader is better served by a relevant hidden page than by no recommendation.
+function relatedFilms(item, index, n = 6, { visible = null } = {}) {
+  if (visible) {
+    const vis = (index || []).filter((c) => visible(c));
+    if (vis.filter((c) => relatedScore(item, c) > 0 && isClose(item, c)).length >= 3) index = vis;
+  }
   const all = (index || [])
     .map((c) => ({ c, s: relatedScore(item, c) }))
     .filter((x) => x.s > 0)

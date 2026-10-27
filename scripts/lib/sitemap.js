@@ -251,6 +251,7 @@ function extendIndexNowWithChanged(today, { root = ".", payloadFile = INDEXNOW_P
 // released in the last NEW_RELEASE_PAST_DAYS or due in the next NEW_RELEASE_AHEAD_DAYS, or any
 // film page whose film arrived on a platform here in the last NEW_ARRIVAL_DAYS.
 const NEW_RELEASES_SITEMAP = "sitemap-new.xml";
+const BING_SITEMAP = "sitemap-bing.xml";   // Bing Webmaster Tools only; never in sitemap.xml or robots.txt
 const NEW_RELEASE_PAST_DAYS = 45, NEW_RELEASE_AHEAD_DAYS = 60, NEW_ARRIVAL_DAYS = 14;
 function isNewReleaseEntry(e, today) {
   if (!e) return false;
@@ -315,13 +316,23 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       return require("./googlehide.js").NOINDEX_META.test(fs.readFileSync(path, "utf8").slice(0, 2048)); // robots or googlebot (lib/googlehide.js)
     } catch { return false; }
   };
+  // Pages hidden from Google only (the googlebot tag, no robots noindex): Bing still indexes them,
+  // so they go in sitemap-bing.xml, which only Bing Webmaster Tools is given (see below).
+  const googleOnlyHidden = (path) => {
+    try { const h = fs.readFileSync(path, "utf8").slice(0, 2048); return h.includes('<meta name="googlebot" content="noindex">') && !/<meta name="robots" content="[^"]*noindex/.test(h); } catch { return false; }
+  };
+  const bingOnly = [];
   const slugCodes = {}; // slug -> Set(codes)
   for (const c of countries) {
     const dir = dirFor(c.code);
     if (!fs.existsSync(dir)) continue;
     for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".html"))) {
       const slug = f.slice(0, -5);
-      if (isNoIndex(`${dir}/${f}`)) { noIndexed.add(`${c.code}/${slug}`); continue; }
+      if (isNoIndex(`${dir}/${f}`)) {
+        noIndexed.add(`${c.code}/${slug}`);
+        if (googleOnlyHidden(`${dir}/${f}`)) bingOnly.push(`  <url><loc>${filmUrlFor(c.code, slug)}</loc><lastmod>${filmLastmod(c.code, slug)}</lastmod></url>`);
+        continue;
+      }
       (slugCodes[slug] = slugCodes[slug] || new Set()).add(c.code);
     }
   }
@@ -474,6 +485,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     if (fs.existsSync(`${base}/index.html`) && !isNoIndex(`${base}/index.html`)) peopleUrls.push(`  <url><loc>${peopleIndexUrl(c.code)}</loc><lastmod>${lm(peopleIndexUrl(c.code), `${base}/index.html`)}</lastmod><priority>0.4</priority></url>`);
     for (const d of fs.readdirSync(base).sort()) {
       if (fs.existsSync(`${base}/${d}/index.html`) && !isNoIndex(`${base}/${d}/index.html`)) peopleUrls.push(`  <url><loc>${personPageUrl(c.code, d)}</loc><lastmod>${lm(personPageUrl(c.code, d), `${base}/${d}/index.html`)}</lastmod><priority>0.5</priority></url>`);
+      else if (googleOnlyHidden(`${base}/${d}/index.html`)) bingOnly.push(`  <url><loc>${personPageUrl(c.code, d)}</loc><lastmod>${lm(personPageUrl(c.code, d), `${base}/${d}/index.html`)}</lastmod></url>`);
     }
   }
 
@@ -501,6 +513,12 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
     fs.writeFileSync(NEW_RELEASES_SITEMAP, urlset(newReleaseUrls));
     children.unshift({ file: NEW_RELEASES_SITEMAP, lastmod: newest(newReleaseUrls) });
   } else fs.rmSync(NEW_RELEASES_SITEMAP, { force: true });
+  // BING ONLY (27 Oct 2026). Pages hidden from Google alone (lib/googlehide.js) lost their sitemap
+  // and, with links to them trimmed from pages Google sees, most of their links in. Bing still
+  // indexes them (its traffic held steady through Google's 22 Oct drop), so they are listed here.
+  // Deliberately NOT in sitemap.xml or robots.txt, which Google reads: this file is submitted in
+  // Bing Webmaster Tools only. 50,000 URLs is a sitemap's limit; past it, the oldest go.
+  fs.writeFileSync(BING_SITEMAP, urlset(bingOnly.slice(0, 50000)));
   for (const c of countries) {
     const entries = filmUrlsBy[c.code] || [];
     if (!entries.length) continue;
@@ -519,6 +537,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
 }
 
 module.exports = {
+  BING_SITEMAP,
   contentFingerprint,
   factsFingerprint,
   extendIndexNowWithChanged,

@@ -5726,6 +5726,40 @@ test("weekly page: 'Browse by platform' links every platform list the edition ha
     assert.deepStrictEqual(H.platformListLinks("in"), [{ href: "/streaming/netflix/", name: "Netflix", n: 394 }, { href: "/streaming/aha/", name: "Aha", n: 14 }], "biggest first; a folder with no page isn't linked");
   });
 });
+test("links from visible pages go to visible pages; hidden pages are listed for Bing only (27 Oct 2026)", () => {
+  const Gr = require("./lib/graph.js");
+  const G = require("./lib/googlehide.js");
+  const R = require("./lib/rollout.js");
+  const fsx = require("fs"), path = require("path");
+  // Related films: visible first when three close visible neighbours exist; otherwise hidden ones still count.
+  const f = (slug, lang = "Tamil") => ({ slug, title: slug, genre: "Drama", language: lang, released: "2020-01-01", kind: "movie" });
+  const item = f("seed");
+  const index = [f("v1"), f("v2"), f("v3"), f("h1"), f("h2"), f("h3"), f("h4")];
+  const vis = (c) => /^v/.test(c.slug);
+  assert.deepStrictEqual(Gr.relatedFilms(item, index, 6, { visible: vis }).map((x) => x.slug).sort(), ["v1", "v2", "v3"]);
+  const two = [f("v1"), f("v2"), f("h1"), f("h2"), f("h3")];
+  assert.ok(Gr.relatedFilms(item, two, 6, { visible: vis }).some((x) => /^h/.test(x.slug)), "fewer than three visible: hidden ones still recommended");
+  assert.strictEqual(Gr.relatedFilms(item, index, 6).length, 6, "no option: unchanged");
+  // listedHidden follows the list and the share.
+  try {
+    R.useRolloutConfig({ features: { "google-hide": { percent: 100 } } });
+    assert.ok(G.listedHidden("uk", "x", { list: { pages: { uk: ["x"] } } }) && !G.listedHidden("us", "x", { list: { pages: { uk: ["x"] } } }));
+    assert.ok(G.pathHidden("people/someone/index.html"), "people pages are hidden, so cast names aren't linked");
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
+  const src = (n) => fsx.readFileSync(path.join(__dirname, "lib", n), "utf8");
+  assert.ok(/existsSync\(personPagePath\(code, ps\)\) && !require\("\.\/googlehide\.js"\)\.pathHidden\(personPagePath\(code, ps\)\)/.test(src("filmpage.js")), "cast links only to visible people pages");
+  assert.ok(/const items = every\.filter\(\(x\) => !listedHidden\(code, x\.slug\)\);/.test(src("evergreen.js")), "platform lists list visible titles only");
+  assert.ok(/relatedFilms\(seed, index, 6, inRollout\(VISIBLE_SIMILAR, slug\)/.test(src("relrefresh.js")) && require("./lib/relrefresh.js").REL_VERSION === 3, "older pages redone once, in stages");
+  const repo = JSON.parse(fsx.readFileSync(path.join(__dirname, "..", "rollout.json"), "utf8"));
+  assert.strictEqual(R.percentOf(repo, "visible-similar", Date.parse("2026-10-27T13:00:00Z")), 25);
+  assert.strictEqual(R.percentOf(repo, "visible-similar", Date.parse("2026-10-31T02:00:00Z")), 100);
+  // Bing-only sitemap: written, never offered to Google.
+  const S = require("./lib/sitemap.js");
+  assert.strictEqual(S.BING_SITEMAP, "sitemap-bing.xml");
+  const sm = src("sitemap.js");
+  assert.ok(/fs\.writeFileSync\(BING_SITEMAP/.test(sm) && !/children\.(?:push|unshift)\(\{ file: BING_SITEMAP/.test(sm), "not in the sitemap index");
+  assert.ok(!/sitemap-bing/.test(fsx.readFileSync(path.join(__dirname, "..", "robots.txt"), "utf8")), "not in robots.txt");
+});
 test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
   assert.ok(!urls.some((u) => /\/films\//.test(u)), "the A–Z pages are retired (25 Oct 2026)");

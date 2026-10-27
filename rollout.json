@@ -65,6 +65,21 @@
    "percent": 100,
    "since": "2026-10-25",
    "what": "catalogue pages Google never showed (google-hidden.json, 90 days to 23 Oct): googlebot noindex, out of the sitemaps and hreflang; Bing and visitors keep them (lib/googlehide.js). Dry run 25 Oct confirmed all 11,887 eligible; switched to 100% at once on 25 Oct at the user's request."
+  },
+  "visible-similar": {
+   "percent": 25,
+   "since": "2026-10-27",
+   "schedule": [
+    {
+     "from": "2026-10-29",
+     "percent": 50
+    },
+    {
+     "from": "2026-10-31",
+     "percent": 100
+    }
+   ],
+   "what": "\"If you liked this\" links pages Google can see first (lib/graph.js relatedFilms visible option); older pages redone once per share step (lib/relrefresh.js REL_VERSION 3)"
   }
  }
 }

@@ -479,6 +479,8 @@ const RECENT_RELEASE_DAYS = 180;
 // first CINEMA_TITLE_DAYS lead with its local release date; past STREAMING_DATE_TITLE_DAYS (a year), a
 // streaming film's title drops "OTT Release Date".
 const INTENT_TITLES = "intent-titles";
+// "If you liked this" picks pages Google can see first (lib/graph.js relatedFilms), in stages.
+const VISIBLE_SIMILAR = "visible-similar";
 const CINEMA_TITLE_DAYS = 28;
 const STREAMING_DATE_TITLE_DAYS = 365;
 const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -1025,7 +1027,9 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // Neighbours come from the pages we actually HAVE (see filmIndexFor), not from TMDB's
   // recommendation list — those were 6 dead cards per page because TMDB recommends films
   // this site has never covered. Every entry below resolves to a real URL.
-  const related = Array.isArray(filmIndex) && filmIndex.length ? relatedFilms(item, filmIndex, 6) : [];
+  // Pages Google can see first (lib/graph.js relatedFilms; rollout "visible-similar").
+  const visOpt = inRollout(VISIBLE_SIMILAR, item.slug) ? { visible: (c) => !require("./googlehide.js").listedHidden((cfg && cfg.code) || "in", c.slug) } : {};
+  const related = Array.isArray(filmIndex) && filmIndex.length ? relatedFilms(item, filmIndex, 6, visOpt) : [];
   const simAll = Array.isArray(item.similar) ? item.similar : [];
   const onSite = (s) => knownSlugs && knownSlugs.has(s.slug);
   const similar = related.length >= 3 ? related
@@ -1263,9 +1267,11 @@ ${FCSB_CSS}
   })()}
   ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
   ${(item.castPics && item.castPics.length) ? `<h2>Cast</h2><div class="cast-strip">${item.castPics.map((c) => {
-    // A name links to its people page when one exists (5+ films here) — see writePeoplePages.
+    // A name links to its people page when one exists (5+ films here) — see writePeoplePages — and
+    // Google can see it. Every people page is hidden from Google (lib/googlehide.js, 25 Oct 2026),
+    // so names are plain text: 3,036 links on visible pages led only to hidden ones (27 Oct audit).
     const ps = slugify(c.name || "");
-    const nm = ps && fs.existsSync(personPagePath(code, ps)) ? `<a href="/${e(PEOPLE_BASE(code))}/${e(ps)}/">${e(c.name)}</a>` : e(c.name);
+    const nm = ps && fs.existsSync(personPagePath(code, ps)) && !require("./googlehide.js").pathHidden(personPagePath(code, ps)) ? `<a href="/${e(PEOPLE_BASE(code))}/${e(ps)}/">${e(c.name)}</a>` : e(c.name);
     return `<div class="cast-card"><img src="${e(c.photo)}" alt="${e(c.name)}" width="72" height="72" loading="lazy"><div class="cast-name">${nm}</div>${c.character ? `<div class="cast-role">${e(c.character)}</div>` : ""}</div>`;
   }).join("")}</div>`
     : cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
@@ -1422,6 +1428,7 @@ function generatePages(data, cfg, allSlugSets) {
 }
 
 module.exports = {
+  VISIBLE_SIMILAR,
   simGridHtml,
   headRatingHtml,
   FCSB_CSS,

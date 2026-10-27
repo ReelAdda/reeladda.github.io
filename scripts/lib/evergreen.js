@@ -169,7 +169,11 @@ function writeStreamingPages(data, cfg, manifest, index = null) {
   const avail = verifiedAvailability(data, (manifest || {})[code] || {}, idx);
   const written = new Set();
   const summary = [];
-  for (const [platform, items] of avail) {
+  const { listedHidden } = require("./googlehide.js");
+  for (const [platform, every] of avail) {
+    // Only titles Google can see (27 Oct 2026): 35,790 of these lists' 49,771 links led to pages
+    // hidden from Google. A list that falls below its gate is removed, and links to it with it.
+    const items = every.filter((x) => !listedHidden(code, x.slug));
     if (items.length < STREAM_PAGE_MIN) continue;
     const pslug = platformSlug(platform);
     if (!pslug) continue;

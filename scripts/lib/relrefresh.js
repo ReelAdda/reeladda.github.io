@@ -18,7 +18,9 @@ const { simGridHtml } = require("./filmpage.js");
 
 // Bump when relatedFilms' rules change, so every old page is redone once.
 // 2 = language affinity, shared cast/director, lead genre (Sept 2026).
-const REL_VERSION = 2;
+// 3 = pages Google can see first (27 Oct 2026), in stages: only films in the "visible-similar"
+//     rollout share are redone, and the rest follow as the share grows.
+const REL_VERSION = 3;
 
 const SECTION_RE = /<h2>If you liked this<\/h2><div class="simgrid">[\s\S]*?<\/div>(?=\s*(?:<h2>|<a class="btn"|<\/div>\s*<footer))/;
 
@@ -37,7 +39,11 @@ function refreshRelated(pagesManifest, countries) {
   const res = { checked: 0, updated: 0 };
   for (const cfg of countries || []) {
     const m = (pagesManifest || {})[cfg.code] || {};
-    const due = Object.entries(m).filter(([, e]) => e && (e.catalog || e.archivedOn) && (e.rel || 1) < REL_VERSION);
+    const { inRollout } = require("./rollout.js");
+    const { VISIBLE_SIMILAR } = require("./filmpage.js");
+    const { listedHidden } = require("./googlehide.js");
+    const due = Object.entries(m).filter(([slug, e]) => e && (e.catalog || e.archivedOn) && (e.rel || 1) < REL_VERSION
+      && ((e.rel || 1) < 2 || inRollout(VISIBLE_SIMILAR, slug)));
     if (!due.length) continue;
     const index = filmIndexFor(cfg);
     const bySlug = new Map(index.map((f) => [f.slug, f]));
@@ -49,7 +55,7 @@ function refreshRelated(pagesManifest, countries) {
       let html;
       try { html = fs.readFileSync(file, "utf8"); } catch { continue; }
       res.checked++;
-      const picks = relatedFilms(seed, index, 6);
+      const picks = relatedFilms(seed, index, 6, inRollout(VISIBLE_SIMILAR, slug) ? { visible: (c) => !listedHidden(cfg.code, c.slug) } : {});
       // The same picks as facts (lib/factsq.js), in the shape the page's facts carry them.
       queueFacts(cfg.code, slug, { similar: picks.map((f) => ({ title: f.title, slug: f.slug, poster: f.poster || "", language: f.language || "", kind: f.kind || "movie" })) });
       // Whatever the rules allow, even one or two — never the old picks they'd now reject.
