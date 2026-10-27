@@ -5927,7 +5927,15 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     assert.ok(/<h2>Episodes<\/h2><p>8 episodes · limited series/.test(html) && /<li class="out"><span class="epn">1<\/span><div><b>No Strings<\/b>/.test(html)
       && /<li class="next"><span class="epn">7<\/span><div><b>Forever<\/b><small>[^<]*62 min<\/small><\/div><span class="eptag">Next<\/span>/.test(html), "a timeline: aired, then the next one marked");
     assert.ok(/How many episodes does VisionQuest have\?/.test(html) && /When is the next episode of VisionQuest\?/.test(html));
-    assert.ok(/<td>Episodes<\/td><td>8 · limited series<\/td>/.test(html) && /<td>Episode length<\/td><td>48–62 min<\/td>/.test(html) && /<td>Part of<\/td><td>The Marvel Cinematic Universe<\/td>/.test(html));
+    assert.ok(/<td>Episodes<\/td><td>8 · limited series<\/td>/.test(html) && /<td>Episode length<\/td><td>48–62 min<\/td>/.test(html) && /<td>Part of<\/td><td>Marvel Cinematic Universe<\/td>/.test(html));
+    // The 27 Oct 2026 review's fixes.
+    assert.ok(!/Best screen/.test(html), "no 'Best screen: Stream at home'");
+    assert.ok(/"numberOfEpisodes":8/.test(html), "the episode count in the structured data");
+    const fd = S.fitFromData(item, { items: [{ slug: "wandavision", title: "WandaVision", released: "2021-01-15" }, { slug: "later", title: "Later", released: "2027-01-01" }] }, (d) => d, "2026-10-27");
+    assert.ok(/week by week — new episodes until 2099-11-04/.test(fd.bestFor) && /finale lands on 2099-11-04/.test(fd.skipIf), JSON.stringify(fd));
+    assert.deepStrictEqual(fd.watchFirst.map((x) => x.slug), ["wandavision"], "watch first: only earlier titles");
+    const pair = S.episodesHtml({ ...item, episodes: { ...ep, list: [{ e: 5, name: "A", date: "2026-10-27", runtime: null }, { e: 6, name: "B", date: "2026-10-27", runtime: null }] } }, (d) => d, "2026-10-28");
+    assert.ok((pair.match(/same-day double drop/g) || []).length === 2, "episodes released together say so");
     const back = X.extractFacts(html, "visionquest");
     assert.deepStrictEqual(back.episodes, ep, "the guide survives a frozen render");
     assert.deepStrictEqual(back.franchise, item.franchise);
@@ -5951,6 +5959,11 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
       assert.ok(/<div class="hero" style="background-image:linear-gradient\([^"]*url\('https:\/\/image\.tmdb\.org\/t\/p\/w780\/bd\.jpg'\)">\s*<div class="head">/.test(lean), "the head inside the hero");
       assert.ok(/<div class="anscard"><p class="answer">[\s\S]*?<p class="nextep"><b>Next episode:<\/b> E7 “Forever” · /.test(lean), "the answer card, with the next episode");
       assert.ok(lean.indexOf('class="anscard"') < lean.indexOf('id="filmychill-score"'), "the answer still leads");
+      assert.ok(/content:'Audience rating'/.test(lean), "the ring says it is the audience rating");
+      const withTake = F.buildFilmPage({ ...item, take: "Most reviews land firmly on the positive side.", takeSrc: "wiki", trailer: "https://www.youtube.com/watch?v=abcdefghijk" }, "2026-10-27", new Set(), IN);
+      assert.ok(/<h2>What the critics say<\/h2>\s*<p class="take">/.test(withTake), "the critics' line under its own heading");
+      assert.ok(/<p class="tlink"><a href="https:\/\/www\.youtube\.com\/watch\?v=abcdefghijk"/.test(withTake), "a plain trailer link beside the player");
+      assert.ok(/<dt>Best for<\/dt><dd>Following it week by week/.test(withTake), "the series' cadence, not a genre line");
       assert.ok(/Redesign, 27 Oct 2026/.test(lean) && /\.eplist li/.test(lean) && /\.frrow/.test(lean));
       const f = X.extractFacts(lean, "visionquest");
       assert.deepStrictEqual([f.title, f.providers, f.rating, f.votes, f.released], ["VisionQuest", ["JioHotstar"], 8.7, 184, "2026-10-13"], "facts read the same from the new layout");

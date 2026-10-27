@@ -789,6 +789,9 @@ const REDESIGN_CSS = [
   "  .anscard .ansub { padding:0 16px !important; margin:0 0 10px !important; }",
   "  .nextep { margin:0 12px 12px; background:var(--cream); border-radius:12px; padding:10px 12px; font-size:14px; line-height:1.5; }",
   "  .fcsb-verdict .dial { width:84px; height:84px; } .fcsb-verdict .dial span { width:68px; height:68px; font-size:28px; }",
+  // The ring is the AUDIENCE rating (lib/meter.js), not the FilmyChill Score: say so under it.
+  "  .fcsb-verdict .dial { position:relative; margin-bottom:16px; } .fcsb-verdict .dial::after { content:'Audience rating'; position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:4px; font-size:10.5px; font-weight:600; color:var(--mute); white-space:nowrap; }",
+  "  .tlink { margin-top:8px; font-size:14px; }",
   "  .fcsb-rows { grid-template-columns:1fr 1fr; } .fcsb-row { flex-direction:column; align-items:flex-start; background:#F7F5FF; border-radius:12px; padding:10px; }",
   "  h2 { font-size:18px; margin:26px 0 10px; }",
   "  .fit { border-left:0; background:#fff; border-radius:16px; padding:14px 16px; }",
@@ -1046,7 +1049,8 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
       .filter(Boolean).length ? [item.posterPath ? img(item.posterPath, "w780") : item.poster, item.backdropPath ? img(item.backdropPath, "w1280") : null].filter(Boolean) : undefined,
     datePublished: item.released || undefined,
     dateModified: (asOf || new Date().toISOString().slice(0, 10)),
-    numberOfSeasons: item.kind === "tv" && item.seasons ? item.seasons : undefined,
+    numberOfSeasons: item.kind === "tv" && (item.seasons || (item.episodes && item.episodes.seasons)) ? (item.seasons || item.episodes.seasons) : undefined,
+    numberOfEpisodes: item.kind === "tv" && item.episodes && item.episodes.count ? item.episodes.count : undefined,
     genre: item.genre || undefined,
     inLanguage: item.language || undefined,
     director: item.director ? { "@type": "Person", name: item.director } : undefined,
@@ -1306,6 +1310,7 @@ ${REDESIGN_CSS}
   })()}
   ${(lean ? leanText(verdictProse) : verdictProse) ? `<h2>What the audience says</h2><p class="vprose">${e(lean ? leanText(verdictProse) : verdictProse)}</p>` : ""}
   ${item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
+  ${item.take && lean ? `<h2>What the critics say</h2>` : ""}
   ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
   ${(() => {
     // The one fact on this page no competitor can reproduce: measured from our own archive
@@ -1352,15 +1357,22 @@ ${REDESIGN_CSS}
     // page that qualifies. Sits directly under the fit prose because it is the same
     // question compressed — a reader who skims takes this and leaves, which is the point.
     // Gated inside watchFit(): returns null on thin signal rather than inventing rows.
-    const wf = watchFit(item);
+    // Rows from the title's own data replace the genre-shaped ones where there is data (27 Oct
+    // 2026 review: "an episode-a-night rhythm" would fit any series): a series' release cadence,
+    // and what to watch first from its franchise (lib/series.js fitFromData).
+    const fd = SER.fitFromData(item, franchise, fmtFull);
+    const wf = watchFit(item) || (fd ? {} : null);
     if (!wf) return "";
+    const bestFor = fd && fd.bestFor ? fd.bestFor : wf.bestFor;
+    const skipIf = fd && fd.bestFor ? fd.skipIf : wf.skipIf;
     const rows = [
       // Lean: a "Why" that only restates the rating ("7.2/10 from 550 ratings…") goes.
       wf.why && !(lean && RESTATES.test(wf.why)) ? `<dt>Why</dt><dd>${e(wf.why)}</dd>` : "",
-      wf.skipIf ? `<dt class="skip">Skip if</dt><dd>${e(wf.skipIf)}</dd>` : "",
-      wf.bestFor ? `<dt>Best for</dt><dd>${e(cap(wf.bestFor))}</dd>` : "",
+      fd && fd.watchFirst.length ? `<dt>Watch first</dt><dd>${fd.watchFirst.map((x) => `<a href="${e(filmPagePath(code, x.slug))}">${e(x.title)}</a>`).join(", ")}</dd>` : "",
+      skipIf ? `<dt class="skip">Skip if</dt><dd>${e(skipIf)}</dd>` : "",
+      bestFor ? `<dt>Best for</dt><dd>${e(cap(bestFor))}</dd>` : "",
     ].join("");
-    return `<div class="fit"><dl>${rows}</dl></div>`;
+    return rows ? `<div class="fit"><dl>${rows}</dl></div>` : "";
   })()}
   ${synopsis && !lean ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${(() => {
@@ -1459,7 +1471,7 @@ ${REDESIGN_CSS}
     return "";
   })()}
   ${SER.episodesHtml(item, fmtFull)}
-  ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
+  ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div><p class="tlink"><a href="https://www.youtube.com/watch?v=${e(ytid)}" rel="noopener">Watch the trailer on YouTube →</a></p>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
   ${franchise ? franchiseRowHtml(franchise, item, code) : ""}
   ${simGridHtml(similar, code, linkable)}
   ${faqs.length ? `<h2>Frequently asked</h2><div class="faq">${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("")}</div>` : ""}

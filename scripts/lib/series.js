@@ -138,7 +138,8 @@ function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10)) 
   // A timeline: aired episodes filled, the next one marked, the rest outlined.
   const items = (ep.list || []).map((x) => {
     const state = x.e === nextNo ? "next" : x.date && x.date <= today ? "out" : "soon";
-    const meta = [x.date ? fmt(x.date) : "Date to be announced", x.runtime ? `${x.runtime} min` : null].filter(Boolean).join(" · ");
+    const pair = x.date && (ep.list || []).some((y) => y !== x && y.date === x.date);
+    const meta = [x.date ? fmt(x.date) : "Date to be announced", pair ? "same-day double drop" : null, x.runtime ? `${x.runtime} min` : null].filter(Boolean).join(" · ");
     return `<li class="${state}"><span class="epn">${x.e}</span><div><b>${e(x.name || `Episode ${x.e}`)}</b><small>${e(meta)}</small></div>${state === "next" ? '<span class="eptag">Next</span>' : ""}</li>`;
   }).join("");
   return `<h2>Episodes</h2><p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""} · original release dates</p>${next}`
@@ -156,6 +157,29 @@ function episodeFaqs(item, fmt, today = new Date().toISOString().slice(0, 10)) {
   return out;
 }
 
+// Pure: the fit rows a title's own data gives (null when it gives none): how a series on air is
+// released, a finished limited series as one sitting, and the franchise titles to watch first
+// (siblings released before it, from franchiseSiblings).
+function fitFromData(item, franchise, fmt, today = new Date().toISOString().slice(0, 10)) {
+  const out = { bestFor: null, skipIf: null, watchFirst: [] };
+  const ep = item && item.kind === "tv" && item.episodes;
+  if (ep && ep.count) {
+    const dates = (ep.list || []).map((x) => x.date).filter(Boolean).sort();
+    const last = dates.length ? dates[dates.length - 1] : null;
+    if (ep.next && ep.next.date >= today && last) {
+      out.bestFor = `following it week by week — new episodes until ${fmt(last)}`;
+      out.skipIf = `you'd rather binge it in one go — the finale lands on ${fmt(last)}`;
+    } else if (ep.limited && last && last <= today) {
+      out.bestFor = `a complete ${ep.count}-episode story you can watch start to finish`;
+    }
+  }
+  if (franchise && franchise.items) {
+    const mine = String((item && item.released) || "");
+    out.watchFirst = franchise.items.filter((x) => String(x.released || "") < mine).slice(-3);
+  }
+  return out.bestFor || out.watchFirst.length ? out : null;
+}
+
 // Pure: "Good to know" rows the guides add.
 function seriesKnowRows(item) {
   const rows = [];
@@ -166,8 +190,8 @@ function seriesKnowRows(item) {
     if (rts.length) { const lo = Math.min(...rts), hi = Math.max(...rts); rows.push({ label: "Episode length", value: lo === hi ? `${lo} min` : `${lo}–${hi} min` }); }
   }
   const fr = item && item.franchise;
-  if (fr && fr.c) rows.push({ label: "Part of", value: `The ${seriesName(fr.c)} series` });
-  else if (fr && fr.u && fr.u.length) rows.push({ label: "Part of", value: `The ${universeName(fr.u[0])}` });
+  if (fr && fr.c) rows.push({ label: "Part of", value: `${seriesName(fr.c)} series` });
+  else if (fr && fr.u && fr.u.length) rows.push({ label: "Part of", value: universeName(fr.u[0]) });
   return rows;
 }
 
@@ -217,5 +241,5 @@ async function sweepSeries(manifest, { budget = 300, tmdb, queueFacts, hidden = 
   return res;
 }
 
-module.exports = { FRANCHISE_KEYWORD, sweepSeries, SERIES_SWEEP_VERSION, episodeFaqs, episodesFrom, episodesHtml, franchiseFrom, franchiseSiblings,
+module.exports = { FRANCHISE_KEYWORD, fitFromData, sweepSeries, SERIES_SWEEP_VERSION, episodeFaqs, episodesFrom, episodesHtml, franchiseFrom, franchiseSiblings,
   readSeriesMark, seasonToFetch, seriesFactsFor, seriesKnowRows, seriesMark, seriesName, seriesSweepDue, universeName };

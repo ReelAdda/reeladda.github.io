@@ -212,8 +212,8 @@ function buildGoodToKnow(item, cfg = null) {
   if (item.genre) rows.push({ label: "Genre", value: item.genre });
   if (item.language) rows.push({ label: "Language", value: item.language });
   const provs = Array.isArray(item.providers) ? item.providers : [];
-  if (provs.length) rows.push({ label: "Best screen", value: "Stream at home" });
-  else if (item.platform === "Theatres") rows.push({ label: "Best screen", value: "Theatre / big screen" });
+  // "Best screen: Stream at home" said nothing a reader didn't know and repeated on every page
+  // (27 Oct 2026 review): gone.
 
   return rows;
 }
