@@ -39,14 +39,21 @@ function hiddenConfig() { return cached || (cached = loadHidden()); }
 // Tests: use this list instead of the file (null goes back to the file).
 function useHiddenList(list) { cached = list || null; }
 
-// Would this page be hidden at 100%? (Listed, still a catalogue page, not a fresh arrival.)
+// Would this page be hidden at 100%? Listed, and not a fresh arrival; a weekly-list page (not a
+// catalogue page) only once its film is WEEKLY_HIDE_DAYS old — the monthly roll (lib/keeplean.js)
+// lists those, and this re-checks the age so a stale list can't hide a recent release.
+const WEEKLY_HIDE_DAYS = 120;
 const setCache = new WeakMap();
 function googleEligible(code, slug, entry, { list = hiddenConfig(), today = new Date().toISOString().slice(0, 10) } = {}) {
   const xs = list && list.pages && list.pages[code];
   if (!Array.isArray(xs)) return false;
   if (!setCache.has(xs)) setCache.set(xs, new Set(xs));
   if (!setCache.get(xs).has(slug)) return false;
-  if (!entry || !entry.catalog) return false;
+  if (!entry) return false;
+  if (!entry.catalog) {
+    const rel = Date.parse(`${String(entry.released || "").slice(0, 10)}T00:00:00Z`);
+    if (!Number.isFinite(rel) || (Date.parse(`${today}T00:00:00Z`) - rel) / 864e5 <= WEEKLY_HIDE_DAYS) return false;
+  }
   const { isNewReleaseEntry } = require("./sitemap.js");
   return !isNewReleaseEntry(entry, today);
 }
@@ -215,5 +222,5 @@ function nearCopyEditions(files, manifest, { root = ".", threshold = NEAR_COPY, 
 }
 
 module.exports = {
-  NEAR_COPY, listedHidden, mainText, nearCopyEditions, similarity, shingleSet,
+  NEAR_COPY, WEEKLY_HIDE_DAYS, listedHidden, mainText, nearCopyEditions, similarity, shingleSet,
   applyGoogleHidePaths, pathHidden, peoplePageFiles, GOOGLEBOT_TAG, HIDE_FEATURE, HIDE_FILE, NOINDEX_META, addGooglebotNoindex, applyGoogleHide, googleEligible, googleHidden, loadHidden, removeGooglebotNoindex, useHiddenList };

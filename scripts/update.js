@@ -339,6 +339,8 @@ const { checkSearchHealth, refreshSearchTop, reportOpportunities, searchHealthLi
 const { addBrandToPages } = require("./lib/brand.js");
 const { applyHonestWording, applyLeanTrim } = require("./lib/honest.js");
 const { applyGoogleHide, applyGoogleHidePaths, googleHidden, nearCopyEditions, peoplePageFiles } = require("./lib/googlehide.js");
+const { healthLine, rollHiddenList, weeklyHealth } = require("./lib/keeplean.js");
+const { unlistedPages } = require("./lib/pagetypes.js");
 const { contentFingerprint, extendIndexNowWithChanged, pruneDeadHubLinks, sweepDeadHubLinks, syncFilmLastmods, writeMultiCountrySitemap } = require("./lib/sitemap.js");
 
 // TMDB release_dates lookups per run for archived films with no cinema date yet (see the
@@ -2420,6 +2422,11 @@ async function main() {
       if (h.state === "drop") healthNote(`${line}. Check Search Console (Performance, Pages, Manual actions)`);
       else if (h.state === "down") healthNote(line);
     } catch (e) { console.log(`Search health: not checked (${e.message})`); }
+    // The monthly hide roll (lib/keeplean.js): before any page is built, so every pass reads the new list.
+    try {
+      const roll = await rollHiddenList({ manifest: JSON.parse(fs.readFileSync("pages-manifest.json", "utf8")) });
+      console.log(roll.rolled ? `Hide list rolled: ${roll.total} page(s) hidden from Google (+${roll.added} / -${roll.removed}), ${roll.shown} pages had impressions` : `Hide list: not rolled (${roll.why})`);
+    } catch (e) { stageFailed("hide list roll", e, { optional: true }); }
     // Pass 1: build data for every country. Every TMDB answer is recorded — each edition on its
     // own, so the proof replays an edition with exactly the answers it got — and the output kept
     // as built, for the split proof right after (proveSplitBuilder).
@@ -2921,6 +2928,18 @@ async function main() {
       const hidden = noindexedSurvivors(merges);
       if (hidden.length) healthNote(`merges: ${hidden.length} merged page(s) redirect to a page marked noindex, so Google drops both — e.g. ${hidden.slice(0, 3).join("; ")}`);
     } catch (e) { stageFailed("merge stubs", e); }
+    // Every page on disk is a listed page type (lib/pagetypes.js); a new kind of page, or a retired
+    // one coming back, turns the run red until it is described there.
+    try {
+      const u = unlistedPages([...filmPageFiles(), ...sitePageFiles()]);
+      if (u.unknown.length) healthIssue(`page types: ${u.unknown.length} page(s) of a kind not listed in lib/pagetypes.js — e.g. ${u.unknown.slice(0, 3).join("; ")}`);
+      if (u.retired.length) healthIssue(`page types: ${u.retired.length} page(s) of a retired kind are back — e.g. ${u.retired.slice(0, 3).join("; ")}`);
+    } catch (e) { stageFailed("page types", e); }
+    // The weekly health report (lib/keeplean.js): numbers and alarms, every 7 days.
+    try {
+      const w = await weeklyHealth({ manifest: pagesManifest });
+      if (w.ran) { console.log(healthLine(w.rec)); for (const a of w.alarms) healthNote(`site health: ${a}`); }
+    } catch (e) { stageFailed("site health report", e, { optional: true }); }
     fs.writeFileSync(RUN_HEALTH_FILE, JSON.stringify(RUN_HEALTH, null, 1));
     console.log(`Done. Built ${COUNTRIES.length} countries: ${COUNTRIES.map((c) => c.code).join(", ")}.` +
       ` Health: ${RUN_HEALTH.issues.length} issue(s), ${RUN_HEALTH.notes.length} note(s).`);

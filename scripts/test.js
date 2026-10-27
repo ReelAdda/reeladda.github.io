@@ -5760,6 +5760,72 @@ test("links from visible pages go to visible pages; hidden pages are listed for 
   assert.ok(/fs\.writeFileSync\(BING_SITEMAP/.test(sm) && !/children\.(?:push|unshift)\(\{ file: BING_SITEMAP/.test(sm), "not in the sitemap index");
   assert.ok(!/sitemap-bing/.test(fsx.readFileSync(path.join(__dirname, "..", "robots.txt"), "utf8")), "not in robots.txt");
 });
+testAsync("keep lean: the monthly hide roll, the weekly health report, and the page-type registry (Oct 2026)", async () => {
+  const K = require("./lib/keeplean.js");
+  const P = require("./lib/pagetypes.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const now = Date.parse("2026-11-20T06:00:00Z");
+  const B = "https://filmychill.com/";
+  // 1. The roll: never-shown catalogue (any age) and never-shown weekly pages over 120 days; a shown page never.
+  const man = { in: { cat: { catalog: true, released: "2026-09-01" }, catShown: { catalog: true, released: "1999-01-01" },
+    oldWeekly: { released: "2026-03-01" }, newWeekly: { released: "2026-10-01" }, oldShown: { released: "2025-01-01" } }, uk: { cat: { catalog: true, released: "2010-01-01" } } };
+  const shown = new Set([`${B}movie/catShown.html`, `${B}movie/oldShown.html`]);
+  assert.deepStrictEqual(K.rollList(man, shown, now), { in: ["cat", "oldWeekly"], uk: ["cat"] });
+  // ...on a schedule, and never on bad data.
+  const dir = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-roll-"));
+  try {
+    const file = path.join(dir, "google-hidden.json");
+    fsx.writeFileSync(file, JSON.stringify({ pages: { in: ["x"] }, paths: ["people/"], rolled: "2026-11-01", pagesWithImpressions: 4000 }));
+    assert.strictEqual((await K.rollHiddenList({ manifest: man, file, nowMs: now, env: {} })).rolled, false, "rolled 19 days ago: not yet");
+    assert.ok(/no Search Console access/.test((await K.rollHiddenList({ manifest: man, file, nowMs: now, env: {}, force: true })).why));
+    const fakeFetch = (rows) => async () => ({ json: async () => ({ rows }) });
+    const env = { FIREBASE_SERVICE_ACCOUNT: "{}" };
+    const SR = require("./lib/searchtop.js"); const realTok = SR.accessToken;
+    // accessToken is called through the module: stub it for the test.
+    require.cache[require.resolve("./lib/searchtop.js")].exports.accessToken = async () => "t";
+    delete require.cache[require.resolve("./lib/keeplean.js")];
+    const K2 = require("./lib/keeplean.js");
+    try {
+      const thin = await K2.rollHiddenList({ manifest: man, file, nowMs: now, env, force: true, fetchImpl: fakeFetch([{ keys: [`${B}movie/catShown.html`], impressions: 3 }]) });
+      assert.ok(!thin.rolled && /missing data/.test(thin.why), "1 shown page against 4,000 last time: the list is kept");
+      const rows = Array.from({ length: 3000 }, (_, i) => ({ keys: [`${B}movie/p${i}.html`], impressions: 1 })).concat([{ keys: [`${B}movie/oldShown.html`], impressions: 2 }]);
+      const ok = await K2.rollHiddenList({ manifest: man, file, nowMs: now, env, force: true, fetchImpl: fakeFetch(rows) });
+      assert.ok(ok.rolled && ok.total === 4, JSON.stringify(ok));
+      const saved = JSON.parse(fsx.readFileSync(file, "utf8"));
+      assert.strictEqual(saved.rolled, "2026-11-20"); assert.deepStrictEqual(saved.paths, ["people/"], "the people list is kept");
+    } finally { require.cache[require.resolve("./lib/searchtop.js")].exports.accessToken = realTok; delete require.cache[require.resolve("./lib/keeplean.js")]; }
+  } finally { fsx.rmSync(dir, { recursive: true, force: true }); }
+  // 2. Health alarms.
+  assert.deepStrictEqual(K.healthAlarms({ toHiddenShare: 0.05, freshWeak: 0, orphans: 10, offered: 7000, indexedShare: 0.3 }, { offered: 6800, indexedShare: 0.31, prevIndexedFell: false }), [], "a healthy week: no alarm");
+  const bad = K.healthAlarms({ toHiddenShare: 0.2, freshWeak: 4, orphans: 150, offered: 9000, indexedShare: 0.25 }, { offered: 7000, indexedShare: 0.3, prevIndexedFell: true });
+  assert.strictEqual(bad.length, 5, bad.join(" | "));
+  inTempDirSync(() => {
+    fsx.mkdirSync("movie"); fsx.mkdirSync("new-on-ott");
+    fsx.writeFileSync("movie/a.html", '<html><head></head><body><a href="/movie/b.html">b</a></body></html>');
+    fsx.writeFileSync("movie/b.html", '<html><head><meta name="googlebot" content="noindex"></head><body></body></html>');
+    fsx.writeFileSync("new-on-ott/index.html", '<html><head></head><body><a href="/movie/a.html">a</a><a href="/movie/b.html">b</a></body></html>');
+    fsx.writeFileSync("sitemap-films-in.xml", `<urlset><url><loc>${B}movie/a.html</loc></url></urlset>`);
+    fsx.writeFileSync("sitemap-pages.xml", `<urlset><url><loc>${B}new-on-ott/</loc></url></urlset>`);
+    fsx.writeFileSync("sitemap-bing.xml", `<urlset><url><loc>${B}movie/b.html</loc></url></urlset>`);
+    const h = K.linkHealth({ manifest: { in: { a: { released: "2026-11-10" } } }, nowMs: now });
+    assert.strictEqual(h.offered, 2, "the Bing-only sitemap isn't Google's");
+    assert.strictEqual(h.toHidden, 2); assert.strictEqual(h.links, 3);
+    assert.strictEqual(h.orphans, 1, "nothing links the weekly page here");
+    assert.strictEqual(h.freshWeak, 1, "the new title a has one link in");
+  });
+  // 4. Every page type described in full; known pages classify; unknown and retired ones are caught.
+  for (const t of P.PAGE_TYPES) for (const k of ["id", "match", "gate", "links", "google", "exit"]) assert.ok(t[k], `${t.id || "?"}: ${k}`);
+  for (const [p, id] of [["index.html", "homepage"], ["uk/index.html", "homepage"], ["uk/movie/x.html", "film"], ["new-on-ott/index.html", "weekly page"], ["new-on-netflix/index.html", "platform hub"],
+    ["us/streaming/netflix/english/index.html", "platform language list"], ["hindi/index.html", "language page"], ["people/x/index.html", "people page"], ["about/index.html", "trust page"], ["404.html", "utility"]]) {
+    assert.strictEqual((P.pageTypeOf(p) || {}).id, id, p);
+  }
+  const u = P.unlistedPages(["movie/a.html", "films/2/index.html", "new-on-netflix/2026-08/index.html", "week/2026-W43/index.html", "quiz/index.html"]);
+  assert.deepStrictEqual(u, { unknown: ["quiz/index.html"], retired: ["films/2/index.html", "new-on-netflix/2026-08/index.html", "week/2026-W43/index.html"] });
+  const up = fsx.readFileSync(path.join(__dirname, "update.js"), "utf8");
+  assert.ok(up.indexOf("rollHiddenList(") < up.indexOf("applyGoogleHide(films"), "rolled before the pages are built");
+  assert.ok(/unlistedPages\(\[\.\.\.filmPageFiles\(\), \.\.\.sitePageFiles\(\)\]\)/.test(up) && /weeklyHealth\(\{ manifest: pagesManifest \}\)/.test(up));
+  assert.ok(/git add -A -- google-hidden\.json site-health\.json/.test(fsx.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8")), "the roll and the report are committed back");
+});
 test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
   assert.ok(!urls.some((u) => /\/films\//.test(u)), "the A–Z pages are retired (25 Oct 2026)");
@@ -7147,7 +7213,9 @@ test("google-hide: never-shown catalogue pages get a Google-only noindex, revers
     assert.ok(G.googleHidden("uk", "old", cat, { list, today }));
     assert.ok(!G.googleHidden("uk", "other", cat, { list, today }), "not listed");
     assert.ok(!G.googleHidden("us", "old", cat, { list, today }), "listed for another edition only");
-    assert.ok(!G.googleHidden("uk", "old", { ...cat, catalog: false }, { list, today }), "no longer a catalogue page");
+    assert.ok(G.googleHidden("uk", "old", { ...cat, catalog: false }, { list, today }), "a weekly-list page well past 120 days can be listed too (lib/keeplean.js roll)");
+    assert.ok(!G.googleHidden("uk", "old", { ...cat, catalog: false, released: "2026-09-01" }, { list, today }), "...but never a recent release, whatever a stale list says");
+    assert.ok(!G.googleHidden("uk", "old", null, { list, today }), "no page record: visible");
     assert.ok(!G.googleHidden("uk", "old", { ...cat, live: { since: "2026-10-20" } }, { list, today }), "a real arrival after the page existed is news: visible");
     R.useRolloutConfig({ features: { "google-hide": { percent: 0 } } });
     assert.ok(!G.googleHidden("uk", "old", cat, { list, today }) && G.googleEligible("uk", "old", cat, { list, today }), "0% = dry run: counted, not hidden");

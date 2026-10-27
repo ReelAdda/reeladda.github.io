@@ -138,6 +138,8 @@ jobs:
           git add -A -- facts-mode.json 2>/dev/null || true
           # "Most searched" data (scripts/lib/searchtop.js): per-page Search Console clicks.
           git add -A -- search-top.json 2>/dev/null || true
+          # The monthly hide roll and the weekly health report (scripts/lib/keeplean.js).
+          git add -A -- google-hidden.json site-health.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit."
