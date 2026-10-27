@@ -3437,8 +3437,7 @@
     "lastCheck": "2026-10-23",
     "misses": 0
    },
-   "fpv": 2,
-   "archivedOn": "2026-10-27"
+   "fpv": 2
   },
   "saga-of-tanya-the-evil": {
    "last": "2026-10-25",
@@ -43100,7 +43099,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-30"
+   "epNext": "2026-10-30",
+   "archivedOn": "2026-10-27"
   },
   "border": {
    "last": "2026-10-22",
@@ -45836,7 +45836,8 @@
     "at": "2026-10-25",
     "w": 8
    },
-   "rel": 2
+   "rel": 3,
+   "archivedOn": "2026-10-27"
   },
   "poniiy": {
    "last": "2026-10-25",
@@ -46467,7 +46468,24 @@
    "title": "Masterplan",
    "rendered": "2026-10-17",
    "fp": "4fec0689a9b6",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt38672588",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "tenzing": {
    "last": "2026-10-21",
@@ -46516,8 +46534,7 @@
      "Johnny Flynn"
     ]
    },
-   "fpv": 2,
-   "archivedOn": "2026-10-27"
+   "fpv": 2
   },
   "visa-vintara-saradaga": {
    "last": "2026-10-24",
@@ -50314,8 +50331,7 @@
      "R. Sarathkumar",
      "Abhimanyu Singh"
     ]
-   },
-   "archivedOn": "2026-10-26"
+   }
   },
   "thaainilam": {
    "last": "2026-10-25",
@@ -52587,7 +52603,6 @@
    "rendered": "2026-10-23",
    "fp": "69e2278b7944",
    "fpv": 2,
-   "archivedOn": "2026-10-26",
    "pv": 13,
    "imdb": "",
    "fcs": {
@@ -53344,7 +53359,16 @@
    "title": "Father",
    "rendered": "2026-10-26",
    "fp": "3a1acd1b5d8f",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "imdb": "tt32263178",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "phony": {
    "last": "2026-10-27",
@@ -60726,7 +60750,7 @@
    "srAt": "2026-10-27"
   },
   "south-park": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 2190,
    "released": "1997-08-13",
    "lang": "English",
@@ -60756,7 +60780,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-27"
   },
   "slow-horses": {
    "last": "2026-10-22",
@@ -72439,7 +72464,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "ccf91fcae340",
+   "fp": "d0a12044a235",
    "rendered": "2026-10-14",
    "archivedOn": "2026-10-18",
    "swept": "2026-10-27",
@@ -72463,7 +72488,11 @@
     ]
    },
    "imdb": "tt32261958",
-   "fpv": 2
+   "fpv": 2,
+   "digital": {
+    "date": "2026-10-27",
+    "note": ""
+   }
   },
   "jurassic-world-rebirth": {
    "last": "2026-10-27",
@@ -98652,7 +98681,7 @@
     "at": "2026-10-21",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "truth": {
     "at": "2026-10-24",
     "providers": [
@@ -98674,7 +98703,8 @@
      "Etienne Guillou-Kervern"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27"
   },
   "bitter-christmas": {
    "last": "2026-10-19",
@@ -104260,7 +104290,6 @@
    "rendered": "2026-10-27",
    "fp": "c29560b904f7",
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "pv": 13,
    "live": {
     "since": "2026-10-27",
@@ -106411,7 +106440,7 @@
    "fpv": 2
   },
   "the-dog-stars": {
-   "last": "2026-10-18",
+   "last": "2026-10-27",
    "pv": 13,
    "tmdbId": 1384216,
    "released": "2026-08-26",
@@ -106426,12 +106455,14 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "dbc568458ff3",
+   "fp": "18c22bfd09d7",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-10-27",
     "providers": [],
-    "rentBuy": [],
+    "rentBuy": [
+     "Amazon Video"
+    ],
     "released": "2026-08-26",
     "title": "The Dog Stars",
     "language": "English",
@@ -107215,7 +107246,9 @@
     ]
    },
    "imdb": "tt2431250",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "nirvanna-the-band-the-show-the-movie": {
    "last": "2026-10-25",
@@ -107425,7 +107458,9 @@
    "fp": "5e3859795b0d",
    "rendered": "2026-10-12",
    "imdb": "tt34675596",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "jana-nayagan": {
    "last": "2026-10-18",
@@ -107641,7 +107676,9 @@
     ]
    },
    "imdb": "tt35051401",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "pinocchio-unstrung": {
    "last": "2026-10-18",
@@ -109089,7 +109126,9 @@
    "fp": "29dae6472626",
    "rendered": "2026-10-13",
    "imdb": "tt9892936",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "insidious-out-of-the-further": {
    "last": "2026-10-24",
@@ -109506,7 +109545,9 @@
     ]
    },
    "imdb": "tt36955608",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "dookudu": {
    "last": "2026-10-22",
@@ -109790,7 +109831,9 @@
      "Daniel Quinn-Toye",
      "Keen Ruffalo"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "vishwanath-sons": {
    "last": "2026-10-18",
@@ -110419,7 +110462,9 @@
    "fp": "d988d99ff015",
    "rendered": "2026-10-12",
    "imdb": "tt31260386",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "dark-matter": {
    "last": "2026-10-22",
@@ -110735,7 +110780,9 @@
     ]
    },
    "imdb": "tt36996011",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-gentlemen": {
    "last": "2026-10-22",
@@ -110845,7 +110892,7 @@
    "kind": "movie",
    "title": "Runner",
    "pv": 13,
-   "last": "2026-10-26",
+   "last": "2026-10-27",
    "archivedOn": "2026-10-02",
    "swept": "2026-10-27",
    "fcs": {
@@ -110854,13 +110901,15 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "ab8a0aef98d3",
+   "fp": "ac0ed38d6b69",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-10-27",
     "providers": [],
     "rentBuy": [
-     "Amazon Video"
+     "Apple TV Store",
+     "Amazon Video",
+     "Sky Store"
     ],
     "released": "2026-09-11",
     "title": "Runner",
@@ -111623,7 +111672,9 @@
     ]
    },
    "imdb": "tt44974627",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "drawn-together": {
    "last": "2026-10-27",
@@ -111993,7 +112044,9 @@
      "Matthijs van de Sande Bakhuyzen"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "a-love-other-than-yours": {
    "last": "2026-10-25",
@@ -112042,7 +112095,10 @@
     ]
    },
    "imdb": "tt43736405",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   },
   "v": {
    "last": "2026-10-25",
@@ -112085,7 +112141,7 @@
    "imdb": "tt38775487"
   },
   "south-park": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 2190,
    "released": "1997-08-13",
    "lang": "English",
@@ -112114,7 +112170,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-27"
   },
   "slow-horses": {
    "last": "2026-10-23",
@@ -112978,7 +113035,10 @@
      "Luann de Lesseps"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "sesame-street": {
    "last": "2026-10-22",
@@ -113430,7 +113490,9 @@
      "Ruth Connell"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "breaking-bad": {
    "last": "2026-10-25",
@@ -115674,7 +115736,10 @@
      "Miriam Margolyes"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "american-horror-story": {
    "last": "2026-10-24",
@@ -115819,7 +115884,9 @@
      "Elizabeth Tulloch"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-scandal": {
    "last": "2026-10-18",
@@ -117986,7 +118053,10 @@
      "Brian Tee"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "seal-team": {
    "last": "2026-10-27",
@@ -120067,7 +120137,10 @@
      "Rachel Dratch"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-01"
   },
   "agatha-christie-s-poirot": {
    "last": "2026-10-22",
@@ -120344,7 +120417,9 @@
      "Richard Beymer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "outlander": {
    "last": "2026-10-25",
@@ -121560,7 +121635,10 @@
      "Ronny Chieng"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "the-office": {
    "last": "2026-10-22",
@@ -123310,7 +123388,9 @@
      "Chad Michael Murray"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "fbi": {
    "last": "2026-10-23",
@@ -124805,7 +124885,9 @@
      "Richard Sammel"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "star-trek-the-next-generation": {
    "last": "2026-10-23",
@@ -125590,7 +125672,9 @@
      "Aaron Staton"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "star-trek-deep-space-nine": {
    "last": "2026-10-23",
@@ -125702,7 +125786,9 @@
      "Ben Whishaw"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "er": {
    "last": "2026-10-25",
@@ -126494,7 +126580,9 @@
      "Ian Peck"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "heroes": {
    "last": "2026-10-23",
@@ -126647,7 +126735,9 @@
      "Nick E. Tarabay"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "tulsa-king": {
    "last": "2026-10-23",
@@ -127625,7 +127715,9 @@
      "Paul G. Raymond"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "bonanza": {
    "last": "2026-10-24",
@@ -127787,7 +127879,9 @@
      "Gary LeRoi Gray"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "band-of-brothers": {
    "last": "2026-10-24",
@@ -128009,7 +128103,9 @@
      "Christoph Sanders"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-middle": {
    "last": "2026-10-24",
@@ -129143,7 +129239,9 @@
      "Johnny Seven"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "peppa-pig": {
    "last": "2026-10-24",
@@ -129201,7 +129299,9 @@
      "David Graham"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-dick-cavett-show": {
    "last": "2026-10-24",
@@ -129411,7 +129511,9 @@
      "Casey Cott"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-expanse": {
    "last": "2026-10-24",
@@ -130526,7 +130628,9 @@
      "Robyn Millan"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-king-of-queens": {
    "last": "2026-10-22",
@@ -130800,7 +130904,9 @@
      "Jeff Garlin"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "private-practice": {
    "last": "2026-10-25",
@@ -131695,7 +131801,10 @@
      "Joey Fatone"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-29"
   },
   "my-little-pony-friendship-is-magic": {
    "last": "2026-10-25",
@@ -131813,7 +131922,9 @@
      "Charlie Weber"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-crown": {
    "last": "2026-10-22",
@@ -132083,7 +132194,9 @@
      "Troy Evans"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "weeds": {
    "last": "2026-10-25",
@@ -132250,7 +132363,9 @@
      "Lucky Yates"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "bullet-train": {
    "last": "2026-10-25",
@@ -132634,7 +132749,9 @@
      "Bill Quinn",
      "John Milford"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "entourage": {
    "last": "2026-10-26",
@@ -132854,7 +132971,9 @@
      "Luke Mitchell"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-alfred-hitchcock-hour": {
    "last": "2026-10-22",
@@ -132904,7 +133023,9 @@
      "Carmen Phillips",
      "Mary Scott"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "star-trek-enterprise": {
    "last": "2026-10-26",
@@ -133065,7 +133186,9 @@
      "Audra McDonald",
      "Delroy Lindo"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "everwood": {
    "last": "2026-10-25",
@@ -133172,7 +133295,9 @@
      "Miles Brown",
      "Peter MacKenzie"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "banshee": {
    "last": "2026-10-27",
@@ -133228,7 +133353,9 @@
      "Ulrich Thomsen",
      "Matt Servitto"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "have-i-got-news-for-you": {
    "last": "2026-10-25",
@@ -133905,7 +134032,9 @@
      "Matthew Rhys",
      "Ron Rifkin"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "american-experience": {
    "last": "2026-10-26",
@@ -133958,7 +134087,9 @@
      "Oliver Platt",
      "Liev Schreiber"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "qi": {
    "last": "2026-10-22",
@@ -134010,7 +134141,10 @@
      "Phill Jupitus",
      "Jimmy Carr"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-03"
   },
   "the-orville": {
    "last": "2026-10-26",
@@ -134278,7 +134412,9 @@
      "Bob Hastings",
      "Efrem Zimbalist Jr."
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "dexter-s-laboratory": {
    "last": "2026-10-26",
@@ -135528,7 +135664,9 @@
      "Krys Marshall",
      "Shantel VanSanten"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "heartland": {
    "last": "2026-10-27",
@@ -135694,7 +135832,9 @@
      "Kendall Jenner",
      "Kylie Jenner"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hell-s-kitchen": {
    "last": "2026-10-27",
@@ -136977,7 +137117,9 @@
    "fp": "7c5736b8f14c",
    "rendered": "2026-10-12",
    "imdb": "tt0108778",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "terminator-2-judgment-day": {
    "last": "2026-10-23",
@@ -137465,7 +137607,9 @@
    "fp": "91fa51590565",
    "rendered": "2026-10-11",
    "imdb": "tt1845307",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "batman-begins": {
    "last": "2026-10-25",
@@ -137673,7 +137817,9 @@
      "Brandon Routh"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "run-sweetheart-run": {
    "last": "2026-10-22",
@@ -138097,7 +138243,9 @@
    "fp": "2fde2d2544f1",
    "rendered": "2026-10-13",
    "imdb": "tt9140554",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "shrek-forever-after": {
    "last": "2026-10-22",
@@ -138553,7 +138701,9 @@
    "fp": "c1b1be02675e",
    "rendered": "2026-10-13",
    "imdb": "tt1826940",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "fast-furious-presents-hobbs-shaw": {
    "last": "2026-10-25",
@@ -138912,7 +139062,9 @@
     ]
    },
    "imdb": "tt36857537",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "get-out": {
    "last": "2026-10-22",
@@ -139033,7 +139185,9 @@
    "fp": "4f4bf1cc396f",
    "rendered": "2026-10-12",
    "imdb": "tt0077000",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "a-working-man": {
    "last": "2026-10-22",
@@ -139091,7 +139245,10 @@
    "fp": "b9faac065e37",
    "rendered": "2026-10-13",
    "imdb": "tt5622316",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-15"
   },
   "man-of-steel": {
    "last": "2026-10-22",
@@ -139214,7 +139371,9 @@
    "fp": "61f48238240b",
    "rendered": "2026-10-11",
    "imdb": "tt0092312",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "medusa": {
    "last": "2026-10-22",
@@ -139361,7 +139520,9 @@
    "fp": "8968643e6cc3",
    "rendered": "2026-10-12",
    "imdb": "tt3749900",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-conjuring-last-rites": {
    "last": "2026-10-22",
@@ -139668,7 +139829,9 @@
    "fp": "64171aa7de48",
    "rendered": "2026-10-13",
    "imdb": "tt0972534",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "sonic-the-hedgehog": {
    "last": "2026-10-25",
@@ -139838,7 +140001,9 @@
    "fp": "aacba436a73f",
    "rendered": "2026-10-11",
    "imdb": "tt0162065",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "beauty-and-the-beast": {
    "last": "2026-10-24",
@@ -140058,7 +140223,9 @@
    "fp": "fe0c4dd487ac",
    "rendered": "2026-10-13",
    "imdb": "tt0374455",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "thor": {
    "last": "2026-10-24",
@@ -140228,7 +140395,9 @@
    "fp": "b4fb42e6c7c2",
    "rendered": "2026-10-13",
    "imdb": "tt0103484",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "evil-dead-rise": {
    "last": "2026-10-27",
@@ -140824,7 +140993,9 @@
    "fp": "8a2ca7c73df4",
    "rendered": "2026-10-13",
    "imdb": "tt1942683",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-little-mermaid": {
    "last": "2026-10-24",
@@ -141331,7 +141502,9 @@
    "fp": "9b8ef0451254",
    "rendered": "2026-10-13",
    "imdb": "tt12677870",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "nosferatu": {
    "last": "2026-10-22",
@@ -141390,7 +141563,9 @@
    "fp": "02ac3a935f31",
    "rendered": "2026-10-14",
    "imdb": "tt0053502",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "doing-life": {
    "last": "2026-10-18",
@@ -141532,7 +141707,9 @@
    "fp": "0b876b93c387",
    "rendered": "2026-10-12",
    "imdb": "tt3228904",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "basic-instinct": {
    "last": "2026-10-27",
@@ -141671,7 +141848,9 @@
    "fp": "085386f543da",
    "rendered": "2026-10-13",
    "imdb": "tt7767422",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "ice-age-dawn-of-the-dinosaurs": {
    "last": "2026-10-25",
@@ -141957,7 +142136,9 @@
    "fp": "f9dd59ed6640",
    "rendered": "2026-10-13",
    "imdb": "tt0106057",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "spaceballs": {
    "last": "2026-10-22",
@@ -142097,7 +142278,9 @@
    "fp": "9cde552f674b",
    "rendered": "2026-10-13",
    "imdb": "tt1416765",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "die-hard": {
    "last": "2026-10-24",
@@ -142358,7 +142541,9 @@
    "fp": "66580cd036a1",
    "rendered": "2026-10-12",
    "imdb": "tt5827228",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "top-gun": {
    "last": "2026-10-25",
@@ -144785,7 +144970,9 @@
    "fp": "b595a93940a7",
    "rendered": "2026-10-13",
    "imdb": "tt0300865",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-social-reckoning": {
    "last": "2026-10-27",
@@ -147264,7 +147451,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-30"
+   "epNext": "2026-10-30",
+   "archivedOn": "2026-10-27"
   },
   "whalefall": {
    "last": "2026-10-25",
@@ -147677,7 +147865,10 @@
    },
    "rel": 3,
    "imdb": "tt31289994",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "masterplan": {
    "last": "2026-10-27",
@@ -147688,7 +147879,24 @@
    "title": "Masterplan",
    "rendered": "2026-10-16",
    "fp": "4fec0689a9b6",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt38672588",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "tenzing": {
    "last": "2026-10-24",
@@ -147984,7 +148192,9 @@
      "Martin Kamm"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "mouthwashing-the-film": {
    "last": "2026-10-21",
@@ -148200,7 +148410,6 @@
      "Kong Lin"
     ]
    },
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -148525,7 +148734,6 @@
     ]
    },
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -149319,14 +149527,14 @@
    "rel": 2
   },
   "la-bola-negra": {
-   "last": "2026-10-26",
+   "last": "2026-10-27",
    "tmdbId": 1422041,
    "released": "2026-11-06",
    "lang": "Spanish",
    "kind": "movie",
-   "title": "LA BOLA NEGRA",
+   "title": "La bola negra",
    "rendered": "2026-10-25",
-   "fp": "09f6cfefd4c7",
+   "fp": "775864d701cf",
    "fpv": 2
   },
   "the-cycle": {
@@ -149354,8 +149562,7 @@
     "at": "2026-10-27",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-27"
+   "rel": 3
   },
   "golmaal-5": {
    "last": "2026-10-25",
@@ -149403,7 +149610,10 @@
     "at": "2026-10-27",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   }
  },
  "au": {
@@ -151389,7 +151599,9 @@
      "Marisha Ray",
      "Travis Willingham"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-mandalorian-and-grogu": {
    "pv": 13,
@@ -152160,7 +152372,9 @@
    "fp": "25c2f9ebf6f8",
    "rendered": "2026-10-14",
    "imdb": "tt36034547",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "ice-skater": {
    "last": "2026-10-22",
@@ -152311,7 +152525,9 @@
     ]
    },
    "imdb": "tt2431250",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "young-washington": {
    "last": "2026-10-24",
@@ -152476,7 +152692,7 @@
    "fpv": 2
   },
   "the-dog-stars": {
-   "last": "2026-10-18",
+   "last": "2026-10-27",
    "pv": 13,
    "tmdbId": 1384216,
    "released": "2026-08-27",
@@ -152491,12 +152707,14 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "fp": "ade4c8b6be8b",
+   "fp": "5194cb2d96fd",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-10-27",
     "providers": [],
-    "rentBuy": [],
+    "rentBuy": [
+     "Amazon Video"
+    ],
     "released": "2026-08-27",
     "title": "The Dog Stars",
     "language": "English",
@@ -152918,7 +153136,9 @@
     ]
    },
    "imdb": "tt30494226",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "tom-and-jerry-forbidden-compass": {
    "last": "2026-10-25",
@@ -153208,7 +153428,9 @@
    "fp": "a3e5e7c2321d",
    "rendered": "2026-10-13",
    "fpv": 2,
-   "imdb": "tt28088031"
+   "imdb": "tt28088031",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "elite-force": {
    "last": "2026-10-23",
@@ -153257,7 +153479,9 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt35495063"
+   "imdb": "tt35495063",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-debt-collector": {
    "last": "2026-10-23",
@@ -154049,7 +154273,9 @@
    "fp": "e889dd898017",
    "rendered": "2026-10-13",
    "imdb": "tt9892936",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "batman-caped-crusader": {
    "last": "2026-10-27",
@@ -154101,7 +154327,9 @@
      "Gary Anthony Williams",
      "John DiMaggio"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "my-life-with-the-walter-boys": {
    "last": "2026-10-23",
@@ -154337,7 +154565,9 @@
      "Daniel Quinn-Toye",
      "Keen Ruffalo"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "coyote-vs-acme": {
    "last": "2026-10-24",
@@ -155153,7 +155383,9 @@
    "fp": "f224054bc608",
    "rendered": "2026-10-12",
    "imdb": "tt31260386",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "practical-magic-2": {
    "last": "2026-10-27",
@@ -155644,7 +155876,7 @@
    "kind": "movie",
    "title": "Runner",
    "pv": 13,
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "swept": "2026-10-27",
    "archivedOn": "2026-10-01",
    "fcs": {
@@ -155653,12 +155885,14 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "b9df216e3570",
+   "fp": "7c80d159a6be",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-10-27",
     "providers": [],
-    "rentBuy": [],
+    "rentBuy": [
+     "Amazon Video"
+    ],
     "released": "2026-09-10",
     "title": "Runner",
     "language": "English",
@@ -155931,7 +156165,9 @@
      "Jenson Button"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "irumudi": {
    "last": "2026-10-25",
@@ -156409,7 +156645,9 @@
      "Matthijs van de Sande Bakhuyzen"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "go-team": {
    "last": "2026-10-23",
@@ -156462,7 +156700,7 @@
    "imdb": "tt38616652"
   },
   "south-park": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 2190,
    "released": "1997-08-13",
    "lang": "English",
@@ -156489,7 +156727,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-27"
   },
   "slow-horses": {
    "last": "2026-10-23",
@@ -157349,7 +157588,10 @@
      "Luann de Lesseps"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "sesame-street": {
    "last": "2026-10-23",
@@ -157681,7 +157923,9 @@
      "Jeff Fischer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "law-order-special-victims-unit": {
    "last": "2026-10-27",
@@ -158677,7 +158921,9 @@
      "John Francis Daley"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "house": {
    "last": "2026-10-23",
@@ -161058,7 +161304,9 @@
      "Carter Young"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "teen-titans-go": {
    "last": "2026-10-23",
@@ -163504,7 +163752,9 @@
      "Tracie Thoms"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "death-in-paradise": {
    "last": "2026-10-27",
@@ -167405,7 +167655,9 @@
      "David Schwimmer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "one-tree-hill": {
    "last": "2026-10-25",
@@ -168869,7 +169121,9 @@
      "Richard Sammel"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "star-trek-the-next-generation": {
    "last": "2026-10-23",
@@ -169639,7 +169893,9 @@
      "Robin Weigert"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "mad-men": {
    "last": "2026-10-23",
@@ -169698,7 +169954,9 @@
      "Aaron Staton"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "murder-she-wrote": {
    "last": "2026-10-22",
@@ -169802,7 +170060,9 @@
      "Armin Shimerman"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "fargo": {
    "last": "2026-10-25",
@@ -170683,7 +170943,9 @@
      "Donna Mills"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "spartacus": {
    "last": "2026-10-27",
@@ -170739,7 +171001,9 @@
      "Nick E. Tarabay"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-closer": {
    "last": "2026-10-25",
@@ -171606,7 +171870,9 @@
      "Brandon Routh"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "star-wars-the-clone-wars": {
    "last": "2026-10-24",
@@ -171658,7 +171924,9 @@
      "Matthew Wood"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-practice": {
    "last": "2026-10-24",
@@ -171924,7 +172192,10 @@
      "Ismael Cruz Cordova"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-11"
   },
   "black-mirror": {
    "last": "2026-10-25",
@@ -173171,7 +173442,9 @@
      "Beau Wirick"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "tracker": {
    "last": "2026-10-25",
@@ -174706,7 +174979,10 @@
      "George H. Xanthis"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-15"
   },
   "30-rock": {
    "last": "2026-10-23",
@@ -174983,7 +175259,9 @@
      "O-T Fagbenle"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "parks-and-recreation": {
    "last": "2026-10-27",
@@ -176077,7 +176355,9 @@
      "Chris Noth"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hot-ones": {
    "last": "2026-10-22",
@@ -176127,7 +176407,10 @@
      "Joey Fatone"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-29"
   },
   "my-little-pony-friendship-is-magic": {
    "last": "2026-10-25",
@@ -176240,7 +176523,9 @@
      "Roma Maffia"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "how-to-get-away-with-murder": {
    "last": "2026-10-25",
@@ -176293,7 +176578,9 @@
      "Charlie Weber"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-crown": {
    "last": "2026-10-23",
@@ -176618,7 +176905,9 @@
      "Madison Lintz",
      "Troy Evans"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "weeds": {
    "last": "2026-10-26",
@@ -176728,7 +177017,9 @@
      "Paul W. Downs",
      "Megan Stalter"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "archer": {
    "last": "2026-10-23",
@@ -176781,7 +177072,9 @@
      "Aisha Tyler",
      "Lucky Yates"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "murdoch-mysteries": {
    "last": "2026-10-26",
@@ -176950,7 +177243,9 @@
      "Peter Jurasik",
      "Stephen Furst"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "entourage": {
    "last": "2026-10-26",
@@ -177005,7 +177300,9 @@
      "Jeremy Piven",
      "Rex Lee"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-wire": {
    "last": "2026-10-26",
@@ -177061,7 +177358,9 @@
      "Deirdre Lovejoy",
      "John Doman"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "true-blood": {
    "last": "2026-10-26",
@@ -177224,7 +177523,9 @@
      "Dominic Keating",
      "Linda Park"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hill-street-blues": {
    "last": "2026-10-26",
@@ -178044,7 +178345,9 @@
      "Andy Hallett",
      "Amy Acker"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "veronica-mars": {
    "last": "2026-10-22",
@@ -178203,7 +178506,9 @@
      "Ivonne Coll",
      "Jaime Camil"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "brothers-and-sisters": {
    "last": "2026-10-26",
@@ -178417,7 +178722,9 @@
      "Peter Macon",
      "J. Lee"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "you": {
    "last": "2026-10-27",
@@ -178628,7 +178935,9 @@
      "Bob Hastings",
      "Efrem Zimbalist Jr."
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-hunger-games-mockingjay-part-2": {
    "last": "2026-10-26",
@@ -179358,7 +179667,9 @@
      "Candi Milo",
      "Allison Moore"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "six-feet-under": {
    "last": "2026-10-27",
@@ -179468,7 +179779,9 @@
      "Sharif Atkins",
      "Marsha Thomason"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "kim-possible": {
    "last": "2026-10-27",
@@ -179680,7 +179993,9 @@
      "Matt Burnett",
      "Phil LaMarr"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "for-all-mankind": {
    "last": "2026-10-27",
@@ -179838,7 +180153,9 @@
      "Carl Weathers",
      "Emily Swallow"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "keeping-up-with-the-kardashians": {
    "last": "2026-10-27",
@@ -179895,7 +180212,9 @@
      "Kendall Jenner",
      "Kylie Jenner"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hell-s-kitchen": {
    "last": "2026-10-27",
@@ -180886,7 +181205,9 @@
      "Kedar Williams-Stirling",
      "Connor Swindells"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "cobra-kai": {
    "last": "2026-10-23",
@@ -180938,7 +181259,9 @@
      "Tanner Buchanan",
      "Mary Mouser"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "marvel-s-daredevil": {
    "last": "2026-10-27",
@@ -180992,7 +181315,9 @@
      "Royce Johnson",
      "Geoffrey Cantor"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "house-of-cards": {
    "last": "2026-10-27",
@@ -181046,7 +181371,9 @@
      "Derek Cecil",
      "Mahershala Ali"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "revenge": {
    "last": "2026-10-22",
@@ -181253,7 +181580,9 @@
      "Nikki M. James",
      "Arty Froushan"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "star-trek-discovery": {
    "last": "2026-10-27",
@@ -181307,7 +181636,9 @@
      "Wilson Cruz",
      "Emily Coutts"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hey-arnold": {
    "last": "2026-10-27",
@@ -182081,7 +182412,9 @@
      "Moosa Mostafa",
      "Georgie Farmer"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-o-c": {
    "last": "2026-10-27",
@@ -182138,7 +182471,9 @@
      "Melinda Clarke",
      "Rachel Bilson"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-americans": {
    "last": "2026-10-27",
@@ -182242,7 +182577,9 @@
      "Neve Campbell",
      "Krista Warner"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "bull": {
    "last": "2026-10-27",
@@ -182511,7 +182848,9 @@
      "Kari Wahlgren"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "parenthood": {
    "last": "2026-10-27",
@@ -182673,7 +183012,9 @@
      "Kate Micucci",
      "Beck Bennett"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-night-agent": {
    "last": "2026-10-23",
@@ -182829,7 +183170,9 @@
      "Sally Pressman"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "lie-to-me": {
    "last": "2026-10-22",
@@ -183976,7 +184319,9 @@
      "Charnele Brown",
      "Glynn Turman"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "law-order-organized-crime": {
    "last": "2026-10-22",
@@ -184177,7 +184522,9 @@
      "Madonna",
      "LL Cool J"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "succession": {
    "last": "2026-10-27",
@@ -184926,7 +185273,10 @@
      "Diane Farr",
      "Stephanie Arcila"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "highlander-the-series": {
    "last": "2026-10-22",
@@ -184984,7 +185334,9 @@
    "fp": "ed5a45b6b4b1",
    "rendered": "2026-10-12",
    "imdb": "tt3551096",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "damages": {
    "last": "2026-10-22",
@@ -185106,7 +185458,9 @@
    "fp": "7c3e49f85dcc",
    "rendered": "2026-10-14",
    "imdb": "tt0758790",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "charlie-s-angels": {
    "last": "2026-10-22",
@@ -185377,7 +185731,9 @@
    "fp": "6ba42fff268b",
    "rendered": "2026-10-14",
    "imdb": "tt14016500",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "home-alone-2-lost-in-new-york": {
    "last": "2026-10-22",
@@ -185644,7 +186000,9 @@
    "fp": "7712f493abcf",
    "rendered": "2026-10-13",
    "imdb": "tt22202452",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "peacemaker": {
    "last": "2026-10-22",
@@ -185675,7 +186033,9 @@
    "fp": "48333f367dc3",
    "rendered": "2026-10-13",
    "imdb": "tt13146488",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "landman": {
    "last": "2026-10-23",
@@ -185945,7 +186305,9 @@
    "fp": "059c5a683470",
    "rendered": "2026-10-13",
    "imdb": "tt0275140",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "modern-family": {
    "last": "2026-10-22",
@@ -186753,7 +187115,9 @@
    "fp": "5aa6e8b4481c",
    "rendered": "2026-10-13",
    "imdb": "tt1843230",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "ratatouille": {
    "last": "2026-10-25",
@@ -186872,13 +187236,13 @@
    "fpv": 2
   },
   "la-bola-negra": {
-   "last": "2026-10-26",
+   "last": "2026-10-27",
    "tmdbId": 1422041,
    "released": "2026-10-15",
    "lang": "Spanish",
    "kind": "movie",
-   "title": "LA BOLA NEGRA",
-   "fp": "2920af7ac114",
+   "title": "La bola negra",
+   "fp": "8fd8f88ca3ec",
    "pv": 13,
    "fcs": {
     "v": "Worth a watch",
@@ -187361,7 +187725,10 @@
    "fp": "2bc9081ef3ee",
    "rendered": "2026-10-12",
    "imdb": "tt22091076",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2027-01-06"
   },
   "catch-me-if-you-can": {
    "last": "2026-10-27",
@@ -187783,7 +188150,9 @@
    "fp": "2066c2de2501",
    "rendered": "2026-10-14",
    "imdb": "tt2712740",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-mummy": {
    "last": "2026-10-27",
@@ -187902,7 +188271,9 @@
    "fp": "722f30f80f50",
    "rendered": "2026-10-13",
    "imdb": "tt0106079",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-shining": {
    "last": "2026-10-22",
@@ -188396,7 +188767,9 @@
    "fp": "57d362525171",
    "rendered": "2026-10-13",
    "imdb": "tt1567432",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-prestige": {
    "last": "2026-10-22",
@@ -189218,7 +189591,9 @@
    "fp": "3f60e930205e",
    "rendered": "2026-10-13",
    "imdb": "tt0460091",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "no-time-to-die": {
    "last": "2026-10-22",
@@ -189596,7 +189971,9 @@
    "fp": "54ff875ba539",
    "rendered": "2026-10-11",
    "imdb": "tt10323338",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-good-dinosaur": {
    "last": "2026-10-22",
@@ -189838,7 +190215,9 @@
    "fp": "86298610e891",
    "rendered": "2026-10-12",
    "imdb": "tt5761496",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "red-queen": {
    "last": "2026-10-27",
@@ -190489,7 +190868,9 @@
    "fp": "7a8928a64e56",
    "rendered": "2026-10-14",
    "imdb": "tt1043813",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "doing-life": {
    "last": "2026-10-23",
@@ -191003,7 +191384,9 @@
    "fp": "301851241df7",
    "rendered": "2026-10-14",
    "imdb": "tt5057054",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-bride": {
    "last": "2026-10-25",
@@ -191602,7 +191985,10 @@
     ]
    },
    "imdb": "tt33406999",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-01"
   },
   "scooby-doo-mystery-incorporated": {
    "last": "2026-10-23",
@@ -191634,7 +192020,9 @@
    "fp": "2b6556144c27",
    "rendered": "2026-10-13",
    "imdb": "tt1660055",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "death-of-a-unicorn": {
    "last": "2026-10-25",
@@ -192022,7 +192410,9 @@
    "fp": "dd343c963d1d",
    "rendered": "2026-10-14",
    "imdb": "tt3288518",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-emperor-s-new-groove": {
    "last": "2026-10-22",
@@ -194251,7 +194641,10 @@
    },
    "rel": 3,
    "imdb": "tt31289994",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "masterplan": {
    "last": "2026-10-27",
@@ -194262,7 +194655,24 @@
    "title": "Masterplan",
    "rendered": "2026-10-16",
    "fp": "4fec0689a9b6",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt38672588",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "tenzing": {
    "last": "2026-10-19",
@@ -194634,7 +195044,9 @@
      "Martin Kamm"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "mouthwashing-the-film": {
    "last": "2026-10-18",
@@ -195044,7 +195456,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -195834,7 +196245,8 @@
     "w": 8
    },
    "rel": 3,
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27"
   },
   "kidney": {
    "last": "2026-10-24",
@@ -195873,7 +196285,6 @@
     "w": 8
    },
    "rel": 3,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-30"
@@ -195935,8 +196346,7 @@
     "at": "2026-10-27",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-27"
+   "rel": 3
   },
   "odium-zero": {
    "last": "2026-10-26",
@@ -195947,6 +196357,26 @@
    "title": "Odium Zero",
    "rendered": "2026-10-26",
    "fp": "b866a3147326",
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "imdb": "",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
+  },
+  "will-you-still-be-my-friend": {
+   "last": "2026-10-27",
+   "tmdbId": 1336116,
+   "released": "2026-12-04",
+   "lang": "Chinese",
+   "kind": "movie",
+   "title": "Will You Still Be My Friend",
+   "rendered": "2026-10-27",
+   "fp": "482d9057a194",
    "fpv": 2
   }
  },
@@ -196511,7 +196941,9 @@
    "fp": "c42fd3f24dcd",
    "rendered": "2026-10-12",
    "fpv": 2,
-   "imdb": "tt43638505"
+   "imdb": "tt43638505",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-bear": {
    "last": "2026-10-22",
@@ -198352,7 +198784,10 @@
    "fp": "6fa4bd826b40",
    "rendered": "2026-10-12",
    "fpv": 2,
-   "imdb": "tt37544955"
+   "imdb": "tt37544955",
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "jujutsu-kaisen": {
    "last": "2026-10-27",
@@ -198406,7 +198841,6 @@
     ]
    },
    "fpv": 2,
-   "archivedOn": "2026-10-26",
    "imdb": "tt37427426"
   },
   "bleach": {
@@ -199414,7 +199848,9 @@
     ]
    },
    "imdb": "tt35051401",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "desire": {
    "last": "2026-10-22",
@@ -199655,7 +200091,9 @@
     "genre": "Reality"
    },
    "fpv": 2,
-   "imdb": ""
+   "imdb": "",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-invite": {
    "last": "2026-10-25",
@@ -200624,7 +201062,9 @@
    "fp": "e617fd249f10",
    "rendered": "2026-10-13",
    "imdb": "tt9892936",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "oktagon-93": {
    "last": "2026-10-24",
@@ -200856,7 +201296,9 @@
     ]
    },
    "imdb": "tt36955608",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "paradeisa": {
    "last": "2026-10-25",
@@ -201266,7 +201708,9 @@
      "Daniel Quinn-Toye",
      "Keen Ruffalo"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "pl-tzlich-schwiegervater": {
    "last": "2026-10-25",
@@ -201565,7 +202009,7 @@
    "fpv": 2
   },
   "mutiny": {
-   "last": "2026-10-26",
+   "last": "2026-10-27",
    "tmdbId": 1288445,
    "released": "2026-08-27",
    "lang": "English",
@@ -201580,13 +202024,14 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "fp": "368de9ade376",
+   "fp": "3b7fa1be28af",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-10-27",
     "providers": [],
     "rentBuy": [
      "Amazon Video",
+     "MagentaTV",
      "maxdome Store"
     ],
     "released": "2026-08-27",
@@ -201961,7 +202406,7 @@
    }
   },
   "the-dog-stars": {
-   "last": "2026-10-24",
+   "last": "2026-10-27",
    "tmdbId": 1384216,
    "released": "2026-08-27",
    "lang": "English",
@@ -201976,12 +202421,15 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "fp": "5e67ba48131a",
+   "fp": "1c3af486690d",
    "rendered": "2026-10-14",
    "truth": {
     "at": "2026-10-27",
     "providers": [],
-    "rentBuy": [],
+    "rentBuy": [
+     "Amazon Video",
+     "maxdome Store"
+    ],
     "released": "2026-08-27",
     "title": "The Dog Stars",
     "language": "English",
@@ -202353,7 +202801,9 @@
     "genre": "Documentary"
    },
    "fpv": 2,
-   "imdb": "tt44535947"
+   "imdb": "tt44535947",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "die-pfandhaus-profis": {
    "last": "2026-10-18",
@@ -202393,7 +202843,9 @@
     "genre": "Documentary"
    },
    "fpv": 2,
-   "imdb": ""
+   "imdb": "",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "monster-mia": {
    "last": "2026-10-24",
@@ -202878,7 +203330,9 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt44912333"
+   "imdb": "tt44912333",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "mayday": {
    "last": "2026-10-25",
@@ -203503,7 +203957,9 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt38956012"
+   "imdb": "tt38956012",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "drawn-together": {
    "last": "2026-10-27",
@@ -203928,7 +204384,7 @@
    "fpv": 2
   },
   "south-park": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 2190,
    "released": "1997-08-13",
    "lang": "English",
@@ -203955,7 +204411,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-27"
   },
   "hope": {
    "last": "2026-10-23",
@@ -205097,7 +205554,9 @@
     ]
    },
    "imdb": "tt0115088",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "babylon-berlin": {
    "last": "2026-10-22",
@@ -205205,7 +205664,9 @@
     ]
    },
    "imdb": "tt5753856",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "maxton-hall-the-world-between-us": {
    "last": "2026-10-22",
@@ -205312,7 +205773,9 @@
     ]
    },
    "imdb": "tt11269100",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-empress": {
    "last": "2026-10-22",
@@ -206403,7 +206866,10 @@
      "Leslie Hendrix"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-29"
   },
   "teenage-mutant-ninja-turtles": {
    "last": "2026-10-22",
@@ -210520,7 +210986,10 @@
      "Matt Lieb"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "gilmore-girls": {
    "last": "2026-10-25",
@@ -216335,7 +216804,10 @@
     ]
    },
    "imdb": "tt13929916",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2027-03-25"
   },
   "pagan-peak": {
    "last": "2026-10-22",
@@ -224216,7 +224688,9 @@
      "Kai Harris"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "elementary": {
    "last": "2026-10-25",
@@ -226784,7 +227258,9 @@
      "Robin Mossley",
      "Susan Chapple"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "yellowstone": {
    "last": "2026-10-26",
@@ -227117,7 +227593,9 @@
      "Jack Riley",
      "Michael Bell"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "star-trek-deep-space-nine": {
    "last": "2026-10-26",
@@ -227392,7 +227870,10 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt39379365"
+   "imdb": "tt39379365",
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "drive-the-pretenders": {
    "last": "2026-10-22",
@@ -232547,7 +233028,9 @@
    "archivedOn": "2026-10-07",
    "rendered": "2026-10-13",
    "imdb": "tt0285403",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "count-dracula": {
    "last": "2026-10-22",
@@ -235731,7 +236214,9 @@
    "fp": "c67d477c24cc",
    "rendered": "2026-10-14",
    "imdb": "tt1442464",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "22-lengths": {
    "last": "2026-10-25",
@@ -236086,7 +236571,9 @@
    "fp": "29f086bbfab5",
    "rendered": "2026-10-11",
    "imdb": "tt1845307",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "teenage-playmates": {
    "last": "2026-10-22",
@@ -236147,7 +236634,9 @@
    "fp": "f89a00dc3908",
    "rendered": "2026-10-12",
    "fpv": 2,
-   "imdb": "tt32536158"
+   "imdb": "tt32536158",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "twilight": {
    "last": "2026-10-25",
@@ -236437,7 +236926,10 @@
      "Rachel Dratch"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-01"
   },
   "further-confessions-of-a-sixth-form-girl": {
    "last": "2026-10-22",
@@ -238048,7 +238540,10 @@
     ]
    },
    "imdb": "tt43650242",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-01"
   },
   "krabat": {
    "last": "2026-10-25",
@@ -242547,14 +243042,14 @@
    "fpv": 2
   },
   "the-trap": {
-   "last": "2026-10-23",
+   "last": "2026-10-27",
    "tmdbId": 283371,
    "released": "2026-10-13",
    "lang": "German",
    "kind": "tv",
    "title": "The Trap",
    "rendered": "2026-10-15",
-   "fp": "b423f032dadd",
+   "fp": "c79ab73d2bef",
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -242568,7 +243063,16 @@
    "title": "From Inside Out: The Architecture of Peter Zumthor",
    "rendered": "2026-10-15",
    "fp": "f30cf6a9f086",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "imdb": "tt43704808",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "freaks-you-re-one-of-us": {
    "last": "2026-10-22",
@@ -243438,7 +243942,9 @@
    "title": "Friends Sex and Games",
    "rendered": "2026-10-17",
    "fp": "a359a19d2eb6",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "buddy": {
    "last": "2026-10-22",
@@ -243662,7 +244168,7 @@
     "at": "2026-10-21",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "truth": {
     "at": "2026-10-24",
     "providers": [
@@ -243684,7 +244190,8 @@
      "Etienne Guillou-Kervern"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27"
   },
   "die-andere-seite": {
    "last": "2026-10-23",
@@ -244494,8 +245001,7 @@
      "Johnny Flynn"
     ]
    },
-   "fpv": 2,
-   "archivedOn": "2026-10-27"
+   "fpv": 2
   },
   "percy-jackson-and-the-olympians": {
    "last": "2026-10-22",
@@ -249601,7 +250107,6 @@
     "w": 8
    },
    "rel": 3,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -250000,7 +250505,9 @@
    "fp": "d7da704a1ab6",
    "rendered": "2026-10-13",
    "fpv": 2,
-   "imdb": "tt40857820"
+   "imdb": "tt40857820",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "saga-of-tanya-the-evil": {
    "last": "2026-10-25",
@@ -251431,7 +251938,9 @@
    "fp": "6ea23edee5e9",
    "rendered": "2026-10-12",
    "imdb": "tt34675596",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-rookie": {
    "last": "2026-10-25",
@@ -252620,7 +253129,9 @@
    "fp": "34c6316889b0",
    "rendered": "2026-10-13",
    "imdb": "tt9892936",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "batman-caped-crusader": {
    "last": "2026-10-22",
@@ -252648,7 +253159,9 @@
    "fp": "1d25352a0f25",
    "rendered": "2026-10-12",
    "imdb": "tt14681596",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "insidious-out-of-the-further": {
    "last": "2026-10-24",
@@ -253093,7 +253606,9 @@
     ]
    },
    "imdb": "tt36955608",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "vishwanath-sons": {
    "last": "2026-10-18",
@@ -254320,7 +254835,10 @@
     "misses": 0
    },
    "fpv": 2,
-   "imdb": "tt44841089"
+   "imdb": "tt44841089",
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "toxic-a-fairy-tale-for-grown-ups": {
    "last": "2026-10-18",
@@ -255992,7 +256510,9 @@
      "Matthijs van de Sande Bakhuyzen"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "a-love-other-than-yours": {
    "last": "2026-10-25",
@@ -256041,7 +256561,10 @@
      "Lee Min-jae"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   },
   "the-soul-whisperer": {
    "last": "2026-10-24",
@@ -259653,7 +260176,9 @@
      "Ruth Connell"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-vampire-diaries": {
    "last": "2026-10-22",
@@ -266992,7 +267517,9 @@
      "Aazhiya"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "paava-kadhaigal": {
    "last": "2026-10-22",
@@ -269307,7 +269834,9 @@
      "Nitya Mathur"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "leila": {
    "last": "2026-10-22",
@@ -271355,7 +271884,9 @@
    },
    "archivedOn": "2026-10-20",
    "fpv": 2,
-   "imdb": "tt46182660"
+   "imdb": "tt46182660",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "harry-potter-and-the-chamber-of-secrets": {
    "last": "2026-10-24",
@@ -273273,7 +273804,9 @@
      "Piyush Sharma"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "kohrra": {
    "last": "2026-10-25",
@@ -276194,7 +276727,9 @@
      "Torrey Hanson",
      "Robin Weigert"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "better-call-saul": {
    "last": "2026-10-22",
@@ -276936,7 +277471,9 @@
      "Satish Kaushik",
      "TJ Bhanu"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "selection-day": {
    "last": "2026-10-22",
@@ -277788,7 +278325,9 @@
      "Kali Prasad Mukherjee",
      "Gautami Kapoor"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "trance": {
    "last": "2026-10-26",
@@ -284246,7 +284785,10 @@
    "fp": "bf689cbadfa7",
    "rendered": "2026-10-14",
    "imdb": "tt1839337",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-02"
   },
   "kal-ho-naa-ho": {
    "last": "2026-10-25",
@@ -284511,7 +285053,9 @@
    "fp": "7218f2c10b43",
    "rendered": "2026-10-14",
    "imdb": "tt0475784",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "awarapan": {
    "last": "2026-10-27",
@@ -285981,7 +286525,9 @@
     ]
    },
    "imdb": "tt36857537",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "iratta": {
    "last": "2026-10-22",
@@ -286459,7 +287005,10 @@
    "fp": "3f4ffc020b14",
    "rendered": "2026-10-14",
    "imdb": "tt16358384",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "jab-tak-hai-jaan": {
    "last": "2026-10-27",
@@ -286836,7 +287385,9 @@
    "fp": "360dd2c64573",
    "rendered": "2026-10-13",
    "imdb": "tt3006802",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "dil-se": {
    "last": "2026-10-22",
@@ -293456,7 +294007,9 @@
    "fp": "b54da39bb8ba",
    "rendered": "2026-10-12",
    "imdb": "tt4270492",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "tehran": {
    "last": "2026-10-22",
@@ -294673,7 +295226,9 @@
    },
    "rel": 3,
    "fpv": 2,
-   "imdb": ""
+   "imdb": "",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "one-battle-after-another": {
    "last": "2026-10-22",
@@ -295095,7 +295650,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-30"
+   "epNext": "2026-10-30",
+   "archivedOn": "2026-10-27"
   },
   "dsp": {
    "last": "2026-10-22",
@@ -296629,7 +297185,9 @@
      "Efrem Zimbalist Jr."
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "love-of-your-life": {
    "last": "2026-10-22",
@@ -297206,11 +297764,11 @@
    },
    "imdb": "tt38672588",
    "fcs": {
-    "v": "early",
-    "at": "2026-10-18",
-    "w": 6
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "truth": {
     "at": "2026-10-24",
     "providers": [
@@ -297232,7 +297790,8 @@
      "Etienne Guillou-Kervern"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27"
   },
   "rakhi": {
    "last": "2026-10-22",
@@ -297898,8 +298457,9 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "rel": 2,
-   "fpv": 2
+   "rel": 3,
+   "fpv": 2,
+   "archivedOn": "2026-10-27"
   },
   "itllu-arjuna": {
    "last": "2026-10-19",
@@ -299540,7 +300100,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-26",
    "imdb": "tt36154131"
   },
   "the-grinch": {
@@ -303125,7 +303684,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -303336,7 +303894,9 @@
    "title": "Apsara",
    "rendered": "2026-10-23",
    "fp": "56ef180e746b",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hope": {
    "last": "2026-10-23",
@@ -303709,7 +304269,9 @@
    "title": "Varam",
    "rendered": "2026-10-25",
    "fp": "58fe4bc6668f",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "golmaal-5": {
    "last": "2026-10-25",
@@ -303820,7 +304382,16 @@
    "title": "The Dome Sessions",
    "rendered": "2026-10-26",
    "fp": "9dc7cc03b013",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "imdb": "",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "final-table": {
    "last": "2026-10-27",
@@ -303830,9 +304401,8 @@
    "kind": "tv",
    "title": "Final Table",
    "rendered": "2026-10-27",
-   "fp": "45c5e3ff89b2",
+   "fp": "a56d7c9ffce2",
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "pv": 13,
    "live": {
     "since": "2026-10-27",
@@ -303848,7 +304418,21 @@
     "at": "2026-10-27",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
+  },
+  "haindava": {
+   "last": "2026-10-27",
+   "tmdbId": 1417808,
+   "released": "2026-11-27",
+   "lang": "Telugu",
+   "kind": "movie",
+   "title": "Haindava",
+   "rendered": "2026-10-27",
+   "fp": "60256e649746",
+   "fpv": 2
   }
  },
  "ca": {
@@ -303903,7 +304487,9 @@
      "Sarah Clarke"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "83": {
    "last": "2026-10-22",
@@ -305397,7 +305983,6 @@
    },
    "imdb": "tt27419466",
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "live": {
     "since": "2026-10-27",
     "providers": [
@@ -305992,7 +306577,9 @@
     ]
    },
    "imdb": "tt35051401",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "i-will-find-you": {
    "last": "2026-10-22",
@@ -307480,7 +308067,9 @@
    "fp": "bc88b2c24836",
    "rendered": "2026-10-13",
    "fpv": 2,
-   "imdb": "tt8323628"
+   "imdb": "tt8323628",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "operation-safed-sagar-the-highest-air-force-mission": {
    "last": "2026-10-18",
@@ -308005,7 +308594,9 @@
     ]
    },
    "imdb": "tt36955608",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "romin": {
    "last": "2026-10-25",
@@ -309250,7 +309841,9 @@
    "fp": "3eb8103ab289",
    "rendered": "2026-10-12",
    "imdb": "tt31260386",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "just-an-illusion": {
    "last": "2026-10-23",
@@ -310731,7 +311324,7 @@
    "srAt": "2026-10-27"
   },
   "south-park": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 2190,
    "released": "1997-08-13",
    "lang": "English",
@@ -310758,7 +311351,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-27"
   },
   "slow-horses": {
    "last": "2026-10-22",
@@ -313031,7 +313625,10 @@
      "SUGA"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "the-mentalist": {
    "last": "2026-10-22",
@@ -315155,7 +315752,9 @@
      "Chad Michael Murray"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hari-ka-om": {
    "last": "2026-10-25",
@@ -316364,7 +316963,9 @@
      "Ginnifer Goodwin"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "jimmy-kimmel-live": {
    "last": "2026-10-22",
@@ -316633,7 +317234,9 @@
      "David Schwimmer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "shameless": {
    "last": "2026-10-22",
@@ -316862,7 +317465,10 @@
      "Jesse Lee Soffer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "best-of-the-best": {
    "last": "2026-10-18",
@@ -320780,7 +321386,9 @@
      "Himanshi Choudhry"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-ba-ds-of-bollywood": {
    "last": "2026-10-25",
@@ -325644,7 +326252,10 @@
      "Matt Lieb"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "s-w-a-t": {
    "last": "2026-10-25",
@@ -329421,7 +330032,9 @@
      "Marina Sirtis"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-west-wing": {
    "last": "2026-10-25",
@@ -329743,7 +330356,9 @@
     ]
    },
    "imdb": "tt0105986",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-boys": {
    "last": "2026-10-25",
@@ -331503,7 +332118,9 @@
      "Will Nye"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "vikings": {
    "last": "2026-10-25",
@@ -331553,7 +332170,9 @@
      "Peter Franzén",
      "Alex Høgh Andersen"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "star-trek-voyager": {
    "last": "2026-10-26",
@@ -331929,7 +332548,9 @@
      "Olivia Olson",
      "Niki Yang"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "student-of-the-year-2": {
    "last": "2026-10-26",
@@ -335143,7 +335764,9 @@
      "Jack McBrayer",
      "Scott Adsit"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "medium": {
    "last": "2026-10-23",
@@ -335252,7 +335875,9 @@
      "Atticus Shaffer",
      "Beau Wirick"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "boston-legal": {
    "last": "2026-10-27",
@@ -337191,7 +337816,9 @@
      "Jeremy Piven",
      "Rex Lee"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "miami-vice": {
    "last": "2026-10-27",
@@ -339247,7 +339874,9 @@
    "fp": "bc89d041ddd9",
    "rendered": "2026-10-14",
    "imdb": "tt0898266",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-king-of-queens": {
    "last": "2026-10-22",
@@ -339422,7 +340051,9 @@
    "fp": "0c94c7ec8bba",
    "rendered": "2026-10-13",
    "imdb": "tt0115341",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "true-detective": {
    "last": "2026-10-22",
@@ -340281,7 +340912,9 @@
    "fp": "1d26bdab22a6",
    "rendered": "2026-10-14",
    "imdb": "tt11905720",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-lord-of-the-rings-the-fellowship-of-the-ring": {
    "last": "2026-10-22",
@@ -340630,7 +341263,9 @@
    "fp": "dd26892b3f73",
    "rendered": "2026-10-12",
    "imdb": "tt3032476",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "toaster": {
    "last": "2026-10-22",
@@ -342996,12 +343631,12 @@
    "fpv": 2
   },
   "la-bola-negra": {
-   "last": "2026-10-26",
+   "last": "2026-10-27",
    "tmdbId": 1422041,
    "released": "2026-10-23",
    "lang": "Spanish",
    "kind": "movie",
-   "title": "LA BOLA NEGRA",
+   "title": "La bola negra",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -343009,7 +343644,7 @@
     "w": 8
    },
    "rel": 2,
-   "fp": "836f4c9a31e2",
+   "fp": "9ed3539b14b2",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-10-17",
@@ -343155,7 +343790,9 @@
    "fp": "4c43e96f147e",
    "rendered": "2026-10-14",
    "imdb": "tt5171438",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "shehzada": {
    "last": "2026-10-22",
@@ -343403,7 +344040,9 @@
    "fp": "d33eff243fe3",
    "rendered": "2026-10-14",
    "imdb": "tt2661044",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "pooja-meri-jaan": {
    "last": "2026-10-16",
@@ -343571,7 +344210,9 @@
    "fp": "cb87d8b6287e",
    "rendered": "2026-10-13",
    "imdb": "tt0437745",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "inspector-zende": {
    "last": "2026-10-25",
@@ -344321,7 +344962,9 @@
    "fp": "6b1faed7cb14",
    "rendered": "2026-10-14",
    "imdb": "tt0362359",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "an-action-hero": {
    "last": "2026-10-22",
@@ -348393,7 +349036,9 @@
    "fp": "0b0a0d47fe5c",
    "rendered": "2026-10-13",
    "imdb": "tt27502465",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "kapoor-sons": {
    "last": "2026-10-22",
@@ -351359,7 +352004,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-30"
+   "epNext": "2026-10-30",
+   "archivedOn": "2026-10-27"
   },
   "the-cleaning-lady": {
    "last": "2026-10-22",
@@ -353908,7 +354554,7 @@
    "kind": "movie",
    "title": "Coward",
    "rendered": "2026-10-17",
-   "fp": "a6efdc051336",
+   "fp": "c227bf061687",
    "fpv": 2
   },
   "santa-claude": {
@@ -358398,8 +359044,7 @@
     "w": 8
    },
    "rel": 3,
-   "fpv": 2,
-   "archivedOn": "2026-10-27"
+   "fpv": 2
   },
   "the-real-housewives-of-beverly-hills": {
    "last": "2026-10-22",
@@ -359640,7 +360285,10 @@
     "at": "2026-10-27",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   }
  },
  "sg": {
@@ -360257,7 +360905,9 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt36872458"
+   "imdb": "tt36872458",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "love-has-fireworks": {
    "last": "2026-10-22",
@@ -360307,7 +360957,9 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt28131816"
+   "imdb": "tt28131816",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "dog-man": {
    "last": "2026-10-25",
@@ -360355,7 +361007,9 @@
      "Hsieh Ying-shiuan",
      "Jack Yao"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "double-occupancy": {
    "last": "2026-10-22",
@@ -361938,7 +362592,9 @@
     ]
    },
    "imdb": "tt30494226",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "heartstopper-forever": {
    "last": "2026-10-18",
@@ -362026,7 +362682,9 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt36596650"
+   "imdb": "tt36596650",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "a-shop-for-killers": {
    "last": "2026-10-27",
@@ -362126,7 +362784,9 @@
     ]
    },
    "imdb": "tt35051401",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "resident-evil": {
    "last": "2026-10-22",
@@ -363031,7 +363691,9 @@
      "Maria Adelaida Puerta",
      "Juanita Molina"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "paw-patrol-the-dino-movie": {
    "last": "2026-10-18",
@@ -363114,7 +363776,9 @@
    "fp": "b36d557d75d8",
    "rendered": "2026-10-12",
    "imdb": "tt14681596",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-last-house": {
    "last": "2026-10-18",
@@ -363213,7 +363877,9 @@
      "Daniel Quinn-Toye",
      "Keen Ruffalo"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-shards": {
    "pv": 13,
@@ -363292,7 +363958,9 @@
      "Jeon Bae-soo",
      "Seo Jeong-yeon"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "secret-file": {
    "last": "2026-10-18",
@@ -364068,7 +364736,9 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt35964684"
+   "imdb": "tt35964684",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "facing-el-chapo": {
    "last": "2026-10-25",
@@ -364246,7 +364916,9 @@
      "Steven G. Norfleet"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "practical-magic-2": {
    "last": "2026-10-27",
@@ -364417,7 +365089,9 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt37231342"
+   "imdb": "tt37231342",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "make-zhonghe-great-again": {
    "last": "2026-10-19",
@@ -364502,7 +365176,10 @@
     ]
    },
    "imdb": "tt43595727",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "the-love-hypothesis": {
    "last": "2026-10-27",
@@ -364820,7 +365497,9 @@
     "misses": 0
    },
    "fpv": 2,
-   "imdb": "tt36982718"
+   "imdb": "tt36982718",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-gentlemen": {
    "last": "2026-10-22",
@@ -365968,7 +366647,9 @@
      "Matthijs van de Sande Bakhuyzen"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "against-the-current": {
    "last": "2026-10-18",
@@ -367826,7 +368507,9 @@
     ]
    },
    "imdb": "tt31887832",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "scissor-seven": {
    "last": "2026-10-22",
@@ -367877,7 +368560,9 @@
      "Liu Xiaoqian"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hidden-love": {
    "last": "2026-10-22",
@@ -368656,7 +369341,10 @@
      "SUGA"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "the-mentalist": {
    "last": "2026-10-22",
@@ -368867,7 +369555,9 @@
      "Jeff Fischer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "law-order-special-victims-unit": {
    "last": "2026-10-27",
@@ -371029,7 +371719,9 @@
      "Chad Michael Murray"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-office": {
    "last": "2026-10-22",
@@ -371136,7 +371828,9 @@
      "Ginnifer Goodwin"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-blacklist": {
    "last": "2026-10-22",
@@ -371837,7 +372531,9 @@
     "misses": 0
    },
    "imdb": "tt39495239",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-scandal": {
    "last": "2026-10-27",
@@ -371966,7 +372662,10 @@
     ]
    },
    "imdb": "tt43736405",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   },
   "spider-man-homecoming": {
    "last": "2026-10-22",
@@ -374470,7 +375169,9 @@
      "Kai Harris"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "karuppu": {
    "last": "2026-10-27",
@@ -376105,7 +376806,9 @@
      "Finn Han"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "revenged-love": {
    "last": "2026-10-22",
@@ -376205,7 +376908,9 @@
      "Shuxin Wan"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "only-for-love": {
    "last": "2026-10-22",
@@ -378594,7 +379299,9 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt23139038"
+   "imdb": "tt23139038",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "love-like-the-galaxy": {
    "last": "2026-10-23",
@@ -378800,7 +379507,9 @@
      "Lian Yiming"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "legend-of-the-female-general": {
    "last": "2026-10-22",
@@ -378902,7 +379611,9 @@
      "Umin Boya"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "love-s-ambition": {
    "last": "2026-10-22",
@@ -381806,7 +382517,9 @@
      "Xu Lu"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "release-that-witch": {
    "last": "2026-10-22",
@@ -384061,7 +384774,9 @@
      "Umin Boya"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "bloodivores": {
    "last": "2026-10-22",
@@ -384112,7 +384827,9 @@
      "Su Shangqing"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "everyone-loves-me": {
    "last": "2026-10-25",
@@ -384520,7 +385237,9 @@
      "Zhai Zilu"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "agent-from-above": {
    "last": "2026-10-22",
@@ -387969,7 +388688,9 @@
      "Cole Hauser",
      "Kelsey Asbille"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "er": {
    "last": "2026-10-25",
@@ -388070,7 +388791,9 @@
      "JB Smoove",
      "Richard Lewis"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-voice": {
    "last": "2026-10-22",
@@ -389745,7 +390468,9 @@
      "Yen Yi-wen",
      "Chang Han"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "stay-with-me": {
    "last": "2026-10-22",
@@ -389895,7 +390620,9 @@
      "Ding Ning"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "gg-precinct": {
    "last": "2026-10-22",
@@ -390095,7 +390822,9 @@
      "Jinwen Chen",
      "Zhao Mingzhou"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "million-follower-detective": {
    "last": "2026-10-22",
@@ -391229,7 +391958,9 @@
      "Jack McBrayer",
      "Scott Adsit"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-middle": {
    "last": "2026-10-22",
@@ -391280,7 +392011,9 @@
      "Atticus Shaffer",
      "Beau Wirick"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "boston-legal": {
    "last": "2026-10-27",
@@ -391331,7 +392064,9 @@
      "René Auberjonois",
      "Julie Bowen"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-outer-limits": {
    "last": "2026-10-27",
@@ -394195,7 +394930,10 @@
    "fp": "2de0ae312dd1",
    "rendered": "2026-10-13",
    "imdb": "tt3513388",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "annaatthe": {
    "last": "2026-10-22",
@@ -395130,7 +395868,9 @@
    "fp": "41cb63551688",
    "rendered": "2026-10-13",
    "imdb": "tt15381716",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "django-unchained": {
    "last": "2026-10-22",
@@ -395340,7 +396080,10 @@
    "fp": "f27c9ff3f416",
    "rendered": "2026-10-12",
    "imdb": "tt2805096",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "aalavandhan": {
    "last": "2026-10-22",
@@ -396262,7 +397005,9 @@
    "archivedOn": "2026-10-07",
    "rendered": "2026-10-13",
    "imdb": "tt0285403",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "raayan": {
    "last": "2026-10-27",
@@ -397040,7 +397785,9 @@
    "fp": "f12aa1fc62d8",
    "rendered": "2026-10-13",
    "imdb": "tt2442560",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "inji-iduppazhagi": {
    "last": "2026-10-22",
@@ -397228,7 +397975,10 @@
    "fp": "ba8a77cefb37",
    "rendered": "2026-10-14",
    "imdb": "tt16358384",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "kanchana-3": {
    "last": "2026-10-22",
@@ -397721,7 +398471,9 @@
    "fp": "c25215f0079d",
    "rendered": "2026-10-14",
    "imdb": "tt2661044",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "ethir-neechal": {
    "last": "2026-10-22",
@@ -399521,7 +400273,9 @@
    "fp": "2fe4395e302d",
    "rendered": "2026-10-14",
    "imdb": "tt0106080",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "biriyani": {
    "last": "2026-10-22",
@@ -403130,7 +403884,9 @@
    "fp": "aae8344d2464",
    "rendered": "2026-10-14",
    "imdb": "tt1358522",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "pokkiri": {
    "last": "2026-10-22",
@@ -403868,7 +404624,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-30"
+   "epNext": "2026-10-30",
+   "archivedOn": "2026-10-27"
   },
   "furious-7": {
    "last": "2026-10-25",
@@ -404204,7 +404961,9 @@
    "fp": "8d77134eacc9",
    "rendered": "2026-10-12",
    "imdb": "tt0103359",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "pariyerum-perumal": {
    "last": "2026-10-22",
@@ -404430,7 +405189,9 @@
     "misses": 0
    },
    "imdb": "tt44922907",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "classmates-minus": {
    "last": "2026-10-25",
@@ -405298,7 +406059,10 @@
    "title": "The Lament of Autumn",
    "rendered": "2026-10-14",
    "fp": "2982541edd9a",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "whalefall": {
    "last": "2026-10-26",
@@ -406535,7 +407299,10 @@
    },
    "rel": 3,
    "imdb": "tt31289994",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "drones": {
    "last": "2026-10-24",
@@ -406903,8 +407670,7 @@
    },
    "rel": 3,
    "fpv": 2,
-   "imdb": "tt6262770",
-   "archivedOn": "2026-10-27"
+   "imdb": "tt6262770"
   },
   "snow-white-and-the-seven-dwarfs": {
    "last": "2026-10-22",
@@ -407708,7 +408474,9 @@
      "Liu Qiushi"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-brandos": {
    "last": "2026-10-25",
@@ -409014,8 +409782,10 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "rel": 2,
-   "fpv": 2
+   "rel": 3,
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "imdb": "tt35433995"
   },
   "kaavalan": {
    "last": "2026-10-25",
@@ -412889,7 +413659,9 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "imdb": "tt37421560"
+   "imdb": "tt37421560",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "lupin": {
    "last": "2026-10-26",
@@ -413227,7 +413999,10 @@
    "title": "Tigers Sniff the Rose",
    "rendered": "2026-10-26",
    "fp": "c3b9491cae8c",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "film-1726805": {
    "last": "2026-10-26",
@@ -413296,7 +414071,21 @@
     "at": "2026-10-27",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
+  },
+  "bisikan": {
+   "last": "2026-10-27",
+   "tmdbId": 1797513,
+   "released": "2026-11-19",
+   "lang": "Malay",
+   "kind": "movie",
+   "title": "Bisikan",
+   "rendered": "2026-10-27",
+   "fp": "60dd3ee0aab9",
+   "fpv": 2
   }
  },
  "my": {
@@ -413807,7 +414596,9 @@
     ]
    },
    "fpv": 2,
-   "imdb": "tt35052365"
+   "imdb": "tt35052365",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-early-spring": {
    "last": "2026-10-26",
@@ -415888,7 +416679,9 @@
      "Liu Duanduan"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "pursuit-of-jade": {
    "last": "2026-10-22",
@@ -416043,7 +416836,9 @@
      "Yuan Ye"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hidden-love": {
    "last": "2026-10-22",
@@ -416198,7 +416993,9 @@
      "Charles Lin"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-untamed": {
    "last": "2026-10-22",
@@ -416250,7 +417047,9 @@
      "Yu Bin"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "love-o2o": {
    "last": "2026-10-25",
@@ -416300,7 +417099,9 @@
     ]
    },
    "imdb": "tt6055498",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "find-yourself": {
    "last": "2026-10-22",
@@ -416351,7 +417152,9 @@
      "Yang Zhiying"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-fixers": {
    "last": "2026-10-27",
@@ -416379,7 +417182,9 @@
     "misses": 0
    },
    "imdb": "tt39495239",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "futurama": {
    "last": "2026-10-22",
@@ -416458,7 +417263,10 @@
     "misses": 0
    },
    "imdb": "tt43595727",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "project-hail-mary": {
    "last": "2026-10-25",
@@ -417399,7 +418207,9 @@
      "Ruth Connell"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "criminal-minds": {
    "last": "2026-10-22",
@@ -421023,7 +421833,9 @@
      "Zhao Wei"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "perfect-match": {
    "last": "2026-10-22",
@@ -421073,7 +421885,9 @@
      "Wu Xuanyi"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "shine-on-me": {
    "last": "2026-10-22",
@@ -421126,7 +421940,9 @@
      "Finn Han"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "revenged-love": {
    "last": "2026-10-22",
@@ -421277,7 +422093,9 @@
      "Shen Yujie"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "love-in-the-clouds": {
    "last": "2026-10-27",
@@ -421328,7 +422146,9 @@
      "Zhu Lilan"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "fireworks-of-my-heart": {
    "last": "2026-10-27",
@@ -421429,7 +422249,9 @@
      "Tong Yao"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "i-am-nobody": {
    "last": "2026-10-22",
@@ -421480,7 +422302,9 @@
      "Wanyan Luorong"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "veil-of-shadows": {
    "last": "2026-10-25",
@@ -421530,7 +422354,9 @@
      "Wu Han"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "love-like-the-galaxy": {
    "last": "2026-10-22",
@@ -421583,7 +422409,9 @@
      "Li Yunrui"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "rosebush-pruning": {
    "last": "2026-10-22",
@@ -423717,7 +424545,9 @@
      "Li Lu"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "eternal-love": {
    "last": "2026-10-23",
@@ -423870,7 +424700,9 @@
      "He Hongshan"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "lighter-and-princess": {
    "last": "2026-10-22",
@@ -423920,7 +424752,9 @@
      "Qian Didi"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-double": {
    "last": "2026-10-22",
@@ -424019,7 +424853,9 @@
      "Tang Zhenchao"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-long-ballad": {
    "last": "2026-10-22",
@@ -424171,7 +425007,9 @@
      "Tong Xiqiao"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "amidst-a-snowstorm-of-love": {
    "last": "2026-10-23",
@@ -424224,7 +425062,9 @@
      "Wang Jiaxuan"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "love-game-in-eastern-fantasy": {
    "last": "2026-10-23",
@@ -424327,7 +425167,9 @@
      "Zhang Chi"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "when-i-fly-towards-you": {
    "last": "2026-10-22",
@@ -424429,7 +425271,9 @@
      "Wang Hongyi"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "best-of-the-best": {
    "last": "2026-10-18",
@@ -425574,7 +426418,9 @@
      "Chi McBride"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "chicago-p-d": {
    "last": "2026-10-25",
@@ -425626,7 +426472,10 @@
      "Jesse Lee Soffer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "smallville": {
    "last": "2026-10-24",
@@ -425790,7 +426639,9 @@
      "David Schwimmer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "brothers": {
    "last": "2026-10-20",
@@ -427370,7 +428221,9 @@
      "Lai Yi"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-princess-royal": {
    "last": "2026-10-22",
@@ -427423,7 +428276,9 @@
      "He Qiu"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-vendetta-of-an": {
    "last": "2026-10-25",
@@ -427472,7 +428327,9 @@
      "Xu Lu"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "had-i-not-seen-the-sun": {
    "last": "2026-10-22",
@@ -427521,7 +428378,9 @@
      "Umin Boya"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-blood-of-youth": {
    "last": "2026-10-27",
@@ -427571,7 +428430,9 @@
      "Flora Dai"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "blossoms-in-adversity": {
    "last": "2026-10-22",
@@ -427621,7 +428482,9 @@
      "Yang Minna"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "put-your-head-on-my-shoulder": {
    "last": "2026-10-25",
@@ -427674,7 +428537,9 @@
      "Zhou Zixin"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-princess-weiyoung": {
    "last": "2026-10-22",
@@ -427877,7 +428742,9 @@
      "Xu Kaining"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "you-are-my-hero": {
    "last": "2026-10-27",
@@ -427927,7 +428794,9 @@
      "Zhang Yao"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-lost-tomb": {
    "last": "2026-10-22",
@@ -428081,7 +428950,9 @@
      "Chen Yi-wen"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-king-s-avatar": {
    "last": "2026-10-25",
@@ -428132,7 +429003,9 @@
      "Zhai Zilu"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "bloodivores": {
    "last": "2026-10-22",
@@ -429054,7 +429927,9 @@
      "Gary Jones"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "stranger-things": {
    "last": "2026-10-25",
@@ -431117,7 +431992,9 @@
      "Lin Mei-shiu",
      "Tan Ai-chen"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-starry-love": {
    "last": "2026-10-22",
@@ -434918,7 +435795,9 @@
      "JB Smoove",
      "Richard Lewis"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "peaky-blinders": {
    "last": "2026-10-22",
@@ -435071,7 +435950,9 @@
      "Josh Dallas",
      "Ginnifer Goodwin"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "ninjago-masters-of-spinjitzu": {
    "last": "2026-10-27",
@@ -435121,7 +436002,9 @@
      "Kirby Morrow",
      "Sam Vincent"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "tulsa-king": {
    "last": "2026-10-22",
@@ -435170,7 +436053,10 @@
      "Dana Delany",
      "Chris Caldovino"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "fringe": {
    "last": "2026-10-27",
@@ -435323,7 +436209,9 @@
      "Paul Johansson",
      "Chad Michael Murray"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "jilla": {
    "last": "2026-10-25",
@@ -436999,7 +437887,9 @@
      "Justin Hartley",
      "Susan Kelechi Watson"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "gossip-girl": {
    "last": "2026-10-25",
@@ -437253,7 +438143,9 @@
     ]
    },
    "imdb": "tt0460644",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "marvel-s-agents-of-s-h-i-e-l-d": {
    "last": "2026-10-25",
@@ -437303,7 +438195,9 @@
      "Iain De Caestecker",
      "Henry Simmons"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "peppa-pig": {
    "last": "2026-10-26",
@@ -437357,7 +438251,9 @@
      "Morwenna Banks",
      "David Graham"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "malcolm-in-the-middle": {
    "last": "2026-10-25",
@@ -437407,7 +438303,9 @@
      "Christopher Masterson"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "riverdale": {
    "last": "2026-10-22",
@@ -437561,7 +438459,9 @@
      "Lindsey Morgan",
      "Richard Harmon"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "nota": {
    "last": "2026-10-27",
@@ -438161,7 +439061,9 @@
    "fp": "6e8924320e6a",
    "rendered": "2026-10-13",
    "imdb": "tt1826940",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "orange-is-the-new-black": {
    "last": "2026-10-22",
@@ -438190,7 +439092,9 @@
    "fp": "3052cdcf4fdb",
    "rendered": "2026-10-13",
    "imdb": "tt2372162",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "high-potential": {
    "last": "2026-10-22",
@@ -438239,7 +439143,10 @@
      "Amirah J"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2027-01-06"
   },
   "the-handmaid-s-tale": {
    "last": "2026-10-25",
@@ -438268,7 +439175,9 @@
    "fp": "87dd0dee9939",
    "rendered": "2026-10-13",
    "imdb": "tt5834204",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "loki": {
    "last": "2026-10-22",
@@ -438356,7 +439265,9 @@
    "fp": "f055db0b851d",
    "rendered": "2026-10-13",
    "imdb": "tt0898266",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-king-of-queens": {
    "last": "2026-10-22",
@@ -438446,7 +439357,9 @@
    "fp": "356a343f5992",
    "rendered": "2026-10-11",
    "imdb": "tt1845307",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "community": {
    "last": "2026-10-27",
@@ -438690,7 +439603,9 @@
    "fp": "08b982eb6f02",
    "rendered": "2026-10-13",
    "imdb": "tt4786824",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "off-campus": {
    "last": "2026-10-22",
@@ -438739,7 +439654,9 @@
      "Antonio Cipriano"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-wire": {
    "last": "2026-10-22",
@@ -439015,7 +439932,9 @@
    "fp": "9f7627e7b49d",
    "rendered": "2026-10-13",
    "imdb": "tt1442449",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-lord-of-the-rings-the-rings-of-power": {
    "last": "2026-10-25",
@@ -439044,7 +439963,10 @@
    "fp": "05555dd0352a",
    "rendered": "2026-10-13",
    "imdb": "tt7631058",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-11"
   },
   "my-little-pony-friendship-is-magic": {
    "last": "2026-10-25",
@@ -439074,7 +439996,9 @@
    "fp": "c97ebe53783e",
    "rendered": "2026-10-13",
    "imdb": "tt1751105",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "bosch": {
    "last": "2026-10-22",
@@ -439104,7 +440028,9 @@
    "fp": "0b452878b973",
    "rendered": "2026-10-12",
    "imdb": "tt3502248",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "tracker": {
    "last": "2026-10-25",
@@ -439642,7 +440568,9 @@
    "fp": "91d2a320538c",
    "rendered": "2026-10-13",
    "imdb": "tt32849226",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "harry-potter-and-the-philosopher-s-stone": {
    "last": "2026-10-22",
@@ -442496,7 +443424,9 @@
    "fp": "5743616aefe0",
    "rendered": "2026-10-13",
    "imdb": "tt5675620",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "vaathi": {
    "last": "2026-10-25",
@@ -442572,7 +443502,9 @@
    },
    "archivedOn": "2026-10-20",
    "imdb": "tt44922907",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "secrets-in-the-hot-spring": {
    "last": "2026-10-22",
@@ -444429,7 +445361,9 @@
    "fp": "fb670ae7c7a1",
    "rendered": "2026-10-12",
    "imdb": "tt3398228",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "biriyani": {
    "last": "2026-10-22",
@@ -446487,7 +447421,10 @@
    "fp": "aa289dd8e79c",
    "rendered": "2026-10-13",
    "imdb": "tt11712058",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2027-01-15"
   },
   "demonte-colony-2": {
    "last": "2026-10-22",
@@ -448206,7 +449143,9 @@
    "fp": "7dfbff5a918c",
    "rendered": "2026-10-13",
    "imdb": "tt0784896",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "chithha": {
    "last": "2026-10-22",
@@ -448660,7 +449599,9 @@
    "fp": "d3362b4b9022",
    "rendered": "2026-10-12",
    "imdb": "tt7713450",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "oh-my-kadavule": {
    "last": "2026-10-22",
@@ -449758,7 +450699,10 @@
     "w": 8
    },
    "fpv": 2,
-   "imdb": ""
+   "imdb": "",
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "doctor-x-mafia-in-white": {
    "last": "2026-10-27",
@@ -449809,7 +450753,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-30"
+   "epNext": "2026-10-30",
+   "archivedOn": "2026-10-27"
   },
   "100-days-of-deception": {
    "last": "2026-10-27",
@@ -451641,7 +452586,10 @@
    },
    "rel": 3,
    "imdb": "tt31289994",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "scooby-doo-mystery-incorporated": {
    "last": "2026-10-22",
@@ -451965,7 +452913,24 @@
    "title": "Masterplan",
    "rendered": "2026-10-16",
    "fp": "4fec0689a9b6",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt38672588",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "tenzing": {
    "last": "2026-10-19",
@@ -452752,7 +453717,9 @@
      "Liu Qiushi"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-age-of-goodbyes": {
    "last": "2026-10-25",
@@ -455987,7 +456954,10 @@
     "lastCheck": "2026-10-25",
     "misses": 0
    },
-   "rel": 2
+   "rel": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-01"
   },
   "star-wars-rebels": {
    "last": "2026-10-22",
@@ -458185,7 +459155,10 @@
    "title": "Tigers Sniff the Rose",
    "rendered": "2026-10-25",
    "fp": "c287d41f65ce",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "surviving-hurricane-otis": {
    "last": "2026-10-27",
@@ -458212,7 +459185,8 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-27"
   },
   "golmaal-5": {
    "last": "2026-10-25",
@@ -458292,9 +459266,8 @@
    "kind": "tv",
    "title": "Final Table",
    "rendered": "2026-10-27",
-   "fp": "45c5e3ff89b2",
+   "fp": "a56d7c9ffce2",
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "pv": 13,
    "live": {
     "since": "2026-10-27",
@@ -458310,7 +459283,10 @@
     "at": "2026-10-27",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   }
  },
  "ph": {
@@ -458752,7 +459728,9 @@
     "misses": 0
    },
    "fpv": 2,
-   "imdb": "tt41793323"
+   "imdb": "tt41793323",
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "four-hands-two-sonatas": {
    "last": "2026-10-19",
@@ -458880,7 +459858,9 @@
     ]
    },
    "imdb": "tt36996011",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-gentlemen": {
    "last": "2026-10-22",
@@ -460096,7 +461076,9 @@
      "Jo Yuri"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "weak-hero": {
    "last": "2026-10-22",
@@ -460198,7 +461180,9 @@
      "Yu Jun-sang"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "bloodhounds": {
    "last": "2026-10-22",
@@ -460352,7 +461336,9 @@
      "Lee Su-mi"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "taxi-driver": {
    "last": "2026-10-22",
@@ -460405,7 +461391,9 @@
      "Yoo Seung-mok"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "dr-romantic": {
    "last": "2026-10-22",
@@ -460556,7 +461544,9 @@
      "Moon Sook"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "mushoku-tensei-jobless-reincarnation": {
    "last": "2026-10-22",
@@ -461258,7 +462248,10 @@
      "Leslie Hendrix"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-29"
   },
   "the-tonight-show-starring-jimmy-fallon": {
    "last": "2026-10-25",
@@ -461307,7 +462300,10 @@
      "SUGA"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "lioness": {
    "last": "2026-10-22",
@@ -461572,7 +462568,9 @@
      "Ruth Connell"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "sesame-street": {
    "last": "2026-10-22",
@@ -461726,7 +462724,9 @@
      "John Francis Daley"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "forgotten": {
    "last": "2026-10-22",
@@ -462334,7 +463334,9 @@
      "Kang Ki-young"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-glory": {
    "last": "2026-10-22",
@@ -462434,7 +463436,9 @@
      "Woo Ji-hyun"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "tale-of-the-nine-tailed": {
    "last": "2026-10-25",
@@ -462545,7 +463549,9 @@
      "Choi Jin-hyuk"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "love-next-door": {
    "last": "2026-10-22",
@@ -462596,7 +463602,9 @@
      "Cho Han-chul"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "reply-1988": {
    "last": "2026-10-22",
@@ -462653,7 +463661,9 @@
      "Ryu Hye-young"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "king-the-land": {
    "last": "2026-10-22",
@@ -462805,7 +463815,9 @@
      "Kim Tae-hun"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "despicable-me": {
    "last": "2026-10-22",
@@ -463542,7 +464554,9 @@
      "Chad Michael Murray"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-flash": {
    "last": "2026-10-22",
@@ -463852,7 +464866,9 @@
      "David Schwimmer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "shake-rattle-roll-evil-origins": {
    "last": "2026-10-25",
@@ -465178,7 +466194,10 @@
      "Lee Jang-woo"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "my-dearest": {
    "last": "2026-10-22",
@@ -465329,7 +466348,9 @@
      "Lee You-mi"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "guardian-the-lonely-and-great-god": {
    "last": "2026-10-22",
@@ -465437,7 +466458,9 @@
      "Shin Hyun-been"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "single-s-inferno": {
    "last": "2026-10-25",
@@ -465539,7 +466562,9 @@
      "Son Hyun-joo"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-penthouse": {
    "last": "2026-10-25",
@@ -468070,7 +469095,9 @@
      "Kim Kap-soo"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "vincenzo": {
    "last": "2026-10-25",
@@ -468172,7 +469199,9 @@
      "Kim Seung-su"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "queen-of-tears": {
    "last": "2026-10-22",
@@ -468222,7 +469251,9 @@
      "Kim Kap-soo"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "empress-ki": {
    "last": "2026-10-25",
@@ -468273,7 +469304,9 @@
      "Jeon Kuk-hwan"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-judge-returns": {
    "last": "2026-10-22",
@@ -469180,7 +470213,10 @@
      "Jesse Lee Soffer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "dexter": {
    "last": "2026-10-22",
@@ -470715,7 +471751,9 @@
      "Jang In-sub"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "descendants-of-the-sun": {
    "last": "2026-10-25",
@@ -470821,7 +471859,9 @@
      "Ahn Chang-hwan"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "d-p": {
    "last": "2026-10-27",
@@ -470872,7 +471912,9 @@
      "Cho Hyun-chul"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "what-s-wrong-with-secretary-kim": {
    "last": "2026-10-24",
@@ -470929,7 +471971,9 @@
      "Kim Byeong-ok"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "can-this-love-be-translated": {
    "last": "2026-10-22",
@@ -470980,7 +472024,9 @@
      "Baek Joo-hee"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "yumi-s-cells": {
    "last": "2026-10-27",
@@ -471135,7 +472181,9 @@
      "Kim So-eun"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "signal": {
    "last": "2026-10-24",
@@ -472579,7 +473627,9 @@
      "Kai Harris"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "seal-team": {
    "last": "2026-10-27",
@@ -474882,7 +475932,9 @@
      "Robin Weigert"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "better-call-saul": {
    "last": "2026-10-22",
@@ -474932,7 +475984,9 @@
      "Michael Mando",
      "Giancarlo Esposito"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "cold-case": {
    "last": "2026-10-26",
@@ -475033,7 +476087,10 @@
      "Kelly Clarkson",
      "Gwen Stefani"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-02"
   },
   "30-rock": {
    "last": "2026-10-22",
@@ -475440,7 +476497,9 @@
      "Jessie Buckley",
      "Ben Whishaw"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "wwe-superstars": {
    "last": "2026-10-22",
@@ -475593,7 +476652,9 @@
      "Finn Cole",
      "Ian Peck"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-big-bang-theory": {
    "last": "2026-10-22",
@@ -475646,7 +476707,9 @@
      "Kunal Nayyar",
      "Melissa Rauch"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hitman-2": {
    "last": "2026-10-22",
@@ -477469,7 +478532,9 @@
      "Paul G. Raymond"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "rizzoli-isles": {
    "last": "2026-10-27",
@@ -477817,7 +478882,9 @@
      "Morwenna Banks",
      "David Graham"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-outer-limits": {
    "last": "2026-10-27",
@@ -477971,7 +479038,9 @@
      "Dascha Polanco"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-100": {
    "last": "2026-10-27",
@@ -478024,7 +479093,9 @@
      "Lindsey Morgan",
      "Richard Harmon"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "supergirl": {
    "last": "2026-10-25",
@@ -478127,7 +479198,9 @@
      "Samira Wiley",
      "O-T Fagbenle"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-chosen": {
    "last": "2026-10-25",
@@ -478281,7 +479354,9 @@
      "Matthew Moy",
      "Jennifer Coolidge"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "blackpink-light-up-the-sky": {
    "last": "2026-10-22",
@@ -480135,7 +481210,9 @@
      "Shelley Hennig",
      "JR Bourne"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "banshee": {
    "last": "2026-10-27",
@@ -480186,7 +481263,9 @@
      "Ulrich Thomsen",
      "Matt Servitto"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-crown": {
    "last": "2026-10-22",
@@ -480236,7 +481315,9 @@
      "Jonathan Pryce",
      "Lesley Manville"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "off-campus": {
    "last": "2026-10-27",
@@ -480286,7 +481367,9 @@
      "Jalen Thomas Brooks",
      "Antonio Cipriano"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-wire": {
    "last": "2026-10-22",
@@ -480389,7 +481472,9 @@
      "Cathy Weseluck",
      "Nicole Oliver"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "bosch": {
    "last": "2026-10-22",
@@ -480650,7 +481735,9 @@
      "Chris Noth"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "invincible": {
    "last": "2026-10-22",
@@ -482551,7 +483638,10 @@
     "misses": 0
    },
    "imdb": "tt43736405",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   },
   "bojack-horseman": {
    "last": "2026-10-25",
@@ -482580,7 +483670,9 @@
    "fp": "552f5fe24793",
    "rendered": "2026-10-12",
    "imdb": "tt3398228",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "archer": {
    "last": "2026-10-22",
@@ -482659,7 +483751,9 @@
    "fp": "ad148b33c1e2",
    "rendered": "2026-10-11",
    "imdb": "tt0103359",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "weeds": {
    "last": "2026-10-22",
@@ -483004,7 +484098,9 @@
    "fp": "639e9cc0d5c8",
    "rendered": "2026-10-12",
    "imdb": "tt1086761",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hacks": {
    "last": "2026-10-22",
@@ -483062,7 +484158,9 @@
    "fp": "938fed8a13f4",
    "rendered": "2026-10-12",
    "imdb": "tt0115157",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "for-all-mankind": {
    "last": "2026-10-25",
@@ -483091,7 +484189,9 @@
    "fp": "26ca161b05d4",
    "rendered": "2026-10-12",
    "imdb": "tt7772588",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "we-bare-bears": {
    "last": "2026-10-25",
@@ -483686,7 +484786,9 @@
    "fp": "d3362b4b9022",
    "rendered": "2026-10-12",
    "imdb": "tt7713450",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "sex-education": {
    "last": "2026-10-22",
@@ -486070,7 +487172,9 @@
    "fp": "f14a60afd15d",
    "rendered": "2026-10-12",
    "imdb": "tt1856010",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-moon": {
    "last": "2026-10-22",
@@ -487730,7 +488834,9 @@
    "fp": "13d108af31f7",
    "rendered": "2026-10-14",
    "imdb": "tt13443470",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "mission-cross": {
    "last": "2026-10-27",
@@ -490574,7 +491680,9 @@
    "fp": "4af1f2df37b2",
    "rendered": "2026-10-14",
    "imdb": "tt5057054",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "always-yours-never-mine": {
    "last": "2026-10-27",
@@ -496610,7 +497718,24 @@
    "title": "Masterplan",
    "rendered": "2026-10-16",
    "fp": "4fec0689a9b6",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt38672588",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "tenzing": {
    "last": "2026-10-21",
@@ -497062,7 +498187,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-26",
    "imdb": ""
   },
   "nowhere-to-lay-my-eyes": {
@@ -497801,7 +498925,9 @@
      "Martin Kamm"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "undercover-high-school": {
    "last": "2026-10-27",
@@ -500088,7 +501214,6 @@
      "Kong Lin"
     ]
    },
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -502581,7 +503706,16 @@
    "title": "7 Days 7 People",
    "rendered": "2026-10-24",
    "fp": "36052d917993",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "imdb": "",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "madagascar-3-europe-s-most-wanted": {
    "last": "2026-10-24",
@@ -502709,7 +503843,8 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-27"
   },
   "final-table": {
    "last": "2026-10-27",
@@ -502737,7 +503872,10 @@
     "at": "2026-10-27",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   },
   "tigers-sniff-the-rose": {
    "last": "2026-10-27",
@@ -502764,7 +503902,11 @@
     "at": "2026-10-27",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-27",
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "status-rejected": {
    "last": "2026-10-26",
@@ -502836,8 +503978,25 @@
    "kind": "tv",
    "title": "Small Town Remedy",
    "rendered": "2026-10-27",
-   "fp": "67c95059f262",
-   "fpv": 2
+   "fp": "5ca7fa00caac",
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Viu"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt38715296",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   }
  },
  "nz": {
@@ -503043,7 +504202,7 @@
    "fpv": 2
   },
   "runner": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 1377237,
    "released": "2026-09-10",
    "lang": "English",
@@ -503058,12 +504217,14 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "b9df216e3570",
+   "fp": "7c80d159a6be",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-10-27",
     "providers": [],
-    "rentBuy": [],
+    "rentBuy": [
+     "Amazon Video"
+    ],
     "released": "2026-09-10",
     "title": "Runner",
     "language": "English",
@@ -503228,7 +504389,7 @@
    "epNext": "2026-10-30"
   },
   "south-park": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 2190,
    "released": "1997-08-13",
    "lang": "English",
@@ -503255,7 +504416,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-27"
   },
   "slow-horses": {
    "last": "2026-10-22",
@@ -506293,7 +507455,9 @@
      "Ginnifer Goodwin"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "guardians-of-the-galaxy-vol-3": {
    "last": "2026-10-22",
@@ -508956,7 +510120,10 @@
      "Ronny Chieng"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "raw": {
    "last": "2026-10-25",
@@ -509117,7 +510284,9 @@
      "John Francis Daley"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "ted-lasso": {
    "last": "2026-10-22",
@@ -510282,7 +511451,9 @@
      "David Schwimmer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "regular-show": {
    "last": "2026-10-25",
@@ -512415,7 +513586,9 @@
      "Richard Sammel"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "lucifer": {
    "last": "2026-10-23",
@@ -513096,7 +514269,9 @@
      "Robin Weigert"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "mad-men": {
    "last": "2026-10-22",
@@ -513152,7 +514327,9 @@
      "Aaron Staton"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "cold-case": {
    "last": "2026-10-23",
@@ -513461,7 +514638,10 @@
      "Rachel Dratch"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-01"
   },
   "cars-2": {
    "last": "2026-10-23",
@@ -514410,7 +515590,9 @@
      "Nick E. Tarabay"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "fringe": {
    "last": "2026-10-24",
@@ -514512,7 +515694,9 @@
      "Richard Lewis"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-big-bang-theory": {
    "last": "2026-10-24",
@@ -514565,7 +515749,9 @@
      "Melissa Rauch"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "buffy-the-vampire-slayer": {
    "last": "2026-10-24",
@@ -515729,7 +516915,10 @@
      "Ismael Cruz Cordova"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-11"
   },
   "euphoria": {
    "last": "2026-10-24",
@@ -516886,7 +518075,9 @@
      "Casey Cott"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-expanse": {
    "last": "2026-10-25",
@@ -517462,7 +518653,9 @@
      "O-T Fagbenle"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "parks-and-recreation": {
    "last": "2026-10-27",
@@ -518224,7 +519417,9 @@
      "JR Bourne"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "invincible": {
    "last": "2026-10-25",
@@ -518429,7 +519624,9 @@
      "Chris Noth"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "hot-ones": {
    "last": "2026-10-25",
@@ -518479,7 +519676,10 @@
      "Joey Fatone"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-29"
   },
   "my-little-pony-friendship-is-magic": {
    "last": "2026-10-25",
@@ -518633,7 +519833,9 @@
      "Charlie Weber"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-crown": {
    "last": "2026-10-23",
@@ -518785,7 +519987,9 @@
      "Antonio Cipriano"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-loud-house": {
    "last": "2026-10-25",
@@ -519638,7 +520842,9 @@
      "Aisha Tyler",
      "Lucky Yates"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "outer-banks": {
    "last": "2026-10-23",
@@ -519738,7 +520944,9 @@
      "Alkaio Thiele",
      "Carter Young"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "murdoch-mysteries": {
    "last": "2026-10-25",
@@ -520967,7 +522175,9 @@
      "Matthew Rhys",
      "Ron Rifkin"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "american-experience": {
    "last": "2026-10-26",
@@ -522449,7 +523659,9 @@
      "Kendall Jenner",
      "Kylie Jenner"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "top-gear": {
    "last": "2026-10-27",
@@ -522964,7 +524176,9 @@
      "Kedar Williams-Stirling",
      "Connor Swindells"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "marvel-s-daredevil": {
    "last": "2026-10-27",
@@ -527565,7 +528779,9 @@
    "fp": "873f7a1d1aa2",
    "rendered": "2026-10-13",
    "imdb": "tt13146488",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "beauty-in-black": {
    "last": "2026-10-23",
@@ -530622,7 +531838,9 @@
     ]
    },
    "imdb": "tt36857537",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-avengers-earth-s-mightiest-heroes": {
    "last": "2026-10-22",
@@ -534152,7 +535370,10 @@
     ]
    },
    "imdb": "tt33406999",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-01"
   },
   "eyes-wide-shut": {
    "last": "2026-10-23",
@@ -539556,7 +540777,10 @@
    },
    "rel": 3,
    "imdb": "tt31289994",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "ramayana-rise-of-a-legend": {
    "last": "2026-10-25",
@@ -539578,7 +540802,24 @@
    "title": "Masterplan",
    "rendered": "2026-10-16",
    "fp": "4fec0689a9b6",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt38672588",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "tenzing": {
    "last": "2026-10-22",
@@ -539989,7 +541230,9 @@
      "Martin Kamm"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "ghost-soldier": {
    "last": "2026-10-26",
@@ -541367,7 +542610,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -541397,7 +542639,8 @@
     "v": "early",
     "at": "2026-10-26",
     "w": 8
-   }
+   },
+   "archivedOn": "2026-10-27"
   },
   "kidney": {
    "last": "2026-10-24",
@@ -541450,6 +542693,26 @@
    "title": "Odium Zero",
    "rendered": "2026-10-26",
    "fp": "b866a3147326",
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "imdb": "",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
+  },
+  "will-you-still-be-my-friend": {
+   "last": "2026-10-27",
+   "tmdbId": 1336116,
+   "released": "2026-12-04",
+   "lang": "Chinese",
+   "kind": "movie",
+   "title": "Will You Still Be My Friend",
+   "rendered": "2026-10-27",
+   "fp": "482d9057a194",
    "fpv": 2
   }
  },
@@ -541944,7 +543207,10 @@
     ]
    },
    "imdb": "tt43736405",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   },
   "reacher": {
    "last": "2026-10-26",
@@ -542147,7 +543413,9 @@
      "Moo Jin-sung"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-gentlemen": {
    "last": "2026-10-22",
@@ -543525,7 +544793,9 @@
      "Yoo Seung-mok"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "dr-romantic": {
    "last": "2026-10-22",
@@ -545914,7 +547184,9 @@
      "Choi Jin-hyuk"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "big-mouth": {
    "last": "2026-10-22",
@@ -548622,7 +549894,9 @@
      "John Francis Daley"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "ted-lasso": {
    "last": "2026-10-22",
@@ -549595,7 +550869,9 @@
      "Lee You-mi"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "guardian-the-lonely-and-great-god": {
    "last": "2026-10-22",
@@ -550558,7 +551834,9 @@
      "David Schwimmer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "chicago-p-d": {
    "last": "2026-10-25",
@@ -551521,7 +552799,9 @@
      "Kim Tae-hun"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "reply-1988": {
    "last": "2026-10-23",
@@ -551576,7 +552856,9 @@
      "Ryu Hye-young"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "king-the-land": {
    "last": "2026-10-22",
@@ -552964,7 +554246,9 @@
      "Ginnifer Goodwin"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "stargate-sg-1": {
    "last": "2026-10-25",
@@ -553015,7 +554299,9 @@
      "Gary Jones"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-good-doctor": {
    "last": "2026-10-22",
@@ -554101,7 +555387,9 @@
      "Kim Byeong-ok"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "once-again": {
    "last": "2026-10-25",
@@ -555715,7 +557003,9 @@
      "Robin Weigert"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "sons-of-anarchy": {
    "last": "2026-10-25",
@@ -558356,7 +559646,9 @@
      "Iain De Caestecker",
      "Henry Simmons"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "outlander": {
    "last": "2026-10-22",
@@ -558406,7 +559698,9 @@
      "Duncan Lacroix"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "wwe-friday-night-smackdown": {
    "last": "2026-10-25",
@@ -558709,7 +560003,9 @@
      "Madelaine Petsch",
      "Casey Cott"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "spartacus": {
    "last": "2026-10-27",
@@ -558799,7 +560095,10 @@
      "Markella Kavenagh",
      "Ismael Cruz Cordova"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-11"
   },
   "ninjago-masters-of-spinjitzu": {
    "last": "2026-10-27",
@@ -560866,7 +562165,9 @@
      "Hannah Simone",
      "Damon Wayans Jr."
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "orange-is-the-new-black": {
    "last": "2026-10-22",
@@ -560916,7 +562217,9 @@
      "Dascha Polanco"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "parks-and-recreation": {
    "last": "2026-10-27",
@@ -561575,7 +562878,9 @@
      "Adam Conover"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "how-to-get-away-with-murder": {
    "last": "2026-10-27",
@@ -563631,7 +564936,9 @@
      "Bob Hastings",
      "Efrem Zimbalist Jr."
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "weeds": {
    "last": "2026-10-22",
@@ -566445,7 +567752,9 @@
      "Shantel VanSanten"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "new-amsterdam": {
    "last": "2026-10-22",
@@ -566503,7 +567812,9 @@
    "fp": "4da7245e1748",
    "rendered": "2026-10-13",
    "imdb": "tt7767422",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "cobra-kai": {
    "last": "2026-10-22",
@@ -566610,7 +567921,9 @@
    "fp": "240c2dc3bcf2",
    "rendered": "2026-10-12",
    "imdb": "tt1856010",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-mandalorian": {
    "last": "2026-10-22",
@@ -568684,7 +569997,9 @@
    "fp": "e4360ed91336",
    "rendered": "2026-10-13",
    "imdb": "tt0212671",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "along-with-the-gods-the-last-49-days": {
    "last": "2026-10-27",
@@ -568965,7 +570280,9 @@
    "fp": "b9def01a9020",
    "rendered": "2026-10-13",
    "imdb": "tt33546863",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "forgotten": {
    "last": "2026-10-22",
@@ -570699,7 +572016,9 @@
    "fp": "e63131e95a7b",
    "rendered": "2026-10-13",
    "imdb": "tt1416765",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "spring-summer-fall-winter-and-spring": {
    "last": "2026-10-22",
@@ -574884,7 +576203,10 @@
     ]
    },
    "imdb": "tt43650242",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-01"
   },
   "the-trauma-code-heroes-on-call": {
    "last": "2026-10-22",
@@ -579886,7 +581208,10 @@
    },
    "rel": 3,
    "imdb": "tt31289994",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "tenzing": {
    "last": "2026-10-22",
@@ -580265,7 +581590,24 @@
    "title": "Masterplan",
    "rendered": "2026-10-16",
    "fp": "4fec0689a9b6",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt38672588",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "a-bug-s-life": {
    "last": "2026-10-27",
@@ -581337,7 +582679,9 @@
      "Martin Kamm"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "ransomed": {
    "last": "2026-10-25",
@@ -583661,7 +585005,6 @@
      "Kong Lin"
     ]
    },
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -585821,7 +587164,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -586666,7 +588008,8 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-27"
   },
   "the-meryl-streep-project": {
    "last": "2026-10-25",
@@ -586760,8 +588103,28 @@
    "kind": "tv",
    "title": "Tigers Sniff the Rose",
    "rendered": "2026-10-27",
-   "fp": "c287d41f65ce",
-   "fpv": 2
+   "fp": "378512629f1e",
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "WeTV"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt35324004",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27",
+   "rel": 3
   }
  },
  "jp": {
@@ -589755,7 +591118,10 @@
     ]
    },
    "imdb": "tt43736405",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   },
   "american-dad": {
    "last": "2026-10-27",
@@ -590870,7 +592236,7 @@
    "fpv": 2
   },
   "super-space-sheriff-gavan-infinity-vs-raiya": {
-   "last": "2026-10-16",
+   "last": "2026-10-27",
    "tmdbId": 1741752,
    "released": "2026-12-11",
    "lang": "Japanese",
@@ -590883,8 +592249,7 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "archivedOn": "2026-10-04",
-   "fp": "a1273ead615b",
+   "fp": "3f22ce606038",
    "rendered": "2026-10-13",
    "fpv": 2,
    "imdb": ""
@@ -596517,7 +597882,9 @@
      "Chad Michael Murray"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "desperate-housewives": {
    "last": "2026-10-24",
@@ -604684,7 +606051,9 @@
      "Michael Mando",
      "Giancarlo Esposito"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "cold-case": {
    "last": "2026-10-23",
@@ -607363,7 +608732,9 @@
      "Tala Ashe",
      "Brandon Routh"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-closer": {
    "last": "2026-10-27",
@@ -612660,7 +614031,9 @@
    "fp": "73fa040a4164",
    "rendered": "2026-10-13",
    "imdb": "tt5834204",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "loki": {
    "last": "2026-10-24",
@@ -612778,7 +614151,9 @@
    "fp": "b7e5ca65a1a4",
    "rendered": "2026-10-13",
    "imdb": "tt0898266",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-king-of-queens": {
    "last": "2026-10-22",
@@ -615784,7 +617159,9 @@
     "title": "Curb Your Enthusiasm"
    },
    "imdb": "tt0264235",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "cure": {
    "last": "2026-10-23",
@@ -618401,7 +619778,9 @@
    "fp": "6c2b738a7f7c",
    "rendered": "2026-10-14",
    "imdb": "tt0306414",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "i-want-to-eat-your-pancreas": {
    "last": "2026-10-23",
@@ -622070,7 +623449,10 @@
     ]
    },
    "imdb": "tt43650242",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-01"
   },
   "wednesday": {
    "last": "2026-10-22",
@@ -624566,7 +625948,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-30"
+   "epNext": "2026-10-30",
+   "archivedOn": "2026-10-27"
   },
   "the-exorcist": {
    "last": "2026-10-27",
@@ -625943,7 +627326,6 @@
     "released": "2026-11-06",
     "title": "Kamen Rider Kabuto 20th: ​​The One Who Inherits the Heavens"
    },
-   "archivedOn": "2026-10-19",
    "fpv": 2,
    "imdb": "tt41389717"
   },
@@ -627322,13 +628704,15 @@
    "rendered": "2026-10-16",
    "fp": "95ffbb5a5451",
    "pv": 13,
-   "rel": 2,
+   "rel": 3,
    "fpv": 2,
    "fcs": {
     "v": "early",
     "at": "2026-10-26",
     "w": 8
-   }
+   },
+   "archivedOn": "2026-10-27",
+   "imdb": "tt47906552"
   },
   "the-lowdown": {
    "last": "2026-10-24",
@@ -627356,7 +628740,10 @@
    },
    "rel": 3,
    "imdb": "tt31289994",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "king-kong-vs-godzilla": {
    "last": "2026-10-22",
@@ -627710,7 +629097,24 @@
    "title": "Masterplan",
    "rendered": "2026-10-16",
    "fp": "4fec0689a9b6",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt38672588",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "tenzing": {
    "last": "2026-10-20",
@@ -628914,7 +630318,9 @@
      "Martin Kamm"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "child-of-kamiari-month": {
    "last": "2026-10-22",
@@ -629818,7 +631224,6 @@
     ]
    },
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -630325,8 +631730,10 @@
     "at": "2026-10-21",
     "w": 8
    },
-   "rel": 2,
-   "fpv": 2
+   "rel": 3,
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "imdb": "tt41592995"
   },
   "memories": {
    "last": "2026-10-23",
@@ -632823,7 +634230,7 @@
     "at": "2026-10-22",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fpv": 2,
    "truth": {
     "at": "2026-10-26",
@@ -632842,7 +634249,9 @@
      "Soichiro Hoshi",
      "Rie Tanaka"
     ]
-   }
+   },
+   "archivedOn": "2026-10-27",
+   "imdb": "tt34424243"
   },
   "cinderella": {
    "last": "2026-10-24",
@@ -634181,7 +635590,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -634211,7 +635619,8 @@
     "v": "early",
     "at": "2026-10-26",
     "w": 8
-   }
+   },
+   "archivedOn": "2026-10-27"
   },
   "gacha-cycle-world": {
    "last": "2026-10-25",
@@ -634259,7 +635668,9 @@
    },
    "rel": 3,
    "imdb": "tt49692512",
-   "archivedOn": "2026-10-27"
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   },
   "wildwood": {
    "last": "2026-10-27",
@@ -634298,7 +635709,21 @@
     "w": 8
    },
    "rel": 3,
-   "archivedOn": "2026-10-27"
+   "archivedOn": "2026-10-27",
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
+  },
+  "ryuji": {
+   "last": "2026-10-27",
+   "tmdbId": 1646897,
+   "released": "2026-10-30",
+   "lang": "Japanese",
+   "kind": "movie",
+   "title": "RYUJI ⻯⼆",
+   "rendered": "2026-10-27",
+   "fp": "9ae1827313a1",
+   "fpv": 2
   }
  },
  "id": {
@@ -634729,7 +636154,10 @@
     ]
    },
    "imdb": "tt43736405",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-31"
   },
   "general-mayhem-the-killing-of-brigadier-j": {
    "last": "2026-10-27",
@@ -634815,7 +636243,9 @@
     "misses": 0
    },
    "imdb": "tt36996011",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "mayday": {
    "last": "2026-10-25",
@@ -638132,7 +639562,9 @@
      "Jeff Fischer"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "family-guy": {
    "last": "2026-10-22",
@@ -644008,7 +645440,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "f2eb854c94cb",
+   "fp": "c06e11a536ff",
    "swept": "2026-10-27",
    "archivedOn": "2026-10-10",
    "rendered": "2026-10-13",
@@ -644016,6 +645448,7 @@
     "at": "2026-10-27",
     "providers": [],
     "rentBuy": [
+     "Apple TV Store",
      "Amazon Video"
     ],
     "released": "2026-09-22",
@@ -651029,10 +652462,12 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "928535e75060",
    "rendered": "2026-10-13",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "imdb": "tt46594641"
   },
   "kpop-demon-hunters": {
    "last": "2026-10-27",
@@ -655597,7 +657032,9 @@
      "Torrey Hanson",
      "Robin Weigert"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "star-wars-the-clone-wars": {
    "last": "2026-10-22",
@@ -655647,7 +657084,9 @@
      "Ashley Eckstein",
      "Matthew Wood"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "wwe-nxt": {
    "last": "2026-10-22",
@@ -658030,7 +659469,9 @@
      "Justin Hartley",
      "Susan Kelechi Watson"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "gossip-girl": {
    "last": "2026-10-27",
@@ -658336,7 +659777,9 @@
      "Iain De Caestecker",
      "Henry Simmons"
     ]
-   }
+   },
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "peppa-pig": {
    "last": "2026-10-27",
@@ -664658,7 +666101,10 @@
    "fp": "062e53769755",
    "rendered": "2026-10-14",
    "imdb": "tt1839337",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-02"
   },
   "a-hard-day": {
    "last": "2026-10-22",
@@ -665051,7 +666497,9 @@
    "fp": "e78b930967f9",
    "rendered": "2026-10-14",
    "imdb": "tt2306299",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-man-standing-next": {
    "last": "2026-10-25",
@@ -665312,8 +666760,7 @@
     "misses": 0
    },
    "imdb": "tt7441658",
-   "fpv": 2,
-   "archivedOn": "2026-10-27"
+   "fpv": 2
   },
   "war": {
    "last": "2026-10-25",
@@ -665738,7 +667185,9 @@
    "fp": "398eacbefc06",
    "rendered": "2026-10-11",
    "imdb": "tt1845307",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "irreplaceable": {
    "last": "2026-10-27",
@@ -667354,7 +668803,9 @@
    "fp": "9f7627e7b49d",
    "rendered": "2026-10-13",
    "imdb": "tt1442449",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-beauty-inside": {
    "last": "2026-10-25",
@@ -670147,12 +671598,14 @@
    "pv": 13,
    "fcs": {
     "v": "early",
-    "at": "2026-10-13",
-    "w": 6
+    "at": "2026-10-27",
+    "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "rendered": "2026-10-13",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "imdb": "tt39073352"
   },
   "the-powerpuff-girls": {
    "last": "2026-10-22",
@@ -670455,7 +671908,9 @@
    "fp": "98fc5f52ee24",
    "rendered": "2026-10-13",
    "imdb": "tt0159206",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "the-berlin-file": {
    "last": "2026-10-22",
@@ -673007,7 +674462,10 @@
    },
    "rel": 3,
    "imdb": "tt31289994",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-28"
   },
   "the-summer-i-turned-pretty": {
    "last": "2026-10-22",
@@ -673349,7 +674807,7 @@
     "at": "2026-10-21",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "truth": {
     "at": "2026-10-24",
     "providers": [
@@ -673371,7 +674829,8 @@
      "Etienne Guillou-Kervern"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27"
   },
   "narco-saints": {
    "last": "2026-10-22",
@@ -673847,7 +675306,6 @@
     "w": 8
    },
    "fpv": 2,
-   "archivedOn": "2026-10-25",
    "imdb": "tt39673642"
   },
   "tomorrow-x-together-world-tour-act-tomorrow": {
@@ -676214,7 +677672,9 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27"
   },
   "what-happened-to-mr-cha": {
    "last": "2026-10-22",
@@ -678386,7 +679846,6 @@
    "rendered": "2026-10-22",
    "fp": "ba6995e9987f",
    "fpv": 2,
-   "archivedOn": "2026-10-26",
    "pv": 13,
    "imdb": "tt39555302",
    "fcs": {
@@ -679047,7 +680506,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -679484,7 +680942,8 @@
     "v": "early",
     "at": "2026-10-26",
     "w": 8
-   }
+   },
+   "archivedOn": "2026-10-27"
   },
   "wildwood": {
    "last": "2026-10-27",
@@ -679552,8 +681011,28 @@
    "kind": "tv",
    "title": "Tigers Sniff the Rose",
    "rendered": "2026-10-27",
-   "fp": "c287d41f65ce",
-   "fpv": 2
+   "fp": "378512629f1e",
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-27",
+    "providers": [
+     "WeTV"
+    ],
+    "lastCheck": "2026-10-27",
+    "misses": 0
+   },
+   "imdb": "tt35324004",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27",
+   "rel": 3
   }
  },
  "br": {
@@ -680727,7 +682206,7 @@
    "srAt": "2026-10-27"
   },
   "south-park": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 2190,
    "released": "1997-08-13",
    "lang": "English",
@@ -680754,7 +682233,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-27"
   },
   "war": {
    "last": "2026-10-25",
@@ -686075,7 +687555,10 @@
      "Matt Lieb"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-27"
   },
   "ratatoing": {
    "last": "2026-10-22",
@@ -687657,7 +689140,10 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "rel": 2
+   "rel": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "pirates-of-the-caribbean-at-world-s-end": {
    "last": "2026-10-22",
@@ -688366,7 +689852,16 @@
    "title": "Let This Stay Between Us",
    "rendered": "2026-10-17",
    "fp": "f1c2e6464458",
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "pv": 13,
+   "imdb": "",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-27",
+    "w": 8
+   },
+   "rel": 3
   },
   "the-king-of-the-cattle": {
    "last": "2026-10-22",
@@ -693337,8 +694832,7 @@
     "w": 8
    },
    "rel": 3,
-   "fpv": 2,
-   "archivedOn": "2026-10-27"
+   "fpv": 2
   },
   "elo-the-hostage-live-on-tv": {
    "last": "2026-10-23",
@@ -694510,6 +696004,17 @@
    "srAt": "2026-10-27",
    "epNext": "2026-10-27",
    "rel": 3
+  },
+  "medley": {
+   "last": "2026-10-27",
+   "tmdbId": 1451022,
+   "released": "2026-10-29",
+   "lang": "Portuguese",
+   "kind": "movie",
+   "title": "Medley",
+   "rendered": "2026-10-27",
+   "fp": "d660ac25adb3",
+   "fpv": 2
   }
  },
  "mx": {
@@ -695687,7 +697192,7 @@
    "srAt": "2026-10-27"
   },
   "south-park": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 2190,
    "released": "1997-08-13",
    "lang": "English",
@@ -695714,7 +697219,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-27"
   },
   "war": {
    "last": "2026-10-25",
@@ -702690,7 +704196,10 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "rel": 2
+   "rel": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "avatar-the-way-of-water": {
    "last": "2026-10-22",
@@ -703188,11 +704697,11 @@
    },
    "imdb": "tt38672588",
    "fcs": {
-    "v": "early",
-    "at": "2026-10-18",
-    "w": 6
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "truth": {
     "at": "2026-10-24",
     "providers": [
@@ -703214,7 +704723,8 @@
      "Etienne Guillou-Kervern"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27"
   },
   "tenzing": {
    "last": "2026-10-20",
@@ -703263,8 +704773,7 @@
      "Johnny Flynn"
     ]
    },
-   "fpv": 2,
-   "archivedOn": "2026-10-27"
+   "fpv": 2
   },
   "nowhere": {
    "last": "2026-10-22",
@@ -706856,7 +708365,7 @@
    "pv": 13,
    "repairedOn": "2026-10-27",
    "rel": 3,
-   "fp": "ec412c3a8e7d",
+   "fp": "d3f1b8495ca0",
    "fcs": {
     "v": "early",
     "at": "2026-10-20",
@@ -706864,6 +708373,7 @@
    },
    "imdb": "tt13609648",
    "fpv": 2,
+   "archivedOn": "2026-10-27",
    "rendered": "2026-10-27"
   },
   "godzilla-minus-zero": {
@@ -707032,7 +708542,10 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-11"
   },
   "cyberpunk-edgerunners": {
    "last": "2026-10-25",
@@ -709727,7 +711240,6 @@
     "w": 8
    },
    "rel": 3,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -711048,7 +712560,7 @@
    "srAt": "2026-10-27"
   },
   "south-park": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 2190,
    "released": "1997-08-13",
    "lang": "English",
@@ -711076,7 +712588,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-27"
   },
   "the-ramparts-of-ice": {
    "last": "2026-10-22",
@@ -718058,7 +719571,10 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "rel": 2
+   "rel": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "dune": {
    "last": "2026-10-25",
@@ -718870,7 +720386,7 @@
     "at": "2026-10-21",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "truth": {
     "at": "2026-10-23",
     "providers": [],
@@ -718889,7 +720405,9 @@
      "Eduardo Ferrés"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27",
+   "imdb": "tt36462691"
   },
   "el-mal-padre": {
    "last": "2026-10-21",
@@ -719830,8 +721348,7 @@
      "Johnny Flynn"
     ]
    },
-   "fpv": 2,
-   "archivedOn": "2026-10-27"
+   "fpv": 2
   },
   "the-boarding-school": {
    "last": "2026-10-25",
@@ -720670,7 +722187,6 @@
    "title": "The Child",
    "rendered": "2026-10-18",
    "fp": "85978f475b84",
-   "archivedOn": "2026-10-19",
    "pv": 13,
    "rel": 3,
    "fcs": {
@@ -721232,7 +722748,7 @@
    "kind": "movie",
    "title": "You Can See Everything",
    "rendered": "2026-10-19",
-   "fp": "ce58145e325c",
+   "fp": "7dc3a357e6b3",
    "fpv": 2
   },
   "wrong-side-of-the-tracks": {
@@ -725934,7 +727450,7 @@
    "lang": "French",
    "kind": "movie",
    "title": "Coward",
-   "fp": "3712a0e7fb8a",
+   "fp": "fc5e5945ba46",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -726312,7 +727828,7 @@
    "srAt": "2026-10-27"
   },
   "south-park": {
-   "last": "2026-10-25",
+   "last": "2026-10-27",
    "tmdbId": 2190,
    "released": "1997-08-13",
    "lang": "English",
@@ -726340,7 +727856,8 @@
    "fpv": 2,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-27"
   },
   "war": {
    "last": "2026-10-25",
@@ -726761,7 +728278,10 @@
     ]
    },
    "imdb": "tt43650242",
-   "fpv": 2
+   "fpv": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-11-01"
   },
   "avengers-endgame": {
    "last": "2026-10-25",
@@ -733336,7 +734856,10 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "rel": 2
+   "rel": 2,
+   "srv": 1,
+   "srAt": "2026-10-27",
+   "epNext": "2026-10-30"
   },
   "her": {
    "last": "2026-10-22",
@@ -733714,11 +735237,11 @@
    },
    "imdb": "tt38672588",
    "fcs": {
-    "v": "early",
-    "at": "2026-10-18",
-    "w": 6
+    "v": "Worth a watch",
+    "at": "2026-10-27",
+    "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "truth": {
     "at": "2026-10-24",
     "providers": [
@@ -733740,7 +735263,8 @@
      "Etienne Guillou-Kervern"
     ]
    },
-   "fpv": 2
+   "fpv": 2,
+   "archivedOn": "2026-10-27"
   },
   "miraculous-world-paris-tales-of-shadybug-and-claw-noir": {
    "last": "2026-10-24",
@@ -740249,7 +741773,6 @@
    },
    "rel": 3,
    "fpv": 2,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27"
@@ -740328,7 +741851,6 @@
     "at": "2026-10-26",
     "w": 8
    },
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-30"
