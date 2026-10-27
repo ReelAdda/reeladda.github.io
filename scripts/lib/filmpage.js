@@ -319,10 +319,13 @@ function descUpcoming({ item, country, V, providers, rentBuy, now, fullDate }) {
 // Saying it IS streaming keeps the snippet honest and on-intent; not saying WHERE is the
 // entire reason to click.
 function descStreaming({ item, country, statsClause }) {
+  // A new sentence starts with a capital when there's no rating or runtime to lead it: 1,817
+  // descriptions read "…worth your evening? the critics' take…" (VisionQuest, 27 Oct 2026).
+  const lead = (rest) => (statsClause ? statsClause + rest : rest.charAt(0).toUpperCase() + rest.slice(1));
   return fitDesc([
-    `${item.title} is streaming in ${country} — but is it worth your evening? ${statsClause}the critics' take, the audience counterpoint and every platform carrying it.`,
-    `${item.title} is streaming in ${country} — but is it worth your evening? ${statsClause}critics' take and every platform carrying it.`,
-    `${item.title} is streaming in ${country}. ${statsClause}verdict, critics' take and where to watch it.`,
+    `${item.title} is streaming in ${country} — but is it worth your evening? ${lead("the critics' take, the audience counterpoint and every platform carrying it.")}`,
+    `${item.title} is streaming in ${country} — but is it worth your evening? ${lead("critics' take and every platform carrying it.")}`,
+    `${item.title} is streaming in ${country}. ${lead("verdict, critics' take and where to watch it.")}`,
     `${item.title} is streaming in ${country} — the verdict and where to watch.`,
   ]);
 }

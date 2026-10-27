@@ -5887,6 +5887,11 @@ test("IndexNow: each hidden page is announced once, in the room under the 10,000
   assert.ok(up.indexOf("extendIndexNowWithHidden()") > up.indexOf("extendIndexNowWithChanged(todayStr())"), "after the changed pages, in the room left");
   assert.ok(/\|hidden-urls\|indexnow-hidden\)/.test(require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8")), "build data, not published");
 });
+test("descriptions: a sentence starts with a capital when no rating leads it (VisionQuest, 27 Oct 2026)", () => {
+  const F = require("./lib/filmpage.js");
+  const d = F.filmMetaDescription({ title: "VisionQuest", slug: "visionquest", kind: "tv", providers: ["JioHotstar"], platform: "JioHotstar", released: "2026-10-13", language: "English" }, { code: "in", name: "India", region: "IN" });
+  assert.ok(!/[?.] [a-z]/.test(d), d);
+});
 test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
   assert.ok(!urls.some((u) => /\/films\//.test(u)), "the A–Z pages are retired (25 Oct 2026)");
