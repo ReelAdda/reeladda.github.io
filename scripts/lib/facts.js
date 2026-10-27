@@ -229,6 +229,15 @@ function keyFacts(html) {
     cert: ((/<td>Watch with family\?<\/td><td>([^<·]+?)\s*·/.exec(html) || [])[1] || certOf(headMeta(html))).trim(),
     // The table, else the header line: a runtime shown only in the header still counts.
     runtime: runtimeMinutes((/<td>Runtime<\/td><td>([^<]+)<\/td>/.exec(html) || [])[1] || "") || runtimeMinutes((/· (\d+ min)\b/.exec(headMeta(html)) || [])[1] || ""),
+    // A series' episode guide (lib/series.js) is a fact too: the count, the next drop, how many
+    // episodes are listed and how many carry a rating. Not the rating values, which drift daily.
+    // Absent (so no fingerprint changes) on every page without a guide.
+    episodes: (() => {
+      const ep = require("./series.js").readSeriesMark(html).episodes;
+      if (!ep || !ep.count) return undefined;
+      const list = ep.list || [];
+      return `${ep.count}|${ep.next ? ep.next.date : ""}|${list.length}|${list.filter((x) => x.rating).length}`;
+    })(),
   };
 }
 // "108 min", "1h 48m", "1h 48m — long" and "~23 min per episode" as minutes, so a format

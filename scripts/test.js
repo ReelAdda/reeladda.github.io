@@ -5944,7 +5944,17 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     assert.deepStrictEqual(rated.list.map((x) => x.rating || null), [8.4, null], "no rating from two votes");
     assert.deepStrictEqual(fd.watchFirst.map((x) => x.slug), ["wandavision"], "watch first: only earlier titles");
     const pair = S.episodesHtml({ ...item, episodes: { ...ep, list: [{ e: 5, name: "A", date: "2026-10-27", runtime: null }, { e: 6, name: "B", date: "2026-10-27", runtime: null }] } }, (d) => d, "2026-10-28");
-    assert.ok((pair.match(/same-day double drop/g) || []).length === 2, "episodes released together say so");
+    assert.ok((pair.match(/double drop with E6/g) || []).length === 1 && !/double drop with E5/.test(pair), "episodes released together say so, once, on the first");
+    // The guide is a fact for the page date (count, next drop, listed, rated); not the rating values.
+    const kf = (eps) => X.keyFacts(`<html><head><script type="application/ld+json">{"@type":"TVSeries","name":"V"}</script></head><body>${S.seriesMark({ episodes: eps })}</body></html>`).episodes;
+    const base = { count: 8, next: { date: "2026-10-27" }, list: [{ e: 1, rating: 7.5 }, { e: 2 }] };
+    assert.strictEqual(kf(base), "8|2026-10-27|2|1");
+    assert.strictEqual(kf({ ...base, list: [{ e: 1, rating: 7.6 }, { e: 2 }] }), kf(base), "a rating drifting 7.5 -> 7.6 isn't news");
+    assert.notStrictEqual(kf({ ...base, list: [{ e: 1, rating: 7.5 }, { e: 2, rating: 8 }] }), kf(base), "a newly rated episode is");
+    assert.strictEqual(X.keyFacts("<html><body><h1>F</h1></body></html>").episodes, undefined, "pages without a guide: no new key, no fingerprint change");
+    // A frozen page's description keeps the verdict (the record's score reaches the rewrite).
+    const rec = require("./lib/archive.js").withRecord({ title: "VisionQuest", kind: "tv", providers: ["JioHotstar"] }, { fcScore: { verdict: "Must watch" }, episodes: two });
+    assert.ok(/FilmyChill verdict: Must watch\.$/.test(F.filmMetaDescription({ ...rec, slug: "visionquest" }, IN)), F.filmMetaDescription({ ...rec, slug: "visionquest" }, IN));
     const back = X.extractFacts(html, "visionquest");
     assert.deepStrictEqual(back.episodes, ep, "the guide survives a frozen render");
     assert.deepStrictEqual(back.franchise, item.franchise);

@@ -166,8 +166,11 @@ function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10)) 
   // A timeline: aired episodes filled, the next one marked, the rest outlined.
   const items = (ep.list || []).map((x) => {
     const state = nextNos.has(x.e) ? "next" : x.date && x.date <= today ? "out" : "soon";
-    const pair = x.date && (ep.list || []).some((y) => y !== x && y.date === x.date);
-    const meta = [x.date ? fmt(x.date) : "Date to be announced", pair ? "same-day double drop" : null, x.runtime ? `${x.runtime} min` : null, x.rating ? `★ ${x.rating.toFixed(1)}` : null].filter(Boolean).join(" · ");
+    // Episodes released the same day: said once, on the first of them ("double drop with E6").
+    const sameDay = x.date ? (ep.list || []).filter((y) => y.date === x.date).map((y) => y.e).sort((a, b) => a - b) : [];
+    const pair = sameDay.length > 1 && sameDay[0] === x.e
+      ? `${sameDay.length === 2 ? "double drop" : "same-day drop"} with ${sameDay.slice(1).map((n) => `E${n}`).join(" & ")}` : null;
+    const meta = [x.date ? fmt(x.date) : "Date to be announced", pair, x.runtime ? `${x.runtime} min` : null, x.rating ? `★ ${x.rating.toFixed(1)}` : null].filter(Boolean).join(" · ");
     return `<li class="${state}"><span class="epn">${x.e}</span><div><b>${e(x.name || `Episode ${x.e}`)}</b><small>${e(meta)}</small></div>${state === "next" ? '<span class="eptag">Next</span>' : ""}</li>`;
   }).join("");
   return `<h2>Episodes</h2><p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""} · original release dates</p>${next}`
