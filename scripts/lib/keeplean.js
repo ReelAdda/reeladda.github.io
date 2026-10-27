@@ -144,6 +144,60 @@ function linkHealth({ root = ".", manifest = {}, nowMs = Date.now() } = {}) {
     toHiddenShare: links ? toHidden / links : 0, orphans: orphans.length, orphanSample: orphans.slice(0, 5), freshWeak, offeredList: [...offeredSet] };
 }
 
+// ---- repeated sentences and thin pages (27 Oct 2026 review) -----------------------------------
+// The main content of a film page — from the answer to the end of the FAQ, never the footer or
+// the vote widget — as sentences, each with the page's own title, language, genres and numbers
+// replaced, so "Jaat is a solid, watchable Hindi film…" and "Dhoom is a solid, watchable Hindi
+// film…" count as one pattern. A pattern on more than REPEAT_SHARE of pages is template text.
+const REPEAT_SHARE = 0.05;
+const WIDGET = /Watched it\?|Was it worth it|Your vote|No sign-up|^Worth it$|^Not worth it$/i;
+function mainSentences(html) {
+  const s = String(html);
+  const from = Math.max(0, s.indexOf('class="anscard"') >= 0 ? s.indexOf('class="anscard"') : s.indexOf('class="answer"'));
+  let to = s.indexOf('<a class="btn"', from); if (to < 0) to = s.indexOf("<footer", from); if (to < 0) to = s.length;
+  const body = s.slice(from, to).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ");
+  const ld = (/"inLanguage":"([^"]+)"/.exec(s) || [])[1] || "";
+  const genres = ((/"genre":"([^"]+)"/.exec(s) || [])[1] || "").split(/\s*\/\s*|\s*&amp;\s*|\s*&\s*/).filter((g) => g.length > 2);
+  const title = ((/"name":"([^"]+)"/.exec(s) || [])[1] || "").replace(/&amp;/g, "&");
+  const esc = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const blocks = [...body.matchAll(/<(p|dd|summary|li|td)\b[^>]*>([\s\S]*?)<\/\1>|<div class="fa">([\s\S]*?)<\/div>/g)].map((m) => m[2] || m[3] || "");
+  const out = [];
+  for (const b of blocks) {
+    const text = b.replace(/<[^>]+>/g, " ").replace(/&#39;/g, "'").replace(/&amp;/g, "&").replace(/&[a-z#0-9]+;/g, " ").replace(/\s+/g, " ").trim();
+    for (const sent of text.split(/(?<=[.?!])\s+/)) {
+      if (sent.length < 25 || WIDGET.test(sent)) continue;
+      let p = sent;
+      // The title as whole words only ("Film T" must not eat the "film t" in "film that").
+      if (title) p = p.replace(new RegExp(`(^|[^\\w])${esc(title)}(?=[^\\w]|$)`, "gi"), "$1«T»");
+      if (ld) p = p.replace(new RegExp(`\\b${esc(ld)}\\b`, "g"), "«L»");
+      for (const g of genres) p = p.replace(new RegExp(`\\b${esc(g)}\\b`, "gi"), "«G»");
+      p = p.replace(/\d[\d,.]*/g, "«N»").replace(/\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\b/g, "«M»");
+      out.push({ pattern: p, words: sent.split(" ").length });
+    }
+  }
+  return out;
+}
+// Over a sample of visible film pages: the patterns on more than REPEAT_SHARE of them, and the
+// pages left with under THIN_WORDS words once those are set aside (recorded, never padded).
+const THIN_WORDS = 150;
+function contentRepetition(files, { root = ".", sample = 1500 } = {}) {
+  const pages = [];
+  const pick = files.length > sample ? files.filter((_, i) => i % Math.ceil(files.length / sample) === 0) : files;
+  for (const rel of pick) {
+    let h; try { h = fs.readFileSync(path.join(root, rel), "utf8"); } catch { continue; }
+    if (NOI.test(h.slice(0, 4096))) continue;
+    pages.push({ rel, sents: mainSentences(h) });
+  }
+  const seen = new Map();
+  for (const p of pages) for (const pat of new Set(p.sents.map((x) => x.pattern))) seen.set(pat, (seen.get(pat) || 0) + 1);
+  const n = pages.length || 1;
+  const repeated = [...seen].filter(([, c]) => c / n > REPEAT_SHARE).sort((a, b) => b[1] - a[1]);
+  const rep = new Set(repeated.map(([p]) => p));
+  const thin = pages.filter((p) => p.sents.filter((x) => !rep.has(x.pattern)).reduce((w, x) => w + x.words, 0) < THIN_WORDS);
+  return { sampled: pages.length, patterns: repeated.slice(0, 15).map(([p, c]) => ({ pattern: p, share: Math.round((c / n) * 1000) / 1000 })),
+    repeatedCount: repeated.length, thinShare: Math.round((thin.length / n) * 1000) / 1000, thinSample: thin.slice(0, 5).map((p) => p.rel) };
+}
+
 // Pure: alarms from this week's record and last week's.
 function healthAlarms(cur, prev) {
   const a = [];
@@ -152,6 +206,12 @@ function healthAlarms(cur, prev) {
   if (cur.orphans > 100) a.push(`${cur.orphans} pages offered to Google have no internal link in (alarm over 100)`);
   if (prev && prev.offered && cur.offered > prev.offered * 1.2) a.push(`pages offered to Google jumped ${Math.round((cur.offered / prev.offered - 1) * 100)}% in a week (${prev.offered} → ${cur.offered})`);
   if (prev && prev.indexedShare != null && cur.indexedShare != null && prev.prevIndexedFell && cur.indexedShare < prev.indexedShare) a.push(`indexed share fell two weeks running (${Math.round(prev.indexedShare * 100)}% → ${Math.round(cur.indexedShare * 100)}%)`);
+  // A NEW template sentence spreading (the known ones are recorded for the 4 Nov review, not alarmed weekly).
+  if (cur.repetition && prev && prev.repetition) {
+    const before = new Set((prev.repetition.patterns || []).map((x) => x.pattern));
+    const fresh = (cur.repetition.patterns || []).filter((x) => !before.has(x.pattern));
+    if (cur.repetition.repeatedCount > prev.repetition.repeatedCount && fresh.length) a.push(`a new sentence pattern is on ${Math.round(fresh[0].share * 100)}% of film pages: "${fresh[0].pattern.slice(0, 90)}"`);
+  }
   return a;
 }
 
@@ -181,6 +241,10 @@ async function weeklyHealth({ manifest, env = process.env, nowMs = Date.now(), r
     if (n) { rec.indexedShare = Math.round((indexed / n) * 1000) / 1000; rec.sampled = n; }
   }
   rec.prevIndexedFell = !!(prev && prev.indexedShare != null && rec.indexedShare != null && rec.indexedShare < prev.indexedShare);
+  try {
+    const { filmPageFiles } = require("./stylesheets.js");
+    rec.repetition = contentRepetition(filmPageFiles(root), { root });
+  } catch { /* the report goes on without it */ }
   const alarms = healthAlarms(rec, prev);
   rec.alarms = alarms;
   hist.runs = [...hist.runs, rec].slice(-26);
@@ -192,4 +256,4 @@ function healthLine(rec) {
   return `Site health (${rec.date}): ${rec.offered} pages offered to Google, ${rec.indexedShare == null ? "indexed share not sampled" : `${Math.round(rec.indexedShare * 100)}% indexed (sample of ${rec.sampled})`}, ${Math.round(rec.toHiddenShare * 100)}% of links to hidden pages, ${rec.orphans} unlinked, ${rec.freshWeak} new title(s) under 3 links`;
 }
 
-module.exports = { HEALTH_FILE, ROLL_DAYS, WINDOW_DAYS, healthAlarms, healthLine, linkHealth, rollHiddenList, rollList, weeklyHealth };
+module.exports = { HEALTH_FILE, REPEAT_SHARE, ROLL_DAYS, THIN_WORDS, WINDOW_DAYS, contentRepetition, healthAlarms, healthLine, linkHealth, mainSentences, rollHiddenList, rollList, weeklyHealth };

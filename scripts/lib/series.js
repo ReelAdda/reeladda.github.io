@@ -25,6 +25,9 @@ const SERIES_SWEEP_VERSION = 1;
 const RECENT_SEASON_DAYS = 150;   // a season that ended this recently still gets its episode list
 
 // Shared universes TMDB marks with a keyword (collections cover plain sequels).
+// An episode's own TMDB rating shows only from this many votes (the film scores' rule: never a
+// 9.8 from two votes).
+const EP_MIN_VOTES = 20;
 const FRANCHISE_KEYWORD = /cinematic universe|shared universe|\(mcu\)|\(dceu\)|monsterverse|wizarding world|spider-?verse|conjuring universe|spy universe|cop universe/i;
 
 // Pure: the episode guide from a TMDB /tv/{id} response and, optionally, its latest season.
@@ -34,7 +37,8 @@ function episodesFrom(d, season = null) {
   if (!count) return null;
   const n = (e) => e && e.air_date ? { s: e.season_number, e: e.episode_number, name: e.name || "", date: e.air_date } : null;
   const list = season && Array.isArray(season.episodes)
-    ? season.episodes.map((x) => ({ e: x.episode_number, name: x.name || "", date: x.air_date || "", runtime: Number(x.runtime) || null })).filter((x) => x.e)
+    ? season.episodes.map((x) => ({ e: x.episode_number, name: x.name || "", date: x.air_date || "", runtime: Number(x.runtime) || null,
+        ...(Number(x.vote_count) >= EP_MIN_VOTES && Number(x.vote_average) > 0 ? { rating: Math.round(Number(x.vote_average) * 10) / 10, votes: Number(x.vote_count) } : {}) })).filter((x) => x.e)
     : [];
   return {
     count,
@@ -125,21 +129,45 @@ function franchiseSiblings(item, index, { visible = () => true, max = 6 } = {}) 
   return null;
 }
 
+// Pure: the next drop — every episode of the current season released on the next episode's date
+// (two at once: "E5 & E6"). Dates, never "today": the page is static and read for days.
+function nextDrop(ep, today = new Date().toISOString().slice(0, 10)) {
+  if (!ep || !ep.next || !ep.next.date || ep.next.date < today) return null;
+  const same = (ep.list || []).filter((x) => x.date === ep.next.date).map((x) => x.e).sort((a, b) => a - b);
+  const nums = same.length ? same : [ep.next.e];
+  const label = nums.length === 1 ? `E${nums[0]}` : nums.length === 2 ? `E${nums[0]} & E${nums[1]}` : `E${nums[0]}–E${nums[nums.length - 1]}`;
+  return { nums, date: ep.next.date, label, name: nums.length === 1 ? ep.next.name : "", season: ep.next.s };
+}
+
+// Pure: the meta description of a series on air — its schedule, the thing people come for. Never
+// the platform (naming it in the snippet sent searchers straight there: 0 clicks from 247
+// impressions at position 1.1). null when the series isn't on air.
+function seriesDescription(item, fmt, today = new Date().toISOString().slice(0, 10)) {
+  const ep = item && item.kind === "tv" && item.episodes;
+  const nd = ep && nextDrop(ep, today);
+  if (!nd) return null;
+  const dates = (ep.list || []).map((x) => x.date).filter(Boolean).sort();
+  const last = dates.length ? dates[dates.length - 1] : null;
+  const verdict = item.fcScore && item.fcScore.verdict ? ` FilmyChill verdict: ${item.fcScore.verdict}.` : "";
+  return `${item.title}: all ${ep.count} episodes with dates. ${nd.label} out ${fmt(nd.date)}${last && last > nd.date ? `, finale ${fmt(last)}` : ""}.${verdict}`;
+}
+
 // Pure: the "Episodes" section (series only). `fmt(date)` formats a date for the edition.
 function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10)) {
   const ep = item && item.kind === "tv" && item.episodes;
   if (!ep || !ep.count) return "";
   const e = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const summary = [`${ep.count} episode${ep.count === 1 ? "" : "s"}${ep.seasons > 1 ? ` across ${ep.seasons} seasons` : ""}`, ep.limited ? "limited series" : null].filter(Boolean).join(" · ");
-  const nextNo = ep.next && ep.next.date >= today && (!ep.season || ep.next.s === ep.season) ? ep.next.e : null;
+  const nd = nextDrop(ep, today);
+  const nextNos = new Set(nd && (!ep.season || nd.season === ep.season) ? nd.nums : []);
   // With no episode list, the next episode is said in words (the answer card says it too).
   const next = !(ep.list || []).length && ep.next && ep.next.date >= today
     ? `<p class="epnext"><b>Next episode:</b> ${ep.next.s > 1 || ep.seasons > 1 ? `S${ep.next.s} ` : ""}E${ep.next.e}${ep.next.name ? ` — ${e(ep.next.name)}` : ""}, ${e(fmt(ep.next.date))}</p>` : "";
   // A timeline: aired episodes filled, the next one marked, the rest outlined.
   const items = (ep.list || []).map((x) => {
-    const state = x.e === nextNo ? "next" : x.date && x.date <= today ? "out" : "soon";
+    const state = nextNos.has(x.e) ? "next" : x.date && x.date <= today ? "out" : "soon";
     const pair = x.date && (ep.list || []).some((y) => y !== x && y.date === x.date);
-    const meta = [x.date ? fmt(x.date) : "Date to be announced", pair ? "same-day double drop" : null, x.runtime ? `${x.runtime} min` : null].filter(Boolean).join(" · ");
+    const meta = [x.date ? fmt(x.date) : "Date to be announced", pair ? "same-day double drop" : null, x.runtime ? `${x.runtime} min` : null, x.rating ? `★ ${x.rating.toFixed(1)}` : null].filter(Boolean).join(" · ");
     return `<li class="${state}"><span class="epn">${x.e}</span><div><b>${e(x.name || `Episode ${x.e}`)}</b><small>${e(meta)}</small></div>${state === "next" ? '<span class="eptag">Next</span>' : ""}</li>`;
   }).join("");
   return `<h2>Episodes</h2><p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""} · original release dates</p>${next}`
@@ -151,8 +179,10 @@ function episodeFaqs(item, fmt, today = new Date().toISOString().slice(0, 10)) {
   const ep = item && item.kind === "tv" && item.episodes;
   if (!ep || !ep.count) return [];
   const out = [{ q: `How many episodes does ${item.title} have?`, a: `${item.title} has ${ep.count} episode${ep.count === 1 ? "" : "s"}${ep.seasons > 1 ? ` across ${ep.seasons} seasons` : ""}${ep.limited ? " — it's a limited series" : ""}.` }];
-  if (ep.next && ep.next.date >= today) {
-    out.push({ q: `When is the next episode of ${item.title}?`, a: `Episode ${ep.next.e}${ep.next.name ? `, "${ep.next.name}",` : ""} is due on ${fmt(ep.next.date)} (its original release date).` });
+  const nd = nextDrop(ep, today);
+  if (nd) {
+    const which = nd.nums.length === 1 ? `Episode ${nd.nums[0]}${nd.name ? `, "${nd.name}",` : ""} comes` : `Episodes ${nd.nums.slice(0, -1).join(", ")} and ${nd.nums[nd.nums.length - 1]} come`;
+    out.push({ q: `When is the next episode of ${item.title}?`, a: `${which} out on ${fmt(nd.date)} (original release date).` });
   }
   return out;
 }
@@ -161,14 +191,14 @@ function episodeFaqs(item, fmt, today = new Date().toISOString().slice(0, 10)) {
 // released, a finished limited series as one sitting, and the franchise titles to watch first
 // (siblings released before it, from franchiseSiblings).
 function fitFromData(item, franchise, fmt, today = new Date().toISOString().slice(0, 10)) {
-  const out = { bestFor: null, skipIf: null, watchFirst: [] };
+  const out = { bestFor: null, skipIf: null, bingeFrom: null, watchFirst: [] };
   const ep = item && item.kind === "tv" && item.episodes;
   if (ep && ep.count) {
     const dates = (ep.list || []).map((x) => x.date).filter(Boolean).sort();
     const last = dates.length ? dates[dates.length - 1] : null;
     if (ep.next && ep.next.date >= today && last) {
       out.bestFor = `following it week by week — new episodes until ${fmt(last)}`;
-      out.skipIf = `you'd rather binge it in one go — the finale lands on ${fmt(last)}`;
+      out.bingeFrom = `${fmt(last)}, when the finale is out`;
     } else if (ep.limited && last && last <= today) {
       out.bestFor = `a complete ${ep.count}-episode story you can watch start to finish`;
     }
@@ -243,5 +273,5 @@ async function sweepSeries(manifest, { budget = 300, tmdb, queueFacts, hidden = 
   return res;
 }
 
-module.exports = { FRANCHISE_KEYWORD, fitFromData, sweepSeries, SERIES_SWEEP_VERSION, episodeFaqs, episodesFrom, episodesHtml, franchiseFrom, franchiseSiblings,
+module.exports = { EP_MIN_VOTES, FRANCHISE_KEYWORD, fitFromData, nextDrop, seriesDescription, sweepSeries, SERIES_SWEEP_VERSION, episodeFaqs, episodesFrom, episodesHtml, franchiseFrom, franchiseSiblings,
   readSeriesMark, seasonToFetch, seriesFactsFor, seriesKnowRows, seriesMark, seriesName, seriesSweepDue, universeName };

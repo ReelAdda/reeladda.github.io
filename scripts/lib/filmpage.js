@@ -441,6 +441,9 @@ function descForState(c) {
 }
 
 function filmMetaDescription(item, cfg = null, opts = {}) {
+  // A series on air: its schedule is what people come for (lib/series.js seriesDescription).
+  const sd = require("./series.js").seriesDescription(item, (dt) => fmtDateFull(dt, localeFor((cfg && cfg.code) || "in")));
+  if (sd) return trim(sd, 160);
   const c = descContext(item, cfg, opts);
   let desc = descForState(c);
   if (desc && typeof desc === "object") return desc.final;
@@ -1298,9 +1301,10 @@ ${REDESIGN_CSS}
     // Lean (the 27 Oct 2026 redesign): the answer is a card over the hero, with the next
     // episode of a series on air under it. The answer's own markup is unchanged inside.
     if (!lean) return `<p class="answer">${ans}</p>${how}`;
-    const nx = item.kind === "tv" && item.episodes && item.episodes.next;
-    const nextEp = nx && nx.date >= new Date().toISOString().slice(0, 10)
-      ? `\n  <p class="nextep"><b>Next episode:</b> E${nx.e}${nx.name ? ` “${e(nx.name)}”` : ""} · ${e(fmtDateFull(nx.date, localeFor(code)))}</p>` : "";
+    // Every episode of the next drop, with its date (never "today": the page is read for days).
+    const nd = item.kind === "tv" && item.episodes ? SER.nextDrop(item.episodes) : null;
+    const nextEp = nd
+      ? `\n  <p class="nextep"><b>Next:</b> ${nd.label}${nd.name ? ` “${e(nd.name)}”` : ""} · out ${e(fmtDateFull(nd.date, localeFor(code)))}</p>` : "";
     return `<div class="anscard"><p class="answer">${ans}</p>${how}${nextEp}</div>`;
   })();
     // Lean: the answer leads, then the score. Otherwise orderAnswer decides (below a full card).
@@ -1368,9 +1372,11 @@ ${REDESIGN_CSS}
     const rows = [
       // Lean: a "Why" that only restates the rating ("7.2/10 from 550 ratings…") goes.
       wf.why && !(lean && RESTATES.test(wf.why)) ? `<dt>Why</dt><dd>${e(wf.why)}</dd>` : "",
-      fd && fd.watchFirst.length ? `<dt>Watch first</dt><dd>${fd.watchFirst.map((x) => `<a href="${e(filmPagePath(code, x.slug))}">${e(x.title)}</a>`).join(", ")}</dd>` : "",
+      // Each with its year and, where its page lists one, the platform it streams on here.
+      fd && fd.watchFirst.length ? `<dt>Watch first</dt><dd>${fd.watchFirst.map((x) => `<a href="${e(filmPagePath(code, x.slug))}">${e(x.title)}</a>${x.released ? ` (${e(String(x.released).slice(0, 4))})` : ""}${(x.platforms || []).length ? `, on ${e(x.platforms[0])}` : ""}`).join("; ")}</dd>` : "",
       skipIf ? `<dt class="skip">Skip if</dt><dd>${e(skipIf)}</dd>` : "",
       bestFor ? `<dt>Best for</dt><dd>${e(cap(bestFor))}</dd>` : "",
+      fd && fd.bingeFrom ? `<dt>Binge it</dt><dd>From ${e(fd.bingeFrom)}</dd>` : "",
     ].join("");
     return rows ? `<div class="fit"><dl>${rows}</dl></div>` : "";
   })()}

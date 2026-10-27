@@ -5933,7 +5933,15 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     assert.ok(/"numberOfEpisodes":8/.test(html), "the episode count in the structured data");
     const fd = S.fitFromData(item, { kind: "collection", items: [{ slug: "wandavision", title: "WandaVision", released: "2021-01-15" }, { slug: "later", title: "Later", released: "2027-01-01" }] }, (d) => d, "2026-10-27");
     assert.deepStrictEqual(S.fitFromData(item, { kind: "universe", items: [{ slug: "x-men-97", title: "X-Men '97", released: "2024-03-20" }] }, (d) => d, "2026-10-27").watchFirst, [], "a shared universe is never a watch-first list");
-    assert.ok(/week by week — new episodes until 2099-11-04/.test(fd.bestFor) && /finale lands on 2099-11-04/.test(fd.skipIf), JSON.stringify(fd));
+    assert.ok(/week by week — new episodes until 2099-11-04/.test(fd.bestFor) && fd.bingeFrom === "2099-11-04, when the finale is out" && !fd.skipIf, JSON.stringify(fd));
+    // The next drop (two episodes the same day), always with its date; ratings only from 20 votes.
+    const two = { ...ep, next: { s: 1, e: 5, name: "Firewall", date: "2099-10-27" }, list: [{ e: 5, name: "Firewall", date: "2099-10-27" }, { e: 6, name: "Deadlock", date: "2099-10-27" }, { e: 8, name: "Forever", date: "2099-11-10" }] };
+    assert.deepStrictEqual(S.nextDrop(two, "2026-10-27"), { nums: [5, 6], date: "2099-10-27", label: "E5 & E6", name: "", season: 1 });
+    assert.ok(/Episodes 5 and 6 come out on 2099-10-27/.test(S.episodeFaqs({ ...item, episodes: two }, (d) => d, "2026-10-27")[1].a));
+    assert.strictEqual(S.seriesDescription({ ...item, episodes: two, fcScore: { verdict: "Must watch" } }, (d) => d, "2026-10-27"),
+      "VisionQuest: all 8 episodes with dates. E5 & E6 out 2099-10-27, finale 2099-11-10. FilmyChill verdict: Must watch.", "the schedule, never the platform");
+    const rated = S.episodesFrom(tv, { season_number: 1, episodes: [{ episode_number: 1, name: "A", air_date: "2026-10-14", vote_average: 8.43, vote_count: 25 }, { episode_number: 2, name: "B", air_date: "2026-10-14", vote_average: 9.8, vote_count: 2 }] });
+    assert.deepStrictEqual(rated.list.map((x) => x.rating || null), [8.4, null], "no rating from two votes");
     assert.deepStrictEqual(fd.watchFirst.map((x) => x.slug), ["wandavision"], "watch first: only earlier titles");
     const pair = S.episodesHtml({ ...item, episodes: { ...ep, list: [{ e: 5, name: "A", date: "2026-10-27", runtime: null }, { e: 6, name: "B", date: "2026-10-27", runtime: null }] } }, (d) => d, "2026-10-28");
     assert.ok((pair.match(/same-day double drop/g) || []).length === 2, "episodes released together say so");
@@ -5958,7 +5966,7 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     inTempDirSync(() => {
       const lean = F.buildFilmPage({ ...item, backdrop: "https://image.tmdb.org/t/p/w780/bd.jpg" }, "2026-10-27", new Set(), IN);
       assert.ok(/<div class="hero" style="background-image:linear-gradient\([^"]*url\('https:\/\/image\.tmdb\.org\/t\/p\/w780\/bd\.jpg'\)">\s*<div class="head">/.test(lean), "the head inside the hero");
-      assert.ok(/<div class="anscard"><p class="answer">[\s\S]*?<p class="nextep"><b>Next episode:<\/b> E7 “Forever” · /.test(lean), "the answer card, with the next episode");
+      assert.ok(/<div class="anscard"><p class="answer">[\s\S]*?<p class="nextep"><b>Next:<\/b> E7 “Forever” · out \d/.test(lean), "the answer card, with the next episode and its date");
       assert.ok(lean.indexOf('class="anscard"') < lean.indexOf('id="filmychill-score"'), "the answer still leads");
       assert.ok(/content:'Audience rating'/.test(lean), "the ring says it is the audience rating");
       const withTake = F.buildFilmPage({ ...item, take: "Most reviews land firmly on the positive side.", takeSrc: "wiki", trailer: "https://www.youtube.com/watch?v=abcdefghijk" }, "2026-10-27", new Set(), IN);
@@ -5983,6 +5991,27 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
   assert.ok(man.in.vq.srv === S.SERIES_SWEEP_VERSION && man.in.vq.epNext === "2099-11-04");
   assert.ok(!S.seriesSweepDue(man.in.vq, Date.parse("2026-10-28T06:00:00Z")) && S.seriesSweepDue(man.in.vq, Date.parse("2026-10-31T06:00:00Z")), "an airing series is refreshed every 3 days");
   assert.ok(/keywords,/.test(fsx.readFileSync(require("path").join(__dirname, "lib", "enrich.js"), "utf8")), "the keywords ride on the details call already made");
+});
+test("repetition report: main-content sentence patterns across pages, thin pages recorded, alarm only for a new pattern (27 Oct 2026)", () => {
+  const K = require("./lib/keeplean.js");
+  const fsx = require("fs");
+  const page = (title, lang, extra) => `<html><head><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"${title}","inLanguage":"${lang}","genre":"Drama"}</script></head><body><div class="anscard"><p class="answer">${title} is streaming in India on Netflix.</p></div><p>${title} is a solid, watchable ${lang} film that mostly delivers on what it promises.</p><p>Watched it? Was it worth it? Your vote helps.</p>${extra}<a class="btn" href="/">x</a><footer><p>Data from TMDB and JustWatch, credited on every page of this site.</p></footer></body></html>`;
+  const s = K.mainSentences(page("Jaat", "Hindi", ""));
+  assert.ok(s.some((x) => x.pattern === "«T» is a solid, watchable «L» film that mostly delivers on what it promises."), JSON.stringify(s));
+  assert.ok(!s.some((x) => /Watched it|TMDB and JustWatch/.test(x.pattern)), "the vote widget and the footer aren't main content");
+  inTempDirSync(() => {
+    fsx.mkdirSync("movie");
+    for (let i = 0; i < 20; i++) fsx.writeFileSync(`movie/f${i}.html`, page(`Film ${String.fromCharCode(65 + i)}`, i % 2 ? "Hindi" : "Tamil", i === 0 ? `<p>${"A sentence only this page has, with many distinct words in it. ".repeat(40)}</p>` : ""));
+    const r = K.contentRepetition(require("./lib/stylesheets.js").filmPageFiles("."), { root: "." });
+    assert.strictEqual(r.sampled, 20);
+    assert.ok(r.patterns.some((p) => /solid, watchable «L» film/.test(p.pattern) && p.share === 1));
+    assert.strictEqual(r.thinShare, 0.95, "19 of 20 pages have nothing left once the template sentences are set aside");
+  });
+  const a = K.healthAlarms({ toHiddenShare: 0, freshWeak: 0, orphans: 0, offered: 100, repetition: { repeatedCount: 3, patterns: [{ pattern: "new «T» line", share: 0.4 }] } },
+    { offered: 100, repetition: { repeatedCount: 2, patterns: [{ pattern: "old", share: 0.9 }] } });
+  assert.ok(a.some((x) => /new sentence pattern is on 40%/.test(x)), a.join(" | "));
+  assert.strictEqual(K.healthAlarms({ toHiddenShare: 0, freshWeak: 0, orphans: 0, offered: 100, repetition: { repeatedCount: 2, patterns: [{ pattern: "old", share: 0.9 }] } },
+    { offered: 100, repetition: { repeatedCount: 2, patterns: [{ pattern: "old", share: 0.9 }] } }).length, 0, "known patterns are recorded, not alarmed every week");
 });
 test("IndexNow ping: the citable data page, never a retired A–Z page", () => {
   const urls = U.indexNowUrls([{ code: "in", name: "India" }, { code: "us", name: "the US" }], {});
