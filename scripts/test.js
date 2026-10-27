@@ -5931,7 +5931,8 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     // The 27 Oct 2026 review's fixes.
     assert.ok(!/Best screen/.test(html), "no 'Best screen: Stream at home'");
     assert.ok(/"numberOfEpisodes":8/.test(html), "the episode count in the structured data");
-    const fd = S.fitFromData(item, { items: [{ slug: "wandavision", title: "WandaVision", released: "2021-01-15" }, { slug: "later", title: "Later", released: "2027-01-01" }] }, (d) => d, "2026-10-27");
+    const fd = S.fitFromData(item, { kind: "collection", items: [{ slug: "wandavision", title: "WandaVision", released: "2021-01-15" }, { slug: "later", title: "Later", released: "2027-01-01" }] }, (d) => d, "2026-10-27");
+    assert.deepStrictEqual(S.fitFromData(item, { kind: "universe", items: [{ slug: "x-men-97", title: "X-Men '97", released: "2024-03-20" }] }, (d) => d, "2026-10-27").watchFirst, [], "a shared universe is never a watch-first list");
     assert.ok(/week by week — new episodes until 2099-11-04/.test(fd.bestFor) && /finale lands on 2099-11-04/.test(fd.skipIf), JSON.stringify(fd));
     assert.deepStrictEqual(fd.watchFirst.map((x) => x.slug), ["wandavision"], "watch first: only earlier titles");
     const pair = S.episodesHtml({ ...item, episodes: { ...ep, list: [{ e: 5, name: "A", date: "2026-10-27", runtime: null }, { e: 6, name: "B", date: "2026-10-27", runtime: null }] } }, (d) => d, "2026-10-28");

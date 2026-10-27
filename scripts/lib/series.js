@@ -104,7 +104,7 @@ const seriesName = (c) => String(c.name || "").replace(/\s+Collection$/i, "");
 function franchiseSiblings(item, index, { visible = () => true, max = 6 } = {}) {
   const fr = item && item.franchise;
   if (!fr || !Array.isArray(index)) return null;
-  const pick = (test, heading) => {
+  const pick = (test, heading, kind) => {
     const all = index.filter((x) => x && x.slug && x.slug !== item.slug && x.franchise && test(x.franchise) && visible(x.slug))
       .sort((a, b) => String(a.released || "").localeCompare(String(b.released || "")) || a.title.localeCompare(b.title));
     if (!all.length) return null;
@@ -112,14 +112,14 @@ function franchiseSiblings(item, index, { visible = () => true, max = 6 } = {}) 
     const mine = String(item.released || "");
     let at = all.findIndex((x) => String(x.released || "") > mine); if (at < 0) at = all.length;
     const from = Math.max(0, Math.min(at - Math.floor(max / 2), all.length - max));
-    return { heading, items: all.slice(from, from + max), total: all.length };
+    return { heading, kind, items: all.slice(from, from + max), total: all.length };
   };
   if (fr.c) {
-    const r = pick((f) => f.c && f.c.id === fr.c.id, `More in the ${seriesName(fr.c)} series`);
+    const r = pick((f) => f.c && f.c.id === fr.c.id, `More in the ${seriesName(fr.c)} series`, "collection");
     if (r) return r;
   }
   for (const u of fr.u || []) {
-    const r = pick((f) => (f.u || []).includes(u), `More from the ${universeName(u)}`);
+    const r = pick((f) => (f.u || []).includes(u), `More from the ${universeName(u)}`, "universe");
     if (r) return r;
   }
   return null;
@@ -173,7 +173,9 @@ function fitFromData(item, franchise, fmt, today = new Date().toISOString().slic
       out.bestFor = `a complete ${ep.count}-episode story you can watch start to finish`;
     }
   }
-  if (franchise && franchise.items) {
+  // Only a true sequel collection says what to watch first: a shared universe's other titles
+  // aren't prerequisites (VisionQuest showed "Watch first: X-Men '97", 27 Oct 2026).
+  if (franchise && franchise.items && franchise.kind === "collection") {
     const mine = String((item && item.released) || "");
     out.watchFirst = franchise.items.filter((x) => String(x.released || "") < mine).slice(-3);
   }
