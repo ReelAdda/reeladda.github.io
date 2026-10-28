@@ -191,17 +191,19 @@ function toneFromFigure(rec) {
 // critics' side, and only when there is a tone or a cited figure.
 function scoreLineHtml(item) {
   const s = item.fcScore;
+  const votes = Number(item.votes || 0);
+  const aud = item.rating != null && votes ? `<b>Audience:</b> ${votes.toLocaleString('en-IN')} ratings on TMDB` : votes ? `<b>Audience:</b> ${votes.toLocaleString('en-IN')} ratings on TMDB, no average yet` : '<b>Audience:</b> not rated on TMDB yet';
   const tone = s && s.critics ? s.critics : null;
   const cited = item.reception ? receptionLine(item.reception, fmtDate, tone) : '';
-  if (!tone && !cited) return '';
-  const label = tone || toneFromFigure(item.reception) || 'no settled verdict';
-  return `<div class="fcs-line"><b>Critics:</b> ${esc(label)}${cited ? ' — ' + esc(cited) : ''}</div>`;
+  const label = tone || (cited ? toneFromFigure(item.reception) : null);
+  const cri = label ? ` · <b>Critics:</b> ${esc(label)}${cited ? ' — ' + esc(cited) : ''}` : '';
+  return `<div class="fcs-line">${aud}${cri}</div>`;
 }
 function fcScoreHtml(item) {
   const s = item.fcScore;
   const none = noScoreText(item);
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
-  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${ratingDial(item)}${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
+  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${ratingDial(item)}${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
 }
 
 // CLEANER CARDS (Oct 2026). One card used to stack a coloured badge for everything, a boxed
@@ -577,7 +579,6 @@ function openDetail(listKey, i, via) {
   const facts = [
     item.runtime ? `<span class="pill">⏱ ${esc(item.kind === 'tv' ? item.runtime + ' min/ep' : fmtRuntime(item.runtime))}</span>` : '',
     item.cert ? `<span class="pill">🔖 ${esc(item.cert)}</span>` : '',
-    item.rating ? `<span class="pill">★ ${esc(String(item.rating))}/10 (${esc(String(item.imdbRating != null ? (item.imdbVotes || 0) : (item.votes || 0)))} ratings)</span>` : '',
   ].join('');
   const relLabel = item.released && item.released > new Date().toISOString().slice(0, 10) ? 'Releases' : 'Released';
   // TV: show the LATEST season's date (freshDate), not the series' original launch — a 2022

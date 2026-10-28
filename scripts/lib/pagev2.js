@@ -287,10 +287,8 @@ function v3Meta(item, { fmt = (d) => d } = {}) {
 // read as a provider.
 function v3Where(item, { relState, country, V, asOf = "", fmt = (d) => d }) {
   const e = escHtml;
-  const votes = Number(item.votes || 0);
-  const aud = item.rating != null && votes
-    ? `<span class="rpill">★ ${Number(item.rating).toFixed(1)}/10 (${e(votes.toLocaleString("en-IN"))} rating${votes === 1 ? "" : "s"})</span>`
-    : `<span class="rpill">${votes ? `${e(votes.toLocaleString("en-IN"))} ratings, no average yet` : "Not rated on TMDB yet"}</span>`;
+  // The platform pill alone (28 Oct 2026): the audience number lives in the score card's ring.
+  const aud = "";
   const provs = (item.providers || []).map(String), rb = Array.isArray(item.rentBuy) ? item.rentBuy.map(String) : [];
   const ott = V.word === "OTT" ? "OTT" : "streaming";
   const when = asOf ? e(fmt(asOf)) : "";

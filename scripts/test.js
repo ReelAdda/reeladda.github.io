@@ -1330,7 +1330,7 @@ test("the gauge is gone from the homepage and film pages: the audience-rating ri
   assert.ok(!/fcm-|class="fcm"/.test(src), "no Chill-o-meter sprite or icon left on the homepage");
   // 28 Oct 2026: the sheet's pill row already shows "★ 8.6/10 (199 ratings)", so the panel is the
   // verdict pill alone — one fact once.
-  assert.ok(src.includes("<span class=\"fcs-v\">${verdictPill(s.verdict)}</span>") && !src.includes("fcs-v\">${ratingDial(item)}"), "the detail sheet: the verdict pill, no second ring");
+  assert.ok(src.includes("<span class=\"fcs-v\">${ratingDial(item)}${verdictPill(s.verdict)}</span>"), "the detail sheet: ring + pill, like the cards");
 
   const fp = require("fs").readFileSync(require("path").join(__dirname, "lib", "filmpage.js"), "utf8");
   assert.ok(!/meterSvg|fcsb-m\b/.test(fp), "film pages draw no gauge");
@@ -9174,7 +9174,7 @@ test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to
     // 2. The sequence: header mark, tag above the title, meta line, pills with the where-to-watch block, score, Story, Director, Cast, Good to know, no fillers.
     assert.ok(/<div class="top v3"><a class="mark"[^>]*><svg class="brand-mark"/.test(v3) && /<span class="v3tag">Trending<\/span>\s*<h1>T \(2026\)<\/h1>/.test(v3));
     assert.ok(/<div class="meta">Drama \/ Crime · Hindi · Released 1 Oct 2026 · 128 min<\/div>/.test(v3), "meta line");
-    assert.ok(/<!--FC:wtw--><!--SW:stream--><!--SW:live=2026-10-28--><div class="pills"><span class="rpill">★ 7\.8\/10 \(500 ratings\)<\/span><span class="pill">Netflix<\/span><span class="wlbl">Rent or buy<\/span><span class="pill">Apple TV<\/span><\/div>/.test(v3), "the block under the title, markers inside");
+    assert.ok(/<!--FC:wtw--><!--SW:stream--><!--SW:live=2026-10-28--><div class="pills"><span class="pill">Netflix<\/span><span class="wlbl">Rent or buy<\/span><span class="pill">Apple TV<\/span><\/div>/.test(v3), "the block under the title, markers inside; the platform pill alone");
     assert.ok(/<!--SW:arrived=2026-10-05\|Netflix-->/.test(v3) && /<!--Availability as of 28 Oct 2026 — platforms may change over time\.-->/.test(v3), "the sweep markers and the availability sentence stay, as comments");
     assert.ok(!/Included with a subscription|platforms may change over time\.<\/p>|Streaming on Netflix in India since/.test(v3.replace(/<!--[\s\S]*?-->/g, "")), "nothing printed under the pills but the pills");
     assert.ok(/<tr><td>More on Netflix<\/td><td><a href="\/new-on-netflix\/">Everything new on Netflix<\/a>/.test(v3) || !/new-on-netflix/.test(v3), "the platform links as a Good to know row");
@@ -9191,8 +9191,8 @@ test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to
     assert.ok(!/What the audience says|What the critics say|Is it for you|<dt>Best for|<dt>Binge it|<h2>Where to watch|class="anscard"|class="cta|data-act="share"|id="sticky"/.test(v3), "fillers, answer card, CTA, Share, the separate Where to watch and the sticky bar are gone");
     assert.ok((v3.match(/Sentence after sentence\./g) || []).length === 60, "the full overview");
     // 3. The score card's one line, and the label following the figure when the page has no tone.
-    assert.ok(/<p class="fcsb-line"><b>Critics:<\/b> positive — 91% on Rotten Tomatoes \(87 reviews\) — per Wikipedia, 10 Oct 2026<\/p>/.test(v3), v3.match(/<p class="fcsb-line">[^]*?<\/p>/)[0]);
-    assert.ok(/<!--FC:fcs=Loved\|positive-->/.test(v3) && !/class="dial /.test(v3), "no ring: the audience number is in the pill");
+    assert.ok(/<p class="fcsb-line"><b>Audience:<\/b> 500 ratings on TMDB · <b>Critics:<\/b> positive — 91% on Rotten Tomatoes \(87 reviews\) — per Wikipedia, 10 Oct 2026<\/p>/.test(v3), v3.match(/<p class="fcsb-line">[^]*?<\/p>/)[0]);
+    assert.ok(/<!--FC:fcs=Loved\|positive-->/.test(v3) && /class="dial dial-must"/.test(v3) && !/class="rpill"/.test(v3), "the ring carries the audience number, in the score card; no rating pill");
     // Visible text only (not the head, markers or structured data): the audience number in the
     // pill and in the FAQ's self-contained answer; the critics' figure in the line and its answer.
     const visible = v3.slice(v3.indexOf("<body")).replace(/<!--[\s\S]*?-->/g, "").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<[^>]+>/g, " ");
@@ -9200,7 +9200,7 @@ test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to
     assert.strictEqual((visible.match(/91%/g) || []).length, 2, "the critics' figure: the line + FAQ answer, nowhere else");
     const noTone = on(100, { ...it, fcScore: { verdict: "Must watch", reason: "Audiences love it.", audience: "Loved", critics: null, basis: "audience" } });
     assert.ok(/<b>Critics:<\/b> positive — 91% on Rotten Tomatoes/.test(noTone) && !/no settled verdict/.test(noTone), "never 'no settled verdict' beside a figure");
-    assert.ok(!/<p class="fcsb-line">/.test(on(100, { ...it, reception: undefined, fcScore: { verdict: "Must watch", reason: "Audiences love it.", audience: "Loved", critics: null, basis: "audience" } })), "no tone and no figure: no line at all");
+    assert.ok(/<p class="fcsb-line"><b>Audience:<\/b> 500 ratings on TMDB<\/p>/.test(on(100, { ...it, reception: undefined, fcScore: { verdict: "Must watch", reason: "Audiences love it.", audience: "Loved", critics: null, basis: "audience" } })), "no tone and no figure: the audience source alone");
     assert.strictEqual(RC.toneFromFigure({ rt: { pct: 55 } }), "mixed"); assert.strictEqual(RC.toneFromFigure({ mc: { score: 40 } }), "negative"); assert.strictEqual(RC.toneFromFigure(null), null);
     // 4. States: theatres, rent only, upcoming, nowhere — each keeps what the readers need.
     const thItem = { ...it, providers: [], rentBuy: [], platform: "Theatres", arrived: undefined };
