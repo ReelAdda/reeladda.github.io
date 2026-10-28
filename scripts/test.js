@@ -9140,6 +9140,56 @@ test("PWA (28 Oct 2026): manifest, service worker, offline page, registration on
     assert.ok(!/rel="manifest"/.test(F.buildFilmPage(it, "2026-10-28", new Set(), IN)));
   } finally { R.useRolloutConfig(null); }
 });
+test("Wikipedia reception figures (28 Oct 2026): parsed with counts, cached without sentences, cited on the Critics row, kept in the facts", () => {
+  const E = require("./lib/editorial.js"), RC = require("./lib/reception.js"), X = require("./lib/facts.js");
+  // 1. Explicit patterns only, each with its sentence.
+  const a = E.parseAggregates("On the review aggregation website Rotten Tomatoes, 53% of 377 critics' reviews are positive, with an average rating of 5.7/10. The site's consensus reads. Metacritic, which uses a weighted average, assigned the film a score of 48 out of 100, based on 55 critics, indicating \"mixed or average\" reviews.");
+  assert.deepStrictEqual({ ...a.rt, s: undefined }, { pct: 53, n: 377, avg: 5.7, s: undefined }); assert.deepStrictEqual({ ...a.mc, s: undefined }, { score: 48, n: 55, s: undefined });
+  assert.ok(/53% of 377/.test(a.rt.s) && /score of 48/.test(a.mc.s), "each figure keeps the sentence it came from");
+  const b = E.parseAggregates("The film holds an approval rating of 85% based on 142 reviews, with an average rating of 7.1/10 on Rotten Tomatoes.");
+  assert.deepStrictEqual([b.rt.pct, b.rt.n, b.rt.avg, b.mc], [85, 142, 7.1, undefined]);
+  assert.strictEqual(E.parseAggregates("Jailer 2 received mostly positive reviews from critics. Latha Srinivasan of NDTV gave 3.5/5 stars."), null, "no aggregator sentence: nothing");
+  assert.strictEqual(E.parseAggregates("The film grossed $480 million, a 92% increase on the first film."), null, "a percentage that isn't an RT figure is not read");
+  // A series: the figure is the season's, and says so; "critical reviews" still counts.
+  const c = E.parseAggregates('The website\'s critical consensus reads, "Tom Hardy is good." On the review aggregation website Rotten Tomatoes, the first season has an approval rating of 77% based on 44 critical reviews. On Metacritic, season 2 has a score of 60 out of 100, based on 18 critics.');
+  assert.deepStrictEqual([c.rt.pct, c.rt.n, c.rt.season, c.mc.score, c.mc.n, c.mc.season], [77, 44, 1, 60, 18, 2]);
+  const d = E.parseAggregates("For the first series, Rotten Tomatoes lists a 95% approval rating based on 60 reviews with an average rating of 7.5/10.");
+  assert.deepStrictEqual([d.rt.pct, d.rt.n, d.rt.avg, d.rt.season], [95, 60, 7.5, 1], "the 'lists a 95% approval rating' phrasing");
+  assert.ok(/^On the review aggregation website Rotten Tomatoes/.test(c.rt.s) && /^On Metacritic/.test(c.mc.s), "the sentence, not the quoted consensus before it: " + c.rt.s);
+  assert.strictEqual(RC.receptionLine({ rt: { pct: 77, n: 44, season: 1 }, mc: { score: 60, season: 2 } }), "77% on Rotten Tomatoes (44 reviews, season 1) · Metacritic 60 (season 2) — per Wikipedia");
+  // 2. The analysis stores the numbers, never the sentences; older entries still yield a record.
+  const read = E.readCritics({ lead: "", reception: "On Rotten Tomatoes, 91% of 87 critics' reviews are positive. Critics praised the performances and the writing. " + "x".repeat(120) });
+  assert.deepStrictEqual(read.agg, { rt: { pct: 91, n: 87 } });
+  const rec = E.entryReception({ src: "wiki", checked: "2026-10-10", a: { tone: "positive", agg: { rt: { pct: 91, n: 87 }, mc: { score: 64, n: 25 } }, ratings: { n: 12, median: 3.5 } } });
+  assert.deepStrictEqual(rec, { rt: { pct: 91, n: 87 }, mc: { score: 64, n: 25 }, ratings: { n: 12, median: 3.5 }, asOf: "2026-10-10" });
+  assert.deepStrictEqual(E.entryReception({ src: "wiki", checked: "2026-10-10", a: { score: { kind: "rt", value: 92 } } }), { rt: { pct: 92 }, asOf: "2026-10-10" }, "a v6 entry: the figure it has, no count");
+  assert.strictEqual(E.entryReception({ src: "tmdb", a: { score: { kind: "rt", value: 92 } } }), null, "only a Wikipedia reading");
+  // 3. The line: dated, no names, a median only from three or more.
+  assert.strictEqual(RC.receptionLine(rec, (d) => d), "91% on Rotten Tomatoes (87 reviews) · Metacritic 64 (25 critics) · 12 published ratings, median 3.5/5 — per Wikipedia, 2026-10-10");
+  assert.strictEqual(RC.receptionLine({ ratings: { n: 2, median: 4 } }), "2 published ratings — per Wikipedia");
+  assert.strictEqual(RC.receptionLine(null), "");
+  // 4. Round trip through the page and the facts key (values and counts only).
+  const html = `<html><body><section class="fcsb" id="filmychill-score">${RC.receptionMark(rec)}<div></div></section></body></html>`;
+  assert.deepStrictEqual(RC.readReceptionMark(html), rec);
+  assert.strictEqual(X.keyFacts(html).reception, "rt91/87|mc64/25|cr12@3.5");
+  assert.strictEqual(X.keyFacts(html.replace("2026-10-10", "2026-11-01")).reception, "rt91/87|mc64/25|cr12@3.5", "the read date alone is not a fact change");
+  assert.strictEqual(X.keyFacts("<html><body></body></html>").reception, undefined, "pages without figures: no key");
+  assert.ok(require("./lib/archive.js").RECORD_FIELDS.includes("reception"), "frozen pages keep it in the record");
+  // 5. On the page: the Critics row cites the line once the switch is on; the marker is there either way.
+  const R = require("./lib/rollout.js"), F = require("./lib/filmpage.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const it = { title: "T", slug: "t", kind: "movie", released: "2026-10-01", language: "Hindi", genre: "Drama", providers: ["Netflix"], rentBuy: [], tmdbId: 1, rating: 7.8, votes: 500,
+    fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" }, reception: rec };
+  try {
+    R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "wiki-reception": { percent: 100 } } });
+    const on = F.buildFilmPage(it, "2026-10-28", new Set(), IN);
+    assert.ok(/<b>Critics<\/b><small>91% on Rotten Tomatoes \(87 reviews\) · Metacritic 64 \(25 critics\) · 12 published ratings, median 3\.5\/5 — per Wikipedia, 10 Oct 2026<\/small>/.test(on), on.slice(on.indexOf("Critics</b>") - 20, on.indexOf("Critics</b>") + 220));
+    assert.ok(on.includes(RC.receptionMark(rec)));
+    R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "wiki-reception": { percent: 0 } } });
+    const off = F.buildFilmPage(it, "2026-10-28", new Set(), IN);
+    assert.ok(/<b>Critics<\/b><small>From published reviews<\/small>/.test(off) && off.includes(RC.receptionMark(rec)), "switched off: the old line, the marker kept");
+    assert.ok(!/Rotten Tomatoes/.test(F.buildFilmPage({ ...it, reception: undefined }, "2026-10-28", new Set(), IN)));
+  } finally { R.useRolloutConfig(null); }
+});
 test("a frozen page with no platform gets the 'not streaming yet' description its title promises (The Invite)", () => {
   const IN = require("./lib/core.js").COUNTRIES[0];
   const F = require("./lib/filmpage.js");

@@ -960,12 +960,16 @@ function fcScoreSection(item) {
         : isRecent(item)
           ? { tag: "Not rated yet", sub: "No audience ratings yet", none: true }
           : { tag: "Not rated", sub: "No audience ratings on TMDB", none: true };
+    // The Critics row cites its figures (lib/reception.js, rollout "wiki-reception"): RT and
+    // Metacritic with counts, the published ratings' count and median, dated to the Wikipedia read.
+    const RC = require("./reception.js");
+    const cited = item.reception && inRollout(RC.RECEPTION_FEATURE, item.slug) ? RC.receptionLine(item.reception, (d) => fmtDateFull(d, localeFor((item._code) || "in"))) : "";
     const cri = s && s.critics
-      ? { tag: s.critics.charAt(0).toUpperCase() + s.critics.slice(1), sub: "From published reviews" }
-      : { tag: "No verdict", sub: "No settled critics' reception on record", none: true };
+      ? { tag: s.critics.charAt(0).toUpperCase() + s.critics.slice(1), sub: cited || "From published reviews" }
+      : { tag: "No verdict", sub: cited || "No settled critics' reception on record", none: true };
     const row = (label, x) => `<div class="fcsb-row"><div><b>${label}</b><small>${e(x.sub)}</small></div><span class="fcsb-tag${x.none ? " none" : ""}">${e(x.tag)}</span></div>`;
     const lvl = !s ? "early" : /^must/i.test(s.verdict) ? "must" : /^skip/i.test(s.verdict) ? "skip" : "worth";
-    return `<section class="fcsb" id="filmychill-score">
+    return `<section class="fcsb" id="filmychill-score">${RC.receptionMark(item.reception)}
     <div class="fcsb-label">FilmyChill score</div>
     <div class="fcsb-verdict">${ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
     <p class="fcsb-why">${e(s ? s.reason : none.why)}</p>

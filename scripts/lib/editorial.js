@@ -442,6 +442,61 @@ function leadTone(lead) {
   return { tone: null, lean: null };
 }
 
+// ============================================================================
+// AGGREGATE FIGURES (28 Oct 2026). The reception section's Rotten Tomatoes and Metacritic
+// sentences, read as structured numbers with their review counts — the evidence the score
+// card's "Critics" row can cite. Explicit patterns only; a sentence that doesn't match one is
+// ignored, never guessed. Each figure keeps the sentence it came from (trimmed) for the dry run
+// and for tracing a wrong one; the sentence is not stored in the cache.
+// ============================================================================
+const RT_PATTERNS = [
+  // "On Rotten Tomatoes, 53% of 377 critics' reviews are positive, with an average rating of 5.7/10."
+  /Rotten Tomatoes[^.]{0,80}?(\d{1,3})%\s+of\s+(\d{1,4})\s+(?:critics'?|reviews)(?:[^.]*?average (?:rating|score) of (\d{1,2}(?:\.\d{1,2})?)\s*(?:\/|out of)\s*10)?/i,
+  // "Rotten Tomatoes lists a 95% approval rating based on 60 reviews with an average rating of 7.5/10"
+  /(\d{1,3})%\s+approval rating(?:[^.]*?based on (\d{1,4}) (?:critical |critics' )?reviews)?(?:[^.]*?average (?:rating|score) of (\d{1,2}(?:\.\d{1,2})?)\s*(?:\/|out of)\s*10)?/i,
+  // "holds an approval rating of 85% based on 142 reviews" / "based on 44 critical reviews"
+  /approval rating of (\d{1,3})%(?:[^.]*?based on (\d{1,4}) (?:critical |critics' )?reviews)?(?:[^.]*?average (?:rating|score) of (\d{1,2}(?:\.\d{1,2})?)\s*(?:\/|out of)\s*10)?/i,
+  // "(\d)% of critics gave positive reviews" without a count
+  /(\d{1,3})%\s+of\s+(?:the\s+)?critics(?:'|\s+gave|\s+reviews)/i,
+];
+const MC_PATTERN = /Metacritic[^.]{0,120}?(?:score of|average (?:score )?of|score)\s+(\d{1,3})(?:\s*(?:out of|\/)\s*100)?(?:[^.]*?based on (\d{1,3}) (?:critics|reviews))?/i;
+function parseAggregates(text) {
+  const t = String(text || "").slice(0, 8000);
+  const out = {};
+  // The sentence a match sits in: from the previous sentence end (a full stop, also one that
+  // closes a quoted consensus) to the next.
+  const sentenceAt = (i) => {
+    const before = t.slice(0, i), ends = [...before.matchAll(/[.!?]["”']?\s/g)];
+    const s = ends.length ? ends[ends.length - 1].index + ends[ends.length - 1][0].length : 0;
+    const em = /[.!?]["”']?(?:\s|$)/.exec(t.slice(i));
+    return t.slice(s, em ? i + em.index + 1 : t.length).trim().slice(0, 220);
+  };
+  // A series article gives the figure per season ("the first season holds…", "season 2 has…"):
+  // the page must say which, not pass it off as the show's.
+  const ORD = { first: 1, second: 2, third: 3, fourth: 4, fifth: 5, sixth: 6, seventh: 7, eighth: 8, ninth: 9, tenth: 10 };
+  const seasonOf = (sentence) => {
+    const m = /\b(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\s+(?:season|part|series)\b|\b(?:season|part|series)\s+(\d{1,2})\b/i.exec(sentence);
+    return m ? (m[1] ? ORD[m[1].toLowerCase()] : Number(m[2])) : null;
+  };
+  const figure = (m, fields) => { const s = sentenceAt(m.index), season = seasonOf(s); return { ...fields, ...(season ? { season } : {}), s }; };
+  for (const re of RT_PATTERNS) {
+    const m = t.match(re);
+    if (!m) continue;
+    const pct = Number(m[1]);
+    if (!(pct >= 0 && pct <= 100)) continue;
+    out.rt = figure(m, { pct, ...(m[2] ? { n: Number(m[2]) } : {}), ...(m[3] ? { avg: Number(m[3]) } : {}) });
+    break;
+  }
+  const mc = t.match(MC_PATTERN);
+  if (mc) {
+    const score = Number(mc[1]);
+    if (score >= 0 && score <= 100) out.mc = figure(mc, { score, ...(mc[2] ? { n: Number(mc[2]) } : {}) });
+  }
+  return out.rt || out.mc ? out : null;
+}
+// The cache keeps the numbers, not the sentences.
+const aggForCache = (agg) => (agg ? Object.fromEntries(Object.entries(agg).map(([k, v]) => [k, Object.fromEntries(Object.entries(v).filter(([f]) => f !== "s"))])) : undefined);
+
 // Pure: { lead, reception } -> the critics analysis attachTakes stores (analyzeReception's
 // shape, plus `ratings` and `toneSrc`), or null. The tone comes from the reception section's
 // own consensus sentence, else the lead's, else the median of three or more critic ratings.
@@ -457,13 +512,34 @@ function readCritics({ lead = "", reception = "" } = {}) {
   else if (fromLead.tone) { tone = fromLead.tone; lean = fromLead.lean; toneSrc = "lead"; }
   else if (byRatings) { tone = byRatings; toneSrc = "ratings"; }
   if (tone === "mixed" && lean && byRatings === lean) tone = lean;
-  if (!a && !tone) return null;
+  const agg = parseAggregates(reception);
+  if (!a && !tone && !agg) return null;
   const out = a ? { ...a } : { tone: null, praised: [], panned: [], divided: [], score: null };
   out.tone = tone;
   if (toneSrc) out.toneSrc = toneSrc;
   if (ratings.length) out.ratings = { n: ratings.length, median: medianOf(ratings) };
+  // The aggregator figures with their counts (28 Oct 2026); `score` above stays for older code.
+  if (agg) out.agg = aggForCache(agg);
   return out;
 }
+
+// Pure: what a takes-cache entry can cite for the critics' side, for the page: the RT and
+// Metacritic figures, the count and median of published ratings, and the day Wikipedia was
+// read. null when the entry holds no figure at all. Only from a Wikipedia reading.
+function entryReception(e) {
+  if (!(e && e.src === "wiki" && e.a)) return null;
+  const a = e.a;
+  const out = {};
+  if (a.agg && a.agg.rt) out.rt = a.agg.rt;
+  else if (a.score && a.score.kind === "rt") out.rt = { pct: a.score.value };
+  if (a.agg && a.agg.mc) out.mc = a.agg.mc;
+  else if (a.score && a.score.kind === "mc") out.mc = { score: a.score.value };
+  if (a.ratings && a.ratings.n) out.ratings = { n: a.ratings.n, median: a.ratings.median };
+  if (!out.rt && !out.mc && !out.ratings) return null;
+  if (e.checked) out.asOf = e.checked;
+  return out;
+}
+function cachedReception(imdbId) { return imdbId ? entryReception(loadTakes()[imdbId]) : null; }
 
 // Pure: enough published reviews to show the critics' side in a film's first week, when the
 // release-week gate (takeConfident) otherwise holds every critics' line back. Indian films are
@@ -1064,6 +1140,10 @@ async function attachTakes(dataByCode) {
             // How many published critic ratings that reading counted: the "N critic reviews"
             // evidence beside a critics-based verdict (lib/meter.js evidenceLabel).
             if (entry.src === "wiki" && entry.a && entry.a.ratings && entry.a.ratings.n) it.criticsCount = entry.a.ratings.n;
+            // What the page can cite for the critics' side (28 Oct 2026): RT / Metacritic figures
+            // and the ratings count, dated to the day the article was read.
+            const rec = entryReception(entry);
+            if (rec) it.reception = rec;
             // Disagreement is computed FRESH each run — ratings move, cached text doesn't.
             const counter = audienceCounterpoint(it);
             if (counter) it.takeCounter = counter;
@@ -1195,6 +1275,9 @@ async function attachTrailerStats(dataByCode) {
 
 module.exports = {
   cachedCriticsCount,
+  cachedReception,
+  entryReception,
+  parseAggregates,
   cachedCriticsTone,
   itemsAgeDays,
   wikiEntityMatches,

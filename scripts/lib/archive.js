@@ -454,7 +454,7 @@ function stripAggregateRating(html) {
 // cinema-run state and the "in cinemas" platform inferred from the page's own markers.
 // Reading platforms back from the page is how Cocoon's "Queer Cinemab" became "Not
 // Announced" (review, Oct 2026).
-const RECORD_FIELDS = ["slug", "title", "kind", "language", "genre", "released", "runtime", "providers", "rentBuy", "episodes", "fcScore"];   // fcScore: a series description ends with the verdict
+const RECORD_FIELDS = ["slug", "title", "kind", "language", "genre", "released", "runtime", "providers", "rentBuy", "episodes", "fcScore", "reception"];   // fcScore: a series description ends with the verdict; reception: the Critics row's figures
 function withRecord(parsed, item) {
   if (!item) return parsed;
   const out = { ...parsed };
@@ -739,6 +739,7 @@ function reconcilePagesManifest(manifest, code, currentSlugs, diskSlugs, todaySt
 }
 
 module.exports = {
+  RECORD_FIELDS,
   withRecord,
   NOT_YET_TITLE,
   ARCHIVE_PATCH_VERSION,

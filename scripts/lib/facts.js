@@ -125,6 +125,9 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   const ser = require("./series.js").readSeriesMark(html);
   if (ser.episodes) item.episodes = ser.episodes;
   if (ser.franchise) item.franchise = ser.franchise;
+  // The Critics row's figures, from the score card's marker (lib/reception.js).
+  const rec = require("./reception.js").readReceptionMark(html);
+  if (rec) item.reception = rec;
   const headCert = certOf(headMeta(html));
   if (cert || ld.contentRating || headCert) item.cert = (cert || ld.contentRating || headCert).trim();
   const director = [].concat(ld.director || []).map((d) => d && d.name).filter(Boolean).join(", ");
@@ -240,6 +243,9 @@ function keyFacts(html) {
       const list = ep.list || [];
       return `${ep.count}|${ep.next ? ep.next.date : ""}|${list.length}|${list.filter((x) => x.rating).length}`;
     })(),
+    // The critics' figures the score card cites (lib/reception.js): values and counts are facts;
+    // the read date is not. Absent on every page without them.
+    reception: (() => { const R = require("./reception.js"); const k = R.receptionKey(R.readReceptionMark(html)); return k || undefined; })(),
   };
 }
 // "108 min", "1h 48m", "1h 48m — long" and "~23 min per episode" as minutes, so a format

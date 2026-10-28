@@ -1,0 +1,50 @@
+// ============================================================================
+// reception.js — what the page cites for the critics' side (28 Oct 2026).
+//
+// The takes cache (lib/editorial.js) reads a film's Wikipedia reception section and keeps the
+// Rotten Tomatoes and Metacritic figures with their review counts, and the count and median of
+// the individual critics' ratings it lists. This module turns that record into the one line the
+// score card's "Critics" row shows, and into the HTML comment the facts reader (lib/facts.js)
+// reads it back from, so a frozen page keeps its figures and the sitemap date moves only when a
+// figure changes. Pure: no fetching here.
+//
+// Honesty rules: every figure is dated to the day the article was read ("per Wikipedia, 10 Oct
+// 2026") and never presented as live; no critic's or publication's name is stored or shown; a
+// median is given only from the count the cache holds (three or more, lib/editorial.js
+// RATINGS_MIN), never computed here from fewer.
+// ============================================================================
+"use strict";
+
+const RECEPTION_FEATURE = "wiki-reception";
+const MARK_RE = /<!--FC:reception=([^>]*)-->/;
+
+// Pure: the record as an HTML comment, or "" without one.
+function receptionMark(rec) {
+  return rec && (rec.rt || rec.mc || rec.ratings) ? `<!--FC:reception=${encodeURIComponent(JSON.stringify(rec))}-->` : "";
+}
+// Pure: the record read back from a page, or null.
+function readReceptionMark(html) {
+  const m = MARK_RE.exec(String(html || ""));
+  if (!m) return null;
+  try { const r = JSON.parse(decodeURIComponent(m[1])); return r && (r.rt || r.mc || r.ratings) ? r : null; } catch { return null; }
+}
+// Pure: the facts key — values and counts, which are the facts; nothing else.
+function receptionKey(rec) {
+  if (!rec) return "";
+  return [rec.rt ? `rt${rec.rt.pct}${rec.rt.n ? `/${rec.rt.n}` : ""}` : "", rec.mc ? `mc${rec.mc.score}${rec.mc.n ? `/${rec.mc.n}` : ""}` : "",
+    rec.ratings ? `cr${rec.ratings.n}@${rec.ratings.median}` : ""].filter(Boolean).join("|");
+}
+// Pure: the one line. `fmt(iso)` formats the read date for the edition.
+function receptionLine(rec, fmt = (d) => d) {
+  if (!rec) return "";
+  const parts = [];
+  // A series figure names its season: Wikipedia gives them per season.
+  const paren = (bits) => (bits.filter(Boolean).length ? ` (${bits.filter(Boolean).join(", ")})` : "");
+  if (rec.rt) parts.push(`${rec.rt.pct}% on Rotten Tomatoes${paren([rec.rt.n ? `${rec.rt.n} reviews` : "", rec.rt.season ? `season ${rec.rt.season}` : ""])}`);
+  if (rec.mc) parts.push(`Metacritic ${rec.mc.score}${paren([rec.mc.n ? `${rec.mc.n} critics` : "", rec.mc.season ? `season ${rec.mc.season}` : ""])}`);
+  if (rec.ratings && rec.ratings.n) parts.push(`${rec.ratings.n} published rating${rec.ratings.n === 1 ? "" : "s"}${rec.ratings.median != null && rec.ratings.n >= 3 ? `, median ${rec.ratings.median}/5` : ""}`);
+  if (!parts.length) return "";
+  return `${parts.join(" · ")} — per Wikipedia${rec.asOf ? `, ${fmt(rec.asOf)}` : ""}`;
+}
+
+module.exports = { RECEPTION_FEATURE, readReceptionMark, receptionKey, receptionLine, receptionMark };

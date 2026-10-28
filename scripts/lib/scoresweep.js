@@ -296,6 +296,8 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
       released: e.released || d.release_date || d.first_air_date || null,
       criticsTone: cachedCriticsTone((d.external_ids && d.external_ids.imdb_id) || d.imdb_id || null),
       criticsCount: cachedCriticsCount((d.external_ids && d.external_ids.imdb_id) || d.imdb_id || null),
+      // The figures the Critics row cites (lib/reception.js), from the same cache.
+      reception: require("./editorial.js").cachedReception((d.external_ids && d.external_ids.imdb_id) || d.imdb_id || null) || undefined,
     };
     const s = fcScore(item);
     if (s) item.fcScore = s;
