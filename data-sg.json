@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-28T12:20:07.890Z",
+ "generatedAt": "2026-10-28T13:03:35.537Z",
  "country": "sg",
  "pick": "You Can See Everything",
  "theatres": [
@@ -168,7 +168,7 @@
    "slug": "clayface",
    "wikiWeeklyViews": 1291315,
    "trending": true,
-   "trailerViews": 346401,
+   "trailerViews": 346616,
    "take": "Critics are split — praise for the direction and humour, pushback on the pacing.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -177,6 +177,12 @@
    ],
    "takeArticle": "Clayface (film)",
    "criticsTone": "mixed",
+   "reception": {
+    "rt": {
+     "pct": 77
+    },
+    "asOf": "2026-10-28"
+   },
    "takeCounter": "Audiences disagree — viewers rate it far higher.",
    "fcScore": {
     "verdict": "Worth a watch",
@@ -349,12 +355,17 @@
    ],
    "theatricalHere": true,
    "slug": "wildwood",
-   "wikiWeeklyViews": 580560,
-   "trailerViews": 19845427,
+   "trailerViews": 19846065,
    "take": "The critical verdict is rare-air positive.",
    "takeSrc": "wiki",
    "takeArticle": "Wildwood (film)",
    "criticsTone": "acclaim",
+   "reception": {
+    "rt": {
+     "pct": 99
+    },
+    "asOf": "2026-10-28"
+   },
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences and critics agree.",
@@ -527,7 +538,7 @@
    "theatricalHere": true,
    "slug": "fjord",
    "wikiWeeklyViews": 43370,
-   "trailerViews": 1419226,
+   "trailerViews": 1419356,
    "take": "Reviews lean positive: strong marks for the tension, quibbles about the writing.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -536,6 +547,16 @@
    "takeArticle": "Fjord (film)",
    "criticsTone": "positive",
    "criticsCount": 2,
+   "reception": {
+    "rt": {
+     "pct": 91
+    },
+    "ratings": {
+     "n": 2,
+     "median": 3.5
+    },
+    "asOf": "2026-10-28"
+   },
    "fcScore": {
     "verdict": "Worth a watch",
     "reason": "Critics are warmer than audiences.",
@@ -724,6 +745,13 @@
    "takeArticle": "Jailer 2",
    "criticsTone": "positive",
    "criticsCount": 12,
+   "reception": {
+    "ratings": {
+     "n": 12,
+     "median": 3
+    },
+    "asOf": "2026-10-28"
+   },
    "hook": "The follow-up to ‘Jailer’.",
    "fcScore": {
     "verdict": "Worth a watch",
@@ -822,16 +850,16 @@
      "kind": "movie"
     },
     {
-     "title": "The Corrupted",
-     "slug": "the-corrupted",
-     "poster": "https://image.tmdb.org/t/p/w342/elf6HOIOAwMlxc4ZBsprEc5VQHc.jpg",
+     "title": "Convict",
+     "slug": "convict",
+     "poster": "https://image.tmdb.org/t/p/w342/mnvkok7eVau9Fg8BMDuwmk8JCZw.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Convict",
-     "slug": "convict",
-     "poster": "https://image.tmdb.org/t/p/w342/mnvkok7eVau9Fg8BMDuwmk8JCZw.jpg",
+     "title": "The Corrupted",
+     "slug": "the-corrupted",
+     "poster": "https://image.tmdb.org/t/p/w342/elf6HOIOAwMlxc4ZBsprEc5VQHc.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -1059,7 +1087,7 @@
    ],
    "slug": "you-can-see-everything",
    "wikiWeeklyViews": 1025511,
-   "trailerViews": 57175,
+   "trailerViews": 57199,
    "take": "Critics loved this one, and the second half and ambition drew the loudest praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1068,6 +1096,12 @@
    ],
    "takeArticle": "You Can See Everything",
    "criticsTone": "acclaim",
+   "reception": {
+    "rt": {
+     "pct": 98
+    },
+    "asOf": "2026-10-28"
+   },
    "hook": "Nathan Fielder's directorial debut.",
    "fcScore": {
     "verdict": "Must watch",
@@ -1125,16 +1159,16 @@
      "kind": "movie"
     },
     {
-     "title": "The Paper Tigers",
-     "slug": "the-paper-tigers",
-     "poster": "https://image.tmdb.org/t/p/w342/x54tAgLfS51fO5EcipNJJ9tfSRK.jpg",
+     "title": "Doctor Strange in the Multiverse of Madness",
+     "slug": "doctor-strange-in-the-multiverse-of-madness",
+     "poster": "https://image.tmdb.org/t/p/w342/ddJcSKbcp4rKZTmuyWaMhuwcfMz.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Doctor Strange in the Multiverse of Madness",
-     "slug": "doctor-strange-in-the-multiverse-of-madness",
-     "poster": "https://image.tmdb.org/t/p/w342/ddJcSKbcp4rKZTmuyWaMhuwcfMz.jpg",
+     "title": "The Paper Tigers",
+     "slug": "the-paper-tigers",
+     "poster": "https://image.tmdb.org/t/p/w342/x54tAgLfS51fO5EcipNJJ9tfSRK.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -1149,6 +1183,13 @@
      "title": "Mulan",
      "slug": "mulan",
      "poster": "https://image.tmdb.org/t/p/w342/aKx1ARwG55zZ0GpRvU2WrGrCG9o.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Monster Hunter",
+     "slug": "monster-hunter",
+     "poster": "https://image.tmdb.org/t/p/w342/1UCOF11QCw8kcqvce8LKOO6pimh.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -1181,13 +1222,6 @@
      "kind": "movie"
     },
     {
-     "title": "Justice League",
-     "slug": "justice-league",
-     "poster": "https://image.tmdb.org/t/p/w342/eifGNCSDuxJeS1loAXil5bIGgvC.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "The Big Brawl",
      "slug": "the-big-brawl",
      "poster": "https://image.tmdb.org/t/p/w342/jFl2hmGWFX9mw0NvOOn08Zr8bn5.jpg",
@@ -1195,9 +1229,9 @@
      "kind": "movie"
     },
     {
-     "title": "Halo: Nightfall",
-     "slug": "halo-nightfall",
-     "poster": "https://image.tmdb.org/t/p/w342/liLQ8EFzHN06eFZ9KQMDK6cmGaK.jpg",
+     "title": "Warcraft",
+     "slug": "warcraft",
+     "poster": "https://image.tmdb.org/t/p/w342/eGi5aoxaZveqNLtE7BZJCuWwR3G.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1241,7 +1275,7 @@
    "theatricalHere": true,
    "slug": "street-fighter",
    "wikiWeeklyViews": 446001,
-   "trailerViews": 35298367,
+   "trailerViews": 35300321,
    "take": "A divided reception: the performances won praise, the humour took the heat.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1249,6 +1283,12 @@
    ],
    "takeArticle": "Street Fighter (2026 film)",
    "criticsTone": "mixed",
+   "reception": {
+    "rt": {
+     "pct": 41
+    },
+    "asOf": "2026-10-28"
+   },
    "fcScore": {
     "verdict": "Skip",
     "reason": "Neither audiences nor critics are sold.",
@@ -1485,7 +1525,7 @@
    "ottFreshDate": "2026-10-23",
    "slug": "lupin",
    "wikiWeeklyViews": 100388,
-   "trailerViews": 6795516,
+   "trailerViews": 6796033,
    "take": "Reviewers responded well — the performances and writing came in for particular praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1494,6 +1534,12 @@
    ],
    "takeArticle": "Lupin (French TV series)",
    "criticsTone": "positive",
+   "reception": {
+    "rt": {
+     "pct": 98
+    },
+    "asOf": "2026-10-28"
+   },
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences and critics agree.",
@@ -1611,13 +1657,13 @@
       "e": 13,
       "name": "Episode 13",
       "date": "2026-10-28",
-      "runtime": null
+      "runtime": 48
      },
      {
       "e": 14,
       "name": "Episode 14",
       "date": "2026-10-28",
-      "runtime": null
+      "runtime": 49
      },
      {
       "e": 15,
@@ -1820,16 +1866,16 @@
      "kind": "tv"
     },
     {
-     "title": "Moonlight Mystique",
-     "slug": "moonlight-mystique",
-     "poster": "https://image.tmdb.org/t/p/w342/4tqNdo1e3dwxPUGGidcuT9IMfJ1.jpg",
+     "title": "Flourished Peony",
+     "slug": "flourished-peony",
+     "poster": "https://image.tmdb.org/t/p/w342/4Kuw2vKrYaw6hBAL2IE3LNtvEzU.jpg",
      "language": "Chinese",
      "kind": "tv"
     },
     {
-     "title": "Flourished Peony",
-     "slug": "flourished-peony",
-     "poster": "https://image.tmdb.org/t/p/w342/4Kuw2vKrYaw6hBAL2IE3LNtvEzU.jpg",
+     "title": "Moonlight Mystique",
+     "slug": "moonlight-mystique",
+     "poster": "https://image.tmdb.org/t/p/w342/4tqNdo1e3dwxPUGGidcuT9IMfJ1.jpg",
      "language": "Chinese",
      "kind": "tv"
     },
@@ -1869,16 +1915,16 @@
      "kind": "tv"
     },
     {
-     "title": "The Rainmaker",
-     "slug": "the-rainmaker",
-     "poster": "https://image.tmdb.org/t/p/w342/q8l0lj20amBFi0SBs8NI9yJpaHq.jpg",
+     "title": "Swagger",
+     "slug": "swagger",
+     "poster": "https://image.tmdb.org/t/p/w342/nASkt8izgpR4toMYgiAnxfjWcE2.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "North & South",
-     "slug": "north-south",
-     "poster": "https://image.tmdb.org/t/p/w342/djdM8JblEUsJN23vXd869X7ACQE.jpg",
+     "title": "The Rainmaker",
+     "slug": "the-rainmaker",
+     "poster": "https://image.tmdb.org/t/p/w342/q8l0lj20amBFi0SBs8NI9yJpaHq.jpg",
      "language": "English",
      "kind": "tv"
     }
@@ -1923,7 +1969,7 @@
    "ottSince": "2026-10-25",
    "ottFreshDate": "2026-10-23",
    "slug": "tigers-sniff-the-rose",
-   "trailerViews": 1433
+   "trailerViews": 1439
   },
   {
    "title": "Cyberpunk: Edgerunners",
@@ -2151,7 +2197,7 @@
    "ottFreshDate": "2026-10-20",
    "slug": "cyberpunk-edgerunners",
    "wikiWeeklyViews": 97778,
-   "trailerViews": 7757573,
+   "trailerViews": 7757735,
    "take": "Critics kept circling back to the action and visuals — in a good way.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2159,6 +2205,12 @@
     "visuals"
    ],
    "takeArticle": "Cyberpunk: Edgerunners",
+   "reception": {
+    "rt": {
+     "pct": 100
+    },
+    "asOf": "2026-10-28"
+   },
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences love it.",
@@ -2392,12 +2444,22 @@
    "slug": "the-terminal-list",
    "wikiWeeklyViews": 295008,
    "trending": true,
-   "trailerViews": 12628657,
+   "trailerViews": 12628953,
    "take": "A divided response, and the writing carries most of the blame.",
    "takeSrc": "wiki",
    "takeArticle": "The Terminal List",
    "criticsTone": "mixed",
    "criticsCount": 1,
+   "reception": {
+    "rt": {
+     "pct": 40
+    },
+    "ratings": {
+     "n": 1,
+     "median": 3.5
+    },
+    "asOf": "2026-10-28"
+   },
    "takeCounter": "The audience isn't buying the reviews — they rate it far higher.",
    "fcScore": {
     "verdict": "Worth a watch",
@@ -2649,7 +2711,7 @@
    "stillGood": true,
    "slug": "tulsa-king",
    "wikiWeeklyViews": 84320,
-   "trailerViews": 11436231,
+   "trailerViews": 11436304,
    "take": "Critics came away positive, praising the humour and second half while docking points for the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2658,6 +2720,12 @@
    ],
    "takeArticle": "Tulsa King",
    "criticsTone": "positive",
+   "reception": {
+    "rt": {
+     "pct": 79
+    },
+    "asOf": "2026-10-28"
+   },
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences and critics agree.",
@@ -3005,7 +3073,8 @@
    "ottFreshDate": "2026-10-16",
    "stillGood": true,
    "slug": "where-the-mask-ends",
-   "trailerViews": 48007
+   "wikiWeeklyViews": 5998,
+   "trailerViews": 48003
   },
   {
    "title": "The Lament of Autumn",
@@ -3406,7 +3475,7 @@
    "ottFreshDate": "2026-10-12",
    "stillGood": true,
    "slug": "the-lament-of-autumn",
-   "trailerViews": 290892
+   "trailerViews": 290919
   },
   {
    "title": "#Love",
@@ -3869,12 +3938,17 @@
    "ottFreshDate": "2026-09-18",
    "stillGood": true,
    "slug": "mobland",
-   "wikiWeeklyViews": 187542,
-   "trailerViews": 12321270,
+   "trailerViews": 12321605,
    "take": "A love-it-or-hate-it reception, right down the middle.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
    "criticsTone": "mixed",
+   "reception": {
+    "rt": {
+     "pct": 76
+    },
+    "asOf": "2026-10-28"
+   },
    "takeCounter": "The audience isn't buying the reviews — they rate it far higher.",
    "fcScore": {
     "verdict": "Worth a watch",
@@ -4110,11 +4184,17 @@
    "slug": "slow-horses",
    "wikiWeeklyViews": 390050,
    "trending": true,
-   "trailerViews": 5870178,
+   "trailerViews": 5870288,
    "take": "Critics loved this one; reception has been close to universal acclaim.",
    "takeSrc": "wiki",
    "takeArticle": "Slow Horses",
    "criticsTone": "acclaim",
+   "reception": {
+    "rt": {
+     "pct": 95
+    },
+    "asOf": "2026-10-28"
+   },
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences and critics agree.",
@@ -4156,13 +4236,6 @@
    "isRecent": true,
    "similar": [
     {
-     "title": "Chief of Station",
-     "slug": "chief-of-station",
-     "poster": "https://image.tmdb.org/t/p/w342/vwRpODBF9Pwt56C7fhaKfGTV2XS.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "The Desperate Hour",
      "slug": "the-desperate-hour",
      "poster": "https://image.tmdb.org/t/p/w342/u6Pg9eTklhg6Aa7kXaxrfdE1Chi.jpg",
@@ -4177,30 +4250,9 @@
      "kind": "movie"
     },
     {
-     "title": "Transporter 3",
-     "slug": "transporter-3",
-     "poster": "https://image.tmdb.org/t/p/w342/o4w9VF3GRZuXe9NHHvZ07pJespl.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Escapist",
-     "slug": "the-escapist",
-     "poster": "https://image.tmdb.org/t/p/w342/9eyKD0mvE0ZSbuxPzmm5wvQaNRr.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Overdrive",
      "slug": "overdrive",
      "poster": "https://image.tmdb.org/t/p/w342/a0hTRjis1cxwmjOuBaS7WdDG3dj.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Furious 7",
-     "slug": "furious-7",
-     "poster": "https://image.tmdb.org/t/p/w342/wurKlC3VKUgcfsn0K51MJYEleS2.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -4226,6 +4278,13 @@
      "kind": "movie"
     },
     {
+     "title": "Hatari!",
+     "slug": "hatari",
+     "poster": "https://image.tmdb.org/t/p/w342/fT1Ht8PSM5cFKmejrnufWvpXAPk.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Gone in 60 Seconds",
      "slug": "gone-in-60-seconds",
      "poster": "https://image.tmdb.org/t/p/w342/qYyeAodAOe4nHuzkHdN35ValzLT.jpg",
@@ -4233,9 +4292,30 @@
      "kind": "movie"
     },
     {
-     "title": "Hatari!",
-     "slug": "hatari",
-     "poster": "https://image.tmdb.org/t/p/w342/fT1Ht8PSM5cFKmejrnufWvpXAPk.jpg",
+     "title": "Patriots Day",
+     "slug": "patriots-day",
+     "poster": "https://image.tmdb.org/t/p/w342/mIDxsJTrOC7NhgOo3GziiHyKfsQ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Angel Eyes",
+     "slug": "angel-eyes",
+     "poster": "https://image.tmdb.org/t/p/w342/6ZeMoynnz4pRweKKZ9c2G1absMJ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Fugitive",
+     "slug": "the-fugitive",
+     "poster": "https://image.tmdb.org/t/p/w342/b3rEtLKyOnF89mcK75GXDXdmOEf.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Convoy",
+     "slug": "convoy",
+     "poster": "https://image.tmdb.org/t/p/w342/xjowoBInlikSlvfAYDRN9ubaODB.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -4278,7 +4358,7 @@
    ],
    "theatricalHere": true,
    "slug": "the-mongoose",
-   "trailerViews": 648645,
+   "trailerViews": 648826,
    "verdict": ""
   },
   {
@@ -4441,7 +4521,7 @@
    ],
    "theatricalHere": true,
    "slug": "ramayana-rise-of-a-legend",
-   "trailerViews": 20309983,
+   "trailerViews": 20311889,
    "verdict": ""
   },
   {
@@ -5055,7 +5135,7 @@
    ],
    "theatricalHere": true,
    "slug": "the-beast",
-   "trailerViews": 2131241,
+   "trailerViews": 2131380,
    "verdict": ""
   },
   {
@@ -5218,7 +5298,7 @@
    ],
    "theatricalHere": true,
    "slug": "dune-part-three",
-   "trailerViews": 9641829,
+   "trailerViews": 9890403,
    "verdict": ""
   },
   {
@@ -5383,7 +5463,7 @@
    ],
    "theatricalHere": true,
    "slug": "avengers-doomsday",
-   "trailerViews": 50918917,
+   "trailerViews": 50924375,
    "verdict": ""
   }
  ],
@@ -5483,6 +5563,13 @@
        "kind": "movie"
       },
       {
+       "title": "The Deliverance",
+       "slug": "the-deliverance",
+       "poster": "https://image.tmdb.org/t/p/w342/og1FteMFRInoQnlZeWqEn8XpXHh.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
        "title": "Bloodline Killer",
        "slug": "bloodline-killer",
        "poster": "https://image.tmdb.org/t/p/w342/wHmzCQwBzT6m8wtZdXHOIITn82B.jpg",
@@ -5500,13 +5587,6 @@
        "title": "The Other",
        "slug": "the-other",
        "poster": "https://image.tmdb.org/t/p/w342/kE6FV8Lc9Aqir6OlgaNgnbFcy9E.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
-       "title": "The Possessed",
-       "slug": "the-possessed",
-       "poster": "https://image.tmdb.org/t/p/w342/tDmWqD80zzxQZhgSzDEOW2llS0L.jpg",
        "language": "English",
        "kind": "movie"
       }
@@ -5592,16 +5672,16 @@
        "kind": "movie"
       },
       {
-       "title": "A California Christmas",
-       "slug": "a-california-christmas",
-       "poster": "https://image.tmdb.org/t/p/w342/caCbdsdGHDJNMjSiA5X4mgIfe61.jpg",
+       "title": "The Life List",
+       "slug": "the-life-list",
+       "poster": "https://image.tmdb.org/t/p/w342/5fg98cVo7da7OIK45csdLSd4NaU.jpg",
        "language": "English",
        "kind": "movie"
       },
       {
-       "title": "The Life List",
-       "slug": "the-life-list",
-       "poster": "https://image.tmdb.org/t/p/w342/5fg98cVo7da7OIK45csdLSd4NaU.jpg",
+       "title": "A California Christmas",
+       "slug": "a-california-christmas",
+       "poster": "https://image.tmdb.org/t/p/w342/caCbdsdGHDJNMjSiA5X4mgIfe61.jpg",
        "language": "English",
        "kind": "movie"
       },
@@ -5641,9 +5721,9 @@
        "kind": "movie"
       },
       {
-       "title": "Chéri",
-       "slug": "ch-ri",
-       "poster": "https://image.tmdb.org/t/p/w342/b35rv11ebJdqCe5chVmSUZ0RIlX.jpg",
+       "title": "You Will Meet a Tall Dark Stranger",
+       "slug": "you-will-meet-a-tall-dark-stranger",
+       "poster": "https://image.tmdb.org/t/p/w342/oBhnI8UZQzTkAH1LMEtrBUmfpjS.jpg",
        "language": "English",
        "kind": "movie"
       }
@@ -6580,6 +6660,12 @@
    "takeSrc": "wiki",
    "takeArticle": "VisionQuest",
    "criticsTone": "positive",
+   "reception": {
+    "rt": {
+     "pct": 90
+    },
+    "asOf": "2026-10-28"
+   },
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences and critics agree.",
@@ -6835,6 +6921,12 @@
    ],
    "takeArticle": "Carrie (miniseries)",
    "criticsTone": "positive",
+   "reception": {
+    "rt": {
+     "pct": 85
+    },
+    "asOf": "2026-10-28"
+   },
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences and critics agree.",
@@ -7017,6 +7109,12 @@
    ],
    "takeArticle": "Moana (2026 film)",
    "criticsTone": "mixed",
+   "reception": {
+    "rt": {
+     "pct": 33
+    },
+    "asOf": "2026-10-28"
+   },
    "takeCounter": "The audience isn't buying the reviews — they rate it far higher.",
    "fcScore": {
     "verdict": "Worth a watch",
@@ -7448,5 +7546,5 @@
    "slug": "drive-the-pretenders"
   }
  ],
- "trackedFilms": 1364
+ "trackedFilms": 1365
 }

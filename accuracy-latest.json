@@ -2,38 +2,20 @@
  "date": "2026-10-28",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 3,
- "high": 2,
- "correctable": 2,
+ "pagesDisagreeing": 1,
+ "high": 1,
+ "correctable": 1,
  "byField": {
-  "genres": 1,
-  "streaming": 1,
-  "release date": 1
+  "streaming": 1
  },
  "rows": [
-  {
-   "field": "genres",
-   "severity": "low",
-   "page": "Romance / Comedy",
-   "tmdb": "Romance, Drama",
-   "code": "in",
-   "slug": "mr-perfect"
-  },
   {
    "field": "streaming",
    "severity": "high",
    "page": "not streaming",
-   "tmdb": "on Prime Video, HBO Max",
-   "code": "uk",
-   "slug": "se7en"
-  },
-  {
-   "field": "release date",
-   "severity": "high",
-   "page": "2026-02-25",
-   "tmdb": "2001-10-02",
-   "code": "sg",
-   "slug": "scrubs"
+   "tmdb": "on Redlight Cinema",
+   "code": "de",
+   "slug": "graphic-desires"
   }
  ]
 }
