@@ -1304,7 +1304,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       <div class="meta">${v3 ? V2.v3Meta(item, { fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? V2.v2Meta(item, year) : (lean
         ? [item.language, item.genre, item.runtime ? (item.kind === "tv" ? `${item.runtime} min episodes` : item.runtime + " min") : null]
         : [item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert]).filter(Boolean).map(e).join(" · ")}</div>
-      ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Where(item, { relState, country, V: V_TITLE, asOf, fmt: (d) => fmtDateFull(d, localeFor(code)), hubLinks: filmHubLinks(item, cfg) }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
+      ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Where(item, { relState, country, V: V_TITLE, asOf, fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
       ${item.released && !v2 ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px"${v2 ? ' hidden' : ""}>Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
     </div>
@@ -1491,6 +1491,9 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       const rec = FILM_HISTORY.get(`${code}:${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}`);
       const days = rec ? cinemaWindowDays(rec, FILM_HISTORY.starts()) : null;
       if (days != null) rows.unshift(`<tr><td>OTT arrival</td><td>${e(fcdataWindowPhrase(days))}${rec.p ? `, on ${e(rec.p)}` : ""} (FilmyChill data)</td></tr>`);
+      // The platform's own pages (crawl paths from every film back to the lists), as a row.
+      const links = filmHubLinks(item, cfg).replace(/^<p[^>]*>More: /, "").replace(/<\/p>$/, "");
+      if (links && providers.length) rows.push(`<tr><td>More on ${e(canonProvider(providers[0]))}</td><td>${links}</td></tr>`);
       return rows.length ? `<h2>Good to know</h2><table class="gtk">${rows.join("")}</table>` : "";
     }
     return v2 && wtw ? `<div class="wtw" id="where-to-watch">${wtw}</div>` : wtw;

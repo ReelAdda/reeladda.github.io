@@ -246,14 +246,35 @@ function v3Css(baseCss) { return v2Css(baseCss) + "\n" + V3_CSS; }
 function v3Tag(item) {
   const e = escHtml;
   if (item.trending) return `<span class="v3tag">Trending</span>`;
-  const badge = item.badge || (item.isRecent ? "New release" : null);
+  // The badge as the lists compute it (lib/freshness.js freshBadge), from the latest season's
+  // start — so a frozen page, which has no badge in its facts, says "New season" when the
+  // pop-up does, and never from the series' first-ever air date.
+  const start = item.kind === "tv" ? seasonStart(item) : (item.freshDate || item.released);
+  const seasons = item.kind === "tv" ? (item.seasons || (item.episodes && item.episodes.seasons) || null) : null;
+  const derived = start ? require("./freshness.js").freshBadge(item.kind === "tv" ? "tv" : "movie", String(start).slice(0, 10), Date.now(), seasons) : null;
+  const badge = item.badge || derived || (item.isRecent ? "New release" : null);
   if (!badge) return "";
   return `<span class="v3tag ${/season/i.test(badge) ? "season" : "new"}">${e(badge)}</span>`;
+}
+// Pure: when the LATEST season started — the current season's first episode date from the
+// episode guide (kept in the facts), else `freshDate` (this week's data); never the series'
+// first-ever air date, which `released` holds for a series (Lupin: 8 Jan 2021 is not "latest
+// season", 28 Oct 2026). null when neither is known: the line then says nothing about it.
+function seasonStart(item) {
+  // This week's data first (the pop-up's date, lib/rules.js deriveFreshDate: the market's own
+  // date where it differs); the episode guide's earliest date for frozen pages, which carry no
+  // freshDate.
+  if (item && item.freshDate) return String(item.freshDate).slice(0, 10);
+  const ep = item && item.kind === "tv" ? item.episodes : null;
+  const first = ep && ep.list && ep.list.length ? ep.list.map((x) => x.date).filter(Boolean).sort()[0] : null;
+  return first || null;
 }
 // Pure: the meta line — genre · language · latest season / released <date> · runtime · trailer views.
 function v3Meta(item, { fmt = (d) => d } = {}) {
   const { trailerViewsLabel } = require("./editorial.js");
-  const when = item.released ? (item.kind === "tv" ? `Latest season ${fmt(item.released)}` : `Released ${fmt(item.released)}`) : null;
+  const when = item.kind === "tv"
+    ? (seasonStart(item) ? `Latest season ${fmt(seasonStart(item))}` : null)
+    : (item.released ? `Released ${fmt(item.released)}` : null);
   const tv = item.trailerViews ? trailerViewsLabel(item.trailerViews) : null;
   return [item.genre, item.language, when, item.runtime ? `${item.runtime} min` : null, tv].filter(Boolean).map(escHtml).join(" · ");
 }
@@ -264,7 +285,7 @@ function v3Meta(item, { fmt = (d) => d } = {}) {
 // the "Availability as of <date> — …" sentence in its two forms, the SW:stream / SW:live /
 // SW:arrived markers, and the hub links. The audience pill is not class "pill", so it is never
 // read as a provider.
-function v3Where(item, { relState, country, V, asOf = "", fmt = (d) => d, hubLinks = "" }) {
+function v3Where(item, { relState, country, V, asOf = "", fmt = (d) => d }) {
   const e = escHtml;
   const votes = Number(item.votes || 0);
   const aud = item.rating != null && votes
@@ -273,30 +294,29 @@ function v3Where(item, { relState, country, V, asOf = "", fmt = (d) => d, hubLin
   const provs = (item.providers || []).map(String), rb = Array.isArray(item.rentBuy) ? item.rentBuy.map(String) : [];
   const ott = V.word === "OTT" ? "OTT" : "streaming";
   const when = asOf ? e(fmt(asOf)) : "";
-  const note = `<p class="wnote">Availability as of ${when} — platforms may change over time.</p>`;
+  // The platform pill is the whole visible answer (the owner: "platform name is enough"). The
+  // availability sentence the facts store and the sweeps read stays, as a comment, in its two
+  // exact forms; nothing else is printed.
+  const note = `<!--Availability as of ${when} — platforms may change over time.-->`;
   const checked = item.untracked
-    ? `<p class="wnote">Availability as of ${when} — the last time we could check. We can't match this film on TMDB, so this page won't update on its own.</p>`
-    : `<p class="wnote">Availability as of ${when} — checked that day: not on any streaming service in ${e(country)} yet.</p>`;
+    ? `<!--Availability as of ${when} — the last time we could check. We can't match this film on TMDB, so this page won't update on its own.-->`
+    : `<!--Availability as of ${when} — checked that day: not on any streaming service in ${e(country)} yet.-->`;
   const rentPills = rb.length ? `<span class="wlbl">Rent or buy</span>${rb.map((p) => `<span class="pill">${e(p)}</span>`).join("")}` : "";
-  const rentNote = `<p class="wnote">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>`;
   const wrap = (pills, caption, { live = false } = {}) => (live
     ? `<!--FC:wtw--><!--SW:stream--><!--SW:live=${e(asOf || "")}--><div class="pills">${aud}${pills}</div>${caption}<!--/SW:stream--><!--/FC:wtw-->`
     : `<!--FC:wtw--><div class="pills">${aud}${pills}</div>${caption}<!--/FC:wtw-->`);
   if (provs.length) {
-    const arrived = item.arrived
-      ? `<!--SW:arrived=${e(item.arrived)}|${e(item.arrivedOn || provs[0])}--><p class="wnote arrived"><b>Streaming ${provs.includes(item.arrivedOn) ? `on ${e(item.arrivedOn)} ` : ""}in ${e(country)} since ${e(fmt(item.arrived))}.</b></p>`
-      : "";
+    const arrived = item.arrived ? `<!--SW:arrived=${e(item.arrived)}|${e(item.arrivedOn || provs[0])}-->` : "";
     // class="pill" exactly: lib/facts.js reads providers by that attribute, character for character.
-    return wrap(provs.map((p) => `<span class="pill">${e(p)}</span>`).join("") + rentPills,
-      `<p class="wnote"><b>Included with a subscription</b> — no extra charge on these platforms.</p>${arrived}${note}${hubLinks}`, { live: true });
+    return wrap(provs.map((p) => `<span class="pill">${e(p)}</span>`).join("") + rentPills, `${arrived}${note}`, { live: true });
   }
   // Status pills (not providers; lib/facts.js STATUS_PILL skips them) sit in a .st wrapper, so
   // they draw as the quiet dashed pill while keeping the class the readers expect.
-  if (item.platform === "Theatres") return wrap(`<span class="st"><span class="pill">In theatres</span></span>${rentPills}`, rb.length ? rentNote + note : checked);
-  if (rb.length) return wrap(rentPills, rentNote + note);
+  if (item.platform === "Theatres") return wrap(`<span class="st"><span class="pill">In theatres</span></span>${rentPills}`, rb.length ? note : checked);
+  if (rb.length) return wrap(rentPills, note);
   if ((relState === "upcoming" || relState === "today") && item.released) {
     const pill = relState === "today" ? "In cinemas today" : `In cinemas from ${e(fmt(item.released))}`;
-    return wrap(`<span class="st"><span class="pill">${pill}</span></span>`, `<p class="wnote">Not out yet — nowhere to stream or rent it until it opens.</p>`);
+    return wrap(`<span class="st"><span class="pill">${pill}</span></span>`, "");
   }
   // Nowhere: no block for the readers (as before), just the honest pill.
   return `<div class="pills">${aud}<span class="ppill none">Not on ${ott} in ${e(country)} ${item.state === "gone" ? "right now" : "yet"}</span></div>`;
@@ -304,4 +324,4 @@ function v3Where(item, { relState, country, V, asOf = "", fmt = (d) => d, hubLin
 // Kept for the mock-up's callers.
 function v3Pills(item, opts) { return v3Where(item, opts); }
 
-module.exports = { DEEP, HERO_GRADIENT, V2_CSS, V2_FEATURE, V2_MARK, V3_CSS, daysWord, v2Crumbs, v2Css, v2Cta, v2Header, v2Meta, v2Page, v2ScorePill, v2Sticky, v2Trailer, v3Css, v3Header, v3Meta, v3Pills, v3Tag, v3Where };
+module.exports = { DEEP, HERO_GRADIENT, V2_CSS, V2_FEATURE, V2_MARK, V3_CSS, daysWord, v2Crumbs, v2Css, v2Cta, v2Header, v2Meta, v2Page, v2ScorePill, v2Sticky, v2Trailer, seasonStart, v3Css, v3Header, v3Meta, v3Pills, v3Tag, v3Where };

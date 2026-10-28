@@ -9142,7 +9142,7 @@ test("Wikipedia reception figures (28 Oct 2026): parsed with counts, cached with
   } finally { R.useRolloutConfig(null); }
 });
 test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to-watch block at the top, the critics label follows its figure", () => {
-  const R = require("./lib/rollout.js"), F = require("./lib/facts.js"), Fp = require("./lib/filmpage.js"), RC = require("./lib/reception.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const R = require("./lib/rollout.js"), F = require("./lib/facts.js"), Fp = require("./lib/filmpage.js"), RC = require("./lib/reception.js"), V2 = require("./lib/pagev2.js"), IN = require("./lib/core.js").COUNTRIES[0];
   const rec = { rt: { pct: 91, n: 87 }, mc: { score: 64, n: 25 }, asOf: "2026-10-10" };
   const it = { title: "T", slug: "t", kind: "movie", released: "2026-10-01", language: "Hindi", genre: "Drama / Crime", runtime: 128, providers: ["Netflix"], rentBuy: ["Apple TV"], tmdbId: 1, rating: 7.8, votes: 500, trending: true, director: "D",
     fullReview: "A long story. " + "Sentence after sentence. ".repeat(60), fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" }, reception: rec, arrived: "2026-10-05", arrivedOn: "Netflix" };
@@ -9167,7 +9167,17 @@ test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to
     assert.ok(/<div class="top v3"><a class="mark"[^>]*><svg class="brand-mark"/.test(v3) && /<span class="v3tag">Trending<\/span>\s*<h1>T \(2026\)<\/h1>/.test(v3));
     assert.ok(/<div class="meta">Drama \/ Crime · Hindi · Released 1 Oct 2026 · 128 min<\/div>/.test(v3), "meta line");
     assert.ok(/<!--FC:wtw--><!--SW:stream--><!--SW:live=2026-10-28--><div class="pills"><span class="rpill">★ 7\.8\/10 \(500 ratings\)<\/span><span class="pill">Netflix<\/span><span class="wlbl">Rent or buy<\/span><span class="pill">Apple TV<\/span><\/div>/.test(v3), "the block under the title, markers inside");
-    assert.ok(/<!--SW:arrived=2026-10-05\|Netflix-->/.test(v3) && /Availability as of 28 Oct 2026 — platforms may change over time\./.test(v3));
+    assert.ok(/<!--SW:arrived=2026-10-05\|Netflix-->/.test(v3) && /<!--Availability as of 28 Oct 2026 — platforms may change over time\.-->/.test(v3), "the sweep markers and the availability sentence stay, as comments");
+    assert.ok(!/Included with a subscription|platforms may change over time\.<\/p>|Streaming on Netflix in India since/.test(v3.replace(/<!--[\s\S]*?-->/g, "")), "nothing printed under the pills but the pills");
+    assert.ok(/<tr><td>More on Netflix<\/td><td><a href="\/new-on-netflix\/">Everything new on Netflix<\/a>/.test(v3) || !/new-on-netflix/.test(v3), "the platform links as a Good to know row");
+    // Dates: a series' "Latest season" is the latest season's start, never the first-ever air date.
+    const lupin = { ...it, kind: "tv", title: "Lupin", trending: false, released: "2021-01-08", seasons: 3, episodes: { count: 8, seasons: 3, season: 3, list: [{ e: 1, name: "A", date: "2026-10-23" }, { e: 2, name: "B", date: "2026-10-23" }] } };
+    const lp = on(100, lupin);
+    assert.ok(/Latest season 23 Oct 2026/.test(lp) && !/Latest season 8 Jan 2021/.test(lp) && /<span class="v3tag season">New season<\/span>/.test(lp), lp.match(/<div class="meta">[^<]*/)[0]);
+    assert.ok(/<h1>Lupin \(2021\)<\/h1>/.test(lp), "the start year stays in the title");
+    assert.strictEqual(V2.seasonStart({ kind: "tv", released: "2021-01-08", freshDate: "2026-10-23" }), "2026-10-23", "freshDate when there is no guide");
+    assert.strictEqual(V2.seasonStart({ kind: "tv", released: "2021-01-08" }), null, "nothing known: the line says nothing rather than the first-air date");
+    assert.ok(!/Latest season/.test(on(100, { ...it, kind: "tv", released: "2021-01-08", episodes: undefined })));
     const order = ["<h2>Story</h2>", '<p class="dir"><b>Director:</b> D</p>', "<h2>Good to know</h2>", "<h2>Trailer</h2>"].map((s) => v3.indexOf(s));
     assert.ok(order[0] > 0 && order.every((p, i) => i === 0 || p === -1 || p > order[i - 1]), "Story before Director before Good to know");
     assert.ok(!/What the audience says|What the critics say|Is it for you|<dt>Best for|<dt>Binge it|<h2>Where to watch|class="anscard"|class="cta|data-act="share"|id="sticky"/.test(v3), "fillers, answer card, CTA, Share, the separate Where to watch and the sticky bar are gone");
@@ -9187,7 +9197,7 @@ test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to
     const rent = on(100, { ...it, providers: [], arrived: undefined });
     assert.deepStrictEqual([F.extractFacts(rent).providers || [], F.extractFacts(rent).rentBuy], [[], ["Apple TV"]]);
     const up = on(100, { ...it, providers: [], rentBuy: [], released: "2026-12-20", arrived: undefined });
-    assert.ok(/<span class="pill">In cinemas from 20 Dec 2026<\/span>/.test(up) && /Not out yet — nowhere to stream or rent it until it opens\./.test(up));
+    assert.ok(/<span class="pill">In cinemas from 20 Dec 2026<\/span>/.test(up) && !/Not out yet — nowhere to stream/.test(up), "the pill alone");
     const none = on(100, { ...it, providers: [], rentBuy: [], platform: "", arrived: undefined });
     assert.ok(/<span class="ppill none">Not on OTT in India yet<\/span>/.test(none) && !/FC:wtw/.test(none));
     // 5. Dark mode: the vote widget follows the theme.
