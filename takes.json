@@ -90251,9 +90251,20 @@
     "kind": "rt",
     "value": 80
    },
-   "toneSrc": "summary"
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 80,
+     "n": 15,
+     "avg": 6.4
+    },
+    "mc": {
+     "score": 65,
+     "n": 13
+    }
+   }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt46066693": {
@@ -96466,6 +96477,20 @@
   "cat": true
  },
  "tt35255682": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-28",
+  "v": 6,
+  "cat": true
+ },
+ "tt49767080": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-28",
+  "v": 6
+ },
+ "tt42666999": {
   "take": null,
   "src": null,
   "checked": "2026-10-28",
