@@ -5952,13 +5952,21 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     // One derived sentence on the release pattern — only when every episode is dated and the dates fit one.
     const L = (ds) => ds.map((d, i) => ({ e: i + 1, name: `E${i + 1}`, date: d }));
     const D = ["2026-10-13", "2026-10-13", "2026-10-20", "2026-10-20", "2026-10-27", "2026-10-27", "2026-11-03", "2026-11-10"];
-    assert.strictEqual(S.releaseCadence({ count: 8, list: L(D) }, (d) => d), "Two episodes a week until 2026-10-27, then one a week; finale 2026-11-10.");
-    assert.strictEqual(S.releaseCadence({ count: 4, list: L(["2026-10-01", "2026-10-08", "2026-10-15", "2026-10-22"]) }, (d) => d), "One episode a week; finale 2026-10-22.");
-    assert.strictEqual(S.releaseCadence({ count: 4, list: L(["2026-10-01", "2026-10-01", "2026-10-08", "2026-10-15"]) }, (d) => d), "Two-episode premiere, then one a week; finale 2026-10-15.");
-    assert.strictEqual(S.releaseCadence({ count: 3, list: L(["2026-10-01", "2026-10-01", "2026-10-01"]) }, (d) => d), "All 3 episodes were released together on 2026-10-01.");
+    const OAD = " Original air dates.";   // every cadence sentence says whose dates these are
+    assert.strictEqual(S.releaseCadence({ count: 8, list: L(D) }, (d) => d), "Two episodes a week until 2026-10-27, then one a week; finale 2026-11-10." + OAD);
+    assert.strictEqual(S.releaseCadence({ count: 4, list: L(["2026-10-01", "2026-10-08", "2026-10-15", "2026-10-22"]) }, (d) => d), "One episode a week; finale 2026-10-22." + OAD);
+    assert.strictEqual(S.releaseCadence({ count: 4, list: L(["2026-10-01", "2026-10-01", "2026-10-08", "2026-10-15"]) }, (d) => d), "Two-episode premiere, then one a week; finale 2026-10-15." + OAD);
+    assert.strictEqual(S.releaseCadence({ count: 3, list: L(["2026-10-01", "2026-10-01", "2026-10-01"]) }, (d) => d), "All 3 episodes were released together on 2026-10-01." + OAD);
     assert.strictEqual(S.releaseCadence({ count: 3, list: L(["2026-10-01", "2026-10-04", "2026-10-30"]) }, (d) => d), null, "irregular dates: no sentence");
+    assert.strictEqual(S.releaseCadence({ count: 4, list: L(["2026-10-01", "2026-10-01", "2026-10-08", "2026-10-08"]) }, (d) => d), "Two episodes a week; finale 2026-10-08." + OAD);
     assert.strictEqual(S.releaseCadence({ count: 8, list: L(D.slice(0, 6)) }, (d) => d), null, "undated episodes left: no sentence");
-    assert.ok(/<p class="epcadence">Two episodes a week until 2026-10-27, then one a week; finale 2026-11-10\.<\/p>/.test(S.episodesHtml({ ...item, episodes: { ...ep, count: 8, list: L(D) } }, (d) => d, "2026-10-28")));
+    assert.ok(/<p class="epcadence">Two episodes a week until 2026-10-27, then one a week; finale 2026-11-10\. Original air dates\.<\/p>/.test(S.episodesHtml({ ...item, episodes: { ...ep, count: 8, list: L(D) } }, (d) => d, "2026-10-28")));
+    // v2 (lib/pagev2.js): "n of count out" with a progress bar; a finished season says so, bar-less.
+    const v2on = S.episodesHtml({ ...item, episodes: { ...ep, count: 8, list: L(D) } }, (d) => d, "2026-10-28", { v2: true });
+    assert.ok(/<span class="lbl">6 of 8 out<\/span>/.test(v2on) && /<div class="epbar"><i data-pct="75"><\/i><\/div>/.test(v2on), v2on.slice(0, 300));
+    const v2done = S.episodesHtml({ ...item, episodes: { ...ep, count: 8, list: L(D) } }, (d) => d, "2026-12-01", { v2: true });
+    assert.ok(/All 8 episodes out · finale 2026-11-10/.test(v2done) && !/epbar/.test(v2done), "finished: no bar");
+    assert.ok(/"timeRequired":"PT56M"/.test(JSON.stringify(S.episodeSchema({ count: 1, list: [{ e: 1, name: "A", date: "2026-10-13", runtime: 56 }] }))), "runtime as timeRequired");
     // The same list as TVSeason → TVEpisode structured data; names and dates only, no ratings.
     const sch = S.episodeSchema({ count: 8, season: 1, seasons: 1, list: [{ e: 1, name: "Pilot", date: "2026-10-13", rating: 8.4 }, { e: 2, date: null }] });
     assert.deepStrictEqual(sch, [{ "@type": "TVSeason", seasonNumber: 1, numberOfEpisodes: 8, episode: [
@@ -8979,6 +8987,63 @@ test("a released film keeps its year in the title when only the 'unconfirmed' ta
   // Year and tag can't both fit (whatever the window is today): the year stays, the tag goes.
   const mid = F.filmTitleTag({ title: "Dorothy", released: rel, kind: "movie", language: "Tamil", providers: [], platform: "Theatres" }, IN);
   assert.ok(/^Dorothy \(\d{4}\) OTT Release Date: Expected /.test(mid) && mid.length <= 60, mid);
+});
+test("redesign v2 (28 Oct 2026): four states of VisionQuest, every fact unchanged, no indigo fills, dark mode, contrast", () => {
+  const R = require("./lib/rollout.js"), F = require("./lib/facts.js"), Mg = require("./lib/migrate.js"), V2 = require("./lib/pagev2.js");
+  const IN = require("./lib/core.js").COUNTRIES[0];
+  const base = F.readFacts("in").get("visionquest");
+  if (!base) return;   // the facts file is not part of a bare checkout
+  const item = base.item, today = "2026-10-28";
+  const shift = (d, days) => new Date(Date.parse(d + "T00:00:00Z") + days * 864e5).toISOString().slice(0, 10);
+  const states = {
+    onAir: item,
+    finished: { ...item, episodes: { ...item.episodes, next: null, list: item.episodes.list.map((x, i) => ({ ...x, date: shift("2026-08-01", 7 * Math.floor(i / 2)) })) } },
+    unreleased: { ...item, released: "2026-11-20", providers: [], platform: "", fcScore: null, votes: 0, rating: null, episodes: { ...item.episodes, next: { s: 1, e: 1, name: "No Strings", date: "2026-11-20" }, list: item.episodes.list.map((x, i) => ({ ...x, date: shift("2026-11-20", 7 * Math.floor(i / 2)) })) } },
+    notStreaming: { ...item, providers: [], platform: "", rentBuy: [] },
+    digital: { ...item, providers: [], platform: "", rentBuy: [], digitalDate: "2026-11-05", digitalNote: "JioHotstar" },
+  };
+  const feats = { "lean-page": { percent: 100 }, "intent-titles": { percent: 100 }, "visible-similar": { percent: 100 }, "one-score": { percent: 100 }, "honest-not-announced": { percent: 100 } };
+  const render = (it, pct) => { R.useRolloutConfig({ features: { ...feats, "redesign-v2": { percent: pct } } }); return Mg.renderFrozen(it, IN, { asOf: today, knownSlugs: new Set() }); };
+  try {
+    for (const [name, it] of Object.entries(states)) {
+      const v2 = render(it, 100), lean = render(it, 0);
+      assert.ok(v2.includes(V2.V2_MARK) && !lean.includes(V2.V2_MARK));
+      // 1. Every fact the page is read for is the same as on the lean page: the flip re-dates nothing.
+      assert.deepStrictEqual(F.keyFacts(v2), F.keyFacts(lean), `${name}: keyFacts unchanged by v2`);
+      assert.strictEqual(require("./lib/sitemap.js").factsFingerprint(v2), require("./lib/sitemap.js").factsFingerprint(lean), `${name}: same fingerprint`);
+      // 2. Episode rows and TVEpisode entries agree.
+      assert.strictEqual((v2.match(/<li class="(?:out|next|soon)">/g) || []).length, (v2.match(/"@type":"TVEpisode"/g) || []).length, `${name}: rows == TVEpisode`);
+      // 3. No indigo fill in the stylesheet; links keep it.
+      const css = /<style>([\s\S]*?)<\/style>/.exec(v2)[1];
+      assert.ok(!/background(?:-color)?:\s*(?:var\(--indigo\)|#4038C7|rgba\(64,56,199)/i.test(css), `${name}: no #4038C7 fill`);
+      assert.ok(/--deep:#1B165F/.test(css) && /prefers-color-scheme: dark/.test(css) && /prefers-reduced-motion/.test(css));
+      assert.ok(/Original air dates\./.test(v2) && /<nav class="crumbs"/.test(v2) && /"name":"New on OTT"/.test(v2) && /\/js\/film\.js/.test(v2));
+      assert.ok(/<h1>VisionQuest \(2026\)<\/h1>/.test(v2), "the year stays in the h1 (facts read it there)");
+      assert.ok(!/\(Unconfirmed\)|undefined|null</.test(v2.replace(/"[^"]*":null/g, "")), `${name}: no placeholders`);
+    }
+    const on = render(states.onAir, 100);
+    assert.ok(/<b>Watch on JioHotstar<\/b>/.test(on) && /id="sticky"/.test(on) && !/data-countdown/.test(on) && /<span class="lbl">\d of 8 out<\/span>/.test(on));
+    assert.ok(/class="spill"[^>]*><svg[\s\S]*?<span class="sn">8\.6<\/span>Must watch<\/span>/.test(on), "score pill: number and verdict");
+    assert.ok(/<div class="frame yt" data-yt="sXKnmgmbkoE"/.test(on) && !/<iframe/.test(on), "trailer loads on tap");
+    const fin = render(states.finished, 100);
+    assert.ok(/All 8 episodes out · finale/.test(fin) && !/<div class="epbar">/.test(fin) && !/class="eptag"/.test(fin));
+    const un = render(states.unreleased, 100);
+    assert.ok(/<b>Releases 20 Nov 2026<\/b>/.test(un) && !/data-countdown/.test(un) && /data-act="remind" data-title="VisionQuest" data-date="2026-11-20"/.test(un) && !/id="sticky"/.test(un) && /spill soon/.test(un));
+    const ns = render(states.notStreaming, 100);
+    assert.ok(/cta none/.test(ns) && /Not on OTT in India yet/.test(ns) && !/id="sticky"/.test(ns) && !/data-act="remind"/.test(ns));
+    const dg = render(states.digital, 100);
+    assert.ok(/<b>Streams from 5 Nov 2026<\/b>/.test(dg) && /data-countdown="2026-11-05">in 8 days</.test(dg), "a streaming date counts down, in days");
+    const th = render({ ...states.unreleased, kind: "movie", episodes: undefined, released: "2026-11-20", platform: "Theatres" }, 100);
+    assert.ok(/<b>In theatres from 20 Nov 2026<\/b>/.test(th) && !/data-countdown/.test(th), "a theatre date: no countdown");
+    // 4. Contrast: 4.5:1 on every text/background pair, light and dark.
+    const lum = (hex) => { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+    const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+    for (const [fg, bg, what] of [["#1A1633", "#FFFFFF", "ink on card"], ["#6B6890", "#FFFFFF", "mute on card"], ["#6B6890", "#F7F5FF", "mute on bg"], ["#4038C7", "#FFFFFF", "link on card"], ["#1A1633", "#FFAD1F", "ink on marigold"], ["#FFFFFF", "#1B165F", "white on deep"], ["#1A1633", "#FFF1D6", "ink on tint"],
+      ["#F4F1FF", "#1A1538", "dark ink on card"], ["#A9A4CC", "#1A1538", "dark mute on card"], ["#A9A4CC", "#0F0C24", "dark mute on bg"], ["#B3AEFF", "#1A1538", "dark link on card"], ["#F4F1FF", "#3A2E10", "dark ink on tint"]]) {
+      assert.ok(ratio(fg, bg) >= 4.5, `${what}: ${ratio(fg, bg).toFixed(2)}:1`);
+    }
+    assert.strictEqual(V2.daysWord("2026-10-29", "2026-10-28"), "tomorrow"); assert.strictEqual(V2.daysWord("2026-10-28", "2026-10-28"), "today");
+  } finally { R.useRolloutConfig(null); }
 });
 test("a frozen page with no platform gets the 'not streaming yet' description its title promises (The Invite)", () => {
   const IN = require("./lib/core.js").COUNTRIES[0];

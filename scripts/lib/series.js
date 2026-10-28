@@ -153,7 +153,7 @@ function seriesDescription(item, fmt, today = new Date().toISOString().slice(0, 
 }
 
 // Pure: the "Episodes" section (series only). `fmt(date)` formats a date for the edition.
-function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10)) {
+function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10), { v2 = false } = {}) {
   const ep = item && item.kind === "tv" && item.episodes;
   if (!ep || !ep.count) return "";
   const e = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -174,7 +174,19 @@ function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10)) 
     return `<li class="${state}"><span class="epn">${x.e}</span><div><b>${e(x.name || `Episode ${x.e}`)}</b><small>${e(meta)}</small></div>${state === "next" ? '<span class="eptag">Next</span>' : ""}</li>`;
   }).join("");
   const cadence = releaseCadence(ep, fmt);
-  return `<h2>Episodes</h2><p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""} · original release dates</p>${next}`
+  const intro = `<p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""} · original air dates</p>`;
+  // v2 (lib/pagev2.js): "n of count out" with a progress bar while the season runs; a finished
+  // series says so with its finale date and has neither.
+  let head = `<h2>Episodes</h2>`;
+  if (v2) {
+    const dated = (ep.list || []).filter((x) => x.date);
+    const out = dated.filter((x) => x.date <= today).length;
+    const last = dated.map((x) => x.date).sort().pop();
+    const done = dated.length === ep.count && out === ep.count;
+    head = `<div class="ephead"><h2>Episodes</h2><span class="lbl">${done ? `All ${ep.count} episodes out${last ? ` · finale ${e(fmt(last))}` : ""}` : `${out} of ${ep.count} out`}</span></div>`
+      + (done ? "" : `<div class="epbar"><i data-pct="${Math.round(100 * out / ep.count)}"></i></div>`);
+  }
+  return head + intro + next
     + (items ? `<ol class="eplist">${items}</ol>` : "") + (cadence ? `<p class="epcadence">${e(cadence)}</p>` : "");
 }
 
@@ -188,19 +200,22 @@ function releaseCadence(ep, fmt) {
   const dates = [...new Set(list.map((x) => x.date))].sort();
   const per = dates.map((d) => list.filter((x) => x.date === d).length);
   const last = fmt(dates[dates.length - 1]);
-  if (dates.length === 1) return `All ${ep.count} episodes were released together on ${last}.`;
+  // Every sentence says whose dates these are: TMDB's original air dates, not a local schedule.
+  const tail = " Original air dates.";
+  if (dates.length === 1) return `All ${ep.count} episodes were released together on ${last}.${tail}`;
   const gaps = dates.slice(1).map((d, i) => (Date.parse(d) - Date.parse(dates[i])) / 864e5);
   if (!gaps.every((g) => g >= 6 && g <= 8)) return null;
   const words = ["", "One", "Two", "Three", "Four"];
   const n = (k) => words[k] || String(k);
-  if (per.every((c) => c === 1)) return `One episode a week; finale ${last}.`;
+  if (per.every((c) => c === 1)) return `One episode a week; finale ${last}.${tail}`;
   // A premiere of several, then singles.
-  if (per[0] > 1 && per.slice(1).every((c) => c === 1)) return `${n(per[0])}-episode premiere, then one a week; finale ${last}.`;
-  // A run of equal-sized drops, then singles.
+  if (per[0] > 1 && per.slice(1).every((c) => c === 1)) return `${n(per[0])}-episode premiere, then one a week; finale ${last}.${tail}`;
+  // A run of equal-sized drops: to the end, or then singles.
   const k = per[0];
   let runs = 0; while (runs < per.length && per[runs] === k) runs++;
-  if (k > 1 && runs > 1 && per.slice(runs).every((c) => c === 1) && runs < per.length) {
-    return `${n(k)} episodes a week until ${fmt(dates[runs - 1])}, then one a week; finale ${last}.`;
+  if (k > 1 && runs === per.length) return `${n(k)} episodes a week; finale ${last}.${tail}`;
+  if (k > 1 && runs > 1 && per.slice(runs).every((c) => c === 1)) {
+    return `${n(k)} episodes a week until ${fmt(dates[runs - 1])}, then one a week; finale ${last}.${tail}`;
   }
   return null;
 }
@@ -215,7 +230,8 @@ function episodeSchema(ep) {
     "@type": "TVSeason",
     seasonNumber: ep.season || 1,
     numberOfEpisodes: ep.seasons > 1 && ep.season ? list.length : ep.count || list.length,
-    episode: list.map((x) => ({ "@type": "TVEpisode", episodeNumber: x.e, name: x.name || `Episode ${x.e}`, datePublished: x.date || undefined })),
+    episode: list.map((x) => ({ "@type": "TVEpisode", episodeNumber: x.e, name: x.name || `Episode ${x.e}`, datePublished: x.date || undefined,
+      ...(x.runtime ? { timeRequired: `PT${Math.round(x.runtime)}M` } : {}) })),
   }];
 }
 
@@ -227,7 +243,7 @@ function episodeFaqs(item, fmt, today = new Date().toISOString().slice(0, 10)) {
   const nd = nextDrop(ep, today);
   if (nd) {
     const which = nd.nums.length === 1 ? `Episode ${nd.nums[0]}${nd.name ? `, "${nd.name}",` : ""} comes` : `Episodes ${nd.nums.slice(0, -1).join(", ")} and ${nd.nums[nd.nums.length - 1]} come`;
-    out.push({ q: `When is the next episode of ${item.title}?`, a: `${which} out on ${fmt(nd.date)} (original release date).` });
+    out.push({ q: `When is the next episode of ${item.title}?`, a: `${which} out on ${fmt(nd.date)} (original air date).` });
   }
   return out;
 }

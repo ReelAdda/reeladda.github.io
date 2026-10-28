@@ -30,6 +30,11 @@
    "percent": 100,
    "since": "2026-10-27",
    "what": "\"If you liked this\" links pages Google can see first (lib/graph.js relatedFilms visible option); older pages redone once per share step (lib/relrefresh.js REL_VERSION 3) — switched to 100% at once on 27 Oct at the owner's request"
+  },
+  "redesign-v2": {
+   "percent": 0,
+   "since": "2026-10-28",
+   "what": "the film-page redesign v2 (lib/pagev2.js): header and hero on --deep with a breadcrumb, score pill, call to action in four states, Share and Remind me, provenance strip, episode progress bar, click-to-load trailer, sticky Watch bar, dark mode. Presentation only; preview first, then 100% in one switch."
   }
  }
 }

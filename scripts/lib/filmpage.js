@@ -986,6 +986,8 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   if (item && item.fcScore && notOutYet(item)) item = { ...item, fcScore: null };
   const e = escHtml;
   const lean = leanPage(item);   // every fact once (LEAN_PAGE)
+  const V2 = require("./pagev2.js");
+  const v2 = lean && V2.v2Page(item);   // the 28 Oct 2026 redesign (lib/pagev2.js), on lean pages
   const code = (cfg && cfg.code) || "in";
   const country = countryNameFor(cfg); // "the US", not the config's "United States" — reads right in titles and prose
   const homeUrl = code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`;
@@ -1102,12 +1104,16 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
     };
   }
 
+  // v2: a middle crumb, the edition's weekly list — a page that exists, under its own name.
+  const weeklyUrl = `${homeUrl}new-on-ott/`;
+  const weeklyLabel = `New on ${streamVocab(cfg).word === "OTT" ? "OTT" : "streaming"}`;
   const breadcrumb = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "FilmyChill", item: homeUrl },
-      { "@type": "ListItem", position: 2, name: item.title, item: url },
+      ...(v2 ? [{ "@type": "ListItem", position: 2, name: weeklyLabel, item: weeklyUrl }] : []),
+      { "@type": "ListItem", position: v2 ? 3 : 2, name: item.title, item: url },
     ],
   };
 
@@ -1176,8 +1182,8 @@ ${(() => {
 <script type="application/ld+json">${ldJson(ld)}</script>
 <script type="application/ld+json">${ldJson(breadcrumb)}</script>${faqLd ? `
 <script type="application/ld+json">${ldJson(faqLd)}</script>` : ""}
-<style>
-  :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
+${v2 ? `<script src="/js/film.js" defer></script>\n` : ""}<style>
+${(() => { const base = `  :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
   .top { background:var(--indigo); padding:14px 16px; } .top a { color:var(--cream); text-decoration:none; font-weight:800; letter-spacing:1px; font-size:18px; }
   .top a span { color:#FFC04D; } /* 4.95:1 on indigo; marigold is 4.3:1 */
@@ -1260,25 +1266,26 @@ ${FCSB_CSS}
   .faq details[open] summary::after { content:"–"; }
   .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
   @media (max-width:420px){ .head { grid-template-columns:110px 1fr; } .poster { width:110px; } h1 { font-size:20px; } }
-${REDESIGN_CSS}
+${REDESIGN_CSS}`; return v2 ? V2.v2Css(base) : base; })()}
 </style>
 </head>
 <body>
-<div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>
-<div class="wrap">${lean ? LEAN_MARK + audienceMark(item) : ""}${SER.seriesMark(item)}
-  ${lean ? `<div class="hero"${/^https:\/\/image\.tmdb\.org\//.test(String(item.backdrop || "")) ? ` style="background-image:linear-gradient(rgba(27,22,95,.84),rgba(27,22,95,.94)),url('${e(item.backdrop)}')"` : ""}>` : ""}
+${v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>`}
+<div class="wrap">${lean ? LEAN_MARK + audienceMark(item) : ""}${v2 ? V2.V2_MARK : ""}${SER.seriesMark(item)}
+  ${lean ? `<div class="hero"${/^https:\/\/image\.tmdb\.org\//.test(String(item.backdrop || "")) ? ` style="background-image:${v2 ? V2.HERO_GRADIENT : "linear-gradient(rgba(27,22,95,.84),rgba(27,22,95,.94))"},url('${e(item.backdrop)}')"` : ""}>` : ""}${v2 ? "\n  " + V2.v2Crumbs(item, { homeUrl, weeklyUrl, weeklyLabel }) : ""}
   <div class="head">
-    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="140" height="210"${lean ? ' fetchpriority="high"' : ""}>` : "<div></div>"}
+    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="${v2 ? 104 : 140}" height="${v2 ? 156 : 210}"${lean ? ' fetchpriority="high"' : ""}>` : "<div></div>"}
     <div>
       <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
-      <div class="meta">${(lean
+      <div class="meta">${v2 ? V2.v2Meta(item, year) : (lean
         ? [item.language, item.genre, item.runtime ? (item.kind === "tv" ? `${item.runtime} min episodes` : item.runtime + " min") : null]
         : [item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert]).filter(Boolean).map(e).join(" · ")}</div>
-      ${lean ? "" : headRatingHtml(item)}
-      ${item.released ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
-      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px">Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
+      ${lean ? "" : headRatingHtml(item)}${v2 ? "\n      " + V2.v2ScorePill(item) : ""}
+      ${item.released && !v2 ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
+      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px"${v2 ? ' hidden' : ""}>Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
     </div>
   </div>${lean ? "\n  </div>" : ""}
+  ${v2 ? V2.v2Cta(item, { cfg, country, asOf, relState, V: V_TITLE }) : ""}
   ${(() => { const answerBlock = (() => {
     // Lead answer line. The GSC data showed pages ranking on page 1 for "where to watch [film]"
     // and "[film] ott release date" but pulling <1% CTR, and answer engines had nothing at the
@@ -1448,7 +1455,7 @@ ${REDESIGN_CSS}
       : `<p>Not streaming yet in ${e(country)}${item.released ? ` — ${e(item.title)} released in theatres ${e(item.released)}` : ""}. No platform has announced ${e(V.article.toLowerCase())} ${e(V.releaseDate)}. We re-check every day and this page updates the moment it lands.</p>`;
     return `<!--SW:pending--><h2>${e(V.heading(item.title))}</h2>${body}<!--/SW:pending-->`;
   })()}
-  ${(() => {
+  ${((wtw) => (v2 && wtw ? `<div class="wtw" id="where-to-watch">${wtw}</div>` : wtw))((() => {
     // Three honest states: streaming (included with a subscription — no extra charge),
     // rent/buy (pay per title), and theatres-only. The subscription-vs-rent distinction
     // is the most common unanswered question on OTT listings; TMDB's monetization split
@@ -1481,9 +1488,9 @@ ${REDESIGN_CSS}
       return `<h2>Where to watch in ${e(country)}</h2><div><span class="pill">${relState === "today" ? "In cinemas today" : `In cinemas from ${e(when)}`}</span></div><p style="color:var(--mute);font-size:12.5px;margin-top:6px">Not out yet — nowhere to stream or rent it until it opens.</p>`;
     }
     return "";
-  })()}
-  ${SER.episodesHtml(item, fmtFull)}
-  ${ytid ? `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div><p class="tlink"><a href="https://www.youtube.com/watch?v=${e(ytid)}" rel="noopener">Watch the trailer on YouTube →</a></p>` : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
+  })())}
+  ${SER.episodesHtml(item, fmtFull, undefined, { v2 })}
+  ${ytid ? (v2 ? V2.v2Trailer(ytid, item.title) : `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div><p class="tlink"><a href="https://www.youtube.com/watch?v=${e(ytid)}" rel="noopener">Watch the trailer on YouTube →</a></p>`) : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
   ${franchise ? franchiseRowHtml(franchise, item, code) : ""}
   ${simGridHtml(similar, code, linkable)}
   ${faqs.length ? `<h2>Frequently asked</h2><div class="faq">${faqs.map((f) => `<details><summary>${e(f.q)}</summary><div class="fa">${e(f.a)}</div></details>`).join("")}</div>` : ""}
@@ -1495,7 +1502,7 @@ ${REDESIGN_CSS}
     return lp && fs.existsSync(`${lp[1]}/index.html`) ? `<a class="btn" href="/${e(lp[1])}/">New ${e(lp[0])} movies &amp; OTT this week →</a>` : "";
   })()}
   <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">See this week's top picks on FilmyChill →</a>
-</div>
+</div>${v2 && !upcoming ? "\n" + V2.v2Sticky(item, providers.map(String)) : ""}
 <footer>
   <nav><a href="${e(homeUrl)}">This week in ${e(country)}</a> · <a href="${code === "in" ? "/new-on-ott/" : `/${e(code)}/new-on-ott/`}">New on ${e(streamVocab(cfg).word === "OTT" ? "OTT" : "streaming")}</a>${code === "in" ? ` · ${LANGUAGE_PAGES.map(([n, s]) => `<a href="/${s}/">${n}</a>`).join(" · ")}` : ""} · <a href="/about/">About</a></nav>
   Verdicts are compiled by FilmyChill's editorial system from audience ratings and published critic reception — <a href="/about/">how we rate</a>.<br>
