@@ -1,10 +1,21 @@
 {
- "date": "2026-10-27",
+ "date": "2026-10-28",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 0,
+ "pagesDisagreeing": 1,
  "high": 0,
  "correctable": 0,
- "byField": {},
- "rows": []
+ "byField": {
+  "runtime": 1
+ },
+ "rows": [
+  {
+   "field": "runtime",
+   "severity": "medium",
+   "page": "140 min",
+   "tmdb": "150 min",
+   "code": "ph",
+   "slug": "dune-part-three"
+  }
+ ]
 }

@@ -327,7 +327,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt26657236": {
@@ -668,7 +668,7 @@
     "median": 4
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt34675596": {
@@ -929,7 +929,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt36103784": {
@@ -2594,7 +2594,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1325575": {
@@ -3188,7 +3188,7 @@
     "median": 3.5
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tv:328818": {
@@ -3473,7 +3473,7 @@
  "tt37281055": {
   "take": "Most critics came away happy.",
   "src": "wiki",
-  "hook": "Casper Kelly's directorial debut.",
+  "hook": null,
   "article": "Buddy (2026 film)",
   "a": {
    "tone": "positive",
@@ -3482,11 +3482,12 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 87
-   }
+    "value": 88
+   },
+   "toneSrc": "summary"
   },
-  "checked": "2026-09-12",
-  "v": 5
+  "checked": "2026-10-28",
+  "v": 6
  },
  "tt43685971": {
   "take": null,
@@ -3873,7 +3874,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt34866643": {
@@ -3899,26 +3900,33 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt32547691": {
-  "take": "Reviewers found plenty to like here.",
+  "take": "Critics were won over, largely on the strength of the performances.",
   "src": "wiki",
   "hook": null,
   "article": "Pressure (2026 film)",
   "a": {
    "tone": "positive",
-   "praised": [],
+   "praised": [
+    "performances"
+   ],
    "panned": [],
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 87
+    "value": 89
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 5,
+    "median": 4
    }
   },
-  "checked": "2026-10-04",
-  "v": 5
+  "checked": "2026-10-28",
+  "v": 6
  },
  "tt4565380": {
   "take": "The performances and themes drew the most notice from reviewers.",
@@ -4162,11 +4170,11 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 77
+    "value": 78
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt44101690": {
@@ -4257,7 +4265,7 @@
   "src": null,
   "hook": null,
   "article": "South Park",
-  "checked": "2026-10-25",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt5875444": {
@@ -4276,7 +4284,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt8758494": {
@@ -4334,7 +4342,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt37020296": {
@@ -4447,7 +4455,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt36980377": {
@@ -4483,7 +4491,7 @@
   "src": null,
   "hook": "Kiran Nadagouda's directorial debut.",
   "article": "418 (film)",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt18332852": {
@@ -4863,7 +4871,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-15",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt36583977": {
@@ -4885,7 +4893,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt36983905": {
@@ -4911,7 +4919,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt39390479": {
@@ -5338,7 +5346,7 @@
     "median": 5
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt6933238": {
@@ -5387,7 +5395,7 @@
     "median": 3
    }
   },
-  "checked": "2026-10-26",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt0096697": {
@@ -5564,7 +5572,7 @@
     "median": 4
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt45381850": {
@@ -5713,14 +5721,14 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-22",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1777082": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt9000310": {
@@ -5861,7 +5869,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt39123061": {
@@ -5931,7 +5939,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt33258199": {
@@ -5964,7 +5972,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt47867242": {
@@ -5978,7 +5986,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt7441658": {
@@ -5996,7 +6004,7 @@
    "divided": [],
    "score": null
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt32639706": {
@@ -6010,7 +6018,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt30050236": {
@@ -6263,7 +6271,7 @@
    "score": null,
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt36064406": {
@@ -6292,7 +6300,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1783270": {
@@ -6504,7 +6512,7 @@
   "src": null,
   "hook": null,
   "article": "Tad and the Magic Lamp",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1777819": {
@@ -6688,7 +6696,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt32398150": {
@@ -6703,7 +6711,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt43691412": {
@@ -6794,7 +6802,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt45692999": {
@@ -6862,7 +6870,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt14976292": {
@@ -6976,7 +6984,7 @@
   "src": null,
   "hook": null,
   "article": "Doctor X: Mafia in White",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt43691434": {
@@ -7021,7 +7029,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt37737331": {
@@ -7029,7 +7037,7 @@
   "src": null,
   "hook": null,
   "article": "Take Charge of My Heart",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt35854736": {
@@ -7177,7 +7185,7 @@
   "src": null,
   "hook": null,
   "article": "Merry Berry Love",
-  "checked": "2026-10-26",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt43442522": {
@@ -7198,7 +7206,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1710034": {
@@ -7228,7 +7236,7 @@
     "median": 3
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt32324552": {
@@ -7253,7 +7261,7 @@
     "median": 2
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt35410859": {
@@ -7280,14 +7288,14 @@
     "median": 3.5
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt37109705": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt31514146": {
@@ -7311,7 +7319,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt43807653": {
@@ -7330,7 +7338,7 @@
    "score": null,
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt43665190": {
@@ -7448,7 +7456,7 @@
     "median": 3.5
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt13609648": {
@@ -7471,7 +7479,7 @@
     "median": 4
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt39206699": {
@@ -7551,7 +7559,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt39140225": {
@@ -7668,7 +7676,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt46024377": {
@@ -7682,7 +7690,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt40855841": {
@@ -7699,7 +7707,7 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 18
+    "value": 14
    },
    "toneSrc": "summary",
    "ratings": {
@@ -7707,7 +7715,7 @@
     "median": 2.25
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt28773062": {
@@ -7724,10 +7732,10 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 69
+    "value": 71
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1787082": {
@@ -7741,7 +7749,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt7852926": {
@@ -7749,14 +7757,14 @@
   "src": null,
   "hook": null,
   "article": "Titanic (2026 film)",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt39309264": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt31289994": {
@@ -7801,14 +7809,14 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt39927807": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1790414": {
@@ -7822,7 +7830,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1498001": {
@@ -9183,7 +9191,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt38672588": {
@@ -9197,7 +9205,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt43700003": {
@@ -9229,7 +9237,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt38805050": {
@@ -9243,7 +9251,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1786823": {
@@ -12514,7 +12522,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt0071562": {
@@ -12764,7 +12772,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1555847": {
@@ -12778,7 +12786,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt47598642": {
@@ -14477,7 +14485,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt0078748": {
@@ -16372,7 +16380,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tv:338103": {
@@ -16393,7 +16401,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1791187": {
@@ -18132,7 +18140,7 @@
   "src": null,
   "hook": null,
   "article": "Dragon Ball Super: Beerus",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt0278866": {
@@ -21513,7 +21521,7 @@
     "median": 3.5
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt9263550": {
@@ -28046,7 +28054,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-26",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt9814458": {
@@ -32780,7 +32788,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt0381798": {
@@ -39960,7 +39968,7 @@
   "src": null,
   "hook": null,
   "article": "Where the Mask Ends",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt38973495": {
@@ -40018,7 +40026,7 @@
     "value": 100
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt2049403": {
@@ -41036,7 +41044,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt14178824": {
@@ -47778,6 +47786,7 @@
  "tt34384661": {
   "take": "Mostly good reviews — the visuals and production design impressed, even if the tone didn't.",
   "src": "wiki",
+  "hook": "The follow-up to ‘Godzilla Minus One’.",
   "article": "Godzilla Minus Zero",
   "a": {
    "tone": "positive",
@@ -47791,13 +47800,12 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 95
+    "value": 96
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-19",
-  "v": 6,
-  "cat": true
+  "checked": "2026-10-28",
+  "v": 6
  },
  "tt30768979": {
   "take": null,
@@ -49767,7 +49775,7 @@
   "src": null,
   "hook": null,
   "article": "Garividi Lakshmi",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt46082263": {
@@ -49785,29 +49793,29 @@
   "v": 6
  },
  "tt34890576": {
-  "take": "Critics are split — praise for the performances and direction, pushback on the production design.",
+  "take": "Critics are split — praise for the direction and humour, pushback on the pacing.",
   "src": "wiki",
   "hook": null,
   "article": "Clayface (film)",
   "a": {
    "tone": "mixed",
    "praised": [
-    "performances",
-    "direction"
+    "direction",
+    "humour"
    ],
    "panned": [
-    "production design"
+    "pacing"
    ],
    "divided": [
-    "writing"
+    "performances"
    ],
    "score": {
     "kind": "rt",
-    "value": 75
+    "value": 77
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt13611778": {
@@ -51830,7 +51838,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt37983543": {
@@ -55725,28 +55733,28 @@
     "median": 3
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1790159": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt32915949": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt46657219": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt45246384": {
@@ -55754,7 +55762,7 @@
   "src": null,
   "hook": null,
   "article": "Love in Disguise (TV series)",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt43658893": {
@@ -55762,14 +55770,14 @@
   "src": null,
   "hook": null,
   "article": "Paradise Lost (2026 film)",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt47597140": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1786494": {
@@ -65283,14 +65291,14 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt39018552": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt43702035": {
@@ -65298,7 +65306,7 @@
   "src": null,
   "hook": null,
   "article": "Marília Mendonça: All the Feels",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt5090568": {
@@ -66795,7 +66803,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt37547793": {
@@ -66813,7 +66821,7 @@
    "divided": [],
    "score": null
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt38188218": {
@@ -70868,14 +70876,14 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1802710": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1406492": {
@@ -73775,28 +73783,28 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt35697291": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt39239818": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1794156": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt24226306": {
@@ -73811,14 +73819,14 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1778703": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt0095489": {
@@ -73858,7 +73866,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt41153966": {
@@ -75718,7 +75726,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt2056785": {
@@ -75737,7 +75745,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1798325": {
@@ -75766,21 +75774,21 @@
     "median": 2.75
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tv:338390": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt39631280": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt37421560": {
@@ -75794,7 +75802,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt0247586": {
@@ -76810,7 +76818,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt2531336": {
@@ -76832,21 +76840,21 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "movie:1782625": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt46659669": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt46658752": {
@@ -76874,7 +76882,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tv:337038": {
@@ -76888,7 +76896,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt46658626": {
@@ -82684,7 +82692,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt15944190": {
@@ -90154,14 +90162,14 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt48242205": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt38990864": {
@@ -90204,21 +90212,21 @@
    "divided": [],
    "score": null
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt39216437": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt35324004": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt12574330": {
@@ -92939,14 +92947,14 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tv:339213": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt47974519": {
@@ -92960,21 +92968,21 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt36553729": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt10759484": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt37959568": {
@@ -95685,9 +95693,9 @@
  "tt38775487": {
   "take": null,
   "src": null,
-  "checked": "2026-10-26",
-  "v": 6,
-  "cat": true
+  "hook": null,
+  "checked": "2026-10-28",
+  "v": 6
  },
  "tt37603783": {
   "take": null,
@@ -95723,7 +95731,7 @@
   "src": null,
   "hook": null,
   "article": "Final Table",
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt44175143": {
@@ -96288,7 +96296,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-27",
+  "checked": "2026-10-28",
   "v": 6
  },
  "tt37799273": {
@@ -96392,6 +96400,74 @@
   "take": null,
   "src": null,
   "checked": "2026-10-27",
+  "v": 6,
+  "cat": true
+ },
+ "tt43089752": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-28",
+  "v": 6
+ },
+ "movie:1792904": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-28",
+  "v": 6
+ },
+ "tt42343337": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-28",
+  "v": 6
+ },
+ "tt37180686": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-28",
+  "v": 6,
+  "cat": true
+ },
+ "tt44879224": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-28",
+  "v": 6,
+  "cat": true
+ },
+ "tt38961056": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-28",
+  "v": 6,
+  "cat": true
+ },
+ "tt36899180": {
+  "take": "Reviewers found plenty to like here.",
+  "src": "wiki",
+  "article": "Moulin (2026 film)",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 64
+   },
+   "toneSrc": "summary"
+  },
+  "checked": "2026-10-28",
+  "v": 6,
+  "cat": true
+ },
+ "tt35255682": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-28",
   "v": 6,
   "cat": true
  }
