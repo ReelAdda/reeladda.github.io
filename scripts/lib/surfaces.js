@@ -58,7 +58,7 @@ const {
 } = require("./rules.js");
 const { stageFailed } = require("./runhealth.js");
 const { USE_IMDB } = require("./tmdb.js");
-const { ssrCard, ssrCardV2, ssrEditorNote, ssrSoonCard, writeRssFeed } = require("./weekly.js");
+const { ssrCard, ssrEditorNote, ssrSoonCard, writeRssFeed } = require("./weekly.js");
 const { heroDialInner } = require("./meter.js");
 const { popularBlockFor } = require("./searchtop.js");
 
@@ -357,20 +357,40 @@ function buildMoreLinks(code, data = null) {
   const V = streamVocab({ code });
   const base = code === "in" ? "" : `/${code}`;
   const li = (href, label) => `<li><a href="${e(href)}">${e(label)}</a></li>`;
-  void data;
-  // v2 (28 Oct 2026): ONE wrapped link row. The platform hubs stay reachable from the weekly
-  // page (its "Browse by platform"), the today/coming/month pages from the weekly page's links,
-  // and the other countries from the header's one selector: "Other countries" opens it, so the
-  // country list is rendered once on the page.
-  const items = [
-    li(`${base}/new-on-ott/`, `New on ${V.word === "OTT" ? "OTT" : "streaming"}`),
-    ...(code === "in" ? LANGUAGE_PAGES.map(([name, slug]) => li(`/${slug}/`, name)) : []),
+  const col = (title, items) => items.length ? `<div><h3>${e(title)}</h3><ul>${items.join("")}</ul></div>` : "";
+
+  const thisMonth = monthKey(new Date().toISOString());
+  const discover = [
+    li(`${base}/new-on-ott/`, `New on ${V.word} this week`),
+    fs.existsSync(todayPath(code)) ? li(todayUrl(code).replace("https://filmychill.com", ""), `New on ${V.word} today`) : "",
+    fs.existsSync(comingPath(code)) ? li(comingUrl(code).replace("https://filmychill.com", ""), `Coming to ${V.word}`) : "",
+    fs.existsSync(ottMonthPath(code, thisMonth)) ? li(`${base}/new-on-ott/${thisMonth}/`, "This month") : "",
+  ].filter(Boolean);
+
+  // Evergreen platform pages first (they link into the catalogue); this week's platform hubs
+  // only when a country has none yet. Four is enough for a footer.
+  let platforms = streamingPagesFor(code).slice(0, 4).map((x) => li(x.href, x.name));
+  if (!platforms.length && data) platforms = hubsFor(data).slice(0, 4).map((h) => li(`${base}/new-on-${h.slug}/`, h.name));
+
+  const languages = code === "in" ? LANGUAGE_PAGES.map(([name, slug]) => li(`/${slug}/`, name)) : [];
+
+  const site = [
     li("/about/", "About"),
     li("/privacy/", "Privacy"),
-    code === "in" ? li("/data/", "Streaming data") : "",
-    `<li><button type="button" data-click="openCountries">Other countries</button></li>`,
+    li("/data/", "Streaming data"),
+    code === "in" ? li("/embed/", "Embed widget") : "",
+    li("https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j", "WhatsApp channel"),
   ].filter(Boolean);
-  return `<nav aria-label="Site"><ul class="foot-links">${items.join("")}</ul></nav>`;
+
+  const others = COUNTRIES.filter((c) => c.code !== code).map((c) => {
+    const meta = COUNTRY_PAGE_META[c.code] || { name: c.name, path: `/${c.code}/` };
+    return `<a href="${e(meta.path)}">${e(meta.name.replace(/^the /, ""))}</a>`;
+  }).join("");
+  const here = COUNTRIES.find((c) => c.code === code) || { name: "India" };
+
+  return `<nav class="foot-cols" aria-label="Site">${col("Discover", discover)}${col("Streaming on", platforms)}${col("Languages", languages)}${col("FilmyChill", site)}</nav>`
+    + `<div class="foot-bar"><span>© ${new Date().getFullYear()} FilmyChill · Vikram Sharma</span>`
+    + `<details class="foot-country"><summary>${e(COUNTRY_FLAG[code] || "")} ${e(here.name)}</summary><div class="foot-country-list">${others}</div></details></div>`;
 }
 
 // The platform pages that exist for this country, biggest first (read from disk: they are
@@ -597,8 +617,8 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
 // its own freshness cue, so the header stays clean.
 function sectionCounts(data) {
   return {
-    theatres: `Top ${((data && data.theatres) || []).length} · `,
-    ott: `Top ${((data && data.ott) || []).length} · `,
+    theatres: `TOP ${((data && data.theatres) || []).length}`,
+    ott: `TOP ${((data && data.ott) || []).length}`,
   };
 }
 
@@ -657,29 +677,19 @@ const homeCsp = (script) => (script ? HOME_CSP.replace("script-src 'self'", `scr
 // ============================================================================
 // Phones: the hero's own 520px layout in index.html.
 const HERO_PHONE_MAX = 520;
-// The hero's markup (v2, 28 Oct 2026: the film page's hero — lib/pagev2.js — with the pick's
-// score pill and a "Where to watch" link to its page). `lastScan` lives in its label row.
-const HERO_LABEL = `<svg class="ic" aria-hidden="true"><use href="#icTrophy"/></svg> Pick of the week`;
 const HERO_HIDDEN = `<div class="hero" id="hero" style="display:none">
   <div class="hero-card" id="heroCard" data-click="heroTap">
     <div class="hero-bg" id="heroBg"></div>
     <div class="hero-grad"></div>
+    <div class="hero-dial" id="heroDial"></div>
     <div class="hero-content">
-      <div class="hero-row"><span class="lbl">${HERO_LABEL}</span><span class="lbl" id="lastScan"></span></div>
+      <span class="hero-eyebrow"><svg class="ic" aria-hidden="true"><use href="#icTrophy"/></svg> Pick of the Week</span>
       <div class="hero-title" id="heroTitle"></div>
       <div class="hero-meta" id="heroMeta"></div>
-      <div class="hero-acts"><span id="heroScore"></span></div>
+      <div class="hero-verdict" id="heroVerdict"></div>
     </div>
   </div>
 </div>`;
-// The hero's meta line: platform · genre · language · season or runtime.
-function heroMetaOf(pick) {
-  const rt = (m) => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ""}` : `${m}m`);
-  const tail = pick.kind === "tv" ? (pick.seasons ? `Season ${pick.seasons}` : "Series") : (pick.runtime ? rt(pick.runtime) : "");
-  return [pick.platform, pick.genre ? String(pick.genre).split(" / ")[0] : "", pick.language, tail].filter(Boolean).join(" · ");
-}
-// Long titles step down a size so the Anton 44 hero doesn't run to three lines (js/app.js twin).
-const HERO_LONG = 18;
 
 function heroPickOf(data) {
   if (!data || !data.pick) return null;
@@ -707,36 +717,23 @@ function ssrHero(data, code = "in") {
   const bg = pick.backdrop
     ? ` style="--hero-sm:url(&quot;${e(heroBgSmallUrl(pick.backdrop))}&quot;);--hero-lg:url(&quot;${e(heroBgUrl(pick.backdrop))}&quot;)"`
     : "";
-  // The score pill (lib/pagev2.js v2ScorePill; heroScorePill in js/app.js writes the same) and a
-  // plain link to the film's page. The link names no action, so the card's own tap handler
-  // (data-click="heroTap", the detail sheet) leaves it alone.
-  const path = pick.slug ? filmPagePath(code, pick.slug) : "";
+  const meta = [pick.platform, pick.genre, pick.language].filter(Boolean).join(" · ");
+  const verdict = (pick.fcScore && pick.fcScore.verdict) || pick.verdict || "";
+  // The audience-rating dial at the top right and the verdict as a pill (Oct 2026 redesign);
+  // the page's script writes the same two (heroDialInner / verdictPill twins in js/app.js).
   return `<div class="hero" id="hero">
   <div class="hero-card" id="heroCard" data-click="heroTap"${href}>
     <div class="hero-bg" id="heroBg"${bg}></div>
     <div class="hero-grad"></div>
+    <div class="hero-dial" id="heroDial">${heroDialInner(pick)}</div>
     <div class="hero-content">
-      <div class="hero-row"><span class="lbl">${HERO_LABEL}</span><span class="lbl" id="lastScan">${e(ssrLastScan(data, { code }))}</span></div>
-      <div class="hero-title${String(pick.title).length > HERO_LONG ? " long" : ""}" id="heroTitle">${e(pick.title)}</div>
-      <div class="hero-meta" id="heroMeta">${e(heroMetaOf(pick))}</div>
-      <div class="hero-acts"><span id="heroScore">${require("./pagev2.js").v2ScorePill(pick)}</span>${path ? `<a class="hero-cta" href="${e(path)}" data-click="link">Where to watch</a>` : ""}</div>
+      <span class="hero-eyebrow"><svg class="ic" aria-hidden="true"><use href="#icTrophy"/></svg> Pick of the Week</span>
+      <div class="hero-title" id="heroTitle">${e(pick.title)}</div>
+      <div class="hero-meta" id="heroMeta">${e(meta)}</div>
+      <div class="hero-verdict" id="heroVerdict">${verdict ? `<span class="vpill vp-hero">${e(verdict)}</span>` : ""}</div>
     </div>
   </div>
 </div>`;
-}
-
-// The language chips (v2): All, then the week's languages by volume, "More" after the fourth
-// (the rest, and the sort order, sit in the More sheet with the same select the page's script
-// fills — langOptions). No counts on chips.
-const CHIP_MAX = 4;
-function langChips(data) {
-  const all = [...((data && data.theatres) || []), ...((data && data.ott) || []), ...((data && data.comingSoon) || [])];
-  const counts = {};
-  all.forEach((x) => { if (x && x.language) counts[x.language] = (counts[x.language] || 0) + 1; });
-  const langs = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-  const chip = (v, on) => `<button type="button" class="chip${on ? " on" : ""}" data-click="setLangChip" data-arg="${escHtml(v)}" aria-pressed="${on}">${escHtml(v)}</button>`;
-  return [chip("All", true), ...langs.slice(0, CHIP_MAX).map((l) => chip(l, false)),
-    `<button type="button" class="chip more" data-click="openMore" aria-haspopup="dialog">More ▾</button>`].join("");
 }
 
 // The language filter's options, exactly as the page's script builds them after loading the
@@ -774,7 +771,7 @@ function renderCountryPage(templateHtml, cfg, data) {
   // "streaming" — the word its visitors actually use and search with.
   html = replaceBetween(html, "TAGLINE", `New movies &amp; ${escHtml(V.releases)} this week`);
   html = replaceBetween(html, "MYLISTSUB", `tracked until they hit ${escHtml(V.word)}`);
-  html = replaceBetween(html, "OTTLINK", "See all");
+  html = replaceBetween(html, "OTTLINK", `All new ${escHtml(V.releases)} this week`);
   html = replaceBetween(html, "MORELINKS", buildMoreLinks(cfg.code, data));
   // The country switcher is rendered from COUNTRIES. It used to be a hardcoded <option>
   // list, which is why adding a country meant editing the same names in four places.
@@ -790,8 +787,8 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "CSP", `<meta http-equiv="Content-Security-Policy" content="${cspWith(homeCsp(script))}">`);
   html = replaceBetween(html, "APPJS", script ? script.tag : `<script src="/js/app.js"></script>`);
   html = replaceBetween(html, "ANALYTICS", analyticsTag());
+  html = replaceBetween(html, "LASTSCAN", escHtml(ssrLastScan(data, cfg)));
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
-  html = replaceBetween(html, "LANGCHIPS", langChips(data));
   // Homepage share/Discover image: the Pick of the Week, then the lists (see hubOgImage).
   html = replaceBetween(html, "OGIMAGE", ogImageTag(hubOgImage([heroPickOf(data), ...(data.theatres || []), ...(data.ott || [])].filter(Boolean), cfg)));
   html = replaceBetween(html, "HERO", ssrHero(data, cfg.code));
@@ -806,13 +803,11 @@ function renderCountryPage(templateHtml, cfg, data) {
   // the hero backdrop, when there is one: it is the LCP image, and in a phone's first second
   // ~110 KB of posters shared its bandwidth (Oct 2026).
   const heroFirst = heroPreload(data) !== "";
-  // v2 cards (lib/weekly.js ssrCardV2): one row each, in the data's order; the "Still worth it"
-  // divider is gone (the streaming row reads as one list), coming-soon cards carry their date.
-  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCardV2(x, i, cfg.code, { eager: i < 2, lowPriority: heroFirst })).join(""));
-  html = replaceBetween(html, "OTT", (data.ott || []).map((x, i) => ssrCardV2(x, i, cfg.code, { lowPriority: heroFirst })).join(""));
+  html = replaceBetween(html, "THEATRES", (data.theatres || []).map((x, i) => ssrCard(x, i, cfg.code, { eager: i < 2, lowPriority: heroFirst })).join(""));
+  html = replaceBetween(html, "OTT", ssrOttSection(data.ott || [], cfg.code, { lowPriority: heroFirst }));
   // Re-derived at render, not just at fetch: the committed data file can be a day old by the
   // time a page is rebuilt, and a passed date must never render inside "Coming soon".
-  html = replaceBetween(html, "SOON", normalizeUpcoming(data.comingSoon).map((x) => ssrCardV2(x, 0, cfg.code, { soon: true })).join(""));
+  html = replaceBetween(html, "SOON", normalizeUpcoming(data.comingSoon).map((x) => ssrSoonCard(x, cfg.code)).join(""));
   // Counts were hardcoded "TOP 5" / "TOP 10" in the template while the sections rendered
   // whatever the week produced — the theatre header said 5 above seven films. The client
   // corrected it after hydration, but the server-rendered page (what Google reads, and what
@@ -868,7 +863,6 @@ module.exports = {
   prerenderIndex,
   homeCsp,
   homeScript,
-  langChips,
   langOptions,
   renderCountryPage,
   sectionCounts,

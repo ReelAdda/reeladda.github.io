@@ -39,29 +39,12 @@ function toggleSave(listKey, i) {
   render();
   if (wasEmpty && wl.length === 1) showInstallNudge('personalBar', 'Saved — we\'ll show its ' + FC_STREAM.word + ' status in My List the day it lands', ' · add FilmyChill to your home screen so the alert finds you');
 }
-function updateWLCount() {
-  const n = loadWL().length, el = document.getElementById('wlCount');
-  if (el) { el.textContent = n; el.dataset.n = n; }
-}
-// The saved row: shown only when something is saved, before In Theatres (v2). Painted from the
-// saved items alone, so it is there before this country's data file arrives.
-function paintMyList() {
-  const wl = loadWL();
-  const sec = document.getElementById('mylistSection');
-  if (!sec) return;
-  sec.style.display = wl.length ? 'block' : 'none';
-  document.getElementById('mylistGrid').innerHTML = wl.map((it, i) => card(it, i, 'wl')).join('');
-}
-// Header "Saved": to the row when there is one; otherwise a one-line hint, so the tap never
-// feels dead.
-function goMyList() {
-  paintMyList();
-  if (loadWL().length) { document.getElementById('mylistSection').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
-  const bar = document.getElementById('personalBar');
-  if (bar && !document.getElementById('pn-savehint')) {
-    bar.insertAdjacentHTML('afterbegin', `<div class="personal-note" id="pn-savehint"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> <span>Nothing saved yet — tap the bookmark on any card to keep it here.</span><button class="pn-x" data-click="removeById" data-arg="pn-savehint" aria-label="Dismiss">×</button></div>`);
-  }
-  if (bar) bar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+function updateWLCount() { document.getElementById('wlCount').textContent = loadWL().length; }
+function toggleMyList() {
+  myListOnly = !myListOnly;
+  document.getElementById('mylistBtn').classList.toggle('active', myListOnly);
+  render();
+  if (myListOnly) document.getElementById('mylistSection').scrollIntoView({ behavior: 'smooth' });
 }
 
 // Dates in the PAGE'S OWN locale (US reads "Jun 19", India reads "19 Jun"). FC_PAGE is
@@ -264,52 +247,23 @@ function cardScore(item) {
   return verdictPill('Not enough ratings', 'early')
     + reason(votes ? 'Only ' + votes.toLocaleString('en-IN') + ' rating' + (votes === 1 ? '' : 's') : '');
 }
-// CARD V2 (28 Oct 2026 redesign; server twin: ssrCardV2 in scripts/lib/weekly.js — same markup
-// plus the save button). One status tag, one meta line, one verdict pill; "New for you" only
-// when nothing else applies.
-function cardTagV2(item, soon) {
-  if (soon) return item.released ? { cls: 'tag-date', text: releaseState(item.released) === 'today' ? 'Today' : fmtDate(item.released) } : null;
-  const badge = cardBadge(item) || (item.isRecent ? 'New' : null);
-  if (/season/i.test(badge || '')) return { cls: 'tag-season', text: 'New season' };
-  if (/show|series/i.test(badge || '')) return { cls: 'tag-show', text: 'New show' };
-  if (badge) return { cls: 'tag-new', text: 'New' };
-  if (item.trending) return { cls: 'tag-trend', text: 'Trending' };
-  if (newForUser.has(item.slug || slugify(item.title))) return { cls: 'tag-new', text: 'New for you' };
-  return null;
-}
-function cardMetaV2(item, soon) {
-  const genre = item.genre ? String(item.genre).split(' / ')[0] : '';
-  const streaming = !!(item.platform && item.platform !== 'Theatres');
-  const parts = soon ? [item.language, streaming ? item.platform : 'Theatres']
-    : streaming ? [item.platform, item.language]
-      : [item.language, genre, item.runtime ? fmtRuntime(item.runtime) : null];
-  return parts.filter(Boolean).map(esc).join(' · ');
-}
-function verdictPillV2(item) {
-  const s = item.fcScore;
-  if (s && s.verdict) { const r = dialRating(item); return verdictPill(`${r != null ? r.toFixed(1) + ' · ' : ''}${s.verdict}`, verdictLevel(s.verdict)); }
-  return verdictPill(noScoreText(item).label === 'Critics split' ? 'Critics split' : 'Verdict soon', 'early');
-}
-const DIAL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"/><path d="M12 16l4-5"/></svg>';
-// Twin of v2ScorePill in scripts/lib/pagev2.js (the hero's pill).
-function heroScorePill(item) {
-  const s = item.fcScore;
-  const r = s ? dialRating(item) : null;
-  if (!s || !s.verdict) return `<span class="spill soon">${DIAL_ICON}Verdict soon</span>`;
-  return `<span class="spill" title="The FilmyChill Score combines audience ratings and critics' reception">${DIAL_ICON}${r != null ? `<span class="sn">${r.toFixed(1)}</span>` : ''}${esc(s.verdict)}</span>`;
-}
-function cardArt(item) {
-  return item.poster
-    ? `<img src="${esc(item.poster)}" alt="${esc(item.title)} poster" width="132" height="198" loading="lazy">`
-    : `<div class="ph" aria-hidden="true">${esc((item.title || '?').charAt(0).toUpperCase())}</div>`;
-}
 function card(item, i, listKey) {
   const track = listKey === 'wl' ? trackStatus(item) : null;
   const saved = isSaved(item);
-  const tag = cardTagV2(item, false);
-  return `<div class="card2" data-click="openDetail" data-enter="openDetail" data-list="${listKey}" data-i="${i}" tabindex="0">
-    <div class="pw2">${cardArt(item)}${tag ? `<span class="tag ${tag.cls}">${esc(tag.text)}</span>` : ''}<button class="save-btn${saved ? ' saved' : ''}" data-click="toggleSave" data-list="${listKey}" data-i="${i}" aria-label="${saved ? 'Remove from' : 'Add to'} My List"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${BOOKMARK_PATH}"/></svg></button></div>
-    <h3 class="ct">${esc(item.title)}</h3><div class="cm">${cardMetaV2(item, false)}</div>${track ? `<div class="track-status ${track.cls}">${track.label}</div>` : ''}${verdictPillV2(item)}
+  const art = item.poster
+    ? `<img class="poster" src="${esc(item.poster)}" alt="${esc(item.title)} poster" width="150" height="200" loading="lazy">`
+    : `<div class="poster ph" aria-hidden="true">${esc((item.title || '?').charAt(0).toUpperCase())}</div>`;
+  return `<div class="card" data-click="openDetail" data-enter="openDetail" data-list="${listKey}" data-i="${i}" tabindex="0">
+    <button class="save-btn${saved ? ' saved' : ''}" data-click="toggleSave" data-list="${listKey}" data-i="${i}" aria-label="${saved ? 'Remove from' : 'Add to'} My List"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${BOOKMARK_PATH}"/></svg></button>
+    <div class="pw">${art}<span class="rank">${i + 1}</span></div>
+    <div class="cb">
+      <h3>${esc(item.title)}</h3>
+      <div class="meta">${cardMeta(item)}</div>
+      ${cardChips(item)}
+      ${track ? `<div class="track-status ${track.cls}">${track.label}</div>` : ''}
+      ${cardScore(item)}
+    </div>
+    ${ratingDial(item)}
   </div>`;
 }
 
@@ -361,11 +315,19 @@ function soonClick(ev, i) {
   return false;
 }
 function soonCard(item, i) {
-  const tag = cardTagV2(item, true);
-  const inner = `<div class="pw2">${cardArt(item)}${tag ? `<span class="tag ${tag.cls}">${esc(tag.text)}</span>` : ''}</div><h3 class="ct">${esc(item.title)}</h3><div class="cm">${cardMetaV2(item, true)}</div>`;
-  return item.slug
-    ? `<a class="card2" href="${esc(filmPagePath(item.slug))}" data-click="soonClick" data-i="${i}">${inner}</a>`
-    : `<div class="card2" data-click="openDetail" data-enter="openDetail" data-list="comingSoon" data-i="${i}" tabindex="0" role="button" aria-label="${esc(item.title)} details">${inner}</div>`;
+  const dd = daysAway(item.released);
+  const open = item.slug
+    ? `<a class="soon-card" href="${esc(filmPagePath(item.slug))}" style="text-decoration:none;color:inherit" data-click="soonClick" data-i="${i}">`
+    : `<div class="soon-card" data-click="openDetail" data-enter="openDetail" data-list="comingSoon" data-i="${i}" tabindex="0" role="button" aria-label="${esc(item.title)} details">`;
+  return `${open}
+    ${item.poster ? `<img src="${esc(item.poster)}" alt="${esc(item.title)} poster" width="150" height="200" loading="lazy">` : `<div class="soon-ph" aria-hidden="true"><span class="soon-ph-letter">${esc((item.title || '?').charAt(0).toUpperCase())}</span><span class="soon-ph-note">Poster on the way</span></div>`}
+    <div class="soon-body">
+      <div class="soon-date">${esc(releaseState(item.released) === 'today' ? 'Today' : fmtDate(item.released))}${dd ? `<span class="soon-days">${esc(dd)}</span>` : ''}</div>
+      <div class="soon-title">${esc(item.title)}</div>
+      <div class="soon-meta">${esc(item.language || '')}${item.genre ? ' · ' + esc(item.genre) : ''}</div>
+      <div class="soon-hint">${item.trailer ? '▶ Trailer →' : 'Details →'}</div>
+    </div>
+  </${item.slug ? 'a' : 'div'}>`;
 }
 
 function applyFilters(list) {
@@ -381,21 +343,34 @@ function render() {
   // chosen now is remembered (activeLang, sortMode) and applied when the data lands, instead of
   // redrawing the page from empty lists (Oct 2026).
   if (!dataReady) { if (hydrateNow) hydrateNow(); return; }
-  paintMyList();
-  const t = applyFilters(DATA.theatres);
-  const o = applyFilters(DATA.ott);
-  const hideMsg = '<div class="error-box">No releases match this filter.</div>';
+  const wl = loadWL();
+  const mySec = document.getElementById('mylistSection');
+  mySec.style.display = wl.length ? 'block' : 'none';
+  document.getElementById('mylistGrid').innerHTML = wl.map((it, i) => card(it, i, 'wl')).join('');
+  const t = myListOnly ? [] : applyFilters(DATA.theatres);
+  const o = myListOnly ? [] : applyFilters(DATA.ott);
+  const hideMsg = myListOnly ? '<div class="error-box">Showing only My List above — tap My List again to see everything.</div>' : '<div class="error-box">No releases match this filter.</div>';
   document.getElementById('moviesGrid').innerHTML = t.map((it) => card(it, DATA.theatres.indexOf(it), 'theatres')).join('') || hideMsg;
-  // v2: one row in the data's order; the "Still worth it" divider is gone.
-  document.getElementById('ottGrid').innerHTML = o.map((it) => card(it, DATA.ott.indexOf(it), 'ott')).join('') || hideMsg;
+  let ottHtml = '', ottDivided = false;
+  o.forEach((it, idx) => {
+    if (!ottDivided && sortMode === 'default' && it.stillGood && idx > 0) {
+      ottHtml += '<div class="ott-divider">Still worth it — standouts from earlier weeks</div>';
+      ottDivided = true;
+    }
+    ottHtml += card(it, DATA.ott.indexOf(it), 'ott');
+  });
+  document.getElementById('ottGrid').innerHTML = ottHtml || hideMsg;
   const cs = upcomingOnly(DATA.comingSoon);
   const csShown = activeLang === 'All' ? cs : cs.filter(x => x.language === activeLang);
   document.getElementById('soonStrip').innerHTML = csShown.map((it) => soonCard(it, cs.indexOf(it))).join('') ||
-    '<div class="error-box">' + (cs.length ? 'No upcoming ' + esc(activeLang) + ' releases in the next scan.' : 'Upcoming releases will appear after the next scan.') + '</div>';
+    '<div class="error-box" style="flex:1">' + (cs.length ? 'No upcoming ' + esc(activeLang) + ' releases in the next scan.' : 'Upcoming releases will appear after the next scan.') + '</div>';
   const tc = document.getElementById('theatreCount');
-  if (tc && DATA.theatres.length) tc.textContent = 'Top ' + DATA.theatres.length + ' · ';
+  if (tc && DATA.theatres.length) tc.textContent = 'TOP ' + DATA.theatres.length;
+  // "TOP 10" overstated a list where only three titles were new this week and the rest were
+  // carried over. Count the fresh ones separately — the divider already tells the truth
+  // further down the list, so the header should agree with it.
   const oc = document.getElementById('ottCount');
-  if (oc && DATA.ott.length) oc.textContent = 'Top ' + DATA.ott.length + ' · ';
+  if (oc && DATA.ott.length) oc.textContent = 'TOP ' + DATA.ott.length;
   updateWLCount();
 }
 
@@ -608,7 +583,7 @@ function closeDetail() {
 }
 document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeDetail(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
-// The sort select (in the More sheet) names its action: data-change="setSort".
+document.getElementById('sortSel').addEventListener('change', e => { sortMode = e.target.value; render(); });
 
 // Language filter: one dropdown (Sept 2026) — the row of chips crowded the toolbar, most of
 // all on phones. Same filter, same remembered choice.
@@ -617,29 +592,7 @@ function setLang(l) {
   try { localStorage.setItem('filmychill-lang', activeLang); } catch {}
   const sel = document.getElementById('langSel');
   if (sel && sel.value !== activeLang) sel.value = activeLang;
-  syncChips();
   render();
-}
-// The chip row follows the choice; a language beyond the first four shows on the More chip.
-function syncChips() {
-  let inRow = activeLang === 'All';
-  document.querySelectorAll('#chips .chip[data-arg]').forEach(c => {
-    const on = c.dataset.arg === activeLang; if (on) inRow = true;
-    c.classList.toggle('on', on); c.setAttribute('aria-pressed', on);
-  });
-  const more = document.querySelector('#chips .chip.more');
-  if (more) { more.textContent = inRow ? 'More ▾' : activeLang + ' ▾'; more.classList.toggle('on', !inRow); }
-}
-function openMore() { document.getElementById('moreOverlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
-function closeMore() { document.getElementById('moreOverlay').classList.remove('open'); document.body.style.overflow = ''; }
-document.getElementById('moreOverlay').addEventListener('click', e => { if (e.target.id === 'moreOverlay') closeMore(); });
-// "Other countries" in the footer: the one country selector is in the header.
-function openCountries() {
-  const d = document.getElementById('countryPill');
-  if (!d) return;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  d.open = true;
-  const s = d.querySelector('summary'); if (s) s.focus();
 }
 
 // ---- Tonight mood shuffle ----
@@ -875,10 +828,6 @@ function afterHero(fn) {
 // geo-detection or redirect — the page simply renders the country it was built for. Visitors
 // reach the right country via search (each page is indexed for its market) or the switcher.
 initCountryPage();
-paintMyList();   // the saved row needs no data file
-// The site's service worker (/sw.js): pages network-first, this week's data and posters cached,
-// so the homepage and a saved list open offline. Registered after load, clear of the first paint.
-if ('serviceWorker' in navigator) addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
 
 // Both backdrop sizes as custom properties; the CSS picks one by screen width. Mirrors ssrHero
 // in scripts/lib/surfaces.js, with the same URLs, so hydrating downloads nothing twice.
@@ -909,14 +858,12 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     if (pick) {
       document.getElementById('hero').style.display = 'block';
       if (pick.backdrop) setHeroBackdrop(pick.backdrop);
-      // Same values the build rendered (ssrHero in scripts/lib/surfaces.js): nothing moves.
-      const ht = document.getElementById('heroTitle');
-      ht.textContent = pick.title; ht.classList.toggle('long', String(pick.title).length > 18);
-      const rt = (m) => (m >= 60 ? Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : '') : m + 'm');
-      const tail = pick.kind === 'tv' ? (pick.seasons ? 'Season ' + pick.seasons : 'Series') : (pick.runtime ? rt(pick.runtime) : '');
-      document.getElementById('heroMeta').textContent = [pick.platform, pick.genre ? String(pick.genre).split(' / ')[0] : '', pick.language, tail].filter(Boolean).join(' · ');
-      const hs = document.getElementById('heroScore');
-      if (hs) hs.innerHTML = heroScorePill(pick);
+      document.getElementById('heroTitle').textContent = pick.title;
+      document.getElementById('heroMeta').textContent = [pick.platform, pick.genre, pick.language].filter(Boolean).join(' · ');
+      const verdict = (pick.fcScore && pick.fcScore.verdict) || pick.verdict || '';
+      document.getElementById('heroVerdict').innerHTML = verdict ? `<span class="vpill vp-hero">${esc(verdict)}</span>` : '';
+      const heroDial = document.getElementById('heroDial');
+      if (heroDial) heroDial.innerHTML = heroDialInner(pick);
       openPick = () => {
         const listKey = DATA.theatres.includes(pick) ? 'theatres' : 'ott';
         openDetail(listKey, DATA[listKey].indexOf(pick), 'pick');
@@ -938,7 +885,6 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     langSel.innerHTML = [`<option value="All">All languages (${total})</option>`,
       ...langs.map(l => `<option value="${esc(l)}">${esc(l)} (${counts[l]})</option>`)].join('');
     langSel.value = activeLang;
-    syncChips();
 
     computePersonal();
     dataReady = true;
@@ -946,8 +892,7 @@ fetch('/data-' + code + '.json?v=' + Date.now())
 
     const d = new Date(data.generatedAt);
     const days = Math.floor((new Date() - d) / 86400000);
-    const ls = document.getElementById('lastScan');
-    if (ls) ls.textContent = days <= 0 ? 'Updated today' : days === 1 ? 'Updated yesterday' : 'Updated ' + days + ' days ago';
+    document.getElementById('lastScan').textContent = days <= 0 ? 'Updated today' : days === 1 ? 'Updated yesterday' : 'Updated ' + days + ' days ago';
 
     // Deep link: open the film if the URL has a #slug (e.g. /#carry-on-jatta-4)
     const openFromHash = () => {
@@ -962,8 +907,7 @@ fetch('/data-' + code + '.json?v=' + Date.now())
   })
   .catch(() => {
     answerHeroTap(false);
-    const ls = document.getElementById('lastScan');
-    if (ls) ls.textContent = 'Fresh picks arriving soon';
+    document.getElementById('lastScan').textContent = 'Fresh picks arriving soon';
     document.getElementById('moviesGrid').innerHTML = '<div class="error-box">No data yet — run the workflow in the Actions tab.</div>';
     document.getElementById('ottGrid').innerHTML = '<div class="error-box">No data yet.</div>';
   });
@@ -975,14 +919,8 @@ fetch('/data-' + code + '.json?v=' + Date.now())
 const ACTIONS = {
   setCountry: (el) => setCountry(el.value || el.dataset.code),
   setLang: (el) => setLang(el.value),
-  setLangChip: (el) => setLang(el.dataset.arg),
-  setSort: (el) => { sortMode = el.value; render(); },
-  openMore: () => openMore(),
-  closeMore: () => closeMore(),
-  openCountries: () => openCountries(),
-  link: () => {},   // a plain link inside a tappable card: the browser follows it
   openMood: () => openMood(),
-  goMyList: () => goMyList(),
+  toggleMyList: () => toggleMyList(),
   shareWeek: () => shareWeek(),
   addFridayRitual: (el) => addFridayRitual(el),
   closeMood: () => closeMood(),
@@ -1014,3 +952,7 @@ document.addEventListener('click', (ev) => { const d = document.getElementById('
 document.addEventListener('keydown', (ev) => { const d = document.getElementById('countryPill'); if (ev.key === 'Escape' && d && d.open) { d.open = false; d.querySelector('summary').focus(); } });
 document.addEventListener('change', (ev) => runAction('data-change', ev));
 document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') runAction('data-enter', ev); });
+
+// The site's service worker (/sw.js): pages network-first, this week's data and posters cached,
+// so the homepage and a saved list open offline. Registered after load, clear of the first paint.
+if ('serviceWorker' in navigator) addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
