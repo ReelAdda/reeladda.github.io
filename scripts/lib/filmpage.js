@@ -984,7 +984,7 @@ function fcScoreSection(item) {
     return `<section class="fcsb" id="filmychill-score">${RC.receptionMark(item.reception)}${fcsMark}
     <div class="fcsb-label">FilmyChill score</div>
     <div class="fcsb-verdict">${ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
-    <p class="fcsb-why">${e(s ? s.reason : none.why)}</p>
+    <p class="fcsb-why">${e(s ? (v3 ? RC.reasonWithEvidence(s.reason, { ...item, reception: cited ? item.reception : undefined }) : s.reason) : none.why)}</p>
     ${v3 ? line : `<div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>`}
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>`;
@@ -1362,7 +1362,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
     // release" window they never had — 704 pages, anime series among them.
     const rec = FILM_HISTORY.get(`${code}:${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}`);
     const days = rec ? cinemaWindowDays(rec, FILM_HISTORY.starts()) : null;
-    if (days == null) return "";
+    if (days == null || v3) return "";   // v3: a "Good to know" row instead (below)
     return `<p class="fcdata"><b>FilmyChill data:</b> reached streaming in ${e(country)} `
       + `${fcdataWindowPhrase(days)}${rec.p ? `, on ${e(rec.p)}` : ""}.</p>`;
   })()}
@@ -1486,6 +1486,11 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
     if (v3) {
       void wtw;
       const rows = goodToKnow.filter((r) => !/^(Runtime|Genre|Language)$/.test(r.label)).map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`);
+      // The site's own measurement (lib/history.js): how long after cinemas the film reached
+      // streaming here — the one fact no competitor can publish, as a row where facts are read.
+      const rec = FILM_HISTORY.get(`${code}:${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}`);
+      const days = rec ? cinemaWindowDays(rec, FILM_HISTORY.starts()) : null;
+      if (days != null) rows.unshift(`<tr><td>OTT arrival</td><td>${e(fcdataWindowPhrase(days))}${rec.p ? `, on ${e(rec.p)}` : ""} (FilmyChill data)</td></tr>`);
       return rows.length ? `<h2>Good to know</h2><table class="gtk">${rows.join("")}</table>` : "";
     }
     return v2 && wtw ? `<div class="wtw" id="where-to-watch">${wtw}</div>` : wtw;

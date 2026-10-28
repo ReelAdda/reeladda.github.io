@@ -8993,7 +8993,8 @@ test("redesign v2 (28 Oct 2026): four states of VisionQuest, every fact unchange
   const IN = require("./lib/core.js").COUNTRIES[0];
   const base = F.readFacts("in").get("visionquest");
   if (!base) return;   // the facts file is not part of a bare checkout
-  const item = base.item, today = "2026-10-28";
+  // The score pinned: the live record's halves move with the sweeps, and the test is about the layout.
+  const item = { ...base.item, rating: 8.6, votes: 194, fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" } }, today = "2026-10-28";
   const shift = (d, days) => new Date(Date.parse(d + "T00:00:00Z") + days * 864e5).toISOString().slice(0, 10);
   const states = {
     onAir: item,
@@ -9151,7 +9152,16 @@ test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to
     // 1. Every fact the readers take is the same (providers, rent/buy, availability date, state, score halves, reception).
     assert.deepStrictEqual(F.keyFacts(v3), F.keyFacts(v2), "keyFacts unchanged by v3");
     const x3 = F.extractFacts(v3), x2 = F.extractFacts(v2);
-    assert.deepStrictEqual(x3.fcScore, x2.fcScore, "the score's audience and critics halves survive the v3 line (FC:fcs marker)");
+    assert.deepStrictEqual({ ...x3.fcScore, reason: "" }, { ...x2.fcScore, reason: "" }, "the score's audience and critics halves survive the v3 line (FC:fcs marker)");
+    // The reason carries its evidence (lib/reception.js reasonWithEvidence): unique per page by construction.
+    assert.strictEqual(x3.fcScore.reason, "Audiences (7.8 from 500 ratings) and critics (91% positive on Rotten Tomatoes) agree.");
+    assert.strictEqual(RC.reasonWithEvidence("Audiences love it; critics are split.", { rating: 6.9, votes: 42, reception: { rt: { pct: 55 } }, fcScore: { critics: "mixed" } }), "Audiences (6.9 from 42 ratings) love it; critics (55% positive on Rotten Tomatoes) are split.");
+    assert.strictEqual(RC.reasonWithEvidence("Audiences and critics agree: skip it.", { rating: 4.1, votes: 300, reception: { rt: { pct: 90 } }, fcScore: { critics: "negative" } }), "Audiences (4.1 from 300 ratings) and critics agree: skip it.", "a figure that argues with the label stays out");
+    assert.strictEqual(RC.reasonWithEvidence("Critics are warmer than audiences.", { rating: 6.2, votes: 80, reception: { ratings: { n: 12, median: 3.5 } }, fcScore: { critics: "positive" } }), "Critics (median 3.5/5 from 12 reviews) are warmer than audiences (6.2 from 80 ratings).");
+    // The FAQ cites the figures too, and the audience number names its source.
+    assert.ok(/<summary>What do critics say about T\?<\/summary><div class="fa">Positive — 91% on Rotten Tomatoes \(87 reviews\) — per Wikipedia, 10 Oct 2026\.<\/div>/.test(v3), "critics FAQ");
+    assert.ok(/It rates 7\.8\/10 from 500 audience ratings on TMDB\./.test(v3));
+    assert.ok(!/What do critics say about/.test(on(100, { ...it, reception: undefined })), "no figures, no critics FAQ");
     assert.deepStrictEqual([x3.providers, x3.rentBuy, x3.reception], [["Netflix"], ["Apple TV"], rec]);
     // 2. The sequence: header mark, tag above the title, meta line, pills with the where-to-watch block, score, Story, Director, Cast, Good to know, no fillers.
     assert.ok(/<div class="top v3"><a class="mark"[^>]*><svg class="brand-mark"/.test(v3) && /<span class="v3tag">Trending<\/span>\s*<h1>T \(2026\)<\/h1>/.test(v3));

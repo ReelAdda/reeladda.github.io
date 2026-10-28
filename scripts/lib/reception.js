@@ -71,4 +71,23 @@ function toneFromFigure(rec) {
   return v >= 70 ? "positive" : v >= 50 ? "mixed" : "negative";
 }
 
-module.exports = { RECEPTION_FEATURE, contradicts, readReceptionMark, receptionKey, receptionLine, receptionMark, toneFromFigure };
+// Pure: the verdict's one-line reason with its evidence in it. The table's sentence ("Audiences
+// and critics agree.") is the same on every page; with the page's own numbers after each word
+// it is different on every page by construction, and the reader sees what it rests on:
+// "Audiences (8.6 from 198 ratings) and critics (91% positive on Rotten Tomatoes) agree."
+// A figure that argues with the critics' label is left out (contradicts), as on the line.
+function reasonWithEvidence(reason, item) {
+  let out = String(reason || "");
+  if (!out) return out;
+  const votes = Number((item && item.votes) || 0);
+  if (item && item.rating != null && votes) out = out.replace(/\b(audiences?)\b/i, (m) => `${m} (${Number(item.rating).toFixed(1)} from ${votes.toLocaleString("en-IN")} ratings)`);
+  const rec = item && item.reception, tone = item && item.fcScore && item.fcScore.critics;
+  let ev = null;
+  if (rec && rec.rt && !contradicts(rec.rt.pct, tone)) ev = `${rec.rt.pct}% positive on Rotten Tomatoes`;
+  else if (rec && rec.mc && !contradicts(rec.mc.score, tone)) ev = `Metacritic ${rec.mc.score}/100`;
+  else if (rec && rec.ratings && rec.ratings.n >= 3 && rec.ratings.median != null) ev = `median ${rec.ratings.median}/5 from ${rec.ratings.n} reviews`;
+  if (ev) out = out.replace(/\b(critics)\b/i, (m) => `${m} (${ev})`);
+  return out;
+}
+
+module.exports = { RECEPTION_FEATURE, contradicts, readReceptionMark, reasonWithEvidence, receptionKey, receptionLine, receptionMark, toneFromFigure };

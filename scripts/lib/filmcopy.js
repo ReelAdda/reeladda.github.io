@@ -240,7 +240,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
       q: `Is ${item.title} worth watching?`,
       // Self-contained on purpose: featured snippets and AI answer engines quote this text
       // out of context, so "see above" is a dead reference the moment it leaves the page.
-      a: trim(`${verdictLabel}.${item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10 on audience ratings.` : ""}${item.take ? ` ${item.take}` : ""}${fit ? ` ${fit.text}` : ""}`, 420),
+      a: trim(`${verdictLabel}.${item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10${Number(item.votes) ? ` from ${Number(item.votes).toLocaleString("en-IN")} audience ratings on TMDB` : " on audience ratings"}.` : ""}${item.take ? ` ${item.take}` : ""}${fit ? ` ${fit.text}` : ""}`, 420),
     });
   } else if (fit) {
     // Previously an unrated or brand-new title got NO answer to the site's central question.
@@ -249,6 +249,19 @@ function buildFaqs(item, countryName = "India", cfg = null) {
       q: `Is ${item.title} worth watching?`,
       a: trim(`${isRecent(item, Date.parse(today)) ? `It's too early for a verdict — ${item.title} doesn't have enough ratings yet.` : `There aren't enough ratings for a verdict on ${item.title}.`} ${fit.text}`, 420),
     });
+  }
+  // Q1b: what critics say, with the figures the page cites (lib/reception.js, rollout
+  // "wiki-reception"): the sourced sentence an answer engine can quote — "Positive — 91% on
+  // Rotten Tomatoes (87 reviews) — per Wikipedia, 28 Oct 2026."
+  {
+    const RC = require("./reception.js");
+    const { inRollout } = require("./rollout.js");
+    const tone = item.fcScore && item.fcScore.critics ? item.fcScore.critics : null;
+    const cited = item.reception && item.slug && inRollout(RC.RECEPTION_FEATURE, item.slug) ? RC.receptionLine(item.reception, (d) => fmtDateFull(d, localeFor(cfg && cfg.code)), { tone }) : "";
+    if (cited) {
+      const label = tone || RC.toneFromFigure(item.reception);
+      faqs.push({ q: `What do critics say about ${item.title}?`, a: `${label ? label.charAt(0).toUpperCase() + label.slice(1) + " — " : ""}${cited}.` });
+    }
   }
   // Q2: where to watch
   let whereA;
