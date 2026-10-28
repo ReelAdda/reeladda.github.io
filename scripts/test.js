@@ -9140,6 +9140,60 @@ test("Wikipedia reception figures (28 Oct 2026): parsed with counts, cached with
     assert.ok(!/Rotten Tomatoes/.test(F.buildFilmPage({ ...it, reception: undefined }, "2026-10-28", new Set(), IN)));
   } finally { R.useRolloutConfig(null); }
 });
+test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to-watch block at the top, the critics label follows its figure", () => {
+  const R = require("./lib/rollout.js"), F = require("./lib/facts.js"), Fp = require("./lib/filmpage.js"), RC = require("./lib/reception.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const rec = { rt: { pct: 91, n: 87 }, mc: { score: 64, n: 25 }, asOf: "2026-10-10" };
+  const it = { title: "T", slug: "t", kind: "movie", released: "2026-10-01", language: "Hindi", genre: "Drama / Crime", runtime: 128, providers: ["Netflix"], rentBuy: ["Apple TV"], tmdbId: 1, rating: 7.8, votes: 500, trending: true, director: "D",
+    fullReview: "A long story. " + "Sentence after sentence. ".repeat(60), fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" }, reception: rec, arrived: "2026-10-05", arrivedOn: "Netflix" };
+  const on = (feat, item = it) => { R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "redesign-v2": { percent: 100 }, "wiki-reception": { percent: 100 }, "page-v3": { percent: feat } } }); return Fp.buildFilmPage(item, "2026-10-28", new Set(), IN); };
+  try {
+    const v3 = on(100), v2 = on(0);
+    // 1. Every fact the readers take is the same (providers, rent/buy, availability date, state, score halves, reception).
+    assert.deepStrictEqual(F.keyFacts(v3), F.keyFacts(v2), "keyFacts unchanged by v3");
+    const x3 = F.extractFacts(v3), x2 = F.extractFacts(v2);
+    assert.deepStrictEqual(x3.fcScore, x2.fcScore, "the score's audience and critics halves survive the v3 line (FC:fcs marker)");
+    assert.deepStrictEqual([x3.providers, x3.rentBuy, x3.reception], [["Netflix"], ["Apple TV"], rec]);
+    // 2. The sequence: header mark, tag above the title, meta line, pills with the where-to-watch block, score, Story, Director, Cast, Good to know, no fillers.
+    assert.ok(/<div class="top v3"><a class="mark"[^>]*><svg class="brand-mark"/.test(v3) && /<span class="v3tag">Trending<\/span>\s*<h1>T \(2026\)<\/h1>/.test(v3));
+    assert.ok(/<div class="meta">Drama \/ Crime · Hindi · Released 1 Oct 2026 · 128 min<\/div>/.test(v3), "meta line");
+    assert.ok(/<!--FC:wtw--><!--SW:stream--><!--SW:live=2026-10-28--><div class="pills"><span class="rpill">★ 7\.8\/10 \(500 ratings\)<\/span><span class="pill">Netflix<\/span><span class="wlbl">Rent or buy<\/span><span class="pill">Apple TV<\/span><\/div>/.test(v3), "the block under the title, markers inside");
+    assert.ok(/<!--SW:arrived=2026-10-05\|Netflix-->/.test(v3) && /Availability as of 28 Oct 2026 — platforms may change over time\./.test(v3));
+    const order = ["<h2>Story</h2>", '<p class="dir"><b>Director:</b> D</p>', "<h2>Good to know</h2>", "<h2>Trailer</h2>"].map((s) => v3.indexOf(s));
+    assert.ok(order[0] > 0 && order.every((p, i) => i === 0 || p === -1 || p > order[i - 1]), "Story before Director before Good to know");
+    assert.ok(!/What the audience says|What the critics say|Is it for you|<dt>Best for|<dt>Binge it|<h2>Where to watch|class="anscard"|class="cta|data-act="share"|id="sticky"/.test(v3), "fillers, answer card, CTA, Share, the separate Where to watch and the sticky bar are gone");
+    assert.ok((v3.match(/Sentence after sentence\./g) || []).length === 60, "the full overview");
+    // 3. The score card's one line, and the label following the figure when the page has no tone.
+    assert.ok(/<p class="fcsb-line"><b>Audience<\/b> ★ 7\.8 \(500 ratings\) · <b>Critics:<\/b> positive — 91% on Rotten Tomatoes \(87 reviews\) — per Wikipedia, 10 Oct 2026<\/p>/.test(v3), v3.match(/<p class="fcsb-line">[^]*?<\/p>/)[0]);
+    assert.ok(/<!--FC:fcs=Loved\|positive-->/.test(v3) && /class="dial dial-must"/.test(v3));
+    const noTone = on(100, { ...it, fcScore: { verdict: "Must watch", reason: "Audiences love it.", audience: "Loved", critics: null, basis: "audience" } });
+    assert.ok(/<b>Critics:<\/b> positive — 91% on Rotten Tomatoes/.test(noTone) && !/no settled verdict/.test(noTone), "never 'no settled verdict' beside a figure");
+    assert.ok(/<b>Critics:<\/b> no settled verdict<\/p>/.test(on(100, { ...it, reception: undefined, fcScore: { verdict: "Must watch", reason: "Audiences love it.", audience: "Loved", critics: null, basis: "audience" } })));
+    assert.strictEqual(RC.toneFromFigure({ rt: { pct: 55 } }), "mixed"); assert.strictEqual(RC.toneFromFigure({ mc: { score: 40 } }), "negative"); assert.strictEqual(RC.toneFromFigure(null), null);
+    // 4. States: theatres, rent only, upcoming, nowhere — each keeps what the readers need.
+    const thItem = { ...it, providers: [], rentBuy: [], platform: "Theatres", arrived: undefined };
+    const th = on(100, thItem);
+    assert.ok(/<span class="st"><span class="pill">In theatres<\/span><\/span>/.test(th) && /Availability as of 28 Oct 2026 — checked that day: not on any streaming service in India yet\./.test(th));
+    assert.deepStrictEqual(F.keyFacts(th), F.keyFacts(on(0, thItem)), "a theatre page's facts, v3 vs v2");
+    const rent = on(100, { ...it, providers: [], arrived: undefined });
+    assert.deepStrictEqual([F.extractFacts(rent).providers || [], F.extractFacts(rent).rentBuy], [[], ["Apple TV"]]);
+    const up = on(100, { ...it, providers: [], rentBuy: [], released: "2026-12-20", arrived: undefined });
+    assert.ok(/<span class="pill">In cinemas from 20 Dec 2026<\/span>/.test(up) && /Not out yet — nowhere to stream or rent it until it opens\./.test(up));
+    const none = on(100, { ...it, providers: [], rentBuy: [], platform: "", arrived: undefined });
+    assert.ok(/<span class="ppill none">Not on OTT in India yet<\/span>/.test(none) && !/FC:wtw/.test(none));
+    // 5. Dark mode: the vote widget follows the theme.
+    assert.ok(/\.fcvote \{ background:var\(--card\); border-color:var\(--line\); color:var\(--ink\); \}/.test(v3));
+    // 6. The pop-up's line (js/app.js) is the twin of the page's.
+    const src = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "app.js"), "utf8");
+    const fnSrc = (name) => { const i = src.indexOf(`function ${name}(`); return src.slice(i, src.indexOf("\n}\n", i) + 2); };
+    const vm = require("vm"), ctx = {}; vm.createContext(ctx);
+    vm.runInContext([fnSrc("contradicts"), fnSrc("receptionLine"), fnSrc("toneFromFigure")].join("\n"), ctx);
+    for (const [r, tone] of [[rec, "positive"], [rec, "negative"], [{ rt: { pct: 39 }, mc: { score: 71 } }, "positive"], [{ ratings: { n: 4, median: 2.5 } }, null], [{ rt: { pct: 77, n: 44, season: 1 } }, null]]) {
+      assert.strictEqual(ctx.receptionLine(r, (d) => d, tone), RC.receptionLine(r, (d) => d, { tone }), JSON.stringify([r, tone]));
+      assert.strictEqual(ctx.toneFromFigure(r), RC.toneFromFigure(r));
+    }
+    assert.ok(/\$\{scoreLineHtml\(item\)\}/.test(src) && /\.fcs-line \{/.test(require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8")));
+  } finally { R.useRolloutConfig(null); }
+});
 test("a frozen page with no platform gets the 'not streaming yet' description its title promises (The Invite)", () => {
   const IN = require("./lib/core.js").COUNTRIES[0];
   const F = require("./lib/filmpage.js");

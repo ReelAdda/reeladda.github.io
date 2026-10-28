@@ -83,7 +83,9 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   const stamp = /class="fcsb-stamp fcsb-(?:must|worth|skip)">([^<]+)</.exec(html);
   const why = /<p class="fcsb-why">([\s\S]*?)<\/p>/.exec(html);
   const tag = (label) => (new RegExp(`<b>${label}<\\/b><small>[^<]*<\\/small><\\/div><span class="fcsb-tag(?: none)?">([^<]+)<`).exec(html) || [])[1];
-  const audTag = tag("Audience"), criTag = tag("Critics");
+  // The score's two halves: from the marker (page v3, which has no rows), else the rows' tags.
+  const fcs = /<!--FC:fcs=([^|>]*)\|([^>]*)-->/.exec(html);
+  const audTag = fcs ? (fcs[1] || "Too few ratings") : tag("Audience"), criTag = fcs ? (fcs[2] ? fcs[2].charAt(0).toUpperCase() + fcs[2].slice(1) : "No verdict") : tag("Critics");
   const conf = /<span class="fcsb-conf">Based on ([\d,]+) ratings<\/span>/.exec(html);
   const take = /<p class="take">([\s\S]*?)(?: <span class="tcounter">([\s\S]*?)<\/span>)?(?: <span class="tsrc">[^<]*<\/span>)?<\/p>/.exec(html);
   const cite = ld.citation && /^Wikipedia: (.+)$/.exec(ld.citation.name || "");

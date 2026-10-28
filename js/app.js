@@ -158,6 +158,43 @@ function fcSignals(item) {
   if (!s) [wikiViewsLabel(item.wikiWeeklyViews), trailerViewsLabel(item.trailerViews)].forEach(b => { if (b) bits.push(b); });
   return bits.length ? `<div class="fcs-sig">${esc(bits.join(' · '))}</div>` : '';
 }
+// The score's two halves as one line under the card, with the critics' figures the build read
+// from Wikipedia (twin of receptionLine / toneFromFigure in scripts/lib/reception.js: at most two
+// figures with their scales, a figure that argues with the label withheld, the label following
+// the figure when the page's own reading has no settled tone).
+function contradicts(value, tone) {
+  if (value == null || !tone) return false;
+  if (/^(positive|acclaim)$/i.test(tone) && value < 50) return true;
+  if (/^negative$/i.test(tone) && value >= 70) return true;
+  return false;
+}
+function receptionLine(rec, fmt, tone) {
+  if (!rec) return '';
+  const parts = [];
+  const paren = (bits) => (bits.filter(Boolean).length ? ` (${bits.filter(Boolean).join(', ')})` : '');
+  const rt = rec.rt && !contradicts(rec.rt.pct, tone) ? rec.rt : null;
+  const mc = rec.mc && !contradicts(rec.mc.score, tone) ? rec.mc : null;
+  if (rt) parts.push(`${rt.pct}% on Rotten Tomatoes${paren([rt.n ? `${rt.n} reviews` : '', rt.season ? `season ${rt.season}` : ''])}`);
+  else if (mc) parts.push(`Metacritic ${mc.score}/100${paren([mc.n ? `${mc.n} critics` : '', mc.season ? `season ${mc.season}` : ''])}`);
+  if (rec.ratings && rec.ratings.n) parts.push(`${rec.ratings.n} published rating${rec.ratings.n === 1 ? '' : 's'}${rec.ratings.median != null && rec.ratings.n >= 3 ? `, median ${rec.ratings.median}/5` : ''}`);
+  if (!parts.length) return '';
+  return `${parts.join(' · ')} — per Wikipedia${rec.asOf ? `, ${fmt(rec.asOf)}` : ''}`;
+}
+function toneFromFigure(rec) {
+  const v = rec && rec.rt ? rec.rt.pct : rec && rec.mc ? rec.mc.score : null;
+  if (v == null) return null;
+  return v >= 70 ? 'positive' : v >= 50 ? 'mixed' : 'negative';
+}
+function scoreLineHtml(item) {
+  const s = item.fcScore;
+  if (!s && !item.reception) return '';
+  const votes = Number(item.votes || 0);
+  const aud = item.rating != null && votes ? `★ ${Number(item.rating).toFixed(1)} (${votes.toLocaleString('en-IN')} ratings)` : votes ? `${votes.toLocaleString('en-IN')} ratings, no average yet` : 'not rated yet';
+  const tone = s && s.critics ? s.critics : null;
+  const cited = item.reception ? receptionLine(item.reception, fmtDate, tone) : '';
+  const label = tone || (cited ? toneFromFigure(item.reception) : null) || 'no settled verdict';
+  return `<div class="fcs-line"><b>Audience</b> ${esc(aud)} · <b>Critics:</b> ${esc(label)}${cited ? ' — ' + esc(cited) : ''}</div>`;
+}
 function fcScoreHtml(item) {
   const s = item.fcScore;
   const none = noScoreText(item);
@@ -553,6 +590,7 @@ function openDetail(listKey, i, via) {
       <div class="meta">${esc(item.genre || '')}${item.language ? ' · ' + esc(item.language) : ''}${whenLine ? ' · ' + esc(whenLine) : ''}${trailerViewsLabel(item.trailerViews) ? ' · ' + trailerViewsLabel(item.trailerViews) : ''}</div>
       <div class="pill-row">${facts}${provs}</div>
       ${fcScoreHtml(item)}
+      ${scoreLineHtml(item)}
       <div class="review">${esc(item.fullReview || item.review || 'No description available.')}</div>
       <div class="credits">
         ${item.director ? `<b>Director:</b> ${esc(item.director)}` : ''}

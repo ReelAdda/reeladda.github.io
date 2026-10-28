@@ -227,8 +227,17 @@ const V3_CSS = [
   "  .rpill { display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border-radius:999px; background:var(--cream); border:1px solid var(--line); color:var(--ink); font-weight:800; font-size:14px; }",
   "  .ppill { display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border-radius:999px; background:var(--deep); color:#fff; font-weight:800; font-size:14px; }",
   "  .ppill.none { background:transparent; color:var(--mute); border:1.5px dashed var(--mute); font-weight:700; }",
+  "  .pills .pill { display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border-radius:999px; margin:0; font-size:14px; font-weight:800; background:var(--deep); color:#fff; border:0; }",
+  "  .pills .st .pill { background:transparent; color:var(--mute); border:1.5px dashed var(--mute); font-weight:700; }",
+  "  .pills .wlbl + .pill { background:var(--card); color:var(--ink); border:1px solid var(--line); }",
+  "  .wlbl { display:inline-flex; align-items:center; font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--mute); padding:0 4px; }",
+  "  .wnote.arrived b { color:var(--ink); }",
   "  .fcsb-line { font-size:14px; color:var(--mute); line-height:1.6; margin:12px 0 0; padding-top:12px; border-top:1px solid var(--line); } .fcsb-line b { color:var(--ink); }",
   "  .dir { margin:10px 0 0; font-size:15px; } .dir b { font-weight:800; }",
+  // The vote widget follows the theme (it was a white card with dark-mode text, unreadable in dark).
+  "  .fcvote { background:var(--card); border-color:var(--line); color:var(--ink); } .fcvote-q { color:var(--ink); }",
+  "  .fcvote-b button { background:var(--card); color:var(--ink); border-color:var(--line); } .fcvote-b button.on { background:var(--deep); border-color:var(--deep); color:#fff; }",
+  "  .wnote { margin:6px 0 0; font-size:12.5px; color:var(--mute); } .wnote b { color:var(--ink); font-weight:700; }",
   "  .gtk td .pill { margin:0 6px 6px 0; } .gtk td p { margin:4px 0 0; font-size:12.5px !important; }",
 ].join("\n");
 function v3Css(baseCss) { return v2Css(baseCss) + "\n" + V3_CSS; }
@@ -248,23 +257,51 @@ function v3Meta(item, { fmt = (d) => d } = {}) {
   const tv = item.trailerViews ? trailerViewsLabel(item.trailerViews) : null;
   return [item.genre, item.language, when, item.runtime ? `${item.runtime} min` : null, tv].filter(Boolean).map(escHtml).join(" · ");
 }
-// Pure: the audience pill (TMDB's number, its count) and the platform pill (where to watch now;
-// "In theatres" / "Not on OTT yet" when nowhere). The platform IS the where-to-watch answer.
-function v3Pills(item, { relState, country, V }) {
+// Pure: the audience pill (TMDB's number, its count), the platform pills and the where-to-watch
+// caption — the page's one where-to-watch block (28 Oct 2026: the owner wants it said once, at
+// the top). Inside <!--FC:wtw--> it carries exactly what the old section carried for the readers
+// and the sweeps: provider pills (class "pill"), the rent/buy pills after a "Rent or buy" label,
+// the "Availability as of <date> — …" sentence in its two forms, the SW:stream / SW:live /
+// SW:arrived markers, and the hub links. The audience pill is not class "pill", so it is never
+// read as a provider.
+function v3Where(item, { relState, country, V, asOf = "", fmt = (d) => d, hubLinks = "" }) {
   const e = escHtml;
   const votes = Number(item.votes || 0);
   const aud = item.rating != null && votes
     ? `<span class="rpill">★ ${Number(item.rating).toFixed(1)}/10 (${e(votes.toLocaleString("en-IN"))} rating${votes === 1 ? "" : "s"})</span>`
     : `<span class="rpill">${votes ? `${e(votes.toLocaleString("en-IN"))} ratings, no average yet` : "Not rated on TMDB yet"}</span>`;
-  const provs = (item.providers || []).map(String), rent = (item.rentBuy || []).map(String).filter((x) => !provs.includes(x));
+  const provs = (item.providers || []).map(String), rb = Array.isArray(item.rentBuy) ? item.rentBuy.map(String) : [];
   const ott = V.word === "OTT" ? "OTT" : "streaming";
-  let plat;
-  if (provs.length) plat = provs.slice(0, 2).map((p) => `<span class="ppill">${e(p)}</span>`).join("");
-  else if (rent.length) plat = `<span class="ppill">Rent or buy: ${e(rent[0])}</span>`;
-  else if (relState === "upcoming" || relState === "today") plat = `<span class="ppill none">Releases ${relState === "today" ? "today" : e(String(item.released).slice(0, 10))}</span>`;
-  else if (item.platform === "Theatres") plat = `<span class="ppill none">In theatres · not on ${ott} yet</span>`;
-  else plat = `<span class="ppill none">Not on ${ott} in ${e(country)} yet</span>`;
-  return `<div class="pills">${aud}${plat}</div>`;
+  const when = asOf ? e(fmt(asOf)) : "";
+  const note = `<p class="wnote">Availability as of ${when} — platforms may change over time.</p>`;
+  const checked = item.untracked
+    ? `<p class="wnote">Availability as of ${when} — the last time we could check. We can't match this film on TMDB, so this page won't update on its own.</p>`
+    : `<p class="wnote">Availability as of ${when} — checked that day: not on any streaming service in ${e(country)} yet.</p>`;
+  const rentPills = rb.length ? `<span class="wlbl">Rent or buy</span>${rb.map((p) => `<span class="pill">${e(p)}</span>`).join("")}` : "";
+  const rentNote = `<p class="wnote">Not on any streaming subscription yet — renting is the only way to watch it at home for now.</p>`;
+  const wrap = (pills, caption, { live = false } = {}) => (live
+    ? `<!--FC:wtw--><!--SW:stream--><!--SW:live=${e(asOf || "")}--><div class="pills">${aud}${pills}</div>${caption}<!--/SW:stream--><!--/FC:wtw-->`
+    : `<!--FC:wtw--><div class="pills">${aud}${pills}</div>${caption}<!--/FC:wtw-->`);
+  if (provs.length) {
+    const arrived = item.arrived
+      ? `<!--SW:arrived=${e(item.arrived)}|${e(item.arrivedOn || provs[0])}--><p class="wnote arrived"><b>Streaming ${provs.includes(item.arrivedOn) ? `on ${e(item.arrivedOn)} ` : ""}in ${e(country)} since ${e(fmt(item.arrived))}.</b></p>`
+      : "";
+    // class="pill" exactly: lib/facts.js reads providers by that attribute, character for character.
+    return wrap(provs.map((p) => `<span class="pill">${e(p)}</span>`).join("") + rentPills,
+      `<p class="wnote"><b>Included with a subscription</b> — no extra charge on these platforms.</p>${arrived}${note}${hubLinks}`, { live: true });
+  }
+  // Status pills (not providers; lib/facts.js STATUS_PILL skips them) sit in a .st wrapper, so
+  // they draw as the quiet dashed pill while keeping the class the readers expect.
+  if (item.platform === "Theatres") return wrap(`<span class="st"><span class="pill">In theatres</span></span>${rentPills}`, rb.length ? rentNote + note : checked);
+  if (rb.length) return wrap(rentPills, rentNote + note);
+  if ((relState === "upcoming" || relState === "today") && item.released) {
+    const pill = relState === "today" ? "In cinemas today" : `In cinemas from ${e(fmt(item.released))}`;
+    return wrap(`<span class="st"><span class="pill">${pill}</span></span>`, `<p class="wnote">Not out yet — nowhere to stream or rent it until it opens.</p>`);
+  }
+  // Nowhere: no block for the readers (as before), just the honest pill.
+  return `<div class="pills">${aud}<span class="ppill none">Not on ${ott} in ${e(country)} ${item.state === "gone" ? "right now" : "yet"}</span></div>`;
 }
+// Kept for the mock-up's callers.
+function v3Pills(item, opts) { return v3Where(item, opts); }
 
-module.exports = { DEEP, HERO_GRADIENT, V2_CSS, V2_FEATURE, V2_MARK, V3_CSS, daysWord, v2Crumbs, v2Css, v2Cta, v2Header, v2Meta, v2Page, v2ScorePill, v2Sticky, v2Trailer, v3Css, v3Header, v3Meta, v3Pills, v3Tag };
+module.exports = { DEEP, HERO_GRADIENT, V2_CSS, V2_FEATURE, V2_MARK, V3_CSS, daysWord, v2Crumbs, v2Css, v2Cta, v2Header, v2Meta, v2Page, v2ScorePill, v2Sticky, v2Trailer, v3Css, v3Header, v3Meta, v3Pills, v3Tag, v3Where };

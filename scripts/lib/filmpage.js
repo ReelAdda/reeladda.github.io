@@ -973,9 +973,15 @@ function fcScoreSection(item) {
     // Page v3: the two halves as one line under the card ("Audience ★ 8.6 (196 ratings) · Critics:
     // positive — 91% on Rotten Tomatoes …"), the detail sheet's form; the rows otherwise.
     const v3 = inRollout("page-v3", item.slug);
+    // The label follows the cited figure when the page's own reading has no settled tone: never
+    // "no settled verdict" beside "90% on Rotten Tomatoes" (28 Oct 2026).
+    const criLabel = cri.none ? (RC.toneFromFigure(cited ? item.reception : null) || "no settled verdict") : cri.tag.toLowerCase();
     const line = v3 ? `<p class="fcsb-line"><b>Audience</b> ${item.rating != null && votes !== "0" ? `★ ${Number(item.rating).toFixed(1)} (${e(votes)} ratings)` : e(aud.tag.toLowerCase())}`
-      + ` · <b>Critics:</b> ${e(cri.none ? "no settled verdict" : cri.tag.toLowerCase())}${cited ? ` — ${e(cited)}` : ""}</p>` : "";
-    return `<section class="fcsb" id="filmychill-score">${RC.receptionMark(item.reception)}
+      + ` · <b>Critics:</b> ${e(criLabel)}${cited ? ` — ${e(cited)}` : ""}</p>` : "";
+    // The two halves as a marker too (<!--FC:fcs=audience|critics-->): lib/facts.js read them from
+    // the rows' tags, which the v3 line replaces; without them a frozen render lost the ring.
+    const fcsMark = `<!--FC:fcs=${e(s && s.audience ? s.audience : "")}|${e(s && s.critics ? s.critics : "")}-->`;
+    return `<section class="fcsb" id="filmychill-score">${RC.receptionMark(item.reception)}${fcsMark}
     <div class="fcsb-label">FilmyChill score</div>
     <div class="fcsb-verdict">${ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
     <p class="fcsb-why">${e(s ? s.reason : none.why)}</p>
@@ -1298,7 +1304,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       <div class="meta">${v3 ? V2.v3Meta(item, { fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? V2.v2Meta(item, year) : (lean
         ? [item.language, item.genre, item.runtime ? (item.kind === "tv" ? `${item.runtime} min episodes` : item.runtime + " min") : null]
         : [item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert]).filter(Boolean).map(e).join(" · ")}</div>
-      ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Pills(item, { relState, country, V: V_TITLE }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
+      ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Where(item, { relState, country, V: V_TITLE, asOf, fmt: (d) => fmtDateFull(d, localeFor(code)), hubLinks: filmHubLinks(item, cfg) }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
       ${item.released && !v2 ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px"${v2 ? ' hidden' : ""}>Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
     </div>
@@ -1475,11 +1481,11 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
     return `<!--SW:pending--><h2>${e(V.heading(item.title))}</h2>${body}<!--/SW:pending-->`;
   })()}
   ${((wtw) => {
-    // v3: the where-to-watch block is the last row of "Good to know" (its heading dropped, its
-    // pills, notes and sweep markers kept inside <!--FC:wtw--> for lib/facts.js and the sweeps).
+    // v3: the where-to-watch block lives under the title (v3Where in lib/pagev2.js, which carries
+    // everything this one carried); here only "Good to know" is drawn, in its place before Episodes.
     if (v3) {
+      void wtw;
       const rows = goodToKnow.filter((r) => !/^(Runtime|Genre|Language)$/.test(r.label)).map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`);
-      if (wtw) rows.push(`<tr><td>Where to watch</td><td><!--FC:wtw-->${wtw.replace(/<h2>[^<]*<\/h2>/, "")}<!--/FC:wtw--></td></tr>`);
       return rows.length ? `<h2>Good to know</h2><table class="gtk">${rows.join("")}</table>` : "";
     }
     return v2 && wtw ? `<div class="wtw" id="where-to-watch">${wtw}</div>` : wtw;

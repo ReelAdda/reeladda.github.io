@@ -62,4 +62,13 @@ function receptionLine(rec, fmt = (d) => d, { tone = null } = {}) {
   return `${parts.join(" · ")} — per Wikipedia${rec.asOf ? `, ${fmt(rec.asOf)}` : ""}`;
 }
 
-module.exports = { RECEPTION_FEATURE, contradicts, readReceptionMark, receptionKey, receptionLine, receptionMark };
+// Pure: the critics' tone a cited figure implies, for a page whose own reading has no settled
+// tone yet: 70%+ positive, 50–69 mixed, under 50 negative (Rotten Tomatoes first, else
+// Metacritic). null without a figure. A label beside a figure must never argue with it.
+function toneFromFigure(rec) {
+  const v = rec && rec.rt ? rec.rt.pct : rec && rec.mc ? rec.mc.score : null;
+  if (v == null) return null;
+  return v >= 70 ? "positive" : v >= 50 ? "mixed" : "negative";
+}
+
+module.exports = { RECEPTION_FEATURE, contradicts, readReceptionMark, receptionKey, receptionLine, receptionMark, toneFromFigure };
