@@ -9095,7 +9095,7 @@ test("Wikipedia reception figures (28 Oct 2026): parsed with counts, cached with
   const d = E.parseAggregates("For the first series, Rotten Tomatoes lists a 95% approval rating based on 60 reviews with an average rating of 7.5/10.");
   assert.deepStrictEqual([d.rt.pct, d.rt.n, d.rt.avg, d.rt.season], [95, 60, 7.5, 1], "the 'lists a 95% approval rating' phrasing");
   assert.ok(/^On the review aggregation website Rotten Tomatoes/.test(c.rt.s) && /^On Metacritic/.test(c.mc.s), "the sentence, not the quoted consensus before it: " + c.rt.s);
-  assert.strictEqual(RC.receptionLine({ rt: { pct: 77, n: 44, season: 1 }, mc: { score: 60, season: 2 } }), "77% on Rotten Tomatoes (44 reviews, season 1) · Metacritic 60 (season 2) — per Wikipedia");
+  assert.strictEqual(RC.receptionLine({ rt: { pct: 77, n: 44, season: 1 }, mc: { score: 60, season: 2 } }), "77% on Rotten Tomatoes (44 reviews, season 1) — per Wikipedia");
   // 2. The analysis stores the numbers, never the sentences; older entries still yield a record.
   const read = E.readCritics({ lead: "", reception: "On Rotten Tomatoes, 91% of 87 critics' reviews are positive. Critics praised the performances and the writing. " + "x".repeat(120) });
   assert.deepStrictEqual(read.agg, { rt: { pct: 91, n: 87 } });
@@ -9104,9 +9104,16 @@ test("Wikipedia reception figures (28 Oct 2026): parsed with counts, cached with
   assert.deepStrictEqual(E.entryReception({ src: "wiki", checked: "2026-10-10", a: { score: { kind: "rt", value: 92 } } }), { rt: { pct: 92 }, asOf: "2026-10-10" }, "a v6 entry: the figure it has, no count");
   assert.strictEqual(E.entryReception({ src: "tmdb", a: { score: { kind: "rt", value: 92 } } }), null, "only a Wikipedia reading");
   // 3. The line: dated, no names, a median only from three or more.
-  assert.strictEqual(RC.receptionLine(rec, (d) => d), "91% on Rotten Tomatoes (87 reviews) · Metacritic 64 (25 critics) · 12 published ratings, median 3.5/5 — per Wikipedia, 2026-10-10");
+  // At most two figures with their scales: one aggregator (RT first, else Metacritic /100) and the ratings.
+  assert.strictEqual(RC.receptionLine(rec, (d) => d), "91% on Rotten Tomatoes (87 reviews) · 12 published ratings, median 3.5/5 — per Wikipedia, 2026-10-10");
+  assert.strictEqual(RC.receptionLine({ mc: { score: 64, n: 25 }, asOf: "2026-10-10" }, (d) => d), "Metacritic 64/100 (25 critics) — per Wikipedia, 2026-10-10");
   assert.strictEqual(RC.receptionLine({ ratings: { n: 2, median: 4 } }), "2 published ratings — per Wikipedia");
   assert.strictEqual(RC.receptionLine(null), "");
+  // A figure that argues with the row's own label is withheld (The Orville: "negative" beside 100%).
+  assert.strictEqual(RC.receptionLine({ rt: { pct: 100, n: 40 }, ratings: { n: 4, median: 2 } }, (d) => d, { tone: "negative" }), "4 published ratings, median 2/5 — per Wikipedia");
+  assert.strictEqual(RC.receptionLine({ rt: { pct: 39 }, mc: { score: 45 } }, (d) => d, { tone: "positive" }), "", "both aggregators contradict: nothing cited");
+  assert.strictEqual(RC.receptionLine({ rt: { pct: 39 }, mc: { score: 71 } }, (d) => d, { tone: "positive" }), "Metacritic 71/100 — per Wikipedia", "the one that agrees is cited");
+  assert.ok(RC.contradicts(39, "positive") && RC.contradicts(100, "negative") && !RC.contradicts(55, "mixed") && !RC.contradicts(80, "positive") && !RC.contradicts(80, null));
   // 4. Round trip through the page and the facts key (values and counts only).
   const html = `<html><body><section class="fcsb" id="filmychill-score">${RC.receptionMark(rec)}<div></div></section></body></html>`;
   assert.deepStrictEqual(RC.readReceptionMark(html), rec);
@@ -9121,7 +9128,11 @@ test("Wikipedia reception figures (28 Oct 2026): parsed with counts, cached with
   try {
     R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "wiki-reception": { percent: 100 } } });
     const on = F.buildFilmPage(it, "2026-10-28", new Set(), IN);
-    assert.ok(/<b>Critics<\/b><small>91% on Rotten Tomatoes \(87 reviews\) · Metacritic 64 \(25 critics\) · 12 published ratings, median 3\.5\/5 — per Wikipedia, 10 Oct 2026<\/small>/.test(on), on.slice(on.indexOf("Critics</b>") - 20, on.indexOf("Critics</b>") + 220));
+    assert.ok(/<b>Critics<\/b><small>91% on Rotten Tomatoes \(87 reviews\) · 12 published ratings, median 3\.5\/5 — per Wikipedia, 10 Oct 2026<\/small>/.test(on), on.slice(on.indexOf("Critics</b>") - 20, on.indexOf("Critics</b>") + 220));
+    // The audience half stays TMDB's, labelled as such, on its own row; the critics' figures never sit beside the ring.
+    assert.ok(/<b>Audience<\/b><small>From 500 ratings on TMDB<\/small>/.test(on) && /Audience rating/.test(on), "the ring is the audience rating, the row says TMDB");
+    const neg = F.buildFilmPage({ ...it, fcScore: { ...it.fcScore, verdict: "Skip", critics: "negative" }, reception: { rt: { pct: 100, n: 40 }, asOf: "2026-10-10" } }, "2026-10-28", new Set(), IN);
+    assert.ok(/<b>Critics<\/b><small>From published reviews<\/small>/.test(neg) && !/Rotten Tomatoes/.test(neg), "a figure that argues with the label is withheld");
     assert.ok(on.includes(RC.receptionMark(rec)));
     R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "wiki-reception": { percent: 0 } } });
     const off = F.buildFilmPage(it, "2026-10-28", new Set(), IN);

@@ -963,7 +963,8 @@ function fcScoreSection(item) {
     // The Critics row cites its figures (lib/reception.js, rollout "wiki-reception"): RT and
     // Metacritic with counts, the published ratings' count and median, dated to the Wikipedia read.
     const RC = require("./reception.js");
-    const cited = item.reception && inRollout(RC.RECEPTION_FEATURE, item.slug) ? RC.receptionLine(item.reception, (d) => fmtDateFull(d, localeFor((item._code) || "in"))) : "";
+    const cited = item.reception && inRollout(RC.RECEPTION_FEATURE, item.slug)
+      ? RC.receptionLine(item.reception, (d) => fmtDateFull(d, localeFor((item._code) || "in")), { tone: s && s.critics }) : "";
     const cri = s && s.critics
       ? { tag: s.critics.charAt(0).toUpperCase() + s.critics.slice(1), sub: cited || "From published reviews" }
       : { tag: "No verdict", sub: cited || "No settled critics' reception on record", none: true };

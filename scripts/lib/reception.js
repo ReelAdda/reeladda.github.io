@@ -34,17 +34,32 @@ function receptionKey(rec) {
   return [rec.rt ? `rt${rec.rt.pct}${rec.rt.n ? `/${rec.rt.n}` : ""}` : "", rec.mc ? `mc${rec.mc.score}${rec.mc.n ? `/${rec.mc.n}` : ""}` : "",
     rec.ratings ? `cr${rec.ratings.n}@${rec.ratings.median}` : ""].filter(Boolean).join("|");
 }
-// Pure: the one line. `fmt(iso)` formats the read date for the edition.
-function receptionLine(rec, fmt = (d) => d) {
+// Pure: does an aggregator figure (0–100) contradict the row's own verdict? A "Positive" row
+// beside a 39% figure, or "Negative" beside 100%, happens when Wikipedia's consensus sentence
+// is about one season or era and the figure about another (The Orville, Scarface): 22 of 1,796
+// cached entries, 28 Oct 2026. The figure is then withheld rather than shown against the label.
+function contradicts(value, tone) {
+  if (value == null || !tone) return false;
+  if (/^(positive|acclaim)$/i.test(tone) && value < 50) return true;
+  if (/^negative$/i.test(tone) && value >= 70) return true;
+  return false;
+}
+// Pure: the one line. `fmt(iso)` formats the read date for the edition; `tone` is the Critics
+// row's label (lib/fcscore.js), so no cited figure argues with it. At most two figures, each
+// with its scale: one aggregator (Rotten Tomatoes first, else Metacritic) and the published
+// ratings, so the row never stacks three numbers on three scales beside the audience ring.
+function receptionLine(rec, fmt = (d) => d, { tone = null } = {}) {
   if (!rec) return "";
   const parts = [];
   // A series figure names its season: Wikipedia gives them per season.
   const paren = (bits) => (bits.filter(Boolean).length ? ` (${bits.filter(Boolean).join(", ")})` : "");
-  if (rec.rt) parts.push(`${rec.rt.pct}% on Rotten Tomatoes${paren([rec.rt.n ? `${rec.rt.n} reviews` : "", rec.rt.season ? `season ${rec.rt.season}` : ""])}`);
-  if (rec.mc) parts.push(`Metacritic ${rec.mc.score}${paren([rec.mc.n ? `${rec.mc.n} critics` : "", rec.mc.season ? `season ${rec.mc.season}` : ""])}`);
+  const rt = rec.rt && !contradicts(rec.rt.pct, tone) ? rec.rt : null;
+  const mc = rec.mc && !contradicts(rec.mc.score, tone) ? rec.mc : null;
+  if (rt) parts.push(`${rt.pct}% on Rotten Tomatoes${paren([rt.n ? `${rt.n} reviews` : "", rt.season ? `season ${rt.season}` : ""])}`);
+  else if (mc) parts.push(`Metacritic ${mc.score}/100${paren([mc.n ? `${mc.n} critics` : "", mc.season ? `season ${mc.season}` : ""])}`);
   if (rec.ratings && rec.ratings.n) parts.push(`${rec.ratings.n} published rating${rec.ratings.n === 1 ? "" : "s"}${rec.ratings.median != null && rec.ratings.n >= 3 ? `, median ${rec.ratings.median}/5` : ""}`);
   if (!parts.length) return "";
   return `${parts.join(" · ")} — per Wikipedia${rec.asOf ? `, ${fmt(rec.asOf)}` : ""}`;
 }
 
-module.exports = { RECEPTION_FEATURE, readReceptionMark, receptionKey, receptionLine, receptionMark };
+module.exports = { RECEPTION_FEATURE, contradicts, readReceptionMark, receptionKey, receptionLine, receptionMark };
