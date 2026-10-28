@@ -212,7 +212,9 @@ function keyFacts(html) {
   return {
     state: pageState(html),
     title: text((/<h1>([\s\S]*?)<\/h1>/.exec(html) || [])[1]),
-    released: (/"datePublished":"([^"]+)"/.exec(html) || [])[1] || "",
+    // The title's own date: episodes inside containsSeason (lib/series.js episodeSchema) carry
+    // datePublished too, and a series without a release date must not borrow its first episode's.
+    released: (/"datePublished":"([^"]+)"/.exec(html.split('"containsSeason"')[0]) || [])[1] || "",
     // Tidied on both sides: punctuation fixes from lib/core.js tidyProse are not a fact change.
     synopsis: tidyProse(text((/<h2>Story<\/h2><p>([\s\S]*?)<\/p>/.exec(html) || [])[1])),
     cast: [...html.matchAll(/<div class="cast-name">([\s\S]*?)<\/div>/g)].map((m) => text(m[1])).join(","),

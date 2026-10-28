@@ -173,8 +173,50 @@ function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10)) 
     const meta = [x.date ? fmt(x.date) : "Date to be announced", pair, x.runtime ? `${x.runtime} min` : null, x.rating ? `★ ${x.rating.toFixed(1)}` : null].filter(Boolean).join(" · ");
     return `<li class="${state}"><span class="epn">${x.e}</span><div><b>${e(x.name || `Episode ${x.e}`)}</b><small>${e(meta)}</small></div>${state === "next" ? '<span class="eptag">Next</span>' : ""}</li>`;
   }).join("");
+  const cadence = releaseCadence(ep, fmt);
   return `<h2>Episodes</h2><p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""} · original release dates</p>${next}`
-    + (items ? `<ol class="eplist">${items}</ol>` : "");
+    + (items ? `<ol class="eplist">${items}</ol>` : "") + (cadence ? `<p class="epcadence">${e(cadence)}</p>` : "");
+}
+
+// Pure: one sentence on how the season is released, derived from the dated episode list alone
+// ("Two episodes a week until 27 Oct 2026, then one a week; finale 11 Nov 2026."). null unless
+// every episode has a date and the pattern is plain: weekly, a bigger premiere, a run of pairs,
+// or all at once. Says nothing when the dates don't fit a pattern — never a guess.
+function releaseCadence(ep, fmt) {
+  const list = (ep && ep.list) || [];
+  if (!list.length || list.length !== ep.count || list.some((x) => !x.date)) return null;
+  const dates = [...new Set(list.map((x) => x.date))].sort();
+  const per = dates.map((d) => list.filter((x) => x.date === d).length);
+  const last = fmt(dates[dates.length - 1]);
+  if (dates.length === 1) return `All ${ep.count} episodes were released together on ${last}.`;
+  const gaps = dates.slice(1).map((d, i) => (Date.parse(d) - Date.parse(dates[i])) / 864e5);
+  if (!gaps.every((g) => g >= 6 && g <= 8)) return null;
+  const words = ["", "One", "Two", "Three", "Four"];
+  const n = (k) => words[k] || String(k);
+  if (per.every((c) => c === 1)) return `One episode a week; finale ${last}.`;
+  // A premiere of several, then singles.
+  if (per[0] > 1 && per.slice(1).every((c) => c === 1)) return `${n(per[0])}-episode premiere, then one a week; finale ${last}.`;
+  // A run of equal-sized drops, then singles.
+  const k = per[0];
+  let runs = 0; while (runs < per.length && per[runs] === k) runs++;
+  if (k > 1 && runs > 1 && per.slice(runs).every((c) => c === 1) && runs < per.length) {
+    return `${n(k)} episodes a week until ${fmt(dates[runs - 1])}, then one a week; finale ${last}.`;
+  }
+  return null;
+}
+
+// Pure: TVSeason/TVEpisode structured data for the TVSeries JSON-LD, from the same dated list
+// the page shows. undefined when there is no list. Names and dates only — no ratings (Google's
+// review-snippet rules; see the aggregateRating note in filmpage.js).
+function episodeSchema(ep) {
+  const list = (ep && ep.list) || [];
+  if (!list.length) return undefined;
+  return [{
+    "@type": "TVSeason",
+    seasonNumber: ep.season || 1,
+    numberOfEpisodes: ep.seasons > 1 && ep.season ? list.length : ep.count || list.length,
+    episode: list.map((x) => ({ "@type": "TVEpisode", episodeNumber: x.e, name: x.name || `Episode ${x.e}`, datePublished: x.date || undefined })),
+  }];
 }
 
 // Pure: series FAQs, only from what the guide holds.
@@ -276,5 +318,5 @@ async function sweepSeries(manifest, { budget = 300, tmdb, queueFacts, hidden = 
   return res;
 }
 
-module.exports = { EP_MIN_VOTES, FRANCHISE_KEYWORD, fitFromData, nextDrop, seriesDescription, sweepSeries, SERIES_SWEEP_VERSION, episodeFaqs, episodesFrom, episodesHtml, franchiseFrom, franchiseSiblings,
+module.exports = { EP_MIN_VOTES, FRANCHISE_KEYWORD, fitFromData, nextDrop, seriesDescription, sweepSeries, SERIES_SWEEP_VERSION, episodeFaqs, episodesFrom, episodesHtml, episodeSchema, releaseCadence, franchiseFrom, franchiseSiblings,
   readSeriesMark, seasonToFetch, seriesFactsFor, seriesKnowRows, seriesMark, seriesName, seriesSweepDue, universeName };

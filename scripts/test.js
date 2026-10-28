@@ -5931,6 +5931,7 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     // The 27 Oct 2026 review's fixes.
     assert.ok(!/Best screen/.test(html), "no 'Best screen: Stream at home'");
     assert.ok(/"numberOfEpisodes":8/.test(html), "the episode count in the structured data");
+    assert.ok(/"containsSeason":\[\{"@type":"TVSeason".*"@type":"TVEpisode","episodeNumber":1/.test(html), "the episode guide as TVSeason/TVEpisode markup");
     const fd = S.fitFromData(item, { kind: "collection", items: [{ slug: "wandavision", title: "WandaVision", released: "2021-01-15" }, { slug: "later", title: "Later", released: "2027-01-01" }] }, (d) => d, "2026-10-27");
     assert.deepStrictEqual(S.fitFromData(item, { kind: "universe", items: [{ slug: "x-men-97", title: "X-Men '97", released: "2024-03-20" }] }, (d) => d, "2026-10-27").watchFirst, [], "a shared universe is never a watch-first list");
     assert.ok(/week by week — new episodes until 2099-11-04/.test(fd.bestFor) && fd.bingeFrom === "2099-11-04, when the finale is out" && !fd.skipIf, JSON.stringify(fd));
@@ -5945,6 +5946,24 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     assert.deepStrictEqual(fd.watchFirst.map((x) => x.slug), ["wandavision"], "watch first: only earlier titles");
     const pair = S.episodesHtml({ ...item, episodes: { ...ep, list: [{ e: 5, name: "A", date: "2026-10-27", runtime: null }, { e: 6, name: "B", date: "2026-10-27", runtime: null }] } }, (d) => d, "2026-10-28");
     assert.ok((pair.match(/double drop with E6/g) || []).length === 1 && !/double drop with E5/.test(pair), "episodes released together say so, once, on the first");
+    // One derived sentence on the release pattern — only when every episode is dated and the dates fit one.
+    const L = (ds) => ds.map((d, i) => ({ e: i + 1, name: `E${i + 1}`, date: d }));
+    const D = ["2026-10-13", "2026-10-13", "2026-10-20", "2026-10-20", "2026-10-27", "2026-10-27", "2026-11-03", "2026-11-10"];
+    assert.strictEqual(S.releaseCadence({ count: 8, list: L(D) }, (d) => d), "Two episodes a week until 2026-10-27, then one a week; finale 2026-11-10.");
+    assert.strictEqual(S.releaseCadence({ count: 4, list: L(["2026-10-01", "2026-10-08", "2026-10-15", "2026-10-22"]) }, (d) => d), "One episode a week; finale 2026-10-22.");
+    assert.strictEqual(S.releaseCadence({ count: 4, list: L(["2026-10-01", "2026-10-01", "2026-10-08", "2026-10-15"]) }, (d) => d), "Two-episode premiere, then one a week; finale 2026-10-15.");
+    assert.strictEqual(S.releaseCadence({ count: 3, list: L(["2026-10-01", "2026-10-01", "2026-10-01"]) }, (d) => d), "All 3 episodes were released together on 2026-10-01.");
+    assert.strictEqual(S.releaseCadence({ count: 3, list: L(["2026-10-01", "2026-10-04", "2026-10-30"]) }, (d) => d), null, "irregular dates: no sentence");
+    assert.strictEqual(S.releaseCadence({ count: 8, list: L(D.slice(0, 6)) }, (d) => d), null, "undated episodes left: no sentence");
+    assert.ok(/<p class="epcadence">Two episodes a week until 2026-10-27, then one a week; finale 2026-11-10\.<\/p>/.test(S.episodesHtml({ ...item, episodes: { ...ep, count: 8, list: L(D) } }, (d) => d, "2026-10-28")));
+    // The same list as TVSeason → TVEpisode structured data; names and dates only, no ratings.
+    const sch = S.episodeSchema({ count: 8, season: 1, seasons: 1, list: [{ e: 1, name: "Pilot", date: "2026-10-13", rating: 8.4 }, { e: 2, date: null }] });
+    assert.deepStrictEqual(sch, [{ "@type": "TVSeason", seasonNumber: 1, numberOfEpisodes: 8, episode: [
+      { "@type": "TVEpisode", episodeNumber: 1, name: "Pilot", datePublished: "2026-10-13" }, { "@type": "TVEpisode", episodeNumber: 2, name: "Episode 2", datePublished: undefined }] }]);
+    assert.strictEqual(S.episodeSchema({ count: 8 }), undefined, "no list, no season markup");
+    assert.strictEqual(X.keyFacts(`<html><head><script type="application/ld+json">{"@type":"TVSeries","name":"V","containsSeason":${JSON.stringify(sch)}}</script></head><body></body></html>`).released, "",
+      "a series without a release date never borrows its first episode's");
+    assert.ok(!JSON.stringify(sch).includes("rating"));
     // The guide is a fact for the page date (count, next drop, listed, rated); not the rating values.
     const kf = (eps) => X.keyFacts(`<html><head><script type="application/ld+json">{"@type":"TVSeries","name":"V"}</script></head><body>${S.seriesMark({ episodes: eps })}</body></html>`).episodes;
     const base = { count: 8, next: { date: "2026-10-27" }, list: [{ e: 1, rating: 7.5 }, { e: 2 }] };

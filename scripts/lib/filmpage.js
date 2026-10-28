@@ -808,6 +808,7 @@ const REDESIGN_CSS = [
   "  .epn { width:26px; height:26px; flex-shrink:0; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:700; background:var(--indigo); color:#fff; }",
   "  .eplist .next .epn { background:var(--marigold); color:#241D52; } .eplist .soon .epn { background:#fff; color:var(--mute); border:1.5px solid #C9C4EC; }",
   "  .eplist b { display:block; font-size:14.5px; } .eplist small { color:var(--mute); font-size:12.5px; } .eplist .soon b { color:var(--mute); }",
+  "  .epcadence { color:var(--mute); font-size:14px; margin:4px 0 0; }",
   "  .eptag { margin-left:auto; font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; background:var(--marigold); color:#241D52; white-space:nowrap; }",
   "  .frrow { display:flex; gap:10px; overflow-x:auto; padding:4px 0 8px; }",
   "  .frcard { flex:0 0 104px; text-decoration:none; color:var(--ink); }",
@@ -1043,6 +1044,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // generatePages (it knows all countries' slug sets); absent for ad-hoc/test renders.
   const alts = (item._alts && Array.isArray(item._alts)) ? item._alts : [];
 
+  const SER = require("./series.js"); // episodes + franchise (series.js needs nothing from here)
   const ld = {
     "@context": "https://schema.org",
     "@type": item.kind === "tv" ? "TVSeries" : "Movie",
@@ -1056,6 +1058,9 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
     dateModified: (asOf || new Date().toISOString().slice(0, 10)),
     numberOfSeasons: item.kind === "tv" && (item.seasons || (item.episodes && item.episodes.seasons)) ? (item.seasons || item.episodes.seasons) : undefined,
     numberOfEpisodes: item.kind === "tv" && item.episodes && item.episodes.count ? item.episodes.count : undefined,
+    // The episode guide as TVSeason → TVEpisode (28 Oct 2026): the title promises a schedule, so
+    // the structured data carries it too — the same dated list the Episodes section shows.
+    containsSeason: item.kind === "tv" ? SER.episodeSchema(item.episodes) : undefined,
     genre: item.genre || undefined,
     inLanguage: item.language || undefined,
     director: item.director ? { "@type": "Person", name: item.director } : undefined,
@@ -1109,7 +1114,6 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // --- Enriched, deterministic sections (original content -> SEO value) ---
   const verdictProse = buildVerdictProse(item, country, localeFor(code));
   // Episodes and franchise (lib/series.js) lead "Good to know"; series FAQs follow "where to watch".
-  const SER = require("./series.js");
   const fmtFull = (dt) => fmtDateFull(dt, localeFor(code));
   const goodToKnow = [...SER.seriesKnowRows(item), ...buildGoodToKnow(item, cfg)];
   const faqs = buildFaqs(item, country, cfg);
