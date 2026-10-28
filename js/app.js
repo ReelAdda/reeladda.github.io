@@ -153,9 +153,11 @@ function noScoreText(item) {
 }
 function fcSignals(item) {
   const s = item.fcScore, bits = [];
+  // With a score, the line under the card (scoreLineHtml) says the audience and critics parts;
+  // this only adds the buzz figures for a title that has no score yet.
+  if (s) return '';
   if (item.rating != null && item.votes) bits.push('Audience ★ ' + Number(item.rating).toFixed(1) + ' (' + Number(item.votes).toLocaleString() + ' ratings)');
-  if (s && s.critics) bits.push('Critics: ' + s.critics);
-  if (!s) [wikiViewsLabel(item.wikiWeeklyViews), trailerViewsLabel(item.trailerViews)].forEach(b => { if (b) bits.push(b); });
+  [wikiViewsLabel(item.wikiWeeklyViews), trailerViewsLabel(item.trailerViews)].forEach(b => { if (b) bits.push(b); });
   return bits.length ? `<div class="fcs-sig">${esc(bits.join(' · '))}</div>` : '';
 }
 // The score's two halves as one line under the card, with the critics' figures the build read

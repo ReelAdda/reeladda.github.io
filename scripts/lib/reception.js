@@ -76,8 +76,13 @@ function toneFromFigure(rec) {
 // it is different on every page by construction, and the reader sees what it rests on:
 // "Audiences (8.6 from 198 ratings) and critics (91% positive on Rotten Tomatoes) agree."
 // A figure that argues with the critics' label is left out (contradicts), as on the line.
+// Pure: the reason without any evidence already in it. A rendered reason is read back into the
+// facts store (lib/facts.js) and rendered again next build; without this the parentheses
+// doubled ("Audiences (8.6 from 198 ratings) (8.6 from 198 ratings)…", 28 Oct 2026).
+const EVIDENCE_RE = /\s\((?:[\d.]+ from [\d,]+ ratings|\d{1,3}% positive on Rotten Tomatoes|Metacritic \d{1,3}\/100|median [\d.]+\/5 from \d+ reviews)\)/g;
+function plainReason(reason) { return String(reason || "").replace(EVIDENCE_RE, ""); }
 function reasonWithEvidence(reason, item) {
-  let out = String(reason || "");
+  let out = plainReason(reason);
   if (!out) return out;
   const votes = Number((item && item.votes) || 0);
   if (item && item.rating != null && votes) out = out.replace(/\b(audiences?)\b/i, (m) => `${m} (${Number(item.rating).toFixed(1)} from ${votes.toLocaleString("en-IN")} ratings)`);
@@ -90,4 +95,4 @@ function reasonWithEvidence(reason, item) {
   return out;
 }
 
-module.exports = { RECEPTION_FEATURE, contradicts, readReceptionMark, reasonWithEvidence, receptionKey, receptionLine, receptionMark, toneFromFigure };
+module.exports = { RECEPTION_FEATURE, contradicts, plainReason, readReceptionMark, reasonWithEvidence, receptionKey, receptionLine, receptionMark, toneFromFigure };

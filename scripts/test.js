@@ -7892,7 +7892,7 @@ test("homepage template mirrors the buzz line and the split-critics wording", ()
   const m = /function wikiViewsLabel\(n\) \{\s*return Number\.isFinite\(n\) && n >= (\d+) \?/.exec(src);
   assert.ok(m && Number(m[1]) === EDT.WIKI_BUZZ_MIN, "the same 70,000 bar as the server");
   assert.ok(/const buzz = wikiViewsLabel\(item\.wikiWeeklyViews\) \|\| \(tv \?/.test(src), "cardScore: Wikipedia views before trailer views");
-  assert.ok(/if \(!s\) \[wikiViewsLabel\(item\.wikiWeeklyViews\), trailerViewsLabel\(item\.trailerViews\)\]/.test(src), "detail view signals");
+  assert.ok(/if \(s\) return '';\s*\n[^\n]*\n\s*\[wikiViewsLabel\(item\.wikiWeeklyViews\), trailerViewsLabel\(item\.trailerViews\)\]/.test(src), "detail view signals: buzz only for an unscored title; a scored one has the line under the card");
   assert.ok(/if \(item\.criticsTone === 'mixed'\) return \{ label: 'Critics split', why: recent \? 'Critics are split; audience ratings are still coming in\.'/.test(src), "noScoreText mirror");
   // (The server-side twin, fcScorePanel in lib/weekly.js, was never called and was removed in
   // the Oct 2026 Power-of-Ten audit; the homepage's own panel is the only one.)
@@ -9158,6 +9158,12 @@ test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to
     assert.strictEqual(RC.reasonWithEvidence("Audiences love it; critics are split.", { rating: 6.9, votes: 42, reception: { rt: { pct: 55 } }, fcScore: { critics: "mixed" } }), "Audiences (6.9 from 42 ratings) love it; critics (55% positive on Rotten Tomatoes) are split.");
     assert.strictEqual(RC.reasonWithEvidence("Audiences and critics agree: skip it.", { rating: 4.1, votes: 300, reception: { rt: { pct: 90 } }, fcScore: { critics: "negative" } }), "Audiences (4.1 from 300 ratings) and critics agree: skip it.", "a figure that argues with the label stays out");
     assert.strictEqual(RC.reasonWithEvidence("Critics are warmer than audiences.", { rating: 6.2, votes: 80, reception: { ratings: { n: 12, median: 3.5 } }, fcScore: { critics: "positive" } }), "Critics (median 3.5/5 from 12 reviews) are warmer than audiences (6.2 from 80 ratings).");
+    // Idempotent: a reason read back from a rendered page gets its evidence once, never twice.
+    const once = RC.reasonWithEvidence("Audiences and critics agree.", it);
+    assert.strictEqual(RC.reasonWithEvidence(once, it), once, "no doubling on re-render");
+    assert.strictEqual(RC.reasonWithEvidence(once, { ...it, rating: 8.1, votes: 600 }), "Audiences (8.1 from 600 ratings) and critics (91% positive on Rotten Tomatoes) agree.", "fresh numbers replace the old parentheses");
+    assert.strictEqual(RC.plainReason(once), "Audiences and critics agree.");
+    assert.ok(/Is T worth watching\?<\/summary><div class="fa">FilmyChill Score: Must watch — Audiences and critics agree\. It rates 7\.8\/10 from 500 audience ratings on TMDB\./.test(on(100, { ...it, fcScore: { ...it.fcScore, reason: once } })), "the FAQ answer uses the plain reason");
     // The FAQ cites the figures too, and the audience number names its source.
     assert.ok(/<summary>What do critics say about T\?<\/summary><div class="fa">Positive — 91% on Rotten Tomatoes \(87 reviews\) — per Wikipedia, 10 Oct 2026\.<\/div>/.test(v3), "critics FAQ");
     assert.ok(/It rates 7\.8\/10 from 500 audience ratings on TMDB\./.test(v3));
