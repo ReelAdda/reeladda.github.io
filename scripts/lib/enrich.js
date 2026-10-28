@@ -330,9 +330,8 @@ async function enrich(kind, id, region = "IN") {
     // eligibility. Not serialized when absent.
     ...(d.backdrop_path ? { backdropPath: d.backdrop_path } : {}),
     ...(d.poster_path ? { posterPath: d.poster_path } : {}),
-    // 900, not 600 (28 Oct 2026): 70 Story sections were cut mid-overview; trim keeps the
-    // sentence boundary.
-    fullReview: trim(d.overview, 900),
+    // The whole overview (28 Oct 2026): the owner wants the Story section uncut.
+    fullReview: String(d.overview || "").trim(),
     ...(regionalRelease ? { released: regionalRelease } : {}),
     ...(castPics.length ? { castPics } : {}),
     ...(theatrical === false ? { theatrical: false } : {}), // only serialized when it matters

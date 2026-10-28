@@ -37,9 +37,14 @@
    "what": "the film-page redesign v2 (lib/pagev2.js): header and hero on --deep with a breadcrumb, score pill, call to action in four states, Share and Remind me, provenance strip, episode progress bar, click-to-load trailer, sticky Watch bar, dark mode. Presentation only; preview first, then 100% in one switch. Switched to 100% at once on 28 Oct 2026 at the owner's request after the preview."
   },
   "wiki-reception": {
-   "percent": 0,
+   "percent": 100,
    "since": "2026-10-28",
-   "what": "the score card's Critics row cites its figures: Rotten Tomatoes / Metacritic with counts and the published ratings' count and median, dated to the Wikipedia read (lib/reception.js, lib/editorial.js parseAggregates). Dry run first."
+   "what": "the score card's Critics row cites its figures: Rotten Tomatoes / Metacritic with counts and the published ratings' count and median, dated to the Wikipedia read (lib/reception.js, lib/editorial.js parseAggregates). Dry run first. Switched to 100% at once on 28 Oct 2026 at the owner's request after the mock-up."
+  },
+  "page-v3": {
+   "percent": 100,
+   "since": "2026-10-28",
+   "what": "film page v3 (owner's sequence, 28 Oct 2026): backdrop, title with status tag, meta line, audience + platform pills, score card with one Audience/Critics line, full Story, director, cast, Good to know (with the where-to-watch row), episodes, trailer, franchise, similar, FAQ. No answer card, CTA, prose fillers, fit rows or separate Where to watch block. Mock-up first. Switched to 100% at once on 28 Oct 2026 at the owner's request after the mock-up."
   }
  }
 }

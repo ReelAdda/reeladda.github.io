@@ -970,11 +970,16 @@ function fcScoreSection(item) {
       : { tag: "No verdict", sub: cited || "No settled critics' reception on record", none: true };
     const row = (label, x) => `<div class="fcsb-row"><div><b>${label}</b><small>${e(x.sub)}</small></div><span class="fcsb-tag${x.none ? " none" : ""}">${e(x.tag)}</span></div>`;
     const lvl = !s ? "early" : /^must/i.test(s.verdict) ? "must" : /^skip/i.test(s.verdict) ? "skip" : "worth";
+    // Page v3: the two halves as one line under the card ("Audience ★ 8.6 (196 ratings) · Critics:
+    // positive — 91% on Rotten Tomatoes …"), the detail sheet's form; the rows otherwise.
+    const v3 = inRollout("page-v3", item.slug);
+    const line = v3 ? `<p class="fcsb-line"><b>Audience</b> ${item.rating != null && votes !== "0" ? `★ ${Number(item.rating).toFixed(1)} (${e(votes)} ratings)` : e(aud.tag.toLowerCase())}`
+      + ` · <b>Critics:</b> ${e(cri.none ? "no settled verdict" : cri.tag.toLowerCase())}${cited ? ` — ${e(cited)}` : ""}</p>` : "";
     return `<section class="fcsb" id="filmychill-score">${RC.receptionMark(item.reception)}
     <div class="fcsb-label">FilmyChill score</div>
     <div class="fcsb-verdict">${ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
     <p class="fcsb-why">${e(s ? s.reason : none.why)}</p>
-    <div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>
+    ${v3 ? line : `<div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>`}
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>`;
 }
@@ -993,6 +998,13 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const lean = leanPage(item);   // every fact once (LEAN_PAGE)
   const V2 = require("./pagev2.js");
   const v2 = lean && V2.v2Page(item);   // the 28 Oct 2026 redesign (lib/pagev2.js), on lean pages
+  // Page v3 (rollout "page-v3"): the owner's sequence — backdrop, title with its status tag, meta
+  // line, audience + platform pills, score card with one Audience/Critics line, the full Story,
+  // director, cast, Good to know with the where-to-watch row, episodes, trailer, franchise,
+  // similar, FAQ. No answer card, call to action, prose fillers, fit rows or separate Where to
+  // watch block. Every fact the readers need keeps its markup (the where-to-watch row carries
+  // the pills, the availability date and the sweep markers inside <!--FC:wtw-->).
+  const v3 = v2 && inRollout("page-v3", item.slug);
   const code = (cfg && cfg.code) || "in";
   const country = countryNameFor(cfg); // "the US", not the config's "United States" — reads right in titles and prose
   const homeUrl = code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`;
@@ -1271,27 +1283,28 @@ ${FCSB_CSS}
   .faq details[open] summary::after { content:"–"; }
   .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
   @media (max-width:420px){ .head { grid-template-columns:110px 1fr; } .poster { width:110px; } h1 { font-size:20px; } }
-${REDESIGN_CSS}`; return v2 ? V2.v2Css(base) : base; })()}
+${REDESIGN_CSS}`; return v3 ? V2.v3Css(base) : v2 ? V2.v2Css(base) : base; })()}
 </style>
 </head>
 <body>
-${v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>`}
+${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}">FILMY<span>CHILL</span></a></div>`}
 <div class="wrap">${lean ? LEAN_MARK + audienceMark(item) : ""}${v2 ? V2.V2_MARK : ""}${SER.seriesMark(item)}
-  ${lean ? `<div class="hero"${/^https:\/\/image\.tmdb\.org\//.test(String(item.backdrop || "")) ? ` style="background-image:${v2 ? V2.HERO_GRADIENT : "linear-gradient(rgba(27,22,95,.84),rgba(27,22,95,.94))"},url('${e(item.backdrop)}')"` : ""}>` : ""}${v2 ? "\n  " + V2.v2Crumbs(item, { homeUrl, weeklyUrl, weeklyLabel }) : ""}
-  <div class="head">
-    ${item.poster ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="${v2 ? 104 : 140}" height="${v2 ? 156 : 210}"${lean ? ' fetchpriority="high"' : ""}>` : "<div></div>"}
-    <div>
+  ${v3 ? `<div class="bd"${/^https:\/\/image\.tmdb\.org\//.test(String(item.backdrop || "")) ? ` style="background-image:url('${e(item.backdrop)}')"` : ""}></div>` : ""}
+  ${lean && !v3 ? `<div class="hero"${/^https:\/\/image\.tmdb\.org\//.test(String(item.backdrop || "")) ? ` style="background-image:${v2 ? V2.HERO_GRADIENT : "linear-gradient(rgba(27,22,95,.84),rgba(27,22,95,.94))"},url('${e(item.backdrop)}')"` : ""}>` : ""}${v2 && !v3 ? "\n  " + V2.v2Crumbs(item, { homeUrl, weeklyUrl, weeklyLabel }) : ""}
+  <div class="head${v3 ? " v3" : ""}">
+    ${item.poster && !v3 ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="${v2 ? 104 : 140}" height="${v2 ? 156 : 210}"${lean ? ' fetchpriority="high"' : ""}>` : v3 ? "" : "<div></div>"}
+    <div>${v3 ? V2.v3Tag(item) : ""}
       <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
-      <div class="meta">${v2 ? V2.v2Meta(item, year) : (lean
+      <div class="meta">${v3 ? V2.v3Meta(item, { fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? V2.v2Meta(item, year) : (lean
         ? [item.language, item.genre, item.runtime ? (item.kind === "tv" ? `${item.runtime} min episodes` : item.runtime + " min") : null]
         : [item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert]).filter(Boolean).map(e).join(" · ")}</div>
-      ${lean ? "" : headRatingHtml(item)}${v2 ? "\n      " + V2.v2ScorePill(item) : ""}
+      ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Pills(item, { relState, country, V: V_TITLE }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
       ${item.released && !v2 ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px"${v2 ? ' hidden' : ""}>Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
     </div>
-  </div>${lean ? "\n  </div>" : ""}
-  ${v2 ? V2.v2Cta(item, { cfg, country, asOf, relState, V: V_TITLE }) : ""}
-  ${(() => { const answerBlock = (() => {
+  </div>${lean && !v3 ? "\n  </div>" : ""}
+  ${v2 && !v3 ? V2.v2Cta(item, { cfg, country, asOf, relState, V: V_TITLE }) : ""}
+  ${v3 ? `${fcScoreSection(item)}\n  ${voteWidgetHtml(item, code)}` : (() => { const answerBlock = (() => {
     // Lead answer line. The GSC data showed pages ranking on page 1 for "where to watch [film]"
     // and "[film] ott release date" but pulling <1% CTR, and answer engines had nothing at the
     // top to lift. This puts the direct answer FIRST, in one snippet-shaped sentence, before the
@@ -1330,10 +1343,11 @@ ${v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}"
       ? `${answerBlock}\n  ${fcScoreSection(item)}\n  ${voteWidgetHtml(item, code)}`
       : orderAnswer(`${fcScoreSection(item)}\n  ${voteWidgetHtml(item, code)}\n  ${answerBlock}`);
   })()}
-  ${(lean ? leanText(verdictProse) : verdictProse) ? `<h2>What the audience says</h2><p class="vprose">${e(lean ? leanText(verdictProse) : verdictProse)}</p>` : ""}
-  ${item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
-  ${item.take && lean ? `<h2>What the critics say</h2>` : ""}
-  ${item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
+  ${v3 ? "" : (lean ? leanText(verdictProse) : verdictProse) ? `<h2>What the audience says</h2><p class="vprose">${e(lean ? leanText(verdictProse) : verdictProse)}</p>` : ""}
+  ${!v3 && item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
+  ${!v3 && item.take && lean ? `<h2>What the critics say</h2>` : ""}
+  ${!v3 && item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
+  ${v3 ? `${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}${item.director ? `<p class="dir"><b>Director:</b> ${e(item.director)}</p>` : ""}` : ""}
   ${(() => {
     // The one fact on this page no competitor can reproduce: measured from our own archive
     // (lib/history.js), not from any API. TMDB stores no history of provider changes.
@@ -1346,7 +1360,7 @@ ${v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}"
     return `<p class="fcdata"><b>FilmyChill data:</b> reached streaming in ${e(country)} `
       + `${fcdataWindowPhrase(days)}${rec.p ? `, on ${e(rec.p)}` : ""}.</p>`;
   })()}
-  ${(() => {
+  ${v3 ? "" : (() => {
     // Fit line (see whyWatch). Sits after the reception blocks and before the synopsis:
     // by this point the reader knows if it's good — this answers whether it's for them.
     const ww = whyWatch(item);
@@ -1359,7 +1373,7 @@ ${v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}"
     const heading = /\d+\s?(?:h|m|min)\b/.test(ww.heading) ? "Is it for you?" : ww.heading;
     return `<h2>${e(heading)}</h2><p class="whywatch">${e(text)}</p>`;
   })()}
-  ${(() => {
+  ${v3 ? "" : (() => {
     // Skip block (see lib/skipif.js). Sits immediately after the fit line, because the two
     // are one argument: here is who this is for, and here is who it is not for. Every other
     // block on this page argues for watching; a page that never says "not you" is a page a
@@ -1374,7 +1388,7 @@ ${v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}"
       + skip.map((r) => `<li>${e(r)}</li>`).join("")
       + `</ul></div>`;
   })()}
-  ${(() => {
+  ${v3 ? "" : (() => {
     // The scannable house format (lib/watchfit.js): same three rows, same order, on every
     // page that qualifies. Sits directly under the fit prose because it is the same
     // question compressed — a reader who skims takes this and leaves, which is the point.
@@ -1399,12 +1413,12 @@ ${v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}"
     return rows ? `<div class="fit"><dl>${rows}</dl></div>` : "";
   })()}
   ${synopsis && !lean ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
-  ${(() => {
+  ${v3 ? "" : (() => {
     // Lean: rows the header line already gives (runtime, genre, language) are left out.
     const rows = lean ? goodToKnow.filter((r) => !/^(Runtime|Genre|Language)$/.test(r.label)) : goodToKnow;
     return rows.length ? `<h2>Good to know</h2><table class="gtk">${rows.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : "";
   })()}
-  ${item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
+  ${!v3 && item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
   ${(item.castPics && item.castPics.length) ? `<h2>Cast</h2><div class="cast-strip">${item.castPics.map((c) => {
     // A name links to its people page when one exists (5+ films here) — see writePeoplePages — and
     // Google can see it. Every people page is hidden from Google (lib/googlehide.js, 25 Oct 2026),
@@ -1414,7 +1428,7 @@ ${v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}"
     return `<div class="cast-card"><img src="${e(c.photo)}" alt="${e(c.name)}" width="72" height="72" loading="lazy"><div class="cast-name">${nm}</div>${c.character ? `<div class="cast-role">${e(c.character)}</div>` : ""}</div>`;
   }).join("")}</div>`
     : cast.length ? `<h2>Cast</h2><div>${cast.map((c) => `<span class="pill">${e(c)}</span>`).join("")}</div>` : ""}
-  ${synopsis && lean ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
+  ${synopsis && lean && !v3 ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}
   ${(() => {
     // ---- "When is X coming to streaming/OTT?" ----------------------------------
     // The single highest-intent question on a theatrical film page, and the one the
@@ -1460,7 +1474,16 @@ ${v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}"
       : `<p>Not streaming yet in ${e(country)}${item.released ? ` — ${e(item.title)} released in theatres ${e(item.released)}` : ""}. No platform has announced ${e(V.article.toLowerCase())} ${e(V.releaseDate)}. We re-check every day and this page updates the moment it lands.</p>`;
     return `<!--SW:pending--><h2>${e(V.heading(item.title))}</h2>${body}<!--/SW:pending-->`;
   })()}
-  ${((wtw) => (v2 && wtw ? `<div class="wtw" id="where-to-watch">${wtw}</div>` : wtw))((() => {
+  ${((wtw) => {
+    // v3: the where-to-watch block is the last row of "Good to know" (its heading dropped, its
+    // pills, notes and sweep markers kept inside <!--FC:wtw--> for lib/facts.js and the sweeps).
+    if (v3) {
+      const rows = goodToKnow.filter((r) => !/^(Runtime|Genre|Language)$/.test(r.label)).map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`);
+      if (wtw) rows.push(`<tr><td>Where to watch</td><td><!--FC:wtw-->${wtw.replace(/<h2>[^<]*<\/h2>/, "")}<!--/FC:wtw--></td></tr>`);
+      return rows.length ? `<h2>Good to know</h2><table class="gtk">${rows.join("")}</table>` : "";
+    }
+    return v2 && wtw ? `<div class="wtw" id="where-to-watch">${wtw}</div>` : wtw;
+  })((() => {
     // Three honest states: streaming (included with a subscription — no extra charge),
     // rent/buy (pay per title), and theatres-only. The subscription-vs-rent distinction
     // is the most common unanswered question on OTT listings; TMDB's monetization split
@@ -1507,7 +1530,7 @@ ${v2 ? V2.v2Header(homeUrl, country) : `<div class="top"><a href="${e(homeUrl)}"
     return lp && fs.existsSync(`${lp[1]}/index.html`) ? `<a class="btn" href="/${e(lp[1])}/">New ${e(lp[0])} movies &amp; OTT this week →</a>` : "";
   })()}
   <a class="btn" href="${e(homeUrl)}#${e(item.slug)}">See this week's top picks on FilmyChill →</a>
-</div>${v2 && !upcoming ? "\n" + V2.v2Sticky(item, providers.map(String)) : ""}
+</div>${v2 && !v3 && !upcoming ? "\n" + V2.v2Sticky(item, providers.map(String)) : ""}
 <footer>
   <nav><a href="${e(homeUrl)}">This week in ${e(country)}</a> · <a href="${code === "in" ? "/new-on-ott/" : `/${e(code)}/new-on-ott/`}">New on ${e(streamVocab(cfg).word === "OTT" ? "OTT" : "streaming")}</a>${code === "in" ? ` · ${LANGUAGE_PAGES.map(([n, s]) => `<a href="/${s}/">${n}</a>`).join(" · ")}` : ""} · <a href="/about/">About</a></nav>
   Verdicts are compiled by FilmyChill's editorial system from audience ratings and published critic reception — <a href="/about/">how we rate</a>.<br>

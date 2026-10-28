@@ -199,4 +199,72 @@ function v2Sticky(item, provs) {
   return `<div class="sticky" id="sticky" aria-hidden="true">${item.poster ? `<img src="${e(item.poster)}" alt="" width="36" height="54" loading="lazy">` : ""}<span class="st"><b>${e(item.title)}</b><small>${e(provs[0])} · included</small></span><a href="#where-to-watch">Watch</a></div>`;
 }
 
-module.exports = { DEEP, HERO_GRADIENT, V2_CSS, V2_FEATURE, V2_MARK, daysWord, v2Crumbs, v2Css, v2Cta, v2Header, v2Meta, v2Page, v2ScorePill, v2Sticky, v2Trailer };
+// ---- Page v3 (28 Oct 2026): the owner's sequence, the detail sheet's top block on the page ----
+// The homepage's header on the film page: the mark (lib/brand.js shape) beside the wordmark,
+// indigo FILMY and marigold CHILL on the cream, the edition pill and the search button as cards.
+const MARK = `<svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true" style="width:.92em;height:.92em;flex:none;margin-right:.16em"><circle cx="50" cy="50" r="37" fill="none" stroke="#EFE6D6" stroke-width="13"/><circle cx="50" cy="50" r="37" fill="none" stroke="#FFAD1F" stroke-width="13" stroke-linecap="round" stroke-dasharray="176 300" transform="rotate(38 50 50)"/><path d="M42 33 Q40 32 40 35 L40 65 Q40 68 42 67 L66 52.5 Q68 50 66 47.5 Z" fill="#4038C7"/></svg>`;
+function v3Header(homeUrl, countryName) {
+  const e = escHtml;
+  return `<div class="top v3"><a class="mark" href="${e(homeUrl)}">${MARK}FILMY<span>CHILL</span></a><span class="cpill">${e(countryName)}</span></div>`;
+}
+const V3_CSS = [
+  "  /* Page v3: the homepage's palette and header; backdrop, title block, pills, score card with one line */",
+  "  :root { --bg:#FFF7EC; --ink:#241D52; --mute:#716A8C; --line:#EFE6D6; --cream:#FFF7EC; --tint:#FFF3DC; --coral:#D93A28; --marigold-dk:#8A5900; }",
+  "  .top.v3 { background:var(--bg); border-bottom:1px solid var(--line); min-height:60px; }",
+  "  .top.v3 .mark { font-family:'Anton',sans-serif; font-weight:400; font-size:24px; letter-spacing:1.2px; color:var(--indigo); display:inline-flex; align-items:center; }",
+  "  .top.v3 .mark span { color:var(--marigold); -webkit-text-stroke:1px var(--indigo); }",
+  "  .top.v3 .cpill, .top.v3 .fcs-btn { color:var(--ink); background:var(--card); border:1px solid var(--line); box-shadow:0 4px 18px rgba(64,56,199,.08); font-weight:700; }",
+  "  .top.v3 .fcs-btn svg { color:var(--indigo); }",
+  "  @media (prefers-color-scheme: dark) { :root:not([data-theme=\"light\"]) .top.v3 .mark span { -webkit-text-stroke:0; } }",
+  "  :root[data-theme=\"dark\"] .top.v3 .mark span { -webkit-text-stroke:0; }",
+  "  .bd { margin:-20px -16px 0; height:220px; background:var(--deep); background-size:cover; background-position:center 25%; }",
+  "  @media (min-width:600px) { .bd { height:300px; } }",
+  "  .head.v3 { display:block; padding-top:18px; } .head.v3 h1 { font-size:32px; line-height:1.05; margin:0 0 6px; }",
+  "  .v3tag { display:inline-block; margin:0 0 8px; padding:4px 10px; border-radius:6px; background:var(--coral,#D93A28); color:#fff; font:800 11px/1.2 system-ui,sans-serif; letter-spacing:1px; text-transform:uppercase; }",
+  "  .v3tag.new { background:var(--marigold); color:#1A1633; } .v3tag.season { background:var(--deep); }",
+  "  .head.v3 .meta { font-size:14px; color:var(--mute); margin-bottom:12px; }",
+  "  .pills { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 4px; }",
+  "  .rpill { display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border-radius:999px; background:var(--cream); border:1px solid var(--line); color:var(--ink); font-weight:800; font-size:14px; }",
+  "  .ppill { display:inline-flex; align-items:center; min-height:40px; padding:0 14px; border-radius:999px; background:var(--deep); color:#fff; font-weight:800; font-size:14px; }",
+  "  .ppill.none { background:transparent; color:var(--mute); border:1.5px dashed var(--mute); font-weight:700; }",
+  "  .fcsb-line { font-size:14px; color:var(--mute); line-height:1.6; margin:12px 0 0; padding-top:12px; border-top:1px solid var(--line); } .fcsb-line b { color:var(--ink); }",
+  "  .dir { margin:10px 0 0; font-size:15px; } .dir b { font-weight:800; }",
+  "  .gtk td .pill { margin:0 6px 6px 0; } .gtk td p { margin:4px 0 0; font-size:12.5px !important; }",
+].join("\n");
+function v3Css(baseCss) { return v2Css(baseCss) + "\n" + V3_CSS; }
+// Pure: the status tag above the title — Trending, else the freshness badge (New season / New
+// show / New release), else nothing. Above the h1, not inside it: lib/facts.js reads the h1.
+function v3Tag(item) {
+  const e = escHtml;
+  if (item.trending) return `<span class="v3tag">Trending</span>`;
+  const badge = item.badge || (item.isRecent ? "New release" : null);
+  if (!badge) return "";
+  return `<span class="v3tag ${/season/i.test(badge) ? "season" : "new"}">${e(badge)}</span>`;
+}
+// Pure: the meta line — genre · language · latest season / released <date> · runtime · trailer views.
+function v3Meta(item, { fmt = (d) => d } = {}) {
+  const { trailerViewsLabel } = require("./editorial.js");
+  const when = item.released ? (item.kind === "tv" ? `Latest season ${fmt(item.released)}` : `Released ${fmt(item.released)}`) : null;
+  const tv = item.trailerViews ? trailerViewsLabel(item.trailerViews) : null;
+  return [item.genre, item.language, when, item.runtime ? `${item.runtime} min` : null, tv].filter(Boolean).map(escHtml).join(" · ");
+}
+// Pure: the audience pill (TMDB's number, its count) and the platform pill (where to watch now;
+// "In theatres" / "Not on OTT yet" when nowhere). The platform IS the where-to-watch answer.
+function v3Pills(item, { relState, country, V }) {
+  const e = escHtml;
+  const votes = Number(item.votes || 0);
+  const aud = item.rating != null && votes
+    ? `<span class="rpill">★ ${Number(item.rating).toFixed(1)}/10 (${e(votes.toLocaleString("en-IN"))} rating${votes === 1 ? "" : "s"})</span>`
+    : `<span class="rpill">${votes ? `${e(votes.toLocaleString("en-IN"))} ratings, no average yet` : "Not rated on TMDB yet"}</span>`;
+  const provs = (item.providers || []).map(String), rent = (item.rentBuy || []).map(String).filter((x) => !provs.includes(x));
+  const ott = V.word === "OTT" ? "OTT" : "streaming";
+  let plat;
+  if (provs.length) plat = provs.slice(0, 2).map((p) => `<span class="ppill">${e(p)}</span>`).join("");
+  else if (rent.length) plat = `<span class="ppill">Rent or buy: ${e(rent[0])}</span>`;
+  else if (relState === "upcoming" || relState === "today") plat = `<span class="ppill none">Releases ${relState === "today" ? "today" : e(String(item.released).slice(0, 10))}</span>`;
+  else if (item.platform === "Theatres") plat = `<span class="ppill none">In theatres · not on ${ott} yet</span>`;
+  else plat = `<span class="ppill none">Not on ${ott} in ${e(country)} yet</span>`;
+  return `<div class="pills">${aud}${plat}</div>`;
+}
+
+module.exports = { DEEP, HERO_GRADIENT, V2_CSS, V2_FEATURE, V2_MARK, V3_CSS, daysWord, v2Crumbs, v2Css, v2Cta, v2Header, v2Meta, v2Page, v2ScorePill, v2Sticky, v2Trailer, v3Css, v3Header, v3Meta, v3Pills, v3Tag };

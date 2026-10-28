@@ -26,6 +26,14 @@ function section(html, title) {
   const j = html.indexOf("<h2", i + 4);
   return html.slice(i, j < 0 ? undefined : j);
 }
+// The where-to-watch block: its own section on older pages; on page v3 (lib/filmpage.js, 28 Oct
+// 2026) a marked row inside "Good to know" — the same pills, notes and sweep markers inside.
+function wtwBlock(html) {
+  const own = section(html, "Where to watch");
+  if (own) return own;
+  const m = /<!--FC:wtw-->([\s\S]*?)<!--\/FC:wtw-->/.exec(html);
+  return m ? m[1] : "";
+}
 // The first meta line under the title: "Hindi · Action / Thriller · 141 min · U/A 16+".
 const headMeta = (html) => (/<h1>[\s\S]*?<\/h1>\s*<div class="meta">([^<]*)<\/div>/.exec(html) || [])[1] || "";
 // The certificate at the end of that line, when the page has no table row for it ("· U",
@@ -56,7 +64,7 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   const story = /<h2>Story<\/h2><p>([\s\S]*?)<\/p>/.exec(html);
   const castPics = [...html.matchAll(/<div class="cast-card"><img src="([^"]*)" alt="[^"]*"[^>]*><div class="cast-name">([\s\S]*?)<\/div>(?:<div class="cast-role">([\s\S]*?)<\/div>)?<\/div>/g)]
     .map((m) => ({ name: text(m[2]), photo: dec(m[1]), ...(m[3] ? { character: text(m[3]) } : {}) }));
-  const wtw = section(html, "Where to watch");
+  const wtw = wtwBlock(html);
   const cut = wtw.indexOf("Rent or buy");
   const pills = (t) => [...t.matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((x) => dec(x[1]).trim());
   const providers = pills(cut >= 0 ? wtw.slice(0, cut) : wtw).filter((p) => !STATUS_PILL.test(p));
@@ -192,7 +200,7 @@ const slugGuess = (t) => String(t).toLowerCase().normalize("NFKD").replace(/[̀-
 // Pure: where the page stands, from its own markers.
 function pageState(html) {
   if (/<!--SW:gone=/.test(html)) return "gone";
-  const wtw = section(html, "Where to watch");
+  const wtw = wtwBlock(html);
   const cut = wtw.indexOf("Rent or buy");
   if ((cut >= 0 ? wtw.slice(0, cut) : wtw).match(/<span class="pill">([^<]+)<\/span>/g)?.some((p) => !STATUS_PILL.test(p))) return "streaming";
   if (/<!--SW:digital=/.test(html)) return "announced";
@@ -209,7 +217,7 @@ function pageState(html) {
 // Pure: the facts a reader relies on, from either version of a page. A migration switches a
 // page only when these are identical before and after; wording and layout may change.
 function keyFacts(html) {
-  const wtw = section(html, "Where to watch");
+  const wtw = wtwBlock(html);
   const cut = wtw.indexOf("Rent or buy");
   const pillSet = (t) => [...t.matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((x) => dec(x[1]).trim()).filter((p) => !STATUS_PILL.test(p)).sort().join(",");
   return {
