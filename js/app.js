@@ -187,21 +187,21 @@ function toneFromFigure(rec) {
   if (v == null) return null;
   return v >= 70 ? 'positive' : v >= 50 ? 'mixed' : 'negative';
 }
+// One fact once: the audience number is in the pill row above; the line carries only the
+// critics' side, and only when there is a tone or a cited figure.
 function scoreLineHtml(item) {
   const s = item.fcScore;
-  if (!s && !item.reception) return '';
-  const votes = Number(item.votes || 0);
-  const aud = item.rating != null && votes ? `★ ${Number(item.rating).toFixed(1)} (${votes.toLocaleString('en-IN')} ratings)` : votes ? `${votes.toLocaleString('en-IN')} ratings, no average yet` : 'not rated yet';
   const tone = s && s.critics ? s.critics : null;
   const cited = item.reception ? receptionLine(item.reception, fmtDate, tone) : '';
-  const label = tone || (cited ? toneFromFigure(item.reception) : null) || 'no settled verdict';
-  return `<div class="fcs-line"><b>Audience</b> ${esc(aud)} · <b>Critics:</b> ${esc(label)}${cited ? ' — ' + esc(cited) : ''}</div>`;
+  if (!tone && !cited) return '';
+  const label = tone || toneFromFigure(item.reception) || 'no settled verdict';
+  return `<div class="fcs-line"><b>Critics:</b> ${esc(label)}${cited ? ' — ' + esc(cited) : ''}</div>`;
 }
 function fcScoreHtml(item) {
   const s = item.fcScore;
   const none = noScoreText(item);
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${ratingDial(item)}${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
-  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${ratingDial(item)}${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
+  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
+  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
 }
 
 // CLEANER CARDS (Oct 2026). One card used to stack a coloured badge for everything, a boxed

@@ -976,15 +976,17 @@ function fcScoreSection(item) {
     // The label follows the cited figure when the page's own reading has no settled tone: never
     // "no settled verdict" beside "90% on Rotten Tomatoes" (28 Oct 2026).
     const criLabel = cri.none ? (RC.toneFromFigure(cited ? item.reception : null) || "no settled verdict") : cri.tag.toLowerCase();
-    const line = v3 ? `<p class="fcsb-line"><b>Audience</b> ${item.rating != null && votes !== "0" ? `★ ${Number(item.rating).toFixed(1)} (${e(votes)} ratings)` : e(aud.tag.toLowerCase())}`
-      + ` · <b>Critics:</b> ${e(criLabel)}${cited ? ` — ${e(cited)}` : ""}</p>` : "";
+    // One fact once (28 Oct 2026): the audience number is in the pill above the card, so the
+    // card has no ring and its line carries only the critics' side — and only when there is
+    // something to say (a tone or a cited figure).
+    const line = v3 && (!cri.none || cited) ? `<p class="fcsb-line"><b>Critics:</b> ${e(criLabel)}${cited ? ` — ${e(cited)}` : ""}</p>` : "";
     // The two halves as a marker too (<!--FC:fcs=audience|critics-->): lib/facts.js read them from
     // the rows' tags, which the v3 line replaces; without them a frozen render lost the ring.
     const fcsMark = `<!--FC:fcs=${e(s && s.audience ? s.audience : "")}|${e(s && s.critics ? s.critics : "")}-->`;
     return `<section class="fcsb" id="filmychill-score">${RC.receptionMark(item.reception)}${fcsMark}
     <div class="fcsb-label">FilmyChill score</div>
-    <div class="fcsb-verdict">${ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
-    <p class="fcsb-why">${e(s ? (v3 ? RC.reasonWithEvidence(s.reason, { ...item, reception: cited ? item.reception : undefined }) : s.reason) : none.why)}</p>
+    <div class="fcsb-verdict">${v3 ? "" : ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
+    <p class="fcsb-why">${e(s ? RC.plainReason(s.reason) : none.why)}</p>
     ${v3 ? line : `<div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>`}
   </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>`;
