@@ -68,9 +68,11 @@ function meterSymbols() {
 // ---- Verdict pills and audience-rating dials (Oct 2026 redesign) ----
 // The verdict as a coloured pill, one colour set on every surface (homepage cards, the language
 // hubs, /new-on-ott/). The homepage's client twin is verdictPill() in js/app.js.
-const VPILL_CSS = ".vpill { display:inline-block; padding:3px 9px; border-radius:6px; font-size:12px; font-weight:800; line-height:1.35; white-space:nowrap; }"
-  + " .vp-must { background:#1E7A4C; color:#FFFFFF; } .vp-worth { background:#FFAD1F; color:#241D52; }"
-  + " .vp-skip { background:#FBE3DF; color:#A52617; } .vp-early { background:#EFE6D6; color:#5E5878; }"
+// The pill shape of the 28 Oct 2026 redesign (round, outlined "Skip"), the same on the homepage,
+// the hubs and the weekly page.
+const VPILL_CSS = ".vpill { display:inline-block; padding:4px 9px; border-radius:999px; font-size:12px; font-weight:800; line-height:1.3; white-space:nowrap; }"
+  + " .vp-must { background:#1E7A4C; color:#FFFFFF; } .vp-worth { background:#FFAD1F; color:#1A1633; }"
+  + " .vp-skip { background:transparent; color:#A52617; box-shadow:inset 0 0 0 1.5px #A52617; } .vp-early { background:#FFF1D6; color:#5E5878; }"
   + " .rev { color:var(--mute); font-size:12.5px; font-weight:600; margin-left:4px; }";
 function verdictPill(label, level = meterLevel(label)) {
   return `<span class="vpill vp-${level}">${escHtml(label)}</span>`;

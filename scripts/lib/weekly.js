@@ -115,6 +115,50 @@ function ssrSoonCard(item, code) {
   </a>`;
 }
 
+// HOMEPAGE CARD V2 (28 Oct 2026 redesign; twin: card() in js/app.js — same markup, so the page
+// doesn't shift when the browser re-renders it). One component with optional slots: the poster
+// (2:3, reserved), ONE status tag (a coming-soon date > New season > New show > New > Trending),
+// the title, ONE meta line, ONE verdict pill ("7.7 · Must watch", else "Verdict soon"). The rank,
+// the ring, reasons and counts stay on the film page and on the weekly page's ssrCard.
+function cardTagV2(item, { soon = false, code = "in" } = {}) {
+  if (soon) {
+    if (!item.released) return null;
+    return { cls: "tag-date", text: releaseState(item.released) === "today" ? "Today" : fmtDateShort(item.released, Date.now(), localeFor(code)) };
+  }
+  const badge = item.badge || (item.isRecent ? "New" : null);
+  if (/season/i.test(badge || "")) return { cls: "tag-season", text: "New season" };
+  if (/show|series/i.test(badge || "")) return { cls: "tag-show", text: "New show" };
+  if (badge) return { cls: "tag-new", text: "New" };
+  if (item.trending) return { cls: "tag-trend", text: "Trending" };
+  return null;
+}
+function cardMetaV2(item, { soon = false } = {}) {
+  const genre = item.genre ? String(item.genre).split(" / ")[0] : "";
+  const streaming = !!(item.platform && item.platform !== "Theatres");
+  const parts = soon ? [item.language, streaming ? item.platform : "Theatres"]
+    : streaming ? [item.platform, item.language]
+      : [item.language, genre, item.runtime ? fmtRuntime(item.runtime) : null];
+  return parts.filter(Boolean).map(escHtml).join(" · ");
+}
+function verdictPillV2(item) {
+  const { dialRating, meterLevel } = require("./meter.js");
+  const s = item.fcScore;
+  if (s && s.verdict) { const r = dialRating(item); return verdictPill(`${r != null ? `${r.toFixed(1)} · ` : ""}${s.verdict}`, meterLevel(s.verdict)); }
+  // "Critics split" is information (the reviews are in, and divided); everything else is "soon".
+  return verdictPill(noScoreText(item).label === "Critics split" ? "Critics split" : "Verdict soon", "early");
+}
+function ssrCardV2(item, i, code, { eager = false, lowPriority = false, soon = false } = {}) {
+  const e = escHtml;
+  const art = item.poster
+    ? `<img src="${e(item.poster)}" alt="${e(item.title)} poster" width="132" height="198" ${eager ? 'loading="eager" decoding="async"' : 'loading="lazy"'}${lowPriority ? ' fetchpriority="low"' : ""}>`
+    : `<div class="ph" aria-hidden="true">${e((item.title || "?").charAt(0).toUpperCase())}</div>`;
+  const tag = cardTagV2(item, { soon, code });
+  const inner = `<div class="pw2">${art}${tag ? `<span class="tag ${tag.cls}">${e(tag.text)}</span>` : ""}</div><h3 class="ct">${e(item.title)}</h3><div class="cm">${cardMetaV2(item, { soon })}</div>${soon ? "" : verdictPillV2(item)}`;
+  return item.slug
+    ? `<a class="card2" href="${e(filmPagePath(code || "in", item.slug))}">${inner}</a>`
+    : `<div class="card2">${inner}</div>`;
+}
+
 // Per-country page metadata: title, description, canonical, OG — country-specific so each
 // page ranks for its own market in search. India keeps the established global-but-India-first
 // wording at the root; the others name their country explicitly.
@@ -595,5 +639,6 @@ module.exports = {
   ssrCard,
   ssrEditorNote,
   ssrSoonCard,
+  ssrCardV2, cardTagV2, cardMetaV2, verdictPillV2,
   writeRssFeed,
 };
