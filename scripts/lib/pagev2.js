@@ -24,7 +24,8 @@ const V2_MARK = "<!--FC:v2-->";
 const v2Page = (item) => !!(item && item.slug && inRollout(V2_FEATURE, item.slug));
 
 // The palette the film page and the homepage share (28 Oct 2026 spec).
-const DEEP = "#1B165F";
+// The site's own indigo (28 Oct 2026: the owner kept the palette; the layout changed, the colours did not).
+const DEEP = "#4038C7";
 const DARK_VARS = "--cream:#0F0C24; --card:#1A1538; --ink:#F4F1FF; --mute:#A9A4CC; --line:#2A2454; --bg:#0F0C24; --tint:#3A2E10; --link:#B3AEFF;";
 
 const V2_CSS = [
@@ -83,7 +84,7 @@ const V2_CSS = [
   "  .frame.yt .play::after { content:''; border-style:solid; border-width:11px 0 11px 19px; border-color:transparent transparent transparent #1A1633; margin-left:4px; }",
   "  .simcard { background:var(--card); border:1px solid var(--line); box-shadow:none; border-radius:14px; transition:transform .15s ease; } .simcard:hover, .simcard:focus-visible { transform:translateY(-2px); }",
   "  .frcard b { color:var(--ink); } .faq .fa { color:var(--mute); } .faq summary::after { color:var(--link); } .faq details { border-top-color:var(--line); }",
-  "  footer { background:var(--deep); color:rgba(255,255,255,.82); margin-top:24px; } footer a { color:#fff; }",
+  "  footer { margin-top:24px; border-top:1px solid var(--line); } footer a { color:var(--link); }",
   "  .sticky { position:fixed; left:0; right:0; bottom:0; min-height:44px; background:var(--card); border-top:1px solid var(--line); display:flex; align-items:center; gap:10px; padding:6px 12px; transform:translateY(110%); transition:transform .15s ease; z-index:9; }",
   "  .sticky.on { transform:none; } .sticky img { width:36px; height:54px; border-radius:6px; object-fit:cover; background:var(--line); } .sticky .st { flex:1; min-width:0; }",
   "  .sticky b { display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; } .sticky small { color:var(--mute); font-size:12px; }",

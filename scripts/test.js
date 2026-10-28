@@ -9016,7 +9016,7 @@ test("redesign v2 (28 Oct 2026): four states of VisionQuest, every fact unchange
       // 3. No indigo fill in the stylesheet; links keep it.
       const css = /<style>([\s\S]*?)<\/style>/.exec(v2)[1];
       assert.ok(!/background(?:-color)?:\s*(?:var\(--indigo\)|#4038C7|rgba\(64,56,199)/i.test(css), `${name}: no #4038C7 fill`);
-      assert.ok(/--deep:#1B165F/.test(css) && /prefers-color-scheme: dark/.test(css) && /prefers-reduced-motion/.test(css));
+      assert.ok(/--deep:#4038C7/.test(css) && /prefers-color-scheme: dark/.test(css) && /prefers-reduced-motion/.test(css));
       assert.ok(/Original air dates\./.test(v2) && /<nav class="crumbs"/.test(v2) && /"name":"New on OTT"/.test(v2) && /\/js\/film\.js/.test(v2));
       assert.ok(/<h1>VisionQuest \(2026\)<\/h1>/.test(v2), "the year stays in the h1 (facts read it there)");
       assert.ok(!/\(Unconfirmed\)|undefined|null</.test(v2.replace(/"[^"]*":null/g, "")), `${name}: no placeholders`);
@@ -9038,7 +9038,7 @@ test("redesign v2 (28 Oct 2026): four states of VisionQuest, every fact unchange
     // 4. Contrast: 4.5:1 on every text/background pair, light and dark.
     const lum = (hex) => { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
     const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
-    for (const [fg, bg, what] of [["#1A1633", "#FFFFFF", "ink on card"], ["#6B6890", "#FFFFFF", "mute on card"], ["#6B6890", "#F7F5FF", "mute on bg"], ["#4038C7", "#FFFFFF", "link on card"], ["#1A1633", "#FFAD1F", "ink on marigold"], ["#FFFFFF", "#1B165F", "white on deep"], ["#1A1633", "#FFF1D6", "ink on tint"],
+    for (const [fg, bg, what] of [["#1A1633", "#FFFFFF", "ink on card"], ["#6B6890", "#FFFFFF", "mute on card"], ["#6B6890", "#F7F5FF", "mute on bg"], ["#4038C7", "#FFFFFF", "link on card"], ["#1A1633", "#FFAD1F", "ink on marigold"], ["#FFFFFF", "#4038C7", "white on deep"], ["#1A1633", "#FFF1D6", "ink on tint"],
       ["#F4F1FF", "#1A1538", "dark ink on card"], ["#A9A4CC", "#1A1538", "dark mute on card"], ["#A9A4CC", "#0F0C24", "dark mute on bg"], ["#B3AEFF", "#1A1538", "dark link on card"], ["#F4F1FF", "#3A2E10", "dark ink on tint"]]) {
       assert.ok(ratio(fg, bg) >= 4.5, `${what}: ${ratio(fg, bg).toFixed(2)}:1`);
     }
@@ -9074,7 +9074,7 @@ test("PWA (28 Oct 2026): manifest, service worker, offline page, registration on
   try {
     R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "redesign-v2": { percent: 100 } } });
     const v2 = F.buildFilmPage(it, "2026-10-28", new Set(), IN);
-    assert.ok(/<link rel="manifest" href="\/manifest\.json">\n<meta name="theme-color" content="#1B165F">/.test(v2) && /\/js\/film\.js/.test(v2));
+    assert.ok(/<link rel="manifest" href="\/manifest\.json">\n<meta name="theme-color" content="#4038C7">/.test(v2) && /\/js\/film\.js/.test(v2));
     R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "redesign-v2": { percent: 0 } } });
     assert.ok(!/rel="manifest"/.test(F.buildFilmPage(it, "2026-10-28", new Set(), IN)));
   } finally { R.useRolloutConfig(null); }
