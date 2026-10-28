@@ -46,10 +46,13 @@ const { countryNameFor, streamVocab } = require("./rules.js");
 //
 // Gates: a platform page needs STREAM_PAGE_MIN titles, a platform x language page
 // STREAM_LANG_MIN. Below that, no page (thin pages are the scaled-content pattern).
+// Two thresholds each (28 Oct 2026, as lib/hubs.js HUB_MIN_NEW/HUB_MIN_KEEP): a list is CREATED
+// at the higher one and SURVIVES down to the lower, so a platform sitting on the boundary
+// doesn't have its URL appear one build and vanish the next.
 // URLs: /streaming/<platform>/ and /streaming/<platform>/<language>/, per country.
 // ============================================================================
-const STREAM_PAGE_MIN = 12;
-const STREAM_LANG_MIN = 6;
+const STREAM_PAGE_MIN = 12, STREAM_PAGE_KEEP = 10;
+const STREAM_LANG_MIN = 6, STREAM_LANG_KEEP = 5;
 const STREAM_PAGE_MAX_AGE = 45;
 const streamPageUrl = (code, pslug, lslug = null) => `https://filmychill.com/${STREAM_BASE(code)}/${pslug}/${lslug ? lslug + "/" : ""}`;
 
@@ -174,12 +177,13 @@ function writeStreamingPages(data, cfg, manifest, index = null) {
     // Only titles Google can see (27 Oct 2026): 35,790 of these lists' 49,771 links led to pages
     // hidden from Google. A list that falls below its gate is removed, and links to it with it.
     const items = every.filter((x) => !listedHidden(code, x.slug));
-    if (items.length < STREAM_PAGE_MIN) continue;
     const pslug = platformSlug(platform);
     if (!pslug) continue;
+    const gate = (p, create, keep) => (fs.existsSync(p) ? keep : create);   // hysteresis: see the header
+    if (items.length < gate(streamPagePath(code, pslug), STREAM_PAGE_MIN, STREAM_PAGE_KEEP)) continue;
     const byLang = new Map();
     for (const x of items) { if (!x.language) continue; if (!byLang.has(x.language)) byLang.set(x.language, []); byLang.get(x.language).push(x); }
-    const langs = [...byLang.entries()].filter(([, xs]) => xs.length >= STREAM_LANG_MIN)
+    const langs = [...byLang.entries()].filter(([name, xs]) => xs.length >= gate(streamPagePath(code, pslug, slugify(name)), STREAM_LANG_MIN, STREAM_LANG_KEEP))
       .sort((a, b) => b[1].length - a[1].length).map(([name, xs]) => ({ name, slug: slugify(name), n: xs.length, xs }));
     const weekly = fs.existsSync(hubPath(code, pslug)) ? hubUrl(code, pslug) : null;
     const main = streamPagePath(code, pslug);
@@ -399,7 +403,9 @@ module.exports = {
   peopleIndexUrl,
   personPageUrl,
   STREAM_LANG_MIN,
+  STREAM_LANG_KEEP,
   STREAM_PAGE_MIN,
+  STREAM_PAGE_KEEP,
   streamPageUrl,
   verifiedAvailability,
   writePeoplePages,

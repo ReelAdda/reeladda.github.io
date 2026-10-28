@@ -5807,8 +5807,11 @@ testAsync("keep lean: the monthly hide roll, the weekly health report, and the p
     fsx.writeFileSync("sitemap-films-in.xml", `<urlset><url><loc>${B}movie/a.html</loc></url></urlset>`);
     fsx.writeFileSync("sitemap-pages.xml", `<urlset><url><loc>${B}new-on-ott/</loc></url></urlset>`);
     fsx.writeFileSync("sitemap-bing.xml", `<urlset><url><loc>${B}movie/b.html</loc></url></urlset>`);
+    // A merge redirect stub at an old address: not a page, so neither visible, hidden nor an orphan.
+    fsx.writeFileSync("movie/old-a.html", '<html><head><meta http-equiv="refresh" content="0; url=/movie/a.html"></head><body><!--FC:merged--><a href="/movie/a.html">a</a></body></html>');
     const h = K.linkHealth({ manifest: { in: { a: { released: "2026-11-10" } } }, nowMs: now });
     assert.strictEqual(h.offered, 2, "the Bing-only sitemap isn't Google's");
+    assert.strictEqual(h.visiblePages, 2, "the stub is not a visible page");
     assert.strictEqual(h.toHidden, 2); assert.strictEqual(h.links, 3);
     assert.strictEqual(h.orphans, 1, "nothing links the weekly page here");
     assert.strictEqual(h.freshWeak, 1, "the new title a has one link in");
@@ -7382,6 +7385,11 @@ test("sitemap-new.xml: current new releases and real platform arrivals, nothing 
   assert.ok(!S.isNewReleaseEntry(null, T) && !S.isNewReleaseEntry({ catalog: true }, T));
   const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "sitemap.js"), "utf8");
   assert.ok(/children\.unshift\(\{ file: NEW_RELEASES_SITEMAP/.test(src), "listed first in the sitemap index");
+  // One file per page kind (28 Oct 2026): lists and catalogue films get their own, pages.xml loses the lists.
+  assert.strictEqual(S.LISTS_SITEMAP, "sitemap-lists.xml"); assert.strictEqual(S.CATALOGUE_SITEMAP, "sitemap-catalogue.xml");
+  assert.ok(/const listEntries = streamUrls\.filter\(indexable\)/.test(src) && !/pageEntries = \[[^\]]*streamUrls/.test(src), "streaming lists in their own file only");
+  assert.ok(/else if \(me && me\.catalog\) catalogueUrls\.push\(entry\)/.test(src), "catalogue pages: the ones not already in sitemap-new");
+  assert.ok(require("./site.js").isGenerated("sitemap-lists.xml") && require("./site.js").isGenerated("sitemap-catalogue.xml"));
 });
 test("IndexNow: every page whose content changed today is announced, not only the current lists (Oct 2026)", () => {
   const S = require("./lib/sitemap.js");
@@ -9367,6 +9375,21 @@ test("a platform page never lists a film today's data shows in cinemas only", ()
   const page = fsx.readFileSync("nz/streaming/netflix/index.html", "utf8");
   assert.ok(/Streamer 0/.test(page), "the platform page was written");
   assert.ok(!/In Cinemas/.test(page), "the film in cinemas isn't on it, whatever an older claim says");
+  // Hysteresis (28 Oct 2026): created at 12, kept down to 10, removed below; language lists 6 / 5.
+  assert.strictEqual(E.STREAM_PAGE_KEEP, 10); assert.strictEqual(E.STREAM_LANG_KEEP, 5);
+  E.writeStreamingPages({ ott: ott.slice(0, 10), ottExtra: [], theatres: [] }, NZ, {}, []);
+  assert.ok(fsx.existsSync("nz/streaming/netflix/index.html"), "10 titles: an existing list survives");
+  E.writeStreamingPages({ ott: ott.slice(0, 9), ottExtra: [], theatres: [] }, NZ, {}, []);
+  assert.ok(!fsx.existsSync("nz/streaming/netflix/index.html"), "9 titles: removed");
+  E.writeStreamingPages({ ott: ott.slice(0, 11), ottExtra: [], theatres: [] }, NZ, {}, []);
+  assert.ok(!fsx.existsSync("nz/streaming/netflix/index.html"), "11 titles: not enough to create one");
+  const hi = ott.map((x, i) => ({ ...x, language: i < 6 ? "Hindi" : "English" }));
+  E.writeStreamingPages({ ott: hi, ottExtra: [], theatres: [] }, NZ, {}, []);
+  assert.ok(fsx.existsSync("nz/streaming/netflix/hindi/index.html"), "6 Hindi titles: a language list");
+  E.writeStreamingPages({ ott: hi.slice(1), ottExtra: [], theatres: [] }, NZ, {}, []);
+  assert.ok(fsx.existsSync("nz/streaming/netflix/hindi/index.html"), "5 Hindi titles: an existing language list survives");
+  E.writeStreamingPages({ ott: hi.slice(2), ottExtra: [], theatres: [] }, NZ, {}, []);
+  assert.ok(!fsx.existsSync("nz/streaming/netflix/hindi/index.html"), "4 Hindi titles: removed");
 }));
 test("no FilmyChill Score on a film that isn't out yet, whatever its ratings", () => {
   const Fc = require("./lib/fcscore.js");

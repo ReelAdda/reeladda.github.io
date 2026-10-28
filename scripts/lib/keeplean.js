@@ -115,6 +115,9 @@ function linkHealth({ root = ".", manifest = {}, nowMs = Date.now() } = {}) {
     const u = "/" + String(rel).replace(/\\/g, "/").replace(/index\.html$/, "");
     exists.add(u);
     let h; try { h = fs.readFileSync(path.join(root, rel), "utf8"); } catch { continue; }
+    // A merge redirect stub (lib/merges.js) is an address, not a page: neither visible nor hidden,
+    // so it isn't counted as unlinked (the 28 Oct 2026 audit found 32 of them among the "orphans").
+    if (h.includes("<!--FC:merged-->")) { exists.delete(u); continue; }
     if (NOI.test(h.slice(0, 4096))) hidden.add(u); else visible.set(u, h);
   }
   const inbound = new Map(); let links = 0, toHidden = 0;

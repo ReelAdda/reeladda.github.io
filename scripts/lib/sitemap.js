@@ -279,6 +279,8 @@ function extendIndexNowWithHidden({ root = ".", payloadFile = INDEXNOW_PAYLOAD_F
 // released in the last NEW_RELEASE_PAST_DAYS or due in the next NEW_RELEASE_AHEAD_DAYS, or any
 // film page whose film arrived on a platform here in the last NEW_ARRIVAL_DAYS.
 const NEW_RELEASES_SITEMAP = "sitemap-new.xml";
+const LISTS_SITEMAP = "sitemap-lists.xml";           // platform and platform-language lists
+const CATALOGUE_SITEMAP = "sitemap-catalogue.xml";   // back-catalogue film pages still offered
 const BING_SITEMAP = "sitemap-bing.xml";   // Bing Webmaster Tools only; never in sitemap.xml or robots.txt
 const BING_REMOVAL_UNTIL = "2026-12-15";     // the removal list is deleted after this day
 const NEW_RELEASE_PAST_DAYS = 45, NEW_RELEASE_AHEAD_DAYS = 60, NEW_ARRIVAL_DAYS = 14;
@@ -369,6 +371,7 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   let filmCount = 0;
   const filmUrls = [];
   const newReleaseUrls = [];   // also listed in sitemap-new.xml (see isNewReleaseEntry)
+  const catalogueUrls = [];    // also listed in sitemap-catalogue.xml (manifest `catalog`, still offered)
   const filmUrlsBy = {};
   for (const c of countries) {
     const dir = dirFor(c.code);
@@ -391,7 +394,9 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
       const entry = `  <url><loc>${filmUrlFor(c.code, slug)}</loc><lastmod>${filmLastmod(c.code, slug)}</lastmod><priority>0.5</priority>${img}${alts ? alts + "\n  " : (img ? "\n  " : "")}</url>`;
       filmUrls.push(entry);
       (filmUrlsBy[c.code] = filmUrlsBy[c.code] || []).push(entry);
-      if (isNewReleaseEntry(pagesManifest && pagesManifest[c.code] && pagesManifest[c.code][slug], today)) newReleaseUrls.push(entry);
+      const me = pagesManifest && pagesManifest[c.code] && pagesManifest[c.code][slug];
+      if (isNewReleaseEntry(me, today)) newReleaseUrls.push(entry);
+      else if (me && me.catalog) catalogueUrls.push(entry);
       filmCount++;
     }
   }
@@ -529,11 +534,21 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   // No page that asks not to be indexed (robots, or Google's own tag from lib/googlehide.js:
   // people pages, the embed instructions) is offered, whichever list above added it.
   const locFile = (loc) => { const p = loc.replace("https://filmychill.com/", ""); return p === "" || p.endsWith("/") ? `${p}index.html` : p; };
-  const pageEntries = [...countryUrls, ...langUrls, ...hubUrls, ...datedUrls, ...streamUrls, ...peopleUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...scopedMonthUrls, ...aboutUrls, ...ottUrls]
-    .filter((x) => { const m = /<loc>([^<]+)<\/loc>/.exec(x); return !m || !isNoIndex(locFile(m[1])); });
+  const indexable = (x) => { const m = /<loc>([^<]+)<\/loc>/.exec(x); return !m || !isNoIndex(locFile(m[1])); };
+  const pageEntries = [...countryUrls, ...langUrls, ...hubUrls, ...datedUrls, ...peopleUrls, ...browseUrls, ...dataUrls, ...embedUrls, ...weekUrls, ...monthUrls, ...scopedMonthUrls, ...aboutUrls, ...ottUrls].filter(indexable);
   fs.writeFileSync("sitemap-pages.xml", urlset(pageEntries));
   pages.save();
   children.push({ file: "sitemap-pages.xml", lastmod: newest(pageEntries) });
+  // ONE FILE PER PAGE KIND (28 Oct 2026). Search Console reports indexed-vs-submitted per sitemap
+  // file, so the kinds Google judges differently get files of their own: the platform and
+  // platform-language lists (LISTS_SITEMAP), and the back-catalogue film pages still offered
+  // (CATALOGUE_SITEMAP, also in their edition's file — a URL may appear in more than one). With
+  // sitemap-new.xml that reads: new releases / older weekly-list films / catalogue / lists / hubs.
+  const listEntries = streamUrls.filter(indexable);
+  if (listEntries.length) { fs.writeFileSync(LISTS_SITEMAP, urlset(listEntries)); children.push({ file: LISTS_SITEMAP, lastmod: newest(listEntries) }); }
+  else fs.rmSync(LISTS_SITEMAP, { force: true });
+  if (catalogueUrls.length) { fs.writeFileSync(CATALOGUE_SITEMAP, urlset(catalogueUrls)); children.push({ file: CATALOGUE_SITEMAP, lastmod: newest(catalogueUrls) }); }
+  else fs.rmSync(CATALOGUE_SITEMAP, { force: true });
   // The pages that earn the clicks, in a sitemap of their own (Oct 2026): new releases are 9% of
   // film pages and ~76% of Google clicks, and Google crawls only ~100–300 of the site's ~22,000
   // pages a day. Google doesn't use IndexNow, so this is how it is pointed at them first. The same
@@ -566,12 +581,14 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   fs.writeFileSync("sitemap.xml",
     `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${children.map((c) =>
       `  <sitemap><loc>https://filmychill.com/${c.file}</loc><lastmod>${c.lastmod}</lastmod></sitemap>`).join("\n")}\n</sitemapindex>\n`);
-  console.log(`Sitemap index: ${children.length} files — ${countries.length} country + ${langUrls.length} language + ${streamUrls.length} streaming + ${peopleUrls.length} people + ${browseUrls.length} browse${dataUrls.length ? " + data" : ""} + ${weekUrls.length} week + ${monthUrls.length} month + ${scopedMonthUrls.length} scoped-month + ${filmCount} film pages.`);
+  console.log(`Sitemap index: ${children.length} files — ${countries.length} country + ${langUrls.length} language + ${listEntries.length} streaming lists + ${peopleUrls.length} people + ${browseUrls.length} browse${dataUrls.length ? " + data" : ""} + ${weekUrls.length} week + ${monthUrls.length} month + ${scopedMonthUrls.length} scoped-month + ${filmCount} film pages (${newReleaseUrls.length} new, ${catalogueUrls.length} catalogue).`);
 }
 
 module.exports = {
   BING_SITEMAP,
   BING_REMOVAL_UNTIL,
+  CATALOGUE_SITEMAP,
+  LISTS_SITEMAP,
   extendIndexNowWithHidden,
   HIDDEN_URLS_FILE,
   INDEXNOW_HIDDEN_FILE,
