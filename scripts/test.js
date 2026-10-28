@@ -8947,8 +8947,11 @@ test("a released film keeps its year in the title when only the 'unconfirmed' ta
   const rel = new Date(Date.now() - 1 * 864e5).toISOString().slice(0, 10);
   const t = F.filmTitleTag({ title: "Street Fighter", released: rel, kind: "movie", language: "English", providers: [], platform: "Theatres" }, IN);
   assert.ok(/^Street Fighter \(\d{4}\) OTT Release Date: Expected /.test(t) && t.length <= 60, t);
-  const short = F.filmTitleTag({ title: "Dorothy", released: rel, kind: "movie", language: "Tamil", providers: [], platform: "Theatres" }, IN);
-  assert.ok(/\(Unconfirmed\)|Not Yet Confirmed/.test(short), "a title that fits with the tag keeps it: " + short);
+  const short = F.filmTitleTag({ title: "Ra", released: rel, kind: "movie", language: "Tamil", providers: [], platform: "Theatres" }, IN);
+  assert.ok(/\(Unconfirmed\)|Not Yet Confirmed/.test(short) && /\(\d{4}\)/.test(short), "a title that fits with year and tag keeps both: " + short);
+  // Year and tag can't both fit (whatever the window is today): the year stays, the tag goes.
+  const mid = F.filmTitleTag({ title: "Dorothy", released: rel, kind: "movie", language: "Tamil", providers: [], platform: "Theatres" }, IN);
+  assert.ok(/^Dorothy \(\d{4}\) OTT Release Date: Expected /.test(mid) && mid.length <= 60, mid);
 });
 test("a frozen page with no platform gets the 'not streaming yet' description its title promises (The Invite)", () => {
   const IN = require("./lib/core.js").COUNTRIES[0];

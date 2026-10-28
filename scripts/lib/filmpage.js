@@ -616,13 +616,15 @@ function filmTitleTag(item, cfg = null) {
       if (left) {
         return fitTitle([
           `${item.title}${yr} OTT Release Date: Expected ${left}, Not Yet Confirmed`,
-          `${item.title} OTT Release Date: Expected ${left}, Not Yet Confirmed`,
           `${item.title}${yr} OTT Release Date: Expected ${left} (Unconfirmed)`,
-          `${item.title} OTT Release Date: Expected ${left} (Unconfirmed)`,
           // Before the year goes: "Street Fighter (2026) OTT Release Date: Expected Nov–Dec"
           // (56 chars) was never offered, so the year fell out — and "street fighter 2026 …"
           // searches had ~400 impressions in a month. The description says it's unconfirmed.
+          // Every with-year form comes first: once the window shrank to "Dec", the no-year
+          // "(Unconfirmed)" form fit in 60 and dropped the year again (28 Oct 2026).
           `${item.title}${yr} OTT Release Date: Expected ${left}`,
+          `${item.title} OTT Release Date: Expected ${left}, Not Yet Confirmed`,
+          `${item.title} OTT Release Date: Expected ${left} (Unconfirmed)`,
           `${item.title} OTT Release Date: Expected ${left}`,
         ]);
       }
