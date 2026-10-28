@@ -876,6 +876,9 @@ function afterHero(fn) {
 // reach the right country via search (each page is indexed for its market) or the switcher.
 initCountryPage();
 paintMyList();   // the saved row needs no data file
+// The site's service worker (/sw.js): pages network-first, this week's data and posters cached,
+// so the homepage and a saved list open offline. Registered after load, clear of the first paint.
+if ('serviceWorker' in navigator) addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
 
 // Both backdrop sizes as custom properties; the CSS picks one by screen width. Mirrors ssrHero
 // in scripts/lib/surfaces.js, with the same URLs, so hydrating downloads nothing twice.

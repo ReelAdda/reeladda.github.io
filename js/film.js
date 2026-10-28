@@ -55,6 +55,10 @@
     yt.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); play(); } });
   }
 
+  // The site's service worker (/sw.js): pages network-first, posters and the shell cached, so a
+  // page opened once reads offline. Registered after load, never in the way of the first paint.
+  if ("serviceWorker" in navigator) addEventListener("load", function () { navigator.serviceWorker.register("/sw.js").catch(function () {}); });
+
   // Sticky bar: on once the call to action has scrolled away, off while the footer shows.
   var sticky = d.getElementById("sticky"), cta = d.querySelector(".cta"), foot = d.querySelector("footer");
   if (sticky && cta && "IntersectionObserver" in window) {

@@ -1160,7 +1160,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${e(titleTag)}</title>
 <meta name="description" content="${e(desc)}">
-${ICON_LINKS}${posterFirst(item, lean)}
+${ICON_LINKS}${v2 ? `\n<link rel="manifest" href="/manifest.json">\n<meta name="theme-color" content="${V2.DEEP}">` : ""}${posterFirst(item, lean)}
 ${robotsTag}
 <link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl(xDefaultCode(alts.map((a) => a.code)), item.slug))}"/>` : ""}
 <meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">

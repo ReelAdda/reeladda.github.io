@@ -50,7 +50,7 @@ const PAGE_TYPES = [
     exit: "never" },
   { id: "trust page", match: re(`(?:about|privacy|dmca|data)/index\\.html`),
     gate: "fixed set", links: "footer of every page", google: "yes", exit: "never" },
-  { id: "utility", match: re(`(?:404|post|google[0-9a-f]+)\\.html`),
+  { id: "utility", match: re(`(?:404|post|google[0-9a-f]+)\\.html|offline/index\\.html`),
     gate: "fixed set: not-found page, channel post kit, Search Console verification", links: "none",
     google: "no", exit: "never" },
 ];

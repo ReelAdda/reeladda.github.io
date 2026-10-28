@@ -9106,6 +9106,40 @@ test("redesign v2 (28 Oct 2026): four states of VisionQuest, every fact unchange
     assert.strictEqual(V2.daysWord("2026-10-29", "2026-10-28"), "tomorrow"); assert.strictEqual(V2.daysWord("2026-10-28", "2026-10-28"), "today");
   } finally { R.useRolloutConfig(null); }
 });
+test("PWA (28 Oct 2026): manifest, service worker, offline page, registration on the homepage and v2 film pages", () => {
+  const fsx = require("fs"), path = require("path");
+  const root = path.join(__dirname, "..");
+  const read = (p) => fsx.readFileSync(path.join(root, p), "utf8");
+  const m = JSON.parse(read("manifest.json"));
+  assert.strictEqual(m.theme_color, "#1B165F"); assert.strictEqual(m.display, "standalone"); assert.strictEqual(m.start_url, "/?source=pwa"); assert.strictEqual(m.scope, "/"); assert.strictEqual(m.id, "/");
+  assert.ok(m.icons.some((i) => i.sizes === "512x512" && /maskable/.test(i.purpose)) && m.icons.some((i) => i.sizes === "192x192" && /any/.test(i.purpose)), "any + maskable icons");
+  assert.ok(m.shortcuts.length >= 2 && m.shortcuts.every((s) => /^\/[a-z-]+\/\?source=pwa$/.test(s.url)));
+  const sw = read("sw.js");
+  assert.ok(/const CACHE = "fc-\d{4}-\d{2}-\d{2}"/.test(sw), "a dated cache name to bump");
+  assert.ok(/req\.mode === "navigate"/.test(sw) && /networkFirst\(req, new Request\(url\.origin \+ url\.pathname\), \{ fallback: "\/offline\/" \}\)/.test(sw), "pages: network first, offline fallback");
+  assert.ok(/isData\(url\)\) \{ e\.respondWith\(networkFirst/.test(sw) && /isStatic\(url\)\) \{ e\.respondWith\(staleWhileRevalidate/.test(sw) && /isPoster\(url\)\) \{ e\.respondWith\(cacheFirstCapped/.test(sw));
+  assert.ok(!/addEventListener\("(?:push|sync|periodicsync|notificationclick)"/.test(sw), "no push, no background work");
+  assert.ok(/if \(req\.method !== "GET"\) return;/.test(sw) && !/googletagmanager|youtube|firestore/.test(sw), "only GETs; third parties pass through");
+  const off = read("offline/index.html");
+  assert.ok(/<meta name="robots" content="noindex">/.test(off) && /You're offline/.test(off) && /href="\/"/.test(off));
+  assert.strictEqual(require("./lib/pagetypes.js").pageTypeOf("offline/index.html").id, "utility", "the registry knows the offline page");
+  const S = require("./site.js");
+  assert.ok(!S.isMainOnly("sw.js") && !S.isMainOnly("offline") && !S.isMainOnly("manifest.json"), "published with the site");
+  assert.ok(/navigator\.serviceWorker\.register\('\/sw\.js'\)/.test(read("js/app.js")) && /navigator\.serviceWorker\.register\("\/sw\.js"\)/.test(read("js/film.js")), "registered by both page scripts, after load");
+  assert.ok(/addEventListener\('load', \(\) => \{ navigator\.serviceWorker\.register/.test(read("js/app.js")));
+  const home = read("index.html");
+  assert.ok(/<meta name="theme-color" content="#1B165F">/.test(home) && /<link rel="manifest" href="\/manifest\.json">/.test(home));
+  // v2 film pages link the manifest and carry the header colour; lean pages are left as they were.
+  const R = require("./lib/rollout.js"), F = require("./lib/filmpage.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const it = { title: "T", slug: "t", kind: "movie", released: "2026-10-01", language: "Hindi", genre: "Drama", providers: ["Netflix"], rentBuy: [], tmdbId: 1 };
+  try {
+    R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "redesign-v2": { percent: 100 } } });
+    const v2 = F.buildFilmPage(it, "2026-10-28", new Set(), IN);
+    assert.ok(/<link rel="manifest" href="\/manifest\.json">\n<meta name="theme-color" content="#1B165F">/.test(v2) && /\/js\/film\.js/.test(v2));
+    R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "redesign-v2": { percent: 0 } } });
+    assert.ok(!/rel="manifest"/.test(F.buildFilmPage(it, "2026-10-28", new Set(), IN)));
+  } finally { R.useRolloutConfig(null); }
+});
 test("a frozen page with no platform gets the 'not streaming yet' description its title promises (The Invite)", () => {
   const IN = require("./lib/core.js").COUNTRIES[0];
   const F = require("./lib/filmpage.js");
