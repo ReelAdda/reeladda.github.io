@@ -8601,7 +8601,14 @@ test("redesign: quieter top — country pill, one toolbar row, extras under Comi
   const soon = src.indexOf("<h2>Coming Soon</h2>"), extras = src.indexOf('<div class="extras">');
   assert.ok(extras > 0 && extras < src.indexOf("<main>") && /data-click="openMood"[\s\S]*?id="mylistBtn"[\s\S]*?<span class="wl-n" id="wlCount">0<\/span>/.test(src.slice(extras, extras + 600)), "mood + My List in the toolbar, with the count badge");
   assert.ok(!/<h2>Coming Soon<\/h2>[\s\S]*class="extras"/.test(src) && soon > 0, "nothing left under Coming Soon");
-  for (const sel of [".cpill summary", ".cpill-list a", ".toolbar select", "footer a.foot-follow", ".toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn"]) {
+  // The Install pill (29 Oct 2026): hidden until the browser says the site is installable (or
+  // iOS from the second visit); tapping opens the native prompt or the Share tip; GA events.
+  assert.ok(/<button class="install-btn" id="installBtn" data-click="installFromPill" hidden>/.test(src.slice(extras, extras + 900)) && /<symbol id="icDownload"/.test(src));
+  assert.ok(/installFromPill: \(\) => installFromPill\(\)/.test(src) && /addEventListener\('beforeinstallprompt', e => \{ e\.preventDefault\(\); deferredInstall = e; if \(installEligible\(\{ ignoreVisit: true \}\)\) installPill\(true, 'Install app'\); \}\)/.test(src));
+  assert.ok(/addEventListener\('appinstalled'[^\n]*pwaTrack\('pwa_install'\)/.test(src) && /pwaTrack\('pwa_launch'\)/.test(src) && /pwaTrack\('pwa_install_tip'\)/.test(src) && /pwaTrack\('pwa_install_prompt'/.test(src), "install analytics");
+  assert.ok(/\/iPhone\|iPad\|iPod\/\.test\(navigator\.userAgent\) && !deferredInstall && installEligible\(\)\) installPill\(true, 'Add to Home Screen'\)/.test(src), "iOS: the tip from the second visit");
+  assert.ok(/\.toolbar \.extras \.install-btn \{ background: var\(--marigold\)/.test(src) && /\.install-btn\[hidden\] \{ display: none; \}/.test(src));
+  for (const sel of [".cpill summary", ".cpill-list a", ".toolbar select", "footer a.foot-follow", ".toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn, .toolbar .extras .install-btn"]) {
     const i = src.indexOf(sel + " {");
     assert.ok(i >= 0 && /min-height: 44px/.test(src.slice(i, src.indexOf("}", i))), `${sel}: 44px tall`);
   }

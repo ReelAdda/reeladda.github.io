@@ -35,12 +35,12 @@
 <meta name="twitter:card" content="summary_large_image"><!--/SSR:HEAD-->
 <meta property="og:site_name" content="FilmyChill">
 <meta property="og:type" content="website">
-<!--SSR:OGIMAGE--><meta property="og:image" content="https://filmychill.com/cards/in/visionquest.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630"><!--/SSR:OGIMAGE-->
+<!--SSR:OGIMAGE--><meta property="og:image" content="https://image.tmdb.org/t/p/w1280/uoXXbN2PrOxH6UKyP7kYwmGpAAP.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720"><!--/SSR:OGIMAGE-->
 <!--SSR:PAGECODE--><meta name="fc-page" content="in"><meta name="fc-stream-word" content="OTT"><meta name="fc-locale" content="en-IN"><!--/SSR:PAGECODE-->
 <meta name="theme-color" content="#4038C7">
-<!--SSR:CSP--><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-D+fQ3wVVc04mUe2LSqHTCSwvzNncUZfZhrR/FqMgqNo=' 'sha256-ETRSHBLUgeV3mhzMMjrwCL4nWDwLThkKYLlVWFKstK8=' https://faves.grow.me 'sha256-mN3/PoIt2V/og3VW7LqjWhuMiHtPRyKyT9FrBhLM2YU=' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://image.tmdb.org data: https://img.grow.me https://itp.mediavine.com https://*.google-analytics.com https://*.googletagmanager.com; frame-src https://www.youtube-nocookie.com https://app.grow.me; connect-src 'self' https://api.grow.me https://faves.grow.me https://client-rapi-mediavine.recombee.com https://some.growplow.events https://img.grow.me https://itp.mediavine.com https://urls.grow.me https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; object-src 'none'; base-uri 'self'"><!--/SSR:CSP-->
+<!--SSR:CSP--><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-hLiFxhAwzwKJ/LGCyYimJJmRh4DooH+lwmqb6nJGYPE='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; connect-src 'self'; object-src 'none'; base-uri 'self'"><!--/SSR:CSP-->
 <!--SSR:ANALYTICS--><!--/SSR:ANALYTICS-->
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icon-192.png">
@@ -175,13 +175,16 @@
   .toolbar .extras { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 0; }
   /* The two as outlined pills in the toolbar's own style: same height and border as the dropdowns,
      the icon in indigo, the saved count as a small badge. */
-  .toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn { flex: 1 1 0; min-width: 0; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  .toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn, .toolbar .extras .install-btn { flex: 1 1 0; min-width: 0; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     background: transparent; border: 1px solid #E3D8C4; border-radius: 999px; color: var(--ink); font: 700 13.5px 'Inter', sans-serif; padding: 0 14px; cursor: pointer; transition: border-color .15s, background .15s; }
-  .toolbar .extras .tonight-btn:hover, .toolbar .extras .mylist-btn:hover, .toolbar .extras .tonight-btn:focus-visible, .toolbar .extras .mylist-btn:focus-visible { border-color: var(--indigo); background: var(--card); outline: none; }
+  .toolbar .extras .tonight-btn:hover, .toolbar .extras .mylist-btn:hover, .toolbar .extras .install-btn:hover, .toolbar .extras .tonight-btn:focus-visible, .toolbar .extras .mylist-btn:focus-visible, .toolbar .extras .install-btn:focus-visible { border-color: var(--indigo); background: var(--card); outline: none; }
   .toolbar .extras .ic { width: 16px; height: 16px; color: var(--indigo); flex: none; }
   .toolbar .extras .mylist-btn.active { background: var(--marigold); border-color: var(--marigold); }
   .wl-n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #F1EFFC; color: var(--indigo); font-size: 11.5px; font-weight: 800; display: inline-grid; place-items: center; }
   .mylist-btn.active .wl-n { background: #241D52; color: #fff; }
+  /* The install pill: marigold, so the one action that is new to a visitor reads as an offer, not a filter. */
+  .toolbar .extras .install-btn { background: var(--marigold); border-color: var(--marigold); color: #241D52; } .toolbar .extras .install-btn .ic { color: #241D52; }
+  .toolbar .extras .install-btn[hidden] { display: none; }
   .extras .tonight-btn, .extras .mylist-btn { min-height: 44px; display: inline-flex; align-items: center; gap: 7px; }
   /* "Most searched" (scripts/lib/searchtop.js POPULAR_CSS, adapted to the homepage). */
   .popular { margin-top: 40px; }
@@ -461,7 +464,7 @@
 </head>
 <body>
 
-<svg style="display:none" aria-hidden="true"><symbol id="waIcon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol><symbol id="icTrophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H5a2 2 0 0 0 0 4h2M17 6h2a2 2 0 0 1 0 4h-2"/></symbol><symbol id="icDice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="8.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="12" cy="12" r=".8" fill="currentColor"/><circle cx="8.5" cy="15.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="15.5" r=".8" fill="currentColor"/></symbol><symbol id="icHourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2c0 5 5 6 5 10s-5 5-5 10M17 2c0 5-5 6-5 10s5 5 5 10"/></symbol><symbol id="icBars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20v-6M12 20V9M19 20v-3"/></symbol><symbol id="icBookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21l-6-4-6 4V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16z"/></symbol><symbol id="icGlobe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9"/></symbol><symbol id="icShare" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M8.3 10.8l6.4-3.6M8.3 13.2l6.4 3.6"/></symbol><symbol id="icCal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></symbol><symbol id="icTrend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol><symbol id="icSpark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.3L20 10l-5.9 1.7L12 18l-2.1-6.3L4 10l5.9-1.7L12 2zM19 15l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/></symbol></svg>
+<svg style="display:none" aria-hidden="true"><symbol id="waIcon" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol><symbol id="icTrophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H5a2 2 0 0 0 0 4h2M17 6h2a2 2 0 0 1 0 4h-2"/></symbol><symbol id="icDice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="8.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="8.5" r=".8" fill="currentColor"/><circle cx="12" cy="12" r=".8" fill="currentColor"/><circle cx="8.5" cy="15.5" r=".8" fill="currentColor"/><circle cx="15.5" cy="15.5" r=".8" fill="currentColor"/></symbol><symbol id="icHourglass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M7 2c0 5 5 6 5 10s-5 5-5 10M17 2c0 5-5 6-5 10s5 5 5 10"/></symbol><symbol id="icBars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20v-6M12 20V9M19 20v-3"/></symbol><symbol id="icBookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21l-6-4-6 4V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16z"/></symbol><symbol id="icGlobe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9"/></symbol><symbol id="icShare" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M8.3 10.8l6.4-3.6M8.3 13.2l6.4 3.6"/></symbol><symbol id="icDownload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M6 11l6 6 6-6M4 21h16"/></symbol><symbol id="icCal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/></symbol><symbol id="icTrend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol><symbol id="icSpark" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.3L20 10l-5.9 1.7L12 18l-2.1-6.3L4 10l5.9-1.7L12 2zM19 15l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/></symbol></svg>
 <header>
   <div class="logo" style="display:inline-flex;align-items:center"><svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true" style="width:.92em;height:.92em;flex:none;margin-right:.16em"><circle cx="50" cy="50" r="37" fill="none" stroke="#EFE6D6" stroke-width="13"/><circle cx="50" cy="50" r="37" fill="none" stroke="#FFAD1F" stroke-width="13" stroke-linecap="round" stroke-dasharray="176 300" transform="rotate(38 50 50)"/><path d="M42 33 Q40 32 40 35 L40 65 Q40 68 42 67 L66 52.5 Q68 50 66 47.5 Z" fill="#4038C7"/></svg>FILMY<span>CHILL</span></div>
   <h1 class="tagline"><!--SSR:TAGLINE-->New movies &amp; OTT releases this week<!--/SSR:TAGLINE--> · <span id="countryLabel">🌐</span></h1>
@@ -470,7 +473,7 @@
       <summary aria-label="Choose country"><svg class="ic" aria-hidden="true"><use href="#icGlobe"/></svg><span><!--SSR:COUNTRYNAME-->India<!--/SSR:COUNTRYNAME--></span><span class="cpill-caret" aria-hidden="true">▾</span></summary>
       <nav class="cpill-list" aria-label="Countries"><!--SSR:COUNTRYOPTS--><a href="/" data-code="in" data-click="setCountry" aria-current="page">🇮🇳 India</a><a href="/us/" data-code="us" data-click="setCountry">🇺🇸 United States</a><a href="/uk/" data-code="uk" data-click="setCountry">🇬🇧 United Kingdom</a><a href="/au/" data-code="au" data-click="setCountry">🇦🇺 Australia</a><a href="/de/" data-code="de" data-click="setCountry">🇩🇪 Germany</a><a href="/ae/" data-code="ae" data-click="setCountry">🇦🇪 UAE</a><a href="/ca/" data-code="ca" data-click="setCountry">🇨🇦 Canada</a><a href="/sg/" data-code="sg" data-click="setCountry">🇸🇬 Singapore</a><a href="/my/" data-code="my" data-click="setCountry">🇲🇾 Malaysia</a><a href="/ph/" data-code="ph" data-click="setCountry">🇵🇭 Philippines</a><a href="/nz/" data-code="nz" data-click="setCountry">🇳🇿 New Zealand</a><a href="/kr/" data-code="kr" data-click="setCountry">🇰🇷 South Korea</a><a href="/jp/" data-code="jp" data-click="setCountry">🇯🇵 Japan</a><a href="/id/" data-code="id" data-click="setCountry">🇮🇩 Indonesia</a><a href="/br/" data-code="br" data-click="setCountry">🇧🇷 Brazil</a><a href="/mx/" data-code="mx" data-click="setCountry">🇲🇽 Mexico</a><a href="/es/" data-code="es" data-click="setCountry">🇪🇸 Spain</a><a href="/fr/" data-code="fr" data-click="setCountry">🇫🇷 France</a><!--/SSR:COUNTRYOPTS--></nav>
     </details>
-    <div class="updated"><div class="dot"></div><span id="lastScan"><!--SSR:LASTSCAN-->Updated 28 Oct<!--/SSR:LASTSCAN--></span></div>
+    <div class="updated"><div class="dot"></div><span id="lastScan"><!--SSR:LASTSCAN-->Updated 29 Oct<!--/SSR:LASTSCAN--></span></div>
   </div>
 </header>
 
@@ -499,6 +502,7 @@
   <div class="extras">
       <button class="tonight-btn" data-click="openMood"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> What to watch tonight?</button>
       <button class="mylist-btn" id="mylistBtn" data-click="toggleMyList"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List <span class="wl-n" id="wlCount">0</span></button>
+      <button class="install-btn" id="installBtn" data-click="installFromPill" hidden><svg class="ic" aria-hidden="true"><use href="#icDownload"/></svg> <span>Install app</span></button>
     </div>
   <div id="personalBar"></div>
 </div>
@@ -516,7 +520,7 @@
   <section>
     <div class="section-head">
       <h2>In Theatres</h2><span class="count" id="theatreCount"><!--SSR:TCOUNT-->TOP 7<!--/SSR:TCOUNT--></span>
-      <span class="sub"><!--SSR:TWINDOW-->Releases from the past two weeks<!--/SSR:TWINDOW--></span>
+      <span class="sub"><!--SSR:TWINDOW-->Releases from the past three weeks<!--/SSR:TWINDOW--></span>
     </div>
     <div class="grid" id="moviesGrid"><!--SSR:THEATRES--><a class="card" href="/movie/clayface.html">
     <div class="pw"><img class="poster" src="https://image.tmdb.org/t/p/w342/9l1NuFjel2j89hiuiJbsxfblqjy.jpg" alt="Clayface poster" width="150" height="200" loading="eager" decoding="async" fetchpriority="low"><span class="rank">1</span></div>
@@ -763,8 +767,8 @@
 <footer>
   <div class="foot-in">
   <div class="foot-brand"><b>FilmyChill</b><span>What's worth watching, refreshed twice a day</span><a class="foot-follow" id="channelBtn" href="https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j" target="_blank" rel="noopener" aria-label="Follow the FilmyChill WhatsApp channel"><span class="wa-chip" aria-hidden="true"><svg class="wa-ic"><use href="#waIcon"/></svg></span>Follow on WhatsApp</a></div>
-  <!--SSR:MORELINKS--><nav class="foot-cols" aria-label="Site"><div><h3>Discover</h3><ul><li><a href="/new-on-ott/">New on OTT this week</a></li><li><a href="/new-on-ott/today/">New on OTT today</a></li><li><a href="/coming-to-ott/">Coming to OTT</a></li></ul></div><div><h3>Streaming on</h3><ul><li><a href="/streaming/netflix/">Netflix</a></li><li><a href="/streaming/prime-video/">Prime Video</a></li><li><a href="/streaming/jiohotstar/">JioHotstar</a></li><li><a href="/streaming/vi-movies-and-tv/">Vi Movies &amp; TV</a></li></ul></div><div><h3>Languages</h3><ul><li><a href="/hindi/">Hindi</a></li><li><a href="/tamil/">Tamil</a></li><li><a href="/telugu/">Telugu</a></li><li><a href="/malayalam/">Malayalam</a></li><li><a href="/kannada/">Kannada</a></li></ul></div><div><h3>FilmyChill</h3><ul><li><a href="/about/">About</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/data/">Streaming data</a></li><li><a href="/embed/">Embed widget</a></li><li><a href="https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j">WhatsApp channel</a></li></ul></div></nav><div class="foot-bar"><span>© 2026 FilmyChill · Vikram Sharma</span><details class="foot-country"><summary>🇮🇳 India</summary><div class="foot-country-list"><a href="/us/">US</a><a href="/uk/">UK</a><a href="/au/">Australia</a><a href="/de/">Germany</a><a href="/ae/">UAE</a><a href="/ca/">Canada</a><a href="/sg/">Singapore</a><a href="/my/">Malaysia</a><a href="/ph/">Philippines</a><a href="/nz/">New Zealand</a><a href="/kr/">South Korea</a><a href="/jp/">Japan</a><a href="/id/">Indonesia</a><a href="/br/">Brazil</a><a href="/mx/">Mexico</a><a href="/es/">Spain</a><a href="/fr/">France</a></div></details></div><!--/SSR:MORELINKS-->
-  <div class="foot-credit"><!--SSR:ATTRIBUTION-->Film data and ratings from <a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a> · Where-to-watch data by <a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a><br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>FilmyChill doesn't host or stream any films or shows — it only lists where they're officially available. Trailers play from YouTube.<br><a href="/privacy/">Privacy</a> · <a href="/dmca/">Copyright</a> · <!--/SSR:ATTRIBUTION--></div>
+  <!--SSR:MORELINKS--><nav class="foot-cols" aria-label="Site"><div><h3>Discover</h3><ul><li><a href="/new-on-ott/">New on OTT this week</a></li><li><a href="/new-on-ott/today/">New on OTT today</a></li><li><a href="/new-on-ott/2026-10/">This month</a></li></ul></div><div><h3>Streaming on</h3><ul><li><a href="/streaming/netflix/">Netflix</a></li><li><a href="/streaming/prime-video/">Prime Video</a></li><li><a href="/streaming/jiohotstar/">JioHotstar</a></li><li><a href="/streaming/vi-movies-and-tv/">Vi Movies &amp; TV</a></li></ul></div><div><h3>Languages</h3><ul><li><a href="/hindi/">Hindi</a></li><li><a href="/tamil/">Tamil</a></li><li><a href="/telugu/">Telugu</a></li><li><a href="/malayalam/">Malayalam</a></li><li><a href="/kannada/">Kannada</a></li></ul></div><div><h3>FilmyChill</h3><ul><li><a href="/about/">About</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/data/">Streaming data</a></li><li><a href="/embed/">Embed widget</a></li><li><a href="https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j">WhatsApp channel</a></li></ul></div></nav><div class="foot-bar"><span>© 2026 FilmyChill · Vikram Sharma</span><details class="foot-country"><summary>🇮🇳 India</summary><div class="foot-country-list"><a href="/us/">US</a><a href="/uk/">UK</a><a href="/au/">Australia</a><a href="/de/">Germany</a><a href="/ae/">UAE</a><a href="/ca/">Canada</a><a href="/sg/">Singapore</a><a href="/my/">Malaysia</a><a href="/ph/">Philippines</a><a href="/nz/">New Zealand</a><a href="/kr/">South Korea</a><a href="/jp/">Japan</a><a href="/id/">Indonesia</a><a href="/br/">Brazil</a><a href="/mx/">Mexico</a><a href="/es/">Spain</a><a href="/fr/">France</a></div></details></div><!--/SSR:MORELINKS-->
+  <div class="foot-credit"><!--SSR:ATTRIBUTION-->Film data and ratings from <a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a> · Where-to-watch data by <a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a><br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>Critics' reception and figures summarised and adapted from <a href="https://en.wikipedia.org/" rel="noopener" target="_blank">Wikipedia</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="noopener license" target="_blank">CC BY-SA 4.0</a>.<br>FilmyChill doesn't host or stream any films or shows — it only lists where they're officially available. Trailers play from YouTube.<br><a href="/privacy/">Privacy</a> · <a href="/dmca/">Copyright</a> · <!--/SSR:ATTRIBUTION--></div>
   </div>
 </footer>
 
@@ -1465,16 +1469,35 @@ function addFridayRitual(btn) {
 
 // ---- Earned install prompt: appears only after a moment of value ----
 let deferredInstall = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
+// The "Install app" pill in the toolbar (29 Oct 2026): shown only when the browser says the site
+// can be installed (Android/desktop Chrome fire beforeinstallprompt), or on iPhone/iPad from the
+// second visit, where it opens the Share → Add to Home Screen tip. Hidden once installed or
+// dismissed; never on the first visit.
+function installPill(show, label) {
+  const b = document.getElementById('installBtn');
+  if (!b) return;
+  if (label) b.querySelector('span').textContent = label;
+  b.hidden = !show;
+}
+function isStandalone() { return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; if (installEligible({ ignoreVisit: true })) installPill(true, 'Install app'); });
+window.addEventListener('appinstalled', () => { deferredInstall = null; installPill(false); removeNudge(); });
+function installFromPill() {
+  if (deferredInstall) { triggerInstall(); return; }
+  // iOS (and any browser without a prompt): the one-line tip, dismissible, in the notes bar.
+  const bar = document.getElementById('personalBar');
+  if (bar && !document.getElementById('installNudge')) bar.insertAdjacentHTML('afterbegin', installNudgeHtml('Add FilmyChill to your Home Screen', ''));
+  triggerInstall();
+}
 let nudgeShownThisSession = false;
 
-function installEligible() {
+function installEligible({ ignoreVisit = false } = {}) {
   try {
     if (localStorage.getItem('filmychill-install-dismissed')) return false;
   } catch { return false; }
-  if (!isReturningVisitor) return false;
-  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return false;
-  if (nudgeShownThisSession) return false;
+  if (!ignoreVisit && !isReturningVisitor) return false;
+  if (isStandalone()) return false;
+  if (!ignoreVisit && nudgeShownThisSession) return false;
   return true;
 }
 
@@ -1507,6 +1530,7 @@ function triggerInstall() {
 
 function removeNudge() { const el = document.getElementById('installNudge'); if (el) el.remove(); }
 function dismissInstall() {
+  installPill(false);
   try { localStorage.setItem('filmychill-install-dismissed', '1'); } catch {}
   removeNudge();
 }
@@ -1698,6 +1722,8 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     langSel.value = activeLang;
 
     computePersonal();
+    // iPhone/iPad have no install prompt: from the second visit the pill offers the tip instead.
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !deferredInstall && installEligible()) installPill(true, 'Add to Home Screen');
     dataReady = true;
     render();
 
@@ -1749,6 +1775,7 @@ const ACTIONS = {
   trackFullPage: (el) => fcTrack('fullpage/' + (FC_PAGE || 'in'), el.dataset.arg),
   saveFromDetail: (el, ev) => { ev.preventDefault(); toggleSave(el.dataset.list, Number(el.dataset.i)); closeDetail(); },
   triggerInstall: () => triggerInstall(),
+  installFromPill: () => installFromPill(),
   dismissInstall: () => dismissInstall(),
   heroTap: (el) => heroTap(el),
 };

@@ -695,16 +695,45 @@ function addFridayRitual(btn) {
 
 // ---- Earned install prompt: appears only after a moment of value ----
 let deferredInstall = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; });
+// The "Install app" pill in the toolbar (29 Oct 2026): shown only when the browser says the site
+// can be installed (Android/desktop Chrome fire beforeinstallprompt), or on iPhone/iPad from the
+// second visit, where it opens the Share → Add to Home Screen tip. Hidden once installed or
+// dismissed; never on the first visit.
+// Install analytics (Google Analytics, the site's counter): pwa_install_prompt (the pill was
+// shown), pwa_install (the browser confirmed an install — Android/desktop; iOS gives no signal),
+// pwa_install_tip (an iPhone user opened the Share tip), pwa_launch (opened as the installed app:
+// standalone display, or the manifest's start URL ?source=pwa). Nothing goes anywhere else.
+function pwaTrack(name, params) {
+  try { if (typeof window.gtag === 'function') window.gtag('event', name, Object.assign({ platform: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'ios' : /Android/.test(navigator.userAgent) ? 'android' : 'desktop' }, params || {})); } catch (e) { /* analytics must never break the page */ }
+}
+function installPill(show, label) {
+  const b = document.getElementById('installBtn');
+  if (!b) return;
+  if (label) b.querySelector('span').textContent = label;
+  if (show && b.hidden) pwaTrack('pwa_install_prompt', { kind: label === 'Install app' ? 'native' : 'tip' });
+  b.hidden = !show;
+}
+function isStandalone() { return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; if (installEligible({ ignoreVisit: true })) installPill(true, 'Install app'); });
+window.addEventListener('appinstalled', () => { deferredInstall = null; installPill(false); removeNudge(); pwaTrack('pwa_install'); });
+if (isStandalone() || /[?&]source=pwa\b/.test(location.search)) pwaTrack('pwa_launch');
+function installFromPill() {
+  if (deferredInstall) { triggerInstall(); return; }
+  // iOS (and any browser without a prompt): the one-line tip, dismissible, in the notes bar.
+  pwaTrack('pwa_install_tip');
+  const bar = document.getElementById('personalBar');
+  if (bar && !document.getElementById('installNudge')) bar.insertAdjacentHTML('afterbegin', installNudgeHtml('Add FilmyChill to your Home Screen', ''));
+  triggerInstall();
+}
 let nudgeShownThisSession = false;
 
-function installEligible() {
+function installEligible({ ignoreVisit = false } = {}) {
   try {
     if (localStorage.getItem('filmychill-install-dismissed')) return false;
   } catch { return false; }
-  if (!isReturningVisitor) return false;
-  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return false;
-  if (nudgeShownThisSession) return false;
+  if (!ignoreVisit && !isReturningVisitor) return false;
+  if (isStandalone()) return false;
+  if (!ignoreVisit && nudgeShownThisSession) return false;
   return true;
 }
 
@@ -737,6 +766,7 @@ function triggerInstall() {
 
 function removeNudge() { const el = document.getElementById('installNudge'); if (el) el.remove(); }
 function dismissInstall() {
+  installPill(false);
   try { localStorage.setItem('filmychill-install-dismissed', '1'); } catch {}
   removeNudge();
 }
@@ -928,6 +958,8 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     langSel.value = activeLang;
 
     computePersonal();
+    // iPhone/iPad have no install prompt: from the second visit the pill offers the tip instead.
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !deferredInstall && installEligible()) installPill(true, 'Add to Home Screen');
     dataReady = true;
     render();
 
@@ -979,6 +1011,7 @@ const ACTIONS = {
   trackFullPage: (el) => fcTrack('fullpage/' + (FC_PAGE || 'in'), el.dataset.arg),
   saveFromDetail: (el, ev) => { ev.preventDefault(); toggleSave(el.dataset.list, Number(el.dataset.i)); closeDetail(); },
   triggerInstall: () => triggerInstall(),
+  installFromPill: () => installFromPill(),
   dismissInstall: () => dismissInstall(),
   heroTap: (el) => heroTap(el),
 };
