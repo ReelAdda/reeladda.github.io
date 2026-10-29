@@ -2,20 +2,28 @@
  "date": "2026-10-29",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
- "high": 1,
- "correctable": 1,
+ "pagesDisagreeing": 2,
+ "high": 2,
+ "correctable": 2,
  "byField": {
-  "platform": 1
+  "streaming": 2
  },
  "rows": [
   {
-   "field": "platform",
+   "field": "streaming",
    "severity": "high",
-   "page": "Prime Video, Tivify",
-   "tmdb": "Prime Video",
-   "code": "es",
-   "slug": "rec-apocalypse"
+   "page": "not streaming",
+   "tmdb": "on Prime Video, Lionsgate Play, ManoramaMAX, AP International South Cinema",
+   "code": "in",
+   "slug": "ananthan-kaadu"
+  },
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "on fuboTV",
+   "tmdb": "on no subscription service",
+   "code": "ca",
+   "slug": "20-20"
   }
  ]
 }
