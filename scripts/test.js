@@ -9195,6 +9195,10 @@ test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to
     assert.ok((v3.match(/Sentence after sentence\./g) || []).length === 60, "the full overview");
     // 3. The score card's one line, and the label following the figure when the page has no tone.
     assert.ok(/<p class="fcsb-line"><b>Audience:<\/b> 500 ratings on TMDB · <b>Critics:<\/b> positive — 91% on Rotten Tomatoes \(87 reviews\) — per Wikipedia, 10 Oct 2026<\/p>/.test(v3), v3.match(/<p class="fcsb-line">[^]*?<\/p>/)[0]);
+    // CC BY-SA (29 Oct 2026): "per Wikipedia" links the article when the page knows it; the footer names the licence.
+    const linked = on(100, { ...it, takeArticle: "T (2026 film)" });
+    assert.ok(/per <a href="https:\/\/en\.wikipedia\.org\/wiki\/T_\(2026_film\)" rel="noopener" target="_blank">Wikipedia<\/a>, 10 Oct 2026<\/p>/.test(linked), "the article link");
+    assert.ok(/summarised and adapted from <a href="https:\/\/en\.wikipedia\.org\/"[^>]*>Wikipedia<\/a>, <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/" rel="noopener license"[^>]*>CC BY-SA 4\.0<\/a>\./.test(v3), "the licence line in the footer");
     assert.ok(/<!--FC:fcs=Loved\|positive-->/.test(v3) && /class="dial dial-must"/.test(v3) && !/class="rpill"/.test(v3), "the ring carries the audience number, in the score card; no rating pill");
     // Visible text only (not the head, markers or structured data): the audience number in the
     // pill and in the FAQ's self-contained answer; the critics' figure in the line and its answer.

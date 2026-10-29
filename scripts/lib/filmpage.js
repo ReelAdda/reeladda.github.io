@@ -981,7 +981,11 @@ function fcScoreSection(item) {
     const nVotes = Number(item.votes || 0);
     const audPart = item.rating != null && nVotes ? `<b>Audience:</b> ${e(nVotes.toLocaleString("en-IN"))} ratings on TMDB`
       : nVotes ? `<b>Audience:</b> ${e(nVotes.toLocaleString("en-IN"))} ratings on TMDB, no average yet` : `<b>Audience:</b> not rated on TMDB yet`;
-    const criPart = !cri.none || cited ? ` · <b>Critics:</b> ${e(criLabel)}${cited ? ` — ${e(cited)}` : ""}` : "";
+    // "per Wikipedia" links the article the figures came from (CC BY-SA asks for the source).
+    const citedHtml = cited ? (item.takeArticle
+      ? e(cited).replace("per Wikipedia", `per <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(String(item.takeArticle).replace(/ /g, "_"))}" rel="noopener" target="_blank">Wikipedia</a>`)
+      : e(cited)) : "";
+    const criPart = !cri.none || cited ? ` · <b>Critics:</b> ${e(criLabel)}${cited ? ` — ${citedHtml}` : ""}` : "";
     const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}</p>` : "";
     // The two halves as a marker too (<!--FC:fcs=audience|critics-->): lib/facts.js read them from
     // the rows' tags, which the v3 line replaces; without them a frozen render lost the ring.

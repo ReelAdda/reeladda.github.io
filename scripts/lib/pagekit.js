@@ -509,10 +509,14 @@ function footerAttribution(useImdb = USE_IMDB) {
   const tmdb = `<a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>`;
   const jw = `<a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a>`;
   if (useImdb) {
-    return `Film data from ${tmdb} · Where-to-watch data by ${jw} · Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>${NO_HOSTING_NOTICE}<br>${FOOTER_LINKS}`;
+    return `Film data from ${tmdb} · Where-to-watch data by ${jw} · Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>${WIKI_NOTICE}<br>${NO_HOSTING_NOTICE}<br>${FOOTER_LINKS}`;
   }
-  return `Film data and ratings from ${tmdb} · Where-to-watch data by ${jw}<br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>${NO_HOSTING_NOTICE}<br>${FOOTER_LINKS}`;
+  return `Film data and ratings from ${tmdb} · Where-to-watch data by ${jw}<br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>${WIKI_NOTICE}<br>${NO_HOSTING_NOTICE}<br>${FOOTER_LINKS}`;
 }
+// Critics' figures and reception on film pages are summarised and adapted from English Wikipedia
+// (CC BY-SA 4.0 asks for attribution, a link to the licence and a note that the text was adapted;
+// each page links its own article beside the figures).
+const WIKI_NOTICE = `Critics' reception and figures summarised and adapted from <a href="https://en.wikipedia.org/" rel="noopener" target="_blank">Wikipedia</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="noopener license" target="_blank">CC BY-SA 4.0</a>.`;
 
 // A hub's share/Discover image: the first listed title with a large image (its branded card,
 // else its w1280 backdrop — see socialImage). Every hub, homepage and week page used to share
