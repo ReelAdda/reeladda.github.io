@@ -17,7 +17,7 @@ const {
 const { filmIndexFor } = require("./graph.js");
 const { releaseState, todayStr } = require("./release.js");
 const { enrich } = require("./enrich.js");
-const { STATUS_PILL } = require("./facts.js");
+const { STATUS_PILL, wtwBlock } = require("./facts.js");
 const { buildFilmPage, filmMetaDescription, filmTitleTag } = require("./filmpage.js");
 const {
   analyticsTag,
@@ -374,8 +374,10 @@ function frozenFilmFacts(html) {
   // Up to the next heading, however long the section is: it was capped at 900 characters,
   // and pages built since the rent-or-buy block and platform links read as having no
   // platforms at all — 320 streaming films titled "Not Announced" (Oct 2026).
-  const wtw = /<h2>Where to watch[^<]*<\/h2>([\s\S]*?)(?:<h2|<footer)/.exec(html);
-  const chunk = wtw ? wtw[1] : "";
+  // Through the shared reader (lib/facts.js wtwBlock), which also finds page v3's block: v3 has no
+  // "Where to watch" heading, and from 28 Oct 2026 this read no platform on any v3 page, so new
+  // streaming pages never got their departure-recheck claim (lib/lifecycle.js).
+  const chunk = wtwBlock(html);
   const cut = chunk.indexOf("Rent or buy");
   const pillsIn = (t) => [...t.matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((x) => x[1].trim());
   const subPills = pillsIn(cut >= 0 ? chunk.slice(0, cut) : chunk);

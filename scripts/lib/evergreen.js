@@ -90,9 +90,15 @@ function verifiedAvailability(data, manifestForCountry, index, now = Date.now())
     const checked = Date.parse(`${live.lastCheck || live.since}T00:00:00Z`);
     if (!Number.isFinite(checked) || (now - checked) / 864e5 > STREAM_PAGE_MAX_AGE) continue;
     const ix = idx.get(slug) || {};
+    // A list never names a platform the title's own page doesn't (29 Oct 2026). Claims can be up to
+    // STREAM_PAGE_MAX_AGE days old while the page is checked more often: Drishyam: The Conclusion
+    // sat on India's Prime Video lists from a 21 Sept claim while its page said "Opened in cinemas
+    // 2 Oct — not streaming yet" (26 such cards, 11 titles). A page the index can't read keeps the claim.
+    const onPage = Array.isArray(ix.providers) ? new Set(ix.providers.map(canonProvider)) : null;
+    const provs = onPage ? live.providers.filter((p) => onPage.has(canonProvider(p))) : live.providers;
     add(slug, { title: e.title || ix.title || slug, language: e.lang || ix.language || "", kind: e.kind || ix.kind || "movie",
       genre: ix.genre || "", rating: null, votes: 0, verdict: null, poster: ix.poster || "", released: e.released || ix.released || null,
-      platform: null }, live.providers);
+      platform: null }, provs);
   }
   for (const list of byPlatform.values()) for (const x of list) x.platform = x.platform || null;
   return byPlatform;

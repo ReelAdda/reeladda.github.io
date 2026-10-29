@@ -7579,7 +7579,8 @@ test("updated dates: the page shows the date its sitemap entry gives, never an o
     fsx.writeFileSync(p("b"), page("17 Oct 2026", "2026-10-17", "Same"));
     // c: content unchanged, shown date already right -> untouched.
     fsx.writeFileSync(p("c"), page("20 Oct 2026", "2026-10-20", "Same"));
-    const man = { in: { a: { last: "2026-10-17", fp: "old", fpv: 2 }, b: { last: "2026-10-23", fp: fp(fsx.readFileSync(p("b"), "utf8")), fpv: 2 }, c: { last: "2026-10-20", fp: fp(fsx.readFileSync(p("c"), "utf8")), fpv: 2 } } };
+    const v = S.FP_VERSION;
+    const man = { in: { a: { last: "2026-10-17", fp: "old", fpv: v }, b: { last: "2026-10-23", fp: fp(fsx.readFileSync(p("b"), "utf8")), fpv: v }, c: { last: "2026-10-20", fp: fp(fsx.readFileSync(p("c"), "utf8")), fpv: v } } };
     const before = fsx.readFileSync(p("c"), "utf8");
     const res = S.syncFilmLastmods(man, [{ code: "in" }], "2026-10-25", { root });
     assert.strictEqual(man.in.a.last, "2026-10-25");
@@ -10133,6 +10134,142 @@ test("search ranking (js/search.js): exact, prefix, spaces ignored, one typo, pe
   assert.strictEqual(find("rajni")[0], "Rajinikanth", "a near first word beats a near third word");
   assert.deepStrictEqual(find("leo 1994"), ["Leon"], "a year narrows it");
   assert.deepStrictEqual(find("zzqqxx"), []);
+});
+
+group("platform names on every OTT card (29 Oct 2026)");
+const _v3wtw = (pills, { live = "2026-10-20", asOf = "20 Oct 2026" } = {}) => `<html><head><link rel="canonical" href="https://filmychill.com/movie/x.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Movie","name":"X","inLanguage":"Hindi","datePublished":"2026-09-01"}</script></head><body><div class="top v3"></div><h1>X (2026)</h1><!--FC:wtw-->${live ? `<!--SW:stream--><!--SW:live=${live}-->` : ""}<div class="pills">${pills}</div><!--Availability as of ${asOf} — platforms may change over time.-->${live ? "<!--/SW:stream-->" : ""}<!--/FC:wtw--></body></html>`;
+const _pill = (n) => `<span class="pill">${n}</span>`, _st = (n) => `<span class="st"><span class="pill">${n}</span></span>`;
+test("the page readers see page v3's where-to-watch block: the film index, the frozen-page reader and whereOf", () => {
+  const F = require("./lib/facts.js"), A = require("./lib/archive.js"), G = require("./lib/graph.js");
+  const html = _v3wtw(_pill("Amazon Prime Video") + _pill("Amazon Prime Video with Ads"));
+  assert.deepStrictEqual(A.frozenFilmFacts(html).item.providers, ["Amazon Prime Video", "Amazon Prime Video with Ads"], "archive.js read no platform on any v3 page from 28 Oct");
+  const w = F.whereOf(html);
+  assert.deepStrictEqual([w.providers, w.state, w.checkedAt], [["Prime Video"], "streaming", "2026-10-20"], "one name per service, the page's own check date");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-idx-")), cwd = process.cwd();
+  try {
+    fsx.mkdirSync(path.join(root, "movie"));
+    fsx.writeFileSync(path.join(root, "movie", "x.html"), html);
+    process.chdir(root);   // filmIndexFor reads movie/ under the working directory
+    const [x] = G.filmIndexFor({ code: "in" });
+    assert.deepStrictEqual([x.platforms, x.providers, x.where], [["Prime Video"], ["Prime Video"], "streaming"], "graph.js read no platform on any v3 page from 28 Oct");
+  } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("pageState reads a status pill's text: 'In cinemas from' and 'Opened in cinemas' are not platforms", () => {
+  const F = require("./lib/facts.js");
+  const status = (s) => _v3wtw(_st(s), { live: "" });
+  assert.strictEqual(F.pageState(status("In cinemas from 5 Nov 2026")), "upcoming");
+  assert.strictEqual(F.pageState(status("Opened in cinemas 2 Oct — not streaming yet")), "theatrical");
+  assert.strictEqual(F.pageState(status("In theatres")), "theatrical");
+  assert.strictEqual(F.pageState(_v3wtw(_pill("Netflix"))), "streaming");
+  assert.strictEqual(F.pageState(status("In cinemas from 5 Nov 2026"), { legacy: true }), "streaming", "the old reading, kept only to upgrade v2 fingerprints");
+});
+test("fingerprint v3: one name per service, so tidying pill names moves no date; v2 entries upgrade without moving theirs", () => {
+  const S = require("./lib/sitemap.js");
+  const raw = _v3wtw(_pill("Amazon Prime Video") + _pill("Amazon Prime Video with Ads")), tidy = _v3wtw(_pill("Prime Video"));
+  assert.strictEqual(S.factsFingerprint(raw), S.factsFingerprint(tidy), "same services, same fingerprint");
+  assert.notStrictEqual(S.factsFingerprint(raw), S.factsFingerprint(_v3wtw(_pill("Netflix"))), "another platform is still a fact");
+  assert.notStrictEqual(S.factsFingerprint(raw, { legacy: true }), S.factsFingerprint(tidy, { legacy: true }), "v2 read names raw");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-fp3-"));
+  try {
+    fsx.mkdirSync(path.join(root, "movie"));
+    fsx.writeFileSync(path.join(root, "movie", "same.html"), raw);
+    fsx.writeFileSync(path.join(root, "movie", "moved.html"), _v3wtw(_pill("Netflix")));
+    const v2 = S.factsFingerprint(raw, { legacy: true });
+    const man = { in: { same: { last: "2026-10-01", fp: v2, fpv: 2 }, moved: { last: "2026-10-01", fp: v2, fpv: 2 } } };
+    S.syncFilmLastmods(man, [{ code: "in" }], "2026-10-30", { root });
+    assert.deepStrictEqual([man.in.same.last, man.in.same.fpv, man.in.same.fp], ["2026-10-01", S.FP_VERSION, S.factsFingerprint(raw)], "upgraded in place, date kept");
+    assert.strictEqual(man.in.moved.last, "2026-10-30", "a real change in the same run still moves the date");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+test("whereLabel: a listed title's platform, or what its own page says instead", () => {
+  const P = require("./lib/pagekit.js"), IN = { code: "in" }, now = Date.parse("2026-10-29T06:00:00Z");
+  assert.strictEqual(P.whereLabel({ providers: ["Amazon Prime Video"] }, IN), "Prime Video");
+  assert.strictEqual(P.whereLabel({ providers: [], where: "upcoming", whereStatus: "In cinemas from 5 Nov 2026" }, IN), "In cinemas");
+  assert.strictEqual(P.whereLabel({ providers: [], where: "theatrical", whereStatus: "Opened in cinemas 2 Oct — not streaming yet" }, IN), "Not on OTT yet");
+  assert.strictEqual(P.whereLabel({ providers: [], where: "theatrical", whereStatus: "Opened in cinemas 2 Oct — not streaming yet" }, { code: "uk" }), "Not streaming yet", "the market's word");
+  assert.strictEqual(P.whereLabel({ providers: [], where: "other", whereStatus: "Not on OTT in India yet" }, IN), "Not on OTT yet");
+  assert.strictEqual(P.whereLabel({ providers: [], where: "gone", whereStatus: "" }, IN), "Not on OTT right now");
+  assert.strictEqual(P.whereLabel({ providers: [], rentBuy: ["Apple TV Store"], where: "rent" }, IN), "Rent or buy");
+  assert.strictEqual(P.whereLabel({ providers: [], where: "announced", digitalDate: "2026-11-05", digitalNote: "Netflix" }, IN, { now }), "Streaming from 5 Nov on Netflix");
+  assert.strictEqual(P.whereLabel({ providers: [], where: "other", whereStatus: "" }, IN), "", "nothing to go on: nothing said");
+});
+test("listing cards lead with the platform, one name per service, or the page's own where-to-watch", () => {
+  const P = require("./lib/pagekit.js"), { canonProvider } = require("./lib/rules.js");
+  for (const n of ["Sonyliv", "Sony Liv", "SonyLIV", "Sony LIV"]) assert.strictEqual(canonProvider(n), "Sony LIV", n);
+  assert.strictEqual(P.platformSlug("Sony LIV"), "sony-liv", "the list keeps its address");
+  const html = P.listingPageHtml({ title: "T", desc: "D", canonical: "https://filmychill.com/x/", h1: "H", updLine: "", lead: "", faqs: [], extraLd: [], homeUrl: "https://filmychill.com/",
+    sections: [{ h2: "S", items: [{ title: "A", slug: "a", platform: "Sonyliv", genre: "Drama" }, { title: "B", slug: "b", where: "Not on OTT yet", genre: "Drama" }] }] });
+  assert.ok(/<div class="rm">Sony LIV · Drama/.test(html), "Sonyliv and Sony Liv are one service");
+  assert.ok(/<div class="rm">Not on OTT yet · Drama/.test(html));
+});
+test("/new-on-ott/: every card names its platform, 'Still worth it' included; calendar rows say where each title is, and hidden pages aren't linked", () => {
+  const GH = require("./lib/googlehide.js"), R = require("./lib/rollout.js");
+  const data = { ..._mixed, ottExtra: [], ott: [..._mixed.ott, _mkOtt("Hidden Gem", { stillGood: true, platform: "Prime Video" })] };
+  const idx = [
+    { slug: "streams", title: "Streams", language: "Hindi", released: "2026-08-20", providers: ["Netflix"], where: "streaming" },
+    { slug: "soon", title: "Soon", language: "Telugu", released: "2026-09-20", providers: [], where: "upcoming", whereStatus: "In cinemas from 20 Sept 2026" },
+    { slug: "waiting", title: "Waiting", language: "Tamil", released: "2026-09-02", providers: [], where: "theatrical", whereStatus: "Opened in cinemas 2 Sept — not streaming yet" },
+    { slug: "hidden-one", title: "Hidden One", language: "Tamil", released: "2026-09-01", providers: ["Netflix"], where: "streaming" },
+  ];
+  GH.useHiddenList({ pages: { in: ["hidden-gem", "hidden-one"] } });
+  R.useRolloutConfig({ features: { "google-hide": { percent: 100 } } });
+  try {
+    const body = (() => { const h = U.buildOttWeekPage(data, _cfgIn, [_cfgIn], idx); return h.slice(h.indexOf("<h1")); })();
+    assert.ok(/<h3>Old Favourite<\/h3>[\s\S]*?<div class="rm">Netflix · English/.test(body), "a 'Still worth it' card names its platform");
+    assert.ok(/<h3>Landed Today<\/h3>[\s\S]*?<div class="rm">Netflix · English/.test(body), "so does a card under 'New on Netflix'");
+    assert.ok(!/Hidden Gem|Hidden One/.test(body), "pages Google doesn't see aren't linked from this page");
+    assert.ok(/Streams<\/a> <span class="rm">Hindi · on Netflix · released 20 Aug<\/span>/.test(body), "streaming: the platform");
+    assert.ok(/Soon<\/a> <span class="rm">Telugu · in cinemas from 20 Sept<\/span>/.test(body), "not open yet: in cinemas from its date");
+    assert.ok(/Waiting<\/a> <span class="rm">Tamil · not on OTT yet · released 2 Sept<\/span>/.test(body), "opened, not streaming: says so");
+  } finally { GH.useHiddenList(null); R.useRolloutConfig(null); }
+});
+test("platform lists: a claim lists a title only on platforms its own page shows (Drishyam: The Conclusion)", () => {
+  const today = new Date().toISOString().slice(0, 10);
+  const claim = (providers) => ({ title: "T", lang: "Hindi", kind: "movie", live: { since: today, lastCheck: today, providers } });
+  const manifest = { drishyam: claim(["Amazon Prime Video"]), agrees: claim(["Amazon Prime Video", "Netflix"]), unread: claim(["Netflix"]) };
+  const index = [{ slug: "drishyam", title: "Drishyam", providers: [], where: "theatrical" }, { slug: "agrees", title: "Agrees", providers: ["Prime Video"], where: "streaming" }];
+  const a = U.verifiedAvailability({ ott: [], ottExtra: [] }, manifest, index);
+  const names = (p) => (a.get(p) || []).map((x) => x.slug).sort();
+  assert.deepStrictEqual(names("Prime Video"), ["agrees"], "its page says not streaming: off the list");
+  assert.deepStrictEqual(names("Netflix"), ["unread"], "a platform its page doesn't show is dropped; a page the index can't read keeps its claim");
+});
+test("language pages: a film that hasn't opened is under 'Coming soon', and the back catalogue names each title's platform or status", () => {
+  const th = (title, released) => ({ title, slug: title.toLowerCase().replace(/\W+/g, "-"), tmdbId: title.length, language: "Telugu", released, platform: "Theatres", genre: "Family" });
+  const data = { generatedAt: "2026-10-29T06:00:00Z", theatres: [], ott: [], comingSoon: [], langPools: { Telugu: { theatres: [th("AK47", "2026-10-30"), th("Open Now", "2026-10-24")], ott: [] } } };
+  const archive = [
+    { slug: "on-netflix", title: "On Netflix", language: "Telugu", released: "2026-09-01", providers: ["Netflix"], where: "streaming", genre: "Drama" },
+    { slug: "waiting", title: "Waiting", language: "Telugu", released: "2026-09-10", providers: [], where: "theatrical", whereStatus: "Opened in cinemas 10 Sept — not streaming yet", genre: "Drama" },
+    { slug: "ak47", title: "AK47", language: "Telugu", released: "2026-10-30", providers: [], where: "upcoming", whereStatus: "In cinemas from 30 Oct 2026", genre: "Family" },
+  ];
+  const html = U.buildLanguagePage(data, "Telugu", "telugu", archive);
+  const sec = (h) => (html.split(`<h2>${h} `)[1] || "").split("</section>")[0];
+  assert.ok(!/AK47/.test(sec("In theatres")) && /AK47/.test(sec("Coming soon")), "not open yet: Coming soon, not In theatres");
+  assert.ok(/<div class="rm">In theatres from 30 Oct · Family<\/div>/.test(sec("Coming soon")), "its card says where it opens, the date once");
+  assert.ok(/Open Now/.test(sec("In theatres")));
+  assert.ok(/<h3>On Netflix<\/h3>[\s\S]*?<div class="rm">Netflix · Drama/.test(html), "a streaming title names its platform");
+  assert.ok(/<h3>Waiting<\/h3>[\s\S]*?<div class="rm">Not on OTT yet · Drama/.test(html), "one that isn't says so");
+});
+test("Coming to OTT: a date with no named service says 'Platform not announced' where the platform goes", () => {
+  const row = (slug, genre, d, platform) => ({ slug, title: slug.toUpperCase(), genre, date: inDays(d), platform, kind: "movie" });
+  const html = U.buildComingPage([row("rv", "Horror", 5, null), row("nf", "Drama", 6, "Netflix"), row("x3", "Drama", 7, "Netflix")], A_IN);
+  assert.ok(/<div class="rm">Platform not announced · Horror<\/div>/.test(html), String(html.match(/<div class="rm">[^<]*/g)));
+  assert.ok(/<div class="rm">Netflix · Drama<\/div>/.test(html));
+});
+test("film pages: one name per service in the pills, on pages Google sees (tidy-names)", () => {
+  const R = require("./lib/rollout.js"), GH = require("./lib/googlehide.js"), Fp = require("./lib/filmpage.js"), S = require("./lib/sitemap.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const it = { title: "T", slug: "tidy-t", kind: "movie", released: "2026-09-01", language: "Hindi", genre: "Drama", runtime: 120, providers: ["Amazon Prime Video", "Amazon Prime Video with Ads", "Disney Plus"], rentBuy: [], tmdbId: 9, rating: 7, votes: 300 };
+  const on = (pct) => { R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "redesign-v2": { percent: 100 }, "wiki-reception": { percent: 100 }, "page-v3": { percent: 100 }, "google-hide": { percent: 100 }, "tidy-names": { percent: pct } } }); return Fp.buildFilmPage(it, "2026-10-29", new Set(), IN); };
+  const pills = (h) => [...((/<!--FC:wtw-->([\s\S]*?)<!--\/FC:wtw-->/.exec(h) || [])[1] || "").matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((m) => m[1]);
+  try {
+    const raw = on(0), tidy = on(100);
+    assert.deepStrictEqual(pills(raw), ["Amazon Prime Video", "Amazon Prime Video with Ads", "Disney Plus"], "off: as recorded");
+    assert.deepStrictEqual(pills(tidy), ["Prime Video", "Disney+"], "on: one name per service");
+    assert.strictEqual(S.factsFingerprint(tidy), S.factsFingerprint(raw), "and no date moves");
+    GH.useHiddenList({ pages: { in: ["tidy-t"] } });
+    assert.deepStrictEqual(pills(on(100)), ["Amazon Prime Video", "Amazon Prime Video with Ads", "Disney Plus"], "pages hidden from Google are left as they are");
+  } finally { R.useRolloutConfig(null); GH.useHiddenList(null); }
 });
 
 (async () => {

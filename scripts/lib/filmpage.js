@@ -56,7 +56,7 @@ const {
   streamPagePath,
   ytIdOf,
 } = require("./pagekit.js");
-const { countryNameFor, hasLanguageWindow, streamVocab, streamWindowEstimate, streamWindowShort, titleWithCountry } = require("./rules.js");
+const { countryNameFor, dedupeProviders, hasLanguageWindow, streamVocab, streamWindowEstimate, streamWindowShort, titleWithCountry } = require("./rules.js");
 
 // ============================================================
 // PER-FILM STATIC PAGES — one SEO-indexable page per film,
@@ -1009,6 +1009,15 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // No score before release, wherever it came from: facts read back from an older page carry
   // the score it showed, and the FAQ, share-card text and panel would all repeat it.
   if (item && item.fcScore && notOutYet(item)) item = { ...item, fcScore: null };
+  // One name per service (rollout "tidy-names", 29 Oct 2026). Records from before names were
+  // canonicalised keep TMDB's raw ones, so 1,021 pages said "Amazon Prime Video" or "Disney Plus"
+  // where every list says "Prime Video" and "Disney+", and 243 named one service twice ("Amazon
+  // Prime Video", "Amazon Prime Video with Ads"). Pages Google sees only; the facts fingerprint
+  // reads names the same way (lib/facts.js keyFacts), so tidying moves no page's date.
+  if (item && inRollout("tidy-names", item.slug) && !require("./googlehide.js").listedHidden((cfg && cfg.code) || "in", item.slug)) {
+    const tidy = (xs) => (Array.isArray(xs) ? dedupeProviders(xs) : xs);
+    item = { ...item, providers: tidy(item.providers), rentBuy: tidy(item.rentBuy), ...(Array.isArray(item.wasOn) ? { wasOn: tidy(item.wasOn) } : {}) };
+  }
   const e = escHtml;
   const lean = leanPage(item);   // every fact once (LEAN_PAGE)
   const V2 = require("./pagev2.js");

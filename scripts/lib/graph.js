@@ -48,14 +48,18 @@ function filmIndexFor(cfg) {
       director: personNames(ld.director || ld.creator).slice(0, 3),
       // Its franchise, from the page's own marker (lib/series.js), for "More in this series".
       franchise: require("./series.js").readSeriesMark(html).franchise || null,
-      // Its subscription platforms here (the "Where to watch" pills before "Rent or buy"), for
-      // "Watch first: Dhoom 2 (2006), on Prime Video".
-      platforms: (() => {
-        const w = /<h2>Where to watch[^<]*<\/h2>([\s\S]*?)(?:<h2|<footer)/.exec(html);
-        if (!w) return [];
-        const sub = w[1].split("Rent or buy")[0];
-        const { STATUS_PILL } = require("./facts.js");
-        return [...sub.matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((m) => m[1].replace(/&amp;/g, "&").trim()).filter((p) => !STATUS_PILL.test(p)).slice(0, 2);
+      // Where the page says it can be watched (lib/facts.js whereOf), for the lists that name a
+      // title's platform. Read through the shared where-to-watch block reader: this looked only
+      // for the old "Where to watch" heading, which page v3 doesn't have, and from 28 Oct 2026 read
+      // no platform on any of the 18,739 film pages.
+      ...(() => {
+        const w = require("./facts.js").whereOf(html);
+        return {
+          // Its first two platforms, for "Watch first: Dhoom 2 (2006), on Prime Video".
+          platforms: w.providers.slice(0, 2),
+          providers: w.providers, rentBuy: w.rentBuy, where: w.state, whereStatus: w.status,
+          checkedAt: w.checkedAt, digitalDate: w.digitalDate || null, digitalNote: w.digitalNote || null,
+        };
       })(),
     });
   }

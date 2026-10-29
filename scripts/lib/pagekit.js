@@ -341,6 +341,27 @@ function fitFirst(options, max) {
 // 2026: card posters one URL at w342 (they were "url1,url2", 132 month pages). v4, 18 Oct
 // 2026: verdicts as coloured pills, the same as the homepage cards.
 const LISTING_VERSION = "<!--listing:4-->";
+
+// Pure: a listed title's where-to-watch in a few words, from its own page (the film index's
+// where-to-watch fields, lib/graph.js filmIndexFor ← lib/facts.js whereOf). Cards and calendar
+// rows print it, so a list never names a platform the page doesn't, and a title that isn't
+// streaming says what its page says. "" when the page gives nothing to go on (29 Oct 2026).
+function whereLabel(f, cfg, { now = Date.now() } = {}) {
+  if (!f) return "";
+  const code = (cfg && cfg.code) || "in";
+  const ott = streamVocab({ code }).word === "OTT";
+  const st = String(f.whereStatus || "");
+  if ((f.providers || []).length) return canonProvider(f.providers[0]);
+  if (f.where === "gone" || /right now/i.test(st)) return ott ? "Not on OTT right now" : "Not streaming right now";
+  if (/^In cinemas today/.test(st)) return "In cinemas today";
+  if (/^In cinemas from/.test(st) || f.where === "upcoming") return "In cinemas";
+  if (st === "In theatres") return "In theatres";
+  if ((f.rentBuy || []).length) return "Rent or buy";
+  const today = new Date(now).toISOString().slice(0, 10);
+  if (f.digitalDate && f.digitalDate >= today) return `Streaming from ${fmtDateShort(f.digitalDate, now, localeFor(code))}${f.digitalNote ? ` on ${canonProvider(f.digitalNote)}` : ""}`;
+  if (f.where === "theatrical" || f.where === "announced" || /not streaming yet|arrival pending|^Not on /i.test(st)) return ott ? "Not on OTT yet" : "Not streaming yet";
+  return "";
+}
 function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null, popular = "" }) {
   // ~80 hubs, month archives and week pages ran 61–72 characters; see fitSiteTitle.
   title = fitSiteTitle(title);
@@ -350,8 +371,11 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
   const V = streamVocab({ code });
   const rowFor = (it) => {
     const badge = it.badge || (it.isRecent ? "New release" : null);
-    const meta = [it.platform && it.platform !== "Theatres" ? it.platform : (it.platform === "Theatres" ? "In theatres" : null),
-      it.genre ? it.genre.split(" / ")[0] : null, freshLabel(it) || null].filter(Boolean).map(e).join(" · ");
+    // Where to watch leads every card (29 Oct 2026): the platform, one name per service ("Sonyliv"
+    // and "Sony Liv" were the same service on two pages), or — for a title that isn't streaming —
+    // what its own page says (`where`, lib/pagekit.js whereLabel), never nothing.
+    const where = it.where || (it.platform && it.platform !== "Theatres" ? canonProvider(it.platform) : (it.platform === "Theatres" ? "In theatres" : null));
+    const meta = [where, it.genre ? it.genre.split(" / ")[0] : null, (!it.whereDated && freshLabel(it)) || null].filter(Boolean).map(e).join(" · ");
     const inner = `
       ${it.poster ? `<img src="${e(it.poster)}" alt="${e(it.title)} poster" width="92" height="138" loading="lazy">` : '<div class="nop"></div>'}
       <div>
@@ -539,6 +563,7 @@ module.exports = {
   NO_HOSTING_NOTICE,
   analyticsTag,
   canonProvider,
+  whereLabel,
   cspWith,
   digitalAnnounceText,
   digitalPassed,

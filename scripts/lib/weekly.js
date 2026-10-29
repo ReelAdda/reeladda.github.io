@@ -24,11 +24,13 @@ const { earlyReadLabel, noScoreText } = require("./fcscore.js");
 const { freshLabel } = require("./freshness.js");
 const {
   analyticsTag,
+  canonProvider,
   cspWith,
   fitFirst,
   footerAttribution,
   hubOgImage,
   ogImageTag,
+  whereLabel,
 } = require("./pagekit.js");
 const { streamVocab } = require("./rules.js");
 
@@ -306,13 +308,16 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
     if (seenIds.has(x.tmdbId)) return false;
     seenIds.add(x.tmdbId);
     return true;
-  });
+  // One name per service in headings, cards and answers ("New on Sonyliv" beside "Sony Liv").
+  }).map((x) => (x.platform ? { ...x, platform: canonProvider(x.platform) } : x));
+  // Links from this page go to pages Google sees (lib/googlehide.js, as the platform lists).
+  const hidden = (slug) => !!slug && require("./googlehide.js").listedHidden(code, slug);
   // Carried-over titles are held out of the per-platform "New on X this week" groups and
   // given their own labelled section at the end. The section headings on this page are
   // literally "New on Netflix this week" — putting a title that arrived five weeks ago
   // under one is a false claim in a heading, which is the worst place to put one.
   const freshItems = items.filter((x) => !x.stillGood);
-  const carriedItems = items.filter((x) => x.stillGood);
+  const carriedItems = items.filter((x) => x.stillGood && !hidden(x.slug));
   // Group by platform, preserving the ranked order inside each group; biggest platforms first.
   const groups = new Map();
   for (const it of freshItems) {
@@ -407,7 +412,10 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
 
   const rowFor = (it) => {
     const badge = it.badge || (it.isRecent ? "New release" : null);
-    const meta = [it.language, it.genre ? it.genre.split(" / ")[0] : null, freshLabel(it) || null].filter(Boolean).map(e).join(" · ");
+    // The platform leads every card, as on every other listing page (29 Oct 2026): the 120 cards
+    // under "Still worth it" named none anywhere, and a card scrolled away from its "New on
+    // Netflix" heading didn't either.
+    const meta = [it.platform || null, it.language, it.genre ? it.genre.split(" / ")[0] : null, freshLabel(it) || null].filter(Boolean).map(e).join(" · ");
     const inner = `
       ${it.poster ? `<img src="${e(it.poster)}" alt="${e(it.title)} poster" width="92" height="138" loading="lazy">` : "<div class=\"nop\"></div>"}
       <div>
@@ -433,16 +441,27 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
     ${carriedItems.map(rowFor).join("\n")}
   </section>` : "");
 
-  const cal = calendarIndex ? releaseCalendar(calendarIndex, { now: Date.parse(gen) || Date.now(), exclude: new Set(items.map((x) => x.slug).filter(Boolean)) }) : { soon: [], recent: [] };
-  const calRow = (f, verb) => `<li><a href="${e(filmPagePath(code, f.slug))}">${e(f.title)}</a> <span class="rm">${e([f.language, `${verb} ${fmtDateShort(f.released, Date.parse(gen) || Date.now(), localeFor(code))}`].filter(Boolean).join(" · "))}</span></li>`;
+  const nowMs = Date.parse(gen) || Date.now();
+  const cal = calendarIndex ? releaseCalendar(calendarIndex.filter((f) => f && !hidden(f.slug)), { now: nowMs, exclude: new Set(items.map((x) => x.slug).filter(Boolean)) }) : { soon: [], recent: [] };
+  // Each row says where the title is, from its own page (29 Oct 2026): "Hindi · on Netflix ·
+  // released 23 Oct", "Hindi · in cinemas from 30 Oct", "Tamil · not on OTT yet · released 2 Oct".
+  const calWhere = (f, soon) => {
+    const when = fmtDateShort(f.released, nowMs, localeFor(code));
+    const w = whereLabel(f, cfg, { now: nowMs });
+    if (w === "In cinemas") return soon ? `in cinemas from ${when}` : `in cinemas · released ${when}`;
+    if (w === "In cinemas today") return "in cinemas today";
+    const place = !w ? "" : (f.providers || []).length ? `on ${w}` : w.charAt(0).toLowerCase() + w.slice(1);
+    return [place, `${soon ? "opens" : "released"} ${when}`].filter(Boolean).join(" · ");
+  };
+  const calRow = (f, soon) => `<li><a href="${e(filmPagePath(code, f.slug))}">${e(f.title)}</a> <span class="rm">${e([f.language, calWhere(f, soon)].filter(Boolean).join(" · "))}</span></li>`;
   const calendarHtml = cal.soon.length || cal.recent.length ? `
   <section>
     <h2>Out recently and coming soon in ${e(countryName)} <span class="cnt">${cal.soon.length + cal.recent.length}</span></h2>
-    <p class="rm" style="margin:0 0 10px">Every film and series FilmyChill covers that opened in ${e(countryName)} in the last six months or opens soon — in cinemas, streaming or on its way.</p>${cal.soon.length ? `
+    <p class="rm" style="margin:0 0 10px">The films and series FilmyChill covers that opened in ${e(countryName)} in the last six months or open soon — in cinemas, streaming or on its way.</p>${cal.soon.length ? `
     <h3 class="calh">Coming soon</h3>
-    <ul class="cal">${cal.soon.map((f) => calRow(f, "opens")).join("")}</ul>` : ""}${cal.recent.length ? `
+    <ul class="cal">${cal.soon.map((f) => calRow(f, true)).join("")}</ul>` : ""}${cal.recent.length ? `
     <h3 class="calh">Released recently</h3>
-    <ul class="cal">${cal.recent.map((f) => calRow(f, "released")).join("")}</ul>` : ""}
+    <ul class="cal">${cal.recent.map((f) => calRow(f, false)).join("")}</ul>` : ""}
   </section>` : "";
 
   const platformHtml = (platformLinks || []).length ? `

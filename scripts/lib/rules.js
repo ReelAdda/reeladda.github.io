@@ -299,6 +299,9 @@ const PROVIDER_CANON = [
   [/^Paramount(?: Plus|\+)(?: Premium| Essential| with Showtime)?$/i, "Paramount+"],
   [/^Peacock(?: Premium(?: Plus)?)?$/i, "Peacock"],
   [/^VI movies and tv$/i, "Vi Movies & TV"],
+  // One spelling for one service (29 Oct 2026): India's today page said "Sonyliv" and its own
+  // platform list "Sony Liv". The brand is "Sony LIV"; the list keeps its /sony-liv/ address.
+  [/^Sony ?Liv$/i, "Sony LIV"],
   // Brazil, Mexico, Spain and France (Oct 2026): the same tier and spelling splits for these
   // markets' own services, merged before their first build so no hub starts out split.
   [/^ViX(?: Premium| Gratis)?$/i, "ViX"],

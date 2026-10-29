@@ -275,7 +275,9 @@ function applyDeparturePatch(html, { title, was, rentBuy, countryName, asOf, unc
     const m2 = html.match(/is available in [^<]*? on ([^<.]+)\./);
     if (m2) m2[1].split(/,| & /).map((x) => x.trim()).filter(Boolean).forEach((x) => names.add(x));
   }
-  for (const pv of names) {
+  // Each name as recorded and in its one-name-per-service form: a page drawn with tidied names
+  // ("Prime Video", lib/filmpage.js tidy-names) under a claim recorded raw ("Amazon Prime Video").
+  for (const pv of new Set([...names].flatMap((n) => [n, canonProvider(n)]))) {
     const stale = `<span class="pill">${e(pv)}</span>`;
     if (out.includes(stale)) out = out.split(stale).join("");
   }

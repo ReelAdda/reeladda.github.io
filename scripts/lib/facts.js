@@ -15,6 +15,7 @@
 const fs = require("fs");
 const path = require("path");
 const { tidyProse } = require("./core.js");
+const { dedupeProviders } = require("./rules.js");
 
 const FACTS_DIR = "facts";
 
@@ -200,11 +201,21 @@ function isoFromShown(s) {
 const slugGuess = (t) => String(t).toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 // Pure: where the page stands, from its own markers.
-function pageState(html) {
+// The status-pill test reads the pill's TEXT (29 Oct 2026). It was run on the whole
+// `<span class="pill">…</span>` tag, which STATUS_PILL's anchored patterns never match, so
+// "In cinemas from 5 Nov", "Opened in cinemas 2 Oct — not streaming yet" and "In theatres" all
+// counted as platforms and their pages read as "streaming" (1,074 of 3,290 calendar links on
+// 29 Oct). `legacy` keeps the old reading for one job only: telling whether a page recorded under
+// fingerprint v2 has changed (lib/sitemap.js syncFilmLastmods).
+function pageState(html, { legacy = false } = {}) {
   if (/<!--SW:gone=/.test(html)) return "gone";
   const wtw = wtwBlock(html);
   const cut = wtw.indexOf("Rent or buy");
-  if ((cut >= 0 ? wtw.slice(0, cut) : wtw).match(/<span class="pill">([^<]+)<\/span>/g)?.some((p) => !STATUS_PILL.test(p))) return "streaming";
+  const subs = cut >= 0 ? wtw.slice(0, cut) : wtw;
+  const streaming = legacy
+    ? subs.match(/<span class="pill">([^<]+)<\/span>/g)?.some((p) => !STATUS_PILL.test(p))
+    : [...subs.matchAll(/<span class="pill">([^<]+)<\/span>/g)].some((m) => !STATUS_PILL.test(dec(m[1]).trim()));
+  if (streaming) return "streaming";
   if (/<!--SW:digital=/.test(html)) return "announced";
   if (/<!--SW:due=/.test(html)) return "upcoming";
   if (cut >= 0) return "rent";
@@ -218,12 +229,16 @@ function pageState(html) {
 
 // Pure: the facts a reader relies on, from either version of a page. A migration switches a
 // page only when these are identical before and after; wording and layout may change.
-function keyFacts(html) {
+// Platforms are compared one name per service (29 Oct 2026): "Amazon Prime Video" and "Prime
+// Video" are the same fact, so tidying a page's pill names (lib/filmpage.js "tidy-names") moves no
+// date. `legacy` is the v2 reading (raw names, the old pageState), for the fingerprint upgrade only.
+function keyFacts(html, { legacy = false } = {}) {
   const wtw = wtwBlock(html);
   const cut = wtw.indexOf("Rent or buy");
-  const pillSet = (t) => [...t.matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((x) => dec(x[1]).trim()).filter((p) => !STATUS_PILL.test(p)).sort().join(",");
+  const names = (t) => [...t.matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((x) => dec(x[1]).trim()).filter((p) => !STATUS_PILL.test(p));
+  const pillSet = (t) => (legacy ? names(t) : dedupeProviders(names(t))).sort().join(",");
   return {
-    state: pageState(html),
+    state: pageState(html, { legacy }),
     title: text((/<h1>([\s\S]*?)<\/h1>/.exec(html) || [])[1]),
     // The title's own date: episodes inside containsSeason (lib/series.js episodeSchema) carry
     // datePublished too, and a series without a release date must not borrow its first episode's.
@@ -273,6 +288,31 @@ function factsDiff(a, b) {
   return Object.keys(a).filter((k) => a[k] !== b[k]);
 }
 
+// Pure: where a film page says the title can be watched, for the pages that list it (29 Oct
+// 2026). Listing cards print a title's platform from this, so a card never names a platform its
+// own page doesn't, and a title that isn't streaming says what its page says instead of nothing.
+//   providers  its subscription platforms, one name per service, in the page's order
+//   rentBuy    rent-or-buy stores
+//   state      pageState: streaming | rent | theatrical | upcoming | announced | gone | other
+//   status     the page's own status pill ("In cinemas from 5 Nov", "Not on OTT in India yet")
+//   checkedAt  the availability check date the page records, when it records one
+function whereOf(html) {
+  const wtw = wtwBlock(html);
+  const cut = wtw.indexOf("Rent or buy");
+  const names = (t) => [...t.matchAll(/<span class="pill">([^<]+)<\/span>/g)].map((x) => dec(x[1]).trim());
+  const subs = names(cut >= 0 ? wtw.slice(0, cut) : wtw);
+  const status = subs.find((p) => STATUS_PILL.test(p)) || dec((/<span class="ppill none">([^<]+)<\/span>/.exec(html) || [])[1] || "");
+  const dig = /<!--SW:digital=(\d{4}-\d{2}-\d{2})\|([^>]*?)-->/.exec(html);
+  return {
+    providers: dedupeProviders(subs.filter((p) => !STATUS_PILL.test(p))),
+    rentBuy: cut >= 0 ? dedupeProviders(names(wtw.slice(cut))) : [],
+    state: pageState(html),
+    status,
+    checkedAt: isoFromShown(availabilityText(html)) || null,
+    ...(dig ? { digitalDate: dig[1], digitalNote: dec(dig[2] || "") } : {}),
+  };
+}
+
 // ---- the store --------------------------------------------------------------------------
 const factsPath = (code, root = ".") => path.join(root, FACTS_DIR, `${code}.jsonl`);
 function readFacts(code, root = ".") {
@@ -294,4 +334,4 @@ function writeFacts(code, map, root = ".") {
   fs.writeFileSync(factsPath(code, root), lines.join("\n") + (lines.length ? "\n" : ""));
 }
 
-module.exports = { FACTS_DIR, STATUS_PILL, availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, pageState, readFacts, writeFacts };
+module.exports = { FACTS_DIR, STATUS_PILL, availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, pageState, readFacts, whereOf, writeFacts, wtwBlock };

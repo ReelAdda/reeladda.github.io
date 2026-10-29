@@ -137,10 +137,13 @@ const RESTAMP_BACKLOG_PER_RUN = 1000;
 // 21,358 sitemap dates became 22 Oct with the older-title FAQ, and the lean layout, honest wording
 // and new titles would have moved them again. Google trusts lastmod only if it means a content
 // change; the new-release sitemap depends on that trust. "Page updated" follows (restampUpdated).
-const FP_VERSION = 2;
-function factsFingerprint(html) {
+// v3 (29 Oct 2026): platforms one name per service, and the page state read from the status pill's
+// text (lib/facts.js keyFacts/pageState). `legacy` computes v2, only to upgrade entries recorded
+// with it without moving their dates.
+const FP_VERSION = 3;
+function factsFingerprint(html, { legacy = false } = {}) {
   const { keyFacts } = require("./facts.js");   // here, not at the top: facts.js loads the page builders
-  const k = keyFacts(html);
+  const k = keyFacts(html, { legacy });
   delete k.availability;
   return crypto.createHash("sha1").update(JSON.stringify(k)).digest("hex").slice(0, 12);
 }
@@ -170,9 +173,12 @@ function syncFilmLastmods(pagesManifest, countries, today, { root = ".", backlog
       const file = { path: path.join(dir, f), code: c.code };
       if (!e.fp) { e.fp = fp; e.fpv = FP_VERSION; res.seeded++; continue; }
       if (e.fpv !== FP_VERSION) {
-        // The switch to facts fingerprints: no date moves for the new rule itself — only if the
-        // page's content changed this very run (judged by the old rule it was recorded with).
-        const changedNow = e.fp !== contentFingerprint(html) && e.fp !== contentFingerprint(html, { legacy: true });
+        // A new fingerprint rule moves no date by itself — only a change this very run does,
+        // judged by the rule the entry was recorded with: v2 (facts, raw names) or before it,
+        // the content fingerprint.
+        const changedNow = e.fpv === 2
+          ? e.fp !== factsFingerprint(html, { legacy: true })
+          : e.fp !== contentFingerprint(html) && e.fp !== contentFingerprint(html, { legacy: true });
         e.fp = fp; e.fpv = FP_VERSION; res.reseeded++;
         if (changedNow) { e.last = today; res.changed++; align(file, html, e); }
         continue;
@@ -593,6 +599,7 @@ module.exports = {
   HIDDEN_URLS_FILE,
   INDEXNOW_HIDDEN_FILE,
   contentFingerprint,
+  FP_VERSION,
   factsFingerprint,
   extendIndexNowWithChanged,
   isNewReleaseEntry,

@@ -15,7 +15,7 @@ const {
 } = require("./core.js");
 const { readHistory } = require("./history.js");
 const { filmIndexFor } = require("./graph.js");
-const { normalizeUpcoming } = require("./release.js");
+const { normalizeUpcoming, releaseState } = require("./release.js");
 const {
   buildPlatformHubPage,
   existingHubSlugs,
@@ -31,6 +31,7 @@ const {
   isoWeekOf,
   listingPageHtml,
   weekSlug,
+  whereLabel,
 } = require("./pagekit.js");
 const { popularBlockFor } = require("./searchtop.js");
 const { countryNameFor, streamVocab } = require("./rules.js");
@@ -89,7 +90,10 @@ function buildComingPage(items, cfg, { now = Date.now(), hasToday = true } = {})
   const groups = [["This week", []], ["Next week", []], ["Later", []]];
   for (const x of items) {
     const w = wk(x.date);
-    const row = { ...x, hook: `Streaming from ${fmtDateFull(x.date, loc)}${x.platform ? ` on ${x.platform}` : ""}` };
+    // TMDB's digital date sometimes names no service: the card says so where the platform goes,
+    // rather than leaving the slot to the genre (29 Oct 2026: 12 cards in three editions).
+    const row = { ...x, hook: `Streaming from ${fmtDateFull(x.date, loc)}${x.platform ? ` on ${x.platform}` : ""}`,
+      ...(x.platform ? {} : { where: "Platform not announced" }) };
     (w === thisWk ? groups[0] : w === nextWk ? groups[1] : groups[2])[1].push(row);
   }
   const sections = groups.filter(([, xs]) => xs.length).map(([h, xs]) => ({ h2: h, items: xs }));
@@ -246,7 +250,11 @@ function buildLanguagePage(data, langName, slug, archive = null) {
     }
     return out;
   };
-  const theatres = merge(of("theatres"), pool.theatres);
+  // A film that hasn't opened yet goes under "Coming soon", never "In theatres" (29 Oct 2026: the
+  // Telugu page listed AK47 "In theatres · Releases 30 Oct" the day before it opened).
+  const notOpen = (x) => releaseState(x && x.released, Date.parse(gen) || Date.now()) === "upcoming";
+  const theatresAll = merge(of("theatres"), pool.theatres);
+  const theatres = theatresAll.filter((x) => !notOpen(x));
   const ott = merge(of("ott"), pool.ott);
   // A page with almost nothing on it must not promise "every" title — that is a completeness
   // claim it cannot back, and thin-content-plus-overclaim is the worst combination to put in
@@ -254,8 +262,21 @@ function buildLanguagePage(data, langName, slug, archive = null) {
   const thin = theatres.length + ott.length < 3;
   // The homepage's few coming-soon titles first, then this language's own upcoming pool
   // (soonExtra in buildCountry), soonest first. Never a passed date (normalizeUpcoming).
-  const soon = normalizeUpcoming(merge(of("comingSoon"), of("soonExtra"))
-    .sort((a, b) => String(a.released || "").localeCompare(String(b.released || ""))));
+  // Where each one will be, from its own page: "In theatres from 5 Nov" (the date then not repeated),
+  // or its platform when the page already names one.
+  const genMs = Date.parse(gen) || Date.now();
+  const pageOf = new Map((Array.isArray(archive) ? archive : []).filter((x) => x && x.slug).map((x) => [x.slug, x]));
+  const soonWhere = (x) => {
+    const w = whereLabel(pageOf.get(x.slug), { code: "in" }, { now: genMs });
+    if (w === "In cinemas" && x.released) return { where: `In theatres from ${fmtDateShort(x.released, genMs, "en-IN")}`, whereDated: true };
+    return w && (pageOf.get(x.slug).providers || []).length ? { where: w } : {};
+  };
+  // A cinema-list film not open yet is a theatrical release even before it has a page of its own.
+  const opensLater = theatresAll.filter(notOpen).map((x) => ({ ...x, platform: null,
+    ...(x.released ? { where: `In theatres from ${fmtDateShort(x.released, genMs, "en-IN")}`, whereDated: true } : {}) }));
+  const soon = normalizeUpcoming(merge(merge(of("comingSoon"), of("soonExtra")), opensLater)
+    .sort((a, b) => String(a.released || "").localeCompare(String(b.released || ""))))
+    .map((x) => ({ ...x, ...soonWhere(x) }));
   const faqs = [];
   if (ott.length) faqs.push({
     q: `What's new in ${langName} on OTT this week?`,
@@ -288,7 +309,10 @@ function buildLanguagePage(data, langName, slug, archive = null) {
     .filter((x) => x && x.slug && x.language === langName && !listedSlugs.has(x.slug))
     .filter((x) => x.released && x.released >= bcCutoff && x.released <= gen.slice(0, 10))
     .sort((a, b) => String(b.released).localeCompare(String(a.released)))
-    .slice(0, 24);
+    .slice(0, 24)
+    // Each card says where to watch it, from its own page (29 Oct 2026): 34 of these were streaming
+    // and named no platform, and 64 that aren't gave no hint of it.
+    .map((x) => ({ ...x, where: whereLabel(x, { code: "in" }, { now: Date.parse(gen) || Date.now() }) || undefined }));
   const all = [...theatres, ...ott].filter((x) => x.slug);
   const extraLd = [{
     "@context": "https://schema.org", "@type": "CollectionPage",
