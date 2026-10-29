@@ -189,6 +189,9 @@
   .toolbar .extras .install-btn[hidden] { display: none; }
   .toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn, .toolbar .extras .install-btn { white-space: nowrap; }
   @media (max-width: 380px) { .toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn, .toolbar .extras .install-btn { padding: 0 10px; font-size: 13px; } }
+  /* toolbar-equal (29 Oct 2026): from tablet width every control is the same box — 150px wide, 40px tall —
+     instead of three pills stretched across the page beside two compact dropdowns. Phones keep equal thirds. */
+  @media (min-width: 600px) { .toolbar select, .toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn, .toolbar .extras .install-btn { flex: 0 0 150px; width: 150px; min-height: 40px; height: 40px; font-size: 13px; } .toolbar select { padding: 0 12px; } .toolbar .extras { gap: 8px; } .toolbar .share-btn.icon-only { width: 40px; height: 40px; flex-basis: 40px; } }
   .extras .tonight-btn, .extras .mylist-btn { min-height: 44px; display: inline-flex; align-items: center; gap: 7px; }
   /* "Most searched" (scripts/lib/searchtop.js POPULAR_CSS, adapted to the homepage). */
   .popular { margin-top: 40px; }
