@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-10-29T07:46:52.576Z",
+ "generatedAt": "2026-10-29T10:05:09.704Z",
  "country": "id",
- "pick": "You Can See Everything",
+ "pick": "Clayface",
  "theatres": [
   {
    "title": "Clayface",
@@ -16,7 +16,7 @@
      "score": "7.5/10"
     }
    ],
-   "votes": 255,
+   "votes": 263,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/9l1NuFjel2j89hiuiJbsxfblqjy.jpg",
    "isRecent": false,
@@ -166,7 +166,9 @@
    ],
    "theatricalHere": true,
    "slug": "clayface",
-   "trailerViews": 353360,
+   "wikiWeeklyViews": 1288265,
+   "trending": true,
+   "trailerViews": 353122,
    "take": "Critics liked it: the direction and humour won praise, though the twists drew some flak.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -363,7 +365,7 @@
    ],
    "slug": "wildwood",
    "wikiWeeklyViews": 626542,
-   "trailerViews": 19865407,
+   "trailerViews": 19867786,
    "take": "The critical verdict is rare-air positive.",
    "takeSrc": "wiki",
    "takeArticle": "Wildwood (film)",
@@ -429,7 +431,7 @@
    "badge": null,
    "similar": [
     {
-     "title": "Pamela, A Love Story",
+     "title": "Pamela, a love story",
      "slug": "pamela-a-love-story",
      "poster": "https://image.tmdb.org/t/p/w342/zkVnRwZWbrd55P3Tx7BZZQ1gU89.jpg",
      "language": "English",
@@ -443,16 +445,16 @@
      "kind": "movie"
     },
     {
-     "title": "Maternal Instinct",
-     "slug": "maternal-instinct",
-     "poster": "https://image.tmdb.org/t/p/w342/dOWWCLSwXS1MBtGEFeItbloiUEN.jpg",
+     "title": "Wick Is Pain",
+     "slug": "wick-is-pain",
+     "poster": "https://image.tmdb.org/t/p/w342/ctZ9bjmCYyfFt3cUepc9axr0zHs.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Wick Is Pain",
-     "slug": "wick-is-pain",
-     "poster": "https://image.tmdb.org/t/p/w342/ctZ9bjmCYyfFt3cUepc9axr0zHs.jpg",
+     "title": "Maternal Instinct",
+     "slug": "maternal-instinct",
+     "poster": "https://image.tmdb.org/t/p/w342/dOWWCLSwXS1MBtGEFeItbloiUEN.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -551,8 +553,7 @@
    ],
    "slug": "you-can-see-everything",
    "wikiWeeklyViews": 965157,
-   "trending": true,
-   "trailerViews": 58910,
+   "trailerViews": 59144,
    "take": "Critics loved this one, and the second half and ambition drew the loudest praise.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -746,7 +747,7 @@
    "theatricalHere": true,
    "slug": "the-sea-speaks-his-name",
    "wikiWeeklyViews": 1708,
-   "trailerViews": 33499
+   "trailerViews": 34236
   },
   {
    "title": "Pirunduk",
@@ -911,7 +912,7 @@
    ],
    "theatricalHere": true,
    "slug": "pirunduk",
-   "trailerViews": 284361
+   "trailerViews": 286817
   },
   {
    "title": "Siti Vampire",
@@ -1076,7 +1077,7 @@
    ],
    "theatricalHere": true,
    "slug": "siti-vampire",
-   "trailerViews": 136307
+   "trailerViews": 136309
   },
   {
    "title": "Jailer 2",
@@ -1501,7 +1502,7 @@
    "slug": "the-terminal-list",
    "wikiWeeklyViews": 291517,
    "trending": true,
-   "trailerViews": 12638069,
+   "trailerViews": 12636201,
    "take": "A divided response, and the writing carries most of the blame.",
    "takeSrc": "wiki",
    "takeArticle": "The Terminal List",
@@ -1523,6 +1524,255 @@
     "reason": "Audiences love it; critics are split.",
     "audience": "Loved",
     "critics": "mixed",
+    "basis": "both"
+   }
+  },
+  {
+   "title": "Lupin",
+   "genre": "Crime / Drama",
+   "language": "French",
+   "released": "2021-01-08",
+   "review": "Inspired by the adventures of Arsène Lupin, gentleman thief Assane Diop sets out to avenge his father for an injustice inflicted by a wealthy family.",
+   "rating": 7.7,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "7.7/10"
+    }
+   ],
+   "votes": 2744,
+   "verdict": "Must watch",
+   "poster": "https://image.tmdb.org/t/p/w342/h6Z2oogE4mJk2uffdtIlLhb0EHx.jpg",
+   "isRecent": true,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 96677,
+   "popularity": 200.3304,
+   "episodes": {
+    "count": 25,
+    "seasons": 3,
+    "limited": false,
+    "season": 3,
+    "next": null,
+    "list": [
+     {
+      "e": 1,
+      "name": "Chapter 1",
+      "date": "2026-10-23",
+      "runtime": 40,
+      "rating": 6.2,
+      "votes": 24
+     },
+     {
+      "e": 2,
+      "name": "Chapter 2",
+      "date": "2026-10-23",
+      "runtime": 44
+     },
+     {
+      "e": 3,
+      "name": "Chapter 3",
+      "date": "2026-10-23",
+      "runtime": 51
+     },
+     {
+      "e": 4,
+      "name": "Chapter 4",
+      "date": "2026-10-23",
+      "runtime": 42
+     },
+     {
+      "e": 5,
+      "name": "Chapter 5",
+      "date": "2026-10-23",
+      "runtime": 48
+     },
+     {
+      "e": 6,
+      "name": "Chapter 6",
+      "date": "2026-10-23",
+      "runtime": 44
+     },
+     {
+      "e": 7,
+      "name": "Chapter 7",
+      "date": "2026-10-23",
+      "runtime": 46
+     },
+     {
+      "e": 8,
+      "name": "Chapter 8",
+      "date": "2026-10-23",
+      "runtime": 49
+     }
+    ]
+   },
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=ga0iTWXCGa0",
+   "providers": [
+    "Netflix"
+   ],
+   "cast": [
+    "Omar Sy",
+    "Ludivine Sagnier",
+    "Antoine Gouy",
+    "Soufiane Guerrab"
+   ],
+   "director": "George Kay",
+   "runtime": null,
+   "imdbVotes": null,
+   "trailerDate": "2020-12-02T15:00:00.000Z",
+   "imdbId": "tt2531336",
+   "seasons": 3,
+   "freshDate": "2026-10-23",
+   "badge": "New season",
+   "similar": [
+    {
+     "title": "The Lost Station Girls",
+     "slug": "the-lost-station-girls",
+     "poster": "https://image.tmdb.org/t/p/w342/282rRZ3wKntv82FPZ3qMnAsNMkV.jpg",
+     "language": "French",
+     "kind": "tv"
+    },
+    {
+     "title": "Spiral",
+     "slug": "spiral",
+     "poster": "https://image.tmdb.org/t/p/w342/t4i4wJCRUDkblYaqp3ln4vENQdC.jpg",
+     "language": "French",
+     "kind": "tv"
+    },
+    {
+     "title": "Witnesses",
+     "slug": "witnesses",
+     "poster": "https://image.tmdb.org/t/p/w342/8SEvbZLKw2cg7ZDdSriz5UsJzaH.jpg",
+     "language": "French",
+     "kind": "tv"
+    },
+    {
+     "title": "Cross",
+     "slug": "cross",
+     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Missing You",
+     "slug": "missing-you",
+     "poster": "https://image.tmdb.org/t/p/w342/aEiqusZEqOrqHmRtOninChmcOG0.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Fool Me Once",
+     "slug": "fool-me-once",
+     "poster": "https://image.tmdb.org/t/p/w342/Ertv4WLEyHgi8zN4ldOKgPcGAZ.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "I Will Find You",
+     "slug": "i-will-find-you",
+     "poster": "https://image.tmdb.org/t/p/w342/pb9oYHHNzauiCQZT03MpDAg46GI.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Three Pines",
+     "slug": "three-pines",
+     "poster": "https://image.tmdb.org/t/p/w342/r5lbLfjfFZYhr2TfuvKpf7b0HpQ.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Monsieur Spade",
+     "slug": "monsieur-spade",
+     "poster": "https://image.tmdb.org/t/p/w342/5B0fvoxRPT7mhZMgMSAM27j6QZb.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Dalgliesh",
+     "slug": "dalgliesh",
+     "poster": "https://image.tmdb.org/t/p/w342/8pqCanIwJFehhZdP00gXE0qc9xc.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Gold",
+     "slug": "the-gold",
+     "poster": "https://image.tmdb.org/t/p/w342/9JY9Gza4HQhXjIPXg9uSy8FeiSM.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Last Seen",
+     "slug": "last-seen",
+     "poster": "https://image.tmdb.org/t/p/w342/vozJZjHv0Yyv4PjoOxF5tVMUGFI.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/aY7zv2pfk9H0QxaaL3PBjvalbKQ.jpg",
+   "backdropPath": "/aY7zv2pfk9H0QxaaL3PBjvalbKQ.jpg",
+   "posterPath": "/h6Z2oogE4mJk2uffdtIlLhb0EHx.jpg",
+   "fullReview": "Inspired by the adventures of Arsène Lupin, gentleman thief Assane Diop sets out to avenge his father for an injustice inflicted by a wealthy family.",
+   "castPics": [
+    {
+     "name": "Omar Sy",
+     "character": "Assane Diop",
+     "photo": "https://image.tmdb.org/t/p/w185/Uuy6WuizieB4fOIGFp0gY90Yq2.jpg"
+    },
+    {
+     "name": "Ludivine Sagnier",
+     "character": "Claire Laurent",
+     "photo": "https://image.tmdb.org/t/p/w185/hd4fLjgtgNEidJOjuLNGfK1sOhm.jpg"
+    },
+    {
+     "name": "Antoine Gouy",
+     "character": "Benjamin Férel",
+     "photo": "https://image.tmdb.org/t/p/w185/g0KnDyYzYHNY3TQgcX3B26ILnTu.jpg"
+    },
+    {
+     "name": "Soufiane Guerrab",
+     "character": "Youssef Guédira",
+     "photo": "https://image.tmdb.org/t/p/w185/3KPutm0tNtt1CtFm6gyLPSqtOK2.jpg"
+    },
+    {
+     "name": "Shirine Boutella",
+     "character": "Sofia Belkacem",
+     "photo": "https://image.tmdb.org/t/p/w185/4qBT877sIjMLycDBmahEpL1nwEk.jpg"
+    },
+    {
+     "name": "Théo Christine",
+     "character": "Raoul Diop",
+     "photo": "https://image.tmdb.org/t/p/w185/rNcIPvVRdjH2GlftrXkhnLimE74.jpg"
+    }
+   ],
+   "platform": "Netflix",
+   "ottSince": "2026-10-22",
+   "ottFreshDate": "2026-10-23",
+   "slug": "lupin",
+   "wikiWeeklyViews": 115422,
+   "trailerViews": 6807429,
+   "take": "Reviewers responded well — the performances and writing came in for particular praise.",
+   "takeSrc": "wiki",
+   "takeAspects": [
+    "performances",
+    "writing"
+   ],
+   "takeArticle": "Lupin (French TV series)",
+   "criticsTone": "positive",
+   "reception": {
+    "rt": {
+     "pct": 98
+    },
+    "asOf": "2026-10-29"
+   },
+   "fcScore": {
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
+    "critics": "positive",
     "basis": "both"
    }
   },
@@ -1752,7 +2002,7 @@
    "ottFreshDate": "2026-10-20",
    "slug": "cyberpunk-edgerunners",
    "wikiWeeklyViews": 87067,
-   "trailerViews": 7762257,
+   "trailerViews": 7762688,
    "take": "Critics kept circling back to the action and visuals — in a good way.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1787,7 +2037,7 @@
      "score": "8.3/10"
     }
    ],
-   "votes": 2886,
+   "votes": 2887,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/rOYLWCdAifpUtPlTf1WHxyaxeMt.jpg",
    "isRecent": true,
@@ -2016,7 +2266,8 @@
    "ottFreshDate": "2026-10-16",
    "stillGood": true,
    "slug": "tulsa-king",
-   "trailerViews": 11439149,
+   "wikiWeeklyViews": 84846,
+   "trailerViews": 11439343,
    "take": "Critics came away positive, praising the humour and second half while docking points for the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2293,7 +2544,7 @@
    "stillGood": true,
    "slug": "love-in-disguise",
    "wikiWeeklyViews": 56265,
-   "trailerViews": 279765
+   "trailerViews": 281040
   },
   {
    "title": "Alas Roban: The Series",
@@ -2863,360 +3114,6 @@
    "slug": "crowyokan"
   },
   {
-   "title": "Black Clover",
-   "genre": "Animation / Action & Adventure",
-   "language": "Japanese",
-   "released": "2017-10-03",
-   "review": "Asta and Yuno are two orphans who want the same thing: to become the Wizard King. Locked in a friendly rivalry, they work hard towards their goal.",
-   "rating": 8.5,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "8.5/10"
-    }
-   ],
-   "votes": 2272,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/uZUtoVChBGhNj9OfrM2LYpwBm8E.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 73223,
-   "popularity": 45.053,
-   "episodes": {
-    "count": 196,
-    "seasons": 2,
-    "limited": false,
-    "season": 2,
-    "next": {
-     "s": 2,
-     "e": 5,
-     "name": "Episode 5",
-     "date": "2026-10-31"
-    },
-    "list": [
-     {
-      "e": 1,
-      "name": "The Battle Begins",
-      "date": "2026-10-03",
-      "runtime": 24
-     },
-     {
-      "e": 2,
-      "name": "The Door to Hell",
-      "date": "2026-10-10",
-      "runtime": 24
-     },
-     {
-      "e": 3,
-      "name": "Black Guardian",
-      "date": "2026-10-17",
-      "runtime": 24
-     },
-     {
-      "e": 4,
-      "name": "Day of Atonement",
-      "date": "2026-10-24",
-      "runtime": 24
-     },
-     {
-      "e": 5,
-      "name": "Episode 5",
-      "date": "2026-10-31",
-      "runtime": null
-     },
-     {
-      "e": 6,
-      "name": "Episode 6",
-      "date": "2026-11-07",
-      "runtime": null
-     },
-     {
-      "e": 7,
-      "name": "Episode 7",
-      "date": "2026-11-14",
-      "runtime": null
-     },
-     {
-      "e": 8,
-      "name": "Episode 8",
-      "date": "2026-11-21",
-      "runtime": null
-     },
-     {
-      "e": 9,
-      "name": "Episode 9",
-      "date": "2026-11-28",
-      "runtime": null
-     },
-     {
-      "e": 10,
-      "name": "Episode 10",
-      "date": "2026-12-05",
-      "runtime": null
-     },
-     {
-      "e": 11,
-      "name": "Episode 11",
-      "date": "2026-12-12",
-      "runtime": null
-     },
-     {
-      "e": 12,
-      "name": "Episode 12",
-      "date": "2026-12-19",
-      "runtime": null
-     },
-     {
-      "e": 13,
-      "name": "Episode 13",
-      "date": "2026-12-26",
-      "runtime": null
-     },
-     {
-      "e": 14,
-      "name": "Episode 14",
-      "date": "2027-01-02",
-      "runtime": null
-     },
-     {
-      "e": 15,
-      "name": "Episode 15",
-      "date": "2027-01-09",
-      "runtime": null
-     },
-     {
-      "e": 16,
-      "name": "Episode 16",
-      "date": "2027-01-16",
-      "runtime": null
-     },
-     {
-      "e": 17,
-      "name": "Episode 17",
-      "date": "2027-01-23",
-      "runtime": null
-     },
-     {
-      "e": 18,
-      "name": "Episode 18",
-      "date": "2027-01-30",
-      "runtime": null
-     },
-     {
-      "e": 19,
-      "name": "Episode 19",
-      "date": "2027-02-06",
-      "runtime": null
-     },
-     {
-      "e": 20,
-      "name": "Episode 20",
-      "date": "2027-02-13",
-      "runtime": null
-     },
-     {
-      "e": 21,
-      "name": "Episode 21",
-      "date": "2027-02-20",
-      "runtime": null
-     },
-     {
-      "e": 22,
-      "name": "Episode 22",
-      "date": "2027-02-27",
-      "runtime": null
-     },
-     {
-      "e": 23,
-      "name": "Episode 23",
-      "date": "2027-03-06",
-      "runtime": null
-     },
-     {
-      "e": 24,
-      "name": "Episode 24",
-      "date": "2027-03-13",
-      "runtime": null
-     },
-     {
-      "e": 25,
-      "name": "Episode 25",
-      "date": "2027-03-20",
-      "runtime": null
-     },
-     {
-      "e": 26,
-      "name": "Episode 26",
-      "date": "2027-03-27",
-      "runtime": null
-     }
-    ]
-   },
-   "cert": "R",
-   "trailer": "https://www.youtube.com/watch?v=QwNWY6z93O4",
-   "providers": [
-    "Crunchyroll"
-   ],
-   "cast": [
-    "Gakuto Kajiwara",
-    "Nobunaga Shimazaki",
-    "Kana Yuuki",
-    "Junichi Suwabe"
-   ],
-   "director": null,
-   "runtime": 24,
-   "imdbVotes": null,
-   "trailerDate": "2023-03-07T11:00:16.000Z",
-   "imdbId": "tt7441658",
-   "seasons": 2,
-   "freshDate": "2026-10-03",
-   "badge": null,
-   "similar": [
-    {
-     "title": "Dragon Quest: The Adventure of Dai",
-     "slug": "dragon-quest-the-adventure-of-dai",
-     "poster": "https://image.tmdb.org/t/p/w342/i28TVlLozR09hqkGsSlu5wa1X2J.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Witch Hat Atelier",
-     "slug": "witch-hat-atelier",
-     "poster": "https://image.tmdb.org/t/p/w342/78m1Tv3suHmUryTI9VNPwKLKjHZ.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "FAIRY TAIL 100 YEARS QUEST",
-     "slug": "fairy-tail-100-years-quest",
-     "poster": "https://image.tmdb.org/t/p/w342/wj5i6YgZj7LltRE3yE6VTgfdbK0.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Easygoing Territory Defense by the Optimistic Lord",
-     "slug": "easygoing-territory-defense-by-the-optimistic-lord",
-     "poster": "https://image.tmdb.org/t/p/w342/2ctXv1LyyVad5VLToS1t2ZqSCQa.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "The Banished Court Magician Aims to Become the Strongest",
-     "slug": "the-banished-court-magician-aims-to-become-the-strongest",
-     "poster": "https://image.tmdb.org/t/p/w342/tmGjjRN9dRFzybRLSecgxNo46IE.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Helck",
-     "slug": "helck",
-     "poster": "https://image.tmdb.org/t/p/w342/u0vH3LAjFEp5q7HNo7EcoIbCyzp.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "The Classroom of a Black Cat and a Witch",
-     "slug": "the-classroom-of-a-black-cat-and-a-witch",
-     "poster": "https://image.tmdb.org/t/p/w342/e850NPQg3a4ZJDWE2EmxmjGa6Ab.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Reincarnated as a Sword",
-     "slug": "reincarnated-as-a-sword",
-     "poster": "https://image.tmdb.org/t/p/w342/yZ3VZVc7iyF7KtIjERBGEedVXqA.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "As a Reincarnated Aristocrat, I'll Use My Appraisal Skill to Rise in the World",
-     "slug": "as-a-reincarnated-aristocrat-i-ll-use-my-appraisal-skill-to-rise-in-the-world",
-     "poster": "https://image.tmdb.org/t/p/w342/jsugIfxS7mg7G254ZOi6b4jDIgM.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Fairy Tail",
-     "slug": "fairy-tail",
-     "poster": "https://image.tmdb.org/t/p/w342/AsfCVSHnFnUnbepLucvIB1N30Il.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Fate/stay night",
-     "slug": "fate-stay-night",
-     "poster": "https://image.tmdb.org/t/p/w342/x7nYPOveHhINREhTtwBHot9ersB.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    },
-    {
-     "title": "Campione!",
-     "slug": "campione",
-     "poster": "https://image.tmdb.org/t/p/w342/hAmRheNO1bsiyyIclvTRj6pMAvf.jpg",
-     "language": "Japanese",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/qu9epTZh29fGUkY7ZYc9PVsv0Ig.jpg",
-   "backdropPath": "/qu9epTZh29fGUkY7ZYc9PVsv0Ig.jpg",
-   "posterPath": "/uZUtoVChBGhNj9OfrM2LYpwBm8E.jpg",
-   "fullReview": "Asta and Yuno are two orphans who want the same thing: to become the Wizard King. Locked in a friendly rivalry, they work hard towards their goal. While Yuno excels at magic, Asta has a problem uncommon in this world: he has no powers! But, on the day they receive their grimoires, they surprise everyone. To reach their goal, they’ll each find their own path to greatness—with or without magic.",
-   "castPics": [
-    {
-     "name": "Gakuto Kajiwara",
-     "character": "Asta (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/kUer38jXf7vTD2TGGxJMZVYL5Te.jpg"
-    },
-    {
-     "name": "Nobunaga Shimazaki",
-     "character": "Yuno (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/qke5rZusHsjSlvB0NKlJ5dQF5D.jpg"
-    },
-    {
-     "name": "Kana Yuuki",
-     "character": "Noelle Silva (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/gnKY83EbfaJWi1y47dgOtiRegAK.jpg"
-    },
-    {
-     "name": "Junichi Suwabe",
-     "character": "Yami Sukehiro (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/4S7c3n3r07A83HvkLrnWZGVhiHg.jpg"
-    },
-    {
-     "name": "Genki Muro",
-     "character": "Magna Swing (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/6YF881kJuP2HaSb5PXRO4hWTZA.jpg"
-    },
-    {
-     "name": "Ayumu Murase",
-     "character": "Luck Voltia (voice)",
-     "photo": "https://image.tmdb.org/t/p/w185/3aGM6KpcCIEKOXP9510tzaKc8uw.jpg"
-    }
-   ],
-   "platform": "Crunchyroll",
-   "ottSince": "2026-10-03",
-   "ottFreshDate": "2026-10-03",
-   "stillGood": true,
-   "slug": "black-clover",
-   "wikiWeeklyViews": 6396,
-   "trailerViews": 238647,
-   "take": "Critics kept circling back to the writing and animation — in a good way.",
-   "takeSrc": "wiki",
-   "takeAspects": [
-    "writing",
-    "animation"
-   ],
-   "takeArticle": "Black Clover (TV series)",
-   "fcScore": {
-    "verdict": "Must watch",
-    "reason": "Audiences love it.",
-    "audience": "Loved",
-    "critics": null,
-    "basis": "audience"
-   }
-  },
-  {
    "title": "Adili Idola Celebrity Roast: Reza Oktovian",
    "genre": "Comedy",
    "language": "Indonesian",
@@ -3264,16 +3161,16 @@
    "badge": null,
    "similar": [
     {
-     "title": "Jerry Seinfeld: 23 Hours to Kill",
-     "slug": "jerry-seinfeld-23-hours-to-kill",
-     "poster": "https://image.tmdb.org/t/p/w342/qvAymJkltRoaxvievYiJfXGusD3.jpg",
+     "title": "Taylor Tomlinson: Quarter-Life Crisis",
+     "slug": "taylor-tomlinson-quarter-life-crisis",
+     "poster": "https://image.tmdb.org/t/p/w342/k3dWZYGa0Tq1mdOUrUXTF7i2n3z.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Taylor Tomlinson: Quarter-Life Crisis",
-     "slug": "taylor-tomlinson-quarter-life-crisis",
-     "poster": "https://image.tmdb.org/t/p/w342/k3dWZYGa0Tq1mdOUrUXTF7i2n3z.jpg",
+     "title": "Jerry Seinfeld: 23 Hours to Kill",
+     "slug": "jerry-seinfeld-23-hours-to-kill",
+     "poster": "https://image.tmdb.org/t/p/w342/qvAymJkltRoaxvievYiJfXGusD3.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3299,9 +3196,9 @@
      "kind": "movie"
     },
     {
-     "title": "Sextuplets",
-     "slug": "sextuplets",
-     "poster": "https://image.tmdb.org/t/p/w342/ztGSEcowBoHyRwcK0s5kIKVVXwy.jpg",
+     "title": "Duplex",
+     "slug": "duplex",
+     "poster": "https://image.tmdb.org/t/p/w342/mCQ4oO9djqcthBRD3ftTnR8qSP7.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3313,23 +3210,9 @@
      "kind": "movie"
     },
     {
-     "title": "Duplex",
-     "slug": "duplex",
-     "poster": "https://image.tmdb.org/t/p/w342/mCQ4oO9djqcthBRD3ftTnR8qSP7.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Playing with Fire",
      "slug": "playing-with-fire",
      "poster": "https://image.tmdb.org/t/p/w342/nBLPIpReSatt1zcgVzSVzq5e581.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Thunderstruck",
-     "slug": "thunderstruck",
-     "poster": "https://image.tmdb.org/t/p/w342/lR1ssqRzslQx9WtTOKnfgqbNB1y.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -3344,6 +3227,20 @@
      "title": "Jim Gaffigan: Mr. Universe",
      "slug": "jim-gaffigan-mr-universe",
      "poster": "https://image.tmdb.org/t/p/w342/weUy08h9xGNKutN608aqFWJDM9O.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Gabriel Iglesias: I'm Sorry for What I Said When I Was Hungry",
+     "slug": "gabriel-iglesias-i-m-sorry-for-what-i-said-when-i-was-hungry",
+     "poster": "https://image.tmdb.org/t/p/w342/eOgTfgiIbrqVB9Ll0T5PtOD8RGb.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Fun with Dick and Jane",
+     "slug": "fun-with-dick-and-jane",
+     "poster": "https://image.tmdb.org/t/p/w342/obBXkCU29eRzbVX5erjrAxugOpN.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -3641,7 +3538,7 @@
    "stillGood": true,
    "slug": "mobland",
    "wikiWeeklyViews": 188993,
-   "trailerViews": 12332588,
+   "trailerViews": 12333454,
    "take": "A love-it-or-hate-it reception, right down the middle.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
@@ -3734,8 +3631,8 @@
       "name": "Judgement Day",
       "date": "2026-10-21",
       "runtime": 62,
-      "rating": 8,
-      "votes": 22
+      "rating": 8.1,
+      "votes": 23
      }
     ]
    },
@@ -3774,16 +3671,16 @@
      "kind": "tv"
     },
     {
-     "title": "Cross",
-     "slug": "cross",
-     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
+     "title": "The Veil",
+     "slug": "the-veil",
+     "poster": "https://image.tmdb.org/t/p/w342/6aM5Lyp3zUtPyc0WVofES6UrV06.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Veil",
-     "slug": "the-veil",
-     "poster": "https://image.tmdb.org/t/p/w342/6aM5Lyp3zUtPyc0WVofES6UrV06.jpg",
+     "title": "Cross",
+     "slug": "cross",
+     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -3887,7 +3784,7 @@
    "slug": "slow-horses",
    "wikiWeeklyViews": 334531,
    "trending": true,
-   "trailerViews": 5873834,
+   "trailerViews": 5874110,
    "take": "Critics loved this one; reception has been close to universal acclaim.",
    "takeSrc": "wiki",
    "takeArticle": "Slow Horses",
@@ -4060,7 +3957,7 @@
     }
    ],
    "slug": "ghost-soldier",
-   "trailerViews": 4231322,
+   "trailerViews": 4235188,
    "verdict": ""
   },
   {
@@ -4216,7 +4113,7 @@
    ],
    "theatricalHere": true,
    "slug": "final-interview",
-   "trailerViews": 90363,
+   "trailerViews": 90460,
    "verdict": ""
   },
   {
@@ -4379,7 +4276,7 @@
    ],
    "theatricalHere": true,
    "slug": "the-hunger-games-sunrise-on-the-reaping",
-   "trailerViews": 183168,
+   "trailerViews": 183369,
    "verdict": ""
   },
   {
@@ -4542,7 +4439,7 @@
    ],
    "theatricalHere": true,
    "slug": "awal-mula-hamka-vol-3",
-   "trailerViews": 112314,
+   "trailerViews": 113521,
    "verdict": ""
   },
   {
@@ -4677,7 +4574,7 @@
    ],
    "theatricalHere": true,
    "slug": "jani-be-good",
-   "trailerViews": 14777,
+   "trailerViews": 14780,
    "verdict": ""
   },
   {
@@ -4739,13 +4636,6 @@
      "kind": "movie"
     },
     {
-     "title": "Rebel Moon - Part One: A Child of Fire",
-     "slug": "rebel-moon-part-one-a-child-of-fire",
-     "poster": "https://image.tmdb.org/t/p/w342/ui4DrH1cKk2vkHshcUcGt2lKxCm.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Stowaway",
      "slug": "stowaway",
      "poster": "https://image.tmdb.org/t/p/w342/eFyRjhJfhNgM565U2mwEp5YUUOv.jpg",
@@ -4800,6 +4690,13 @@
      "poster": "https://image.tmdb.org/t/p/w342/Aim3kVNh1MPIxPEFeJrl9e9Uf1a.jpg",
      "language": "English",
      "kind": "movie"
+    },
+    {
+     "title": "Return of the Jedi",
+     "slug": "return-of-the-jedi",
+     "poster": "https://image.tmdb.org/t/p/w342/jQYlydvHm3kUix1f8prMucrplhm.jpg",
+     "language": "English",
+     "kind": "movie"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/i5E9H7Ik0u61ylDDTbmUpTL3Yw.jpg",
@@ -4839,7 +4736,7 @@
     }
    ],
    "slug": "dune-part-three",
-   "trailerViews": 16160843,
+   "trailerViews": 16592737,
    "verdict": ""
   },
   {
@@ -4896,6 +4793,13 @@
      "kind": "movie"
     },
     {
+     "title": "Justice League: Crisis on Infinite Earths Part One",
+     "slug": "justice-league-crisis-on-infinite-earths-part-one",
+     "poster": "https://image.tmdb.org/t/p/w342/mcRVsjMbhFstRK9z2oGRHiIvulr.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Doctor Strange in the Multiverse of Madness",
      "slug": "doctor-strange-in-the-multiverse-of-madness",
      "poster": "https://image.tmdb.org/t/p/w342/ddJcSKbcp4rKZTmuyWaMhuwcfMz.jpg",
@@ -4924,20 +4828,6 @@
      "kind": "movie"
     },
     {
-     "title": "Teen Titans Go! vs. Teen Titans",
-     "slug": "teen-titans-go-vs-teen-titans",
-     "poster": "https://image.tmdb.org/t/p/w342/GWJEdzVC9aOBSOMF9NHodYxSsE.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Iron Man & Captain America: Heroes United",
-     "slug": "iron-man-captain-america-heroes-united",
-     "poster": "https://image.tmdb.org/t/p/w342/CX7eRlaxFXiW3UGQBdQUoSVZRi.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Captain America: Civil War",
      "slug": "captain-america-civil-war",
      "poster": "https://image.tmdb.org/t/p/w342/rAGiXaUfPzY7CDEyNKUofk3Kw2e.jpg",
@@ -4962,6 +4852,13 @@
      "title": "Avengers: Endgame",
      "slug": "avengers-endgame",
      "poster": "https://image.tmdb.org/t/p/w342/bR8ISy1O9XQxqiy0fQFw2BX72RQ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Dark Phoenix",
+     "slug": "dark-phoenix",
+     "poster": "https://image.tmdb.org/t/p/w342/cCTJPelKGLhALq3r51A9uMonxKj.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -5004,7 +4901,7 @@
    ],
    "theatricalHere": true,
    "slug": "avengers-doomsday",
-   "trailerViews": 51047832,
+   "trailerViews": 51059584,
    "verdict": ""
   },
   {
@@ -5352,241 +5249,279 @@
  },
  "ottExtra": [
   {
-   "title": "Lupin",
-   "genre": "Crime / Drama",
-   "language": "French",
-   "released": "2021-01-08",
-   "review": "Inspired by the adventures of Arsène Lupin, gentleman thief Assane Diop sets out to avenge his father for an injustice inflicted by a wealthy family.",
-   "rating": 7.7,
+   "title": "American Horror Story",
+   "genre": "Drama / Mystery",
+   "language": "English",
+   "released": "2011-10-05",
+   "review": "An anthology horror drama series centering on different characters and locations, including a house with a murderous past, an asylum, a witch coven, a freak…",
+   "rating": 8.1,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.7/10"
+     "score": "8.1/10"
     }
    ],
-   "votes": 2744,
+   "votes": 6272,
    "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/h6Z2oogE4mJk2uffdtIlLhb0EHx.jpg",
-   "isRecent": true,
+   "poster": "https://image.tmdb.org/t/p/w342/yCkPLQ10qKIUgRBXmQVVMF1h96d.jpg",
+   "isRecent": false,
    "isFresh": false,
    "kind": "tv",
-   "tmdbId": 96677,
-   "popularity": 200.3304,
+   "tmdbId": 1413,
+   "popularity": 158.3365,
    "episodes": {
-    "count": 25,
-    "seasons": 3,
+    "count": 145,
+    "seasons": 13,
     "limited": false,
-    "season": 3,
-    "next": null,
+    "season": 13,
+    "next": {
+     "s": 13,
+     "e": 13,
+     "name": "Devil of a Good Time",
+     "date": "2026-10-29"
+    },
     "list": [
      {
       "e": 1,
-      "name": "Chapter 1",
-      "date": "2026-10-23",
-      "runtime": 40,
-      "rating": 6.2,
-      "votes": 24
+      "name": "13",
+      "date": "2026-09-24",
+      "runtime": 34
      },
      {
       "e": 2,
-      "name": "Chapter 2",
-      "date": "2026-10-23",
-      "runtime": 44
+      "name": "1:13 AM",
+      "date": "2026-09-24",
+      "runtime": 33
      },
      {
       "e": 3,
-      "name": "Chapter 3",
-      "date": "2026-10-23",
-      "runtime": 51
+      "name": "Rauhnacht",
+      "date": "2026-09-24",
+      "runtime": 23
      },
      {
       "e": 4,
-      "name": "Chapter 4",
-      "date": "2026-10-23",
-      "runtime": 42
+      "name": "Is That All There Is?",
+      "date": "2026-10-01",
+      "runtime": 30
      },
      {
       "e": 5,
-      "name": "Chapter 5",
-      "date": "2026-10-23",
-      "runtime": 48
+      "name": "Date Night",
+      "date": "2026-10-01",
+      "runtime": 27
      },
      {
       "e": 6,
-      "name": "Chapter 6",
-      "date": "2026-10-23",
-      "runtime": 44
+      "name": "The Return of Devil's Night",
+      "date": "2026-10-01",
+      "runtime": 25
      },
      {
       "e": 7,
-      "name": "Chapter 7",
-      "date": "2026-10-23",
-      "runtime": 46
+      "name": "The Baddest Witch of Them All",
+      "date": "2026-10-08",
+      "runtime": 24
      },
      {
       "e": 8,
-      "name": "Chapter 8",
-      "date": "2026-10-23",
-      "runtime": 49
+      "name": "Hell No",
+      "date": "2026-10-08",
+      "runtime": 32
+     },
+     {
+      "e": 9,
+      "name": "The Devil Is in the Details",
+      "date": "2026-10-15",
+      "runtime": 34
+     },
+     {
+      "e": 10,
+      "name": "The Prodigal Son",
+      "date": "2026-10-15",
+      "runtime": 25
+     },
+     {
+      "e": 11,
+      "name": "Madison's Happy Ending",
+      "date": "2026-10-22",
+      "runtime": 32
+     },
+     {
+      "e": 12,
+      "name": "Sisters in Arms",
+      "date": "2026-10-22",
+      "runtime": 32
+     },
+     {
+      "e": 13,
+      "name": "Devil of a Good Time",
+      "date": "2026-10-29",
+      "runtime": null
      }
     ]
    },
    "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=ga0iTWXCGa0",
+   "trailer": "https://www.youtube.com/watch?v=nLJR2twdK00",
    "providers": [
-    "Netflix"
+    "Disney+"
    ],
    "cast": [
-    "Omar Sy",
-    "Ludivine Sagnier",
-    "Antoine Gouy",
-    "Soufiane Guerrab"
+    "Sarah Paulson",
+    "Evan Peters",
+    "Angela Bassett",
+    "Kathy Bates"
    ],
-   "director": "George Kay",
+   "director": "Ryan Murphy",
    "runtime": null,
    "imdbVotes": null,
-   "trailerDate": "2020-12-02T15:00:00.000Z",
-   "imdbId": "tt2531336",
-   "seasons": 3,
-   "freshDate": "2026-10-23",
-   "badge": "New season",
+   "trailerDate": "2021-07-08T17:55:47.000Z",
+   "imdbId": "tt1844624",
+   "seasons": 13,
+   "freshDate": "2026-09-24",
+   "badge": null,
    "similar": [
     {
-     "title": "The Lost Station Girls",
-     "slug": "the-lost-station-girls",
-     "poster": "https://image.tmdb.org/t/p/w342/282rRZ3wKntv82FPZ3qMnAsNMkV.jpg",
-     "language": "French",
-     "kind": "tv"
-    },
-    {
-     "title": "Spiral",
-     "slug": "spiral",
-     "poster": "https://image.tmdb.org/t/p/w342/t4i4wJCRUDkblYaqp3ln4vENQdC.jpg",
-     "language": "French",
-     "kind": "tv"
-    },
-    {
-     "title": "Witnesses",
-     "slug": "witnesses",
-     "poster": "https://image.tmdb.org/t/p/w342/8SEvbZLKw2cg7ZDdSriz5UsJzaH.jpg",
-     "language": "French",
-     "kind": "tv"
-    },
-    {
-     "title": "Cross",
-     "slug": "cross",
-     "poster": "https://image.tmdb.org/t/p/w342/6hhKdavCEZi8d584ZtIrQIrBvZI.jpg",
+     "title": "Guillermo del Toro's Cabinet of Curiosities",
+     "slug": "guillermo-del-toro-s-cabinet-of-curiosities",
+     "poster": "https://image.tmdb.org/t/p/w342/a91e9hpWwfCqxJI4xM9Q2RhuxgI.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Missing You",
-     "slug": "missing-you",
-     "poster": "https://image.tmdb.org/t/p/w342/aEiqusZEqOrqHmRtOninChmcOG0.jpg",
+     "title": "American Horror Stories",
+     "slug": "american-horror-stories",
+     "poster": "https://image.tmdb.org/t/p/w342/8b9FGJ9WhpkeGFOHYgKjPT5AXS6.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Fool Me Once",
-     "slug": "fool-me-once",
-     "poster": "https://image.tmdb.org/t/p/w342/Ertv4WLEyHgi8zN4ldOKgPcGAZ.jpg",
+     "title": "Motherland: Fort Salem",
+     "slug": "motherland-fort-salem",
+     "poster": "https://image.tmdb.org/t/p/w342/s2dBDw3ns9rss51ikDtcINehMQM.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "I Will Find You",
-     "slug": "i-will-find-you",
-     "poster": "https://image.tmdb.org/t/p/w342/pb9oYHHNzauiCQZT03MpDAg46GI.jpg",
+     "title": "Them",
+     "slug": "them",
+     "poster": "https://image.tmdb.org/t/p/w342/2JIrVunDSjldv7Jv2uNKrrqwfej.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Three Pines",
-     "slug": "three-pines",
-     "poster": "https://image.tmdb.org/t/p/w342/r5lbLfjfFZYhr2TfuvKpf7b0HpQ.jpg",
+     "title": "The Haunting of Bly Manor",
+     "slug": "the-haunting-of-bly-manor",
+     "poster": "https://image.tmdb.org/t/p/w342/vIXQ8UymmQ7zJEPrKJP3s3fSbhR.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Monsieur Spade",
-     "slug": "monsieur-spade",
-     "poster": "https://image.tmdb.org/t/p/w342/5B0fvoxRPT7mhZMgMSAM27j6QZb.jpg",
+     "title": "Mayfair Witches",
+     "slug": "mayfair-witches",
+     "poster": "https://image.tmdb.org/t/p/w342/eDl1veju2Hf3tyFmGAedtGXb9Yv.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Dalgliesh",
-     "slug": "dalgliesh",
-     "poster": "https://image.tmdb.org/t/p/w342/8pqCanIwJFehhZdP00gXE0qc9xc.jpg",
+     "title": "Sanctuary: A Witch's Tale",
+     "slug": "sanctuary-a-witch-s-tale",
+     "poster": "https://image.tmdb.org/t/p/w342/iZllgPmOXS5PadAs4mDp6JhQJod.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Gold",
-     "slug": "the-gold",
-     "poster": "https://image.tmdb.org/t/p/w342/9JY9Gza4HQhXjIPXg9uSy8FeiSM.jpg",
+     "title": "Lore",
+     "slug": "lore",
+     "poster": "https://image.tmdb.org/t/p/w342/xNixoyzlSfJVy3Lp7AB1Vwrg2Va.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Last Seen",
-     "slug": "last-seen",
-     "poster": "https://image.tmdb.org/t/p/w342/vozJZjHv0Yyv4PjoOxF5tVMUGFI.jpg",
+     "title": "Fear Itself",
+     "slug": "fear-itself",
+     "poster": "https://image.tmdb.org/t/p/w342/vlcynm3pJf5tRsyXre9oEnVAEVb.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Masters of Horror",
+     "slug": "masters-of-horror",
+     "poster": "https://image.tmdb.org/t/p/w342/vgTy1Lfi5P1yD7ZvsuoPKYvxwzv.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Creepshow",
+     "slug": "creepshow",
+     "poster": "https://image.tmdb.org/t/p/w342/fassm77VqtSDHv9x17eJ3DkGVml.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Terror",
+     "slug": "the-terror",
+     "poster": "https://image.tmdb.org/t/p/w342/fUVn5mScv83FfwrRUUR694yA7bd.jpg",
      "language": "English",
      "kind": "tv"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/aY7zv2pfk9H0QxaaL3PBjvalbKQ.jpg",
-   "backdropPath": "/aY7zv2pfk9H0QxaaL3PBjvalbKQ.jpg",
-   "posterPath": "/h6Z2oogE4mJk2uffdtIlLhb0EHx.jpg",
-   "fullReview": "Inspired by the adventures of Arsène Lupin, gentleman thief Assane Diop sets out to avenge his father for an injustice inflicted by a wealthy family.",
+   "backdrop": "https://image.tmdb.org/t/p/w780/5G4Bnc4Q0YUK1bwLEUYmIsmm2Ib.jpg",
+   "backdropPath": "/5G4Bnc4Q0YUK1bwLEUYmIsmm2Ib.jpg",
+   "posterPath": "/yCkPLQ10qKIUgRBXmQVVMF1h96d.jpg",
+   "fullReview": "An anthology horror drama series centering on different characters and locations, including a house with a murderous past, an asylum, a witch coven, a freak show, a hotel, a farmhouse in Roanoke, a cult, the apocalypse and a summer camp.",
    "castPics": [
     {
-     "name": "Omar Sy",
-     "character": "Assane Diop",
-     "photo": "https://image.tmdb.org/t/p/w185/Uuy6WuizieB4fOIGFp0gY90Yq2.jpg"
+     "name": "Sarah Paulson",
+     "character": "Cordelia Goode / Sally McKenna / Ms. Wilhemina Venable / Tuberculosis Karen / Mamie Eisenhower",
+     "photo": "https://image.tmdb.org/t/p/w185/tJnhBV516yrekR3hTDUw15UMbxS.jpg"
     },
     {
-     "name": "Ludivine Sagnier",
-     "character": "Claire Laurent",
-     "photo": "https://image.tmdb.org/t/p/w185/hd4fLjgtgNEidJOjuLNGfK1sOhm.jpg"
+     "name": "Evan Peters",
+     "character": "Tate Langdon / James Patrick March / Kai Anderson",
+     "photo": "https://image.tmdb.org/t/p/w185/m9okq20ca2Md38i2ekJeKs3vTwa.jpg"
     },
     {
-     "name": "Antoine Gouy",
-     "character": "Benjamin Férel",
-     "photo": "https://image.tmdb.org/t/p/w185/g0KnDyYzYHNY3TQgcX3B26ILnTu.jpg"
+     "name": "Angela Bassett",
+     "character": "Marie Laveau",
+     "photo": "https://image.tmdb.org/t/p/w185/tKnuviliyeKNGlo26IU5gIrJAtd.jpg"
     },
     {
-     "name": "Soufiane Guerrab",
-     "character": "Youssef Guédira",
-     "photo": "https://image.tmdb.org/t/p/w185/3KPutm0tNtt1CtFm6gyLPSqtOK2.jpg"
+     "name": "Kathy Bates",
+     "character": "Delphine LaLaurie",
+     "photo": "https://image.tmdb.org/t/p/w185/qZRTzTjV4OC1Ii9a0n8QBS9zMOd.jpg"
     },
     {
-     "name": "Shirine Boutella",
-     "character": "Sofia Belkacem",
-     "photo": "https://image.tmdb.org/t/p/w185/4qBT877sIjMLycDBmahEpL1nwEk.jpg"
+     "name": "Emma Roberts",
+     "character": "Madison Montgomery",
+     "photo": "https://image.tmdb.org/t/p/w185/utggW2yIufP3A5CGdT8H5mXyGLs.jpg"
     },
     {
-     "name": "Théo Christine",
-     "character": "Raoul Diop",
-     "photo": "https://image.tmdb.org/t/p/w185/rNcIPvVRdjH2GlftrXkhnLimE74.jpg"
+     "name": "Billie Lourd",
+     "character": "Mallory / Winter Anderson",
+     "photo": "https://image.tmdb.org/t/p/w185/1u8bZL6ZXu5iDbPO3Z0Spetyt34.jpg"
     }
    ],
-   "platform": "Netflix",
-   "ottSince": "2026-10-22",
-   "ottFreshDate": "2026-10-23",
-   "slug": "lupin",
-   "take": "Reviewers responded well — the performances and writing came in for particular praise.",
+   "platform": "Disney+",
+   "ottSince": "2026-09-28",
+   "ottFreshDate": "2026-09-24",
+   "slug": "american-horror-story",
+   "take": "The visuals and production design won critics over; the second half drew the odd complaint.",
    "takeSrc": "wiki",
    "takeAspects": [
-    "performances",
-    "writing"
+    "visuals",
+    "production design"
    ],
-   "takeArticle": "Lupin (French TV series)",
+   "takeArticle": "American Horror Story",
    "criticsTone": "positive",
+   "criticsCount": 3,
    "reception": {
     "rt": {
-     "pct": 98
+     "pct": 72
+    },
+    "ratings": {
+     "n": 3,
+     "median": 3
     },
     "asOf": "2026-10-29"
    },
@@ -5611,7 +5546,7 @@
      "score": "7.0/10"
     }
    ],
-   "votes": 50,
+   "votes": 51,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/chZa8Jd9kSDj11bekGjwwotFPEw.jpg",
    "isRecent": true,
@@ -6052,7 +5987,7 @@
      "score": "New release"
     }
    ],
-   "votes": 17,
+   "votes": 16,
    "verdict": "Just released — verdict soon",
    "poster": "https://image.tmdb.org/t/p/w342/s9syckECnUYhKePQ1A0DC0mFVZ9.jpg",
    "isRecent": true,
@@ -6088,16 +6023,16 @@
      "kind": "movie"
     },
     {
-     "title": "Hunting Grounds",
-     "slug": "hunting-grounds",
-     "poster": "https://image.tmdb.org/t/p/w342/cgZjpqRQt9sk6XMCwZ3B1NPAaoy.jpg",
+     "title": "All the Old Knives",
+     "slug": "all-the-old-knives",
+     "poster": "https://image.tmdb.org/t/p/w342/g4tMniKxol1TBJrHlAtiDjjlx4Q.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "All the Old Knives",
-     "slug": "all-the-old-knives",
-     "poster": "https://image.tmdb.org/t/p/w342/g4tMniKxol1TBJrHlAtiDjjlx4Q.jpg",
+     "title": "Hunting Grounds",
+     "slug": "hunting-grounds",
+     "poster": "https://image.tmdb.org/t/p/w342/cgZjpqRQt9sk6XMCwZ3B1NPAaoy.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -6112,13 +6047,6 @@
      "title": "Attraction",
      "slug": "attraction",
      "poster": "https://image.tmdb.org/t/p/w342/sTexeAs91LXC3qp8SbI73pYsqVr.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Furious 7",
-     "slug": "furious-7",
-     "poster": "https://image.tmdb.org/t/p/w342/wurKlC3VKUgcfsn0K51MJYEleS2.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -6144,13 +6072,6 @@
      "kind": "movie"
     },
     {
-     "title": "Our Kind of Traitor",
-     "slug": "our-kind-of-traitor",
-     "poster": "https://image.tmdb.org/t/p/w342/sYKzETDzreQKKazVj11J4Oy5Wgt.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Odd Thomas",
      "slug": "odd-thomas",
      "poster": "https://image.tmdb.org/t/p/w342/skBMhQjHLTU1rp4gutxHp0JuY1C.jpg",
@@ -6158,9 +6079,23 @@
      "kind": "movie"
     },
     {
+     "title": "Our Kind of Traitor",
+     "slug": "our-kind-of-traitor",
+     "poster": "https://image.tmdb.org/t/p/w342/sYKzETDzreQKKazVj11J4Oy5Wgt.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Bad Sister",
      "slug": "bad-sister",
      "poster": "https://image.tmdb.org/t/p/w342/hlJSkTnCZsotjOJjAA5jrdckH0o.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "52 Pick-Up",
+     "slug": "52-pick-up",
+     "poster": "https://image.tmdb.org/t/p/w342/ru8dtoh6tNi7kKAbLgbaE9J5SGf.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -6233,7 +6168,12 @@
     "seasons": 1,
     "limited": false,
     "season": 1,
-    "next": null,
+    "next": {
+     "s": 1,
+     "e": 22,
+     "name": "Episode 22",
+     "date": "2026-10-29"
+    },
     "list": [
      {
       "e": 1,
@@ -6492,13 +6432,6 @@
      "kind": "tv"
     },
     {
-     "title": "Swagger",
-     "slug": "swagger",
-     "poster": "https://image.tmdb.org/t/p/w342/nASkt8izgpR4toMYgiAnxfjWcE2.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
      "title": "The Rainmaker",
      "slug": "the-rainmaker",
      "poster": "https://image.tmdb.org/t/p/w342/q8l0lj20amBFi0SBs8NI9yJpaHq.jpg",
@@ -6516,6 +6449,13 @@
      "title": "Sanditon",
      "slug": "sanditon",
      "poster": "https://image.tmdb.org/t/p/w342/iKMCbTAkEgvA97M8Isdqp4t12Cf.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "North & South",
+     "slug": "north-south",
+     "poster": "https://image.tmdb.org/t/p/w342/djdM8JblEUsJN23vXd869X7ACQE.jpg",
      "language": "English",
      "kind": "tv"
     }
