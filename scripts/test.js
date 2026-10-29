@@ -8600,7 +8600,7 @@ test("redesign: quieter top — country pill, one toolbar row, extras under Comi
   // 29 Oct 2026: Mood and My List moved to the top — their own line in the toolbar, under the
   // dropdowns, as outlined pills with the saved count as a badge; not under Coming Soon any more.
   const soon = src.indexOf("<h2>Coming Soon</h2>"), extras = src.indexOf('<div class="extras">');
-  assert.ok(extras > 0 && extras < src.indexOf("<main>") && /data-click="openMood"[\s\S]*?id="mylistBtn"[\s\S]*?<span class="wl-n" id="wlCount">0<\/span>/.test(src.slice(extras, extras + 600)), "mood + My List in the toolbar, with the count badge");
+  assert.ok(extras > 0 && extras < src.indexOf("<main>") && /id="installBtn"[\s\S]*?id="mylistBtn"[\s\S]*?<span class="wl-n" id="wlCount">0<\/span>[\s\S]*?data-click="openMood"/.test(src.slice(extras, extras + 900)), "Add to Home, My List (with the count badge), Tonight in the toolbar");
   assert.ok(!/<h2>Coming Soon<\/h2>[\s\S]*class="extras"/.test(src) && soon > 0, "nothing left under Coming Soon");
   // The Install pill (29 Oct 2026): hidden until the browser says the site is installable (or
   // iOS from the second visit); tapping opens the native prompt or the Share tip; GA events.
