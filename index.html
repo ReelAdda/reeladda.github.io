@@ -182,9 +182,13 @@
   .toolbar .extras .mylist-btn.active { background: var(--marigold); border-color: var(--marigold); }
   .wl-n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #F1EFFC; color: var(--indigo); font-size: 11.5px; font-weight: 800; display: inline-grid; place-items: center; }
   .mylist-btn.active .wl-n { background: #241D52; color: #fff; }
-  /* The install pill: marigold, so the one action that is new to a visitor reads as an offer, not a filter. */
-  .toolbar .extras .install-btn { background: var(--marigold); border-color: var(--marigold); color: #241D52; } .toolbar .extras .install-btn .ic { color: #241D52; }
+  /* The install pill: marigold with ink text, the Pick of the Week eyebrow's colours, so the one new action stands out from the two filters. */
+  .toolbar .extras .install-btn { background: var(--marigold); border-color: var(--marigold); color: var(--ink); font-weight: 800; }
+  .toolbar .extras .install-btn .ic { color: var(--ink); }
+  .toolbar .extras .install-btn:hover, .toolbar .extras .install-btn:focus-visible { background: #FFC04D; border-color: #FFC04D; color: var(--ink); }
   .toolbar .extras .install-btn[hidden] { display: none; }
+  .toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn, .toolbar .extras .install-btn { white-space: nowrap; }
+  @media (max-width: 380px) { .toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn, .toolbar .extras .install-btn { padding: 0 10px; font-size: 13px; } }
   .extras .tonight-btn, .extras .mylist-btn { min-height: 44px; display: inline-flex; align-items: center; gap: 7px; }
   /* "Most searched" (scripts/lib/searchtop.js POPULAR_CSS, adapted to the homepage). */
   .popular { margin-top: 40px; }
@@ -500,9 +504,9 @@
   </select>
   <button class="share-btn icon-only" data-click="shareWeek" title="Share this week on WhatsApp" aria-label="Share this week on WhatsApp"><svg class="ic" aria-hidden="true"><use href="#icShare"/></svg></button>
   <div class="extras">
-      <button class="tonight-btn" data-click="openMood"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> What to watch tonight?</button>
+      <button class="tonight-btn" data-click="openMood" aria-label="What to watch tonight? Pick a mood"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> Tonight</button>
       <button class="mylist-btn" id="mylistBtn" data-click="toggleMyList"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List <span class="wl-n" id="wlCount">0</span></button>
-      <button class="install-btn" id="installBtn" data-click="installFromPill" hidden><svg class="ic" aria-hidden="true"><use href="#icDownload"/></svg> <span>Install app</span></button>
+      <button class="install-btn" id="installBtn" data-click="installFromPill" hidden><svg class="ic" aria-hidden="true"><use href="#icDownload"/></svg> <span>Install</span></button>
     </div>
   <div id="personalBar"></div>
 </div>

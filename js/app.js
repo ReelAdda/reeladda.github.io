@@ -710,11 +710,11 @@ function installPill(show, label) {
   const b = document.getElementById('installBtn');
   if (!b) return;
   if (label) b.querySelector('span').textContent = label;
-  if (show && b.hidden) pwaTrack('pwa_install_prompt', { kind: label === 'Install app' ? 'native' : 'tip' });
+  if (show && b.hidden) pwaTrack('pwa_install_prompt', { kind: label === 'Install' ? 'native' : 'tip' });
   b.hidden = !show;
 }
 function isStandalone() { return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; if (installEligible({ ignoreVisit: true })) installPill(true, 'Install app'); });
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; if (installEligible({ ignoreVisit: true })) installPill(true, 'Install'); });
 window.addEventListener('appinstalled', () => { deferredInstall = null; installPill(false); removeNudge(); pwaTrack('pwa_install'); });
 if (isStandalone() || /[?&]source=pwa\b/.test(location.search)) pwaTrack('pwa_launch');
 function installFromPill() {
@@ -959,7 +959,7 @@ fetch('/data-' + code + '.json?v=' + Date.now())
 
     computePersonal();
     // iPhone/iPad have no install prompt: from the second visit the pill offers the tip instead.
-    if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !deferredInstall && installEligible()) installPill(true, 'Add to Home Screen');
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !deferredInstall && installEligible()) installPill(true, 'Add to Home');
     dataReady = true;
     render();
 
