@@ -8595,10 +8595,13 @@ test("redesign: quieter top — country pill, one toolbar row, extras under Comi
   assert.ok(!/id="countrySel"/.test(src), "the old select is gone");
   const tb = src.slice(src.indexOf('<div class="toolbar">'), src.indexOf("<main>"));
   assert.ok(/id="langSel"/.test(tb) && /id="sortSel"/.test(tb) && /class="share-btn icon-only"[^>]*aria-label="Share this week on WhatsApp"/.test(tb), "toolbar: two selects + icon share");
-  assert.ok(!/tonight-btn|mylistBtn|channelBtn/.test(tb), "mood, My List and Follow left the toolbar");
+  assert.ok(!/channelBtn/.test(tb), "Follow left the toolbar");
+  // 29 Oct 2026: Mood and My List moved to the top — their own line in the toolbar, under the
+  // dropdowns, as outlined pills with the saved count as a badge; not under Coming Soon any more.
   const soon = src.indexOf("<h2>Coming Soon</h2>"), extras = src.indexOf('<div class="extras">');
-  assert.ok(extras > soon && /data-click="openMood"[\s\S]*?id="mylistBtn"/.test(src.slice(extras, extras + 600)), "mood + My List under Coming Soon");
-  for (const sel of [".cpill summary", ".cpill-list a", ".toolbar select", "footer a.foot-follow", ".extras .tonight-btn, .extras .mylist-btn"]) {
+  assert.ok(extras > 0 && extras < src.indexOf("<main>") && /data-click="openMood"[\s\S]*?id="mylistBtn"[\s\S]*?<span class="wl-n" id="wlCount">0<\/span>/.test(src.slice(extras, extras + 600)), "mood + My List in the toolbar, with the count badge");
+  assert.ok(!/<h2>Coming Soon<\/h2>[\s\S]*class="extras"/.test(src) && soon > 0, "nothing left under Coming Soon");
+  for (const sel of [".cpill summary", ".cpill-list a", ".toolbar select", "footer a.foot-follow", ".toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn"]) {
     const i = src.indexOf(sel + " {");
     assert.ok(i >= 0 && /min-height: 44px/.test(src.slice(i, src.indexOf("}", i))), `${sel}: 44px tall`);
   }

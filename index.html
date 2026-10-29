@@ -171,8 +171,17 @@
   .share-btn.icon-only { width: 44px; height: 44px; padding: 0; justify-content: center; background: transparent;
     border: 1px solid #E3D8C4; color: var(--indigo); flex: 0 0 44px; }
   .share-btn.icon-only .ic { width: 18px; height: 18px; }
-  /* Mood picker and My List, now under Coming Soon. */
-  .extras { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  /* Mood picker and My List: at the top, their own line under the dropdowns (29 Oct 2026). */
+  .toolbar .extras { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 0; }
+  /* The two as outlined pills in the toolbar's own style: same height and border as the dropdowns,
+     the icon in indigo, the saved count as a small badge. */
+  .toolbar .extras .tonight-btn, .toolbar .extras .mylist-btn { flex: 1 1 0; min-width: 0; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: transparent; border: 1px solid #E3D8C4; border-radius: 999px; color: var(--ink); font: 700 13.5px 'Inter', sans-serif; padding: 0 14px; cursor: pointer; transition: border-color .15s, background .15s; }
+  .toolbar .extras .tonight-btn:hover, .toolbar .extras .mylist-btn:hover, .toolbar .extras .tonight-btn:focus-visible, .toolbar .extras .mylist-btn:focus-visible { border-color: var(--indigo); background: var(--card); outline: none; }
+  .toolbar .extras .ic { width: 16px; height: 16px; color: var(--indigo); flex: none; }
+  .toolbar .extras .mylist-btn.active { background: var(--marigold); border-color: var(--marigold); }
+  .wl-n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #F1EFFC; color: var(--indigo); font-size: 11.5px; font-weight: 800; display: inline-grid; place-items: center; }
+  .mylist-btn.active .wl-n { background: #241D52; color: #fff; }
   .extras .tonight-btn, .extras .mylist-btn { min-height: 44px; display: inline-flex; align-items: center; gap: 7px; }
   /* "Most searched" (scripts/lib/searchtop.js POPULAR_CSS, adapted to the homepage). */
   .popular { margin-top: 40px; }
@@ -487,6 +496,10 @@
     <option value="date">Newest</option>
   </select>
   <button class="share-btn icon-only" data-click="shareWeek" title="Share this week on WhatsApp" aria-label="Share this week on WhatsApp"><svg class="ic" aria-hidden="true"><use href="#icShare"/></svg></button>
+  <div class="extras">
+      <button class="tonight-btn" data-click="openMood"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> What to watch tonight?</button>
+      <button class="mylist-btn" id="mylistBtn" data-click="toggleMyList"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List <span class="wl-n" id="wlCount">0</span></button>
+    </div>
   <div id="personalBar"></div>
 </div>
 
@@ -718,10 +731,6 @@
     <div class="ritual-row">
       <svg class="ic" aria-hidden="true"><use href="#icCal"/></svg> <span><b>Make it Friday movie night</b> — a weekly nudge in your own calendar to see what's new</span>
       <button class="ritual-btn" data-click="addFridayRitual">+ Add ritual</button>
-    </div>
-    <div class="extras">
-      <button class="tonight-btn" data-click="openMood"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> What to watch tonight?</button>
-      <button class="mylist-btn" id="mylistBtn" data-click="toggleMyList"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List (<span id="wlCount">0</span>)</button>
     </div>
 </section>
   <!--SSR:POPULAR--><section class="popular" aria-labelledby="pop-h"><div class="section-head"><h2 id="pop-h">Most searched this week</h2><span class="sub">The FilmyChill pages people found most on Google in the latest week</span></div><ol class="pop-list"><li><a href="/movie/the-dark-heaven.html"><span class="pop-b"><span class="pop-t">The Dark Heaven</span><span class="pop-m">Tamil · 2026</span></span></a></li><li><a href="/movie/premada-oorali.html"><span class="pop-b"><span class="pop-t">Premada Oorali</span><span class="pop-m">Kannada · 2026</span></span></a></li><li><a href="/movie/don-t-trouble-the-trouble.html"><span class="pop-b"><span class="pop-t">Don&#39;t Trouble the Trouble</span><span class="pop-m">Telugu · 2026</span></span></a></li><li><a href="/movie/thella-kaagitham.html"><span class="pop-b"><span class="pop-t">Thella Kaagitham</span><span class="pop-m">Telugu · 2026</span></span></a></li><li><a href="/movie/once-more.html"><span class="pop-b"><span class="pop-t">Once More</span><span class="pop-m">Tamil · 2026</span></span></a></li><li><a href="/movie/happy-journey.html"><span class="pop-b"><span class="pop-t">Happy Journey</span><span class="pop-m">Telugu · 2026</span></span></a></li></ol></section><!--/SSR:POPULAR-->
