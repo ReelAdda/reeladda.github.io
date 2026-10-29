@@ -623,7 +623,7 @@ function closeDetail() {
   document.body.style.overflow = '';
 }
 document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeDetail(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDetail(); closeInstallHelp(); } });
 document.getElementById('sortSel').addEventListener('change', e => { sortMode = e.target.value; render(); });
 
 // Language filter: one dropdown (Sept 2026) — the row of chips crowded the toolbar, most of
@@ -669,6 +669,7 @@ function moodPick(mood) {
   }
 }
 document.getElementById('moodOverlay').addEventListener('click', e => { if (e.target.id === 'moodOverlay') closeMood(); });
+document.getElementById('installOverlay').addEventListener('click', e => { if (e.target.id === 'installOverlay') closeInstallHelp(); });
 
 
 
@@ -719,12 +720,33 @@ window.addEventListener('appinstalled', () => { deferredInstall = null; installP
 if (isStandalone() || /[?&]source=pwa\b/.test(location.search)) pwaTrack('pwa_launch');
 function installFromPill() {
   if (deferredInstall) { triggerInstall(); return; }
-  // iOS (and any browser without a prompt): the one-line tip, dismissible, in the notes bar.
+  // iOS (and any browser without a prompt): no site can install itself there, so a sheet shows the
+  // taps, for the browser in hand (29 Oct 2026: the one-line tip under the toolbar went unseen).
   pwaTrack('pwa_install_tip');
-  const bar = document.getElementById('personalBar');
-  if (bar && !document.getElementById('installNudge')) bar.insertAdjacentHTML('afterbegin', installNudgeHtml('Add FilmyChill to your Home Screen', ''));
-  triggerInstall();
+  openInstallHelp();
 }
+function installStepsHtml() {
+  const ua = navigator.userAgent;
+  const share = '<svg class="ic" aria-hidden="true"><use href="#icShareIos"/></svg>';
+  const plus = '<svg class="ic" aria-hidden="true"><use href="#icPlusBox"/></svg>';
+  const add = `<li><span>Tap <b>Add</b>. The FilmyChill icon appears on your Home Screen.</span></li>`;
+  if (!/iPhone|iPad|iPod/.test(ua)) {
+    return `<li><span>Open your browser menu <b>⋮</b></span></li><li><span>Tap <b>Install app</b> or <b>Add to Home screen</b></span></li>${add}`;
+  }
+  const ipad = /iPad/.test(ua);
+  const where = /CriOS/.test(ua) ? 'at the top right, next to the address'
+    : /FxiOS|EdgiOS/.test(ua) ? 'in the menu (☰ or ⋯)'
+    : ipad ? 'at the top right' : 'in the bar at the bottom of the screen';
+  return `<li><span>Tap <b>Share</b> ${share}<span class="ios-where">${where}</span></span></li>`
+    + `<li><span>Scroll down and tap <b>Add to Home Screen</b> ${plus}</span></li>${add}`;
+}
+function openInstallHelp() {
+  const steps = document.getElementById('installSteps');
+  if (steps) steps.innerHTML = installStepsHtml();
+  document.getElementById('installOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeInstallHelp() { document.getElementById('installOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 let nudgeShownThisSession = false;
 
 function installEligible({ ignoreVisit = false } = {}) {
@@ -1012,6 +1034,7 @@ const ACTIONS = {
   saveFromDetail: (el, ev) => { ev.preventDefault(); toggleSave(el.dataset.list, Number(el.dataset.i)); closeDetail(); },
   triggerInstall: () => triggerInstall(),
   installFromPill: () => installFromPill(),
+  closeInstallHelp: () => closeInstallHelp(),
   dismissInstall: () => dismissInstall(),
   heroTap: (el) => heroTap(el),
 };
