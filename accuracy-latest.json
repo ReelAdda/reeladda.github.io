@@ -1,10 +1,21 @@
 {
- "date": "2026-10-28",
+ "date": "2026-10-29",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 0,
+ "pagesDisagreeing": 1,
  "high": 0,
- "correctable": 0,
- "byField": {},
- "rows": []
+ "correctable": 1,
+ "byField": {
+  "rent/buy": 1
+ },
+ "rows": [
+  {
+   "field": "rent/buy",
+   "severity": "medium",
+   "page": "none",
+   "tmdb": "JustWatch TV Store, Apple TV Store, Amazon Video, Fetch TV",
+   "code": "au",
+   "slug": "i-want-your-sex"
+  }
+ ]
 }
