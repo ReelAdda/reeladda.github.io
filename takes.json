@@ -4405,9 +4405,20 @@
     "kind": "rt",
     "value": 96
    },
-   "toneSrc": "summary"
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 96,
+     "n": 303,
+     "avg": 7.8
+    },
+    "mc": {
+     "score": 79,
+     "n": 51
+    }
+   }
   },
-  "checked": "2026-10-28",
+  "checked": "2026-10-29",
   "v": 6
  },
  "tt37020296": {
@@ -4944,9 +4955,20 @@
     "kind": "rt",
     "value": 85
    },
-   "toneSrc": "summary"
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 85,
+     "n": 183,
+     "avg": 7
+    },
+    "mc": {
+     "score": 66,
+     "n": 32
+    }
+   }
   },
-  "checked": "2026-10-28",
+  "checked": "2026-10-29",
   "v": 6
  },
  "tt36583977": {
@@ -5838,9 +5860,20 @@
     "kind": "rt",
     "value": 31
    },
-   "toneSrc": "summary"
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 31,
+     "n": 186,
+     "avg": 4.9
+    },
+    "mc": {
+     "score": 44,
+     "n": 35
+    }
+   }
   },
-  "checked": "2026-10-28",
+  "checked": "2026-10-29",
   "v": 6
  },
  "movie:1777082": {
@@ -41340,7 +41373,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-28",
+  "checked": "2026-10-29",
   "v": 6
  },
  "tt14178824": {
@@ -56093,14 +56126,14 @@
   "src": null,
   "hook": null,
   "article": "Paradise Lost (2026 film)",
-  "checked": "2026-10-28",
+  "checked": "2026-10-29",
   "v": 6
  },
  "tt47597140": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-28",
+  "checked": "2026-10-29",
   "v": 6
  },
  "movie:1786494": {
@@ -71297,9 +71330,10 @@
  "tt47597050": {
   "take": null,
   "src": null,
-  "checked": "2026-10-22",
-  "v": 6,
-  "cat": true
+  "hook": "Lee Yong-jae's directorial debut.",
+  "article": "Ugly Duckling Ms. Maeng",
+  "checked": "2026-10-29",
+  "v": 6
  },
  "tt0050974": {
   "take": null,
@@ -96766,7 +96800,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-28",
+  "checked": "2026-10-29",
   "v": 6
  },
  "tt37180686": {
