@@ -9473,7 +9473,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-28",
+  "checked": "2026-10-29",
   "v": 6
  },
  "tt32029049": {
@@ -71213,7 +71213,7 @@
     "median": 4.5
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-29",
   "v": 6
  },
  "tt21952924": {
@@ -97093,6 +97093,43 @@
     }
    }
   },
+  "checked": "2026-10-29",
+  "v": 6,
+  "cat": true
+ },
+ "tt43655467": {
+  "take": "Reviewers mostly checked out early on this one.",
+  "src": "wiki",
+  "hook": "The follow-up to ‘Ali G Indahouse’.",
+  "article": "Ali G: Who Iz I?",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 48
+   },
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 48,
+     "n": 29,
+     "avg": 5
+    },
+    "mc": {
+     "score": 38,
+     "n": 13
+    }
+   }
+  },
+  "checked": "2026-10-29",
+  "v": 6
+ },
+ "tt36770512": {
+  "take": null,
+  "src": null,
   "checked": "2026-10-29",
   "v": 6,
   "cat": true
