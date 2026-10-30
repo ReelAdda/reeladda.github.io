@@ -5932,7 +5932,7 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     assert.ok(/<h2>Episodes<\/h2><p>8 episodes · limited series/.test(html) && /<li class="out"><span class="epn">1<\/span><div><b>No Strings<\/b>/.test(html)
       && /<li class="next"><span class="epn">7<\/span><div><b>Forever<\/b><small>[^<]*62 min<\/small><\/div><span class="eptag">Next<\/span>/.test(html), "a timeline: aired, then the next one marked");
     assert.ok(/How many episodes does VisionQuest have\?/.test(html) && /When is the next episode of VisionQuest\?/.test(html));
-    assert.ok(/<td>Episodes<\/td><td>8 · limited series<\/td>/.test(html) && /<td>Episode length<\/td><td>48–62 min<\/td>/.test(html) && /<td>Part of<\/td><td>Marvel Cinematic Universe<\/td>/.test(html));
+    assert.ok(/<td>Episodes<\/td><td>8 · limited series<\/td>/.test(html) && /<td>Episode length<\/td><td>48–62 min<\/td>/.test(html) && /<td>Part of<\/td><td>Marvel<\/td>/.test(html));
     // The 27 Oct 2026 review's fixes.
     assert.ok(!/Best screen/.test(html), "no 'Best screen: Stream at home'");
     assert.ok(/"numberOfEpisodes":8/.test(html), "the episode count in the structured data");
@@ -5996,7 +5996,7 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     fsx.writeFileSync("movie/wandavision.html", sibPage);
     F.resetFranchiseIndex();   // a build reads the pages on disk once; here they changed mid-test
     const withRow = F.buildFilmPage({ ...item, slug: "vq2" }, "2026-10-27", new Set(["wandavision"]), IN);
-    assert.ok(/<h2>More from the Marvel Cinematic Universe<\/h2><div class="frrow">/.test(withRow) && withRow.includes('href="/movie/wandavision.html"'));
+    assert.ok(/<h2>More from Marvel<\/h2><div class="frrow">/.test(withRow) && withRow.includes('href="/movie/wandavision.html"'));
     assert.ok(withRow.indexOf("WandaVision") < withRow.indexOf("You're here"), "release order, this title marked: " + (/<div class="frrow">[\s\S]*?<\/div><\/div>/.exec(withRow) || [""])[0].slice(0, 300));
     assert.ok(!X.extractFacts(withRow, "vq2").similar.some((s) => s.slug === "wandavision"), "franchise cards aren't read as similar titles");
   });
@@ -10300,6 +10300,27 @@ test("film pages: five fixes from the VisionQuest audit, on pages Google sees (p
     assert.strictEqual(S.factsFingerprint(fix), S.factsFingerprint(off), "no sitemap date moves");
     GH.useHiddenList({ pages: { in: ["vq-fix"] } });
     assert.ok(/<b>Director:<\/b>/.test(on(100)), "pages hidden from Google are left as they are");
+  } finally { R.useRolloutConfig(null); GH.useHiddenList(null); }
+});
+test("series pages: Episodes before Good to know; visible date; no unused markup (30 Oct 2026)", () => {
+  const R = require("./lib/rollout.js"), GH = require("./lib/googlehide.js"), Fp = require("./lib/filmpage.js"), S = require("./lib/sitemap.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const it = { title: "VQ", slug: "vq-order", kind: "tv", released: "2026-10-13", language: "English", genre: "Drama", providers: ["JioHotstar"], rentBuy: [], tmdbId: 78, rating: 8.6, votes: 220,
+    trailer: "https://www.youtube.com/watch?v=sXKnmgmbkoE", cast: ["A", "B"], fullReview: "A story.",
+    episodes: { count: 2, seasons: 1, limited: true, list: [{ e: 1, name: "One", date: "2026-10-13", runtime: 50 }, { e: 2, name: "Two", date: "2099-10-20" }], next: { e: 2, s: 1, date: "2099-10-20", name: "Two" } } };
+  R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "redesign-v2": { percent: 100 }, "page-v3": { percent: 100 }, "google-hide": { percent: 100 } } });
+  try {
+    const h = Fp.buildFilmPage(it, "2026-10-30", new Set(), IN);
+    const order = [...h.matchAll(/<h2>([^<]+)<\/h2>/g)].map((m) => m[1]);
+    assert.ok(order.indexOf("Episodes") >= 0 && order.indexOf("Episodes") < order.indexOf("Good to know"), order.join(" > "));
+    assert.ok(/<div class="meta" style="margin-top:2px;font-size:12\.5px">Page updated 30 Oct 2026<\/div>/.test(h), "the date is shown, in the form every restamp pass matches");
+    assert.ok(!/BreadcrumbList/.test(h) && !/FAQPage/.test(h) && /<details>/.test(h), "no breadcrumb or FAQ markup; the questions stay on the page");
+    assert.ok(!/VideoObject/.test(h) && /data-yt="sXKnmgmbkoE"/.test(h), "no real upload date: no video markup, the trailer stays");
+    const real = Fp.buildFilmPage({ ...it, trailerDate: "2026-10-01T16:00:00Z" }, "2026-10-30", new Set(), IN);
+    assert.ok(/"uploadDate":"2026-10-01T16:00:00Z"/.test(real) && !/"contentUrl"/.test(real));
+    assert.strictEqual(S.factsFingerprint(real), S.factsFingerprint(h), "no sitemap date moves");
+    GH.useHiddenList({ pages: { in: ["vq-order"] } });
+    const hid = Fp.buildFilmPage(it, "2026-10-30", new Set(), IN);
+    assert.ok(/BreadcrumbList/.test(hid) && / hidden>Page updated/.test(hid), "pages hidden from Google are left as they are");
   } finally { R.useRolloutConfig(null); GH.useHiddenList(null); }
 });
 test("near-copy check: the v3 header is stripped like the old one (30 Oct 2026)", () => {

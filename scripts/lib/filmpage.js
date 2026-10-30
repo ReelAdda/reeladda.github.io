@@ -1046,6 +1046,16 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // the pills, the availability date and the sweep markers inside <!--FC:wtw-->).
   const v3 = v2 && inRollout("page-v3", item.slug);
   const code = (cfg && cfg.code) || "in";
+  // Episodes before Good to know (the owner, 30 Oct 2026): the schedule is what a series page's
+  // title promises, and it sat fourth, under Story, Cast and Good to know. Nothing else moves.
+  // Pages Google sees only, like the other 30 Oct changes.
+  const seen = !require("./googlehide.js").listedHidden(code, item.slug);   // a page Google sees
+  const epFirst = v3 && item.kind === "tv" && seen;
+  // Markup clean-up and a visible date (the owner, 30 Oct 2026), pages Google sees on v3: no
+  // BreadcrumbList (v3 shows no breadcrumb) and no FAQPage (the questions stay on the page; the
+  // markup earns nothing); a trailer VideoObject only with the trailer's real publish date, not
+  // the premiere as a stand-in; "Page updated" shown, dated like the sitemap (lib/migrate.js).
+  const tidyLd = v3 && seen;
   const country = countryNameFor(cfg); // "the US", not the config's "United States" — reads right in titles and prose
   const homeUrl = code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`;
   const year = (item.released || "").slice(0, 4);
@@ -1149,7 +1159,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // but out of the markup — an item missing a required field is only an error in Search
   // Console. embedUrl is the privacy-friendly nocookie embed we already render; contentUrl is
   // the watch URL.
-  const _upDate = videoUploadDate(item.trailerDate, item.freshDate || item.released);
+  const _upDate = tidyLd ? videoUploadDate(item.trailerDate, null) : videoUploadDate(item.trailerDate, item.freshDate || item.released);
   if (item.trailer && /youtube\.com\/watch/.test(item.trailer) && _upDate) {
     const _ytid = ytIdOf(item.trailer);
     ld.trailer = {
@@ -1158,7 +1168,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
       description: `Official trailer for ${item.title}${item.language ? ` (${item.language})` : ""}.`,
       thumbnailUrl: _ytid ? `https://img.youtube.com/vi/${_ytid}/hqdefault.jpg` : undefined,
       uploadDate: _upDate,
-      contentUrl: item.trailer,
+      contentUrl: tidyLd ? undefined : item.trailer,   // a watch page is not the media file
       embedUrl: _ytid ? `https://www.youtube-nocookie.com/embed/${_ytid}` : undefined,
     };
   }
@@ -1202,7 +1212,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const linkable = related.length >= 3 ? () => true : onSite;
 
   // FAQPage schema — only when we have at least 2 Q&As (Google wants a real list).
-  const faqLd = faqs.length >= 2 ? {
+  const faqLd = faqs.length >= 2 && !tidyLd ? {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: faqs.map((f) => ({
@@ -1238,8 +1248,8 @@ ${(() => {
 })()}
 <meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="Content-Security-Policy" content="${cspWith(`default-src 'self'; connect-src 'self' ${VOTE_CONNECT.join(" ")}; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org${item._fix30 && ytid ? " https://img.youtube.com" : ""} data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'`)}">${analyticsTag()}
-<script type="application/ld+json">${ldJson(ld)}</script>
-<script type="application/ld+json">${ldJson(breadcrumb)}</script>${faqLd ? `
+<script type="application/ld+json">${ldJson(ld)}</script>${tidyLd ? "" : `
+<script type="application/ld+json">${ldJson(breadcrumb)}</script>`}${faqLd ? `
 <script type="application/ld+json">${ldJson(faqLd)}</script>` : ""}
 ${v2 ? `<script src="/js/film.js" defer></script>\n` : ""}<style>
 ${(() => { const base = `  :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
@@ -1342,7 +1352,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
         : [item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert]).filter(Boolean).map(e).join(" · ")}</div>
       ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Where(item, { relState, country, V: V_TITLE, asOf, fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
       ${item.released && !v2 ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
-      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px"${v2 ? ' hidden' : ""}>Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
+      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px"${v2 && !tidyLd ? ' hidden' : ""}>Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
     </div>
   </div>${lean && !v3 ? "\n  </div>" : ""}
   ${v2 && !v3 ? V2.v2Cta(item, { cfg, country, asOf, relState, V: V_TITLE }) : ""}
@@ -1516,6 +1526,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       : `<p>Not streaming yet in ${e(country)}${item.released ? ` — ${e(item.title)} released in theatres ${e(item.released)}` : ""}. No platform has announced ${e(V.article.toLowerCase())} ${e(V.releaseDate)}. We re-check every day and this page updates the moment it lands.</p>`;
     return `<!--SW:pending--><h2>${e(V.heading(item.title))}</h2>${body}<!--/SW:pending-->`;
   })()}
+  ${epFirst ? SER.episodesHtml(item, fmtFull, undefined, { v2 }) : ""}
   ${((wtw) => {
     // v3: the where-to-watch block lives under the title (v3Where in lib/pagev2.js, which carries
     // everything this one carried); here only "Good to know" is drawn, in its place before Episodes.
@@ -1567,7 +1578,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
     }
     return "";
   })())}
-  ${SER.episodesHtml(item, fmtFull, undefined, { v2 })}
+  ${epFirst ? "" : SER.episodesHtml(item, fmtFull, undefined, { v2 })}
   ${ytid ? (v2 ? V2.v2Trailer(ytid, item.title) : `<h2>Trailer</h2><div class="frame"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${e(ytid)}?rel=0" title="${e(item.title)} trailer" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div><p class="tlink"><a href="https://www.youtube.com/watch?v=${e(ytid)}" rel="noopener">Watch the trailer on YouTube →</a></p>`) : item.trailer ? `<h2>Trailer</h2><p><a href="${e(item.trailer)}" rel="noopener">Find the trailer on YouTube →</a></p>` : ""}
   ${franchise ? franchiseRowHtml(franchise, item, code) : ""}
   ${simGridHtml(similar, code, linkable)}

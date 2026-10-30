@@ -235,7 +235,10 @@ function renderMigrated(manifest, cfg, { today, mode = null, modes = null, liste
     // "Page updated" and dateModified: the later of the facts' date and the date the page last
     // visibly changed (`last`, the sitemap's lastmod, moved by syncFilmLastmods). Neither date
     // is in the content fingerprint, so this can't loop.
-    const asOf = e.last && e.last > rec.updated && e.last <= today ? e.last : rec.updated;
+    // Since 30 Oct 2026 the sitemap's date alone when there is one: "Page updated" is now shown,
+    // and the facts' own date also moves with vote counts, so half the visible pages would have
+    // told readers a later date than the sitemap gives (3,124 of 6,143, 29 Oct build).
+    const asOf = e.last && e.last <= today ? e.last : rec.updated;
     // No TMDB id, or one TMDB no longer has (lib/lifecycle.js): no sweep can recheck it.
     const untracked = !e.tmdbId || !!e.tmdbGone;
     return renderFrozen(item, cfg, { asOf, knownSlugs, availability: availabilityFor(item, code), untracked });

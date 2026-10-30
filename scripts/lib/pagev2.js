@@ -70,8 +70,11 @@ const V2_CSS = [
   "  .epbar { height:6px; background:var(--line); border-radius:3px; overflow:hidden; margin:0 0 8px; } .epbar i { display:block; height:100%; width:0; background:var(--deep); border-radius:3px; transition:width .3s ease; }",
   "  .eplist { padding:4px 14px; } .eplist li { min-height:44px; align-items:center; border-top-color:var(--line); } .eplist b { color:var(--ink); }",
   "  .eplist .next { background:var(--tint); margin:0 -14px; padding:10px 14px; border-radius:10px; border-top:0; } .eplist .next b { font-weight:800; }",
-  "  .eplist .next .epn { animation:fcpulse 2s ease-in-out infinite; }",
-  "  @keyframes fcpulse { 0%,100% { box-shadow:0 0 0 0 rgba(255,173,31,.6); } 50% { box-shadow:0 0 0 6px rgba(255,173,31,0); } }",
+  // The "Next" pulse is a ring on its own layer that only scales and fades (30 Oct 2026): it used
+  // to animate box-shadow, which no browser can hand to the GPU, so phones repainted it on every
+  // frame for as long as the page was open (Lighthouse, VisionQuest mobile: ~2 s of rendering).
+  "  .eplist .next .epn { position:relative; } .eplist .next .epn::after { content:''; position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 6px rgba(255,173,31,.6); opacity:0; pointer-events:none; will-change:transform, opacity; animation:fcpulse 2s ease-out infinite; }",
+  "  @keyframes fcpulse { 0% { opacity:1; transform:scale(.78); } 50%,100% { opacity:0; transform:scale(1); } }",
   "  .eplist .soon .epn { background:transparent; border:1.5px solid var(--mute); color:var(--mute); }",
   "  .cast-card { flex:0 0 76px; } .cast-card img { width:64px; height:64px; }",
   "  .gtk tbody { display:flex; flex-wrap:wrap; gap:8px; } .gtk tr { flex-direction:row; align-items:center; gap:6px; border-radius:999px; padding:8px 12px; background:var(--card); }",

@@ -99,7 +99,10 @@ function readSeriesMark(html) {
   try { const v = JSON.parse(decodeURIComponent(m[1])); return { episodes: v.ep || null, franchise: v.fr || null }; } catch { return {}; }
 }
 
-const universeName = (kw) => String(kw).replace(/\s*\((?:mcu|dceu)\)\s*/i, "").replace(/\b\w/g, (ch) => ch.toUpperCase());
+// The MCU keyword is community-tagged on TMDB and takes in titles outside the canon (X-Men '97 on
+// VisionQuest's row, 30 Oct 2026): it is named "Marvel", which is true of every title it holds.
+const isMarvel = (kw) => /marvel cinematic universe|\(mcu\)/i.test(String(kw));
+const universeName = (kw) => (isMarvel(kw) ? "Marvel" : String(kw).replace(/\s*\((?:mcu|dceu)\)\s*/i, "").replace(/\b\w/g, (ch) => ch.toUpperCase()));
 const seriesName = (c) => String(c.name || "").replace(/\s+Collection$/i, "");
 
 // Pure: the titles to list in "More in this series" for `item`, from the edition's film index
@@ -123,7 +126,7 @@ function franchiseSiblings(item, index, { visible = () => true, max = 6 } = {}) 
     if (r) return r;
   }
   for (const u of fr.u || []) {
-    const r = pick((f) => (f.u || []).includes(u), `More from the ${universeName(u)}`, "universe");
+    const r = pick((f) => (f.u || []).includes(u), isMarvel(u) ? "More from Marvel" : `More from the ${universeName(u)}`, "universe");
     if (r) return r;
   }
   return null;
