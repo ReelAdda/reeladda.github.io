@@ -32,6 +32,7 @@ const { filmScore } = require("./score.js");
 const { filmIndexFor, filmPageExists, relatedFilms, sameFilmPageExists } = require("./graph.js");
 const { inRollout } = require("./rollout.js");
 const { cap, whyWatch } = require("./whywatch.js");
+const { plainOn } = require("./humanprose.js");
 const { skipIf } = require("./skipif.js");
 const { watchFit } = require("./watchfit.js");
 const { releaseState } = require("./release.js");
@@ -420,11 +421,74 @@ function descGeneric({ item, yr, country, thing, statsClause }) {
   ]);
 }
 
+// Plain snippets (rollout "human-prose", lib/humanprose.js), 30 Oct 2026: the same facts in
+// the same order, said in full sentences. No spaced em dashes, no rhetorical hook ("— but is
+// it worth your evening?"), no "verdict inside", and no list padded to three for rhythm.
+// Still never the platform's name on a streaming page (see descStreaming).
+function plainStats({ ratingBit, runtimeBit }) {
+  if (ratingBit && runtimeBit) return `It rates ${ratingBit} and runs ${runtimeBit}. `;
+  if (ratingBit) return `It rates ${ratingBit}. `;
+  if (runtimeBit) return `It runs ${runtimeBit}. `;
+  return "";
+}
+const PLAIN_DESC = {
+  streaming: (c) => fitDesc([
+    `${c.item.title} is streaming in ${c.country}. ${plainStats(c)}See the FilmyChill verdict, what critics said and every platform that has it.`,
+    `${c.item.title} is streaming in ${c.country}. ${plainStats(c)}See the FilmyChill verdict and every platform that has it.`,
+    `${c.item.title} is streaming in ${c.country}. See the verdict and where to watch it.`,
+    `${c.item.title} is streaming in ${c.country}.`,
+  ]),
+  rentBuy: (c) => fitDesc([
+    `${c.item.title} isn't on any subscription in ${c.country} yet. ${plainStats(c)}See where to rent or buy it and whether it's worth paying for.`,
+    `${c.item.title} isn't on a subscription in ${c.country} yet. See where to rent or buy it and the verdict.`,
+    `${c.item.title}: where to rent or buy it in ${c.country}, and the verdict.`,
+  ]),
+  inCinemas: (c) => {
+    const lead = c.runEnded ? `${c.item.title} has finished its theatrical run in ${c.country}`
+      : c.runOpen ? `${c.item.title} opened in cinemas in ${c.country}${c.openedOn ? ` on ${c.openedOn}` : ""}`
+      : `${c.item.title} is in cinemas in ${c.country}`;
+    return fitDesc([
+      `${lead}. We check every day for ${c.V.article.toLowerCase()} ${c.V.releaseDate}. ${plainStats(c)}See what critics said and the verdict.`,
+      `${lead}. We check every day for ${c.V.article.toLowerCase()} ${c.V.releaseDate}.`,
+      `${lead}.`,
+    ]);
+  },
+  generic: (c) => {
+    const what = [c.item.language, c.item.genre].filter(Boolean).join(" ");
+    return fitDesc([
+      `${c.item.title}${c.yr} is ${what ? `${/^[aeiou]/i.test(what) ? "an" : "a"} ${what}` : "a"} ${c.thing}. ${plainStats(c)}See the verdict, what critics said and where to watch it in ${c.country}.`,
+      `${c.item.title}${c.yr}: rating, verdict and where to watch it in ${c.country}.`,
+    ]);
+  },
+  // A title that already has a colon gets a full stop, not the older " —" separator.
+  expectedWindow: (c) => {
+    const sep = c.titleSep === " —" ? "." : c.titleSep;
+    return fitDesc([
+      `${c.item.title}${sep} ${c.V.word} release expected around ${c.est.short} (${c.windowBasis}, not a confirmed date). ${cap(c.inCinemas)}. ${plainStats(c)}`.trim(),
+      `${c.item.title}${sep} ${c.V.word} release expected around ${c.est.short} (an estimate, not a confirmed date). ${cap(c.inCinemas)}.`,
+      `${c.item.title}${sep} ${c.V.word} release expected around ${c.est.short}. ${cap(c.inCinemas)}.`,
+    ]);
+  },
+};
+// A plain rewrite of an older candidate's wording, for states without their own list above:
+// the hooks go, the spaced em dash becomes a sentence break.
+const plainSentence = (t) => String(t || "")
+  .replace(/ — (\p{Ll})/gu, (m, ch) => `. ${ch.toUpperCase()}`).replace(/ — /g, ". ").replace(/—/g, ",");
+
 // Which state the page is in, checked in this order (the first match wins); returns the
 // description for it. The lapsed check sits inside the cinemas state, as it always has.
 function descForState(c) {
   const { item, opts, upcoming, providers, rentBuy, est, inCinemasOnly } = c;
   const film = item.kind !== "tv";
+  if (c.plain) {
+    const pick = (film && digitalUpcoming(item)) || (film && digitalPassed(item)) || opts.gone || (upcoming && item.released) ? null
+      : providers.length ? "streaming" : rentBuy.length ? "rentBuy" : est && film ? null : est ? "expectedWindow"
+      : (item.platform === "Theatres" || (inCinemasOnly && item.released && !upcoming)) ? (film && item.released && !upcoming ? null : "inCinemas")
+      : "generic";
+    if (pick) return PLAIN_DESC[pick](c);
+    const d = descForState({ ...c, plain: false });
+    return d && typeof d === "object" ? { final: plainSentence(d.final) } : plainSentence(d);
+  }
   if (film && digitalUpcoming(item)) return descDigitalUpcoming(c);
   if (film && digitalPassed(item)) return descDigitalPassed(c);
   if (opts.gone) return descGone(c);
@@ -449,11 +513,13 @@ function filmMetaDescription(item, cfg = null, opts = {}) {
   const sd = require("./series.js").seriesDescription(item, (dt) => fmtDateFull(dt, localeFor(code0)), undefined, { airLabel });
   if (sd) return trim(sd, 160);
   const c = descContext(item, cfg, opts);
+  // Plain wording (rollout "human-prose"): worked out here too, for the same reason as above.
+  c.plain = !!(item && (item._plain || plainOn(item.slug)));
   let desc = descForState(c);
   if (desc && typeof desc === "object") return desc.final;
   // Last-resort guard: five live pages once shipped with an empty description. Never again.
   if (!desc || desc.trim().length < 20) {
-    desc = trim(`${item.title}${c.yr}: ${[item.language, item.genre, c.thing].filter(Boolean).join(" ")} — review, rating and where to watch in ${c.country}`, 155);
+    desc = trim(`${item.title}${c.yr}: ${[item.language, item.genre, c.thing].filter(Boolean).join(" ")}${c.plain ? ". Review, rating" : " — review, rating"} and where to watch in ${c.country}`, 155);
   }
   return desc;
 }
@@ -845,9 +911,10 @@ function franchiseRowHtml(fr, item, code) {
 
 // The score line for a page with no score yet. `label` and `audience` come from the item on a
 // live render, or from the page's own card on a frozen one (see compactEarlyScore).
-function compactScoreHtml(label, audience, tail = ", no critics' verdict yet.") {
+// `sep`: ":" on plain-wording pages (rollout "human-prose"); lib/facts.js reads either form.
+function compactScoreHtml(label, audience, tail = ", no critics' verdict yet.", sep = " —") {
   const e = escHtml;
-  return `<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">FilmyChill score</span> <span class="fcsb-mini-v">${e(label)}</span> — ${e(audience)}${tail} <a href="/about/#score">How scoring works</a></p></section>`;
+  return `<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">FilmyChill score</span> <span class="fcsb-mini-v">${e(label)}</span>${sep} ${e(audience)}${tail} <a href="/about/#score">How scoring works</a></p></section>`;
 }
 // Time words ("so far", "yet") only for a film that's actually new; an older film gets the plain
 // count ("only 12 audience ratings"), never a hint that more are on the way (Oct 2026).
@@ -942,7 +1009,7 @@ function fcScoreSection(item) {
       const n = Number(item.votes || 0);
       return compactScoreHtml(none.label, n > 0
         ? `${n.toLocaleString("en-IN")} audience rating${n === 1 ? "" : "s"} so far, all from before its release`
-        : "nobody has seen it yet", ". The score comes once people have watched it.");
+        : "nobody has seen it yet", ". The score comes once people have watched it.", item._plain ? ":" : " —");
     }
     const s = item.fcScore || null;
     // No score yet: one line instead of a card of empty rows (832 pages led with four
@@ -950,7 +1017,7 @@ function fcScoreSection(item) {
     // "Critics split" says the reviews are in: the line must not then add "no critics' verdict yet".
     if (!s) return compactScoreHtml(none.label, audiencePhrase(item.votes, isRecent(item)),
       none.label === "Critics split" ? ", and the critics' reviews are divided."
-        : isRecent(item) ? undefined : ", and no settled critics' verdict.");
+        : isRecent(item) ? undefined : ", and no settled critics' verdict.", item._plain ? ":" : " —");
     const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
     // Lean layout (LEAN_PAGE): the ring carries the rating and the count is said once — in the
     // "Based on N ratings" chip on an early read, else here.
@@ -971,7 +1038,7 @@ function fcScoreSection(item) {
     // Metacritic with counts, the published ratings' count and median, dated to the Wikipedia read.
     const RC = require("./reception.js");
     const cited = item.reception && inRollout(RC.RECEPTION_FEATURE, item.slug)
-      ? RC.receptionLine(item.reception, (d) => fmtDateFull(d, localeFor((item._code) || "in")), { tone: s && s.critics }) : "";
+      ? RC.receptionLine(item.reception, (d) => fmtDateFull(d, localeFor((item._code) || "in")), { tone: s && s.critics, plain: !!item._plain }) : "";
     const cri = s && s.critics
       ? { tag: s.critics.charAt(0).toUpperCase() + s.critics.slice(1), sub: cited || "From published reviews" }
       : { tag: "No verdict", sub: cited || "No settled critics' reception on record", none: true };
@@ -994,7 +1061,7 @@ function fcScoreSection(item) {
     const citedHtml = cited ? (article
       ? e(cited).replace("per Wikipedia", `per <a href="${wikiUrl(article)}" rel="noopener" target="_blank">Wikipedia</a>`)
       : e(cited)) : "";
-    const criPart = !cri.none || cited ? ` · <b>Critics:</b> ${e(criLabel)}${cited ? ` — ${citedHtml}` : ""}` : "";
+    const criPart = !cri.none || cited ? ` · <b>Critics:</b> ${e(criLabel)}${cited ? `${item._plain ? "," : " —"} ${citedHtml}` : ""}` : "";
     const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}</p>` : "";
     // The two halves as a marker too (<!--FC:fcs=audience|critics-->): lib/facts.js read them from
     // the rows' tags, which the v3 line replaces; without them a frozen render lost the ring.
@@ -1034,6 +1101,10 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // original air dates; an episode-length range says which episodes it covers. None of these is
   // in the facts fingerprint (lib/facts.js keyFacts), so no sitemap date moves.
   if (item && inRollout(PAGE_FIXES, item.slug) && !require("./googlehide.js").listedHidden((cfg && cfg.code) || "in", item.slug)) item = { ...item, _fix30: true };
+  // Plain wording (rollout "human-prose", lib/humanprose.js): the page's own sentences without
+  // spaced em dashes, canned fit lines or rotating flourishes. By slug, so a stage rewrites a
+  // share of the film pages and never all of them in one build.
+  if (item && plainOn(item.slug)) item = { ...item, _plain: true };
   const e = escHtml;
   const lean = leanPage(item);   // every fact once (LEAN_PAGE)
   const V2 = require("./pagev2.js");
@@ -1510,9 +1581,9 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       // gave the cinema date). The description quotes the same window, so the page backs it.
       const est = item.platform === "Theatres" ? streamWindowEstimate(item.released, item.language, asOfDate) : null;
       const usual = est && !est.passed
-        ? ` ${e(hasLanguageWindow(item.language) ? `${item.language} releases` : "Releases like this")} usually reach ${V.word === "OTT" ? "OTT" : "streaming"} ${est.lo}–${est.hi} weeks after opening, which would put it around <strong>${e(est.span)}</strong> — an estimate, not a confirmed date.`
+        ? ` ${e(hasLanguageWindow(item.language) ? `${item.language} releases` : "Releases like this")} usually reach ${V.word === "OTT" ? "OTT" : "streaming"} ${est.lo}–${est.hi} weeks after opening, which would put it around <strong>${e(est.span)}</strong>${item._plain ? ". That's an estimate based on past releases." : " — an estimate, not a confirmed date."}`
         : "";
-      return `<!--SW:pending--><!--SW:due=${e(due)}--><h2>${e(V.heading(item.title))}</h2><p>${opens} ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens — this page updates automatically the day it starts streaming.${usual}</p><!--/SW:pending-->`;
+      return `<!--SW:pending--><!--SW:due=${e(due)}--><h2>${e(V.heading(item.title))}</h2><p>${opens} ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens${item._plain ? ". This page" : " — this page"} updates automatically the day it starts streaming.${usual}</p><!--/SW:pending-->`;
     }
     if (digitalUpcoming(item)) {
       const on = item.digitalNote ? ` on ${e(item.digitalNote)}` : "";
@@ -1594,11 +1665,14 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
 </div>${v2 && !v3 && !upcoming ? "\n" + V2.v2Sticky(item, providers.map(String)) : ""}
 <footer>
   <nav><a href="${e(homeUrl)}">This week in ${e(country)}</a> · <a href="${code === "in" ? "/new-on-ott/" : `/${e(code)}/new-on-ott/`}">New on ${e(streamVocab(cfg).word === "OTT" ? "OTT" : "streaming")}</a>${code === "in" ? ` · ${LANGUAGE_PAGES.map(([n, s]) => `<a href="/${s}/">${n}</a>`).join(" · ")}` : ""} · <a href="/about/">About</a></nav>
-  Verdicts are compiled by FilmyChill's ${item._fix30 ? "automated system" : "editorial system"} from audience ratings and published critic reception — <a href="/about/">how we rate</a>.<br>
+  ${item._plain
+    ? `Each verdict is worked out by FilmyChill's automated system from audience ratings and published critics' reviews. <a href="/about/">How we rate</a>.<br>`
+    : `Verdicts are compiled by FilmyChill's ${item._fix30 ? "automated system" : "editorial system"} from audience ratings and published critic reception — <a href="/about/">how we rate</a>.<br>`}
   ${(() => {
     // The CC BY-SA credit links the film's own article when the page knows it (30 Oct 2026).
     const article = item._fix30 && (item.takeArticle || (item.reception && item.reception.article));
-    return article ? footerAttribution().replace('<a href="https://en.wikipedia.org/" rel="noopener" target="_blank">Wikipedia</a>', `<a href="${e(wikiUrl(article))}" rel="noopener" target="_blank">Wikipedia</a>`) : footerAttribution();
+    const credit = footerAttribution(undefined, { plain: !!item._plain });
+    return article ? credit.replace('<a href="https://en.wikipedia.org/" rel="noopener" target="_blank">Wikipedia</a>', `<a href="${e(wikiUrl(article))}" rel="noopener" target="_blank">Wikipedia</a>`) : credit;
   })()}© 2026 FilmyChill · Vikram Sharma
 </footer>
 </body>

@@ -574,6 +574,8 @@ function buildPlatformHubPage(data, cfg, hub) {
       altPaths[c.code] = c.code === "in" ? `/${hubDirName}/` : `/${c.code}/${hubDirName}/`;
     }
   }
+  // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
+  const plain = require("./humanprose.js").plainOn(url);
   return listingPageHtml({
     // "9 New on JioHotstar This Week (21–27 Sept)": a count and the week's dates are the two
     // things a searcher scanning results can check at a glance (and the count is exact: it is
@@ -584,7 +586,9 @@ function buildPlatformHubPage(data, cfg, hub) {
       `${fresh.length} New on ${hub.name} This Week (${weekRangeFor(gen, code)})`,
       `New on ${hub.name} ${countryName} This Week (${monthYear})`,
     ] : [`New on ${hub.name} ${countryName} This Week (${monthYear}) | FilmyChill`, `New on ${hub.name} ${countryName} This Week (${monthYear})`], 60),
-    desc: `${fresh.length ? "Every movie and series newly streaming" : "What's streaming"} on ${hub.name} in ${countryName} this week — ratings, critics' verdicts, what to skip. Updated twice daily.`,
+    desc: plain
+      ? `${fresh.length ? "Every movie and series newly streaming" : "What's streaming"} on ${hub.name} in ${countryName} this week, with ratings, critics' verdicts and what to skip. Updated twice daily.`
+      : `${fresh.length ? "Every movie and series newly streaming" : "What's streaming"} on ${hub.name} in ${countryName} this week — ratings, critics' verdicts, what to skip. Updated twice daily.`,
     canonical: url,
     h1: `New on ${hub.name} in ${countryName} this week`,
     updLine: `Updated ${updatedHuman} · refreshed twice daily`,
@@ -592,13 +596,15 @@ function buildPlatformHubPage(data, cfg, hub) {
     // saying "10 new titles" above a list where four landed a month ago is the same false
     // claim in smaller type.
     lead: fresh.length
-      ? `${fresh.length} new ${fresh.length === 1 ? "title" : "titles"} on ${hub.name} this week, ranked and rated — with an honest word on which are worth your evening.${carried.length ? ` Plus ${carried.length} still worth catching from earlier weeks.` : ""}`
+      ? (plain
+        ? `${fresh.length} new ${fresh.length === 1 ? "title" : "titles"} on ${hub.name} this week, with ratings and our verdict on each.${carried.length ? ` Below them are ${carried.length} from earlier weeks that are still worth watching.` : ""}`
+        : `${fresh.length} new ${fresh.length === 1 ? "title" : "titles"} on ${hub.name} this week, ranked and rated — with an honest word on which are worth your evening.${carried.length ? ` Plus ${carried.length} still worth catching from earlier weeks.` : ""}`)
       : `Nothing new landed on ${hub.name} this week. Here's what's still worth watching from recent weeks, ranked and rated.`,
     sections: [
       ...((films.length && series.length)
         ? [{ h2: "Movies", items: films }, { h2: "Series", items: series }]
         : (fresh.length ? [{ h2: `Added this week`, items: fresh }] : [])),
-      ...(carried.length ? [{ h2: "Still worth it — from earlier weeks", items: carried }] : []),
+      ...(carried.length ? [{ h2: plain ? "Still worth watching from earlier weeks" : "Still worth it — from earlier weeks", items: carried }] : []),
     ],
     faqs, extraLd, homeUrl: `https://filmychill.com${m.path}`, code, altPaths,
     // Up from "new this week" to "everything on it", when that page exists (see writeStreamingPages).

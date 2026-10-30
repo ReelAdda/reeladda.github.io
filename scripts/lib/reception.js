@@ -48,7 +48,8 @@ function contradicts(value, tone) {
 // row's label (lib/fcscore.js), so no cited figure argues with it. At most two figures, each
 // with its scale: one aggregator (Rotten Tomatoes first, else Metacritic) and the published
 // ratings, so the row never stacks three numbers on three scales beside the audience ring.
-function receptionLine(rec, fmt = (d) => d, { tone = null } = {}) {
+// `plain` (rollout "human-prose", lib/humanprose.js): ", per Wikipedia" instead of a spaced em dash.
+function receptionLine(rec, fmt = (d) => d, { tone = null, plain = false } = {}) {
   if (!rec) return "";
   const parts = [];
   // A series figure names its season: Wikipedia gives them per season.
@@ -59,7 +60,7 @@ function receptionLine(rec, fmt = (d) => d, { tone = null } = {}) {
   else if (mc) parts.push(`Metacritic ${mc.score}/100${paren([mc.n ? `${mc.n} critics` : "", mc.season ? `season ${mc.season}` : ""])}`);
   if (rec.ratings && rec.ratings.n) parts.push(`${rec.ratings.n} published rating${rec.ratings.n === 1 ? "" : "s"}${rec.ratings.median != null && rec.ratings.n >= 3 ? `, median ${rec.ratings.median}/5` : ""}`);
   if (!parts.length) return "";
-  return `${parts.join(" · ")} — per Wikipedia${rec.asOf ? `, ${fmt(rec.asOf)}` : ""}`;
+  return `${parts.join(plain ? " and " : " · ")}${plain ? "," : " —"} per Wikipedia${rec.asOf ? `, ${fmt(rec.asOf)}` : ""}`;
 }
 
 // Pure: the critics' tone a cited figure implies, for a page whose own reading has no settled

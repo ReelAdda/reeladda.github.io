@@ -98,19 +98,21 @@ function buildComingPage(items, cfg, { now = Date.now(), hasToday = true } = {})
   }
   const sections = groups.filter(([, xs]) => xs.length).map(([h, xs]) => ({ h2: h, items: xs }));
   const n = items.length;
+  // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
+  const plain = require("./humanprose.js").plainOn(comingUrl(code));
   const faqs = [{
     q: `What's coming to ${V.word} in ${country} next?`,
     a: items.slice(0, 5).map((x) => `${x.title} (${fmtDateShort(x.date, now, loc)}${x.platform ? `, ${x.platform}` : ""})`).join(", ") + (n > 5 ? `, and ${n - 5} more.` : "."),
   }, {
     q: `Are these dates confirmed?`,
-    a: `Yes — every date here was announced by the platform or studio and published on TMDB. Estimates are never listed. Each page switches to "streaming now" the day the title lands.`,
+    a: `Yes${plain ? ". Every" : " — every"} date here was announced by the platform or studio and published on TMDB. Estimates are never listed. Each page switches to "streaming now" the day the title lands.`,
   }];
   const url = comingUrl(code);
   const linkable = items.filter((x) => x.slug);
   return listingPageHtml({
     title: fitFirst([`Upcoming ${V.Releases} in ${country}: ${n} Dates Announced | FilmyChill`, `Upcoming ${V.Releases} in ${country}: ${n} Dates Announced`,
       `Upcoming ${V.Releases} in ${country} (${n})`, `Coming to ${V.word} in ${country}`], 60),
-    desc: fitFirst([`${n} films with an announced ${V.word === "OTT" ? "OTT" : "streaming"} release date in ${country}, soonest first — with the platform, where it's been named. Announced dates only, never estimates.`,
+    desc: fitFirst([`${n} films with an announced ${V.word === "OTT" ? "OTT" : "streaming"} release date in ${country}, soonest first${plain ? ", with the platform where it's been named" : " — with the platform, where it's been named"}. Announced dates only, never estimates.`,
       `${n} announced ${V.word === "OTT" ? "OTT" : "streaming"} release dates in ${country}, soonest first.`], 160),
     canonical: url,
     h1: `Coming to ${V.word} in ${country}`,
@@ -145,18 +147,22 @@ function buildTodayPage(records, cfg, { index = [], now = Date.now(), hasComing 
   if (yst.length) sections.push({ h2: `Yesterday, ${fmtDateShort(yday, now, loc)}`, items: yst });
   if (earlier.length) sections.push({ h2: "Earlier this week", items: earlier });
   const d = fmtDateShort(today, now, loc);
+  // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
+  const plain = require("./humanprose.js").plainOn(todayUrl(code));
   return listingPageHtml({
     title: fitFirst(tod.length
       ? [`${tod.length} New on ${V.word} Today in ${country} (${d}) | FilmyChill`, `${tod.length} New on ${V.word} Today in ${country} (${d})`, `New on ${V.word} Today (${d})`]
       : [`New on ${V.word} Today in ${country} (${d}) | FilmyChill`, `New on ${V.word} Today in ${country} (${d})`, `New on ${V.word} Today (${d})`], 60),
     desc: fitFirst([tod.length
-      ? `${tod.length} title${tod.length === 1 ? "" : "s"} started streaming in ${country} today, ${d}, plus everything that arrived this week — checked twice a day.`
+      ? `${tod.length} title${tod.length === 1 ? "" : "s"} started streaming in ${country} today, ${d}, plus everything that arrived this week${plain ? ". Checked twice a day." : " — checked twice a day."}`
+      : plain ? `What started streaming in ${country} over the last week, newest first. ${d}'s arrivals appear as soon as they land. Checked twice a day.`
       : `What started streaming in ${country} over the last week, newest first — ${d}'s arrivals appear as soon as they land. Checked twice a day.`], 160),
     canonical: todayUrl(code),
     h1: `New on ${V.word} today — ${country}`,
     updLine: `Updated ${new Date(now).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" })} · checked twice a day`,
     lead: tod.length
       ? `What appeared on a subscription service in ${country} today, then the rest of the week. Every date is the day FilmyChill first saw it streaming.`
+      : plain ? `Nothing new has landed in ${country} yet today. Below is everything that arrived this week, newest first. Today's titles appear here as soon as they land.`
       : `Nothing new has landed in ${country} yet today. Here's everything that arrived this week, newest first — today's titles appear here the moment they do.`,
     sections, faqs: [], code, extraLd: [],
     // Only link pages that exist this run — the coming page is gated and can be absent.
@@ -327,17 +333,25 @@ function buildLanguagePage(data, langName, slug, archive = null) {
       { "@type": "ListItem", position: 2, name: `${langName} this week`, item: url },
     ],
   }];
+  // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
+  const plain = require("./humanprose.js").plainOn(url);
   return listingPageHtml({
     title: `New ${langName} Movies & OTT Releases This Week (${monthYear}) | FilmyChill`,
-    desc: thin
-      ? `New ${langName} movies in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`
-      : `Every new ${langName} movie in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`,
+    desc: plain
+      ? `${thin ? "New" : "Every new"} ${langName} movie${thin ? "s" : ""} in theatres and on OTT this week, with ratings, critics' verdicts and where to watch. Updated twice daily.`
+      : thin
+        ? `New ${langName} movies in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`
+        : `Every new ${langName} movie in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`,
     canonical: url,
     h1: `New ${langName} Movies & OTT This Week`,
     updLine: `Updated ${updatedHuman} · refreshed twice daily`,
-    lead: thin
-      ? `The ${langName} titles in theatres and on OTT right now, ranked and rated — plus what's coming next. A quiet week for ${langName}; this page fills out as more lands.`
-      : `Every ${langName} title that hit theatres or started streaming this week, ranked and rated — plus what's coming next.`,
+    lead: plain
+      ? (thin
+        ? `The ${langName} titles in theatres and on OTT right now, with ratings, and what's coming next. It's a quiet week for ${langName}, so this page grows as more titles land.`
+        : `Every ${langName} title that hit theatres or started streaming this week, with ratings, and what's coming next.`)
+      : thin
+        ? `The ${langName} titles in theatres and on OTT right now, ranked and rated — plus what's coming next. A quiet week for ${langName}; this page fills out as more lands.`
+        : `Every ${langName} title that hit theatres or started streaming this week, ranked and rated — plus what's coming next.`,
     sections: [
       { h2: "In theatres", items: theatres },
       { h2: "Streaming now", items: ott },

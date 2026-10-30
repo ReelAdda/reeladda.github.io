@@ -134,6 +134,29 @@ function fitCaveat(item) {
 
 function cap(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : str; }
 
+// Plain wording (rollout "human-prose", 30 Oct 2026): one sentence of facts the page holds,
+// for the "worth watching?" answer of a title with no verdict yet ("It's a 2h 13m Telugu drama,
+// rated U/A."). The caveat lines above fit any film of a given length or vote count, which is
+// what makes them read as machine-made ("Standard length — a normal evening's watch, nothing
+// to plan around"), and they repeat what the page already shows. null when there's nothing.
+function plainFit(item) {
+  if (!item) return null;
+  const genre = String(item.genre || "").split("/").map((g) => g.trim().toLowerCase()).filter(Boolean)[0] || "";
+  const lang = item.language || "";
+  const cert = item.cert ? `, rated ${item.cert}` : "";
+  if (item.kind === "tv") {
+    const n = Number(item.seasons) || 0;
+    const what = [lang, genre, "series"].filter(Boolean).join(" ");
+    if (!lang && !genre && !n) return null;
+    return `It's ${article(what)} ${what}${n ? ` with ${n} season${n === 1 ? "" : "s"}` : ""}${cert}.`;
+  }
+  const mins = Number(item.runtime) || 0;
+  const rt = mins >= 25 ? fmtRuntime(mins) : "";
+  const what = [rt, lang, genre, "film"].filter(Boolean).join(" ");
+  if (!rt && !lang && !genre) return null;
+  return `It's ${article(what)} ${what}${cert}.`;
+}
+
 // Public: { heading, text } or null. The heading is per-film on purpose — no two pages
 // share an H2 ("Should you spend 2h 22m on it?").
 function whyWatch(item) {
@@ -154,6 +177,7 @@ module.exports = {
   commitmentLine,
   fitCaveat,
   pickVariant,
+  plainFit,
   runtimePhrase,
   whyWatch,
 };

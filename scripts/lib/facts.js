@@ -99,7 +99,8 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   // The compact score line ("Too early — 3 audience ratings so far") is the only place a
   // brand-new film's count appears.
   // Older films read "only 12 audience ratings" (no "so far": time words are for new films only).
-  const compactVotes = /<span class="fcsb-mini-v">[^<]*<\/span> — (?:only )?([\d,]+) audience ratings?(?: so far)?/.exec(html);
+  // " — " on older renders, ": " on plain-wording ones (lib/humanprose.js).
+  const compactVotes = /<span class="fcsb-mini-v">[^<]*<\/span>(?: —|:) (?:only )?([\d,]+) audience ratings?(?: so far)?/.exec(html);
   const votes = mark ? Number(mark[2] || 0) : votesHead ? Number(votesHead[1].replace(/,/g, "")) : audRow ? Number(audRow[2].replace(/,/g, ""))
     : compactVotes ? Number(compactVotes[1].replace(/,/g, "")) : 0;
   // Series carry their episode length in the "Good to know" table, not in the JSON-LD.

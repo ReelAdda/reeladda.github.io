@@ -288,6 +288,8 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
   const countryName = m.name; // "India", "the US", ...
   const homeUrl = `https://filmychill.com${m.path}`;
   const url = ottWeekUrl(code);
+  // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
+  const plain = require("./humanprose.js").plainOn(url);
   // Market vocabulary. The URL stays /new-on-ott/ everywhere — it is already indexed and a
   // slug is not user-facing copy — but every word a visitor or a SERP snippet SEES comes
   // from V, so the US page reads "New Streaming Releases", never "New OTT Releases".
@@ -342,11 +344,12 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
   // Same rule as the language pages: only claim completeness when the page can back it.
   const thin = freshItems.length < 8;
   const lead = thin ? "New movies and web series" : "Every new movie and web series";
+  const dash = plain ? "," : " —";   // plain wording: a comma (lib/humanprose.js)
   const desc = fitFirst([
-    `${lead} streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`,
-    `${lead} streaming in ${countryName} this week${two ? ` on ${two}` : ""} — with ratings, verdicts and where to watch. Updated twice daily.`,
-    `${lead} streaming in ${countryName} this week — with ratings, verdicts and where to watch. Updated twice daily.`,
-    `${lead} streaming in ${countryName} this week — ratings, verdicts and where to watch.`,
+    `${lead} streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""}${dash} with ratings, verdicts and where to watch. Updated twice daily.`,
+    `${lead} streaming in ${countryName} this week${two ? ` on ${two}` : ""}${dash} with ratings, verdicts and where to watch. Updated twice daily.`,
+    `${lead} streaming in ${countryName} this week${dash} with ratings, verdicts and where to watch. Updated twice daily.`,
+    `${lead} streaming in ${countryName} this week${dash} ${plain ? "with " : ""}ratings, verdicts and where to watch.`,
   ], 160);
 
   // FAQ per major platform + one "best of" — real answers from real data, mirrored in
@@ -370,7 +373,7 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
   if (carriedItems.length >= 2) {
     faqs.push({
       q: `What else is worth watching right now in ${countryName}?`,
-      a: `Not new this week, but still worth it: ${carriedItems.slice(0, 4).map((x) => `${x.title} (${x.platform})`).join(", ")}.`,
+      a: `${plain ? "From earlier weeks and still worth watching" : "Not new this week, but still worth it"}: ${carriedItems.slice(0, 4).map((x) => `${x.title} (${x.platform})`).join(", ")}.`,
     });
   }
   const faqLd = faqs.length >= 2 ? {
@@ -437,7 +440,7 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
   + (carriedItems.length ? `
   <section>
     <h2>Still worth it <span class="cnt">${carriedItems.length}</span></h2>
-    <p class="rm" style="margin:0 0 10px">Not new this week — added in earlier weeks and still worth your evening.</p>
+    <p class="rm" style="margin:0 0 10px">${plain ? "Added in earlier weeks and still worth watching." : "Not new this week — added in earlier weeks and still worth your evening."}</p>
     ${carriedItems.map(rowFor).join("\n")}
   </section>` : "");
 
@@ -536,7 +539,7 @@ ${ogImageTag(hubOgImage(freshItems, cfg))}
 <div class="wrap">
   <h1>New ${e(V.Releases)} This Week in ${e(countryName)}</h1>
   <div class="upd">Updated ${e(updatedHuman)} · refreshed twice daily</div>
-  <p class="lead">Every movie and web series that started streaming in ${e(countryName)} in the last 45 days, grouped by platform and ranked by rating — so you know what's actually worth your time.</p>
+  <p class="lead">Every movie and web series that started streaming in ${e(countryName)} in the last 45 days, grouped by platform and ranked by rating${plain ? "." : " — so you know what's actually worth your time."}</p>
 ${sections}
 ${platformHtml}
 ${calendarHtml}
@@ -544,7 +547,7 @@ ${faqHtml}
   <a class="btn" href="${e(homeUrl)}">← This week's full picks (theatres + ${e(V.word)})</a>
 </div>
 <footer>
-  ${footerAttribution()}© 2026 FilmyChill
+  ${footerAttribution(undefined, { plain })}© 2026 FilmyChill
 </footer>
 </body>
 </html>`;

@@ -12,7 +12,8 @@ const {
   localeFor,
 } = require("./core.js");
 const { isRecent } = require("./fcscore.js");
-const { whyWatch } = require("./whywatch.js");
+const { plainFit, whyWatch } = require("./whywatch.js");
+const { plainOn } = require("./humanprose.js");
 const { certAudience } = require("./enrich.js");
 const { digitalAnnounceText, digitalUpcoming } = require("./pagekit.js");
 const { streamVocab, streamWindowEstimate } = require("./rules.js");
@@ -207,7 +208,9 @@ function buildGoodToKnow(item, cfg = null) {
   }
   if (item.cert) {
     const family = certAudience(item.cert, certRegion(cfg)).label;   // one rule for 18 rating boards
-    rows.push({ label: "Watch with family?", value: `${item.cert} · ${family}` });
+    // lib/facts.js reads the certificate before the " · "; the label after it is wording only.
+    const plainRow = !!(item._plain || plainOn(item.slug));
+    rows.push({ label: "Watch with family?", value: `${item.cert} · ${plainRow ? family.replace(" — ", ", ") : family}` });
   }
   if (item.genre) rows.push({ label: "Genre", value: item.genre });
   if (item.language) rows.push({ label: "Language", value: item.language });
@@ -231,25 +234,31 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   // FAQ answer agrees with the stamp at the top; the audience verdict is the fallback.
   // The plain reason: the page's reason carries its evidence (lib/reception.js) and the answer
   // gives the numbers in its own words, so they'd be said twice otherwise.
-  const verdictLabel = item.fcScore ? `FilmyChill Score: ${item.fcScore.verdict} — ${require("./reception.js").plainReason(item.fcScore.reason).replace(/\.$/, "")}${item.fcScore.early ? ` (based on only ${Number(item.fcScore.votes).toLocaleString("en-IN")} ratings)` : ""}` : (item.verdict || "");
+  // Plain wording (rollout "human-prose", lib/humanprose.js): full stops instead of spaced em
+  // dashes, and no canned "fit" line after the facts.
+  const plain = !!(item._plain || plainOn(item.slug));
+  const verdictLabel = item.fcScore ? `FilmyChill Score: ${item.fcScore.verdict}${plain ? "." : " —"} ${require("./reception.js").plainReason(item.fcScore.reason).replace(/\.$/, "")}${item.fcScore.early ? ` (based on only ${Number(item.fcScore.votes).toLocaleString("en-IN")} ratings)` : ""}` : (item.verdict || "");
 
   // Q1: worth watching. Verdict + reception + the fit line (see whyWatch) — the last part
   // is what stops this answer reading like every other page's answer, and it's the bit an
   // answer engine can't get from a ratings feed.
-  const fit = whyWatch(item);
+  // Plain: no fit line after a verdict (it restated the runtime and rating count in a canned
+  // sentence), and the facts sentence alone where there is no verdict yet.
+  const fit = plain ? (plainFit(item) ? { text: plainFit(item) } : null) : whyWatch(item);
+  const fitAfterVerdict = plain ? null : fit;
   if (verdictLabel && !/verdict soon|enough ratings/i.test(verdictLabel)) {
     faqs.push({
       q: `Is ${item.title} worth watching?`,
       // Self-contained on purpose: featured snippets and AI answer engines quote this text
       // out of context, so "see above" is a dead reference the moment it leaves the page.
-      a: trim(`${verdictLabel}.${item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10${Number(item.votes) ? ` from ${Number(item.votes).toLocaleString("en-IN")} audience ratings on TMDB` : " on audience ratings"}.` : ""}${item.take ? ` ${item.take}` : ""}${fit ? ` ${fit.text}` : ""}`, 420),
+      a: trim(`${verdictLabel}.${item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10${Number(item.votes) ? ` from ${Number(item.votes).toLocaleString("en-IN")} audience ratings on TMDB` : " on audience ratings"}.` : ""}${item.take ? ` ${item.take}` : ""}${fitAfterVerdict ? ` ${fitAfterVerdict.text}` : ""}`, 420),
     });
   } else if (fit) {
     // Previously an unrated or brand-new title got NO answer to the site's central question.
     // We still won't invent a verdict — we answer with what we can defend.
     faqs.push({
       q: `Is ${item.title} worth watching?`,
-      a: trim(`${isRecent(item, Date.parse(today)) ? `It's too early for a verdict — ${item.title} doesn't have enough ratings yet.` : `There aren't enough ratings for a verdict on ${item.title}.`} ${fit.text}`, 420),
+      a: trim(`${isRecent(item, Date.parse(today)) ? `It's too early for a verdict${plain ? "." : " —"} ${item.title} doesn't have enough ratings yet.` : `There aren't enough ratings for a verdict on ${item.title}.`} ${fit.text}`, 420),
     });
   }
   // Q1b: what critics say, with the figures the page cites (lib/reception.js, rollout
@@ -259,18 +268,20 @@ function buildFaqs(item, countryName = "India", cfg = null) {
     const RC = require("./reception.js");
     const { inRollout } = require("./rollout.js");
     const tone = item.fcScore && item.fcScore.critics ? item.fcScore.critics : null;
-    const cited = item.reception && item.slug && inRollout(RC.RECEPTION_FEATURE, item.slug) ? RC.receptionLine(item.reception, (d) => fmtDateFull(d, localeFor(cfg && cfg.code)), { tone }) : "";
+    const cited = item.reception && item.slug && inRollout(RC.RECEPTION_FEATURE, item.slug) ? RC.receptionLine(item.reception, (d) => fmtDateFull(d, localeFor(cfg && cfg.code)), { tone, plain }) : "";
     if (cited) {
       const label = tone || RC.toneFromFigure(item.reception);
-      faqs.push({ q: `What do critics say about ${item.title}?`, a: `${label ? label.charAt(0).toUpperCase() + label.slice(1) + " — " : ""}${cited}.` });
+      faqs.push({ q: `What do critics say about ${item.title}?`, a: `${label ? label.charAt(0).toUpperCase() + label.slice(1) + (plain ? ": " : " — ") : ""}${cited}.` });
     }
   }
   // Q2: where to watch
   let whereA;
-  if (upcoming) whereA = `${item.title} hasn't released yet${item.released ? ` — it's due ${fmtDateFull(item.released, localeFor(cfg && cfg.code))}` : ""}. We'll list where to watch once it's out.`;
+  // The release-day settle pass (lib/pagekit.js) matches both forms of this answer.
+  if (upcoming) whereA = `${item.title} hasn't released yet${item.released ? `${plain ? ". It's due" : " — it's due"} ${fmtDateFull(item.released, localeFor(cfg && cfg.code))}` : ""}. We'll list where to watch once it's out.`;
   else if (provs.length) whereA = `You can stream ${item.title} in ${countryName} on ${provs.join(", ")}.`;
   else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across ${countryName}. ${V.article} ${V.release} hasn't been announced yet.`;
-  else whereA = `Streaming availability for ${item.title} in ${countryName} isn't confirmed yet — check back as platforms update.`;
+  else whereA = plain ? `Streaming availability for ${item.title} in ${countryName} isn't confirmed yet. This page updates when a platform lists it.`
+    : `Streaming availability for ${item.title} in ${countryName} isn't confirmed yet — check back as platforms update.`;
   faqs.push({ q: `Where can I watch ${item.title}?`, a: whereA });
 
   // Q2b: streaming release date — the highest-volume non-brand query shape in every
@@ -285,13 +296,16 @@ function buildFaqs(item, countryName = "India", cfg = null) {
     // is a first sighting or the release date: neither is when the film reached the platform.
     const arrival = item.arrived ? fmtDateFull(item.arrived, localeFor(cfg && cfg.code)) : null;
     if (provs.length) {
-      ottA = `${item.title} is already streaming in ${countryName} on ${provs.join(", ")}${arrival ? ` — it arrived${item.arrivedOn && provs.includes(item.arrivedOn) ? ` on ${item.arrivedOn}` : ""} on ${arrival}` : ""}.`;
+      // One sentence either way: the departure patch (lib/lifecycle.js) rewrites it up to the full stop.
+      ottA = `${item.title} is already streaming in ${countryName} on ${provs.join(", ")}${arrival ? (plain
+        ? `, where it arrived on ${arrival}`
+        : ` — it arrived${item.arrivedOn && provs.includes(item.arrivedOn) ? ` on ${item.arrivedOn}` : ""} on ${arrival}`) : ""}.`;
     } else if (digitalUpcoming(item)) {
       ottA = `${digitalAnnounceText(item.title, item.digitalDate, item.digitalNote, countryName, cfg)} This page updates automatically the day it starts streaming.`;
     } else {
       const est = item.platform === "Theatres" ? streamWindowEstimate(item.released, item.language) : null;
       const hint = est && !est.passed
-        ? ` ${item.language || "These"} releases typically reach streaming about ${est.lo}–${est.hi} weeks after their theatrical run, which would put it around ${est.span} — that's a pattern, not a confirmed date.`
+        ? ` ${item.language || "These"} releases typically reach streaming about ${est.lo}–${est.hi} weeks after their theatrical run, which would put it around ${est.span}${plain ? ". That's an estimate based on past releases." : " — that's a pattern, not a confirmed date."}`
         : "";
       ottA = `${V.article} ${V.releaseDate} for ${item.title} hasn't been officially announced yet.${hint} This page updates automatically the day it starts streaming.`;
     }
@@ -302,7 +316,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   if (item.cert) {
     const bucket = certAudience(item.cert, certRegion(cfg)).bucket;
     const a =
-      bucket === "adults" ? `${item.title} is rated ${item.cert} — aimed at adult audiences.`
+      bucket === "adults" ? `${item.title} is rated ${item.cert}${plain ? ", for adult audiences." : " — aimed at adult audiences."}`
       : bucket === "teens" ? `${item.title} is rated ${item.cert}. Fine for older kids with guidance.`
       : bucket === "family" ? `${item.title} is rated ${item.cert}, suitable for family viewing.`
       : `${item.title} is rated ${item.cert}.`;

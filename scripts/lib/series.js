@@ -247,7 +247,9 @@ function episodeSchema(ep) {
 function episodeFaqs(item, fmt, today = new Date().toISOString().slice(0, 10)) {
   const ep = item && item.kind === "tv" && item.episodes;
   if (!ep || !ep.count) return [];
-  const out = [{ q: `How many episodes does ${item.title} have?`, a: `${item.title} has ${ep.count} episode${ep.count === 1 ? "" : "s"}${ep.seasons > 1 ? ` across ${ep.seasons} seasons` : ""}${ep.limited ? " — it's a limited series" : ""}.` }];
+  // Plain wording (rollout "human-prose", lib/humanprose.js): two sentences, no spaced em dash.
+  const plain = !!(item._plain || require("./humanprose.js").plainOn(item.slug));
+  const out = [{ q: `How many episodes does ${item.title} have?`, a: `${item.title} has ${ep.count} episode${ep.count === 1 ? "" : "s"}${ep.seasons > 1 ? ` across ${ep.seasons} seasons` : ""}${ep.limited ? (plain ? ". It's a limited series" : " — it's a limited series") : ""}.` }];
   const nd = nextDrop(ep, today);
   if (nd) {
     const which = nd.nums.length === 1 ? `Episode ${nd.nums[0]}${nd.name ? `, "${nd.name}",` : ""} comes` : `Episodes ${nd.nums.slice(0, -1).join(", ")} and ${nd.nums[nd.nums.length - 1]} come`;

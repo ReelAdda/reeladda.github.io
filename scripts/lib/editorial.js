@@ -814,6 +814,63 @@ function composeTake(a, seed = 0) {
   }
 }
 
+// Plain critics' summaries (rollout "human-prose", lib/humanprose.js), 30 Oct 2026: one
+// sentence per shape, said the way a person reports a reception. The pools above rotate
+// synonyms so neighbouring cards never match ("a drubbing", "the fault line", "took the
+// heat"), and that synonym-cycling is itself one of the clearest marks of machine writing
+// (Wikipedia:Signs of AI writing, "elegant variation"). Two films with the same shape now share
+// a sentence frame; their praised and criticised aspects still differ.
+function composePlainTake(a) {
+  if (!a) return null;
+  const list = (arr) => (arr.length === 2 ? `${arr[0]} and ${arr[1]}` : arr[0]);
+  const p = (a.praised || []).length ? list(a.praised) : null;
+  const c = (a.panned || []).length ? a.panned[0] : null;
+  const d = (a.divided || []).length ? a.divided[0] : null;
+  switch (a.tone) {
+    case "acclaim":
+      return p ? `Critics loved it, especially the ${p}.` : `Critics loved it.`;
+    case "positive":
+      if (p && c) return `Critics liked the ${p} but criticised the ${c}.`;
+      if (p && d) return `Critics liked the ${p} but disagreed about the ${d}.`;
+      if (d) return `Critics were mostly positive but disagreed about the ${d}.`;
+      if (p) return `Critics liked it, especially the ${p}.`;
+      if (c) return `Critics were mostly positive, with complaints about the ${c}.`;
+      return `Critics were mostly positive.`;
+    case "mixed":
+      if (p && c) return `Critics were split. They praised the ${p} and criticised the ${c}.`;
+      if (p && d) return `Critics were split. They praised the ${p} and disagreed about the ${d}.`;
+      if (d) return `Critics were split, most of all about the ${d}.`;
+      if (p) return `Critics were split. Some praised the ${p}.`;
+      if (c) return `Critics were split, and most complaints were about the ${c}.`;
+      return a.score ? `Critics were split.` : null;   // no aspect, no figure: say nothing
+    case "negative":
+      return c ? `Critics didn't like it, especially the ${c}.` : `Critics didn't like it.`;
+    default:
+      if (p && c) return `Reviewers praised the ${p} and criticised the ${c}.`;
+      if (p) return `Reviewers praised the ${p}.`;
+      if (c) return `Reviewers criticised the ${c}.`;
+      return null;
+  }
+}
+function composePlainTmdbTake(ta) {
+  if (!ta || !ta.lean || !TMDB_TAKE_VARIANTS[ta.lean]) return null;
+  const list = (arr) => (arr.length === 2 ? `${arr[0]} and ${arr[1]}` : arr[0]);
+  const p = (ta.praised || []).length ? list(ta.praised) : null;
+  const c = (ta.panned || []).length ? ta.panned[0] : null;
+  const head = `Early viewer reviews on TMDB are ${ta.lean}`;
+  if (p && c) return `${head}. Viewers praised the ${p} and criticised the ${c}.`;
+  if (p) return `${head}, with praise for the ${p}.`;
+  if (c) return `${head}, with complaints about the ${c}.`;
+  return `${head}.`;
+}
+// An older cached take with no stored analysis: a pool line maps to its tone's plain sentence;
+// anything else (an aspect line written before the pools) is left for the next re-read.
+function plainPoolTake(take) {
+  if (!take) return null;
+  const tone = Object.keys(TAKE_VARIANTS).find((k) => TAKE_VARIANTS[k].includes(take));
+  return tone ? composePlainTake({ tone, score: true }) : null;
+}
+
 // English-Wikipedia reception section as plain text, or null if the article has none.
 // Uses TextExtracts (keyless); sub-headings inside the section are stripped, their
 // prose kept, so "=== Critical response ===" under "== Reception ==" still counts.
@@ -1113,6 +1170,9 @@ async function attachTakes(dataByCode) {
           : reseedTake(entry.take, seed);
         const takeAspects = entry.a?.praised?.length ? entry.a.praised
           : entry.ta?.praised?.length ? entry.ta.praised : null;
+        // Plain wording (rollout "human-prose"): one sentence per shape, by the item's own slug.
+        const plainTake = entry.a ? composePlainTake(entry.a)
+          : entry.ta ? composePlainTmdbTake(entry.ta) : plainPoolTake(entry.take);
         for (const it of items) {
           // CONFIDENCE GATE — mirrors the one already on the rating. An isFresh item
           // (released within 7 days AND under 20 votes) renders "Just released — verdict
@@ -1133,7 +1193,7 @@ async function attachTakes(dataByCode) {
           // listed 10 by day three. cachedCriticsTone keeps the same rule for the score
           // step's cache fallback.
           if (entry.take && (takeConfident(it) || criticsSettled(entry.a))) {
-            it.take = seededTake;
+            it.take = (plainTake && require("./humanprose.js").plainOn(it.slug)) ? plainTake : seededTake;
             it.takeSrc = entry.src;
             if (takeAspects) it.takeAspects = takeAspects; // feeds the editor's note flourish
             if (entry.src === "wiki" && entry.article) it.takeArticle = entry.article; // provenance -> JSON-LD citation
@@ -1290,8 +1350,11 @@ module.exports = {
   attachTakes,
   attachTrailerStats,
   audienceCounterpoint,
+  composePlainTake,
+  composePlainTmdbTake,
   composeTake,
   composeTmdbTake,
+  plainPoolTake,
   computeBuzz,
   criticRatings,
   criticsSettled,

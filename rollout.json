@@ -52,6 +52,12 @@
    "since": "2026-10-30",
    "what": "five fixes from the VisionQuest audit, on pages Google sees (lib/filmpage.js PAGE_FIXES): a series' creator labelled Creator, not Director (page, JSON-LD creator, FAQ); the trailer preview image allowed by the page's CSP; 'per Wikipedia' and the footer credit link the film's article; series dates in the snippet and meta line marked 'original air date'; an episode-length range names the episodes it covers; footer 'automated system'. None is in the facts fingerprint, so no sitemap date moves. Planned as five stages of ~1,230 pages; switched to 100% at once on 30 Oct 2026 at the owner's request (all 6,143 visible film pages at the next build). Dry run: every fix shows on VisionQuest, fingerprint unchanged."
   },
+  "human-prose": {
+   "percent": 0,
+   "schedule": [{ "from": "2026-10-31T00:00", "percent": 20 }, { "from": "2026-10-31T12:00", "percent": 40 }, { "from": "2026-11-01T00:00", "percent": 60 }, { "from": "2026-11-01T12:00", "percent": 80 }, { "from": "2026-11-02T00:00", "percent": 100 }],
+   "since": "2026-10-30",
+   "what": "the site's own sentences in plain wording, after Wikipedia:Signs of AI writing (lib/humanprose.js): no spaced em dashes in prose, no canned fit lines ('Standard length — a normal evening's watch'), no rhetorical snippet hook ('— but is it worth your evening?'), one plain critics' summary per shape instead of rotating flourishes, plain hub/list intros and footer. Film pages by slug, list pages by canonical URL. TMDB synopses, titles and status pills untouched. Not in the facts fingerprint: no sitemap date moves. Five stages, one per build window, so no build rewrites more than ~1,250 visible film pages."
+  },
   "page-v3": {
    "percent": 100,
    "since": "2026-10-28",

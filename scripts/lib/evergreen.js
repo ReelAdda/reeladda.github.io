@@ -118,6 +118,8 @@ function buildStreamingPage(items, cfg, { platform, pslug, language = null, lslu
   if (films.length) sections.push({ h2: `${language ? language + " films" : "Films"} on ${platform}`, items: films.map((x) => ({ ...x, platform })) });
   if (series.length) sections.push({ h2: `${language ? language + " series" : "Series"} on ${platform}`, items: series.map((x) => ({ ...x, platform })) });
   const rated = sorted.filter((x) => x.rating != null && (x.votes || 0) >= 50);
+  // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
+  const plain = require("./humanprose.js").plainOn(url);
   const faqs = [{
     q: `How many ${language ? language + " " : ""}titles are on ${platform} in ${country}?`,
     // Name only what is there: "(0 films, 12 series)" read as a broken count (Oct 2026).
@@ -125,7 +127,7 @@ function buildStreamingPage(items, cfg, { platform, pslug, language = null, lslu
   }];
   if (rated.length) faqs.push({
     q: `What's the best-rated ${language ? language + " " : ""}title on ${platform} in ${country}?`,
-    a: `${rated[0].title}${rated[0].rating != null ? ` — ${Number(rated[0].rating).toFixed(1)}/10 across ${Number(rated[0].votes).toLocaleString("en-IN")} ratings` : ""}${rated[1] ? `, then ${rated[1].title}` : ""}${rated[2] ? ` and ${rated[2].title}` : ""}.`,
+    a: `${rated[0].title}${rated[0].rating != null ? `${plain ? ", rated" : " —"} ${Number(rated[0].rating).toFixed(1)}/10 ${plain ? "from" : "across"} ${Number(rated[0].votes).toLocaleString("en-IN")} ratings` : ""}${rated[1] ? `, then ${rated[1].title}` : ""}${rated[2] ? ` and ${rated[2].title}` : ""}.`,
   });
   faqs.push({
     q: `How current is this list?`,
@@ -158,13 +160,16 @@ function buildStreamingPage(items, cfg, { platform, pslug, language = null, lslu
       `${language ? language + " " : ""}Titles on ${platform} in ${country}`,
     ], 60),
     desc: fitFirst([
-      `All ${n} ${language ? language + " " : ""}movies and series FilmyChill has confirmed streaming on ${platform} in ${country}, rated and ranked — each one rechecked, last updated ${checked}.`,
+      plain ? `All ${n} ${language ? language + " " : ""}movies and series FilmyChill has confirmed streaming on ${platform} in ${country}, rated and ranked. Each one is rechecked. Updated ${checked}.`
+        : `All ${n} ${language ? language + " " : ""}movies and series FilmyChill has confirmed streaming on ${platform} in ${country}, rated and ranked — each one rechecked, last updated ${checked}.`,
       `${n} ${language ? language + " " : ""}movies and series confirmed on ${platform} in ${country}, rated and ranked. Updated ${checked}.`,
     ], 160),
     canonical: url,
     h1: `${subject} on ${platform} in ${country}`,
     updLine: `${n} title${n === 1 ? "" : "s"} · availability confirmed within ${STREAM_PAGE_MAX_AGE} days · updated ${checked}`,
-    lead: `The ${language ? language + " " : ""}films and series FilmyChill covers that are streaming on ${platform} in ${country} right now, best-rated first. Not the whole ${platform} library — every title here has been checked against ${platform}'s current listing.`,
+    lead: plain
+      ? `The ${language ? language + " " : ""}films and series FilmyChill covers that are streaming on ${platform} in ${country} right now, best-rated first. It's a selection of the ${platform} library, and every title here has been checked against ${platform}'s current listing.`
+      : `The ${language ? language + " " : ""}films and series FilmyChill covers that are streaming on ${platform} in ${country} right now, best-rated first. Not the whole ${platform} library — every title here has been checked against ${platform}'s current listing.`,
     sections, faqs, extraLd, navLinks, code,
     homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
   });

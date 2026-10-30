@@ -10323,6 +10323,86 @@ test("series pages: Episodes before Good to know; visible date; no unused markup
     assert.ok(/BreadcrumbList/.test(hid) && / hidden>Page updated/.test(hid), "pages hidden from Google are left as they are");
   } finally { R.useRolloutConfig(null); GH.useHiddenList(null); }
 });
+group("plain wording: no signs of AI writing in the site's own sentences (human-prose, 30 Oct 2026)");
+const HP_ON = { features: { "lean-page": { percent: 100 }, "redesign-v2": { percent: 100 }, "page-v3": { percent: 100 }, "wiki-reception": { percent: 100 },
+  "google-hide": { percent: 100 }, "tidy-names": { percent: 100 }, "page-fixes-30oct": { percent: 100 }, "visible-similar": { percent: 100 },
+  "one-score": { percent: 100 }, "intent-titles": { percent: 100 }, "honest-not-announced": { percent: 100 }, "human-prose": { percent: 100 } } };
+const hpDay = (o) => new Date(Date.now() + o * 864e5).toISOString().slice(0, 10);
+const HP_BASE = { language: "Tamil", genre: "Drama/Thriller", runtime: 133, tmdbId: 501, cast: ["A", "B"], fullReview: "A family keeps a secret.", trailer: "https://www.youtube.com/watch?v=abcdefghijk" };
+const HP_FILMS = {
+  streaming: { ...HP_BASE, title: "Kaathal", slug: "hp-stream", kind: "movie", released: hpDay(-200), providers: ["Netflix"], rentBuy: [], rating: 8.1, votes: 6200, cert: "A",
+    arrived: hpDay(-150), arrivedOn: "Netflix", take: "Critics liked it, especially the performances.",
+    fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" },
+    reception: { rt: { pct: 91, n: 87 }, ratings: { n: 6, median: 4 }, asOf: hpDay(-1), article: "Kaathal" } },
+  series: { ...HP_BASE, title: "Show", slug: "hp-series", kind: "tv", runtime: null, released: hpDay(-30), providers: ["JioHotstar"], rentBuy: [], rating: 8.6, votes: 220, cert: "U", seasons: 3,
+    episodes: { count: 4, seasons: 1, limited: true, list: [{ e: 1, name: "One", date: hpDay(-30), runtime: 50 }, { e: 2, name: "Two", date: hpDay(-23), runtime: 52 }, { e: 3, name: "Three", date: hpDay(4) }, { e: 4, name: "Four", date: hpDay(11) }], next: { e: 3, s: 1, date: hpDay(4), name: "Three" } },
+    fcScore: { verdict: "Worth a watch", reason: "Audiences like it.", audience: "Liked", critics: null, basis: "audience" } },
+  rent: { ...HP_BASE, title: "Rented", slug: "hp-rent", kind: "movie", released: hpDay(-400), providers: [], rentBuy: ["Apple TV"], rating: 6.4, votes: 900, cert: "UA 13+",
+    fcScore: { verdict: "Worth a watch", reason: "Audiences like it.", audience: "Liked", critics: null, basis: "audience" } },
+  unrated: { ...HP_BASE, title: "Fresh", slug: "hp-fresh", kind: "movie", released: hpDay(-3), providers: ["ZEE5"], rentBuy: [], rating: null, votes: 3 },
+  upcoming: { ...HP_BASE, title: "Soon", slug: "hp-soon", kind: "movie", released: hpDay(9), providers: [], rentBuy: [], platform: "Theatres", votes: 0 },
+  theatres: { ...HP_BASE, title: "Running", slug: "hp-running", kind: "movie", released: hpDay(-12), providers: [], rentBuy: [], platform: "Theatres", rating: 7.2, votes: 140 },
+  lapsed: { ...HP_BASE, title: "Old One", slug: "hp-lapsed", kind: "movie", released: hpDay(-300), providers: [], rentBuy: [], platform: "Theatres", rating: 6.0, votes: 80 },
+  generic: { ...HP_BASE, title: "Unknown", slug: "hp-generic", kind: "movie", released: hpDay(-900), providers: [], rentBuy: [], platform: null, rating: 7.0, votes: 300 },
+};
+test("film pages in every state: the site's sentences read plainly, and no fact or date moves", () => {
+  const R = require("./lib/rollout.js"), HP = require("./lib/humanprose.js"), Fp = require("./lib/filmpage.js"), S = require("./lib/sitemap.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const bad = [];
+  try {
+    for (const [k, it] of Object.entries(HP_FILMS)) {
+      R.useRolloutConfig({ features: { ...HP_ON.features, "human-prose": { percent: 0 } } });
+      const before = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
+      R.useRolloutConfig(HP_ON);
+      const html = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
+      for (const h of HP.scanProse(HP.siteProse(html, { skipPending: true }))) bad.push(`${k}: ${h.rule} "${h.match}" in "${h.sentence}"`);
+      assert.strictEqual(S.factsFingerprint(html), S.factsFingerprint(before), `${k}: the facts fingerprint is unchanged, so no sitemap date moves`);
+    }
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
+  assert.deepStrictEqual(bad, [], "\n" + bad.join("\n"));
+});
+test("list pages read plainly too: platform lists, hubs, today, coming, language and weekly pages", () => {
+  const R = require("./lib/rollout.js"), HP = require("./lib/humanprose.js");
+  const bad = [];
+  const check = (name, html) => { for (const h of HP.scanProse(HP.siteProse(html, { skipPending: true }))) bad.push(`${name}: ${h.rule} "${h.match}" in "${h.sentence}"`); };
+  try {
+    R.useRolloutConfig(HP_ON);
+    const items = Array.from({ length: 6 }, (_, i) => ({ slug: "s" + i, title: "Title " + i, language: "Tamil", kind: i % 2 ? "tv" : "movie", rating: 6 + i / 2, votes: 100 + i, providers: ["Netflix"] }));
+    check("platform list", U.buildStreamingPage(items, G_IN, { platform: "Netflix", pslug: "netflix" }));
+    const hub = { name: "JioHotstar", slug: "jiohotstar", items: Array.from({ length: 4 }, (_, i) => ({ title: "T" + i, slug: "t" + i, platform: "JioHotstar", kind: "movie" })) };
+    check("platform hub", U.buildPlatformHubPage({ generatedAt: new Date().toISOString() }, A_IN, hub));
+    const d = (o) => new Date(Date.now() - o * 864e5).toISOString().slice(0, 10);
+    const recs = [{ c: "in", k: "movie", t: "Today Film", p: "ZEE5", first: d(0), rel: "2026-08-01", lang: "Tamil" }, { c: "in", k: "movie", t: "Yesterday Film", p: "Netflix", first: d(1), rel: "2026-08-01", lang: "Hindi" }];
+    check("today", U.buildTodayPage(recs, A_IN));
+    check("today, quiet", U.buildTodayPage(recs.slice(1), A_IN));
+    check("coming", U.buildComingPage([{ slug: "a", title: "A", date: hpDay(5), platform: "Netflix", kind: "movie" }, { slug: "b", title: "B", date: hpDay(9), kind: "movie" }], A_IN));
+    check("language", U.buildLanguagePage(LANG_DATA, "Tamil", "tamil"));
+    check("weekly", U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES));
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
+  assert.deepStrictEqual(bad, [], "\n" + bad.join("\n"));
+});
+test("plain wording: answers the sweeps rewrite are matched in both forms; summaries say one thing plainly", () => {
+  const R = require("./lib/rollout.js"), SS = require("./lib/scoresweep.js"), E = require("./lib/editorial.js"), F = require("./lib/facts.js"), Fp = require("./lib/filmpage.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  try {
+    R.useRolloutConfig(HP_ON);
+    const s = { verdict: "Must watch", reason: "Audiences and critics agree.", early: false };
+    const lead = SS.faqLead({ slug: "x", title: "X", rating: 8.1 }, s);
+    assert.strictEqual(lead, "FilmyChill Score: Must watch. Audiences and critics agree. It rates 8.1/10 on audience ratings.");
+    // A plain answer is replaced whole: the reason sentence is not left behind to repeat.
+    const re = SS.relead("FilmyChill Score: Worth a watch. Audiences like it. It rates 7.0/10 on audience ratings. Critics liked it.", lead);
+    assert.strictEqual(re, `${lead} Critics liked it.`);
+    // The compact score line reads back its count in either form (lib/facts.js).
+    const unrated = Fp.buildFilmPage({ ...HP_FILMS.unrated, votes: 12, released: hpDay(-400) }, hpDay(0), new Set(), IN);
+    assert.ok(/<span class="fcsb-mini-v">[^<]*<\/span>: only 12 audience ratings/.test(unrated), (unrated.match(/fcsb-mini">.{0,160}/) || [""])[0]);
+    assert.strictEqual(F.extractFacts(unrated.replace(/<!--FC:audience=[^>]*-->/, ""), "hp-fresh").votes, 12, "count read back from the plain line");
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
+  // One plain sentence per reception shape, no rotating synonyms.
+  assert.strictEqual(E.composePlainTake({ tone: "mixed", praised: ["visuals"], panned: ["script"] }), "Critics were split. They praised the visuals and criticised the script.");
+  assert.strictEqual(E.composePlainTake({ tone: "acclaim", praised: ["performances", "music"] }), "Critics loved it, especially the performances and music.");
+  assert.strictEqual(E.composePlainTake({ tone: "mixed" }), null, "no aspect and no figure: nothing to say");
+  assert.strictEqual(E.plainPoolTake("Reviews don't come much warmer than this."), "Critics loved it.");
+  assert.strictEqual(E.composePlainTmdbTake({ lean: "positive", praised: ["action"] }), "Early viewer reviews on TMDB are positive, with praise for the action.");
+});
+
 test("near-copy check: the v3 header is stripped like the old one (30 Oct 2026)", () => {
   const G = require("./lib/googlehide.js");
   const t = G.mainText('<body><div class="top v3"><a class="mark" href="/">FILMY<span>CHILL</span></a><span class="cpill">Singapore</span></div><h1>X</h1></body>');

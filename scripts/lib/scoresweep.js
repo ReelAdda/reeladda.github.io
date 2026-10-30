@@ -115,9 +115,12 @@ function refreshHead(html, item) {
 //   - the "Is it worth watching?" answer (visible and in the FAQ schema) opens with today's
 //     FilmyChill Score — or, with no score, says plainly there aren't enough ratings.
 // Only openings this site itself wrote are replaced; anything unrecognised is left as it is.
+// The plain forms (rollout "human-prose", lib/humanprose.js) come first: the older pattern below
+// would match only "FilmyChill Score: Must watch." of a plain answer and leave its reason behind.
 const FAQ_LEADS = [
-  /^It's too early for a verdict — .+? doesn't have enough ratings yet\./,
+  /^It's too early for a verdict(?: —|\.) .+? doesn't have enough ratings yet\./,
   /^There aren't enough ratings for a verdict on .+?\./,
+  /^FilmyChill Score: [^.—]+\. [^.]*\.(?: It rates \d+(?:\.\d)?\/10 on audience ratings\.)?/,
   /^FilmyChill Score: [^.]*\.(?: It rates \d+(?:\.\d)?\/10 on audience ratings\.)?/,
   /^(?:Must watch|Worth a watch|Decent one-time watch|Skip unless curious)\.(?: It rates \d+(?:\.\d)?\/10 on audience ratings\.)?/,
 ];
@@ -126,7 +129,8 @@ function faqLead(item, s) {
   const reason = s.reason.replace(/\.$/, "");
   const few = s.early ? ` (based on only ${Number(s.votes).toLocaleString("en-IN")} ratings)` : "";
   const rates = item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10 on audience ratings.` : "";
-  return `FilmyChill Score: ${s.verdict} — ${reason}${few}.${rates}`;
+  const plain = require("./humanprose.js").plainOn(item.slug);
+  return `FilmyChill Score: ${s.verdict}${plain ? "." : " —"} ${reason}${few}.${rates}`;
 }
 function relead(text, lead) {
   if (lead == null) return null;
@@ -328,6 +332,8 @@ module.exports = {
   injectScoreSection,
   flagYearOutliers,
   injectVote,
+  faqLead,
+  relead,
   refreshCopy,
   refreshHead,
   resolveTmdbId,

@@ -244,7 +244,8 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
   const tail = (a) => live
     ? `opened in theatres in ${country} on ${opened}, and it${a}s streaming there now — see where to watch above.`
     : `opened in theatres in ${country} on ${opened}${runClause(a)}. It isn${a}t streaming yet — this page updates the day it is.`;
-  out = out.replace(new RegExp(`hasn${APOS}t released yet(?: — it${APOS}s due [^.<"]+)?\\. We${APOS}ll list where to watch once it${APOS}s out\\.`, "g"),
+  // Both wordings of the answer: " — it's due X" and the plain ". It's due X" (lib/humanprose.js).
+  out = out.replace(new RegExp(`hasn${APOS}t released yet(?: — it${APOS}s due [^.<"]+|\\. It${APOS}s due [^.<"]+)?\\. We${APOS}ll list where to watch once it${APOS}s out\\.`, "g"),
     (m) => tail(apos(m)));
   if (!live) {
     // Pages settled before the run clause existed, or crossing from open to ended: rewrite the
@@ -473,7 +474,7 @@ ${faqHtml}
   <a class="btn" style="background:transparent;color:var(--indigo);border:1.5px solid var(--indigo)" href="${e(prevWeekHref)}">← Previous week</a>` : ""}
 </div>
 <footer>
-  ${footerAttribution()}© 2026 FilmyChill · Vikram Sharma
+  ${footerAttribution(undefined, { plain: require("./humanprose.js").plainOn(canonical) })}© 2026 FilmyChill · Vikram Sharma
 </footer>
 </body>
 </html>`;
@@ -526,8 +527,13 @@ function weekRangeFor(when, code) {
 // Every page footer says no video is hosted here and links the privacy and copyright pages
 // (Oct 2026); templates follow FOOTER_LINKS with "© 2026 …".
 const NO_HOSTING_NOTICE = "FilmyChill doesn't host or stream any films or shows — it only lists where they're officially available. Trailers play from YouTube.";
+// Plain wording (rollout "human-prose", lib/humanprose.js): the same notice in two sentences.
+const NO_HOSTING_PLAIN = "FilmyChill doesn't host or stream any films or shows. It lists where they're officially available, and trailers play from YouTube.";
 const FOOTER_LINKS = '<a href="/privacy/">Privacy</a> · <a href="/dmca/">Copyright</a> · ';
-function footerAttribution(useImdb = USE_IMDB) {
+function footerAttribution(useImdb = USE_IMDB, { plain = false } = {}) {
+  return footerAttributionText(useImdb).replace(NO_HOSTING_NOTICE, plain ? NO_HOSTING_PLAIN : NO_HOSTING_NOTICE);
+}
+function footerAttributionText(useImdb) {
   // Required wording kept verbatim (TMDB's disclaimer; IMDb's "Used with permission" when its
   // ratings are shown); only the layout is compact: credits on one line, the notice below.
   const tmdb = `<a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>`;
