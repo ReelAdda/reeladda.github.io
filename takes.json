@@ -3965,7 +3965,7 @@
     }
    }
   },
-  "checked": "2026-10-29",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt32547691": {
@@ -6018,7 +6018,7 @@
     "median": 3.5
    }
   },
-  "checked": "2026-10-19",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt44922907": {
@@ -6372,7 +6372,7 @@
   "src": null,
   "hook": "Jason Sanjay's directorial debut.",
   "article": "Sigma (film)",
-  "checked": "2026-10-21",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt31841170": {
@@ -6394,7 +6394,7 @@
     "median": 3
    }
   },
-  "checked": "2026-10-22",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt43407940": {
@@ -6944,7 +6944,7 @@
     "median": 2.5
    }
   },
-  "checked": "2026-10-27",
+  "checked": "2026-10-30",
   "v": 6
  },
  "movie:1750042": {
@@ -6968,16 +6968,27 @@
     "kind": "rt",
     "value": 19
    },
-   "toneSrc": "summary"
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 19,
+     "n": 99,
+     "avg": 4.4
+    },
+    "mc": {
+     "score": 38,
+     "n": 15
+    }
+   }
   },
-  "checked": "2026-10-23",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt47657999": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-29",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt45692999": {
@@ -7250,9 +7261,19 @@
     "kind": "rt",
     "value": 100
    },
-   "toneSrc": "summary"
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 100,
+     "n": 21
+    },
+    "mc": {
+     "score": 80,
+     "n": 11
+    }
+   }
   },
-  "checked": "2026-10-21",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt43720940": {
@@ -7928,16 +7949,16 @@
    "agg": {
     "rt": {
      "pct": 41,
-     "n": 128,
+     "n": 140,
      "avg": 4.9
     },
     "mc": {
-     "score": 44,
-     "n": 26
+     "score": 43,
+     "n": 27
     }
    }
   },
-  "checked": "2026-10-29",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt46024377": {
@@ -15382,6 +15403,7 @@
  "tt11379026": {
   "take": "Word from reviewers is solidly good.",
   "src": "wiki",
+  "hook": null,
   "article": "Ghosts (American TV series)",
   "a": {
    "tone": "positive",
@@ -15394,9 +15416,8 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-17",
-  "v": 6,
-  "cat": true
+  "checked": "2026-10-30",
+  "v": 6
  },
  "tt5433140": {
   "take": "Critics can't agree — high marks for the ambition and humour, complaints about the runtime.",
@@ -50187,7 +50208,7 @@
    "agg": {
     "rt": {
      "pct": 77,
-     "n": 192,
+     "n": 193,
      "avg": 6.6
     },
     "mc": {
@@ -50196,7 +50217,7 @@
     }
    }
   },
-  "checked": "2026-10-29",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt13611778": {
@@ -74165,7 +74186,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-29",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt35697291": {
@@ -76181,7 +76202,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-29",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt37421560": {
@@ -77211,7 +77232,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-29",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt2531336": {
@@ -77289,7 +77310,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-29",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt46658626": {
@@ -90641,14 +90662,14 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 80
+    "value": 77
    },
    "toneSrc": "summary",
    "agg": {
     "rt": {
-     "pct": 80,
-     "n": 15,
-     "avg": 6.4
+     "pct": 77,
+     "n": 22,
+     "avg": 6.7
     },
     "mc": {
      "score": 65,
@@ -90656,7 +90677,7 @@
     }
    }
   },
-  "checked": "2026-10-29",
+  "checked": "2026-10-30",
   "v": 6
  },
  "tt46066693": {
@@ -97318,6 +97339,80 @@
   "cat": true
  },
  "tt38361305": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-30",
+  "v": 6,
+  "cat": true
+ },
+ "tt38116565": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Colisión",
+  "checked": "2026-10-30",
+  "v": 6
+ },
+ "tt44090278": {
+  "take": "Wall-to-wall praise from the critics on this one.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Baththa",
+  "a": {
+   "tone": "acclaim",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead"
+  },
+  "checked": "2026-10-30",
+  "v": 6
+ },
+ "tv:307478": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-30",
+  "v": 6
+ },
+ "movie:1806311": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-30",
+  "v": 6
+ },
+ "tt39751377": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-10-30",
+  "v": 6
+ },
+ "tt33402927": {
+  "take": null,
+  "src": null,
+  "article": "On Behalf of My Son",
+  "checked": "2026-10-30",
+  "v": 6,
+  "cat": true
+ },
+ "tt39314834": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-30",
+  "v": 6,
+  "cat": true
+ },
+ "tt16115226": {
+  "take": null,
+  "src": null,
+  "checked": "2026-10-30",
+  "v": 6,
+  "cat": true
+ },
+ "tt48165024": {
   "take": null,
   "src": null,
   "checked": "2026-10-30",

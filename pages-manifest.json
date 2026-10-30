@@ -1338,9 +1338,9 @@
    "rel": 3,
    "fp": "79ccc0e88b3b",
    "rendered": "2026-10-14",
-   "swept": "2026-10-29",
+   "swept": "2026-10-30",
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-10-30",
     "providers": [],
     "rentBuy": [
      "Apple TV Store"
@@ -2090,9 +2090,9 @@
    "rel": 3,
    "fp": "862b7e037d29",
    "rendered": "2026-10-14",
-   "swept": "2026-10-29",
+   "swept": "2026-10-30",
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-10-30",
     "providers": [],
     "rentBuy": [],
     "released": "2026-05-15",
@@ -3313,9 +3313,9 @@
    "rel": 3,
    "fp": "927ab08c615e",
    "rendered": "2026-10-14",
-   "swept": "2026-10-29",
+   "swept": "2026-10-30",
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-10-30",
     "providers": [],
     "rentBuy": [],
     "released": "2026-05-29",
@@ -4353,7 +4353,8 @@
    },
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "saga-of-tanya-the-evil": {
    "last": "2026-10-28",
@@ -9767,7 +9768,7 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "e073b5bee045",
    "rendered": "2026-10-14",
    "live": {
@@ -9781,7 +9782,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "phoolan": {
    "last": "2026-10-21",
@@ -9826,7 +9828,7 @@
    "srAt": "2026-10-27"
   },
   "the-dark-heaven": {
-   "last": "2026-10-24",
+   "last": "2026-10-30",
    "tmdbId": 1618200,
    "released": "2026-09-18",
    "lang": "Tamil",
@@ -9840,12 +9842,15 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "8307c4132175",
+   "fp": "1432cbbd5ea0",
    "archivedOn": "2026-10-09",
    "rendered": "2026-10-14",
    "truth": {
     "at": "2026-10-30",
-    "providers": [],
+    "providers": [
+     "Prime Video",
+     "AP International South Cinema"
+    ],
     "rentBuy": [],
     "released": "2026-09-18",
     "title": "The Dark Heaven",
@@ -9864,7 +9869,18 @@
    "imdb": "",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "live": {
+    "since": "2026-10-30",
+    "providers": [
+     "Prime Video",
+     "AP International South Cinema"
+    ],
+    "lastCheck": "2026-10-30",
+    "misses": 0,
+    "arrived": "2026-10-30",
+    "prevCheck": "2026-10-30"
+   }
   },
   "enna-vilai": {
    "last": "2026-10-18",
@@ -21682,7 +21698,7 @@
    "lang": "Korean",
    "kind": "movie",
    "title": "Hope",
-   "fp": "b595117c3d7b",
+   "fp": "01110db925e0",
    "rendered": "2026-10-13",
    "pv": 13,
    "swept": "2026-10-24",
@@ -21723,7 +21739,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Street Fighter",
-   "fp": "8ef657f7cebd",
+   "fp": "7a1016420c70",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -29528,8 +29544,7 @@
     "misses": 0
    },
    "imdb": "tt1844624",
-   "fpv": 3,
-   "archivedOn": "2026-10-30"
+   "fpv": 3
   },
   "chicago-fire": {
    "last": "2026-10-28",
@@ -38157,7 +38172,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "51a1eb8c972e",
+   "fp": "00df3f35f4ee",
    "rendered": "2026-10-12",
    "pv": 13,
    "imdb": "tt34890576",
@@ -39028,15 +39043,14 @@
    }
   },
   "baththa": {
-   "last": "2026-10-27",
-   "fp": "224d9520ff3a",
+   "last": "2026-10-30",
+   "fp": "73cd4b3fe87f",
    "tmdbId": 1515692,
    "released": "2026-10-01",
    "lang": "Tamil",
    "kind": "movie",
    "title": "Baththa",
    "rendered": "2026-10-12",
-   "archivedOn": "2026-10-22",
    "pv": 13,
    "swept": "2026-10-30",
    "truth": {
@@ -39624,9 +39638,8 @@
    "srAt": "2026-10-27"
   },
   "sigma": {
-   "last": "2026-10-29",
-   "fp": "bc2c4e5f2ae8",
-   "archivedOn": "2026-10-12",
+   "last": "2026-10-30",
+   "fp": "0a08c55d5fc7",
    "pv": 13,
    "released": "2026-10-02",
    "lang": "Tamil",
@@ -39671,14 +39684,13 @@
   },
   "don-t-trouble-the-trouble": {
    "last": "2026-10-30",
-   "fp": "7bed5ec757c9",
+   "fp": "1368b4fe49ff",
    "rendered": "2026-10-12",
    "tmdbId": 1261763,
    "released": "2026-10-02",
    "lang": "Telugu",
    "kind": "movie",
    "title": "Don't Trouble the Trouble",
-   "archivedOn": "2026-10-23",
    "pv": 13,
    "swept": "2026-10-30",
    "truth": {
@@ -44819,7 +44831,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -44948,8 +44977,8 @@
    "srAt": "2026-10-27"
   },
   "comrade-kalyan": {
-   "last": "2026-10-25",
-   "fp": "7dc63569439b",
+   "last": "2026-10-30",
+   "fp": "fe8cc7b2db72",
    "rendered": "2026-10-12",
    "tmdbId": 1428295,
    "released": "2026-10-09",
@@ -44959,7 +44988,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-10-28",
    "pv": 13,
    "swept": "2026-10-30",
    "truth": {
@@ -49711,7 +49739,7 @@
    "kind": "movie",
    "title": "Verity",
    "rendered": "2026-10-16",
-   "fp": "1120606ee29c",
+   "fp": "ae30239018c0",
    "pv": 13,
    "swept": "2026-10-30",
    "truth": {
@@ -49892,15 +49920,14 @@
    "rel": 3
   },
   "avaraachan-sons": {
-   "last": "2026-10-26",
+   "last": "2026-10-30",
    "rendered": "2026-10-16",
-   "fp": "e6bcd213c573",
+   "fp": "95823b4e1d80",
    "tmdbId": 1290035,
    "released": "2026-10-02",
    "lang": "Malayalam",
    "kind": "movie",
    "title": "Avaraachan & Sons",
-   "archivedOn": "2026-10-16",
    "pv": 13,
    "swept": "2026-10-30",
    "truth": {
@@ -50817,7 +50844,8 @@
    "fpv": 3,
    "imdb": "tt32909364",
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "hello-kadhal": {
    "last": "2026-10-25",
@@ -54589,7 +54617,8 @@
     ]
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "thaainilam": {
    "last": "2026-10-25",
@@ -57015,13 +57044,13 @@
    "rel": 3
   },
   "haiku": {
-   "last": "2026-10-28",
+   "last": "2026-10-30",
    "tmdbId": 1593350,
    "released": "2026-10-23",
    "lang": "Tamil",
    "kind": "movie",
    "title": "Haiku",
-   "fp": "6cf6d84c6f80",
+   "fp": "80a5ddd0f24f",
    "rendered": "2026-10-24",
    "fpv": 3,
    "srv": 1,
@@ -57209,14 +57238,14 @@
    "srAt": "2026-10-27"
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-23",
-   "fp": "234442c5533f",
+   "fp": "8660d0f57b18",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -57574,7 +57603,8 @@
    },
    "rel": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "matargashti": {
    "last": "2026-10-27",
@@ -57642,7 +57672,6 @@
    "rendered": "2026-10-25",
    "fp": "a6c0a06aae09",
    "fpv": 3,
-   "archivedOn": "2026-10-26",
    "pv": 13,
    "imdb": "tt37727259",
    "fcs": {
@@ -57958,7 +57987,8 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "drive-the-pretenders": {
    "last": "2026-10-30",
@@ -57987,8 +58017,7 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-30"
+   "rel": 3
   },
   "distance": {
    "last": "2026-10-30",
@@ -58123,6 +58152,60 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "71d073fe457d",
+   "fpv": 3
+  },
+  "avatar-seven-havens": {
+   "last": "2026-10-30",
+   "tmdbId": 284833,
+   "released": "2026-10-09",
+   "lang": "English",
+   "kind": "tv",
+   "title": "Avatar: Seven Havens",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "08637e99b854",
+   "fpv": 3
+  },
+  "ghosts": {
+   "last": "2026-10-30",
+   "tmdbId": 126027,
+   "released": "2021-10-07",
+   "lang": "English",
+   "kind": "tv",
+   "title": "Ghosts",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-12-10",
+   "rendered": "2026-10-30",
+   "fp": "a88103becc3a",
+   "fpv": 3
+  },
+  "collision": {
+   "last": "2026-10-30",
+   "tmdbId": 331033,
+   "released": "2026-09-07",
+   "lang": "Spanish",
+   "kind": "tv",
+   "title": "Collision",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "5f452bf41bdc",
+   "fpv": 3
+  },
+  "raawadi": {
+   "last": "2026-10-30",
+   "tmdbId": 1621270,
+   "released": "2026-12-24",
+   "lang": "Tamil",
+   "kind": "movie",
+   "title": "Raawadi",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "0d05ce2c6ff0",
    "fpv": 3
   }
  },
@@ -59061,7 +59144,8 @@
     "misses": 0
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "evil-dead-burn": {
    "last": "2026-10-25",
@@ -61484,8 +61568,8 @@
     "at": "2026-10-30",
     "providers": [],
     "rentBuy": [
-     "JustWatch TV Store",
      "Amazon Video",
+     "JustWatch TV Store",
      "Google Play Movies"
     ],
     "released": "2026-08-14",
@@ -62352,7 +62436,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "108d375a84f8",
+   "fp": "02e006cd1621",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "fcs": {
@@ -62671,7 +62755,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -65036,7 +65120,7 @@
     "title": "Onslaught",
     "language": "English",
     "runtime": 92,
-    "genre": "Action / Horror",
+    "genre": "Action / Thriller",
     "director": "Adam Wingard",
     "cast": [
      "Adria Arjona",
@@ -65085,12 +65169,12 @@
     "genre": "Horror / Comedy",
     "director": "Casper Kelly",
     "cast": [
+     "Keegan-Michael Key",
      "Delaney Quinn",
+     "Tristan Borders",
+     "Madison Skyy Polan",
      "Caleb Williams",
-     "Bennie Taylor",
-     "Eric Bauza",
-     "Patton Oswalt",
-     "Sergey Zhuravsky"
+     "Patton Oswalt"
     ]
    },
    "imdb": "tt37281055",
@@ -65665,11 +65749,13 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "4cc2e5f2b101",
+   "fp": "21c3aebe8081",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-10-30",
-    "providers": [],
+    "providers": [
+     "Prime Video"
+    ],
     "rentBuy": [],
     "released": "2026-09-04",
     "title": "Mirzapur: The Movie",
@@ -65689,7 +65775,17 @@
    "imdb": "tt34339725",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "live": {
+    "since": "2026-10-30",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-30",
+    "misses": 0,
+    "arrived": "2026-10-30",
+    "prevCheck": "2026-10-30"
+   }
   },
   "irumudi": {
    "last": "2026-10-25",
@@ -66526,7 +66622,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "slow-horses": {
    "last": "2026-10-28",
@@ -66541,7 +66638,7 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "4d57856ebc66",
    "rendered": "2026-10-13",
    "live": {
@@ -66574,7 +66671,8 @@
    },
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "last-seen": {
    "last": "2026-10-27",
@@ -72473,7 +72571,7 @@
    "fp": "8fed7ae56ab5",
    "rendered": "2026-10-13",
    "truth": {
-    "at": "2026-10-20",
+    "at": "2026-10-30",
     "providers": [
      "YouTube TV",
      "ViX"
@@ -72577,7 +72675,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt31173096",
    "truth": {
-    "at": "2026-10-20",
+    "at": "2026-10-30",
     "providers": [
      "Netflix"
     ],
@@ -78271,7 +78369,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "66bc9358a054",
+   "fp": "a0281cf58398",
    "rendered": "2026-10-14",
    "archivedOn": "2026-10-18",
    "swept": "2026-10-30",
@@ -81160,7 +81258,7 @@
    "kind": "movie",
    "title": "Street Fighter",
    "pv": 13,
-   "fp": "f593d4c31bc2",
+   "fp": "8d9925b5eb27",
    "rendered": "2026-10-13",
    "fcs": {
     "v": "early",
@@ -87987,8 +88085,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "unabomber": {
    "last": "2026-10-18",
@@ -100970,7 +101067,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -101157,7 +101271,30 @@
    "fp": "325210934e78",
    "rendered": "2026-10-13",
    "imdb": "tt0211851",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-10-30",
+    "providers": [
+     "ViX"
+    ],
+    "rentBuy": [
+     "Fandango At Home"
+    ],
+    "released": "1987-10-05",
+    "title": "Quinceañera",
+    "language": "Spanish",
+    "runtime": 45,
+    "genre": "Soap / Drama",
+    "director": "René Muñoz",
+    "cast": [
+     "Adela Noriega",
+     "Ernesto Laguardia",
+     "Thalia",
+     "Rafael Rojas",
+     "Sebastián Ligarde",
+     "Blanca Sánchez"
+    ]
+   }
   },
   "a-working-man": {
    "last": "2026-10-22",
@@ -102115,13 +102252,13 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "eacbab9daf05",
+   "fp": "feab6853a37b",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -102140,7 +102277,6 @@
     "confirmed": true
    },
    "imdb": "tt35854736",
-   "archivedOn": "2026-10-20",
    "truth": {
     "at": "2026-10-23",
     "providers": [
@@ -105413,7 +105549,36 @@
    "title": "Jailer 2",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "swept": "2026-10-30",
+   "truth": {
+    "at": "2026-10-30",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2026-10-14",
+    "title": "Jailer 2",
+    "language": "Tamil",
+    "runtime": 163,
+    "genre": "Action / Comedy",
+    "director": "Nelson",
+    "cast": [
+     "Rajinikanth",
+     "S. J. Suryah",
+     "Suraj Venjaramoodu",
+     "Ramya Krishnan",
+     "Vidya Balan",
+     "Namo Narayana"
+    ]
+   },
+   "imdb": "tt33318732",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "knots-landing": {
    "last": "2026-10-28",
@@ -105996,14 +106161,14 @@
    "fpv": 3
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-16",
-   "fp": "ad031e3efb74",
+   "fp": "6e04bb753bff",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -106568,7 +106733,8 @@
    "fpv": 3,
    "imdb": "tt21604774",
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "anonymously-yours": {
    "last": "2026-10-22",
@@ -112048,7 +112214,7 @@
    "rel": 3
   },
   "fall": {
-   "last": "2026-10-24",
+   "last": "2026-10-30",
    "archivedOn": "2026-10-24",
    "pv": 13,
    "catalog": true,
@@ -112073,8 +112239,33 @@
    },
    "rel": 3,
    "rendered": "2026-10-24",
-   "fp": "db504ef8b3c8",
-   "fpv": 3
+   "fp": "41b9525b2b1e",
+   "fpv": 3,
+   "truth": {
+    "at": "2026-10-30",
+    "providers": [
+     "MovieSphere+"
+    ],
+    "rentBuy": [
+     "Amazon Video",
+     "Apple TV Store",
+     "Google Play Movies"
+    ],
+    "released": "2022-08-12",
+    "title": "Fall",
+    "language": "English",
+    "runtime": 107,
+    "genre": "Thriller",
+    "director": "Scott Mann",
+    "cast": [
+     "Grace Caroline Currey",
+     "Virginia Gardner",
+     "Mason Gooding",
+     "Jeffrey Dean Morgan",
+     "Jasper Cole",
+     "Darrell Dennis"
+    ]
+   }
   },
   "yellowstone": {
    "last": "2026-10-25",
@@ -112151,14 +112342,14 @@
    "srAt": "2026-10-27"
   },
   "yaga": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 314360,
    "released": "2026-10-23",
    "lang": "English",
    "kind": "tv",
    "title": "YAGA",
    "rendered": "2026-10-25",
-   "fp": "7df2b4e15afa",
+   "fp": "bc3b62c49777",
    "fpv": 3,
    "archivedOn": "2026-10-25",
    "pv": 13,
@@ -112285,8 +112476,7 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-30"
+   "rel": 3
   },
   "timbiriche": {
    "last": "2026-10-29",
@@ -112329,6 +112519,33 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "4cb7f048493e",
+   "fpv": 3
+  },
+  "ghosts": {
+   "last": "2026-10-30",
+   "tmdbId": 126027,
+   "released": "2021-10-07",
+   "lang": "English",
+   "kind": "tv",
+   "title": "Ghosts",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-12-10",
+   "rendered": "2026-10-30",
+   "fp": "fdfcdc1056e3",
+   "fpv": 3
+  },
+  "the-stationary-traveler": {
+   "last": "2026-10-30",
+   "tmdbId": 1802066,
+   "released": "2026-11-06",
+   "lang": "Spanish",
+   "kind": "movie",
+   "title": "The Stationary Traveler",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "8d4414c182a9",
    "fpv": 3
   }
  },
@@ -113184,7 +113401,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "072cc1b70d9f",
+   "fp": "bd86884eac55",
    "rendered": "2026-10-14",
    "swept": "2026-10-23",
    "truth": {
@@ -113221,7 +113438,8 @@
     "misses": 0
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "evil-dead-burn": {
    "last": "2026-10-25",
@@ -115653,8 +115871,8 @@
     "at": "2026-10-30",
     "providers": [],
     "rentBuy": [
-     "JustWatch TV Store",
      "Rakuten TV",
+     "JustWatch TV Store",
      "Amazon Video"
     ],
     "released": "2026-08-05",
@@ -116910,7 +117128,7 @@
     "w": 8
    },
    "rel": 2,
-   "fp": "6f684c9000b2",
+   "fp": "9f2702ce9d23",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "truth": {
@@ -117228,7 +117446,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -119112,7 +119330,7 @@
     "language": "English",
     "runtime": 97,
     "genre": "Comedy",
-    "director": "Scott Moore, Jon Lucas",
+    "director": "Jon Lucas, Scott Moore",
     "cast": [
      "Leslie Mann",
      "Michelle Buteau",
@@ -120255,11 +120473,13 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "a381b74d12f5",
+   "fp": "90dfe01bcc3a",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-10-30",
-    "providers": [],
+    "providers": [
+     "Prime Video"
+    ],
     "rentBuy": [],
     "released": "2026-09-04",
     "title": "Mirzapur: The Movie",
@@ -120279,7 +120499,17 @@
    "imdb": "tt34339725",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "live": {
+    "since": "2026-10-30",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-30",
+    "misses": 0,
+    "arrived": "2026-10-30",
+    "prevCheck": "2026-10-30"
+   }
   },
   "irumudi": {
    "last": "2026-10-27",
@@ -121118,7 +121348,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "slow-horses": {
    "last": "2026-10-28",
@@ -121133,7 +121364,7 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "327d1e4e9bec",
    "rendered": "2026-10-13",
    "live": {
@@ -121147,7 +121378,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "has-fallen": {
    "last": "2026-10-28",
@@ -124728,8 +124960,7 @@
     "misses": 0
    },
    "imdb": "tt1844624",
-   "fpv": 3,
-   "archivedOn": "2026-10-30"
+   "fpv": 3
   },
   "chicago-p-d": {
    "last": "2026-10-25",
@@ -144525,7 +144756,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "8075b6d18d32",
+   "fp": "c3e2c1197fa0",
    "rendered": "2026-10-14",
    "archivedOn": "2026-10-16",
    "swept": "2026-10-30",
@@ -155002,7 +155233,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Street Fighter",
-   "fp": "5f2c8310dbaa",
+   "fp": "aa87e5dd4d13",
    "rendered": "2026-10-13",
    "pv": 13,
    "fcs": {
@@ -155699,8 +155930,8 @@
    "fpv": 3
   },
   "baththa": {
-   "last": "2026-10-29",
-   "fp": "2bd958ec1e7e",
+   "last": "2026-10-30",
+   "fp": "6cb9f55a08cd",
    "archivedOn": "2026-10-07",
    "pv": 13,
    "released": "2026-10-01",
@@ -155718,7 +155949,9 @@
    "swept": "2026-10-30",
    "truth": {
     "at": "2026-10-30",
-    "providers": [],
+    "providers": [
+     "Netflix"
+    ],
     "rentBuy": [],
     "released": "2026-10-01",
     "title": "Baththa",
@@ -155738,7 +155971,17 @@
    "imdb": "tt32012509",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "live": {
+    "since": "2026-10-30",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-30",
+    "misses": 0,
+    "arrived": "2026-10-30",
+    "prevCheck": "2026-10-30"
+   }
   },
   "blaze-and-the-monster-machines": {
    "last": "2026-10-28",
@@ -156344,7 +156587,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -157419,13 +157679,13 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "9b810d156cb0",
+   "fp": "079637a932f4",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -157444,7 +157704,6 @@
     "confirmed": true
    },
    "imdb": "tt35854736",
-   "archivedOn": "2026-10-20",
    "truth": {
     "at": "2026-10-23",
     "providers": [
@@ -158910,7 +159169,36 @@
    "title": "Jailer 2",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "swept": "2026-10-30",
+   "truth": {
+    "at": "2026-10-30",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2026-10-14",
+    "title": "Jailer 2",
+    "language": "Tamil",
+    "runtime": 163,
+    "genre": "Action / Comedy",
+    "director": "Nelson",
+    "cast": [
+     "Rajinikanth",
+     "S. J. Suryah",
+     "Suraj Venjaramoodu",
+     "Ramya Krishnan",
+     "Vidya Balan",
+     "Namo Narayana"
+    ]
+   },
+   "imdb": "tt33318732",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "helluva-boss": {
    "last": "2026-10-29",
@@ -159477,7 +159765,8 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "bokshi": {
    "last": "2026-10-25",
@@ -160626,14 +160915,14 @@
    "srAt": "2026-10-27"
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-23",
-   "fp": "6f4eebe5208b",
+   "fp": "9a74a239d5ff",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -161094,7 +161383,8 @@
    "rel": 3,
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "kidney": {
    "last": "2026-10-24",
@@ -161201,11 +161491,10 @@
    },
    "rel": 3,
    "srv": 1,
-   "srAt": "2026-10-27",
-   "archivedOn": "2026-10-29"
+   "srAt": "2026-10-27"
   },
   "final-table": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 316702,
    "released": "2026-10-24",
    "lang": "Korean",
@@ -161232,7 +161521,8 @@
    "rel": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-31"
+   "epNext": "2026-10-31",
+   "archivedOn": "2026-10-30"
   },
   "a-talent-for-murder": {
    "last": "2026-10-28",
@@ -161287,8 +161577,7 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-30"
+   "rel": 3
   },
   "meethe-mein-kya-hai": {
    "last": "2026-10-30",
@@ -161384,6 +161673,47 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "3a09aa3f84c4",
+   "fpv": 3
+  },
+  "ghosts": {
+   "last": "2026-10-30",
+   "tmdbId": 126027,
+   "released": "2021-10-07",
+   "lang": "English",
+   "kind": "tv",
+   "title": "Ghosts",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-12-10",
+   "rendered": "2026-10-30",
+   "fp": "8709cf5406d9",
+   "fpv": 3
+  },
+  "collision": {
+   "last": "2026-10-30",
+   "tmdbId": 331033,
+   "released": "2026-09-07",
+   "lang": "Spanish",
+   "kind": "tv",
+   "title": "Collision",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "78c65249f78f",
+   "fpv": 3
+  },
+  "the-perfect-lie-2026": {
+   "last": "2026-10-30",
+   "tmdbId": 307478,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "The Perfect Lie",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "a3e2dd606cc7",
    "fpv": 3
   }
  },
@@ -162330,7 +162660,8 @@
     "misses": 0
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "evil-dead-burn": {
    "last": "2026-10-25",
@@ -163163,8 +163494,7 @@
    "imdb": "tt37287335",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27",
-   "archivedOn": "2026-10-30"
+   "srAt": "2026-10-27"
   },
   "off-campus": {
    "last": "2026-10-27",
@@ -165494,7 +165824,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "44f79b9d58f5",
+   "fp": "9780497c9689",
    "fcs": {
     "v": "early",
     "at": "2026-10-21",
@@ -165926,7 +166256,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -168153,12 +168483,12 @@
     "genre": "Horror / Comedy",
     "director": "Casper Kelly",
     "cast": [
+     "Keegan-Michael Key",
      "Delaney Quinn",
+     "Tristan Borders",
+     "Madison Skyy Polan",
      "Caleb Williams",
-     "Bennie Taylor",
-     "Eric Bauza",
-     "Patton Oswalt",
-     "Sergey Zhuravsky"
+     "Patton Oswalt"
     ]
    },
    "imdb": "tt37281055",
@@ -169183,7 +169513,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "slow-horses": {
    "last": "2026-10-28",
@@ -169198,7 +169529,7 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "acad91b2d80b",
    "rendered": "2026-10-13",
    "live": {
@@ -169212,7 +169543,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "dune-part-three": {
    "last": "2026-10-27",
@@ -172782,8 +173114,7 @@
     "misses": 0
    },
    "imdb": "tt1844624",
-   "fpv": 3,
-   "archivedOn": "2026-10-30"
+   "fpv": 3
   },
   "chicago-p-d": {
    "last": "2026-10-25",
@@ -180884,7 +181215,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "516d5b096485",
+   "fp": "07d5e89dfd4d",
    "rendered": "2026-10-14",
    "archivedOn": "2026-10-17",
    "swept": "2026-10-30",
@@ -204051,8 +204382,7 @@
    }
   },
   "ghosts": {
-   "last": "2026-10-26",
-   "archivedOn": "2026-09-30",
+   "last": "2026-10-30",
    "pv": 13,
    "catalog": true,
    "tmdbId": 126027,
@@ -204076,7 +204406,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "4ba912ee6161",
+   "fp": "66a288e3bf3f",
    "rendered": "2026-10-12",
    "imdb": "tt11379026",
    "fpv": 3,
@@ -209691,7 +210021,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "haunted-hotel": {
    "last": "2026-10-27",
@@ -209829,13 +210176,13 @@
    "srAt": "2026-10-28"
   },
   "avatar-seven-havens": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "9b810d156cb0",
+   "fp": "079637a932f4",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -209854,7 +210201,6 @@
     "confirmed": true
    },
    "imdb": "tt35854736",
-   "archivedOn": "2026-10-20",
    "truth": {
     "at": "2026-10-23",
     "providers": [
@@ -211590,14 +211936,14 @@
    "fpv": 3
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-23",
-   "fp": "6f4eebe5208b",
+   "fp": "9a74a239d5ff",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -212094,7 +212440,8 @@
    "rel": 3,
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "kidney": {
    "last": "2026-10-24",
@@ -212126,7 +212473,7 @@
    "kind": "tv",
    "title": "YAGA",
    "rendered": "2026-10-25",
-   "fp": "7db59373392a",
+   "fp": "7219986d20bd",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -212330,8 +212677,7 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-30"
+   "rel": 3
   },
   "pressure": {
    "last": "2026-10-30",
@@ -212405,7 +212751,16 @@
    "srAt": "2026-10-29",
    "rendered": "2026-10-29",
    "fp": "fea8055987c7",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "tt42666999",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "ali-g-who-iz-i": {
    "last": "2026-10-30",
@@ -212418,6 +212773,32 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "9be84a6e2bdd",
+   "fpv": 3
+  },
+  "collision": {
+   "last": "2026-10-30",
+   "tmdbId": 331033,
+   "released": "2026-09-07",
+   "lang": "Spanish",
+   "kind": "tv",
+   "title": "Collision",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "78c65249f78f",
+   "fpv": 3
+  },
+  "new-recruit-haunted-military-hospital": {
+   "last": "2026-10-30",
+   "tmdbId": 1691865,
+   "released": "2026-12-30",
+   "lang": "Korean",
+   "kind": "movie",
+   "title": "New Recruit: Haunted Military Hospital",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "b0c49312dc93",
    "fpv": 3
   }
  },
@@ -215806,7 +216187,7 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "c8c46909ee4b",
+   "fp": "593bbf80584d",
    "rendered": "2026-10-14",
    "swept": "2026-10-22",
    "truth": {
@@ -215843,7 +216224,8 @@
     "misses": 0
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "smoking-behind-the-supermarket-with-you": {
    "last": "2026-10-27",
@@ -217529,7 +217911,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -221394,7 +221776,7 @@
     "language": "French",
     "runtime": 85,
     "genre": "Animation / Comedy",
-    "director": "Marco Nguyen, Nicolas Athané",
+    "director": "Nicolas Athané, Marco Nguyen",
     "cast": [
      "Alex Ramirès",
      "Jéremy Gillet",
@@ -221437,7 +221819,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "hope": {
    "last": "2026-10-28",
@@ -221494,7 +221877,7 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "8c68b59d28dc",
    "rendered": "2026-10-13",
    "live": {
@@ -221508,7 +221891,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "last-seen": {
    "last": "2026-10-27",
@@ -237121,8 +237505,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "ncis-los-angeles": {
    "last": "2026-10-28",
@@ -257530,7 +257913,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Other Mommy",
-   "fp": "64bff453c003",
+   "fp": "e9e95a98a866",
    "rendered": "2026-10-13",
    "pv": 13,
    "imdb": "tt36586020",
@@ -257541,7 +257924,6 @@
    },
    "rel": 3,
    "fpv": 3,
-   "archivedOn": "2026-10-27",
    "srv": 1,
    "srAt": "2026-10-27"
   },
@@ -258089,7 +258471,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -259301,13 +259700,13 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "9ae8e3a0d66c",
+   "fp": "10f2b302672c",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -259326,7 +259725,6 @@
     "confirmed": true
    },
    "imdb": "tt35854736",
-   "archivedOn": "2026-10-20",
    "truth": {
     "at": "2026-10-23",
     "providers": [
@@ -261820,7 +262218,6 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-10-29",
    "swept": "2026-10-30",
    "truth": {
     "at": "2026-10-30",
@@ -262231,7 +262628,8 @@
    },
    "rel": 3,
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "freaks-you-re-one-of-us": {
    "last": "2026-10-22",
@@ -262383,14 +262781,14 @@
    "fpv": 3
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-15",
-   "fp": "b2ef3f61a86f",
+   "fp": "5c5a5fc758b6",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -263178,7 +263576,7 @@
    "kind": "movie",
    "title": "Buddy",
    "rendered": "2026-10-17",
-   "fp": "bd14940031d8",
+   "fp": "30983d35f4b7",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -268611,7 +269009,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "fa944a6b4239",
+   "fp": "e97c4b61c34d",
    "rendered": "2026-10-23",
    "fpv": 3,
    "srv": 1,
@@ -269029,7 +269427,16 @@
    "fp": "81997374148e",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "tt48165024",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "nobody-wants-this": {
    "last": "2026-10-27",
@@ -269423,7 +269830,16 @@
    "fp": "a85b94240b88",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "the-100": {
    "last": "2026-10-28",
@@ -269532,7 +269948,8 @@
    },
    "rel": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "udta-teer": {
    "last": "2026-10-26",
@@ -269673,7 +270090,6 @@
    "rendered": "2026-10-28",
    "fp": "a3fe06da0e64",
    "fpv": 3,
-   "archivedOn": "2026-10-29",
    "pv": 13,
    "imdb": "tt41337362",
    "fcs": {
@@ -269750,7 +270166,7 @@
    "fpv": 3
   },
   "yaga": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 314360,
    "released": "2026-10-23",
    "lang": "English",
@@ -269760,9 +270176,8 @@
    "srAt": "2026-10-29",
    "epNext": "2026-10-30",
    "rendered": "2026-10-29",
-   "fp": "15884af9be0d",
+   "fp": "ba28f389bf4f",
    "fpv": 3,
-   "archivedOn": "2026-10-29",
    "pv": 13,
    "live": {
     "since": "2026-10-29",
@@ -269781,7 +270196,7 @@
    "rel": 3
   },
   "tote-oma": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 1800253,
    "released": "2026-10-21",
    "lang": "German",
@@ -269790,8 +270205,17 @@
    "srv": 1,
    "srAt": "2026-10-29",
    "rendered": "2026-10-29",
-   "fp": "f57ef5917b0a",
-   "fpv": 3
+   "fp": "42afbe00d823",
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "tt48141547",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "the-unicorn-that-said-no": {
    "last": "2026-10-30",
@@ -269817,6 +270241,59 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "e45e780cd001",
+   "fpv": 3
+  },
+  "ungehor-am": {
+   "last": "2026-10-30",
+   "tmdbId": 1802798,
+   "released": "2026-10-31",
+   "lang": "German",
+   "kind": "movie",
+   "title": "Ungehor§am",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "53226644f40a",
+   "fpv": 3
+  },
+  "ghosts-2021": {
+   "last": "2026-10-30",
+   "tmdbId": 126027,
+   "released": "2021-10-07",
+   "lang": "English",
+   "kind": "tv",
+   "title": "Ghosts",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-12-10",
+   "rendered": "2026-10-30",
+   "fp": "7595204968bf",
+   "fpv": 3
+  },
+  "collision": {
+   "last": "2026-10-30",
+   "tmdbId": 331033,
+   "released": "2026-09-07",
+   "lang": "Spanish",
+   "kind": "tv",
+   "title": "Collision",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "78c65249f78f",
+   "fpv": 3
+  },
+  "ghost-song": {
+   "last": "2026-10-30",
+   "tmdbId": 1447206,
+   "released": "2026-11-05",
+   "lang": "German",
+   "kind": "movie",
+   "title": "Ghost Song",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "96b75b365ab9",
    "fpv": 3
   }
  },
@@ -270955,9 +271432,9 @@
    },
    "fp": "06893bb3948b",
    "rendered": "2026-10-14",
-   "swept": "2026-10-29",
+   "swept": "2026-10-30",
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-10-30",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-01",
@@ -271106,9 +271583,9 @@
    },
    "fp": "08f640d69441",
    "rendered": "2026-10-14",
-   "swept": "2026-10-29",
+   "swept": "2026-10-30",
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-10-30",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-03",
@@ -271300,9 +271777,9 @@
    },
    "fp": "d8618a646c7c",
    "rendered": "2026-10-14",
-   "swept": "2026-10-29",
+   "swept": "2026-10-30",
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-10-30",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-09",
@@ -271877,9 +272354,9 @@
    },
    "fp": "9654eba5027e",
    "rendered": "2026-10-14",
-   "swept": "2026-10-29",
+   "swept": "2026-10-30",
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-10-30",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-12",
@@ -272537,7 +273014,7 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "fp": "0e04132d1e69",
+   "fp": "cf01618dad8c",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "fpv": 3,
@@ -277205,7 +277682,7 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "2d87d76bd8ef",
    "rendered": "2026-10-14",
    "live": {
@@ -277219,7 +277696,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "has-fallen": {
    "last": "2026-10-28",
@@ -309210,7 +309688,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "437958152100",
+   "fp": "67493d86f97f",
    "archivedOn": "2026-10-14",
    "rendered": "2026-10-14",
    "swept": "2026-10-30",
@@ -309784,7 +310262,8 @@
      "Rohini",
      "Harish Uthaman"
     ]
-   }
+   },
+   "swept": "2026-10-30"
   },
   "kabali": {
    "last": "2026-10-27",
@@ -315096,7 +315575,9 @@
      "Fahadh Faasil",
      "Ssara Palekar",
      "Saurabh Sachdeva",
-     "Venkatesh Kakumanu"
+     "Venkatesh Kakumanu",
+     "Subbaraju",
+     "Mahesh Manjrekar"
     ]
    },
    "archivedOn": "2026-10-23",
@@ -315975,7 +316456,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -323191,8 +323689,7 @@
    "fpv": 3
   },
   "ghosts": {
-   "last": "2026-10-22",
-   "archivedOn": "2026-10-18",
+   "last": "2026-10-30",
    "pv": 13,
    "catalog": true,
    "tmdbId": 126027,
@@ -323211,7 +323708,7 @@
    },
    "rel": 3,
    "rendered": "2026-10-18",
-   "fp": "c46283bd4c8b",
+   "fp": "8e373677b9e4",
    "fcs": {
     "v": "Must watch",
     "at": "2026-10-19",
@@ -323398,8 +323895,7 @@
    "fpv": 3,
    "imdb": "tt36154131",
    "srv": 1,
-   "srAt": "2026-10-28",
-   "archivedOn": "2026-10-29"
+   "srAt": "2026-10-28"
   },
   "the-grinch": {
    "last": "2026-10-25",
@@ -327129,18 +327625,18 @@
    "srAt": "2026-10-27"
   },
   "sumo-didi": {
-   "last": "2026-10-25",
+   "last": "2026-10-30",
    "tmdbId": 1186823,
-   "released": "2026-10-23",
+   "released": "2023-10-27",
    "lang": "Hindi",
    "kind": "movie",
    "title": "Sumo Didi",
-   "fp": "c28353331902",
+   "fp": "46e0bbeae6e4",
    "pv": 13,
    "imdb": "tt24226306",
    "fcs": {
     "v": "early",
-    "at": "2026-10-23",
+    "at": "2026-10-30",
     "w": 8
    },
    "rel": 3,
@@ -327148,7 +327644,10 @@
    "archivedOn": "2026-10-24",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "truth": {
+    "released": "2023-10-27"
+   }
   },
   "raid-2": {
    "last": "2026-10-23",
@@ -327317,7 +327816,7 @@
    "kind": "movie",
    "title": "Hope",
    "rendered": "2026-10-23",
-   "fp": "7745b38b45ac",
+   "fp": "4a716b04b8dd",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -327613,7 +328112,8 @@
     "w": 8
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "kidney": {
    "last": "2026-10-24",
@@ -327850,10 +328350,11 @@
    },
    "rel": 3,
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "final-table": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 316702,
    "released": "2026-10-24",
    "lang": "Korean",
@@ -327880,7 +328381,8 @@
    "rel": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-31"
+   "epNext": "2026-10-31",
+   "archivedOn": "2026-10-30"
   },
   "haindava": {
    "last": "2026-10-27",
@@ -327958,7 +328460,8 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "drive-the-pretenders": {
    "last": "2026-10-30",
@@ -327987,8 +328490,7 @@
     ],
     "lastCheck": "2026-10-29",
     "misses": 0
-   },
-   "archivedOn": "2026-10-30"
+   }
   },
   "idiots": {
    "last": "2026-10-30",
@@ -328113,6 +328615,33 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "92a40f3d62d1",
+   "fpv": 3
+  },
+  "the-perfect-lie-2026": {
+   "last": "2026-10-30",
+   "tmdbId": 307478,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "The Perfect Lie",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "a3e2dd606cc7",
+   "fpv": 3
+  },
+  "comrade-kalyan": {
+   "last": "2026-10-30",
+   "tmdbId": 1428295,
+   "released": "2026-10-09",
+   "lang": "Telugu",
+   "kind": "movie",
+   "title": "Comrade Kalyan",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "8580f10bf6a6",
    "fpv": 3
   }
  },
@@ -329942,7 +330471,8 @@
     "misses": 0
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "smoking-behind-the-supermarket-with-you": {
    "last": "2026-10-27",
@@ -331116,7 +331646,7 @@
    "title": "Clayface",
    "tmdbId": 1400940,
    "rel": 2,
-   "fp": "ee8d0c3ef244",
+   "fp": "8a374806e58c",
    "fcs": {
     "v": "early",
     "at": "2026-10-20",
@@ -335779,7 +336309,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "slow-horses": {
    "last": "2026-10-28",
@@ -335794,7 +336325,7 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "d8d80c537f55",
    "rendered": "2026-10-14",
    "live": {
@@ -335808,7 +336339,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "phoolan": {
    "last": "2026-10-21",
@@ -350033,7 +350565,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "948760b17ff7",
+   "fp": "d3742bdfe945",
    "rendered": "2026-10-14",
    "archivedOn": "2026-10-17",
    "swept": "2026-10-30",
@@ -351082,8 +351614,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "do-deewane-seher-mein": {
    "last": "2026-10-22",
@@ -359703,7 +360234,7 @@
    "imdb": "tt0121164",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-27",
+    "at": "2026-10-30",
     "providers": [
      "Crave",
      "Starz"
@@ -372219,7 +372750,7 @@
    "imdb": "tt0212671",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-28",
+    "at": "2026-10-30",
     "providers": [
      "Disney+"
     ],
@@ -374418,8 +374949,7 @@
    "fpv": 3
   },
   "ghosts": {
-   "last": "2026-10-23",
-   "archivedOn": "2026-10-05",
+   "last": "2026-10-30",
    "pv": 13,
    "catalog": true,
    "tmdbId": 126027,
@@ -374444,7 +374974,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "d82c1f3294d2",
+   "fp": "eb9ffb9b5b59",
    "rendered": "2026-10-12",
    "imdb": "tt11379026",
    "truth": {
@@ -376398,7 +376928,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -377668,13 +378215,13 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "9b810d156cb0",
+   "fp": "079637a932f4",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -377693,7 +378240,6 @@
     "confirmed": true
    },
    "imdb": "tt35854736",
-   "archivedOn": "2026-10-20",
    "truth": {
     "at": "2026-10-23",
     "providers": [
@@ -378332,7 +378878,7 @@
     "language": "French",
     "runtime": 85,
     "genre": "Animation / Comedy",
-    "director": "Marco Nguyen, Nicolas Athané",
+    "director": "Nicolas Athané, Marco Nguyen",
     "cast": [
      "Alex Ramirès",
      "Jéremy Gillet",
@@ -382420,7 +382966,7 @@
    "imdb": "tt0062568",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-28",
+    "at": "2026-10-30",
     "providers": [
      "Netflix"
     ],
@@ -387111,14 +387657,14 @@
    "fpv": 3
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-23",
-   "fp": "369a6c273809",
+   "fp": "de55afaf3ed0",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -387176,7 +387722,8 @@
      "Suchita Trivedi",
      "Raghav Dhir"
     ]
-   }
+   },
+   "swept": "2026-10-30"
   },
   "bhool-chuk-maaf": {
    "last": "2026-10-25",
@@ -387767,7 +388314,8 @@
     "w": 8
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "matargashti": {
    "last": "2026-10-27",
@@ -387975,7 +388523,7 @@
    "rel": 3
   },
   "the-cycle": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 1290418,
    "released": "2026-09-24",
    "lang": "English",
@@ -387984,7 +388532,7 @@
    "srv": 1,
    "srAt": "2026-10-28",
    "rendered": "2026-10-28",
-   "fp": "7f8bafcfad47",
+   "fp": "5c89e30a2ee0",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -388003,8 +388551,7 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-28"
+   "rel": 3
   },
   "where-the-mask-ends": {
    "last": "2026-10-28",
@@ -388125,8 +388672,7 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-30"
+   "rel": 3
   },
   "fatherland": {
    "last": "2026-10-30",
@@ -389872,7 +390418,8 @@
     "misses": 0
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "smoking-behind-the-supermarket-with-you": {
    "last": "2026-10-27",
@@ -390969,7 +391516,7 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "fp": "5fafbd1338aa",
+   "fp": "d00ca0fcfb87",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "fpv": 3,
@@ -391452,7 +391999,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -393726,12 +394273,12 @@
     "genre": "Horror / Comedy",
     "director": "Casper Kelly",
     "cast": [
+     "Keegan-Michael Key",
      "Delaney Quinn",
+     "Tristan Borders",
+     "Madison Skyy Polan",
      "Caleb Williams",
-     "Bennie Taylor",
-     "Eric Bauza",
-     "Patton Oswalt",
-     "Sergey Zhuravsky"
+     "Patton Oswalt"
     ]
    },
    "imdb": "tt37281055",
@@ -394091,7 +394638,7 @@
   "you-can-see-everything": {
    "last": "2026-10-30",
    "tmdbId": 1765072,
-   "released": "2026-10-16",
+   "released": "2026-11-26",
    "lang": "English",
    "kind": "movie",
    "title": "You Can See Everything",
@@ -394102,7 +394649,7 @@
     "at": "2026-10-17",
     "w": 6
    },
-   "fp": "11d5f4af8a14",
+   "fp": "8563e4ae1cfb",
    "rendered": "2026-10-14",
    "imdb": "tt45368240",
    "fpv": 3,
@@ -395159,7 +395706,7 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "4978a1dcfd2c",
    "rendered": "2026-10-13",
    "live": {
@@ -395173,7 +395720,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "renegade-immortal-battle-of-the-immortal-slayer": {
    "last": "2026-10-25",
@@ -401607,8 +402155,7 @@
     "misses": 0
    },
    "imdb": "tt1844624",
-   "fpv": 3,
-   "archivedOn": "2026-10-30"
+   "fpv": 3
   },
   "arrow": {
    "last": "2026-10-22",
@@ -427705,7 +428252,7 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "fp": "e25a4a87c0fe",
+   "fp": "20419617542a",
    "rendered": "2026-10-14",
    "archivedOn": "2026-10-17",
    "swept": "2026-10-30",
@@ -428578,15 +429125,14 @@
    "imdb": "tt41558341"
   },
   "baththa": {
-   "last": "2026-10-27",
-   "fp": "2bd958ec1e7e",
+   "last": "2026-10-30",
+   "fp": "9274f1d2a73b",
    "tmdbId": 1515692,
    "released": "2026-10-01",
    "lang": "Tamil",
    "kind": "movie",
    "title": "Baththa",
    "rendered": "2026-10-12",
-   "archivedOn": "2026-10-22",
    "pv": 13,
    "swept": "2026-10-30",
    "truth": {
@@ -433948,7 +434494,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "traces-of-justice": {
    "last": "2026-10-26",
@@ -436407,8 +436970,7 @@
    "fpv": 3
   },
   "ghosts": {
-   "last": "2026-10-22",
-   "archivedOn": "2026-10-12",
+   "last": "2026-10-30",
    "pv": 13,
    "catalog": true,
    "tmdbId": 126027,
@@ -436430,7 +436992,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "a82a5cfaadd1",
+   "fp": "46f05800a8e3",
    "rendered": "2026-10-12",
    "imdb": "tt11379026",
    "fpv": 3
@@ -437221,11 +437783,28 @@
    "kind": "tv",
    "title": "The Lament of Autumn",
    "rendered": "2026-10-14",
-   "fp": "c5088841125d",
+   "fp": "7aa43798e2ec",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-30",
+    "providers": [
+     "Viu"
+    ],
+    "lastCheck": "2026-10-30",
+    "misses": 0
+   },
+   "imdb": "tt37109705",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "whalefall": {
    "last": "2026-10-26",
@@ -438130,7 +438709,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "imdb": "tt32909364"
+   "imdb": "tt32909364",
+   "archivedOn": "2026-10-30"
   },
   "kong-skull-island": {
    "last": "2026-10-22",
@@ -443951,14 +444531,14 @@
    "fpv": 3
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-21",
-   "fp": "74c43b8c63fd",
+   "fp": "ae4b7d94211c",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -445519,7 +446099,8 @@
     "w": 8
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "golmaal-5": {
    "last": "2026-10-25",
@@ -445610,7 +446191,7 @@
    "archivedOn": "2026-10-29"
   },
   "final-table": {
-   "last": "2026-10-28",
+   "last": "2026-10-30",
    "tmdbId": 316702,
    "released": "2026-10-24",
    "lang": "Korean",
@@ -445637,7 +446218,8 @@
    "rel": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-31"
+   "epNext": "2026-10-31",
+   "archivedOn": "2026-10-30"
   },
   "bisikan": {
    "last": "2026-10-27",
@@ -445749,8 +446331,7 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-30"
+   "rel": 3
   },
   "the-hunger-games-sunrise-on-the-reaping": {
    "last": "2026-10-29",
@@ -445798,7 +446379,16 @@
    "srAt": "2026-10-29",
    "fp": "5bfd89fb2883",
    "fpv": 3,
-   "rendered": "2026-10-29"
+   "rendered": "2026-10-29",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "tt48436840",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "flowers-bloom-when-touched": {
    "last": "2026-10-30",
@@ -445859,6 +446449,59 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "cf3805c0d6ac",
+   "fpv": 3
+  },
+  "collision": {
+   "last": "2026-10-30",
+   "tmdbId": 331033,
+   "released": "2026-09-07",
+   "lang": "Spanish",
+   "kind": "tv",
+   "title": "Collision",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "bd14e6b74cc8",
+   "fpv": 3
+  },
+  "the-perfect-lie-2026": {
+   "last": "2026-10-30",
+   "tmdbId": 307478,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "The Perfect Lie",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "f584fb861980",
+   "fpv": 3
+  },
+  "raawadi": {
+   "last": "2026-10-30",
+   "tmdbId": 1621270,
+   "released": "2026-12-24",
+   "lang": "Tamil",
+   "kind": "movie",
+   "title": "Raawadi",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "0d05ce2c6ff0",
+   "fpv": 3
+  },
+  "thedal": {
+   "last": "2026-10-30",
+   "tmdbId": 1806311,
+   "released": "2026-10-25",
+   "lang": "Tamil",
+   "kind": "movie",
+   "title": "THEDAL",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "5a11f8cf2392",
    "fpv": 3
   }
  },
@@ -446323,7 +446966,7 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "276f3cd6269b",
    "rendered": "2026-10-13",
    "live": {
@@ -446337,7 +446980,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "kudrat-1968-high-council": {
    "last": "2026-10-28",
@@ -459932,15 +460576,14 @@
    "fpv": 3
   },
   "baththa": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 1515692,
    "released": "2026-10-01",
    "lang": "Tamil",
    "kind": "movie",
    "title": "Baththa",
-   "fp": "2bd958ec1e7e",
+   "fp": "9274f1d2a73b",
    "rendered": "2026-10-12",
-   "archivedOn": "2026-10-22",
    "pv": 13,
    "swept": "2026-10-30",
    "truth": {
@@ -464233,8 +464876,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "unabomber": {
    "last": "2026-10-18",
@@ -465665,7 +466307,7 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "fp": "62fb50810483",
+   "fp": "daaa034a7199",
    "swept": "2026-10-30",
    "rendered": "2026-10-14",
    "archivedOn": "2026-10-17",
@@ -476428,7 +477070,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "99d750629be6",
+   "fp": "67332de7f1c1",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -480300,8 +480942,7 @@
    "srAt": "2026-10-27"
   },
   "ghosts": {
-   "last": "2026-10-22",
-   "archivedOn": "2026-10-04",
+   "last": "2026-10-30",
    "pv": 13,
    "catalog": true,
    "tmdbId": 126027,
@@ -480323,7 +480964,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "b3907c31734f",
+   "fp": "5ac947038463",
    "rendered": "2026-10-12",
    "imdb": "tt11379026",
    "fpv": 3
@@ -482453,7 +483094,25 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "truth": {
+    "at": "2026-10-30",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2026-10-24",
+    "title": "Orang Minyak",
+    "language": "Malay",
+    "runtime": 18,
+    "genre": "Horror / Drama",
+    "director": "Leon Cheo",
+    "cast": [
+     "Ayden Farish",
+     "Suhaillah Salam",
+     "Fir Rahman",
+     "Adrian Toh",
+     "Joshua Kwan"
+    ]
+   }
   },
   "weeds": {
    "last": "2026-10-22",
@@ -482612,7 +483271,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "scene": {
    "last": "2026-10-28",
@@ -486743,7 +487419,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "imdb": "tt32909364"
+   "imdb": "tt32909364",
+   "archivedOn": "2026-10-30"
   },
   "the-trap": {
    "last": "2026-10-28",
@@ -488184,7 +488861,16 @@
    "fp": "584a680e1744",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "the-wandering-earth-iii": {
    "last": "2026-10-17",
@@ -488206,7 +488892,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-28",
-   "archivedOn": "2026-10-29",
    "truth": {
     "at": "2026-10-29",
     "providers": [],
@@ -491822,14 +492507,14 @@
    "fpv": 3
   },
   "driving-mom-crazy": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 298546,
    "released": "2026-10-18",
    "lang": "Chinese",
    "kind": "tv",
    "title": "Driving Mom Crazy",
    "rendered": "2026-10-20",
-   "fp": "ecc9f164426a",
+   "fp": "1b110d0b2fb7",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -491840,10 +492525,17 @@
     "lastCheck": "2026-10-25",
     "misses": 0
    },
-   "rel": 2,
+   "rel": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-10-30",
+   "imdb": "tt46657219",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   }
   },
   "star-wars-rebels": {
    "last": "2026-10-22",
@@ -493640,7 +494332,16 @@
    "rendered": "2026-10-24",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "tt39239818",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "cuddle-caf": {
    "last": "2026-10-24",
@@ -494167,7 +494868,8 @@
    },
    "rel": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "golmaal-5": {
    "last": "2026-10-25",
@@ -494243,7 +494945,7 @@
    "archivedOn": "2026-10-29"
   },
   "final-table": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 316702,
    "released": "2026-10-24",
    "lang": "Korean",
@@ -494270,7 +494972,8 @@
    "rel": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-31"
+   "epNext": "2026-10-31",
+   "archivedOn": "2026-10-30"
   },
   "enemy-of-the-smuggler": {
    "last": "2026-10-27",
@@ -494325,8 +495028,7 @@
     ],
     "lastCheck": "2026-10-29",
     "misses": 0
-   },
-   "archivedOn": "2026-10-30"
+   }
   },
   "the-hunger-games-sunrise-on-the-reaping": {
    "last": "2026-10-29",
@@ -494437,7 +495139,16 @@
    "srAt": "2026-10-29",
    "rendered": "2026-10-29",
    "fp": "96a174f917a4",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "tt39673991",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "singgaramm": {
    "last": "2026-10-30",
@@ -494450,6 +495161,72 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "cf3805c0d6ac",
+   "fpv": 3
+  },
+  "collision": {
+   "last": "2026-10-30",
+   "tmdbId": 331033,
+   "released": "2026-09-07",
+   "lang": "Spanish",
+   "kind": "tv",
+   "title": "Collision",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "78c65249f78f",
+   "fpv": 3
+  },
+  "the-perfect-lie": {
+   "last": "2026-10-30",
+   "tmdbId": 307478,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "The Perfect Lie",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "a3e2dd606cc7",
+   "fpv": 3
+  },
+  "raawadi": {
+   "last": "2026-10-30",
+   "tmdbId": 1621270,
+   "released": "2026-12-24",
+   "lang": "Tamil",
+   "kind": "movie",
+   "title": "Raawadi",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "0d05ce2c6ff0",
+   "fpv": 3
+  },
+  "ah-girl": {
+   "last": "2026-10-30",
+   "tmdbId": 747509,
+   "released": "2026-11-19",
+   "lang": "Chinese",
+   "kind": "movie",
+   "title": "Ah Girl",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "a2e6b16e4d70",
+   "fpv": 3
+  },
+  "thedal": {
+   "last": "2026-10-30",
+   "tmdbId": 1806311,
+   "released": "2026-10-25",
+   "lang": "Tamil",
+   "kind": "movie",
+   "title": "THEDAL",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "5a11f8cf2392",
    "fpv": 3
   }
  },
@@ -494785,7 +495562,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -494864,7 +495641,7 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "718341db4180",
    "rendered": "2026-10-13",
    "live": {
@@ -494878,7 +495655,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "honor-thy-mother": {
    "last": "2026-10-27",
@@ -502865,7 +503643,7 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "fp": "26d4280ec425",
+   "fp": "f2d550e2aa3c",
    "rendered": "2026-10-14",
    "archivedOn": "2026-10-15",
    "swept": "2026-10-30",
@@ -524224,8 +525002,7 @@
    }
   },
   "ghosts": {
-   "last": "2026-10-22",
-   "archivedOn": "2026-09-29",
+   "last": "2026-10-30",
    "pv": 13,
    "catalog": true,
    "tmdbId": 126027,
@@ -524248,7 +525025,7 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "b3907c31734f",
+   "fp": "5ac947038463",
    "rendered": "2026-10-12",
    "imdb": "tt11379026",
    "fpv": 3,
@@ -524481,7 +525258,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "4d97397e36e4",
+   "fp": "baaad4695e8f",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -525590,7 +526367,8 @@
    },
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "swept": "2026-10-30"
   },
   "the-powerpuff-girls": {
    "last": "2026-10-28",
@@ -530896,7 +531674,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "2-valid-ids": {
    "last": "2026-10-25",
@@ -533264,7 +534059,7 @@
     "misses": 0
    },
    "imdb": "tt39328047",
-   "rel": 2,
+   "rel": 3,
    "fpv": 3,
    "fcs": {
     "v": "early",
@@ -533273,7 +534068,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30"
+   "epNext": "2026-10-30",
+   "archivedOn": "2026-10-30"
   },
   "28-years-later-the-bone-temple": {
    "last": "2026-10-22",
@@ -533578,7 +534374,24 @@
    "rendered": "2026-10-13",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt37737331",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "xo-kitty": {
    "last": "2026-10-22",
@@ -542170,7 +542983,8 @@
    },
    "rel": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "final-table": {
    "last": "2026-10-27",
@@ -542231,7 +543045,8 @@
    "rel": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "status-rejected": {
    "last": "2026-10-26",
@@ -542416,8 +543231,7 @@
     ],
     "lastCheck": "2026-10-29",
     "misses": 0
-   },
-   "archivedOn": "2026-10-30"
+   }
   },
   "on-the-heights": {
    "last": "2026-10-29",
@@ -542456,6 +543270,68 @@
    "srAt": "2026-10-29",
    "rendered": "2026-10-29",
    "fp": "fea8055987c7",
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "tt42666999",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
+  },
+  "balaraw-blood-island": {
+   "last": "2026-10-30",
+   "tmdbId": 313699,
+   "released": "2026-10-29",
+   "lang": "Filipino",
+   "kind": "tv",
+   "title": "Balaraw: Blood Island",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "d138d41b40c8",
+   "fpv": 3
+  },
+  "true-manila-encounters": {
+   "last": "2026-10-30",
+   "tmdbId": 338334,
+   "released": "2026-10-29",
+   "lang": "Filipino",
+   "kind": "tv",
+   "title": "True Manila Encounters",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-11-05",
+   "rendered": "2026-10-30",
+   "fp": "fe765c110e79",
+   "fpv": 3
+  },
+  "collision": {
+   "last": "2026-10-30",
+   "tmdbId": 331033,
+   "released": "2026-09-07",
+   "lang": "Spanish",
+   "kind": "tv",
+   "title": "Collision",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "78c65249f78f",
+   "fpv": 3
+  },
+  "new-recruit-haunted-military-hospital": {
+   "last": "2026-10-30",
+   "tmdbId": 1691865,
+   "released": "2026-12-30",
+   "lang": "Korean",
+   "kind": "movie",
+   "title": "New Recruit: Haunted Military Hospital",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "b0c49312dc93",
    "fpv": 3
   }
  },
@@ -542819,9 +543695,9 @@
     "at": "2026-10-30",
     "providers": [],
     "rentBuy": [
-     "JustWatch TV Store",
      "Neon TV",
-     "Apple TV Store"
+     "Apple TV Store",
+     "JustWatch TV Store"
     ],
     "released": "2026-09-09",
     "title": "Practical Magic 2",
@@ -542892,7 +543768,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "slow-horses": {
    "last": "2026-10-28",
@@ -542907,7 +543784,7 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fp": "8c68b59d28dc",
    "rendered": "2026-10-13",
    "live": {
@@ -542921,7 +543798,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "neagley": {
    "last": "2026-10-27",
@@ -546613,8 +547491,7 @@
     "misses": 0
    },
    "imdb": "tt1844624",
-   "fpv": 3,
-   "archivedOn": "2026-10-30"
+   "fpv": 3
   },
   "fbi": {
    "last": "2026-10-22",
@@ -550780,7 +551657,7 @@
    "title": "Verity",
    "pv": 13,
    "rel": 3,
-   "fp": "4d1de4738e0f",
+   "fp": "d72f01c754c0",
    "rendered": "2026-10-14",
    "archivedOn": "2026-10-17",
    "swept": "2026-10-30",
@@ -550820,7 +551697,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Street Fighter",
-   "fp": "d8dd112460ab",
+   "fp": "83bbff5714ce",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -556363,7 +557240,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "3f4c78078eef",
+   "fp": "611b67e2ad30",
    "rendered": "2026-10-12",
    "pv": 13,
    "imdb": "tt34890576",
@@ -571385,9 +572262,9 @@
      "HBO Max"
     ],
     "rentBuy": [
-     "JustWatch TV Store",
      "Neon TV",
-     "Apple TV Store"
+     "Apple TV Store",
+     "JustWatch TV Store"
     ],
     "released": "2010-11-18",
     "title": "Harry Potter and the Deathly Hallows: Part 1",
@@ -571616,8 +572493,7 @@
    }
   },
   "ghosts": {
-   "last": "2026-10-23",
-   "archivedOn": "2026-09-29",
+   "last": "2026-10-30",
    "pv": 13,
    "catalog": true,
    "tmdbId": 126027,
@@ -571640,7 +572516,7 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "b3907c31734f",
+   "fp": "5ac947038463",
    "rendered": "2026-10-12",
    "imdb": "tt11379026",
    "fpv": 3,
@@ -578969,7 +579845,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "that-s-so-raven": {
    "last": "2026-10-28",
@@ -582458,8 +583351,7 @@
    "imdb": "tt37287335",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27",
-   "archivedOn": "2026-10-30"
+   "srAt": "2026-10-27"
   },
   "crystal-lake": {
    "last": "2026-10-30",
@@ -584044,17 +584936,18 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-23",
-   "fp": "6f4eebe5208b",
+   "fp": "9a74a239d5ff",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -584377,7 +585270,8 @@
     "w": 8
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "kidney": {
    "last": "2026-10-24",
@@ -584614,8 +585508,7 @@
     ],
     "lastCheck": "2026-10-29",
     "misses": 0
-   },
-   "archivedOn": "2026-10-30"
+   }
   },
   "meethe-mein-kya-hai": {
    "last": "2026-10-30",
@@ -584692,6 +585585,41 @@
    "srAt": "2026-10-29",
    "rendered": "2026-10-29",
    "fp": "fea8055987c7",
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "tt42666999",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
+  },
+  "collision": {
+   "last": "2026-10-30",
+   "tmdbId": 331033,
+   "released": "2026-09-07",
+   "lang": "Spanish",
+   "kind": "tv",
+   "title": "Collision",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "78c65249f78f",
+   "fpv": 3
+  },
+  "new-recruit-haunted-military-hospital": {
+   "last": "2026-10-30",
+   "tmdbId": 1691865,
+   "released": "2026-12-30",
+   "lang": "Korean",
+   "kind": "movie",
+   "title": "New Recruit: Haunted Military Hospital",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "b0c49312dc93",
    "fpv": 3
   }
  },
@@ -585049,7 +585977,7 @@
    "kind": "tv",
    "title": "Slow Horses",
    "pv": 13,
-   "rel": 2,
+   "rel": 3,
    "fcs": {
     "v": "Must watch",
     "at": "2026-10-19",
@@ -585069,7 +585997,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "neagley": {
    "last": "2026-10-27",
@@ -594248,8 +595177,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "seinfeld": {
    "last": "2026-10-27",
@@ -621758,7 +622686,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -624345,13 +625290,13 @@
    "fpv": 3
   },
   "take-charge-of-my-heart": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 289423,
    "released": "2026-10-09",
    "lang": "Korean",
    "kind": "tv",
    "title": "Take Charge of My Heart",
-   "fp": "159fe811a34d",
+   "fp": "9564b40888d7",
    "rendered": "2026-10-13",
    "fpv": 3,
    "srv": 1,
@@ -632665,14 +633610,14 @@
    "fpv": 3
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-23",
-   "fp": "fb621267c9b1",
+   "fp": "089d491a2d88",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -632836,7 +633781,7 @@
    "kind": "movie",
    "title": "Clayface",
    "rendered": "2026-10-23",
-   "fp": "65e24c0d3939",
+   "fp": "c93a0a4303ff",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -632881,7 +633826,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "move-to-heaven": {
    "last": "2026-10-28",
@@ -632942,8 +633888,7 @@
    "fpv": 3
   },
   "ghosts": {
-   "last": "2026-10-23",
-   "archivedOn": "2026-10-23",
+   "last": "2026-10-30",
    "pv": 13,
    "catalog": true,
    "tmdbId": 126027,
@@ -632967,7 +633912,7 @@
    },
    "rel": 3,
    "rendered": "2026-10-23",
-   "fp": "e2bd9bb50513",
+   "fp": "a70a0955be73",
    "fpv": 3
   },
   "the-pirates": {
@@ -633240,7 +634185,8 @@
    },
    "rel": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "the-meryl-streep-project": {
    "last": "2026-10-29",
@@ -633379,7 +634325,8 @@
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27",
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "other-mommy": {
    "last": "2026-10-27",
@@ -633480,8 +634427,7 @@
     ],
     "lastCheck": "2026-10-29",
     "misses": 0
-   },
-   "archivedOn": "2026-10-30"
+   }
   },
   "halo": {
    "last": "2026-10-28",
@@ -633927,7 +634873,7 @@
    "kind": "tv",
    "title": "Slow Horses",
    "pv": 13,
-   "rel": 2,
+   "rel": 3,
    "fcs": {
     "v": "Must watch",
     "at": "2026-10-19",
@@ -633946,7 +634892,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "plastic-beauty": {
    "last": "2026-10-27",
@@ -637790,7 +638737,8 @@
    "fpv": 3,
    "imdb": "",
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "one-piece": {
    "last": "2026-10-28",
@@ -645443,8 +646391,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "seinfeld": {
    "last": "2026-10-22",
@@ -669019,8 +669966,7 @@
    "fpv": 3
   },
   "ghosts": {
-   "last": "2026-10-22",
-   "archivedOn": "2026-10-04",
+   "last": "2026-10-30",
    "pv": 13,
    "catalog": true,
    "tmdbId": 126027,
@@ -669042,7 +669988,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "b3907c31734f",
+   "fp": "5ac947038463",
    "rendered": "2026-10-12",
    "imdb": "tt11379026",
    "fpv": 3
@@ -672027,7 +672973,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "09410fa00a25",
+   "fp": "d73bfacb8cad",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -672276,7 +673222,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -677787,7 +678750,6 @@
    },
    "rel": 3,
    "imdb": "tt39335288",
-   "archivedOn": "2026-10-28",
    "srv": 1,
    "srAt": "2026-10-28",
    "swept": "2026-10-30",
@@ -683920,14 +684882,14 @@
    "srAt": "2026-10-27"
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-23",
-   "fp": "6f4eebe5208b",
+   "fp": "9a74a239d5ff",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -684272,7 +685234,8 @@
     "w": 8
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "gacha-cycle-world": {
    "last": "2026-10-25",
@@ -684315,7 +685278,7 @@
    }
   },
   "final-table": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 316702,
    "released": "2026-10-24",
    "lang": "Korean",
@@ -684342,7 +685305,8 @@
    "imdb": "tt49692512",
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-31"
+   "epNext": "2026-10-31",
+   "archivedOn": "2026-10-30"
   },
   "wildwood": {
    "last": "2026-10-30",
@@ -684385,7 +685349,8 @@
    "rel": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "ryuji": {
    "last": "2026-10-27",
@@ -684440,8 +685405,7 @@
     ],
     "lastCheck": "2026-10-29",
     "misses": 0
-   },
-   "archivedOn": "2026-10-30"
+   }
   },
   "ghost-end-of-night": {
    "last": "2026-10-28",
@@ -684496,6 +685460,42 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "cf6183cff1cf",
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
+  },
+  "the-perfect-lie": {
+   "last": "2026-10-30",
+   "tmdbId": 307478,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "The Perfect Lie",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "a3e2dd606cc7",
+   "fpv": 3
+  },
+  "superplastic-deformation": {
+   "last": "2026-10-30",
+   "tmdbId": 1782930,
+   "released": "2026-12-05",
+   "lang": "Japanese",
+   "kind": "movie",
+   "title": "Superplastic Deformation",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "dfdb1c0603ad",
    "fpv": 3
   }
  },
@@ -684830,7 +685830,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -684874,7 +685874,7 @@
    "kind": "tv",
    "title": "Slow Horses",
    "pv": 13,
-   "rel": 2,
+   "rel": 3,
    "fcs": {
     "v": "Must watch",
     "at": "2026-10-20",
@@ -684893,7 +685893,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "a-love-other-than-yours": {
    "last": "2026-10-27",
@@ -704143,7 +705144,7 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "fp": "ea819c99a883",
+   "fp": "9ed640d8a634",
    "rendered": "2026-10-14",
    "archivedOn": "2026-10-16",
    "swept": "2026-10-30",
@@ -712351,8 +713352,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "milly-mamet": {
    "last": "2026-10-25",
@@ -715027,7 +716027,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "0332baa85271",
+   "fp": "3b9df3fe5be3",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -715079,7 +716079,8 @@
      "Niniek L. Karim",
      "Lukman Sardi"
     ]
-   }
+   },
+   "swept": "2026-10-30"
   },
   "the-suspect": {
    "last": "2026-10-30",
@@ -717968,7 +718969,7 @@
    "srAt": "2026-10-27"
   },
   "black-clover": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 73223,
    "released": "2017-10-03",
    "lang": "Japanese",
@@ -717995,7 +718996,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-31"
+   "epNext": "2026-10-31",
+   "archivedOn": "2026-10-30"
   },
   "war": {
    "last": "2026-10-30",
@@ -721417,7 +722419,24 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -723886,8 +724905,7 @@
    "fpv": 3
   },
   "ghosts": {
-   "last": "2026-10-22",
-   "archivedOn": "2026-10-12",
+   "last": "2026-10-30",
    "pv": 13,
    "catalog": true,
    "tmdbId": 126027,
@@ -723909,7 +724927,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "b3907c31734f",
+   "fp": "5ac947038463",
    "rendered": "2026-10-12",
    "imdb": "tt11379026",
    "fpv": 3
@@ -732646,7 +733664,8 @@
     "w": 8
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "wildwood": {
    "last": "2026-10-30",
@@ -732751,7 +733770,8 @@
    "srv": 1,
    "srAt": "2026-10-27",
    "epNext": "2026-10-27",
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "ghost-soldier": {
    "last": "2026-10-28",
@@ -732806,8 +733826,7 @@
     ],
     "lastCheck": "2026-10-29",
     "misses": 0
-   },
-   "archivedOn": "2026-10-30"
+   }
   },
   "the-ones-who-come-and-go": {
    "last": "2026-10-30",
@@ -732898,6 +733917,41 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "b810418a74b7",
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
+  },
+  "collision": {
+   "last": "2026-10-30",
+   "tmdbId": 331033,
+   "released": "2026-09-07",
+   "lang": "Spanish",
+   "kind": "tv",
+   "title": "Collision",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "78c65249f78f",
+   "fpv": 3
+  },
+  "new-recruit-haunted-military-hospital": {
+   "last": "2026-10-30",
+   "tmdbId": 1691865,
+   "released": "2026-12-30",
+   "lang": "Korean",
+   "kind": "movie",
+   "title": "New Recruit: Haunted Military Hospital",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "b0c49312dc93",
    "fpv": 3
   }
  },
@@ -733147,7 +734201,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Verity",
-   "fp": "ef3862610b99",
+   "fp": "8b808db79758",
    "pv": 13,
    "fcs": {
     "v": "Skip",
@@ -733495,8 +734549,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "unabomber": {
    "last": "2026-10-23",
@@ -734168,7 +735221,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "war": {
    "last": "2026-10-30",
@@ -734330,8 +735384,7 @@
    "fp": "ce3b1c1c8928",
    "rendered": "2026-10-12",
    "imdb": "tt37287335",
-   "fpv": 3,
-   "archivedOn": "2026-10-30"
+   "fpv": 3
   },
   "law-order-special-victims-unit": {
    "last": "2026-10-27",
@@ -734883,7 +735936,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -735668,7 +736721,7 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "rendered": "2026-10-12",
    "live": {
     "since": "2026-10-15",
@@ -735682,7 +736735,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "street-fighter": {
    "last": "2026-10-29",
@@ -736035,7 +737089,24 @@
    "rendered": "2026-10-11",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "ben-hur-a-s-rie": {
    "last": "2026-10-27",
@@ -737497,8 +738568,8 @@
    "swept": "2026-10-30"
   },
   "avatar-seven-havens": {
-   "last": "2026-10-27",
-   "fp": "9c89163cf25e",
+   "last": "2026-10-30",
+   "fp": "c907ab978eb1",
    "rendered": "2026-10-11",
    "pv": 13,
    "released": "2026-10-09",
@@ -737523,7 +738594,6 @@
     "confirmed": true
    },
    "imdb": "tt35854736",
-   "archivedOn": "2026-10-21",
    "truth": {
     "at": "2026-10-24",
     "providers": [
@@ -738752,7 +739822,7 @@
    "imdb": "tt38591370"
   },
   "dune-part-two": {
-   "last": "2026-10-22",
+   "last": "2026-10-30",
    "archivedOn": "2026-10-12",
    "pv": 13,
    "catalog": true,
@@ -738778,9 +739848,35 @@
    },
    "rel": 3,
    "rendered": "2026-10-12",
-   "fp": "6d449dc6ac1e",
+   "fp": "f2cd3df5df7a",
    "imdb": "tt15239678",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-10-30",
+    "providers": [
+     "HBO Max",
+     "Claro tv+",
+     "Universal+"
+    ],
+    "rentBuy": [
+     "Apple TV Store",
+     "Amazon Video"
+    ],
+    "released": "2024-02-29",
+    "title": "Dune: Part Two",
+    "language": "English",
+    "runtime": 167,
+    "genre": "Science Fiction / Adventure",
+    "director": "Denis Villeneuve",
+    "cast": [
+     "Timothée Chalamet",
+     "Zendaya",
+     "Rebecca Ferguson",
+     "Javier Bardem",
+     "Josh Brolin",
+     "Austin Butler"
+    ]
+   }
   },
   "rick-and-morty": {
    "last": "2026-10-23",
@@ -740306,7 +741402,32 @@
    "rendered": "2026-10-14",
    "fp": "030a174f1560",
    "imdb": "tt1617661",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-10-30",
+    "providers": [
+     "Netflix",
+     "HBO Max"
+    ],
+    "rentBuy": [
+     "Apple TV Store",
+     "Amazon Video"
+    ],
+    "released": "2015-02-05",
+    "title": "Jupiter Ascending",
+    "language": "English",
+    "runtime": 127,
+    "genre": "Science Fiction / Fantasy",
+    "director": "Lilly Wachowski, Lana Wachowski",
+    "cast": [
+     "Channing Tatum",
+     "Mila Kunis",
+     "Sean Bean",
+     "Eddie Redmayne",
+     "Douglas Booth",
+     "Tuppence Middleton"
+    ]
+   }
   },
   "castle": {
    "last": "2026-10-27",
@@ -740595,7 +741716,7 @@
    "kind": "movie",
    "title": "Clayface",
    "rendered": "2026-10-15",
-   "fp": "d099d2b6083c",
+   "fp": "640d28048248",
    "pv": 13,
    "rel": 2,
    "truth": {
@@ -743569,7 +744690,28 @@
    "imdb": "tt2395427",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "truth": {
+    "at": "2026-10-30",
+    "providers": [
+     "Disney+"
+    ],
+    "rentBuy": [],
+    "released": "2015-04-23",
+    "title": "Avengers: Age of Ultron",
+    "language": "English",
+    "runtime": 141,
+    "genre": "Action / Adventure",
+    "director": "Joss Whedon",
+    "cast": [
+     "Robert Downey Jr.",
+     "Chris Hemsworth",
+     "Mark Ruffalo",
+     "Chris Evans",
+     "Scarlett Johansson",
+     "Jeremy Renner"
+    ]
+   }
   },
   "the-x-files": {
    "last": "2026-10-27",
@@ -744900,7 +746042,27 @@
    },
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "truth": {
+    "at": "2026-10-30",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2011-09-22",
+    "title": "Person of Interest",
+    "language": "English",
+    "genre": "Action & Adventure / Crime",
+    "director": "Jonathan Nolan",
+    "cast": [
+     "Jim Caviezel",
+     "Michael Emerson",
+     "Kevin Chapman",
+     "Taraji P. Henson",
+     "Amy Acker",
+     "Sarah Shahi"
+    ]
+   }
   },
   "solo-vivo": {
    "last": "2026-10-24",
@@ -747409,7 +748571,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "invisible-life": {
    "last": "2026-10-25",
@@ -747900,14 +749063,14 @@
    "fpv": 3
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-23",
-   "fp": "d840a2952bd8",
+   "fp": "bae6dfe591fd",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -748557,7 +749720,16 @@
    "srAt": "2026-10-29",
    "rendered": "2026-10-29",
    "fp": "56392e54c551",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "tt33402927",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "gugu-s-world": {
    "last": "2026-10-29",
@@ -748599,8 +749771,7 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-30"
+   "rel": 3
   },
   "the-gift-of-deceit": {
    "last": "2026-10-29",
@@ -748638,8 +749809,25 @@
    "srv": 1,
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "3dbd890a8dea",
-   "fpv": 3
+   "fp": "64bbacdc1ce2",
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-30",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-30",
+    "misses": 0
+   },
+   "imdb": "tt37961714",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "ali-g-who-iz-i": {
    "last": "2026-10-30",
@@ -748652,6 +749840,33 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "e45e780cd001",
+   "fpv": 3
+  },
+  "ghosts": {
+   "last": "2026-10-30",
+   "tmdbId": 126027,
+   "released": "2021-10-07",
+   "lang": "English",
+   "kind": "tv",
+   "title": "Ghosts",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-12-10",
+   "rendered": "2026-10-30",
+   "fp": "399496b2255b",
+   "fpv": 3
+  },
+  "camisas-negras": {
+   "last": "2026-10-30",
+   "tmdbId": 1793945,
+   "released": "2026-11-19",
+   "lang": "Portuguese",
+   "kind": "movie",
+   "title": "Camisas Negras",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "9697f41908e2",
    "fpv": 3
   }
  },
@@ -749140,8 +750355,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "drawn-together": {
    "last": "2026-10-27",
@@ -749955,7 +751169,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "war": {
    "last": "2026-10-30",
@@ -750577,7 +751792,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Verity",
-   "fp": "4dcd2cbde1c2",
+   "fp": "9312030c3090",
    "pv": 13,
    "fcs": {
     "v": "Skip",
@@ -751397,7 +752612,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -751426,7 +752641,7 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "rendered": "2026-10-12",
    "live": {
     "since": "2026-10-15",
@@ -751439,7 +752654,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "the-social-reckoning": {
    "last": "2026-10-30",
@@ -751703,7 +752919,24 @@
    "rendered": "2026-10-11",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -753029,13 +754262,13 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "9b810d156cb0",
+   "fp": "079637a932f4",
    "rendered": "2026-10-11",
    "pv": 13,
    "fcs": {
@@ -753054,7 +754287,6 @@
     "confirmed": true
    },
    "imdb": "tt35854736",
-   "archivedOn": "2026-10-21",
    "truth": {
     "at": "2026-10-23",
     "providers": [
@@ -756222,7 +757454,7 @@
    "kind": "movie",
    "title": "Clayface",
    "rendered": "2026-10-15",
-   "fp": "db6c1b118042",
+   "fp": "3d22f1844b2e",
    "pv": 13,
    "truth": {
     "at": "2026-10-20",
@@ -759015,7 +760247,7 @@
    "fp": "b001d3eefdf6",
    "imdb": "tt1710308",
    "truth": {
-    "at": "2026-10-25",
+    "at": "2026-10-30",
     "providers": [
      "HBO Max",
      "Cartoon Network"
@@ -762747,7 +763979,28 @@
    "rel": 3,
    "rendered": "2026-10-21",
    "fp": "dc5626ac1048",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-10-30",
+    "providers": [
+     "Prime Video"
+    ],
+    "rentBuy": [],
+    "released": "2026-06-03",
+    "title": "Masters of the Universe",
+    "language": "English",
+    "runtime": 141,
+    "genre": "Action / Fantasy",
+    "director": "Travis Knight",
+    "cast": [
+     "Nicholas Galitzine",
+     "Camila Mendes",
+     "Idris Elba",
+     "Jared Leto",
+     "Alison Brie",
+     "Jóhannes Haukur Jóhannesson"
+    ]
+   }
   },
   "the-terminal-list": {
    "last": "2026-10-28",
@@ -763890,14 +765143,14 @@
    "fpv": 3
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-23",
-   "fp": "b38727265e28",
+   "fp": "2c764612ea08",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -763930,7 +765183,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "lupin": {
    "last": "2026-10-28",
@@ -764601,8 +765855,7 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-30"
+   "rel": 3
   },
   "the-child": {
    "last": "2026-10-30",
@@ -764641,7 +765894,52 @@
    "srAt": "2026-10-30",
    "epNext": "2026-10-31",
    "rendered": "2026-10-30",
-   "fp": "03d0067aedd6",
+   "fp": "92ab1ec2d34e",
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-30",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-30",
+    "misses": 0
+   },
+   "imdb": "tt49692512",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
+  },
+  "ghosts": {
+   "last": "2026-10-30",
+   "tmdbId": 126027,
+   "released": "2021-10-07",
+   "lang": "English",
+   "kind": "tv",
+   "title": "Ghosts",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-12-10",
+   "rendered": "2026-10-30",
+   "fp": "d081640fa654",
+   "fpv": 3
+  },
+  "the-perfect-lie": {
+   "last": "2026-10-30",
+   "tmdbId": 307478,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "The Perfect Lie",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "a3e2dd606cc7",
    "fpv": 3
   }
  },
@@ -765206,8 +766504,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "drawn-together": {
    "last": "2026-10-27",
@@ -765995,7 +767292,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "the-ramparts-of-ice": {
    "last": "2026-10-28",
@@ -767307,7 +768605,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -767336,7 +768634,7 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "rendered": "2026-10-12",
    "live": {
     "since": "2026-10-15",
@@ -767349,7 +768647,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "last-seen": {
    "last": "2026-10-27",
@@ -767584,7 +768883,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Verity",
-   "fp": "ed95cf27ed0a",
+   "fp": "e41bd1f98d76",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -767630,7 +768929,24 @@
    "rendered": "2026-10-11",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "the-river-train": {
    "last": "2026-10-24",
@@ -767905,7 +769221,7 @@
    "lang": "Korean",
    "kind": "movie",
    "title": "Hope",
-   "fp": "becd46bc0d1c",
+   "fp": "96e4a1e44716",
    "pv": 13,
    "fcs": {
     "v": "Worth a watch",
@@ -774321,14 +775637,14 @@
    "archivedOn": "2026-10-28"
   },
   "avatar-seven-havens": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
    "rendered": "2026-10-18",
-   "fp": "dcf1935d6e09",
+   "fp": "e634c9aec3d7",
    "pv": 13,
    "live": {
     "since": "2026-10-18",
@@ -774368,7 +775684,6 @@
      "Dee Bradley Baker"
     ]
    },
-   "archivedOn": "2026-10-21",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
@@ -778776,14 +780091,14 @@
    "fpv": 3
   },
   "nightborn": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 964849,
    "released": "2026-10-16",
    "lang": "Finnish",
    "kind": "movie",
    "title": "Nightborn",
    "rendered": "2026-10-21",
-   "fp": "329da4b74416",
+   "fp": "30d9d2cc6b77",
    "pv": 13,
    "fcs": {
     "v": "Skip",
@@ -778981,14 +780296,14 @@
    "fpv": 3
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-21",
-   "fp": "6f4eebe5208b",
+   "fp": "9a74a239d5ff",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -779856,7 +781171,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "a9b209e2b950",
+   "fp": "1d7cdfbb744a",
    "rendered": "2026-10-24",
    "fpv": 3,
    "srv": 1,
@@ -780121,7 +781436,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-27",
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "fiesta-pag-na": {
    "last": "2026-10-24",
@@ -780316,7 +781632,7 @@
    "kind": "movie",
    "title": "The Awakening",
    "rendered": "2026-10-24",
-   "fp": "12e4ffea8fd4",
+   "fp": "dd1083724c81",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -780632,7 +781948,6 @@
     "w": 8
    },
    "rel": 3,
-   "archivedOn": "2026-10-30",
    "truth": {
     "at": "2026-10-30",
     "providers": [
@@ -780718,7 +782033,16 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "3b216978ea08",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "imdb": "tt16115226",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "yaga": {
    "last": "2026-10-30",
@@ -780731,7 +782055,34 @@
    "srAt": "2026-10-30",
    "epNext": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "765da5c31f70",
+   "fp": "059e611ab8d2",
+   "fpv": 3
+  },
+  "ghosts": {
+   "last": "2026-10-30",
+   "tmdbId": 126027,
+   "released": "2021-10-07",
+   "lang": "English",
+   "kind": "tv",
+   "title": "Ghosts",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-12-10",
+   "rendered": "2026-10-30",
+   "fp": "dbc0aed21e37",
+   "fpv": 3
+  },
+  "the-confidant": {
+   "last": "2026-10-30",
+   "tmdbId": 1707078,
+   "released": "2027-01-29",
+   "lang": "Spanish",
+   "kind": "movie",
+   "title": "The Confidant",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "6434e6ec207d",
    "fpv": 3
   }
  },
@@ -781382,8 +782733,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-29",
-   "archivedOn": "2026-10-30"
+   "epNext": "2026-10-29"
   },
   "unabomber": {
    "last": "2026-10-24",
@@ -782030,7 +783380,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-28"
+   "epNext": "2026-10-28",
+   "archivedOn": "2026-10-30"
   },
   "war": {
    "last": "2026-10-30",
@@ -782757,7 +784108,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Verity",
-   "fp": "2c5819530247",
+   "fp": "caa38fae3631",
    "archivedOn": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -783549,7 +784900,7 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "rendered": "2026-10-12",
    "live": {
     "since": "2026-10-15",
@@ -783562,7 +784913,8 @@
    "imdb": "tt5875444",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "asterix-the-kingdom-of-nubia": {
    "last": "2026-10-24",
@@ -783852,7 +785204,24 @@
    "rendered": "2026-10-11",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-29",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-29",
+    "misses": 0
+   },
+   "imdb": "tt11540908",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-10-30",
+    "w": 8
+   },
+   "rel": 3
   },
   "link-click": {
    "last": "2026-10-28",
@@ -785233,13 +786602,13 @@
    "srAt": "2026-10-28"
   },
   "avatar-seven-havens": {
-   "last": "2026-10-27",
+   "last": "2026-10-30",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "9b810d156cb0",
+   "fp": "079637a932f4",
    "rendered": "2026-10-11",
    "pv": 13,
    "fcs": {
@@ -785258,7 +786627,6 @@
     "confirmed": true
    },
    "imdb": "tt35854736",
-   "archivedOn": "2026-10-21",
    "truth": {
     "at": "2026-10-23",
     "providers": [
@@ -787709,7 +789077,7 @@
    "kind": "movie",
    "title": "Hope",
    "rendered": "2026-10-14",
-   "fp": "af944d8af110",
+   "fp": "e94561c0a888",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -790010,7 +791378,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-28",
-   "archivedOn": "2026-10-30",
    "imdb": "tt38361305"
   },
   "maigret": {
@@ -795397,10 +796764,12 @@
     "at": "2026-10-22",
     "w": 8
    },
-   "rel": 2,
+   "rel": 3,
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "archivedOn": "2026-10-30",
+   "imdb": "tt39314834"
   },
   "the-bear": {
    "last": "2026-10-22",
@@ -795754,7 +797123,7 @@
    "kind": "movie",
    "title": "Clayface",
    "rendered": "2026-10-22",
-   "fp": "4b37aaa2f226",
+   "fp": "eb65bf9c0388",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -796074,14 +797443,14 @@
    "fpv": 3
   },
   "visionquest": {
-   "last": "2026-10-29",
+   "last": "2026-10-30",
    "tmdbId": 213375,
    "released": "2026-10-13",
    "lang": "English",
    "kind": "tv",
    "title": "VisionQuest",
    "rendered": "2026-10-23",
-   "fp": "6f4eebe5208b",
+   "fp": "9a74a239d5ff",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -796659,7 +798028,8 @@
     "w": 8
    },
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-10-30"
   },
   "species": {
    "last": "2026-10-29",
@@ -796710,7 +798080,7 @@
    "kind": "tv",
    "title": "YAGA",
    "rendered": "2026-10-25",
-   "fp": "4c7b771168f6",
+   "fp": "ba28f389bf4f",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -796839,7 +798209,7 @@
    "rel": 3
   },
   "final-table": {
-   "last": "2026-10-28",
+   "last": "2026-10-30",
    "tmdbId": 316702,
    "released": "2026-10-24",
    "lang": "Korean",
@@ -796866,7 +798236,8 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-30"
   },
   "drive-the-pretenders": {
    "last": "2026-10-30",
@@ -796895,8 +798266,7 @@
     "at": "2026-10-28",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-10-30"
+   "rel": 3
   },
   "whisper-of-the-heart": {
    "last": "2026-10-29",
@@ -797038,6 +798408,33 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "e45e780cd001",
+   "fpv": 3
+  },
+  "ghosts": {
+   "last": "2026-10-30",
+   "tmdbId": 126027,
+   "released": "2021-10-07",
+   "lang": "English",
+   "kind": "tv",
+   "title": "Ghosts",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "epNext": "2026-12-10",
+   "rendered": "2026-10-30",
+   "fp": "5d69ba67a335",
+   "fpv": 3
+  },
+  "collision": {
+   "last": "2026-10-30",
+   "tmdbId": 331033,
+   "released": "2026-09-07",
+   "lang": "Spanish",
+   "kind": "tv",
+   "title": "Collision",
+   "srv": 1,
+   "srAt": "2026-10-30",
+   "rendered": "2026-10-30",
+   "fp": "78c65249f78f",
    "fpv": 3
   }
  }
