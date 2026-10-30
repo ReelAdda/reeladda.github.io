@@ -54,6 +54,7 @@ function comparable(html, root = ".") {
   s = ensureBrandMark(s); // and the header mark (lib/brand.js)
   s = honestWording(s); // and the streaming-date wording (lib/honest.js): either wording is the same page
   s = leanTrim(s);      // and the lean page's trimmed "not streaming yet" lead (lib/honest.js)
+  s = require("./humanprose.js").humanWording(s); // and the plain wording of the sweeps' sentences (lib/humanprose.js)
   s = removeGooglebotNoindex(s); // and the Google-only noindex (lib/googlehide.js), added after the writers
   for (const re of STAMPS) s = s.replace(re, "");
   return s;

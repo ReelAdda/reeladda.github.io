@@ -181,7 +181,8 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   if (gone && !providers.length) {
     item.state = "gone";
     if (gone[1]) item.goneAt = gone[1];
-    const was = / — it was on ([^<]+?)\.(?: |<)/.exec(html.slice(gone.index));
+    // " — it was on X." or, in plain wording (lib/humanprose.js), ". It was on X."
+    const was = /(?: — i|\. I)t was on ([^<]+?)\.(?: |<)/.exec(html.slice(gone.index));
     if (was) item.wasOn = dec(was[1]).split(/, /).map((x) => x.trim()).filter(Boolean);
     const rb = /You can still rent or buy it on ([^<]+?)\.</.exec(html.slice(gone.index));
     if (rb && !rentBuy.length) item.rentBuy = dec(rb[1]).split(/, /).map((x) => x.trim()).filter(Boolean);

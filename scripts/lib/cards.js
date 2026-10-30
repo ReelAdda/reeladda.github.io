@@ -99,7 +99,10 @@ function shareCardSvg(item, cfg) {
   const fcs = item.fcScore || null;
   const verdict = ((fcs && fcs.verdict) || item.verdict || "").toUpperCase();
   const fit = whyWatch(item);
-  const blurb = item.take || (fit ? fit.text : "");
+  // Plain wording (rollout "human-prose", lib/humanprose.js): the facts sentence, not the canned
+  // fit line, when there's no critics' summary to show.
+  const plain = require("./humanprose.js").plainOn(item.slug);
+  const blurb = item.take || (plain ? (require("./whywatch.js").plainFit(item) || "") : (fit ? fit.text : ""));
   const status = cardStatus(item, cfg);
   const titleLines = wrapForCard(item.title, 46, 620, 2, "inter");
   const blurbLines = wrapForCard(blurb, 26, 660, 2, "inter");

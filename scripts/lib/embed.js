@@ -109,7 +109,7 @@ ${ICON_LINKS}
 </style></head><body>
   <h1>Put this week's OTT picks on your site</h1>
   <p>A compact, self-updating widget showing what's new on streaming in India each week. Paste
-  one line of code — it refreshes on its own every week, no maintenance. Free to use; it links
+  one line of code. It refreshes on its own every week, with no maintenance. Free to use; it links
   back to FilmyChill.</p>
   <pre>${e(snippet)}</pre>
   <h2>Preview</h2>

@@ -341,7 +341,10 @@ function buildPersonPage(person, cfg, { availability }) {
     canonical: url,
     h1: streaming.length ? `${person.name}: films streaming in ${country}` : `${person.name} on FilmyChill`,
     updLine: `${n} film${n === 1 ? "" : "s"} covered · ${streaming.length} streaming now in ${country}`,
-    lead: `The ${person.name} films and series FilmyChill covers — streaming ones first, with the platform each is on today. Not a complete filmography: only titles this site has a page for.`,
+    // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
+    lead: require("./humanprose.js").plainOn(url)
+      ? `The ${person.name} films and series FilmyChill covers, streaming ones first, with the platform each is on today. It isn't a complete filmography: only titles this site has a page for.`
+      : `The ${person.name} films and series FilmyChill covers — streaming ones first, with the platform each is on today. Not a complete filmography: only titles this site has a page for.`,
     sections, faqs, extraLd, code,
     navLinks: [{ href: peopleIndexUrl(code), label: `More people on FilmyChill ${country}` }],
     homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
@@ -389,7 +392,9 @@ function writePeoplePages(data, cfg, manifest) {
     void items;
     const page = listingPageHtml({
       title: fitFirst([`Actors & Directors on FilmyChill ${country} | FilmyChill`, `Actors & Directors on FilmyChill ${country}`], 60),
-      desc: `Where to stream the films of ${sorted.length} actors and directors FilmyChill covers in ${country} — each page lists what is streaming now and on which platform.`,
+      desc: require("./humanprose.js").plainOn(peopleIndexUrl(code))
+        ? `Where to stream the films of ${sorted.length} actors and directors FilmyChill covers in ${country}. Each page lists what is streaming now and on which platform.`
+        : `Where to stream the films of ${sorted.length} actors and directors FilmyChill covers in ${country} — each page lists what is streaming now and on which platform.`,
       canonical: peopleIndexUrl(code),
       h1: `Actors & directors — ${country}`,
       updLine: `${sorted.length} ${sorted.length === 1 ? "person" : "people"} with ${PEOPLE_MIN}+ films on FilmyChill`,

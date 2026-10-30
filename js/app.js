@@ -395,7 +395,7 @@ function render() {
   let ottHtml = '', ottDivided = false;
   o.forEach((it, idx) => {
     if (!ottDivided && sortMode === 'default' && it.stillGood && idx > 0) {
-      ottHtml += '<div class="ott-divider">Still worth it — standouts from earlier weeks</div>';
+      ottHtml += '<div class="ott-divider">Still worth watching from earlier weeks</div>';
       ottDivided = true;
     }
     ottHtml += card(it, DATA.ott.indexOf(it), 'ott');

@@ -198,7 +198,8 @@ function buildHeadTags(cfg, useImdb = USE_IMDB, data = null) {
     // (see marqueeScore) rather than the top-ranked one, which answers a different question.
     const picks = [marqueePick(data.theatres, cfg), marqueePick(data.ott, cfg)].filter(Boolean);
     const names = picks.map((x) => x.title);
-    const desc = (n, more) => `This week: ${n} + ${more} more — ratings, verdicts & where to watch in ${m.name}. Updated twice daily.`;
+    // Plain wording (lib/humanprose.js): a comma, not a spaced em dash. All 18 homepages at once.
+    const desc = (n, more) => `This week: ${n} + ${more} more, with ratings, verdicts & where to watch in ${m.name}. Updated twice daily.`;
     if (names.length && all.length > names.length) {
       dynDesc = desc(names.join(", "), all.length - names.length);
       if (dynDesc.length > 158) {
@@ -325,7 +326,7 @@ function ssrOttSection(items, code, cardOpts = {}) {
   let out = "", divided = false;
   items.forEach((x, i) => {
     if (!divided && x.stillGood && i > 0) {
-      out += `<div class="ott-divider">Still worth it — standouts from earlier weeks</div>`;
+      out += `<div class="ott-divider">Still worth watching from earlier weeks</div>`;
       divided = true;
     }
     out += ssrCard(x, i, code, cardOpts);
@@ -612,7 +613,7 @@ function writeCountrySurfaces(cfg, data, { template = null, allCountries = COUNT
 
 // Section header labels, server-rendered from the data (so the header can't drift from the
 // list under it, which is the bug this fixed — it used to be a hardcoded TOP 5 / TOP 10).
-// Presented as a simple total: the "Still worth it — standouts from earlier weeks" divider
+// Presented as a simple total: the "Still worth watching from earlier weeks" divider
 // further down already separates new arrivals from carried-over titles, and each card has
 // its own freshness cue, so the header stays clean.
 function sectionCounts(data) {
@@ -826,7 +827,7 @@ function renderCountryPage(templateHtml, cfg, data) {
   // Same lesson as the fc-page meta tag, now applied to the block that predated it.
   html = replaceBetween(html, "JSONLD",
     `<script type="application/ld+json">${buildHomeJsonLd(data, cfg)}</script>`);
-  html = replaceBetween(html, "ATTRIBUTION", footerAttribution());
+  html = replaceBetween(html, "ATTRIBUTION", footerAttribution(undefined, { plain: true }));   // plain wording, lib/humanprose.js
   if (isIndia) {
     fs.writeFileSync("index.html", html);
   } else {

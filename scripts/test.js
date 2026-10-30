@@ -10324,66 +10324,68 @@ test("series pages: Episodes before Good to know; visible date; no unused markup
   } finally { R.useRolloutConfig(null); GH.useHiddenList(null); }
 });
 group("plain wording: no signs of AI writing in the site's own sentences (human-prose, 30 Oct 2026)");
-const HP_ON = { features: { "lean-page": { percent: 100 }, "redesign-v2": { percent: 100 }, "page-v3": { percent: 100 }, "wiki-reception": { percent: 100 },
-  "google-hide": { percent: 100 }, "tidy-names": { percent: 100 }, "page-fixes-30oct": { percent: 100 }, "visible-similar": { percent: 100 },
-  "one-score": { percent: 100 }, "intent-titles": { percent: 100 }, "honest-not-announced": { percent: 100 }, "human-prose": { percent: 100 } } };
+const PC = require("./lib/prosecheck.js");
 const hpDay = (o) => new Date(Date.now() + o * 864e5).toISOString().slice(0, 10);
-const HP_BASE = { language: "Tamil", genre: "Drama/Thriller", runtime: 133, tmdbId: 501, cast: ["A", "B"], fullReview: "A family keeps a secret.", trailer: "https://www.youtube.com/watch?v=abcdefghijk" };
-const HP_FILMS = {
-  streaming: { ...HP_BASE, title: "Kaathal", slug: "hp-stream", kind: "movie", released: hpDay(-200), providers: ["Netflix"], rentBuy: [], rating: 8.1, votes: 6200, cert: "A",
-    arrived: hpDay(-150), arrivedOn: "Netflix", take: "Critics liked it, especially the performances.",
-    fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" },
-    reception: { rt: { pct: 91, n: 87 }, ratings: { n: 6, median: 4 }, asOf: hpDay(-1), article: "Kaathal" } },
-  series: { ...HP_BASE, title: "Show", slug: "hp-series", kind: "tv", runtime: null, released: hpDay(-30), providers: ["JioHotstar"], rentBuy: [], rating: 8.6, votes: 220, cert: "U", seasons: 3,
-    episodes: { count: 4, seasons: 1, limited: true, list: [{ e: 1, name: "One", date: hpDay(-30), runtime: 50 }, { e: 2, name: "Two", date: hpDay(-23), runtime: 52 }, { e: 3, name: "Three", date: hpDay(4) }, { e: 4, name: "Four", date: hpDay(11) }], next: { e: 3, s: 1, date: hpDay(4), name: "Three" } },
-    fcScore: { verdict: "Worth a watch", reason: "Audiences like it.", audience: "Liked", critics: null, basis: "audience" } },
-  rent: { ...HP_BASE, title: "Rented", slug: "hp-rent", kind: "movie", released: hpDay(-400), providers: [], rentBuy: ["Apple TV"], rating: 6.4, votes: 900, cert: "UA 13+",
-    fcScore: { verdict: "Worth a watch", reason: "Audiences like it.", audience: "Liked", critics: null, basis: "audience" } },
-  unrated: { ...HP_BASE, title: "Fresh", slug: "hp-fresh", kind: "movie", released: hpDay(-3), providers: ["ZEE5"], rentBuy: [], rating: null, votes: 3 },
-  upcoming: { ...HP_BASE, title: "Soon", slug: "hp-soon", kind: "movie", released: hpDay(9), providers: [], rentBuy: [], platform: "Theatres", votes: 0 },
-  theatres: { ...HP_BASE, title: "Running", slug: "hp-running", kind: "movie", released: hpDay(-12), providers: [], rentBuy: [], platform: "Theatres", rating: 7.2, votes: 140 },
-  lapsed: { ...HP_BASE, title: "Old One", slug: "hp-lapsed", kind: "movie", released: hpDay(-300), providers: [], rentBuy: [], platform: "Theatres", rating: 6.0, votes: 80 },
-  generic: { ...HP_BASE, title: "Unknown", slug: "hp-generic", kind: "movie", released: hpDay(-900), providers: [], rentBuy: [], platform: null, rating: 7.0, votes: 300 },
-};
-test("film pages in every state: the site's sentences read plainly, and no fact or date moves", () => {
-  const R = require("./lib/rollout.js"), HP = require("./lib/humanprose.js"), Fp = require("./lib/filmpage.js"), S = require("./lib/sitemap.js"), IN = require("./lib/core.js").COUNTRIES[0];
-  const bad = [];
+test("every page shape and every hand-written page reads plainly (scripts/prose-check.js)", () => {
+  const r = PC.runCheck();
+  assert.ok(r.pages >= 30, "the check drew every page shape: " + r.pages);
+  assert.deepStrictEqual(r.hits.map((h) => h.page + ": " + h.rule + " \"" + h.match + "\" in " + h.sentence), []);
+});
+test("plain wording moves no fact: same fingerprint, and the facts read back are the same in either wording", () => {
+  const R = require("./lib/rollout.js"), HP = require("./lib/humanprose.js"), M = require("./lib/migrate.js"), F = require("./lib/facts.js"), S = require("./lib/sitemap.js"), IN = require("./lib/core.js").COUNTRIES[0];
   try {
-    for (const [k, it] of Object.entries(HP_FILMS)) {
-      R.useRolloutConfig({ features: { ...HP_ON.features, "human-prose": { percent: 0 } } });
-      const before = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
-      R.useRolloutConfig(HP_ON);
-      const html = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
-      for (const h of HP.scanProse(HP.siteProse(html, { skipPending: true }))) bad.push(`${k}: ${h.rule} "${h.match}" in "${h.sentence}"`);
-      assert.strictEqual(S.factsFingerprint(html), S.factsFingerprint(before), `${k}: the facts fingerprint is unchanged, so no sitemap date moves`);
+    for (const [k, it] of Object.entries(PC.films())) {
+      R.useRolloutConfig({ features: { ...PC.ALL_ON.features, "human-prose": { percent: 0 } } });
+      const off = HP.machineWording(PC.finish(M.renderFrozen(it, IN, { asOf: hpDay(0), knownSlugs: new Set() })));
+      R.useRolloutConfig(PC.ALL_ON);
+      const on = PC.finish(M.renderFrozen(it, IN, { asOf: hpDay(0), knownSlugs: new Set() }));
+      assert.strictEqual(S.factsFingerprint(on), S.factsFingerprint(off), k + ": the facts fingerprint is unchanged, so no sitemap date moves");
+      // The next build reads the page's facts back from the page on disk (lib/migrate.js): every
+      // reader must find the same facts in the plain sentences as in the sweeps' ones.
+      assert.deepStrictEqual(F.extractFacts(on, it.slug), F.extractFacts(HP.machineWording(on), it.slug), k + ": the same facts read back from either wording");
     }
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }
-  assert.deepStrictEqual(bad, [], "\n" + bad.join("\n"));
 });
-test("list pages read plainly too: platform lists, hubs, today, coming, language and weekly pages", () => {
-  const R = require("./lib/rollout.js"), HP = require("./lib/humanprose.js");
-  const bad = [];
-  const check = (name, html) => { for (const h of HP.scanProse(HP.siteProse(html, { skipPending: true }))) bad.push(`${name}: ${h.rule} "${h.match}" in "${h.sentence}"`); };
-  try {
-    R.useRolloutConfig(HP_ON);
-    const items = Array.from({ length: 6 }, (_, i) => ({ slug: "s" + i, title: "Title " + i, language: "Tamil", kind: i % 2 ? "tv" : "movie", rating: 6 + i / 2, votes: 100 + i, providers: ["Netflix"] }));
-    check("platform list", U.buildStreamingPage(items, G_IN, { platform: "Netflix", pslug: "netflix" }));
-    const hub = { name: "JioHotstar", slug: "jiohotstar", items: Array.from({ length: 4 }, (_, i) => ({ title: "T" + i, slug: "t" + i, platform: "JioHotstar", kind: "movie" })) };
-    check("platform hub", U.buildPlatformHubPage({ generatedAt: new Date().toISOString() }, A_IN, hub));
-    const d = (o) => new Date(Date.now() - o * 864e5).toISOString().slice(0, 10);
-    const recs = [{ c: "in", k: "movie", t: "Today Film", p: "ZEE5", first: d(0), rel: "2026-08-01", lang: "Tamil" }, { c: "in", k: "movie", t: "Yesterday Film", p: "Netflix", first: d(1), rel: "2026-08-01", lang: "Hindi" }];
-    check("today", U.buildTodayPage(recs, A_IN));
-    check("today, quiet", U.buildTodayPage(recs.slice(1), A_IN));
-    check("coming", U.buildComingPage([{ slug: "a", title: "A", date: hpDay(5), platform: "Netflix", kind: "movie" }, { slug: "b", title: "B", date: hpDay(9), kind: "movie" }], A_IN));
-    check("language", U.buildLanguagePage(LANG_DATA, "Tamil", "tamil"));
-    check("weekly", U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES));
-  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
-  assert.deepStrictEqual(bad, [], "\n" + bad.join("\n"));
+test("the last pass and its inverse: exact, idempotent, and only on pages drawn from their facts", () => {
+  const HP = require("./lib/humanprose.js");
+  const sweeps = [
+    "<p>X opened in theatres in India on 25 Oct 2026 and may still be showing — check local cinema listings. We haven&#39;t seen an announced OTT release date yet — check back soon.</p>",
+    "<p>X opened in theatres in India on 2 Oct 2026. It isn't streaming yet — this page updates the day it is.</p>",
+    "<p>X opened in theatres in India on 2 Oct 2026, and it&#39;s streaming there now — see where to watch above.</p>",
+    "<p>It opened in theatres in India on 2 Oct 2026 — check back here for its OTT arrival.</p>",
+    "<p><b>X</b> No OTT release date in our sources yet — this page updates the day it lands on streaming.</p>",
+    "<p style=\"x\">That's the usual pattern, not a confirmed date — we haven't seen one announced. We re-check every day.</p>",
+    "<p>Not streaming yet — X is in its theatrical run in India.</p>",
+    "<p>X isn't on any subscription service we track in India — it was on Netflix. Checked 2026-10-12. We keep looking — if it comes back, this page updates.</p>",
+  ].join("\n");
+  const plain = HP.humanWording(sweeps);
+  assert.ok(!/—/.test(plain), plain);
+  assert.strictEqual(HP.humanWording(plain), plain, "idempotent");
+  assert.strictEqual(HP.machineWording(plain), sweeps, "the exact inverse");
+  assert.strictEqual(HP.machineWording(sweeps), sweeps, "the inverse leaves the sweeps' wording alone");
+  // The pass: in the rollout and drawn from facts -> plain; anything else -> the sweeps' wording.
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "hp-"));
+  fsx.mkdirSync(path.join(root, "movie"));
+  fsx.writeFileSync(path.join(root, "movie/a.html"), sweeps);
+  fsx.writeFileSync(path.join(root, "movie/b.html"), plain);
+  const r = HP.applyHumanWording(["movie/a.html", "movie/b.html"], { root, included: (slug) => slug === "a" });
+  assert.strictEqual(fsx.readFileSync(path.join(root, "movie/a.html"), "utf8"), plain);
+  assert.strictEqual(fsx.readFileSync(path.join(root, "movie/b.html"), "utf8"), sweeps, "a page outside the rollout goes back");
+  assert.deepStrictEqual([r.pages, r.plain, r.changed], [2, 1, 2]);
+  // The audit judges switched pages only, and names the sentence.
+  fsx.writeFileSync(path.join(root, "movie/a.html"), "<html><body><p>It is a testament to its era — truly.</p></body></html>");
+  fsx.writeFileSync(path.join(root, "movie/b.html"), "<html><body><p>It is a testament to its era — truly.</p></body></html>");
+  const a = HP.auditProse(["movie/a.html", "movie/b.html"], { root, included: (key) => key === "a" });
+  assert.deepStrictEqual([a.pages, a.switched, a.withSigns], [2, 1, 1]);
+  assert.ok(/em-dash/.test(a.top.join(" ")) && /testament/.test(a.top.join(" ")), a.top.join(" | "));
+  fsx.rmSync(root, { recursive: true, force: true });
 });
+
 test("plain wording: answers the sweeps rewrite are matched in both forms; summaries say one thing plainly", () => {
   const R = require("./lib/rollout.js"), SS = require("./lib/scoresweep.js"), E = require("./lib/editorial.js"), F = require("./lib/facts.js"), Fp = require("./lib/filmpage.js"), IN = require("./lib/core.js").COUNTRIES[0];
   try {
-    R.useRolloutConfig(HP_ON);
+    R.useRolloutConfig(PC.ALL_ON);
     const s = { verdict: "Must watch", reason: "Audiences and critics agree.", early: false };
     const lead = SS.faqLead({ slug: "x", title: "X", rating: 8.1 }, s);
     assert.strictEqual(lead, "FilmyChill Score: Must watch. Audiences and critics agree. It rates 8.1/10 on audience ratings.");
@@ -10391,7 +10393,7 @@ test("plain wording: answers the sweeps rewrite are matched in both forms; summa
     const re = SS.relead("FilmyChill Score: Worth a watch. Audiences like it. It rates 7.0/10 on audience ratings. Critics liked it.", lead);
     assert.strictEqual(re, `${lead} Critics liked it.`);
     // The compact score line reads back its count in either form (lib/facts.js).
-    const unrated = Fp.buildFilmPage({ ...HP_FILMS.unrated, votes: 12, released: hpDay(-400) }, hpDay(0), new Set(), IN);
+    const unrated = Fp.buildFilmPage({ ...PC.films().unrated, votes: 12, released: hpDay(-400) }, hpDay(0), new Set(), IN);
     assert.ok(/<span class="fcsb-mini-v">[^<]*<\/span>: only 12 audience ratings/.test(unrated), (unrated.match(/fcsb-mini">.{0,160}/) || [""])[0]);
     assert.strictEqual(F.extractFacts(unrated.replace(/<!--FC:audience=[^>]*-->/, ""), "hp-fresh").votes, 12, "count read back from the plain line");
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }

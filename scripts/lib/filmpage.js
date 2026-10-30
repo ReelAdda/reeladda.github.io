@@ -1594,7 +1594,10 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
     const est = streamWindowEstimate(item.released, item.language, asOfDate);
     const body = est && !est.passed
       ? `<p>Not streaming yet — ${e(item.title)} is in its theatrical run in ${e(country)}${item.released ? `, released ${e(item.released)}` : ""}. ${e(item.language || "Films like this")} releases typically reach streaming about ${est.lo}–${est.hi} weeks after opening, which would put it somewhere around <strong>${e(est.span)}</strong>.</p><p style="color:var(--mute);font-size:13px">That's the usual pattern, not a confirmed date — no platform has announced one. We re-check every day and this page updates the moment it lands.</p>`
-      : `<p>Not streaming yet in ${e(country)}${item.released ? ` — ${e(item.title)} released in theatres ${e(item.released)}` : ""}. No platform has announced ${e(V.article.toLowerCase())} ${e(V.releaseDate)}. We re-check every day and this page updates the moment it lands.</p>`;
+      : item._plain
+        // Plain wording (lib/humanprose.js): two sentences, and the date as the edition writes dates.
+        ? `<p>Not streaming yet in ${e(country)}.${item.released ? ` ${e(item.title)} opened in theatres on ${e(fmtDateFull(item.released, localeFor(code)))}.` : ""} No platform has announced`
+        : `<p>Not streaming yet in ${e(country)}${item.released ? ` — ${e(item.title)} released in theatres ${e(item.released)}` : ""}. No platform has announced ${e(V.article.toLowerCase())} ${e(V.releaseDate)}. We re-check every day and this page updates the moment it lands.</p>`;
     return `<!--SW:pending--><h2>${e(V.heading(item.title))}</h2>${body}<!--/SW:pending-->`;
   })()}
   ${epFirst ? SER.episodesHtml(item, fmtFull, undefined, { v2 }) : ""}
