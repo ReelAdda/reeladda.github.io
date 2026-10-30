@@ -2878,7 +2878,8 @@ async function main() {
     } catch (e) { stageFailed("lean trim", e); }
     // Plain wording, then the audit (lib/humanprose.js; rollout.json "human-prose"). The sweeps'
     // sentences go plain after the last writer, on pages drawn from their facts; then every page
-    // the rollout has switched is scanned for signs of AI writing, and any hit turns the run red.
+    // the rollout has switched is scanned for signs of AI writing. A hit is flagged in the run
+    // summary as a note (the owner, 30 Oct 2026: "don't fail the build, just flag").
     try {
       const HPR = require("./lib/humanprose.js");
       const drawn = (slug, rel) => {
@@ -2891,8 +2892,8 @@ async function main() {
       const audit = HPR.auditProse([...filmPageFiles(), ...sitePageFiles()], {
         included: (key, rel) => HPR.plainOn(key) && (!/(?:^|\/)movie\//.test(rel) || drawn(key, rel)) });
       console.log(`Prose audit: ${audit.switched} of ${audit.pages} page(s) switched to plain wording, ${audit.withSigns} with a sign of AI writing`);
-      if (audit.withSigns) healthIssue(`signs of AI writing on ${audit.withSigns} page(s) the plain-wording rollout has switched (lib/humanprose.js): ${audit.top.slice(0, 3).join(" | ")}`);
-    } catch (e) { stageFailed("plain wording", e); }
+      if (audit.withSigns) healthNote(`signs of AI writing on ${audit.withSigns} page(s) the plain-wording rollout has switched (lib/humanprose.js); fix the template each comes from: ${audit.top.slice(0, 3).join(" | ")}`);
+    } catch (e) { stageFailed("plain wording", e, { optional: true }); }
     // Catalogue pages Google never showed, hidden from Google only (lib/googlehide.js; rollout.json
     // "google-hide"). Before the hreflang and sitemap passes: both read the tag.
     try {

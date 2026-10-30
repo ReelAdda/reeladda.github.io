@@ -148,6 +148,9 @@ function applyArrivalPatch(html, { title, providers, countryName, cfg, asOf, arr
     `<span class="pill">Theatrical run ended — ${V.arrival} pending</span>`,
     `<span class="pill">Theatrical run ended — OTT arrival pending</span>`,
     `<span class="pill">Theatrical run ended — streaming arrival pending</span>`,
+    // …and the plain forms a page drawn in plain wording carries (lib/humanprose.js).
+    `<span class="pill">Theatrical run ended, OTT arrival pending</span>`,
+    `<span class="pill">Theatrical run ended, streaming arrival pending</span>`,
     `<span class="pill">In theatres</span>`,
   ]) {
     if (out.includes(stale)) { out = out.split(stale).join(pills); break; }
@@ -552,7 +555,8 @@ function patchDueIfPassed(html, { title, countryName, cfg, now = Date.now() }) {
   return { html: out, changed: true };
 }
 
-const RUN_ENDED_PILL_RE = /<span class="pill">Theatrical run ended — (?:OTT|streaming) arrival pending<\/span>/;
+// Either form: " — " or the plain ", " (lib/humanprose.js).
+const RUN_ENDED_PILL_RE = /<span class="pill">Theatrical run ended(?: —|,) (?:OTT|streaming) arrival pending<\/span>/;
 const EXPECTED_TITLE_RE = /<title>[^<]*\bExpected [A-Z][a-z]{2}/;
 // The fallback description before it named the film (filmMetaDescription, Oct 2026).
 const OLD_FALLBACK_DESC_RE = /<meta name="description" content="Not (?:on any (?:OTT platform|streaming service)|streaming) in /;

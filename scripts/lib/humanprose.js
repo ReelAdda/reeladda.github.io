@@ -46,11 +46,15 @@ function siteProse(html, { skipPending = false } = {}) {
   h = h.replace(/[\s\S]*?<body[^>]*>/, "").replace(/<a\b[^>]*href="[^"]*\/movie\/[^"]*"[^>]*>[\s\S]*?<\/a>/g, " ");
   if (skipPending) h = h.replace(/<!--SW:pending-->[\s\S]*?<!--\/SW:pending-->/g, " ");
   h = h.replace(/<(script|style|svg|noscript|pre|code|textarea)\b[\s\S]*?<\/\1>/gi, " ").replace(/<!--[\s\S]*?-->/g, " ")   // code samples aren't prose
+    // The vote box asks the reader a real question for its buttons ("Watched it? Was it worth
+    // it?"): a form, not prose. Same block lib/sitemap.js leaves out of the page's content.
+    .replace(/<div class="fcvote"[\s\S]*?<div class="fcvote-done"[^>]*><\/div>\s*<\/div>/g, " ")
     .replace(/<h1\b[\s\S]*?<\/h1>/gi, "\n")                                    // the title
     .replace(/<h2>Story<\/h2>\s*<p>[\s\S]*?<\/p>/g, "\n")                      // TMDB synopsis
     .replace(/<ol class="eplist">[\s\S]*?<\/ol>/g, "\n")                        // episode names
     .replace(/<div class="cast-strip">[\s\S]*?<\/div>\s*<\/div>/g, "\n")        // cast
-    .replace(/<span class="pill">[^<]*<\/span>/g, " ")                          // status and platform pills
+    // Platform pills are names; a status pill ("Opened in cinemas 2 Oct, not streaming yet") is ours.
+    .replace(/<span class="pill">([^<]*)<\/span>/g, (m, t) => (/^(?:Opened in|Theatrical run|In (?:theatres|cinemas)|Releases?|Not out)/.test(t) ? `\n${t}\n` : " "))
     .replace(/<(?:h3|b|strong)[^>]*class="[^"]*\b(?:t|title|ct)\b[^"]*"[^>]*>[\s\S]*?<\/(?:h3|b|strong)>/g, " ");
   const text = h.replace(/<\/?(?:p|div|li|ul|ol|h[1-6]|tr|td|th|table|section|details|summary|footer|nav|br)\b[^>]*>/gi, "\n")
     .replace(/<[^>]+>/g, " ").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&nbsp;/g, " ")
@@ -69,6 +73,9 @@ const RULES = [
   { id: "promo", re: /\b(?:boasts?|vibrant|nestled|in the heart of|groundbreaking|breathtaking|captivating|unparalleled|seamless(?:ly)?|must-see|game[- ]changer|rich tapestry)\b/gi, fix: "Say the fact behind the adjective." },
   { id: "not-just", re: /\bnot (?:only|just|merely)\b[^.!?]{0,90}?\bbut\b|\b(?:it(?:'|’)?s|it is|this is) not (?:just )?[^.!?,;]{1,40}[,;:]\s*it(?:'|’)?s\b|\b\w+, not \w+\.$/gim, fix: "State the positive fact once." },
   { id: "rather-than", re: /\brather than (?:a |an |the )?\w+/gi, fix: "Drop the contrast unless it is a real choice." },
+  // A short question answered in the same breath ("Staying in? Put on…"): a hook, not a question
+  // the reader asked. FAQ questions sit on their own line and never match.
+  { id: "question-hook", re: /(?:^|[.!:][ \t]+)(?:[A-Z][\w'’]*)(?:[ \t]+[\w'’]+){0,4}\?[ \t]+[A-Z]/gm, fix: "State the answer; drop the question that sets it up." },
   { id: "hedge", re: /\bit(?:'|’)?s (?:important|worth) (?:to note|noting)\b|\bbased on (?:the )?available information\b|\bnot widely (?:available|documented)\b/gi, fix: "Say what is known and where it came from." },
   { id: "chatbot", re: /\bI hope this helps\b|\blet me know\b|\bas an AI\b|\bas of my last (?:knowledge|training)\b|\b(?:Certainly|Of course)!/gi, fix: "Remove: it's addressed to a chatbot user." },
   { id: "summary", re: /(?:^|[.!?]\s+)(?:In summary|In conclusion|Overall|Ultimately|In short)[,:]/gm, fix: "Delete the recap." },
@@ -116,6 +123,15 @@ const HUMAN_RULES = [
   // Waiting block lead on pages the lean trim doesn't reach: "<p>Not streaming yet — X …"
   { fwd: [/<p>Not streaming yet — /g, () => "<p>Not streaming yet: "],
     rev: [/<p>Not streaming yet: /g, () => "<p>Not streaming yet — "] },
+  // Status pills (lib/pagekit.js openPill, lib/lifecycle.js): lib/facts.js STATUS_PILL knows a
+  // status pill by how it starts, and the sweeps match both forms (OPEN_PILL_RE, RUN_ENDED_PILL_RE).
+  { fwd: [/(<span class="pill">Opened in cinemas [^<]*?) — not streaming yet<\/span>/g, (m, a) => `${a}, not streaming yet</span>`],
+    rev: [/(<span class="pill">Opened in cinemas [^<]*?), not streaming yet<\/span>/g, (m, a) => `${a} — not streaming yet</span>`] },
+  { fwd: [/<span class="pill">Theatrical run ended — (OTT|streaming) arrival pending<\/span>/g, (m, k) => `<span class="pill">Theatrical run ended, ${k} arrival pending</span>`],
+    rev: [/<span class="pill">Theatrical run ended, (OTT|streaming) arrival pending<\/span>/g, (m, k) => `<span class="pill">Theatrical run ended — ${k} arrival pending</span>`] },
+  // Arrival note on a page the arrival sweep patched in place (lib/lifecycle.js applyArrivalPatch).
+  { fwd: [/We recheck periodically — platforms do drop titles\./g, () => "We recheck periodically, because platforms do drop titles."],
+    rev: [/We recheck periodically, because platforms do drop titles\./g, () => "We recheck periodically — platforms do drop titles."] },
   // Departure notice (lib/lifecycle.js): "…we track in India — it was on Netflix." lib/facts.js reads
   // the platform back from either form.
   { fwd: [/ — it was on /g, () => ". It was on "],

@@ -43,6 +43,12 @@ const SAFETY_GROUPS = new Set([
   "departure sweep — rechecking claims we already made",
 ]);
 const SAFETY_NAME = /escap|injection|xss|stylesheet|corrupt|outage|\bcsp/i;
+// Flag tier (30 Oct 2026, the owner: "don't fail the build, just flag"): a failure here is a
+// note in the run summary, never a red run. Wording checks only; anything that guards facts,
+// dates or what the sweeps read back stays a content test.
+const FLAG_GROUPS = new Set([
+  "plain wording: signs of AI writing (flagged, never fails the build)",
+]);
 const TIERED = process.env.TEST_TIERS === "1";
 
 let passed = 0, failed = 0;
@@ -51,7 +57,7 @@ const groupsSeen = new Set();
 const failures = [];
 function recordFailure(name, grp, e) {
   failed++;
-  failures.push({ name, group: grp, safety: SAFETY_GROUPS.has(grp) || SAFETY_NAME.test(name), message: String(e && e.message || e).split("\n")[0].slice(0, 300) });
+  failures.push({ name, group: grp, safety: SAFETY_GROUPS.has(grp) || SAFETY_NAME.test(name), flag: FLAG_GROUPS.has(grp), message: String(e && e.message || e).split("\n")[0].slice(0, 300) });
   console.error(`  \u2717 ${name}\n      ${e.message}`);
 }
 function test(name, fn) {
@@ -4713,24 +4719,24 @@ const _noteData = () => ({ generatedAt: _d(0), pick: "Slow Horses",
 
 test("the note opens with the Pick of the Week, then a labelled alternative from the other side", () => {
   const n = U.buildEditorNote(_noteData(), { code: "in" }, 1);
-  assert.ok(/^(This week's pick is|Our pick this week is) Slow Horses on Apple TV/.test(n), n);
-  assert.ok(/(Heading to the cinema\?|For a night out,) Runner/.test(n), "the cinema alternative is labelled as one: " + n);
+  assert.ok(/^Top pick: Slow Horses on Apple TV\. In cinemas: Runner\./.test(n), n);
   assert.ok((n.match(/Slow Horses/g) || []).length === 1, "the pick is never recommended twice");
 });
-test("the note speaks in verdicts, never raw TMDB numbers", () => {
+test("the note is plain: one wording for every week, no numbers, no hype, no question hooks", () => {
+  const first = U.buildEditorNote(_noteData(), { code: "in" }, 0);
   for (let seed = 0; seed < 12; seed++) {
     const n = U.buildEditorNote(_noteData(), { code: "in" }, seed);
-    assert.ok(/must-watch|worth a watch/.test(n) && !/\d\.\d/.test(n), n);
-    assert.ok(!/exciting|something for everyone|lineup|!|I watched|I saw|we watched/i.test(n), n);
-    assert.ok(n.split(/(?<=[.?]) /).length <= 5 && n.length < 330, n);
+    assert.strictEqual(n, first, "no rotating phrasings: " + n);
+    assert.ok(!/\d\.\d|[?!—]|exciting|something for everyone|lineup|I watched|we watched/i.test(n), n);
+    assert.ok(n.split(/(?<=\.) /).length <= 4 && n.length < 200, n);
   }
 });
 test("a Skip is called out; with none, one more title from the pick's own side", () => {
   const n = U.buildEditorNote(_noteData(), { code: "in" }, 1);
-  assert.ok(/Flop/.test(n) && /give a miss|can wait/.test(n), n);
+  assert.ok(/Skip Flop\.$/.test(n), n);
   const noSkip = _noteData(); noSkip.theatres = noSkip.theatres.filter((x) => x.title !== "Flop");
   const m = U.buildEditorNote(noSkip, { code: "in" }, 1);
-  assert.ok(/Also streaming: American Horror Story on JioHotstar, a must-watch\./.test(m), m);
+  assert.ok(/Also streaming: American Horror Story on JioHotstar\.$/.test(m), m);
 });
 test("only current, properly scored titles are recommended — never an older standout or a few-ratings score", () => {
   const d = _noteData();
@@ -4741,19 +4747,18 @@ test("only current, properly scored titles are recommended — never an older st
     assert.ok(!/Old Favourite|March Season|Thin/.test(n), n);
   }
 });
-test("editor's note: nothing trustworthy -> null; seeded phrasing is stable", () => {
+test("editor's note: nothing trustworthy -> null; a pick in cinemas gets a streaming alternative", () => {
   assert.strictEqual(U.buildEditorNote({ theatres: [{ title: "X", rating: 7, votes: 3 }], ott: [] }, { code: "in" }), null);
-  const d = _noteData();
-  assert.strictEqual(U.buildEditorNote(d, { code: "in" }, 7), U.buildEditorNote(d, { code: "in" }, 7));
   const pickInCinemas = { ..._noteData(), pick: "Runner" };
-  assert.ok(/^(This week's pick is|Our pick this week is) Runner in cinemas/.test(U.buildEditorNote(pickInCinemas, { code: "in" }, 2)));
-  assert.ok(/(Staying in\?|On the sofa instead\?)/.test(U.buildEditorNote(pickInCinemas, { code: "in" }, 2)), "pick in cinemas -> the alternative streams");
+  const n = U.buildEditorNote(pickInCinemas, { code: "in" }, 2);
+  assert.ok(/^Top pick: Runner, in cinemas\. To stream: (Slow Horses on Apple TV|American Horror Story on JioHotstar)\./.test(n), n);
 });
-test("ssrEditorNote renders styled block and escapes (escHtml scope guard)", () => {
+test("ssrEditorNote: escaped, and labelled for what it is: generated picks are not an editor's note", () => {
   const d = { ..._noteData(), pick: "A & B" };
   d.ott[0] = { ...d.ott[0], title: "A & B" };
   const html = U.ssrEditorNote(d, { code: "us" });
   assert.ok(html.includes('class="ednote"') && html.includes("A &amp; B"), html);
+  assert.ok(/<b>This week's picks · <\/b>Top pick: A &amp; B on Apple TV\./.test(html) && !/Editor's note/.test(html), html);
   assert.strictEqual(U.ssrEditorNote({ theatres: [], ott: [] }, { code: "us" }), "");
 });
 
@@ -10323,7 +10328,7 @@ test("series pages: Episodes before Good to know; visible date; no unused markup
     assert.ok(/BreadcrumbList/.test(hid) && / hidden>Page updated/.test(hid), "pages hidden from Google are left as they are");
   } finally { R.useRolloutConfig(null); GH.useHiddenList(null); }
 });
-group("plain wording: no signs of AI writing in the site's own sentences (human-prose, 30 Oct 2026)");
+group("plain wording: signs of AI writing (flagged, never fails the build)");
 const PC = require("./lib/prosecheck.js");
 const hpDay = (o) => new Date(Date.now() + o * 864e5).toISOString().slice(0, 10);
 test("every page shape and every hand-written page reads plainly (scripts/prose-check.js)", () => {
@@ -10331,6 +10336,7 @@ test("every page shape and every hand-written page reads plainly (scripts/prose-
   assert.ok(r.pages >= 30, "the check drew every page shape: " + r.pages);
   assert.deepStrictEqual(r.hits.map((h) => h.page + ": " + h.rule + " \"" + h.match + "\" in " + h.sentence), []);
 });
+group("plain wording: facts, dates and the sweeps' sentences stay intact (30 Oct 2026)");
 test("plain wording moves no fact: same fingerprint, and the facts read back are the same in either wording", () => {
   const R = require("./lib/rollout.js"), HP = require("./lib/humanprose.js"), M = require("./lib/migrate.js"), F = require("./lib/facts.js"), S = require("./lib/sitemap.js"), IN = require("./lib/core.js").COUNTRIES[0];
   try {
@@ -10357,6 +10363,8 @@ test("the last pass and its inverse: exact, idempotent, and only on pages drawn 
     "<p style=\"x\">That's the usual pattern, not a confirmed date — we haven't seen one announced. We re-check every day.</p>",
     "<p>Not streaming yet — X is in its theatrical run in India.</p>",
     "<p>X isn't on any subscription service we track in India — it was on Netflix. Checked 2026-10-12. We keep looking — if it comes back, this page updates.</p>",
+    "<div><span class=\"pill\">Opened in cinemas 2 Oct — not streaming yet</span><span class=\"pill\">Theatrical run ended — OTT arrival pending</span></div>",
+    "<p>Spotted by our daily availability check on 2026-10-30. We recheck periodically — platforms do drop titles.</p>",
   ].join("\n");
   const plain = HP.humanWording(sweeps);
   assert.ok(!/—/.test(plain), plain);
@@ -10426,11 +10434,12 @@ test("near-copy check: the v3 header is stripped like the old one (30 Oct 2026)"
     if (!groupsSeen.has(g)) recordFailure(`safety tier lists "${g}"`, "", new Error("no test group has this title any more \u2014 update SAFETY_GROUPS"));
   }
   const safetyFailed = failures.filter((f) => f.safety);
-  const contentFailed = failures.filter((f) => !f.safety);
+  const flagged = failures.filter((f) => !f.safety && f.flag);
+  const contentFailed = failures.filter((f) => !f.safety && !f.flag);
   try {
-    require("fs").writeFileSync("test-results.json", JSON.stringify({ passed, failed, safetyFailed, contentFailed }, null, 2) + "\n");
+    require("fs").writeFileSync("test-results.json", JSON.stringify({ passed, failed, safetyFailed, contentFailed, flagged }, null, 2) + "\n");
   } catch {}
-  console.log(`Tests: ${passed} passed, ${failed} failed${failed ? ` (${safetyFailed.length} safety, ${contentFailed.length} content)` : ""}`);
+  console.log(`Tests: ${passed} passed, ${failed} failed${failed ? ` (${safetyFailed.length} safety, ${contentFailed.length} content, ${flagged.length} flagged)` : ""}`);
   if (safetyFailed.length || (failed > 0 && !TIERED)) { console.error("FAIL"); process.exit(1); }
   if (failed > 0) {
     for (const f of contentFailed) console.log(`::warning title=Content test failed (site still updates)::${f.name} \u2014 ${f.message.replace(/[\r\n]+/g, " ")}`);

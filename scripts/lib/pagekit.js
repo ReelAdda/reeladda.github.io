@@ -163,7 +163,8 @@ function theatreRunState(released, now = Date.now()) {
 // The frozen-page status pill for the open state. It names a fact (the opening date) rather
 // than asserting a current screening, and it stays recognisable as a status pill ("cinema").
 const openPill = (d) => `<span class="pill">Opened in cinemas ${escHtml(d)} — not streaming yet</span>`;
-const OPEN_PILL_RE = /<span class="pill">Opened in cinemas [^<]* — not streaming yet<\/span>/;
+// Either form: " — not streaming yet", or ", not streaming yet" in plain wording (lib/humanprose.js).
+const OPEN_PILL_RE = /<span class="pill">Opened in cinemas [^<]*?(?: —|,) not streaming yet<\/span>/;
 
 // ============================================================================
 // SETTLING A FROZEN PAGE PAST ITS RELEASE DATE.
@@ -270,7 +271,7 @@ function settleReleasedCopy(html, { countryName, cfg = null, now = Date.now() } 
       });
     // The status pill. Only a THEATRICAL status pill is touched — never a provider.
     const short = fmtDateShort(date, now, localeFor(cfg && cfg.code));
-    const statusPills = [OPEN_PILL_RE, /<span class="pill">Theatrical run ended — (?:OTT|streaming) arrival pending<\/span>/, /<span class="pill">In theatres<\/span>/];
+    const statusPills = [OPEN_PILL_RE, /<span class="pill">Theatrical run ended(?: —|,) (?:OTT|streaming) arrival pending<\/span>/, /<span class="pill">In theatres<\/span>/];
     const want = run === "open" ? openPill(short)
       : `<span class="pill">Theatrical run ended — ${streamVocab(cfg).arrival} pending</span>`;
     for (const re of statusPills) { if (re.test(out)) { out = out.replace(re, want); break; } }

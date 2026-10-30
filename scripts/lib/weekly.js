@@ -165,11 +165,15 @@ function isoWeekNum(d = new Date()) {
 // `short` (the homepage, Oct 2026 redesign): the same picks with the verdict-and-reason
 // clauses left out, since each card now shows its own verdict pill — "For a night out, Digger
 // is the ticket. Give Street Fighter a miss."
+// Plain wording (30 Oct 2026, lib/humanprose.js): one fixed wording. The note used to rotate two
+// phrasings per slot by week and open with question hooks ("Staying in? Put on…", "Heading to the
+// cinema? X is the one to book", "X can wait"), both marks of machine-written text, and it was
+// signed "Editor's note" though code writes it. The choice of titles is unchanged; `seed` and
+// `short` stay for callers.
 function buildEditorNote(data, cfg, seed = null, { short = false } = {}) {
+  void seed; void short;
   const th = ((data && data.theatres) || []).map((x) => ({ ...x, _cinema: true }));
   const ott = ((data && data.ott) || []).filter((x) => !x.stillGood).map((x) => ({ ...x, _cinema: false }));
-  const s = seed != null ? seed : isoWeekNum() * 31 + ((cfg && cfg.code) || "in").charCodeAt(0);
-  const pick = (pool, i) => pool[Math.abs(s + i * 7) % pool.length];
   const LEVEL = { "Must watch": 2, "Worth a watch": 1 };
   // Same "actually new" test as Pick of the Week (choosePick in lib/surfaces.js): a March
   // season newly listed in September is not this week's recommendation.
@@ -179,13 +183,8 @@ function buildEditorNote(data, cfg, seed = null, { short = false } = {}) {
   const good = (x) => x.fcScore && LEVEL[x.fcScore.verdict] && !x.fcScore.early && isNew(x);
   const best = (list, not) => list.filter((x) => good(x) && !not.has(x.title))
     .sort((a, b) => LEVEL[b.fcScore.verdict] - LEVEL[a.fcScore.verdict] || rankValue(b) - rankValue(a))[0] || null;
-  const verdictWords = (x) => (x.fcScore.verdict === "Must watch" ? "a must-watch" : "worth a watch");
-  const why = (x) => {
-    const r = String(x.fcScore.reason || "").replace(/\.$/, "");
-    return r ? r.charAt(0).toLowerCase() + r.slice(1) : "";
-  };
-  const where = (x) => (x._cinema ? "in cinemas" : x.platform ? `on ${x.platform}` : "streaming");
-  const sentence = (x) => `${verdictWords(x)}${why(x) ? ` — ${why(x)}` : ""}`;
+  // "Clayface, in cinemas" / "Lupin on Netflix": where to see it, said once.
+  const at = (x) => (x._cinema ? `${x.title}, in cinemas` : `${x.title} ${x.platform ? `on ${x.platform}` : "streaming"}`);
 
   const all = [...th, ...ott];
   const flagship = data && data.pick ? all.find((x) => x.title === data.pick) || null : null;
@@ -194,49 +193,25 @@ function buildEditorNote(data, cfg, seed = null, { short = false } = {}) {
 
   if (flagship) {
     used.add(flagship.title);
-    parts.push(!short && flagship.fcScore && LEVEL[flagship.fcScore.verdict]
-      ? pick([
-          `This week's pick is ${flagship.title} ${where(flagship)}: ${sentence(flagship)}.`,
-          `Our pick this week is ${flagship.title} ${where(flagship)}, and it's ${sentence(flagship)}.`,
-        ], 1)
-      : `This week's pick is ${flagship.title} ${where(flagship)}.`);
+    parts.push(`Top pick: ${at(flagship)}.`);
   }
 
-  // The labelled alternative, from the other side of the page.
+  // The labelled alternative, from the other side of the page. With no pick it leads instead.
   const otherSide = flagship ? (flagship._cinema ? ott : th) : th;
   const alt = best(otherSide, used);
   if (alt) {
     used.add(alt.title);
-    if (short) parts.push(alt._cinema
-      ? pick([`Heading to the cinema? ${alt.title} is the one to book.`, `For a night out, ${alt.title} is the ticket.`], 2)
-      : pick([`Staying in? Put on ${alt.title} ${where(alt)}.`, `On the sofa instead? Put on ${alt.title} ${where(alt)}.`], 2));
-    else parts.push(alt._cinema
-      ? pick([
-          `Heading to the cinema? ${alt.title} is the one to book: ${sentence(alt)}.`,
-          `For a night out, ${alt.title} is the ticket: ${sentence(alt)}.`,
-        ], 2)
-      : pick([
-          `Staying in? ${alt.title} ${where(alt)} is ${sentence(alt)}.`,
-          `On the sofa instead? Put on ${alt.title} ${where(alt)}: ${sentence(alt)}.`,
-        ], 2));
+    parts.push(!flagship ? `Top pick: ${at(alt)}.` : alt._cinema ? `In cinemas: ${alt.title}.` : `To stream: ${at(alt)}.`);
   }
 
   // A Skip worth knowing about beats a third recommendation.
   const skip = all.find((x) => x.fcScore && x.fcScore.verdict === "Skip" && !x.fcScore.early && !used.has(x.title));
-  if (skip && short) {
-    parts.push(pick([`Give ${skip.title} a miss.`, `${skip.title} can wait.`], 3));
-  } else if (skip) {
-    parts.push(pick([
-      `One to give a miss: ${skip.title} — ${why(skip) || "the audience verdict is in"}.`,
-      `${skip.title} can wait — ${why(skip) || "the audience verdict is in"}.`,
-    ], 3));
+  if (skip) {
+    parts.push(`Skip ${skip.title}.`);
   } else {
     const sameSide = flagship ? (flagship._cinema ? th : ott) : ott;
     const also = best(sameSide, used);
-    const tail = (x) => (short ? "" : `, ${verdictWords(x)}`);
-    if (also) parts.push(also._cinema
-      ? `Also in cinemas: ${also.title}${tail(also)}.`
-      : `Also streaming: ${also.title} ${where(also)}${tail(also)}.`);
+    if (also) parts.push(also._cinema ? `Also in cinemas: ${also.title}.` : `Also streaming: ${at(also)}.`);
   }
 
   if (!parts.length || (!flagship && !alt)) return null; // nothing trustworthy to say
@@ -244,15 +219,17 @@ function buildEditorNote(data, cfg, seed = null, { short = false } = {}) {
 }
 
 function ssrEditorNote(data, cfg) {
-  let note = null;
+  let note = null, own = false;
   if (cfg && cfg.code === "in" && fs.existsSync("editor-note.txt")) {
-    const own = fs.readFileSync("editor-note.txt", "utf8").trim();
-    if (own) note = own; // the human's line always wins
+    const line = fs.readFileSync("editor-note.txt", "utf8").trim();
+    if (line) { note = line; own = true; } // the human's line always wins
   }
   if (!note) note = buildEditorNote(data, cfg, null, { short: true });
   if (!note) return "";
-  // One plain paragraph (Oct 2026 redesign); the date already sits in the "Updated" pill.
-  return `<p class="ednote"><b>Editor's note · </b>${escHtml(note)}</p>`;
+  // One plain paragraph (Oct 2026 redesign); the date already sits in the "Updated" pill. Signed
+  // "Editor's note" only when a person wrote it (editor-note.txt); the generated line is labelled
+  // for what it is (30 Oct 2026).
+  return `<p class="ednote"><b>${own ? "Editor's note" : "This week's picks"} · </b>${escHtml(note)}</p>`;
 }
 
 // RELEASE CALENDAR (25 Oct 2026). Every film page released in the last RECENT_DAYS or still to

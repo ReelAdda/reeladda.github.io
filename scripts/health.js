@@ -34,6 +34,9 @@ try {
   const t = JSON.parse(fs.readFileSync(process.env.HEALTH_TEST_RESULTS || "test-results.json", "utf8"));
   const cf = Array.isArray(t.contentFailed) ? t.contentFailed : [];
   if (cf.length) issues.push(`${cf.length} content test(s) failed — the site updated anyway; fix before the next run: ${cf.slice(0, 5).map((f) => `"${f.name}" (${f.message})`).join("; ")}`);
+  // Wording checks (scripts/test.js FLAG_GROUPS): flagged in the summary, never a red run.
+  const fl = Array.isArray(t.flagged) ? t.flagged : [];
+  if (fl.length) notes.push(`${fl.length} plain-wording check(s) found signs of AI writing (flagged, the run stays green): ${fl.slice(0, 3).map((f) => `"${f.name}" (${f.message})`).join("; ")}`);
 } catch { /* no results file: tests did not run in this job */ }
 const catalog = h.catalog || {};
 
