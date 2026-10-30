@@ -2,38 +2,20 @@
  "date": "2026-10-30",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 3,
- "high": 0,
+ "pagesDisagreeing": 1,
+ "high": 1,
  "correctable": 1,
  "byField": {
-  "title": 1,
-  "director": 1,
-  "genres": 1
+  "release date": 1
  },
  "rows": [
   {
-   "field": "title",
-   "severity": "low",
-   "page": "Bigg Boss: Agnipareeksha",
-   "tmdb": "Bigg Boss Malayalam: Agnipareeksha",
-   "code": "in",
-   "slug": "bigg-boss-agnipareeksha"
-  },
-  {
-   "field": "director",
-   "severity": "medium",
-   "page": "Bobby Kolli",
-   "tmdb": "K.S. Ravindra",
-   "code": "ae",
-   "slug": "daaku-maharaaj"
-  },
-  {
-   "field": "genres",
-   "severity": "low",
-   "page": "War / Action",
-   "tmdb": "Action, Thriller, Drama",
-   "code": "kr",
-   "slug": "escape-from-mogadishu"
+   "field": "release date",
+   "severity": "high",
+   "page": "2026-10-23",
+   "tmdb": "2023-10-27",
+   "code": "ca",
+   "slug": "sumo-didi"
   }
  ]
 }
