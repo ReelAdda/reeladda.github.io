@@ -177,7 +177,7 @@ function applyGoogleHidePaths(files, { root = ".", hidden = pathHidden } = {}) {
 const NEAR_COPY = 0.9;
 function mainText(html) {
   let s = String(html).replace(/[\s\S]*?<body[^>]*>/, "").replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g, " ");
-  s = s.replace(/<footer[\s\S]*?<\/footer>/g, " ").replace(/<nav[\s\S]*?<\/nav>/g, " ").replace(/<div class="top">[\s\S]*?<\/div>/, " ");
+  s = s.replace(/<footer[\s\S]*?<\/footer>/g, " ").replace(/<nav[\s\S]*?<\/nav>/g, " ").replace(/<div class="top(?: [^"]*)?">[\s\S]*?<\/div>/, " ");   // "top v3" too (30 Oct 2026): the v3 header was compared as text
   return s.replace(/<[^>]+>/g, " ").replace(/&[a-z#0-9]+;/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
 }
 function shingleSet(text) {

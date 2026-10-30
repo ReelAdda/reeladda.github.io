@@ -142,14 +142,19 @@ function nextDrop(ep, today = new Date().toISOString().slice(0, 10)) {
 // Pure: the meta description of a series on air — its schedule, the thing people come for. Never
 // the platform (naming it in the snippet sent searchers straight there: 0 clicks from 247
 // impressions at position 1.1). null when the series isn't on air.
-function seriesDescription(item, fmt, today = new Date().toISOString().slice(0, 10)) {
+// `airLabel` (rollout "page-fixes-30oct"): the dates are TMDB's original air dates, which a
+// streaming market can get a day later (VisionQuest E7: 3 Nov in the US, 4 Nov on JioHotstar), so
+// the snippet says whose dates they are instead of reading as the edition's own.
+function seriesDescription(item, fmt, today = new Date().toISOString().slice(0, 10), { airLabel = false } = {}) {
   const ep = item && item.kind === "tv" && item.episodes;
   const nd = ep && nextDrop(ep, today);
   if (!nd) return null;
   const dates = (ep.list || []).map((x) => x.date).filter(Boolean).sort();
   const last = dates.length ? dates[dates.length - 1] : null;
   const verdict = item.fcScore && item.fcScore.verdict ? ` FilmyChill verdict: ${item.fcScore.verdict}.` : "";
-  return `${item.title}: all ${ep.count} episodes with dates. ${nd.label} out ${fmt(nd.date)}${last && last > nd.date ? `, finale ${fmt(last)}` : ""}.${verdict}`;
+  const finale = last && last > nd.date ? `, finale ${fmt(last)}` : "";
+  const whose = airLabel ? ` (original air date${finale ? "s" : ""})` : "";
+  return `${item.title}: all ${ep.count} episodes with dates. ${nd.label} out ${fmt(nd.date)}${finale}${whose}.${verdict}`;
 }
 
 // Pure: the "Episodes" section (series only). `fmt(date)` formats a date for the edition.
@@ -274,13 +279,29 @@ function fitFromData(item, franchise, fmt, today = new Date().toISOString().slic
 }
 
 // Pure: "Good to know" rows the guides add.
-function seriesKnowRows(item) {
+// `partialRuntimes` (rollout "page-fixes-30oct"): a range from only some of the episodes says
+// which ones ("48–57 min (E1–E6)"); VisionQuest's 48–57 left out the 62- and 68-minute E7–E8.
+function seriesKnowRows(item, { partialRuntimes = false } = {}) {
   const rows = [];
   const ep = item && item.kind === "tv" && item.episodes;
   if (ep && ep.count) {
     rows.push({ label: "Episodes", value: `${ep.count}${ep.seasons > 1 ? ` across ${ep.seasons} seasons` : ""}${ep.limited ? " · limited series" : ""}` });
-    const rts = (ep.list || []).map((x) => x.runtime).filter(Boolean);
-    if (rts.length) { const lo = Math.min(...rts), hi = Math.max(...rts); rows.push({ label: "Episode length", value: lo === hi ? `${lo} min` : `${lo}–${hi} min` }); }
+    const timed = (ep.list || []).filter((x) => x.runtime);
+    const rts = timed.map((x) => x.runtime);
+    if (rts.length) {
+      const lo = Math.min(...rts), hi = Math.max(...rts);
+      let value = lo === hi ? `${lo} min` : `${lo}–${hi} min`;
+      const listed = (ep.list || []).length;
+      // The season shown: every listed episode (a multi-season guide lists the current season only).
+      const expected = ep.seasons > 1 ? listed : Math.max(listed, ep.count || 0);
+      if (partialRuntimes && timed.length < expected) {
+        const nums = timed.map((x) => x.e).sort((a, b) => a - b);
+        const run = nums.every((n, i) => i === 0 || n === nums[i - 1] + 1);
+        const which = nums.length === 1 ? `E${nums[0]}` : run ? `E${nums[0]}–E${nums[nums.length - 1]}` : `${nums.length} of ${expected} episodes`;
+        value += ` (${which})`;
+      }
+      rows.push({ label: "Episode length", value });
+    }
   }
   const fr = item && item.franchise;
   if (fr && fr.c) rows.push({ label: "Part of", value: `${seriesName(fr.c)} series` });

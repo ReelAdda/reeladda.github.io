@@ -270,10 +270,15 @@ function seasonStart(item) {
   return first || null;
 }
 // Pure: the meta line — genre · language · latest season / released <date> · runtime · trailer views.
-function v3Meta(item, { fmt = (d) => d } = {}) {
+// `airLabel` (rollout "page-fixes-30oct"): a season start taken from the episode guide is TMDB's
+// original air date, not necessarily the edition's ("13 Oct" in the US, 14 Oct on JioHotstar).
+function v3Meta(item, { fmt = (d) => d, airLabel = false } = {}) {
   const { trailerViewsLabel } = require("./editorial.js");
+  const start = item.kind === "tv" ? seasonStart(item) : null;
+  const ep = item.kind === "tv" ? item.episodes : null;
+  const guideFirst = ep && ep.list && ep.list.length ? ep.list.map((x) => x.date).filter(Boolean).sort()[0] : null;
   const when = item.kind === "tv"
-    ? (seasonStart(item) ? `Latest season ${fmt(seasonStart(item))}` : null)
+    ? (start ? `Latest season ${fmt(start)}${airLabel && guideFirst && start === guideFirst ? " (original air date)" : ""}` : null)
     : (item.released ? `Released ${fmt(item.released)}` : null);
   const tv = item.trailerViews ? trailerViewsLabel(item.trailerViews) : null;
   return [item.genre, item.language, when, item.runtime ? `${item.runtime} min` : null, tv].filter(Boolean).map(escHtml).join(" · ");

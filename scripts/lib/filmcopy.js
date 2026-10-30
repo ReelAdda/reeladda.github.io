@@ -336,7 +336,7 @@ function olderTitleFaqs(item, cfg, nowMs) {
   const cast = (Array.isArray(item.cast) ? item.cast : []).map((c) => (typeof c === "string" ? c : c && c.name)).filter(Boolean).slice(0, 4);
   if (cast.length) {
     const names = cast.length > 1 ? `${cast.slice(0, -1).join(", ")} and ${cast[cast.length - 1]}` : cast[0];
-    out.push({ q: `Who is in the cast of ${t}?`, a: `${t} stars ${names}${item.director ? `, directed by ${item.director}` : ""}.` });
+    out.push({ q: `Who is in the cast of ${t}?`, a: `${t} stars ${names}${item.director ? `, ${tv && item._fix30 ? "created" : "directed"} by ${item.director}` : ""}.` });
   }
   out.push({ q: tv ? `When did ${t} first air?` : `When did ${t} come out?`, a: `${t} ${tv ? "first aired" : "was released"} on ${fmtDateFull(item.released.slice(0, 10), localeFor(cfg && cfg.code))}.` });
   return out;

@@ -442,7 +442,11 @@ function descForState(c) {
 
 function filmMetaDescription(item, cfg = null, opts = {}) {
   // A series on air: its schedule is what people come for (lib/series.js seriesDescription).
-  const sd = require("./series.js").seriesDescription(item, (dt) => fmtDateFull(dt, localeFor((cfg && cfg.code) || "in")));
+  // The flag is worked out here too: the frozen-page chain (lib/archive.js rewriteMetaDescription)
+  // calls this with the stored item, which never carries buildFilmPage's _fix30.
+  const code0 = (cfg && cfg.code) || "in";
+  const airLabel = !!(item && (item._fix30 || (item.slug && inRollout(PAGE_FIXES, item.slug) && !require("./googlehide.js").listedHidden(code0, item.slug))));
+  const sd = require("./series.js").seriesDescription(item, (dt) => fmtDateFull(dt, localeFor(code0)), undefined, { airLabel });
   if (sd) return trim(sd, 160);
   const c = descContext(item, cfg, opts);
   let desc = descForState(c);
@@ -497,6 +501,9 @@ const RECENT_RELEASE_DAYS = 180;
 const INTENT_TITLES = "intent-titles";
 // "If you liked this" picks pages Google can see first (lib/graph.js relatedFilms), in stages.
 const VISIBLE_SIMILAR = "visible-similar";
+// Five page fixes from the VisionQuest audit (30 Oct 2026), in stages; see buildFilmPage.
+const PAGE_FIXES = "page-fixes-30oct";
+const wikiUrl = (article) => `https://en.wikipedia.org/wiki/${encodeURIComponent(String(article).replace(/ /g, "_"))}`;
 const CINEMA_TITLE_DAYS = 28;
 const STREAMING_DATE_TITLE_DAYS = 365;
 const MONTH_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -982,8 +989,10 @@ function fcScoreSection(item) {
     const audPart = item.rating != null && nVotes ? `<b>Audience:</b> ${e(nVotes.toLocaleString("en-IN"))} ratings on TMDB`
       : nVotes ? `<b>Audience:</b> ${e(nVotes.toLocaleString("en-IN"))} ratings on TMDB, no average yet` : `<b>Audience:</b> not rated on TMDB yet`;
     // "per Wikipedia" links the article the figures came from (CC BY-SA asks for the source).
-    const citedHtml = cited ? (item.takeArticle
-      ? e(cited).replace("per Wikipedia", `per <a href="https://en.wikipedia.org/wiki/${encodeURIComponent(String(item.takeArticle).replace(/ /g, "_"))}" rel="noopener" target="_blank">Wikipedia</a>`)
+    // The reception record carries its article too (30 Oct 2026): v3 and frozen pages have no take.
+    const article = item.takeArticle || (item._fix30 && item.reception && item.reception.article) || "";
+    const citedHtml = cited ? (article
+      ? e(cited).replace("per Wikipedia", `per <a href="${wikiUrl(article)}" rel="noopener" target="_blank">Wikipedia</a>`)
       : e(cited)) : "";
     const criPart = !cri.none || cited ? ` · <b>Critics:</b> ${e(criLabel)}${cited ? ` — ${citedHtml}` : ""}` : "";
     const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}</p>` : "";
@@ -1018,6 +1027,13 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
     const tidy = (xs) => (Array.isArray(xs) ? dedupeProviders(xs) : xs);
     item = { ...item, providers: tidy(item.providers), rentBuy: tidy(item.rentBuy), ...(Array.isArray(item.wasOn) ? { wasOn: tidy(item.wasOn) } : {}) };
   }
+  // Five page fixes (rollout "page-fixes-30oct", from the VisionQuest audit), pages Google sees
+  // only: a series' creator is labelled Creator, not Director (TMDB's created_by fills the field);
+  // the trailer preview's YouTube image is allowed by the page's CSP (it was blocked everywhere);
+  // "per Wikipedia" and the footer credit link the film's article; series dates say they are
+  // original air dates; an episode-length range says which episodes it covers. None of these is
+  // in the facts fingerprint (lib/facts.js keyFacts), so no sitemap date moves.
+  if (item && inRollout(PAGE_FIXES, item.slug) && !require("./googlehide.js").listedHidden((cfg && cfg.code) || "in", item.slug)) item = { ...item, _fix30: true };
   const e = escHtml;
   const lean = leanPage(item);   // every fact once (LEAN_PAGE)
   const V2 = require("./pagev2.js");
@@ -1106,7 +1122,9 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
     containsSeason: item.kind === "tv" ? SER.episodeSchema(item.episodes) : undefined,
     genre: item.genre || undefined,
     inLanguage: item.language || undefined,
-    director: item.director ? { "@type": "Person", name: item.director } : undefined,
+    // A series' "director" is TMDB's created_by (lib/enrich.js): schema.org's creator, once fixed.
+    director: item.director && !(item._fix30 && item.kind === "tv") ? { "@type": "Person", name: item.director } : undefined,
+    creator: item.director && item._fix30 && item.kind === "tv" ? { "@type": "Person", name: item.director } : undefined,
     actor: (item.castPics && item.castPics.length)
       ? item.castPics.map((c) => ({ "@type": "Person", name: c.name, image: c.photo }))
       : cast.map((c) => ({ "@type": "Person", name: c })),
@@ -1162,7 +1180,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const verdictProse = buildVerdictProse(item, country, localeFor(code));
   // Episodes and franchise (lib/series.js) lead "Good to know"; series FAQs follow "where to watch".
   const fmtFull = (dt) => fmtDateFull(dt, localeFor(code));
-  const goodToKnow = [...SER.seriesKnowRows(item), ...buildGoodToKnow(item, cfg)];
+  const goodToKnow = [...SER.seriesKnowRows(item, { partialRuntimes: !!item._fix30 }), ...buildGoodToKnow(item, cfg)];
   const faqs = buildFaqs(item, country, cfg);
   faqs.splice(Math.min(2, faqs.length), 0, ...SER.episodeFaqs(item, fmtFull));
   // "More in this series": other titles of the franchise with a page Google can see here.
@@ -1219,7 +1237,7 @@ ${(() => {
   return `<meta property="og:image" content="${e(src)}">${dims}${alt}`;
 })()}
 <meta name="twitter:card" content="summary_large_image">
-<meta http-equiv="Content-Security-Policy" content="${cspWith(`default-src 'self'; connect-src 'self' ${VOTE_CONNECT.join(" ")}; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'`)}">${analyticsTag()}
+<meta http-equiv="Content-Security-Policy" content="${cspWith(`default-src 'self'; connect-src 'self' ${VOTE_CONNECT.join(" ")}; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org${item._fix30 && ytid ? " https://img.youtube.com" : ""} data:; frame-src https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'`)}">${analyticsTag()}
 <script type="application/ld+json">${ldJson(ld)}</script>
 <script type="application/ld+json">${ldJson(breadcrumb)}</script>${faqLd ? `
 <script type="application/ld+json">${ldJson(faqLd)}</script>` : ""}
@@ -1319,7 +1337,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
     ${item.poster && !v3 ? `<img class="poster" src="${e(item.poster)}" alt="${e(item.title)} poster" width="${v2 ? 104 : 140}" height="${v2 ? 156 : 210}"${lean ? ' fetchpriority="high"' : ""}>` : v3 ? "" : "<div></div>"}
     <div>${v3 ? V2.v3Tag(item) : ""}
       <h1>${e(item.title)}${year ? ` (${year})` : ""}</h1>
-      <div class="meta">${v3 ? V2.v3Meta(item, { fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? V2.v2Meta(item, year) : (lean
+      <div class="meta">${v3 ? V2.v3Meta(item, { fmt: (d) => fmtDateFull(d, localeFor(code)), airLabel: !!item._fix30 }) : v2 ? V2.v2Meta(item, year) : (lean
         ? [item.language, item.genre, item.runtime ? (item.kind === "tv" ? `${item.runtime} min episodes` : item.runtime + " min") : null]
         : [item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert]).filter(Boolean).map(e).join(" · ")}</div>
       ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Where(item, { relState, country, V: V_TITLE, asOf, fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
@@ -1371,7 +1389,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
   ${!v3 && item.hook ? `<p class="hook">${e(item.hook)}</p>` : ""}
   ${!v3 && item.take && lean ? `<h2>What the critics say</h2>` : ""}
   ${!v3 && item.take ? `<p class="take">${e(item.take)}${item.takeCounter ? ` <span class="tcounter">${e(item.takeCounter)}</span>` : ""}${item.takeSrc === "wiki" ? ` <span class="tsrc">— distilled from critics' published reviews</span>` : ""}</p>` : ""}
-  ${v3 ? `${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}${item.director ? `<p class="dir"><b>Director:</b> ${e(item.director)}</p>` : ""}` : ""}
+  ${v3 ? `${synopsis ? `<h2>Story</h2><p>${e(synopsis)}</p>` : ""}${item.director ? `<p class="dir"><b>${item._fix30 && item.kind === "tv" ? "Creator" : "Director"}:</b> ${e(item.director)}</p>` : ""}` : ""}
   ${(() => {
     // The one fact on this page no competitor can reproduce: measured from our own archive
     // (lib/history.js), not from any API. TMDB stores no history of provider changes.
@@ -1442,7 +1460,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
     const rows = lean ? goodToKnow.filter((r) => !/^(Runtime|Genre|Language)$/.test(r.label)) : goodToKnow;
     return rows.length ? `<h2>Good to know</h2><table class="gtk">${rows.map((row) => `<tr><td>${e(row.label)}</td><td>${e(row.value)}</td></tr>`).join("")}</table>` : "";
   })()}
-  ${!v3 && item.director ? `<h2>Director</h2><p>${e(item.director)}</p>` : ""}
+  ${!v3 && item.director ? `<h2>${item._fix30 && item.kind === "tv" ? "Creator" : "Director"}</h2><p>${e(item.director)}</p>` : ""}
   ${(item.castPics && item.castPics.length) ? `<h2>Cast</h2><div class="cast-strip">${item.castPics.map((c) => {
     // A name links to its people page when one exists (5+ films here) — see writePeoplePages — and
     // Google can see it. Every people page is hidden from Google (lib/googlehide.js, 25 Oct 2026),
@@ -1565,8 +1583,12 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
 </div>${v2 && !v3 && !upcoming ? "\n" + V2.v2Sticky(item, providers.map(String)) : ""}
 <footer>
   <nav><a href="${e(homeUrl)}">This week in ${e(country)}</a> · <a href="${code === "in" ? "/new-on-ott/" : `/${e(code)}/new-on-ott/`}">New on ${e(streamVocab(cfg).word === "OTT" ? "OTT" : "streaming")}</a>${code === "in" ? ` · ${LANGUAGE_PAGES.map(([n, s]) => `<a href="/${s}/">${n}</a>`).join(" · ")}` : ""} · <a href="/about/">About</a></nav>
-  Verdicts are compiled by FilmyChill's editorial system from audience ratings and published critic reception — <a href="/about/">how we rate</a>.<br>
-  ${footerAttribution()}© 2026 FilmyChill · Vikram Sharma
+  Verdicts are compiled by FilmyChill's ${item._fix30 ? "automated system" : "editorial system"} from audience ratings and published critic reception — <a href="/about/">how we rate</a>.<br>
+  ${(() => {
+    // The CC BY-SA credit links the film's own article when the page knows it (30 Oct 2026).
+    const article = item._fix30 && (item.takeArticle || (item.reception && item.reception.article));
+    return article ? footerAttribution().replace('<a href="https://en.wikipedia.org/" rel="noopener" target="_blank">Wikipedia</a>', `<a href="${e(wikiUrl(article))}" rel="noopener" target="_blank">Wikipedia</a>`) : footerAttribution();
+  })()}© 2026 FilmyChill · Vikram Sharma
 </footer>
 </body>
 </html>`;
@@ -1624,6 +1646,7 @@ function generatePages(data, cfg, allSlugSets) {
 }
 
 module.exports = {
+  PAGE_FIXES,
   VISIBLE_SIMILAR,
   resetFranchiseIndex,
   simGridHtml,

@@ -47,6 +47,11 @@
    "since": "2026-10-29",
    "what": "one name per service in a film page's where-to-watch pills, FAQ and links ('Prime Video', not 'Amazon Prime Video' + 'Amazon Prime Video with Ads'), on pages Google sees (~236; lib/filmpage.js, rules.js dedupeProviders). Fingerprint v3 reads names the same way, so no date moves — once the stored fingerprints are upgraded to v3, which the builds before 30 Oct 12:00 UTC do; it switches itself on at the 30 Oct 13:52 UTC build."
   },
+  "page-fixes-30oct": {
+   "percent": 100,
+   "since": "2026-10-30",
+   "what": "five fixes from the VisionQuest audit, on pages Google sees (lib/filmpage.js PAGE_FIXES): a series' creator labelled Creator, not Director (page, JSON-LD creator, FAQ); the trailer preview image allowed by the page's CSP; 'per Wikipedia' and the footer credit link the film's article; series dates in the snippet and meta line marked 'original air date'; an episode-length range names the episodes it covers; footer 'automated system'. None is in the facts fingerprint, so no sitemap date moves. Planned as five stages of ~1,230 pages; switched to 100% at once on 30 Oct 2026 at the owner's request (all 6,143 visible film pages at the next build). Dry run: every fix shows on VisionQuest, fingerprint unchanged."
+  },
   "page-v3": {
    "percent": 100,
    "since": "2026-10-28",

@@ -537,6 +537,9 @@ function entryReception(e) {
   if (a.ratings && a.ratings.n) out.ratings = { n: a.ratings.n, median: a.ratings.median };
   if (!out.rt && !out.mc && !out.ratings) return null;
   if (e.checked) out.asOf = e.checked;
+  // The article the figures came from (30 Oct 2026): the record travels without the take on v3
+  // and frozen pages, and "per Wikipedia" must still link the article, not Wikipedia's home page.
+  if (e.article) out.article = e.article;
   return out;
 }
 function cachedReception(imdbId) { return imdbId ? entryReception(loadTakes()[imdbId]) : null; }

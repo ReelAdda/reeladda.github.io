@@ -121,7 +121,8 @@ function buildLlmsFullTxt(dataByCode) {
         if (it.fcScore) lines.push(`   FilmyChill Score: ${it.fcScore.verdict} — ${it.fcScore.reason} (${it.fcScore.early ? `based on only ${it.fcScore.votes} ratings` : "combines audience ratings and critics' reception"})`);
         if (it.take) lines.push(`   Critics: ${it.take}${it.takeArticle ? ` [source: en.wikipedia.org/wiki/${String(it.takeArticle).replace(/ /g, "_")}]` : ""}`);
         if (it.hook) lines.push(`   Context: ${it.hook}`);
-        if (it.director) lines.push(`   Director: ${it.director}`);
+        // A series' "director" is TMDB's created_by (lib/enrich.js): its creator.
+        if (it.director) lines.push(`   ${it.kind === "tv" ? "Creator" : "Director"}: ${it.director}`);
         lines.push(`   URL: ${filmPageUrl(cfg.code, it.slug)}`);
       });
     }

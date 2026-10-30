@@ -10271,6 +10271,43 @@ test("film pages: one name per service in the pills, on pages Google sees (tidy-
     assert.deepStrictEqual(pills(on(100)), ["Amazon Prime Video", "Amazon Prime Video with Ads", "Disney Plus"], "pages hidden from Google are left as they are");
   } finally { R.useRolloutConfig(null); GH.useHiddenList(null); }
 });
+test("film pages: five fixes from the VisionQuest audit, on pages Google sees (page-fixes-30oct)", () => {
+  const R = require("./lib/rollout.js"), GH = require("./lib/googlehide.js"), Fp = require("./lib/filmpage.js"), S = require("./lib/sitemap.js"), F = require("./lib/facts.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const ep = (e, date, runtime) => ({ e, name: `Ep ${e}`, date, ...(runtime ? { runtime } : {}) });
+  const it = { title: "VQ", slug: "vq-fix", kind: "tv", released: "2026-10-13", language: "English", genre: "Drama", providers: ["JioHotstar"], rentBuy: [], tmdbId: 77, rating: 8.6, votes: 220,
+    director: "Terry Matalas", trailer: "https://www.youtube.com/watch?v=sXKnmgmbkoE", cast: ["A", "B"],
+    episodes: { count: 8, seasons: 1, limited: true, list: [ep(1, "2026-10-13", 56), ep(2, "2026-10-13", 48), ep(3, "2026-10-20", 50), ep(4, "2026-10-20", 52), ep(5, "2026-10-27", 55), ep(6, "2026-10-27", 57), ep(7, "2099-11-03"), ep(8, "2099-11-10")], next: { e: 7, s: 1, date: "2099-11-03", name: "Ep 7" } },
+    fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" },
+    reception: { rt: { pct: 91, n: 87 }, asOf: "2026-10-29", article: "VisionQuest (TV series)" } };
+  const on = (pct) => { R.useRolloutConfig({ features: { "lean-page": { percent: 100 }, "redesign-v2": { percent: 100 }, "wiki-reception": { percent: 100 }, "page-v3": { percent: 100 }, "google-hide": { percent: 100 }, "page-fixes-30oct": { percent: pct } } }); return Fp.buildFilmPage(it, "2026-10-30", new Set(), IN); };
+  try {
+    const off = on(0), fix = on(100);
+    // 1. Creator, not Director: on the page and in the structured data; the facts reader reads it back.
+    assert.ok(/<b>Director:<\/b> Terry Matalas/.test(off) && !/<b>Director:/.test(fix) && /<b>Creator:<\/b> Terry Matalas/.test(fix));
+    assert.ok(/"creator":\{"@type":"Person","name":"Terry Matalas"\}/.test(fix) && !/"director":/.test(fix), "JSON-LD creator");
+    assert.strictEqual(F.extractFacts(fix, "vq-fix").director, "Terry Matalas", "read back from creator");
+    // 2. The trailer preview's image host is allowed by the CSP.
+    assert.ok(!/img-src[^;]*img\.youtube\.com/.test(off) && /img-src[^;]*https:\/\/img\.youtube\.com/.test(fix));
+    // 3. "per Wikipedia" and the footer credit link the article, not Wikipedia's home page.
+    assert.ok(/per <a href="https:\/\/en\.wikipedia\.org\/wiki\/VisionQuest_\(TV_series\)"/.test(fix) && !/per <a href/.test(off));
+    assert.ok(/adapted from <a href="https:\/\/en\.wikipedia\.org\/wiki\/VisionQuest_\(TV_series\)"/.test(fix) && /adapted from <a href="https:\/\/en\.wikipedia\.org\/"/.test(off));
+    // 4. Original air dates said as such: snippet and meta line.
+    assert.ok(/E7 out [^"]*, finale [^"(]*\(original air dates\)\./.test(fix) && !/original air date/.test((/<meta name="description" content="([^"]*)"/.exec(off) || [])[1]));
+    assert.ok(/Latest season 13 Oct 2026 \(original air date\)/.test(fix), (fix.match(/<div class="meta">[^<]*/) || [""])[0]);
+    // 5. The episode-length range names the episodes it covers.
+    assert.ok(/<td>Episode length<\/td><td>48–57 min \(E1–E6\)<\/td>/.test(fix) && /<td>Episode length<\/td><td>48–57 min<\/td>/.test(off));
+    assert.ok(/automated system/.test(fix) && /editorial system/.test(off));
+    assert.strictEqual(S.factsFingerprint(fix), S.factsFingerprint(off), "no sitemap date moves");
+    GH.useHiddenList({ pages: { in: ["vq-fix"] } });
+    assert.ok(/<b>Director:<\/b>/.test(on(100)), "pages hidden from Google are left as they are");
+  } finally { R.useRolloutConfig(null); GH.useHiddenList(null); }
+});
+test("near-copy check: the v3 header is stripped like the old one (30 Oct 2026)", () => {
+  const G = require("./lib/googlehide.js");
+  const t = G.mainText('<body><div class="top v3"><a class="mark" href="/">FILMY<span>CHILL</span></a><span class="cpill">Singapore</span></div><h1>X</h1></body>');
+  assert.strictEqual(t, "x");
+  assert.strictEqual(G.mainText('<body><div class="top"><a href="/">FILMY</a></div><h1>X</h1></body>'), "x");
+});
 
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");

@@ -141,7 +141,8 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   if (rec) item.reception = rec;
   const headCert = certOf(headMeta(html));
   if (cert || ld.contentRating || headCert) item.cert = (cert || ld.contentRating || headCert).trim();
-  const director = [].concat(ld.director || []).map((d) => d && d.name).filter(Boolean).join(", ");
+  // A series' creator is marked up as creator (rollout "page-fixes-30oct"); same field here.
+  const director = [].concat(ld.director || ld.creator || []).map((d) => d && d.name).filter(Boolean).join(", ");
   if (director) item.director = director;
   const poster = (/<img class="poster" src="([^"]+)"/.exec(html) || [])[1];
   if (poster) item.poster = dec(poster);
