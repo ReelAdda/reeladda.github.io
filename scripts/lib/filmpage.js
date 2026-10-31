@@ -1119,9 +1119,10 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   const code = (cfg && cfg.code) || "in";
   // Episodes before Good to know (the owner, 30 Oct 2026): the schedule is what a series page's
   // title promises, and it sat fourth, under Story, Cast and Good to know. Nothing else moves.
-  // Pages Google sees only, like the other 30 Oct changes.
+  // Every series page, hidden from Google or not (31 Oct 2026): readers reach hidden pages too,
+  // and Tulsa King showed the old order beside VisionQuest's new one.
   const seen = !require("./googlehide.js").listedHidden(code, item.slug);   // a page Google sees
-  const epFirst = v3 && item.kind === "tv" && seen;
+  const epFirst = v3 && item.kind === "tv";
   // Markup clean-up and a visible date (the owner, 30 Oct 2026), pages Google sees on v3: no
   // BreadcrumbList (v3 shows no breadcrumb) and no FAQPage (the questions stay on the page; the
   // markup earns nothing); a trailer VideoObject only with the trailer's real publish date, not

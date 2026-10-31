@@ -10326,7 +10326,10 @@ test("series pages: Episodes before Good to know; visible date; no unused markup
     assert.strictEqual(S.factsFingerprint(real), S.factsFingerprint(h), "no sitemap date moves");
     GH.useHiddenList({ pages: { in: ["vq-order"] } });
     const hid = Fp.buildFilmPage(it, "2026-10-30", new Set(), IN);
-    assert.ok(/BreadcrumbList/.test(hid) && / hidden>Page updated/.test(hid), "pages hidden from Google are left as they are");
+    assert.ok(/BreadcrumbList/.test(hid) && / hidden>Page updated/.test(hid), "markup clean-up: pages hidden from Google are left as they are");
+    // The order is for readers, who reach hidden pages too (Tulsa King, 31 Oct 2026): same everywhere.
+    const hidOrder = [...hid.matchAll(/<h2>([^<]+)<\/h2>/g)].map((m) => m[1]);
+    assert.ok(hidOrder.indexOf("Episodes") < hidOrder.indexOf("Good to know"), "Episodes first on a hidden series page too: " + hidOrder.join(" > "));
   } finally { R.useRolloutConfig(null); GH.useHiddenList(null); }
 });
 group("plain wording: signs of AI writing (flagged, never fails the build)");
