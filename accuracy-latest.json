@@ -1,10 +1,39 @@
 {
- "date": "2026-10-30",
+ "date": "2026-10-31",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 0,
- "high": 0,
- "correctable": 0,
- "byField": {},
- "rows": []
+ "pagesDisagreeing": 3,
+ "high": 2,
+ "correctable": 2,
+ "byField": {
+  "runtime": 1,
+  "release date": 1,
+  "platform": 1
+ },
+ "rows": [
+  {
+   "field": "runtime",
+   "severity": "medium",
+   "page": "140 min",
+   "tmdb": "150 min",
+   "code": "de",
+   "slug": "dune-part-three"
+  },
+  {
+   "field": "release date",
+   "severity": "high",
+   "page": "2026-10-30",
+   "tmdb": "2026-10-21",
+   "code": "es",
+   "slug": "klara-and-the-sun"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Prime Video, Tivify",
+   "tmdb": "Prime Video",
+   "code": "es",
+   "slug": "rec"
+  }
+ ]
 }
