@@ -918,20 +918,30 @@ function compactScoreHtml(label, audience, tail = ", no critics' verdict yet.", 
 }
 // Time words ("so far", "yet") only for a film that's actually new; an older film gets the plain
 // count ("only 12 audience ratings"), never a hint that more are on the way (Oct 2026).
-// Published reviews (lib/reviews.js): "Reviews: The Hindu · Rediff · 123telugu (2.75/5)", each
-// name a link to the outlet's own review, one per outlet, a star rating only where the feed stated
+// Published reviews (lib/reviews.js) ride in the sentence the card already has, so nothing is said
+// twice (owner, 31 Oct 2026): no score yet, "…; 3 reviews out, in The Hindu, Rediff and 123telugu
+// (2.75/5)."; with a score, the Audience · Critics line ends " · Reviews: The Hindu, Rediff". Each
+// name links to the outlet's own review, one per outlet, a star rating only where the feed stated
 // one. The count rides in <!--FC:reviews=n--> for lib/facts.js: a page's first reviews are news.
-function reviewsLineHtml(item) {
+function reviewLinks(item) {
   const e = escHtml;
   const rv = Array.isArray(item && item.reviews) ? item.reviews : [];
-  if (!rv.length) return "";
   const seen = new Set(), parts = [];
   for (const r of rv) {
     if (!r || !r.o || !r.u || seen.has(r.o)) continue;
     seen.add(r.o);
     parts.push(`<a href="${e(r.u)}" rel="noopener nofollow" target="_blank">${e(r.o)}</a>${typeof r.s === "number" ? ` (${e(String(r.s))}/5)` : ""}`);
   }
-  return `<!--FC:reviews=${rv.length}--><p class="fcsb-line fcsb-rv"><b>Reviews:</b> ${parts.join(" · ")}</p>\n  `;
+  return { n: rv.length, parts, mark: rv.length ? `<!--FC:reviews=${rv.length}-->` : "" };
+}
+const andList = (xs) => xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
+function reviewsTail(item) {
+  const { n, parts, mark } = reviewLinks(item);
+  return n ? `; ${n} review${n === 1 ? "" : "s"} out, in ${andList(parts)}.${mark}` : "";
+}
+function reviewsClause(item) {
+  const { n, parts, mark } = reviewLinks(item);
+  return n ? ` · <b>Reviews:</b> ${parts.join(", ")}${mark}` : "";
 }
 function audiencePhrase(votes, recent) {
   const n = Number(votes || 0);
@@ -1031,13 +1041,10 @@ function fcScoreSection(item) {
     // "not enough ratings" blocks before the answer, Oct 2026).
     // "Critics split" says the reviews are in: the line must not then add "no critics' verdict yet".
     if (!s) {
-      const nRv = (item.reviews || []).length;
-      const compact = compactScoreHtml(none.label, audiencePhrase(item.votes, isRecent(item)),
-        none.label === "Critics split" ? ", and the critics' reviews are divided."
-          : nRv ? `, and ${nRv} review${nRv === 1 ? " is" : "s are"} out.`   // the reviews line below names them
-          : isRecent(item) ? undefined : ", and no settled critics' verdict.", item._plain ? ":" : " —");
-      // The compact section has no note paragraph: the reviews line closes the section.
-      return compact.replace(/<\/section>$/, `${reviewsLineHtml(item).trim()}</section>`);
+      const rvTail = reviewsTail(item);
+      return compactScoreHtml(none.label, audiencePhrase(item.votes, isRecent(item)),
+        none.label === "Critics split" ? `, and the critics' reviews are divided${rvTail || "."}`
+          : rvTail || (isRecent(item) ? undefined : ", and no settled critics' verdict."), item._plain ? ":" : " —");
     }
     const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
     // Lean layout (LEAN_PAGE): the ring carries the rating and the count is said once — in the
@@ -1083,7 +1090,7 @@ function fcScoreSection(item) {
       ? e(cited).replace("per Wikipedia", `per <a href="${wikiUrl(article)}" rel="noopener" target="_blank">Wikipedia</a>`)
       : e(cited)) : "";
     const criPart = !cri.none || cited ? ` · <b>Critics:</b> ${e(criLabel)}${cited ? `${item._plain ? "," : " —"} ${citedHtml}` : ""}` : "";
-    const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}</p>` : "";
+    const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}${reviewsClause(item)}</p>` : "";
     // The two halves as a marker too (<!--FC:fcs=audience|critics-->): lib/facts.js read them from
     // the rows' tags, which the v3 line replaces; without them a frozen render lost the ring.
     const fcsMark = `<!--FC:fcs=${e(s && s.audience ? s.audience : "")}|${e(s && s.critics ? s.critics : "")}-->`;
@@ -1091,8 +1098,8 @@ function fcScoreSection(item) {
     <div class="fcsb-label">FilmyChill score</div>
     <div class="fcsb-verdict">${ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
     <p class="fcsb-why">${e(s ? RC.plainReason(s.reason) : none.why)}</p>
-    ${v3 ? line : `<div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>`}
-    ${reviewsLineHtml(item)}</section>
+    ${v3 ? line : `<div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>${reviewsClause(item) ? `<p class="fcsb-line fcsb-rv">${reviewsClause(item).replace(/^ · /, "")}</p>` : ""}`}
+  </section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>`;
 }
 

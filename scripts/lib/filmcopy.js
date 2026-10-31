@@ -277,7 +277,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   // Q1c: the published reviews (lib/reviews.js), named so an answer engine can send readers on.
   if (Array.isArray(item.reviews) && item.reviews.length) {
     const outlets = [...new Set(item.reviews.map((r) => r && r.o).filter(Boolean))];
-    if (outlets.length) faqs.push({ q: `Where are the reviews of ${item.title}?`, a: `Published reviews so far: ${outlets.length > 1 ? `${outlets.slice(0, -1).join(", ")} and ${outlets[outlets.length - 1]}` : outlets[0]}. The links are on this page under the FilmyChill score.` });
+    if (outlets.length) faqs.push({ q: `Where are the reviews of ${item.title}?`, a: `Published reviews so far: ${outlets.length > 1 ? `${outlets.slice(0, -1).join(", ")} and ${outlets[outlets.length - 1]}` : outlets[0]}. The links are in the FilmyChill score card on this page.` });
   }
   // Q2: where to watch
   let whereA;

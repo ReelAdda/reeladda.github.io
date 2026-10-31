@@ -10548,18 +10548,19 @@ testAsync("refreshReviews: writes the file, keeps a failed feed's last matches, 
   // A stored link the feed still carries is judged again (a matcher fix cleans the file); one the
   // feed has rotated off is kept.
   bDown = false;
-  saved.films["movie:1"].items.push({ o: "A", u: "https://example.org/ak", h: "Review: Aadarsha Kutumbam", d: "2026-10-20" }, { o: "A", u: "https://example.org/gone", h: "Jailer 2 review: rotated off the feed", d: "2026-10-17" });
+  // …and an outlet taken off the list loses its stored links (the removal path).
+  saved.films["movie:1"].items.push({ o: "A", u: "https://example.org/ak", h: "Review: Aadarsha Kutumbam", d: "2026-10-20" }, { o: "A", u: "https://example.org/gone", h: "Jailer 2 review: rotated off the feed", d: "2026-10-17" }, { o: "Gone Outlet", u: "https://gone.example/j2", h: "Jailer 2 review", d: "2026-10-18" });
   fsx.writeFileSync(file, JSON.stringify(saved));
   const r3 = await RV.refreshReviews({ films, file, fetchImpl, now: now + 2 * 864e5, feeds });
   const saved3 = JSON.parse(fsx.readFileSync(file, "utf8"));
-  assert.deepStrictEqual([r3.feedsOk, saved3.films["movie:1"].items.map((i) => i.u).sort()], [2, ["https://b.example/jailer-2-review", "https://b.example/jailer-2-review-2", "https://example.org/gone", "https://example.org/jailer-2-review", "https://example.org/jailer-2-review-2"]], "the wrong link is dropped, the rotated-off one kept");
+  assert.deepStrictEqual([r3.feedsOk, saved3.films["movie:1"].items.map((i) => i.u).sort()], [2, ["https://b.example/jailer-2-review", "https://b.example/jailer-2-review-2", "https://example.org/gone", "https://example.org/jailer-2-review", "https://example.org/jailer-2-review-2"]], "the wrong link and the removed outlet's are dropped, the rotated-off one kept");
   RV.useReviews(saved3);
   assert.strictEqual(RV.reviewsFor("movie", 1).length, 5);
   assert.deepStrictEqual(RV.starAverage(RV.reviewsFor("movie", 1), 2), { avg: 3, n: 2 }, "the two rated items, from A and B, both say 3/5");
   RV.useReviews(null);
   fsx.rmSync(dir, { recursive: true, force: true });
 });
-test("film page: a 'Reviews:' line under the score, one link per outlet, the no-score line says reviews are out, an FAQ names them; first reviews move the date", () => {
+test("film page: the review links join the score card's own sentence, one link per outlet, an FAQ names them; first reviews move the date", () => {
   const R = require("./lib/rollout.js"), RV = require("./lib/reviews.js"), Fp = require("./lib/filmpage.js"), F = require("./lib/facts.js"), S = require("./lib/sitemap.js"), IN = require("./lib/core.js").COUNTRIES[0];
   const PC = require("./lib/prosecheck.js");
   const it = { ...PC.films().unrated, tmdbId: 4242, released: hpDay(-8), votes: 0, rating: null };
@@ -10570,9 +10571,14 @@ test("film page: a 'Reviews:' line under the score, one link per outlet, the no-
     const off = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
     R.useRolloutConfig({ features: { ...PC.ALL_ON.features, reviews: { percent: 100 } } });
     const on = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
-    assert.ok(!/<p class="fcsb-line fcsb-rv">/.test(off) && /<!--FC:reviews=3--><p class="fcsb-line fcsb-rv"><b>Reviews:<\/b> <a href="https:\/\/www\.thehindu\.com\/x" rel="noopener nofollow" target="_blank">The Hindu<\/a> · <a href="https:\/\/www\.rediff\.com\/x"[^>]*>Rediff<\/a> \(3\/5\)<\/p>/.test(on), (on.match(/fcsb-rv.{0,300}/) || [""])[0]);
-    assert.ok(/Too early<\/span>: no audience ratings yet, and 3 reviews are out\./.test(on), (on.match(/fcsb-mini">.{0,200}/) || [""])[0]);
-    assert.ok(/<summary>Where are the reviews of Fresh\?<\/summary><div class="fa">Published reviews so far: The Hindu and Rediff\./.test(on), "FAQ");
+    // One sentence, not a second row (owner, 31 Oct): "...; 3 reviews out, in The Hindu and Rediff (3/5)."
+    assert.ok(!/<!--FC:reviews=/.test(off) && !/fcsb-rv"/.test(off) && /Too early<\/span>: no audience ratings yet; 3 reviews out, in <a href="https:\/\/www\.thehindu\.com\/x" rel="noopener nofollow" target="_blank">The Hindu<\/a> and <a href="https:\/\/www\.rediff\.com\/x"[^>]*>Rediff<\/a> \(3\/5\)\.<!--FC:reviews=3--> <a href="\/about\/#score">/.test(on), (on.match(/fcsb-mini">.{0,400}/) || [""])[0]);
+    assert.ok(!/fcsb-rv"/.test(on) && !/reviews are out/.test(on), "no second row, no repeated count");
+    assert.ok(/<summary>Where are the reviews of Fresh\?<\/summary><div class="fa">Published reviews so far: The Hindu and Rediff\. The links are in the FilmyChill score card on this page\./.test(on), "FAQ");
+    // With a score, the links join the Audience · Critics line.
+    const scored = Fp.buildFilmPage({ ...it, votes: 420, rating: 7.4, fcScore: { verdict: "Worth a watch", reason: "audience", audience: "positive", critics: "" } }, hpDay(0), new Set(), IN);
+    const sline = (scored.match(/<p class="fcsb-line"><b>Audience:<\/b>[^\n]*/) || [""])[0];
+    assert.ok(/ · <b>Reviews:<\/b> <a href="https:\/\/www\.thehindu\.com\/x"[^>]*>The Hindu<\/a>, <a href="https:\/\/www\.rediff\.com\/x"[^>]*>Rediff<\/a> \(3\/5\)<!--FC:reviews=3--><\/p>/.test(sline) && !/fcsb-rv"/.test(scored), sline || (scored.match(/<section class="fcsb[\s\S]{0,600}/) || [""])[0]);
     assert.strictEqual(F.keyFacts(on).reviews, "3");
     assert.notStrictEqual(S.factsFingerprint(on), S.factsFingerprint(off), "first reviews are news: the date moves once");
     const scan = require("./lib/humanprose.js");

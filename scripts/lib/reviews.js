@@ -26,7 +26,11 @@ const REVIEWS_FILE = "reviews.json";
 const REVIEW_WINDOW_DAYS = 60;    // reviews are matched to titles released this recently (or 14 days ahead)
 const REVIEW_LEAD_DAYS = 14;      // a review may run before the release date
 const FEED_TIMEOUT_MS = 15000;
-const UA = "Mozilla/5.0 (compatible; FilmyChillBot/1.0; +https://filmychill.com/about/)";
+const UA = "Mozilla/5.0 (compatible; FilmyChillBot/1.0; +https://filmychill.com/about/; filmychill.contact@gmail.com)";
+// Not read, by the outlet's own feed terms: Onmanorama ("personal use", "no commercial use without
+// express consent", onmanorama.com/rss.html, read 31 Oct 2026). Rediff says "free for individuals and
+// non-profit organisations" and forbids nothing; kept, the owner's call. An outlet that asks to be
+// removed comes off the list above; its stored links are dropped at the next build (refreshReviews).
 
 // The feeds. `langs`: the film languages an outlet's reviews are about; "any" for national press.
 // Every address answered with items on 31 Oct 2026; one that stops answering is skipped that run
@@ -48,7 +52,6 @@ const FEEDS = [
   { name: "India Today", url: "https://www.indiatoday.in/rss/1206611", langs: "any" },
   { name: "DNA", url: "https://www.dnaindia.com/feeds/entertainment.xml", langs: "any" },
   { name: "Free Press Journal", url: "https://www.freepressjournal.in/stories.rss?section=entertainment", langs: "any" },
-  { name: "Onmanorama", url: "https://www.onmanorama.com/entertainment/movie-reviews.feeds.onmrss.xml", langs: ["Malayalam", "Tamil", "Telugu", "Hindi", "English"] },
   { name: "123telugu", url: "https://www.123telugu.com/category/reviews/feed", langs: ["Telugu"] },
   { name: "Telugu360", url: "https://www.telugu360.com/feed/", langs: ["Telugu"] },
   { name: "Cinema Express", url: "https://www.cinemaexpress.com/feed", langs: ["Tamil", "Telugu", "Malayalam", "Kannada", "Hindi", "English"] },
@@ -203,10 +206,10 @@ async function refreshReviews({ films, file = REVIEWS_FILE, fetchImpl = fetch, n
   const titleOf = new Map(films.map((f) => [f.key, f]));
   // A stored link is kept once its feed has rotated it off (feeds hold 20–50 items) or its feed
   // failed today; one the feed still carries is judged again, so a matcher fix also cleans the file.
-  const live = new Set(items.map((i) => i.link));
+  const live = new Set(items.map((i) => i.link)), outlets = new Set(feeds.map((f) => f.name));
   for (const key of new Set([...Object.keys(next), ...matched.keys()])) {
     const list = matched.get(key) || [];
-    const prev = ((next[key] && next[key].items) || []).filter((x) => !live.has(x.u) || list.some((r) => r.u === x.u));
+    const prev = ((next[key] && next[key].items) || []).filter((x) => outlets.has(x.o) && (!live.has(x.u) || list.some((r) => r.u === x.u)));
     const merged = [...prev];
     for (const r of list) if (!merged.some((x) => x.u === r.u)) merged.push(r);
     const f = titleOf.get(key);
