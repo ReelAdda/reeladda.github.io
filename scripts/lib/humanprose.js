@@ -191,6 +191,12 @@ function plainKeyOf(rel, html) {
   if (m) return m[1];
   return (/<link rel="canonical" href="([^"]+)"/.exec(String(html || "")) || [])[1] || "";
 }
+// The rollout key from a page alone (its canonical link), for passes that see only the HTML.
+function plainKeyOfHtml(html) {
+  const c = (/<link rel="canonical" href="([^"]+)"/.exec(String(html || "")) || [])[1] || "";
+  const m = /\/movie\/([^/]+)\.html$/.exec(c);
+  return m ? m[1] : c;
+}
 function auditProse(files, { root = ".", included = plainOn, max = 8 } = {}) {
   const fs = require("fs"), path = require("path");
   const res = { pages: 0, switched: 0, withSigns: 0, hits: 0, shapes: new Map() };
@@ -232,4 +238,4 @@ function scanProse(text, { allow = [] } = {}) {
   return hits;
 }
 
-module.exports = { HUMAN_PROSE, HUMAN_RULES, RULES, applyHumanWording, auditProse, humanWording, machineWording, plainKeyOf, plainOn, scanProse, siteProse };
+module.exports = { HUMAN_PROSE, HUMAN_RULES, RULES, applyHumanWording, auditProse, humanWording, machineWording, plainKeyOf, plainKeyOfHtml, plainOn, scanProse, siteProse };

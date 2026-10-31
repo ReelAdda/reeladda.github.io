@@ -568,6 +568,7 @@ function ogImageTag(src) {
 module.exports = {
   FOOTER_LINKS,
   NO_HOSTING_NOTICE,
+  NO_HOSTING_PLAIN,
   analyticsTag,
   canonProvider,
   whereLabel,

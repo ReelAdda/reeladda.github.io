@@ -45,8 +45,10 @@ function films() {
   };
 }
 
-// What a page goes through after its writers, in the build's order (scripts/update.js).
-const finish = (html) => HP.humanWording(H.leanTrim(H.honestWording(html)));
+// What a page goes through after its writers, in the build's order (scripts/update.js): the legal
+// footer pass (lib/stylesheets.js ensureFooterLegal, which once re-added the dashed notice beside
+// the plain one, 30 Oct 2026), honest wording, lean trim, plain wording.
+const finish = (html) => HP.humanWording(H.leanTrim(H.honestWording(require("./stylesheets.js").ensureFooterLegal(html))));
 
 // Every page shape the site draws, rendered with every rollout on. [name, html] pairs.
 function renderedPages() {
@@ -93,12 +95,13 @@ function runCheck({ root = path.join(__dirname, "..", ".."), extra = [] } = {}) 
   const scan = (name, html) => { pages++; for (const h of HP.scanProse(HP.siteProse(html))) hits.push({ page: name, ...h }); };
   try {
     R.useRolloutConfig(ALL_ON);
-    for (const [name, html] of renderedPages()) scan(name, html);
+    for (const [name, html] of renderedPages()) scan(name, finish(html));
+    // The hand-written pages as the build publishes them: its footer pass runs over them too.
+    for (const rel of STATIC_PAGES) {
+      let html; try { html = fs.readFileSync(path.join(root, rel), "utf8"); } catch { continue; }
+      scan(rel, finish(html));
+    }
   } finally { R.useRolloutConfig(prev); }
-  for (const rel of STATIC_PAGES) {
-    let html; try { html = fs.readFileSync(path.join(root, rel), "utf8"); } catch { continue; }
-    scan(rel, html);
-  }
   const walk = (p) => {
     let st; try { st = fs.statSync(p); } catch { return; }
     if (st.isDirectory()) { for (const e of fs.readdirSync(p)) walk(path.join(p, e)); }

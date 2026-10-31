@@ -29,7 +29,7 @@ const fs = require("fs");
 const path = require("path");
 const { COUNTRIES, escHtml, fmtDateFull, ICON_LINKS, ldJson, localeFor, videoUploadDate } = require("./core.js");
 const { audiencePhrase, compactScoreHtml, FCSB_CSS, fcdataWindowPhrase, orderAnswer } = require("./filmpage.js");
-const { FOOTER_LINKS, NO_HOSTING_NOTICE, ytIdOf } = require("./pagekit.js");
+const { FOOTER_LINKS, NO_HOSTING_NOTICE, NO_HOSTING_PLAIN, ytIdOf } = require("./pagekit.js");
 const { titleWithCountry } = require("./rules.js");
 const { fixNotYetTitle, settleTimeWords } = require("./archive.js");
 
@@ -71,14 +71,20 @@ function ensureFooterLegal(html) {
   const foot = m[1];
   // A homepage's credit line is footerAttribution(), re-rendered every run between these markers.
   if (foot.includes("<!--SSR:ATTRIBUTION-->")) return html;
-  if (foot.includes(NO_HOSTING_NOTICE) && foot.includes('href="/dmca/"') && foot.includes('href="/privacy/"')) return html;
+  // The notice in the wording the page's rollout state wants (lib/humanprose.js): either form
+  // counts as present. Until 31 Oct 2026 only the dashed form counted, so this pass added it
+  // beside the plain one on the About and weekly pages; a page with both keeps the wanted one.
+  const HP = require("./humanprose.js");
+  const want = HP.plainOn(HP.plainKeyOfHtml(html)) ? NO_HOSTING_PLAIN : NO_HOSTING_NOTICE;
+  const other = want === NO_HOSTING_PLAIN ? NO_HOSTING_NOTICE : NO_HOSTING_PLAIN;
+  if (foot.includes(want) && !foot.includes(other) && foot.includes('href="/dmca/"') && foot.includes('href="/privacy/"')) return html;
   const at = foot.indexOf("© 2026 FilmyChill");
   if (at < 0) return html;
   let before = foot.slice(0, at);
-  for (const piece of [`${NO_HOSTING_NOTICE}<br>`, '<a href="/privacy/">Privacy</a> · ', '<a href="/dmca/">Copyright</a> · ']) before = before.replace(piece, "");
+  for (const piece of [`${NO_HOSTING_NOTICE}<br>`, `${NO_HOSTING_PLAIN}<br>`, '<a href="/privacy/">Privacy</a> · ', '<a href="/dmca/">Copyright</a> · ']) before = before.split(piece).join("");
   before = before.trimEnd();
   const sep = before && !before.endsWith("<br>") ? "<br>" : "";
-  return html.replace(m[0], `<footer>${before}${sep}${NO_HOSTING_NOTICE}<br>${FOOTER_LINKS}${foot.slice(at)}</footer>`);
+  return html.replace(m[0], `<footer>${before}${sep}${want}<br>${FOOTER_LINKS}${foot.slice(at)}</footer>`);
 }
 
 // Pure: declare the browser icons (core.js ICON_LINKS) on a page that has none. Only the

@@ -4753,12 +4753,12 @@ test("editor's note: nothing trustworthy -> null; a pick in cinemas gets a strea
   const n = U.buildEditorNote(pickInCinemas, { code: "in" }, 2);
   assert.ok(/^Top pick: Runner, in cinemas\. To stream: (Slow Horses on Apple TV|American Horror Story on JioHotstar)\./.test(n), n);
 });
-test("ssrEditorNote: escaped, and labelled for what it is: generated picks are not an editor's note", () => {
+test("ssrEditorNote: escaped, and labelled \"Editor's note\" (the owner's call, 31 Oct 2026)", () => {
   const d = { ..._noteData(), pick: "A & B" };
   d.ott[0] = { ...d.ott[0], title: "A & B" };
   const html = U.ssrEditorNote(d, { code: "us" });
   assert.ok(html.includes('class="ednote"') && html.includes("A &amp; B"), html);
-  assert.ok(/<b>This week's picks · <\/b>Top pick: A &amp; B on Apple TV\./.test(html) && !/Editor's note/.test(html), html);
+  assert.ok(/<b>Editor's note · <\/b>Top pick: A &amp; B on Apple TV\./.test(html), html);
   assert.strictEqual(U.ssrEditorNote({ theatres: [], ott: [] }, { code: "us" }), "");
 });
 
@@ -10242,16 +10242,17 @@ test("platform lists: a claim lists a title only on platforms its own page shows
 });
 test("language pages: a film that hasn't opened is under 'Coming soon', and the back catalogue names each title's platform or status", () => {
   const th = (title, released) => ({ title, slug: title.toLowerCase().replace(/\W+/g, "-"), tmdbId: title.length, language: "Telugu", released, platform: "Theatres", genre: "Family" });
-  const data = { generatedAt: "2026-10-29T06:00:00Z", theatres: [], ott: [], comingSoon: [], langPools: { Telugu: { theatres: [th("AK47", "2026-10-30"), th("Open Now", "2026-10-24")], ott: [] } } };
+  const data = { generatedAt: "2026-10-29T06:00:00Z", theatres: [], ott: [], comingSoon: [], langPools: { Telugu: { theatres: [th("AK47", inDays(1)), th("Open Now", inDays(-6))], ott: [] } } };
   const archive = [
     { slug: "on-netflix", title: "On Netflix", language: "Telugu", released: "2026-09-01", providers: ["Netflix"], where: "streaming", genre: "Drama" },
     { slug: "waiting", title: "Waiting", language: "Telugu", released: "2026-09-10", providers: [], where: "theatrical", whereStatus: "Opened in cinemas 10 Sept — not streaming yet", genre: "Drama" },
-    { slug: "ak47", title: "AK47", language: "Telugu", released: "2026-10-30", providers: [], where: "upcoming", whereStatus: "In cinemas from 30 Oct 2026", genre: "Family" },
+    { slug: "ak47", title: "AK47", language: "Telugu", released: inDays(1), providers: [], where: "upcoming", whereStatus: "In cinemas from tomorrow", genre: "Family" },
   ];
   const html = U.buildLanguagePage(data, "Telugu", "telugu", archive);
   const sec = (h) => (html.split(`<h2>${h} `)[1] || "").split("</section>")[0];
   assert.ok(!/AK47/.test(sec("In theatres")) && /AK47/.test(sec("Coming soon")), "not open yet: Coming soon, not In theatres");
-  assert.ok(/<div class="rm">In theatres from 30 Oct · Family<\/div>/.test(sec("Coming soon")), "its card says where it opens, the date once");
+  // Opens tomorrow: the dates are relative so the test never expires (it did on 31 Oct 2026).
+  assert.ok(/<div class="rm">In theatres from \d{1,2} [A-Z][a-z]{2,3}\.? · Family<\/div>/.test(sec("Coming soon")), "its card says where it opens, the date once: " + sec("Coming soon").slice(0, 300));
   assert.ok(/Open Now/.test(sec("In theatres")));
   assert.ok(/<h3>On Netflix<\/h3>[\s\S]*?<div class="rm">Netflix · Drama/.test(html), "a streaming title names its platform");
   assert.ok(/<h3>Waiting<\/h3>[\s\S]*?<div class="rm">Not on OTT yet · Drama/.test(html), "one that isn't says so");
@@ -10350,6 +10351,21 @@ test("plain wording moves no fact: same fingerprint, and the facts read back are
       // reader must find the same facts in the plain sentences as in the sweeps' ones.
       assert.deepStrictEqual(F.extractFacts(on, it.slug), F.extractFacts(HP.machineWording(on), it.slug), k + ": the same facts read back from either wording");
     }
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
+});
+test("the legal footer pass keeps one no-hosting notice, in the wording the page's rollout wants", () => {
+  const R = require("./lib/rollout.js"), SS = require("./lib/stylesheets.js"), PK = require("./lib/pagekit.js");
+  const page = (notices) => `<html><head><link rel="canonical" href="https://filmychill.com/about/"></head><body><footer>Film data.<br>${notices.map((n) => `${n}<br>`).join("")}<a href="/privacy/">Privacy</a> · <a href="/dmca/">Copyright</a> · © 2026 FilmyChill</footer></body></html>`;
+  const count = (h, n) => h.split(n).length - 1;
+  try {
+    R.useRolloutConfig(PC.ALL_ON);
+    const plain = page([PK.NO_HOSTING_PLAIN]);
+    assert.strictEqual(SS.ensureFooterLegal(plain), plain, "the plain notice counts as present");
+    const both = SS.ensureFooterLegal(page([PK.NO_HOSTING_PLAIN, PK.NO_HOSTING_NOTICE]));
+    assert.ok(count(both, PK.NO_HOSTING_PLAIN) === 1 && count(both, PK.NO_HOSTING_NOTICE) === 0, both);
+    R.useRolloutConfig(ROLLOUT_OFF);
+    const old = page([PK.NO_HOSTING_NOTICE]);
+    assert.strictEqual(SS.ensureFooterLegal(old), old, "outside the rollout the dashed notice stays");
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }
 });
 test("the last pass and its inverse: exact, idempotent, and only on pages drawn from their facts", () => {

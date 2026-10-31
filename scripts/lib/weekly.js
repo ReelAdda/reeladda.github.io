@@ -219,17 +219,16 @@ function buildEditorNote(data, cfg, seed = null, { short = false } = {}) {
 }
 
 function ssrEditorNote(data, cfg) {
-  let note = null, own = false;
+  let note = null;
   if (cfg && cfg.code === "in" && fs.existsSync("editor-note.txt")) {
     const line = fs.readFileSync("editor-note.txt", "utf8").trim();
-    if (line) { note = line; own = true; } // the human's line always wins
+    if (line) note = line; // the human's line always wins
   }
   if (!note) note = buildEditorNote(data, cfg, null, { short: true });
   if (!note) return "";
-  // One plain paragraph (Oct 2026 redesign); the date already sits in the "Updated" pill. Signed
-  // "Editor's note" only when a person wrote it (editor-note.txt); the generated line is labelled
-  // for what it is (30 Oct 2026).
-  return `<p class="ednote"><b>${own ? "Editor's note" : "This week's picks"} · </b>${escHtml(note)}</p>`;
+  // One plain paragraph (Oct 2026 redesign); the date already sits in the "Updated" pill. Always
+  // labelled "Editor's note": the owner's call (31 Oct 2026), after a day as "This week's picks".
+  return `<p class="ednote"><b>Editor's note · </b>${escHtml(note)}</p>`;
 }
 
 // RELEASE CALENDAR (25 Oct 2026). Every film page released in the last RECENT_DAYS or still to
