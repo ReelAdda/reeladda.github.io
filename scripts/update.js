@@ -2587,7 +2587,20 @@ async function main() {
         }
       }
       const rv = await RV.refreshReviews({ films });
-      console.log(`Reviews: ${rv.feedsOk} of ${rv.feedsOk + rv.feedsFailed.length} feeds read, ${rv.reviewItems} review headlines, ${rv.filmsMatched} title(s) matched this run, ${rv.filmsStored} held with ${rv.links} links${rv.feedsFailed.length ? ` (failed: ${rv.feedsFailed.join("; ")})` : ""}`);
+      // The cards' line and the detail sheet's links come from the data files: item.rv =
+      // [{ o, u }], only where the score card has no critics' reading (lib/reviews.js wantsReviews).
+      const { inRollout } = require("./lib/rollout.js"), RECEPTION_FEATURE = require("./lib/reception.js").RECEPTION_FEATURE;
+      let withRv = 0;
+      for (const cfg of builtCountries) {
+        const d = dataByCode[cfg.code] || {};
+        for (const it of [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || []), ...Object.values(d.langPools || {}).flat()]) {
+          if (!it || !it.tmdbId || !inRollout("reviews", it.slug)) continue;
+          const cited = !!it.reception && inRollout(RECEPTION_FEATURE, it.slug);
+          const list = RV.wantsReviews(it, cited) ? RV.outlets(RV.reviewsFor(it.kind, it.tmdbId)) : [];
+          if (list.length) { it.rv = list; withRv++; } else delete it.rv;
+        }
+      }
+      console.log(`Reviews: ${withRv} card(s) across editions carry outlet names; ${rv.feedsOk} of ${rv.feedsOk + rv.feedsFailed.length} feeds read, ${rv.reviewItems} review headlines, ${rv.filmsMatched} title(s) matched this run, ${rv.filmsStored} held with ${rv.links} links${rv.feedsFailed.length ? ` (failed: ${rv.feedsFailed.join("; ")})` : ""}`);
       if (rv.feedsFailed.length >= Math.ceil(RV.FEEDS.length / 2)) healthNote(`reviews: ${rv.feedsFailed.length} of ${RV.FEEDS.length} feeds failed: ${rv.feedsFailed.slice(0, 3).join("; ")}`);
     } catch (e) { stageFailed("reviews", e, { optional: true }); }
     // Now write every country's data file (India also writes the legacy data.json).

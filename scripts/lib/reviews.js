@@ -246,4 +246,28 @@ function starAverage(items, min = 3) {
   return { avg: Math.round((s.reduce((a, b) => a + b, 0) / s.length) * 10) / 10, n: s.length };
 }
 
-module.exports = { FEEDS, REVIEWS_FILE, REVIEW_WINDOW_DAYS, fetchFeed, headlineMatches, isReview, loadReviews, matchReviews, parseFeed, parseStars, refreshReviews, reviewsFor, starAverage, useReviews };
+// Where the links belong (owner, 31 Oct 2026): only where the score card has no critics' reading
+// of its own — no FilmyChill score yet, or a score from audience ratings alone with nothing cited
+// from Wikipedia. A page with a verdict and the critics' figures already answers the question.
+function wantsReviews(item, citedCritics = false) {
+  const s = item && item.fcScore;
+  return !s || (!s.critics && !citedCritics);
+}
+// One entry per outlet, oldest first: [{ o, u }], what the data files carry as item.rv.
+function outlets(items) {
+  const seen = new Set(), out = [];
+  for (const r of items || []) { if (r && r.o && r.u && !seen.has(r.o)) { seen.add(r.o); out.push({ o: r.o, u: r.u }); } }
+  return out;
+}
+// The card's line, names only (a card is one link, so the outlets' links wait for the detail
+// sheet or the film page): "Read the reviews: Indian Express, The Hindu →"; three outlets or
+// more: "Indian Express, The Hindu and 2 more". Twin: reviewsCardText in js/app.js.
+function reviewsCardText(rv) {
+  const names = outlets(rv).map((x) => x.o);
+  if (!names.length) return "";
+  const shown = names.slice(0, 2).join(", ");
+  const more = names.length - 2;
+  return `Read the reviews: ${shown}${more > 0 ? ` and ${more} more` : ""} →`;
+}
+
+module.exports = { FEEDS, REVIEWS_FILE, REVIEW_WINDOW_DAYS, fetchFeed, headlineMatches, isReview, loadReviews, matchReviews, outlets, parseFeed, parseStars, refreshReviews, reviewsCardText, reviewsFor, starAverage, useReviews, wantsReviews };

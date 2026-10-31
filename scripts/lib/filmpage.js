@@ -1139,10 +1139,9 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // from audience ratings alone with nothing cited from Wikipedia (owner, 31 Oct 2026: a page that
   // carries a verdict with the critics' figures already answers the question).
   if (item && inRollout("reviews", item.slug)) {
-    const s = item.fcScore;
+    const RVW = require("./reviews.js");
     const citedCritics = !!item.reception && inRollout(require("./reception.js").RECEPTION_FEATURE, item.slug);
-    const wanted = !s || (!s.critics && !citedCritics);
-    const rv = wanted ? require("./reviews.js").reviewsFor(item.kind, item.tmdbId) : [];
+    const rv = RVW.wantsReviews(item, citedCritics) ? RVW.reviewsFor(item.kind, item.tmdbId) : [];
     if (rv.length) item = { ...item, reviews: rv };
   }
   const e = escHtml;

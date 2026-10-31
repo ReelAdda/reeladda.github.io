@@ -7947,7 +7947,7 @@ test("homepage template mirrors the buzz line and the split-critics wording", ()
   const m = /function wikiViewsLabel\(n\) \{\s*return Number\.isFinite\(n\) && n >= (\d+) \?/.exec(src);
   assert.ok(m && Number(m[1]) === EDT.WIKI_BUZZ_MIN, "the same 70,000 bar as the server");
   assert.ok(/const buzz = wikiViewsLabel\(item\.wikiWeeklyViews\) \|\| \(tv \?/.test(src), "cardScore: Wikipedia views before trailer views");
-  assert.ok(/if \(s\) return '';\s*\n[^\n]*\n\s*\[wikiViewsLabel\(item\.wikiWeeklyViews\), trailerViewsLabel\(item\.trailerViews\)\]/.test(src), "detail view signals: buzz only for an unscored title; a scored one has the line under the card");
+  assert.ok(/if \(s\) return links;\s*\n[^\n]*\n\s*\[wikiViewsLabel\(item\.wikiWeeklyViews\), trailerViewsLabel\(item\.trailerViews\)\]/.test(src), "detail view signals: buzz only for an unscored title (the review links for either); a scored one has the line under the card");
   assert.ok(/if \(item\.criticsTone === 'mixed'\) return \{ label: 'Critics split', why: recent \? 'Critics are split; audience ratings are still coming in\.'/.test(src), "noScoreText mirror");
   // (The server-side twin, fcScorePanel in lib/weekly.js, was never called and was removed in
   // the Oct 2026 Power-of-Ten audit; the homepage's own panel is the only one.)
@@ -10589,6 +10589,28 @@ test("film page: the review links join the score card's own sentence, one link p
   } finally { RV.useReviews(null); R.useRolloutConfig(ROLLOUT_OFF); }
 });
 
+test("cards: 'Read the reviews: A, B →' under the pill where the card has no critics' reading; data files carry item.rv; the homepage twin and its sheet links (31 Oct 2026)", () => {
+  const RV = require("./lib/reviews.js"), W = require("./lib/weekly.js");
+  // The rule, shared by the film page, the data files and the cards.
+  assert.deepStrictEqual([RV.wantsReviews({}), RV.wantsReviews({ fcScore: { critics: "" } }, false), RV.wantsReviews({ fcScore: { critics: "" } }, true), RV.wantsReviews({ fcScore: { critics: "positive" } }, false)], [true, true, false, false]);
+  const rv = [{ o: "Indian Express", u: "https://indianexpress.com/x", h: "x", d: "2026-10-23" }, { o: "The Hindu", u: "https://www.thehindu.com/y", h: "y", d: "2026-10-23" }, { o: "The Hindu", u: "https://www.thehindu.com/y2", h: "y2", d: "2026-10-24" }];
+  assert.deepStrictEqual(RV.outlets(rv), [{ o: "Indian Express", u: "https://indianexpress.com/x" }, { o: "The Hindu", u: "https://www.thehindu.com/y" }], "one entry per outlet, first link");
+  assert.strictEqual(RV.reviewsCardText(rv), "Read the reviews: Indian Express, The Hindu →");
+  assert.strictEqual(RV.reviewsCardText([...rv, { o: "Scroll", u: "https://scroll.in/z" }, { o: "NDTV", u: "https://ndtv.com/n" }]), "Read the reviews: Indian Express, The Hindu and 2 more →");
+  assert.strictEqual(RV.reviewsCardText([]), "");
+  // The server card: the line after the pill and its reason, names only, no link inside the card's link.
+  const it = { title: "Udta Teer", slug: "udta-teer", language: "Hindi", genre: "Comedy", runtime: 137, kind: "movie", votes: 4, criticsCount: 9, released: "2026-10-23", rv: RV.outlets(rv) };
+  const card = W.ssrCard(it, 3, "in");
+  assert.ok(/<\/span>(?:<div class="sreason">[^<]*<\/div>)?<div class="sreason srv">Read the reviews: Indian Express, The Hindu →<\/div>/.test(card), card.match(/vpill[\s\S]{0,200}/)[0]);
+  assert.strictEqual((card.match(/<a /g) || []).length, 1, "the card is still one link");
+  assert.ok(!/srv/.test(W.ssrCard({ ...it, rv: undefined }, 3, "in")), "no outlets, no line");
+  // The homepage twin (js/app.js) and the detail sheet's links; the data step sets item.rv.
+  const app = homeSource(), upd = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(app.includes("return 'Read the reviews: ' + names.slice(0, 2).join(', ') + (more > 0 ? ' and ' + more + ' more' : '') + ' →';"), "twin wording");
+  assert.ok(app.includes('<div class="sreason srv">${esc(text)}</div>') && app.includes('<div class="fcs-sig fcs-rv"><b>Reviews:</b>') && /if \(s\) return links;/.test(app), "card line and sheet links");
+  assert.ok(/RV\.wantsReviews\(it, cited\) \? RV\.outlets\(RV\.reviewsFor\(it\.kind, it\.tmdbId\)\) : \[\]/.test(upd) && /it\.rv = list/.test(upd), "update.js sets item.rv by the same rule");
+  assert.ok(require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8").includes(".sreason.srv { color: #4038C7;"), "homepage CSS (the hubs' template too): the line in the link colour");
+});
 test("near-copy check: the v3 header is stripped like the old one (30 Oct 2026)", () => {
   const G = require("./lib/googlehide.js");
   const t = G.mainText('<body><div class="top v3"><a class="mark" href="/">FILMY<span>CHILL</span></a><span class="cpill">Singapore</span></div><h1>X</h1></body>');

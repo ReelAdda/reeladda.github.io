@@ -153,12 +153,16 @@ function noScoreText(item) {
 }
 function fcSignals(item) {
   const s = item.fcScore, bits = [];
+  // The published reviews, one link per outlet (item.rv, set only where the card has no critics'
+  // reading): what the card's "Read the reviews" line promised.
+  const rv = (item.rv || []).filter((r) => r && r.o && /^https?:\/\//.test(r.u || ''));
+  const links = rv.length ? `<div class="fcs-sig fcs-rv"><b>Reviews:</b> ${rv.map((r) => `<a href="${esc(r.u)}" rel="noopener nofollow" target="_blank">${esc(r.o)}</a>`).join(' · ')}</div>` : '';
   // With a score, the line under the card (scoreLineHtml) says the audience and critics parts;
   // this only adds the buzz figures for a title that has no score yet.
-  if (s) return '';
+  if (s) return links;
   if (item.rating != null && item.votes) bits.push('Audience ★ ' + Number(item.rating).toFixed(1) + ' (' + Number(item.votes).toLocaleString() + ' ratings)');
   [wikiViewsLabel(item.wikiWeeklyViews), trailerViewsLabel(item.trailerViews)].forEach(b => { if (b) bits.push(b); });
-  return bits.length ? `<div class="fcs-sig">${esc(bits.join(' · '))}</div>` : '';
+  return (bits.length ? `<div class="fcs-sig">${esc(bits.join(' · '))}</div>` : '') + links;
 }
 // The score's two halves as one line under the card, with the critics' figures the build read
 // from Wikipedia (twin of receptionLine / toneFromFigure in scripts/lib/reception.js: at most two
@@ -263,7 +267,21 @@ function heroDialInner(item) {
   const v = r.toFixed(1);
   return `<div class="dial dial-hero" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div><div class="hero-dial-label">Audience</div>`;
 }
+// Twin of reviewsCardText in scripts/lib/reviews.js: the outlets whose reviews are out, for a
+// title with no critics' reading (item.rv in data.json). Names only on the card; the detail
+// sheet (fcSignals) has the links.
+function reviewsCardText(rv) {
+  const names = []; const seen = {};
+  (rv || []).forEach((r) => { if (r && r.o && r.u && !seen[r.o]) { seen[r.o] = 1; names.push(r.o); } });
+  if (!names.length) return '';
+  const more = names.length - 2;
+  return 'Read the reviews: ' + names.slice(0, 2).join(', ') + (more > 0 ? ' and ' + more + ' more' : '') + ' →';
+}
 function cardScore(item) {
+  const text = reviewsCardText(item.rv);
+  return cardScoreBase(item) + (text ? `<div class="sreason srv">${esc(text)}</div>` : '');
+}
+function cardScoreBase(item) {
   const s = item.fcScore;
   const reason = (text) => (text ? `<div class="sreason">${text}</div>` : '');
   if (s) {

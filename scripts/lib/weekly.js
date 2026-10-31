@@ -54,7 +54,15 @@ function ssrCardChips(item) {
 }
 // The verdict as a pill with its one-line reason under it (Oct 2026 redesign: the audience
 // rating moved out of this line into the card's dial, ratingDial in lib/meter.js).
+// Under the pill and its reason, the published reviews' outlets for a title with no critics'
+// reading (item.rv from the data file; lib/reviews.js): "Read the reviews: Indian Express, The
+// Hindu →", in the link colour. Names only: the card is one link, and the film page (or the
+// homepage's detail sheet) carries the outlets' own links. Twin: cardScore in js/app.js.
 function ssrCardScore(item, code) {
+  const text = require("./reviews.js").reviewsCardText(item.rv);
+  return ssrCardScoreBase(item, code) + (text ? `<div class="sreason srv">${escHtml(text)}</div>` : "");
+}
+function ssrCardScoreBase(item, code) {
   const e = escHtml, s = item.fcScore;
   const reason = (text) => (text ? `<div class="sreason">${text}</div>` : "");
   if (s) {
