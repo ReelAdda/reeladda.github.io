@@ -2571,6 +2571,25 @@ async function main() {
       dataByCode[cfg.code].trackedFilms = Object.keys(priorManifest[cfg.code] || {}).length;
     }
 
+    // Published reviews from the outlets' feeds (lib/reviews.js; rollout "reviews"): matched to
+    // every title released in the last 60 days across all editions, then read by the page builders.
+    try {
+      const RV = require("./lib/reviews.js");
+      const seenKeys = new Set(), films = [];
+      for (const cfg of builtCountries) {
+        const d = dataByCode[cfg.code] || {};
+        for (const it of [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || []), ...Object.values(d.langPools || {}).flat()]) {
+          if (!it || !it.tmdbId) continue;
+          const key = `${it.kind === "tv" ? "tv" : "movie"}:${it.tmdbId}`;
+          if (seenKeys.has(key)) continue;
+          seenKeys.add(key);
+          films.push({ key, title: it.title, language: it.language || "", released: String(it.released || it.freshDate || "").slice(0, 10) });
+        }
+      }
+      const rv = await RV.refreshReviews({ films });
+      console.log(`Reviews: ${rv.feedsOk} of ${rv.feedsOk + rv.feedsFailed.length} feeds read, ${rv.reviewItems} review headlines, ${rv.filmsMatched} title(s) matched this run, ${rv.filmsStored} held with ${rv.links} links${rv.feedsFailed.length ? ` (failed: ${rv.feedsFailed.join("; ")})` : ""}`);
+      if (rv.feedsFailed.length >= Math.ceil(RV.FEEDS.length / 2)) healthNote(`reviews: ${rv.feedsFailed.length} of ${RV.FEEDS.length} feeds failed: ${rv.feedsFailed.slice(0, 3).join("; ")}`);
+    } catch (e) { stageFailed("reviews", e, { optional: true }); }
     // Now write every country's data file (India also writes the legacy data.json).
     for (const cfg of builtCountries) {
       // soonExtra only feeds pages written in this run (film pages, language pages); the homepage

@@ -274,6 +274,11 @@ function buildFaqs(item, countryName = "India", cfg = null) {
       faqs.push({ q: `What do critics say about ${item.title}?`, a: `${label ? label.charAt(0).toUpperCase() + label.slice(1) + (plain ? ": " : " — ") : ""}${cited}.` });
     }
   }
+  // Q1c: the published reviews (lib/reviews.js), named so an answer engine can send readers on.
+  if (Array.isArray(item.reviews) && item.reviews.length) {
+    const outlets = [...new Set(item.reviews.map((r) => r && r.o).filter(Boolean))];
+    if (outlets.length) faqs.push({ q: `Where are the reviews of ${item.title}?`, a: `Published reviews so far: ${outlets.length > 1 ? `${outlets.slice(0, -1).join(", ")} and ${outlets[outlets.length - 1]}` : outlets[0]}. The links are on this page under the FilmyChill score.` });
+  }
   // Q2: where to watch
   let whereA;
   // The release-day settle pass (lib/pagekit.js) matches both forms of this answer.

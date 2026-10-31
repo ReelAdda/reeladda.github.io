@@ -274,6 +274,8 @@ function keyFacts(html, { legacy = false } = {}) {
     // The critics' figures the score card cites (lib/reception.js): values and counts are facts;
     // the read date is not. Absent on every page without them.
     reception: (() => { const R = require("./reception.js"); const k = R.receptionKey(R.readReceptionMark(html)); return k || undefined; })(),
+    // Published reviews listed (lib/reviews.js): the count, so a page's first reviews move its date.
+    reviews: (/<!--FC:reviews=(\d+)-->/.exec(html) || [])[1] || undefined,
   };
 }
 // "108 min", "1h 48m", "1h 48m — long" and "~23 min per episode" as minutes, so a format

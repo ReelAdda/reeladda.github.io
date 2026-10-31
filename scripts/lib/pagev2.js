@@ -236,6 +236,7 @@ const V3_CSS = [
   "  .wlbl { display:inline-flex; align-items:center; font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--mute); padding:0 4px; }",
   "  .wnote.arrived b { color:var(--ink); }",
   "  .fcsb-line { font-size:14px; color:var(--mute); line-height:1.6; margin:12px 0 0; padding-top:12px; border-top:1px solid var(--line); } .fcsb-line b { color:var(--ink); }",
+  "  .fcsb-rv { margin:10px 0 0; padding:0; border-top:0; } .fcsb-rv a { color:var(--indigo); font-weight:600; text-decoration:none; } .fcsb-rv a:hover { text-decoration:underline; }",
   "  .dir { margin:10px 0 0; font-size:15px; } .dir b { font-weight:800; }",
   // The vote widget follows the theme (it was a white card with dark-mode text, unreadable in dark).
   "  .fcvote { background:var(--card); border-color:var(--line); color:var(--ink); } .fcvote-q { color:var(--ink); }",

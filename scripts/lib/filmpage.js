@@ -918,6 +918,21 @@ function compactScoreHtml(label, audience, tail = ", no critics' verdict yet.", 
 }
 // Time words ("so far", "yet") only for a film that's actually new; an older film gets the plain
 // count ("only 12 audience ratings"), never a hint that more are on the way (Oct 2026).
+// Published reviews (lib/reviews.js): "Reviews: The Hindu · Rediff · 123telugu (2.75/5)", each
+// name a link to the outlet's own review, one per outlet, a star rating only where the feed stated
+// one. The count rides in <!--FC:reviews=n--> for lib/facts.js: a page's first reviews are news.
+function reviewsLineHtml(item) {
+  const e = escHtml;
+  const rv = Array.isArray(item && item.reviews) ? item.reviews : [];
+  if (!rv.length) return "";
+  const seen = new Set(), parts = [];
+  for (const r of rv) {
+    if (!r || !r.o || !r.u || seen.has(r.o)) continue;
+    seen.add(r.o);
+    parts.push(`<a href="${e(r.u)}" rel="noopener nofollow" target="_blank">${e(r.o)}</a>${typeof r.s === "number" ? ` (${e(String(r.s))}/5)` : ""}`);
+  }
+  return `<!--FC:reviews=${rv.length}--><p class="fcsb-line fcsb-rv"><b>Reviews:</b> ${parts.join(" · ")}</p>\n  `;
+}
 function audiencePhrase(votes, recent) {
   const n = Number(votes || 0);
   if (n > 0) return recent
@@ -1015,9 +1030,15 @@ function fcScoreSection(item) {
     // No score yet: one line instead of a card of empty rows (832 pages led with four
     // "not enough ratings" blocks before the answer, Oct 2026).
     // "Critics split" says the reviews are in: the line must not then add "no critics' verdict yet".
-    if (!s) return compactScoreHtml(none.label, audiencePhrase(item.votes, isRecent(item)),
-      none.label === "Critics split" ? ", and the critics' reviews are divided."
-        : isRecent(item) ? undefined : ", and no settled critics' verdict.", item._plain ? ":" : " —");
+    if (!s) {
+      const nRv = (item.reviews || []).length;
+      const compact = compactScoreHtml(none.label, audiencePhrase(item.votes, isRecent(item)),
+        none.label === "Critics split" ? ", and the critics' reviews are divided."
+          : nRv ? `, and ${nRv} review${nRv === 1 ? " is" : "s are"} out.`   // the reviews line below names them
+          : isRecent(item) ? undefined : ", and no settled critics' verdict.", item._plain ? ":" : " —");
+      // The compact section has no note paragraph: the reviews line closes the section.
+      return compact.replace(/<\/section>$/, `${reviewsLineHtml(item).trim()}</section>`);
+    }
     const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
     // Lean layout (LEAN_PAGE): the ring carries the rating and the count is said once — in the
     // "Based on N ratings" chip on an early read, else here.
@@ -1071,7 +1092,7 @@ function fcScoreSection(item) {
     <div class="fcsb-verdict">${ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
     <p class="fcsb-why">${e(s ? RC.plainReason(s.reason) : none.why)}</p>
     ${v3 ? line : `<div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>`}
-  </section>
+    ${reviewsLineHtml(item)}</section>
   <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>`;
 }
 
@@ -1105,6 +1126,12 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // spaced em dashes, canned fit lines or rotating flourishes. By slug, so a stage rewrites a
   // share of the film pages and never all of them in one build.
   if (item && plainOn(item.slug)) item = { ...item, _plain: true };
+  // Published reviews from the outlets' feeds (lib/reviews.js; rollout "reviews", 31 Oct 2026):
+  // the page names the outlets and links out. Overlaid at render so frozen pages get them too.
+  if (item && inRollout("reviews", item.slug)) {
+    const rv = require("./reviews.js").reviewsFor(item.kind, item.tmdbId);
+    if (rv.length) item = { ...item, reviews: rv };
+  }
   const e = escHtml;
   const lean = leanPage(item);   // every fact once (LEAN_PAGE)
   const V2 = require("./pagev2.js");

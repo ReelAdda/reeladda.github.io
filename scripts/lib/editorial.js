@@ -375,7 +375,7 @@ function analyzeReception(text) {
 // ============================================================================
 const RATINGS_MIN = 3;              // a median of fewer reviews is not a consensus
 const CRITICS_SETTLED_MIN = 5;      // published reviews that count as a settled reception in week one
-const CRITICS_RECHECK_DAYS = 28;    // a new film's unsettled reading is re-read daily for this long
+const CRITICS_RECHECK_DAYS = 60;    // a new film's unsettled reading is re-read daily for this long (28 to 31 Oct 2026: regional reviews land late)
 // Age in days of a group of listings for one film (the earliest date any of them carries).
 function itemsAgeDays(items, nowMs = Date.now()) {
   const ds = (items || []).map((x) => String((x && (x.released || x.freshDate)) || "").slice(0, 10)).filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
@@ -1122,7 +1122,7 @@ async function attachTakes(dataByCode) {
       // A new film's reading is re-read every day until five reviews settle it (Oct 2026): the
       // first read of an Indian film's article is often taken on opening day, before the critics'
       // reviews are added, and was then kept for good — Jailer 2's cache held a tone and no
-      // ratings while its article listed 12. Only for films out under four weeks.
+      // ratings while its article listed 12. Only for films out under CRITICS_RECHECK_DAYS (60: regional reviews land late).
       const recheck = !!entry && !stale && entry.src === "wiki" && !criticsSettled(entry.a)
         && entry.checked !== today && itemsAgeDays(items) != null && itemsAgeDays(items) < CRITICS_RECHECK_DAYS;
       const needsFetch = !entry || stale || recheck || ((!entry.take || entry.hook === undefined) && entry.checked !== today);

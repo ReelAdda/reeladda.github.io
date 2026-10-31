@@ -10487,6 +10487,99 @@ test("plain wording: answers the sweeps rewrite are matched in both forms; summa
   assert.strictEqual(E.composePlainTmdbTake({ lean: "positive", praised: ["action"] }), "Early viewer reviews on TMDB are positive, with praise for the action.");
 });
 
+group("published reviews from the outlets' feeds (lib/reviews.js, 31 Oct 2026)");
+const RV_XML = `<?xml version="1.0"?><rss><channel>
+<item><title><![CDATA[Jailer 2 review: Rajinikanth shines, but the sequel struggles]]></title><link>https://example.org/jailer-2-review</link><pubDate>Thu, 16 Oct 2026 10:00:00 +0530</pubDate><description><![CDATA[Nelson's sequel. Rating: 3/5]]></description></item>
+<item><title>Review: Aadarsha Kutumbam &#8211; A Decent Family Entertainer</title><link>https://example.org/ak</link><pubDate>Fri, 31 Oct 2026 08:00:00 +0530</pubDate><description>123telugu.com Rating : 2.75/5 Starring</description></item>
+<item><title>Officials Review Development Works in Narsingi</title><link>https://example.org/civic</link><pubDate>Fri, 31 Oct 2026 08:00:00 +0530</pubDate><description></description></item>
+<item><title>Jailer 2 box office: day 3</title><link>https://example.org/bo</link><pubDate>Sat, 18 Oct 2026 08:00:00 +0530</pubDate></item>
+<item><title>Jailer 2 review: a second opinion</title><link>https://example.org/jailer-2-review-2</link><pubDate>Mon, 20 Oct 2026 08:00:00 +0530</pubDate></item>
+<item><title>Broken</title></item>
+</channel></rss>`;
+test("feed parsing: items, CDATA, entities and dates; a broken item is skipped", () => {
+  const RV = require("./lib/reviews.js");
+  const items = RV.parseFeed(RV_XML, { name: "Test Outlet", langs: "any" });
+  assert.strictEqual(items.length, 5);
+  assert.deepStrictEqual([items[0].title, items[0].date, items[1].title], ["Jailer 2 review: Rajinikanth shines, but the sequel struggles", "2026-10-16", "Review: Aadarsha Kutumbam - A Decent Family Entertainer"]);
+  assert.ok(RV.isReview("Jailer 2 review: x") && RV.isReview("Meethe Mein Kya Hai Movie Review: दिवाली") && RV.isReview("जेलर 2 रिव्यू") && !RV.isReview("Jailer 2 box office"));
+});
+test("star ratings: only what the feed states, on a 5-point scale", () => {
+  const RV = require("./lib/reviews.js");
+  assert.deepStrictEqual(["123telugu.com Rating : 2.75/5 Starring", "3.5 stars", "Rating: 3/5", "★★★☆☆", "7/10", "no rating", "2026/5 films", "a 4/5 star outing"].map(RV.parseStars), [2.75, 3.5, 3, 3, 3.5, null, null, 4]);
+});
+test("matching: the title as whole words next to 'review', inside the window, with the outlet's language agreeing", () => {
+  const RV = require("./lib/reviews.js");
+  const M = (h, t) => RV.headlineMatches(h, t);
+  assert.ok(M("Jailer 2 review: Rajinikanth shines", "Jailer 2") && M("Review: Aadarsha Kutumbam - A Decent Family Entertainer", "Aadarsha Kutumbam") && M("‘The Fix’ movie review: Liam Neeson", "The Fix"));
+  assert.ok(!M("Serilingampally Officials Review Development Works", "Officials") && !M("Clayface review", "Face") && !M("Jailer 2 box office: day 3", "Jailer 2") && !M("Jailer 20 review", "Jailer 2"), "negatives");
+  // One-word titles count only in the headline convention: "Hope review: …" or "Review: Hope".
+  assert.ok(M("‘Hope’ review: Na Hong-jin's thriller", "Hope") && M("Hope movie review: a slow burn", "Hope") && M("OTT Review: Akka - Telugu-dubbed series", "Akka"), "one-word forms");
+  assert.ok(!M("Officials Review Development Works", "Officials") && !M("New hope for the review of flood works", "Hope") && !M("Carrie Coon on her review habits", "Carrie"), "one-word negatives");
+  // 31 Oct dry run: "#Love" must not take "Cyberpunk: Edgerunners 2 series review: Love and art…" or "Review: ‘Love Always’…".
+  assert.ok(M("#Love Review: Romcom With No Spark", "#Love") && !M("‘Cyberpunk: Edgerunners 2’ series review: Love and art in the time of technofascism", "#Love") && !M("Review: ‘Love Always’ takes its title way too seriously", "#Love") && !M("Love Review: Romcom", "#Love"), "a leading # must be in the headline, and the title ends the segment");
+  const items = RV.parseFeed(RV_XML, { name: "Test Outlet", langs: "any" });
+  const films = [{ key: "movie:1", title: "Jailer 2", language: "Tamil", released: "2026-10-15" }, { key: "movie:2", title: "Aadarsha Kutumbam", language: "Telugu", released: "2026-10-30" }, { key: "movie:3", title: "Officials", language: "Hindi", released: "2026-10-25" }];
+  const m = RV.matchReviews(items, films, "2026-10-31");
+  assert.deepStrictEqual([...m.keys()], ["movie:1", "movie:2"]);
+  assert.deepStrictEqual(m.get("movie:1").map((x) => [x.o, x.d, x.s]), [["Test Outlet", "2026-10-16", 3], ["Test Outlet", "2026-10-20", undefined]]);
+  assert.strictEqual(m.get("movie:2")[0].s, 2.75);
+  // A Telugu outlet does not get matched to a Hindi film of the same title; a national one does.
+  const te = RV.parseFeed(RV_XML, { name: "Telugu Outlet", langs: ["Telugu"] });
+  assert.deepStrictEqual([...RV.matchReviews(te, [{ key: "movie:9", title: "Jailer 2", language: "Hindi", released: "2026-10-15" }], "2026-10-31").keys()], []);
+  // Out of the window: a review 61 days after release is not this release's.
+  assert.deepStrictEqual([...RV.matchReviews(items, [{ key: "movie:1", title: "Jailer 2", language: "Tamil", released: "2026-08-01" }], "2026-10-31").keys()], []);
+});
+testAsync("refreshReviews: writes the file, keeps a failed feed's last matches, prunes old films", async () => {
+  const RV = require("./lib/reviews.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const dir = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-rv-")), file = path.join(dir, "reviews.json");
+  const feeds = [{ name: "A", url: "https://a.example/feed", langs: "any" }, { name: "B", url: "https://b.example/feed", langs: "any" }];
+  const films = [{ key: "movie:1", title: "Jailer 2", language: "Tamil", released: "2026-10-15" }, { key: "movie:7", title: "Old Film", language: "Hindi", released: "2026-01-01" }];
+  const now = Date.parse("2026-10-31T06:00:00Z");
+  let bDown = false;
+  const fetchImpl = async (url) => ({ ok: !(bDown && url.startsWith("https://b")), status: 503, text: async () => (url.startsWith("https://a") ? RV_XML : RV_XML.replace(/example\.org/g, "b.example")) });
+  const r1 = await RV.refreshReviews({ films, file, fetchImpl, now, feeds });
+  assert.deepStrictEqual([r1.feedsOk, r1.feedsFailed.length, r1.filmsMatched, r1.links], [2, 0, 1, 4]);
+  bDown = true;
+  const r2 = await RV.refreshReviews({ films, file, fetchImpl, now: now + 864e5, feeds });
+  const saved = JSON.parse(fsx.readFileSync(file, "utf8"));
+  assert.deepStrictEqual([r2.feedsOk, r2.feedsFailed.length, saved.films["movie:1"].items.length], [1, 1, 4], "B's two links kept from the last run");
+  assert.ok(!saved.films["movie:7"], "an old film holds nothing");
+  // A stored link the feed still carries is judged again (a matcher fix cleans the file); one the
+  // feed has rotated off is kept.
+  bDown = false;
+  saved.films["movie:1"].items.push({ o: "A", u: "https://example.org/ak", h: "Review: Aadarsha Kutumbam", d: "2026-10-20" }, { o: "A", u: "https://example.org/gone", h: "Jailer 2 review: rotated off the feed", d: "2026-10-17" });
+  fsx.writeFileSync(file, JSON.stringify(saved));
+  const r3 = await RV.refreshReviews({ films, file, fetchImpl, now: now + 2 * 864e5, feeds });
+  const saved3 = JSON.parse(fsx.readFileSync(file, "utf8"));
+  assert.deepStrictEqual([r3.feedsOk, saved3.films["movie:1"].items.map((i) => i.u).sort()], [2, ["https://b.example/jailer-2-review", "https://b.example/jailer-2-review-2", "https://example.org/gone", "https://example.org/jailer-2-review", "https://example.org/jailer-2-review-2"]], "the wrong link is dropped, the rotated-off one kept");
+  RV.useReviews(saved3);
+  assert.strictEqual(RV.reviewsFor("movie", 1).length, 5);
+  assert.deepStrictEqual(RV.starAverage(RV.reviewsFor("movie", 1), 2), { avg: 3, n: 2 }, "the two rated items, from A and B, both say 3/5");
+  RV.useReviews(null);
+  fsx.rmSync(dir, { recursive: true, force: true });
+});
+test("film page: a 'Reviews:' line under the score, one link per outlet, the no-score line says reviews are out, an FAQ names them; first reviews move the date", () => {
+  const R = require("./lib/rollout.js"), RV = require("./lib/reviews.js"), Fp = require("./lib/filmpage.js"), F = require("./lib/facts.js"), S = require("./lib/sitemap.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const PC = require("./lib/prosecheck.js");
+  const it = { ...PC.films().unrated, tmdbId: 4242, released: hpDay(-8), votes: 0, rating: null };
+  const reviews = { films: { "movie:4242": { items: [{ o: "The Hindu", u: "https://www.thehindu.com/x", h: "Fresh review", d: hpDay(-7) }, { o: "Rediff", u: "https://www.rediff.com/x", h: "Fresh Review", d: hpDay(-6), s: 3 }, { o: "Rediff", u: "https://www.rediff.com/y", h: "Fresh review again", d: hpDay(-5) }] } } };
+  try {
+    RV.useReviews(reviews);
+    R.useRolloutConfig({ features: { ...PC.ALL_ON.features, reviews: { percent: 0 } } });
+    const off = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
+    R.useRolloutConfig({ features: { ...PC.ALL_ON.features, reviews: { percent: 100 } } });
+    const on = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
+    assert.ok(!/<p class="fcsb-line fcsb-rv">/.test(off) && /<!--FC:reviews=3--><p class="fcsb-line fcsb-rv"><b>Reviews:<\/b> <a href="https:\/\/www\.thehindu\.com\/x" rel="noopener nofollow" target="_blank">The Hindu<\/a> · <a href="https:\/\/www\.rediff\.com\/x"[^>]*>Rediff<\/a> \(3\/5\)<\/p>/.test(on), (on.match(/fcsb-rv.{0,300}/) || [""])[0]);
+    assert.ok(/Too early<\/span>: no audience ratings yet, and 3 reviews are out\./.test(on), (on.match(/fcsb-mini">.{0,200}/) || [""])[0]);
+    assert.ok(/<summary>Where are the reviews of Fresh\?<\/summary><div class="fa">Published reviews so far: The Hindu and Rediff\./.test(on), "FAQ");
+    assert.strictEqual(F.keyFacts(on).reviews, "3");
+    assert.notStrictEqual(S.factsFingerprint(on), S.factsFingerprint(off), "first reviews are news: the date moves once");
+    const scan = require("./lib/humanprose.js");
+    assert.deepStrictEqual(scan.scanProse(scan.siteProse(on)), [], "plain wording");
+  } finally { RV.useReviews(null); R.useRolloutConfig(ROLLOUT_OFF); }
+});
+
 test("near-copy check: the v3 header is stripped like the old one (30 Oct 2026)", () => {
   const G = require("./lib/googlehide.js");
   const t = G.mainText('<body><div class="top v3"><a class="mark" href="/">FILMY<span>CHILL</span></a><span class="cpill">Singapore</span></div><h1>X</h1></body>');
