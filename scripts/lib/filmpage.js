@@ -1135,8 +1135,14 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   if (item && plainOn(item.slug)) item = { ...item, _plain: true };
   // Published reviews from the outlets' feeds (lib/reviews.js; rollout "reviews", 31 Oct 2026):
   // the page names the outlets and links out. Overlaid at render so frozen pages get them too.
+  // Only where the card has no critics' reading of its own: no FilmyChill score yet, or a score
+  // from audience ratings alone with nothing cited from Wikipedia (owner, 31 Oct 2026: a page that
+  // carries a verdict with the critics' figures already answers the question).
   if (item && inRollout("reviews", item.slug)) {
-    const rv = require("./reviews.js").reviewsFor(item.kind, item.tmdbId);
+    const s = item.fcScore;
+    const citedCritics = !!item.reception && inRollout(require("./reception.js").RECEPTION_FEATURE, item.slug);
+    const wanted = !s || (!s.critics && !citedCritics);
+    const rv = wanted ? require("./reviews.js").reviewsFor(item.kind, item.tmdbId) : [];
     if (rv.length) item = { ...item, reviews: rv };
   }
   const e = escHtml;

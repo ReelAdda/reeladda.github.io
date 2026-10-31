@@ -10575,10 +10575,13 @@ test("film page: the review links join the score card's own sentence, one link p
     assert.ok(!/<!--FC:reviews=/.test(off) && !/fcsb-rv"/.test(off) && /Too early<\/span>: no audience ratings yet; 3 reviews out, in <a href="https:\/\/www\.thehindu\.com\/x" rel="noopener nofollow" target="_blank">The Hindu<\/a> and <a href="https:\/\/www\.rediff\.com\/x"[^>]*>Rediff<\/a> \(3\/5\)\.<!--FC:reviews=3--> <a href="\/about\/#score">/.test(on), (on.match(/fcsb-mini">.{0,400}/) || [""])[0]);
     assert.ok(!/fcsb-rv"/.test(on) && !/reviews are out/.test(on), "no second row, no repeated count");
     assert.ok(/<summary>Where are the reviews of Fresh\?<\/summary><div class="fa">Published reviews so far: The Hindu and Rediff\. The links are in the FilmyChill score card on this page\./.test(on), "FAQ");
-    // With a score, the links join the Audience · Critics line.
+    // A score from audience ratings alone, no critics' reading: the links join the Audience · Critics line.
     const scored = Fp.buildFilmPage({ ...it, votes: 420, rating: 7.4, fcScore: { verdict: "Worth a watch", reason: "audience", audience: "positive", critics: "" } }, hpDay(0), new Set(), IN);
     const sline = (scored.match(/<p class="fcsb-line"><b>Audience:<\/b>[^\n]*/) || [""])[0];
     assert.ok(/ · <b>Reviews:<\/b> <a href="https:\/\/www\.thehindu\.com\/x"[^>]*>The Hindu<\/a>, <a href="https:\/\/www\.rediff\.com\/x"[^>]*>Rediff<\/a> \(3\/5\)<!--FC:reviews=3--><\/p>/.test(sline) && !/fcsb-rv"/.test(scored), sline || (scored.match(/<section class="fcsb[\s\S]{0,600}/) || [""])[0]);
+    // A score with a critics' reading already answers the question: no links, no FAQ, no marker (owner, 31 Oct).
+    const critics = Fp.buildFilmPage({ ...it, votes: 420, rating: 7.4, fcScore: { verdict: "Worth a watch", reason: "both", audience: "positive", critics: "positive" } }, hpDay(0), new Set(), IN);
+    assert.ok(!/<b>Reviews:<\/b>/.test(critics) && !/<!--FC:reviews=/.test(critics) && !/Where are the reviews of/.test(critics), "scored with critics: untouched");
     assert.strictEqual(F.keyFacts(on).reviews, "3");
     assert.notStrictEqual(S.factsFingerprint(on), S.factsFingerprint(off), "first reviews are news: the date moves once");
     const scan = require("./lib/humanprose.js");
