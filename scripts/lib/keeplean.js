@@ -60,7 +60,7 @@ async function shownPages(token, env, from, to, fetchImpl = fetch) {
 }
 
 // Pure: the hide list from the page records and the set of pages Google showed.
-function rollList(manifest, shown, nowMs = Date.now()) {
+function rollList(manifest, shown, nowMs = Date.now(), { facts = (code, slug) => G.factsOf(code, slug) } = {}) {
   const pages = {};
   for (const [code, list] of Object.entries(manifest || {})) {
     if (!list || typeof list !== "object") continue;
@@ -68,6 +68,9 @@ function rollList(manifest, shown, nowMs = Date.now()) {
       if (!e || typeof e !== "object") continue;
       const url = `${B}${code === "in" ? "" : `${code}/`}movie/${slug}.html`;
       if (shown.has(url)) continue;
+      // A current title (a season airing, a recent release or arrival) is never listed, whatever
+      // Google showed (lib/googlehide.js currentEntry, 31 Oct 2026).
+      if (G.currentEntry(e, facts(code, slug), iso(nowMs))) continue;
       if (!e.catalog) {
         const rel = Date.parse(`${String(e.released || "").slice(0, 10)}T00:00:00Z`);
         if (!Number.isFinite(rel) || (nowMs - rel) / 864e5 <= G.WEEKLY_HIDE_DAYS) continue;

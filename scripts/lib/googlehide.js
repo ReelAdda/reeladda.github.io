@@ -46,9 +46,80 @@ function hiddenConfig() { return cached || (cached = loadHidden()); }
 // Tests: use this list instead of the file (null goes back to the file).
 function useHiddenList(list) { cached = list || null; }
 
-// Would this page be hidden at 100%? Listed, and not a fresh arrival; a weekly-list page (not a
-// catalogue page) only once its film is WEEKLY_HIDE_DAYS old — the monthly roll (lib/keeplean.js)
-// lists those, and this re-checks the age so a stale list can't hide a recent release.
+// ============================================================================
+// CURRENT TITLES ARE NEVER HIDDEN (31 Oct 2026, the owner: "we don't want archiving rules to hide
+// current trending shows and movies"). The hide rule asks only whether Google showed a page in the
+// last 90 days. Tulsa King's page was built from a series first aired in 2022, had no impressions
+// while the site was young, and was hidden on 25 Oct — while season 4 was airing (E3 out 30 Oct).
+// Hidden pages earn no impressions, so the monthly roll could never release it. A title is
+// "current" when its own record says so: an episode due or just out, a season still running or
+// ended within CURRENT_DAYS, a release or a streaming arrival within CURRENT_DAYS, or an announced
+// streaming date near today. Such a page is not eligible to be hidden (googleEligible), is skipped
+// by the roll (lib/keeplean.js rollList), and is taken off the list at the start of every build
+// (releaseCurrent), so a sequel or a new season frees its page without waiting for anything.
+// ============================================================================
+const CURRENT_DAYS = 90;        // a season, release or arrival this recent keeps a page visible
+const EPISODE_GRACE_DAYS = 14;  // a "next episode" this far in the past still counts as current
+const { readFacts } = require("./facts.js");
+let factsCache = new Map();
+// The page's facts record (lib/facts.js store), cached per edition for the run. Tests may set a
+// lookup of their own; null goes back to the store.
+let factsLookup = null;
+function useFactsLookup(fn) { factsLookup = fn || null; factsCache = new Map(); }
+function factsOf(code, slug) {
+  if (factsLookup) return factsLookup(code, slug);
+  if (!factsCache.has(code)) factsCache.set(code, readFacts(code));
+  return factsCache.get(code).get(slug) || null;
+}
+// Pure: is this title current, by its manifest entry and (when given) its facts record?
+function currentEntry(entry, rec, today = new Date().toISOString().slice(0, 10)) {
+  const t = Date.parse(`${today}T00:00:00Z`);
+  const days = (d) => (/^\d{4}-\d{2}-\d{2}/.test(d || "") ? (t - Date.parse(`${String(d).slice(0, 10)}T00:00:00Z`)) / 864e5 : null);
+  const recent = (d, past = CURRENT_DAYS, ahead = CURRENT_DAYS) => { const n = days(d); return n != null && n <= past && n >= -ahead; };
+  if (entry) {
+    if (recent(entry.epNext, EPISODE_GRACE_DAYS, 3650)) return true;          // an episode due, or out this fortnight
+    if (recent(entry.released)) return true;                                  // released within the window, or ahead
+    if (entry.digital && recent(entry.digital.date)) return true;             // an announced streaming date near today
+    const { isNewReleaseEntry } = require("./sitemap.js");
+    if (isNewReleaseEntry(entry, today)) return true;                         // a fresh arrival on a platform
+  }
+  const it = rec && rec.item;
+  if (it) {
+    const ep = it.episodes || {};
+    if (ep.next && recent(ep.next.date, EPISODE_GRACE_DAYS, 3650)) return true;
+    if ((ep.list || []).some((x) => recent(x.date))) return true;             // a season running or just ended
+    if (recent(it.freshDate) || recent(it.arrived) || recent(it.digitalDate)) return true;
+    if (recent(it.released)) return true;
+  }
+  return false;
+}
+// Every build: current titles come off the hide list, logged in the file ("released"), so the
+// passes that follow (lists, links, hreflang, sitemaps, the noindex tag) all see them as visible.
+function releaseCurrent({ manifest, file = HIDE_FILE, today = new Date().toISOString().slice(0, 10), facts = factsOf } = {}) {
+  let cur; try { cur = JSON.parse(fs.readFileSync(file, "utf8")); } catch { return { released: 0, examples: [] }; }
+  const pages = cur.pages || {};
+  const freed = [];
+  for (const [code, xs] of Object.entries(pages)) {
+    if (!Array.isArray(xs)) continue;
+    const keep = [];
+    for (const slug of xs) {
+      const e = manifest && manifest[code] && manifest[code][slug];
+      if (e && currentEntry(e, facts(code, slug), today)) freed.push(`${code}/${slug}`); else keep.push(slug);
+    }
+    pages[code] = keep;
+  }
+  if (freed.length) {
+    cur.total = Object.values(pages).reduce((n, xs) => n + xs.length, 0);
+    cur.released = [...(cur.released || []), { on: today, pages: freed.length, rule: `current title: an episode due or out, a season, release or arrival within ${CURRENT_DAYS} days`, examples: freed.slice(0, 5) }].slice(-24);
+    fs.writeFileSync(file, JSON.stringify(cur, null, 1) + "\n");
+    cached = null;   // the passes below read the new list
+  }
+  return { released: freed.length, examples: freed.slice(0, 5) };
+}
+
+// Would this page be hidden at 100%? Listed, not current (above), and not a fresh arrival; a
+// weekly-list page (not a catalogue page) only once its film is WEEKLY_HIDE_DAYS old — the monthly
+// roll (lib/keeplean.js) lists those, and this re-checks the age so a stale list can't hide a recent release.
 const WEEKLY_HIDE_DAYS = 120;
 const setCache = new WeakMap();
 function googleEligible(code, slug, entry, { list = hiddenConfig(), today = new Date().toISOString().slice(0, 10) } = {}) {
@@ -57,6 +128,7 @@ function googleEligible(code, slug, entry, { list = hiddenConfig(), today = new 
   if (!setCache.has(xs)) setCache.set(xs, new Set(xs));
   if (!setCache.get(xs).has(slug)) return false;
   if (!entry) return false;
+  if (currentEntry(entry, factsOf(code, slug), today)) return false;
   if (!entry.catalog) {
     const rel = Date.parse(`${String(entry.released || "").slice(0, 10)}T00:00:00Z`);
     if (!Number.isFinite(rel) || (Date.parse(`${today}T00:00:00Z`) - rel) / 864e5 <= WEEKLY_HIDE_DAYS) return false;
@@ -233,5 +305,6 @@ function nearCopyEditions(files, manifest, { root = ".", threshold = NEAR_COPY, 
 }
 
 module.exports = {
+  CURRENT_DAYS, EPISODE_GRACE_DAYS, currentEntry, factsOf, releaseCurrent, useFactsLookup,
   NEAR_COPY, WEEKLY_HIDE_DAYS, listedHidden, mainText, nearCopyEditions, similarity, shingleSet,
   applyGoogleHidePaths, pathHidden, peoplePageFiles, BINGBOT_TAG, HIDE_TAG, GOOGLEBOT_TAG, HIDE_FEATURE, HIDE_FILE, NOINDEX_META, addGooglebotNoindex, applyGoogleHide, googleEligible, googleHidden, loadHidden, removeGooglebotNoindex, useHiddenList };

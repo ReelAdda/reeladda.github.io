@@ -2428,6 +2428,12 @@ async function main() {
       const roll = await rollHiddenList({ manifest: JSON.parse(fs.readFileSync("pages-manifest.json", "utf8")) });
       console.log(roll.rolled ? `Hide list rolled: ${roll.total} page(s) hidden from Google (+${roll.added} / -${roll.removed}), ${roll.shown} pages had impressions` : `Hide list: not rolled (${roll.why})`);
     } catch (e) { stageFailed("hide list roll", e, { optional: true }); }
+    // Current titles come off the hide list every build (lib/googlehide.js releaseCurrent, 31 Oct
+    // 2026): a season airing, a sequel just out, a fresh arrival. Before any page is built.
+    try {
+      const freed = require("./lib/googlehide.js").releaseCurrent({ manifest: JSON.parse(fs.readFileSync("pages-manifest.json", "utf8")) });
+      if (freed.released) { const line = `Hide list: ${freed.released} current title page(s) released to Google, e.g. ${freed.examples.join(", ")}`; console.log(line); healthNote(line); }
+    } catch (e) { stageFailed("hide list release", e, { optional: true }); }
     // Pass 1: build data for every country. Every TMDB answer is recorded — each edition on its
     // own, so the proof replays an edition with exactly the answers it got — and the output kept
     // as built, for the split proof right after (proveSplitBuilder).

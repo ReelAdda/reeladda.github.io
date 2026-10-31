@@ -5767,17 +5767,58 @@ test("links from visible pages go to visible pages; hidden pages are listed for 
   assert.ok(/fs\.writeFileSync\(BING_SITEMAP/.test(sm) && !/children\.(?:push|unshift)\(\{ file: BING_SITEMAP/.test(sm), "not in the sitemap index");
   assert.ok(!/sitemap-bing/.test(fsx.readFileSync(path.join(__dirname, "..", "robots.txt"), "utf8")), "not in robots.txt");
 });
+test("hide list: a current title is never hidden and is released every build (Tulsa King, 31 Oct 2026)", () => {
+  const G = require("./lib/googlehide.js"), R = require("./lib/rollout.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const today = "2026-10-31";
+  const old = { catalog: true, released: "2022-11-13" };
+  // By the manifest entry alone.
+  assert.strictEqual(G.currentEntry(old, null, today), false, "an old catalogue title is not current");
+  assert.strictEqual(G.currentEntry({ ...old, epNext: "2026-10-30" }, null, today), true, "an episode out yesterday");
+  assert.strictEqual(G.currentEntry({ ...old, epNext: "2026-10-01" }, null, today), false, "an episode a month ago is not enough on its own");
+  assert.strictEqual(G.currentEntry({ catalog: true, released: "2026-09-15" }, null, today), true, "a release within 90 days");
+  assert.strictEqual(G.currentEntry({ catalog: true, released: "2026-07-01" }, null, today), false, "a release 4 months ago");
+  assert.strictEqual(G.currentEntry({ ...old, digital: { date: "2026-11-20" } }, null, today), true, "an announced streaming date");
+  // By the page's own record: a season still running, or one that ended within 90 days.
+  const rec = (ep) => ({ slug: "x", item: { episodes: ep } });
+  assert.strictEqual(G.currentEntry(old, rec({ count: 10, next: { date: "2026-11-06" }, list: [] }), today), true, "next episode in the record");
+  assert.strictEqual(G.currentEntry(old, rec({ count: 10, list: [{ e: 1, date: "2026-09-02" }] }), today), true, "a season that ended 8 weeks ago");
+  assert.strictEqual(G.currentEntry(old, rec({ count: 10, list: [{ e: 1, date: "2024-09-02" }] }), today), false, "a season two years ago");
+  assert.strictEqual(G.currentEntry(old, { slug: "x", item: { arrived: "2026-10-20" } }, today), true, "a fresh arrival in the record");
+  // googleEligible: listed, in the share, but current -> not hidden.
+  const list = { pages: { in: ["tulsa-king", "old-film"] } };
+  try {
+    R.useRolloutConfig({ features: { "google-hide": { percent: 100 } } });
+    G.useFactsLookup((code, slug) => (slug === "tulsa-king" ? rec({ count: 10, next: { date: "2026-11-06" }, list: [] }) : null));
+    assert.strictEqual(G.googleEligible("in", "tulsa-king", old, { list, today }), false, "current: never eligible");
+    assert.strictEqual(G.googleEligible("in", "old-film", old, { list, today }), true, "an old title stays hidden");
+    // releaseCurrent: taken off the file, logged, idempotent.
+    const dir = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-rel-"));
+    const file = path.join(dir, "google-hidden.json");
+    fsx.writeFileSync(file, JSON.stringify({ pages: { in: ["old-film", "tulsa-king"], uk: ["tulsa-king"] }, total: 3 }));
+    const man = { in: { "old-film": old, "tulsa-king": old }, uk: { "tulsa-king": { ...old, epNext: "2026-10-30" } } };
+    const r = G.releaseCurrent({ manifest: man, file, today });
+    assert.deepStrictEqual([r.released, r.examples], [2, ["in/tulsa-king", "uk/tulsa-king"]]);
+    const after = JSON.parse(fsx.readFileSync(file, "utf8"));
+    assert.deepStrictEqual([after.pages, after.total, after.released[0].pages], [{ in: ["old-film"], uk: [] }, 1, 2]);
+    assert.strictEqual(G.releaseCurrent({ manifest: man, file, today }).released, 0, "nothing left to release");
+    fsx.rmSync(dir, { recursive: true, force: true });
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); G.useFactsLookup(null); G.useHiddenList(null); }
+});
 testAsync("keep lean: the monthly hide roll, the weekly health report, and the page-type registry (Oct 2026)", async () => {
   const K = require("./lib/keeplean.js");
   const P = require("./lib/pagetypes.js");
   const fsx = require("fs"), os = require("os"), path = require("path");
   const now = Date.parse("2026-11-20T06:00:00Z");
   const B = "https://filmychill.com/";
-  // 1. The roll: never-shown catalogue (any age) and never-shown weekly pages over 120 days; a shown page never.
-  const man = { in: { cat: { catalog: true, released: "2026-09-01" }, catShown: { catalog: true, released: "1999-01-01" },
-    oldWeekly: { released: "2026-03-01" }, newWeekly: { released: "2026-10-01" }, oldShown: { released: "2025-01-01" } }, uk: { cat: { catalog: true, released: "2010-01-01" } } };
+  // 1. The roll: never-shown catalogue (any age) and never-shown weekly pages over 120 days; a shown page never;
+  //    a current title never (a season airing, a release within 90 days), whatever Google showed (31 Oct 2026).
+  const man = { in: { cat: { catalog: true, released: "2026-06-01" }, catShown: { catalog: true, released: "1999-01-01" },
+    oldWeekly: { released: "2026-03-01" }, newWeekly: { released: "2026-10-01" }, oldShown: { released: "2025-01-01" },
+    airing: { catalog: true, released: "2022-11-13", epNext: "2026-11-27" }, justOut: { catalog: true, released: "2026-09-01" } },
+    uk: { cat: { catalog: true, released: "2010-01-01" } } };
   const shown = new Set([`${B}movie/catShown.html`, `${B}movie/oldShown.html`]);
-  assert.deepStrictEqual(K.rollList(man, shown, now), { in: ["cat", "oldWeekly"], uk: ["cat"] });
+  assert.deepStrictEqual(K.rollList(man, shown, now, { facts: () => null }), { in: ["cat", "oldWeekly"], uk: ["cat"] });
   // ...on a schedule, and never on bad data.
   const dir = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-roll-"));
   try {
