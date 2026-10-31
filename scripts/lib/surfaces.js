@@ -290,7 +290,7 @@ function buildHomeJsonLd(data, cfg) {
       name: "FilmyChill",
       url: "https://filmychill.com/",
       logo: { "@type": "ImageObject", url: "https://filmychill.com/icon-192.png", width: 192, height: 192 },
-      sameAs: ["https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j"],
+      sameAs: ["https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j", "https://www.instagram.com/filmychillofficial/"],
       // The one inbox for corrections, privacy and copyright (About, Privacy, /dmca/).
       contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "filmychill.contact@gmail.com" },
     },

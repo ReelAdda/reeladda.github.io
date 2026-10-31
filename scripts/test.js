@@ -2061,6 +2061,7 @@ test("A07 · About and Privacy give the contact address; the homepage Organizati
   const ld = S.buildHomeJsonLd({ generatedAt: "2026-10-11T00:00:00Z", theatres: [], ott: [] }, { code: "in", name: "India", region: "IN" });
   const org = JSON.parse(ld)["@graph"].find((x) => x["@type"] === "Organization");
   assert.deepStrictEqual(org.contactPoint, { "@type": "ContactPoint", contactType: "customer support", email: "filmychill.contact@gmail.com" });
+  assert.deepStrictEqual(org.sameAs, ["https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j", "https://www.instagram.com/filmychillofficial/"], "the WhatsApp channel and the official Instagram page (31 Oct 2026)");
 });
 test("A03 · a non-film sitemap URL keeps its date until its content changes", () => {
   const fsx = require("fs"), os = require("os"), path = require("path");
