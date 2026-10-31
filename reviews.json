@@ -1,0 +1,303 @@
+{
+ "_about": "Published reviews of recent titles, from the outlets' RSS feeds (lib/reviews.js): outlet, link, headline, date, and a star rating only when the feed states one. Keyed by kind:tmdbId; pruned 90 days after release.",
+ "fetched": "2026-10-31",
+ "feeds": {
+  "https://www.thehindu.com/entertainment/reviews/feeder/default.rss": {
+   "ok": "2026-10-31",
+   "items": 60
+  },
+  "https://indianexpress.com/section/entertainment/movie-review/feed/": {
+   "failed": "2026-10-31",
+   "error": "HTTP 403"
+  },
+  "https://indianexpress.com/section/entertainment/tamil/feed/": {
+   "failed": "2026-10-31",
+   "error": "HTTP 403"
+  },
+  "https://indianexpress.com/section/entertainment/telugu/feed/": {
+   "failed": "2026-10-31",
+   "error": "HTTP 403"
+  },
+  "https://indianexpress.com/section/entertainment/malayalam/feed/": {
+   "failed": "2026-10-31",
+   "error": "HTTP 403"
+  },
+  "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml": {
+   "ok": "2026-10-31",
+   "items": 92
+  },
+  "https://feeds.feedburner.com/ndtvmovies-latest": {
+   "ok": "2026-10-31",
+   "items": 100
+  },
+  "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml": {
+   "failed": "2026-10-31",
+   "error": "HTTP 403"
+  },
+  "https://www.news18.com/rss/movies.xml": {
+   "failed": "2026-10-31",
+   "error": "HTTP 403"
+  },
+  "https://feeds.feedburner.com/ScrollinArticles.rss": {
+   "ok": "2026-10-31",
+   "items": 100
+  },
+  "https://www.koimoi.com/feed/": {
+   "failed": "2026-10-31",
+   "error": "HTTP 403"
+  },
+  "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms": {
+   "ok": "2026-10-31",
+   "items": 20
+  },
+  "https://www.indiatoday.in/rss/1206611": {
+   "ok": "2026-10-31",
+   "items": 20
+  },
+  "https://www.dnaindia.com/feeds/entertainment.xml": {
+   "ok": "2026-10-31",
+   "items": 20
+  },
+  "https://www.freepressjournal.in/stories.rss?section=entertainment": {
+   "ok": "2026-10-31",
+   "items": 67
+  },
+  "https://www.123telugu.com/category/reviews/feed": {
+   "ok": "2026-10-31",
+   "items": 30
+  },
+  "https://www.telugu360.com/feed/": {
+   "ok": "2026-10-31",
+   "items": 10
+  },
+  "https://www.cinemaexpress.com/feed": {
+   "ok": "2026-10-31",
+   "items": 9
+  },
+  "https://www.vikatan.com/feed": {
+   "ok": "2026-10-31",
+   "items": 8
+  },
+  "https://www.prajavani.net/feed": {
+   "ok": "2026-10-31",
+   "items": 26
+  },
+  "https://www.amarujala.com/rss/entertainment.xml": {
+   "ok": "2026-10-31",
+   "items": 40
+  },
+  "https://www.sangbadpratidin.in/feed/": {
+   "ok": "2026-10-31",
+   "items": 20
+  }
+ },
+ "films": {
+  "movie:1503762": {
+   "title": "Sense and Sensibility",
+   "released": "2026-10-14",
+   "items": [
+    {
+     "o": "Hindustan Times",
+     "u": "https://www.hindustantimes.com/entertainment/hollywood/sense-and-sensibility-review-the-enduring-pleasures-of-jane-austen-classic-gets-a-perceptive-and-adaptation-101793432756674.html",
+     "h": "Sense and Sensibility review: The enduring pleasures of Jane Austen's classic gets a faithful and melancholic adaptation",
+     "d": "2026-10-31"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/sense-and-sensibility-movie-review-daisy-edgar-jones-shines-in-this-genteel-persuasion/article71643648.ece",
+     "h": "‘Sense and Sensibility’ movie review: Daisy Edgar-Jones shines in this genteel persuasion",
+     "d": "2026-10-31"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1496785": {
+   "title": "Aadarsha Kutumbam House No: 47 - AK47",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/aadarsha-kutumbam-house-no47-movie-review-venkatesh-anchors-trivikrams-family-drama/article71641841.ece",
+     "h": "‘Aadarsha Kutumbam-House No.47’ movie review: Venkatesh anchors Trivikram’s predictable yet entertaining family drama",
+     "d": "2026-10-30"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1234139": {
+   "title": "Jailer 2",
+   "released": "2026-10-15",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/jailer-2-movie-review-superstar-rajinikanth-nelson-shivarajkumar-mohanlal-anirudh-ravichander/article71587540.ece",
+     "h": "‘Jailer 2’ movie review: Rajinikanth’s flourishes elevate Nelson’s rousing herogasm",
+     "d": "2026-10-26"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1740967": {
+   "title": "Orijinal",
+   "released": "2026-10-29",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/orijinal-movie-review-a-time-travel-film-in-which-the-human-story-is-more-intriguing-than-the-time-travel/article71616842.ece",
+     "h": "‘Orijinal’ movie review: A time travel film in which the human story is more intriguing than the time travel",
+     "d": "2026-10-23"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1153576": {
+   "title": "Street Fighter",
+   "released": "2026-10-16",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/street-fighter-movie-review-noah-centineo-andrew-schulz-vidyut-jammwal-cody-rhodes-roman-reigns-jason-momoa-50-cent/article71592175.ece",
+     "h": "‘Street Fighter’ movie review: Fists, fetishes and a fighting chance at cult status",
+     "d": "2026-10-23"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1375156": {
+   "title": "Udta Teer",
+   "released": "2026-10-23",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/udta-teer-movie-review-ayushmann-khurrana-is-on-target-in-this-spy-misadventure/article71615236.ece",
+     "h": "‘Udta Teer’ movie review: Ayushmann Khurrana is on target in this spy misadventure",
+     "d": "2026-10-23"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1400940": {
+   "title": "Clayface",
+   "released": "2026-10-23",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/clayface-movie-review-tom-rhys-harries-shines-in-body-horror-thriller-clayface-review-clayface-ott-release/article71611386.ece",
+     "h": "‘Clayface’ movie review: Tom Rhys Harries shines in body-horror thriller",
+     "d": "2026-10-22"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1288069": {
+   "title": "Tenzing",
+   "released": "2026-10-15",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/tenzing-movie-review-genden-phuntsok-jennifer-peedom-tom-hiddleston-willem-dafoe-edmund-hillary/article71589471.ece",
+     "h": "‘Tenzing’ movie review: Genden Phuntsok is Mr. Amazing in Jennifer Peedom’s soulful ode to an overlooked hero",
+     "d": "2026-10-21"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1058424": {
+   "title": "Hope",
+   "released": "2026-10-29",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/hope-movie-review-na-hong-jin-hoyeon-korean-sci-fi-horror-movie/article71599282.ece",
+     "h": "‘Hope’ movie review: One Shibal After Another",
+     "d": "2026-10-18"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1255833": {
+   "title": "Whalefall",
+   "released": "2026-10-16",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/whalefall-movie-review-austin-abrams-is-a-fiercely-modern-jonah-in-this-whale-of-a-tale/article71592880.ece",
+     "h": "‘Whalefall’ movie review: Austin Abrams is a fiercely modern Jonah in this whale of a tale",
+     "d": "2026-10-16"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1654581": {
+   "title": "Nayyi Navelli",
+   "released": "2026-10-16",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/nayyi-navelli-movie-review-yami-gautams-genre-neutral-offering-is-high-on-decibels-low-on-charms/article71591867.ece",
+     "h": "‘Nayyi Navelli’ movie review: Yami Gautam’s genre-neutral offering is high on decibels, low on charms",
+     "d": "2026-10-16"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1389172": {
+   "title": "Reporting Live",
+   "released": "2026-10-09",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/reporting-live-movie-review-lost-in-the-shifting-sands-parineeti-chopra-netflix/article71564548.ece",
+     "h": "‘Reporting Live’ movie review: Lost in the shifting sands",
+     "d": "2026-10-09"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1281331": {
+   "title": "The Social Reckoning",
+   "released": "2026-10-22",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/the-social-reckoning-movie-review-aaron-sorkin-facebook-files/article71563805.ece",
+     "h": "‘The Social Reckoning’ movie review: Aaron Sorkin can’t optimise the MSIs in his (Meta)stisised Facebook Files slop",
+     "d": "2026-10-09"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "tv:288673": {
+   "title": "Carrie",
+   "released": "2026-10-07",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/carrie-series-review-mike-flanagan-summer-h-howell-horror/article71555051.ece",
+     "h": "‘Carrie’ series review: Mike Flanagan finds humanity in horror",
+     "d": "2026-10-08"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1195803": {
+   "title": "Wicker",
+   "released": "2026-11-05",
+   "items": [
+    {
+     "o": "NDTV",
+     "u": "https://www.ndtv.com/entertainment/wicker-review-olivia-colman-alexander-skarsgard-shine-in-a-wicked-and-strange-love-story-3-5-stars-12258028#publisher=newsstand",
+     "h": "Wicker Review: Olivia Colman, Alexander Skarsgard Shine In A Wicked And Strange Love Story",
+     "d": "2026-10-30"
+    },
+    {
+     "o": "Scroll",
+     "u": "https://scroll.in/reel/1096763/wicker-review-an-exquisitely-crafted-fairy-tale-romance?utm_source=rss&utm_medium=public",
+     "h": "‘Wicker’ review: An exquisitely crafted fairy tale romance",
+     "d": "2026-10-30"
+    }
+   ],
+   "updated": "2026-10-31"
+  }
+ }
+}
