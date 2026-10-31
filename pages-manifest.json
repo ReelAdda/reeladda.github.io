@@ -29581,7 +29581,8 @@
    "imdb": "tt1844624",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-31"
+   "srAt": "2026-10-31",
+   "archivedOn": "2026-10-31"
   },
   "chicago-fire": {
    "last": "2026-10-28",
@@ -56378,7 +56379,7 @@
    "kind": "movie",
    "title": "Scene",
    "rendered": "2026-10-21",
-   "fp": "b8acb4dcafd9",
+   "fp": "c7d56ab6e96f",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -57940,7 +57941,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-25",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -58466,7 +58467,6 @@
    "rendered": "2026-10-30",
    "fp": "5e8571ffd274",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "live": {
     "since": "2026-10-31",
@@ -58755,9 +58755,8 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "e5e2257715c0",
+   "fp": "de894e4a4337",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "live": {
     "since": "2026-10-31",
@@ -66137,7 +66136,7 @@
    "srAt": "2026-10-27"
   },
   "you-can-see-everything": {
-   "last": "2026-10-30",
+   "last": "2026-10-31",
    "tmdbId": 1765072,
    "released": "2026-10-16",
    "lang": "English",
@@ -66150,7 +66149,7 @@
     "w": 8
    },
    "rel": 2,
-   "fp": "7713ec5042b6",
+   "fp": "2237c43022df",
    "rendered": "2026-10-14",
    "imdb": "tt45368240",
    "fpv": 3,
@@ -106122,7 +106121,7 @@
    },
    "rel": 3,
    "truth": {
-    "at": "2026-10-23",
+    "at": "2026-10-31",
     "providers": [],
     "rentBuy": [],
     "released": "2026-10-23",
@@ -106137,7 +106136,7 @@
      "Zhang Yixing",
      "Carina Lau",
      "Hu Yu'an",
-     "Sisley Choi Si-Pui"
+     "Sisley Choi Si-pui"
     ]
    },
    "fpv": 3,
@@ -112844,7 +112843,7 @@
    "fpv": 3
   },
   "arrow": {
-   "last": "2026-10-23",
+   "last": "2026-10-31",
    "archivedOn": "2026-10-23",
    "pv": 13,
    "catalog": true,
@@ -112869,8 +112868,32 @@
    },
    "rel": 3,
    "rendered": "2026-10-23",
-   "fp": "0f7f323a7019",
-   "fpv": 3
+   "fp": "8063fc507f8d",
+   "fpv": 3,
+   "truth": {
+    "at": "2026-10-31",
+    "providers": [
+     "Prime Video"
+    ],
+    "rentBuy": [
+     "Amazon Video",
+     "Apple TV Store",
+     "Google Play Movies"
+    ],
+    "released": "2012-10-10",
+    "title": "Arrow",
+    "language": "English",
+    "genre": "Crime / Drama",
+    "director": "Andrew Kreisberg, Greg Berlanti",
+    "cast": [
+     "Stephen Amell",
+     "David Ramsey",
+     "Emily Bett Rickards",
+     "Katie Cassidy",
+     "Paul Blackthorne",
+     "Willa Holland"
+    ]
+   }
   },
   "the-spirit-of-the-beehive": {
    "last": "2026-10-23",
@@ -113090,7 +113113,28 @@
    "rel": 3,
    "rendered": "2026-10-23",
    "fp": "6c10085296db",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-10-31",
+    "providers": [
+     "ViX"
+    ],
+    "rentBuy": [],
+    "released": "2006-10-21",
+    "title": "El Chavo: The Animated Series",
+    "language": "Spanish",
+    "runtime": 23,
+    "genre": "Animation / Comedy",
+    "director": "Roberto Gómez Bolaños",
+    "cast": [
+     "Sebastián Llapur",
+     "Víctor Delgado",
+     "Erica Edwards",
+     "Jesús Guzmán",
+     "Mario Castañeda",
+     "Juan Carlos Tinoco"
+    ]
+   }
   },
   "the-awakening": {
    "last": "2026-10-30",
@@ -162769,7 +162813,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-24",
-   "fp": "e4233073648e",
+   "fp": "7608d5a4e7c6",
    "pv": 13,
    "live": {
     "since": "2026-10-24",
@@ -163248,8 +163292,25 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "3591f98ef766",
-   "fpv": 3
+   "fp": "cdef924c3055",
+   "fpv": 3,
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt37522541",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
   },
   "collision-course": {
    "last": "2026-10-31",
@@ -163280,6 +163341,19 @@
     "w": 8
    },
    "rel": 3
+  },
+  "dead-end-job": {
+   "last": "2026-10-31",
+   "tmdbId": 289517,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "Dead-End Job",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "21b23c170110",
+   "fpv": 3
   }
  },
  "au": {
@@ -174687,7 +174761,7 @@
     "at": "2026-10-18",
     "w": 8
    },
-   "fp": "78ee07156739",
+   "fp": "89330c24f67e",
    "rendered": "2026-10-11",
    "live": {
     "since": "2026-10-15",
@@ -214306,7 +214380,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-24",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "pv": 13,
    "live": {
     "since": "2026-10-24",
@@ -219059,7 +219133,7 @@
    "srv": 1,
    "srAt": "2026-10-27",
    "truth": {
-    "at": "2026-10-28",
+    "at": "2026-10-31",
     "providers": [
      "Disney+"
     ],
@@ -225520,7 +225594,7 @@
    "rendered": "2026-10-13",
    "imdb": "tt12042730",
    "truth": {
-    "at": "2026-10-19",
+    "at": "2026-10-31",
     "providers": [
      "Prime Video",
      "MGM Plus"
@@ -272149,7 +272223,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-25",
-   "fp": "a6cfc055300e",
+   "fp": "3dbd890a8dea",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -272612,8 +272686,25 @@
    "srAt": "2026-10-31",
    "epNext": "2026-11-05",
    "rendered": "2026-10-31",
-   "fp": "7155c30ef293",
-   "fpv": 3
+   "fp": "8366c8825e66",
+   "fpv": 3,
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "Apple TV"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt26598805",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
   },
   "identitti": {
    "last": "2026-10-31",
@@ -272626,6 +272717,19 @@
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
    "fp": "d7c2ebdce179",
+   "fpv": 3
+  },
+  "dead-end-job": {
+   "last": "2026-10-31",
+   "tmdbId": 289517,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "Dead-End Job",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "a7b39f8125ba",
    "fpv": 3
   }
  },
@@ -279184,7 +279288,7 @@
    "srAt": "2026-10-27"
   },
   "you-can-see-everything": {
-   "last": "2026-10-30",
+   "last": "2026-10-31",
    "tmdbId": 1765072,
    "released": "2026-10-16",
    "lang": "English",
@@ -279197,7 +279301,7 @@
     "at": "2026-10-31",
     "w": 8
    },
-   "fp": "11d5f4af8a14",
+   "fp": "a264f9be5683",
    "rendered": "2026-10-14",
    "imdb": "tt45368240",
    "fpv": 3,
@@ -329126,7 +329230,7 @@
    "kind": "movie",
    "title": "Scene",
    "rendered": "2026-10-21",
-   "fp": "556f2826bebb",
+   "fp": "6bdb74edc1db",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -330762,7 +330866,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-24",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "pv": 13,
    "live": {
     "since": "2026-10-24",
@@ -331416,7 +331520,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "fa240f9cd2fe",
+   "fp": "561445d508a8",
    "fpv": 3
   },
   "nocturne": {
@@ -331430,8 +331534,25 @@
    "srAt": "2026-10-31",
    "epNext": "2026-11-05",
    "rendered": "2026-10-31",
-   "fp": "4aa38a0d5558",
-   "fpv": 3
+   "fp": "b7ab717a08b3",
+   "fpv": 3,
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "Apple TV"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt26598805",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
   },
   "si-yugandhar": {
    "last": "2026-10-31",
@@ -331444,6 +331565,19 @@
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
    "fp": "9c662f0009eb",
+   "fpv": 3
+  },
+  "dead-end-job": {
+   "last": "2026-10-31",
+   "tmdbId": 289517,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "Dead-End Job",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "241930ffc29b",
    "fpv": 3
   }
  },
@@ -338436,7 +338570,7 @@
    "srAt": "2026-10-27"
   },
   "you-can-see-everything": {
-   "last": "2026-10-30",
+   "last": "2026-10-31",
    "tmdbId": 1765072,
    "released": "2026-10-16",
    "lang": "English",
@@ -338449,7 +338583,7 @@
     "at": "2026-10-17",
     "w": 6
    },
-   "fp": "97dee3f38516",
+   "fp": "06fee1ca6123",
    "rendered": "2026-10-14",
    "imdb": "tt45368240",
    "fpv": 3,
@@ -389812,7 +389946,7 @@
    "kind": "movie",
    "title": "Scene",
    "rendered": "2026-10-21",
-   "fp": "556f2826bebb",
+   "fp": "6bdb74edc1db",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -391498,7 +391632,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-25",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -391984,8 +392118,25 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "fa240f9cd2fe",
-   "fpv": 3
+   "fp": "1d8c80e18228",
+   "fpv": 3,
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt37522541",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
   },
   "pyre": {
    "last": "2026-10-31",
@@ -391998,6 +392149,19 @@
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
    "fp": "0941346f8848",
+   "fpv": 3
+  },
+  "dead-end-job": {
+   "last": "2026-10-31",
+   "tmdbId": 289517,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "Dead-End Job",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "6c118b5da115",
    "fpv": 3
   }
  },
@@ -443494,7 +443658,7 @@
    "kind": "movie",
    "title": "Scene",
    "rendered": "2026-10-17",
-   "fp": "556f2826bebb",
+   "fp": "6bdb74edc1db",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -445811,11 +445975,28 @@
    "kind": "tv",
    "title": "Where the Mask Ends",
    "rendered": "2026-10-19",
-   "fp": "c586fcfe6b4d",
+   "fp": "b4a7cb59fab8",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt42576855",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
   },
   "oh-my-kadavule": {
    "last": "2026-10-22",
@@ -449752,7 +449933,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-25",
-   "fp": "601291c6f8cd",
+   "fp": "332c5d3f78bf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -450229,7 +450410,8 @@
     "at": "2026-10-31",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-31"
   },
   "thedal": {
    "last": "2026-10-31",
@@ -450254,7 +450436,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "d752d9a28bfb",
+   "fp": "c6a0c0328f0b",
    "fpv": 3
   },
   "collision-course": {
@@ -450299,7 +450481,6 @@
    "rendered": "2026-10-31",
    "fp": "99ce6bc4f0c8",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "imdb": "tt31913088",
    "fcs": {
@@ -450308,6 +450489,19 @@
     "w": 8
    },
    "rel": 3
+  },
+  "akka": {
+   "last": "2026-10-31",
+   "tmdbId": 243555,
+   "released": "2026-10-30",
+   "lang": "Tamil",
+   "kind": "tv",
+   "title": "Akka",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "9700a66aee92",
+   "fpv": 3
   }
  },
  "my": {
@@ -487380,7 +487574,7 @@
    "lang": "Tamil",
    "kind": "movie",
    "title": "Scene",
-   "fp": "556f2826bebb",
+   "fp": "6bdb74edc1db",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -491465,14 +491659,14 @@
    "fpv": 3
   },
   "you-can-see-everything": {
-   "last": "2026-10-30",
+   "last": "2026-10-31",
    "tmdbId": 1765072,
    "released": "2026-10-16",
    "lang": "English",
    "kind": "movie",
    "title": "You Can See Everything",
    "rendered": "2026-10-15",
-   "fp": "11d5f4af8a14",
+   "fp": "a264f9be5683",
    "pv": 13,
    "fcs": {
     "v": "Worth a watch",
@@ -498964,11 +499158,28 @@
    "kind": "tv",
    "title": "Tigers Sniff the Rose",
    "rendered": "2026-10-25",
-   "fp": "22750f53cc47",
+   "fp": "ab7eea3e2292",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "WeTV"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt35324004",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
   },
   "surviving-hurricane-otis": {
    "last": "2026-10-31",
@@ -498978,7 +499189,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-25",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -499255,7 +499466,24 @@
    "srAt": "2026-10-29",
    "rendered": "2026-10-29",
    "fp": "5e8571ffd274",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt43655467",
+   "fcs": {
+    "v": "Skip",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
   },
   "will-you-still-be-my-friend": {
    "last": "2026-10-29",
@@ -499372,7 +499600,8 @@
     "at": "2026-10-31",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-10-31"
   },
   "ah-girl": {
    "last": "2026-10-30",
@@ -499410,7 +499639,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "fa240f9cd2fe",
+   "fp": "561445d508a8",
    "fpv": 3
   },
   "collision-course": {
@@ -499469,7 +499698,6 @@
    "rendered": "2026-10-31",
    "fp": "99ce6bc4f0c8",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "imdb": "tt31913088",
    "fcs": {
@@ -499478,6 +499706,32 @@
     "w": 8
    },
    "rel": 3
+  },
+  "akka": {
+   "last": "2026-10-31",
+   "tmdbId": 243555,
+   "released": "2026-10-30",
+   "lang": "Tamil",
+   "kind": "tv",
+   "title": "Akka",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "21466b597960",
+   "fpv": 3
+  },
+  "dead-end-job": {
+   "last": "2026-10-31",
+   "tmdbId": 289517,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "Dead-End Job",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "241930ffc29b",
+   "fpv": 3
   }
  },
  "ph": {
@@ -547551,7 +547805,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-25",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -548015,7 +548269,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "fa240f9cd2fe",
+   "fp": "561445d508a8",
    "fpv": 3
   },
   "collision-course": {
@@ -590322,7 +590576,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-24",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "pv": 13,
    "live": {
     "since": "2026-10-24",
@@ -590787,7 +591041,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "fa240f9cd2fe",
+   "fp": "561445d508a8",
    "fpv": 3
   },
   "collision-course": {
@@ -639519,14 +639773,14 @@
    "fpv": 3
   },
   "you-can-see-everything": {
-   "last": "2026-10-30",
+   "last": "2026-10-31",
    "tmdbId": 1765072,
    "released": "2026-10-16",
    "lang": "English",
    "kind": "movie",
    "title": "You Can See Everything",
    "rendered": "2026-10-25",
-   "fp": "c753d577e001",
+   "fp": "7cd6f14d560d",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt45368240",
@@ -639599,7 +639853,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-25",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -639941,7 +640195,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "fa240f9cd2fe",
+   "fp": "561445d508a8",
    "fpv": 3
   },
   "collision-course": {
@@ -690957,7 +691211,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-24",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "pv": 13,
    "live": {
     "since": "2026-10-24",
@@ -691289,7 +691543,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "fa240f9cd2fe",
+   "fp": "561445d508a8",
    "fpv": 3
   },
   "nocturne": {
@@ -691316,7 +691570,37 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "3d2556cc48be",
+   "fp": "fcb75706d5a8",
+   "fpv": 3,
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt38793125",
+   "fcs": {
+    "v": "early",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
+  },
+  "dead-end-job": {
+   "last": "2026-10-31",
+   "tmdbId": 289517,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "Dead-End Job",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "241930ffc29b",
    "fpv": 3
   }
  },
@@ -739797,7 +740081,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-24",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "pv": 13,
    "live": {
     "since": "2026-10-24",
@@ -740226,7 +740510,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "fa240f9cd2fe",
+   "fp": "561445d508a8",
    "fpv": 3
   },
   "collision-course": {
@@ -756193,7 +756477,7 @@
    "srv": 1,
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "a6cfc055300e",
+   "fp": "3dbd890a8dea",
    "fpv": 3,
    "archivedOn": "2026-10-30",
    "pv": 13,
@@ -772251,7 +772535,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-26",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -772539,7 +772823,24 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "95179f575233",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt43655467",
+   "fcs": {
+    "v": "Skip",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
   },
   "final-table": {
    "last": "2026-10-30",
@@ -772734,6 +773035,19 @@
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
    "fp": "b3e7a867f115",
+   "fpv": 3
+  },
+  "dead-end-job": {
+   "last": "2026-10-31",
+   "tmdbId": 289517,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "Dead-End Job",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "50459744c9e2",
    "fpv": 3
   }
  },
@@ -787046,7 +787360,7 @@
    "kind": "movie",
    "title": "Nightborn",
    "rendered": "2026-10-21",
-   "fp": "329da4b74416",
+   "fp": "b65790f4fbc3",
    "pv": 13,
    "fcs": {
     "v": "Skip",
@@ -787060,7 +787374,9 @@
    "truth": {
     "at": "2026-10-31",
     "providers": [],
-    "rentBuy": [],
+    "rentBuy": [
+     "Movistar Plus+"
+    ],
     "released": "2026-10-16",
     "title": "Nightborn",
     "language": "Finnish",
@@ -788595,7 +788911,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-24",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "pv": 13,
    "live": {
     "since": "2026-10-24",
@@ -789062,7 +789378,24 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "5e8571ffd274",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt43655467",
+   "fcs": {
+    "v": "Skip",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
   },
   "falcons": {
    "last": "2026-10-30",
@@ -789267,6 +789600,19 @@
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
    "fp": "3ca195295c5c",
+   "fpv": 3
+  },
+  "dead-end-job": {
+   "last": "2026-10-31",
+   "tmdbId": 289517,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "Dead-End Job",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "a7b39f8125ba",
    "fpv": 3
   }
  },
@@ -805307,7 +805653,7 @@
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-24",
-   "fp": "761de032df7d",
+   "fp": "4b436a5718d4",
    "pv": 13,
    "live": {
     "since": "2026-10-24",
@@ -805756,7 +806102,24 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "183baa6a5e6d",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-10-31",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-31",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-10-31",
+    "misses": 0
+   },
+   "imdb": "tt43655467",
+   "fcs": {
+    "v": "Skip",
+    "at": "2026-10-31",
+    "w": 8
+   },
+   "rel": 3
   },
   "ghosts": {
    "last": "2026-10-31",
@@ -805914,6 +806277,19 @@
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
    "fp": "f1b8ec4f84e2",
+   "fpv": 3
+  },
+  "dead-end-job": {
+   "last": "2026-10-31",
+   "tmdbId": 289517,
+   "released": "2026-10-30",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "Dead-End Job",
+   "srv": 1,
+   "srAt": "2026-10-31",
+   "rendered": "2026-10-31",
+   "fp": "a7b39f8125ba",
    "fpv": 3
   }
  }

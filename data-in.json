@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-10-31T16:54:45.307Z",
+ "generatedAt": "2026-10-31T17:59:35.554Z",
  "country": "in",
- "pick": "VisionQuest",
+ "pick": "Clayface",
  "theatres": [
   {
    "title": "Clayface",
@@ -9,15 +9,15 @@
    "language": "English",
    "released": "2026-10-23",
    "review": "Matt Hagen's meteoric rise from Gotham street kid to Hollywood leading man is tragically cut short when a local crime boss's actions leave him horribly…",
-   "rating": 7.4,
+   "rating": 7.5,
    "scores": [
     {
      "source": "TMDB",
-     "score": "7.4/10"
+     "score": "7.5/10"
     }
    ],
-   "votes": 295,
-   "verdict": "Worth a watch",
+   "votes": 298,
+   "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/9l1NuFjel2j89hiuiJbsxfblqjy.jpg",
    "isRecent": false,
    "isFresh": false,
@@ -168,7 +168,7 @@
    "slug": "clayface",
    "wikiWeeklyViews": 1009870,
    "trending": true,
-   "trailerViews": 368080,
+   "trailerViews": 368489,
    "take": "Critics liked the direction and humour but criticised the twists.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -196,9 +196,9 @@
     "article": "Clayface (film)"
    },
    "fcScore": {
-    "verdict": "Worth a watch",
-    "reason": "Critics are warmer than audiences.",
-    "audience": "Liked",
+    "verdict": "Must watch",
+    "reason": "Audiences and critics agree.",
+    "audience": "Loved",
     "critics": "positive",
     "basis": "both"
    }
@@ -258,6 +258,13 @@
      "kind": "movie"
     },
     {
+     "title": "Monster Hunter",
+     "slug": "monster-hunter",
+     "poster": "https://image.tmdb.org/t/p/w342/1UCOF11QCw8kcqvce8LKOO6pimh.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "The Hunger Games: The Ballad of Songbirds & Snakes",
      "slug": "the-hunger-games-the-ballad-of-songbirds-snakes",
      "poster": "https://image.tmdb.org/t/p/w342/mBaXZ95R2OxueZhvQbcEWy2DqyO.jpg",
@@ -265,16 +272,9 @@
      "kind": "movie"
     },
     {
-     "title": "Black Adam",
-     "slug": "black-adam",
-     "poster": "https://image.tmdb.org/t/p/w342/rCtreCr4xiYEWDQTebybolIh6Xe.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Wonder Woman 1984",
-     "slug": "wonder-woman-1984",
-     "poster": "https://image.tmdb.org/t/p/w342/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
+     "title": "Mulan",
+     "slug": "mulan",
+     "poster": "https://image.tmdb.org/t/p/w342/aKx1ARwG55zZ0GpRvU2WrGrCG9o.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -293,13 +293,6 @@
      "kind": "movie"
     },
     {
-     "title": "Crouching Tiger, Hidden Dragon: Sword of Destiny",
-     "slug": "crouching-tiger-hidden-dragon-sword-of-destiny",
-     "poster": "https://image.tmdb.org/t/p/w342/te3aeAyhkfqgpa5BSTq3oNxGqQD.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Masters of the Universe",
      "slug": "masters-of-the-universe",
      "poster": "https://image.tmdb.org/t/p/w342/gaUecXFd31V68yOTJPJYaB9YhAf.jpg",
@@ -307,16 +300,9 @@
      "kind": "movie"
     },
     {
-     "title": "Futurama: Bender's Game",
-     "slug": "futurama-bender-s-game",
-     "poster": "https://image.tmdb.org/t/p/w342/bx8OVOBn5WP9TJJuOpRzyMCdzzb.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "A Knight's Tale",
-     "slug": "a-knight-s-tale",
-     "poster": "https://image.tmdb.org/t/p/w342/srb1XnrlDZHcdpjBKqUu4qAzxKU.jpg",
+     "title": "Crouching Tiger, Hidden Dragon: Sword of Destiny",
+     "slug": "crouching-tiger-hidden-dragon-sword-of-destiny",
+     "poster": "https://image.tmdb.org/t/p/w342/te3aeAyhkfqgpa5BSTq3oNxGqQD.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -324,6 +310,20 @@
      "title": "The Big Brawl",
      "slug": "the-big-brawl",
      "poster": "https://image.tmdb.org/t/p/w342/jFl2hmGWFX9mw0NvOOn08Zr8bn5.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Warcraft",
+     "slug": "warcraft",
+     "poster": "https://image.tmdb.org/t/p/w342/eGi5aoxaZveqNLtE7BZJCuWwR3G.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "A Knight's Tale",
+     "slug": "a-knight-s-tale",
+     "poster": "https://image.tmdb.org/t/p/w342/srb1XnrlDZHcdpjBKqUu4qAzxKU.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -367,7 +367,7 @@
    "theatricalHere": true,
    "slug": "street-fighter",
    "wikiWeeklyViews": 321186,
-   "trailerViews": 35481930,
+   "trailerViews": 35486328,
    "take": "Critics were split. They praised the performances and criticised the humour.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1120,7 +1120,7 @@
    ],
    "theatricalHere": true,
    "slug": "pehla-pyaar-doosri-baar",
-   "trailerViews": 23304867
+   "trailerViews": 23305871
   },
   {
    "title": "Nayyi Navelli",
@@ -1481,7 +1481,7 @@
    "ottSince": "2026-10-29",
    "ottFreshDate": "2026-10-27",
    "slug": "drive-the-pretenders",
-   "trailerViews": 838490,
+   "trailerViews": 843198,
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences love it.",
@@ -1740,7 +1740,7 @@
    "slug": "avatar-seven-havens",
    "wikiWeeklyViews": 228399,
    "trending": true,
-   "trailerViews": 6007333,
+   "trailerViews": 6008053,
    "take": "Critics were mostly positive.",
    "takeSrc": "wiki",
    "takeArticle": "Avatar: Seven Havens",
@@ -1932,7 +1932,7 @@
    "ottSince": "2026-10-31",
    "ottFreshDate": "2026-10-30",
    "slug": "meethe-mein-kya-hai",
-   "trailerViews": 748917,
+   "trailerViews": 751344,
    "rv": [
     {
      "o": "Scroll",
@@ -2163,7 +2163,7 @@
    "ottSince": "2026-10-23",
    "ottFreshDate": "2026-10-23",
    "slug": "chaar-yaar",
-   "trailerViews": 36777
+   "trailerViews": 36778
   },
   {
    "title": "Reporting Live",
@@ -2333,7 +2333,7 @@
    "ottFreshDate": "2026-10-09",
    "stillGood": true,
    "slug": "reporting-live",
-   "trailerViews": 13784,
+   "trailerViews": 13772,
    "rv": [
     {
      "o": "The Hindu",
@@ -2568,7 +2568,7 @@
    "stillGood": true,
    "slug": "cyberpunk-edgerunners",
    "wikiWeeklyViews": 72480,
-   "trailerViews": 7773899,
+   "trailerViews": 7774216,
    "take": "Reviewers praised the action and visuals.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -3056,7 +3056,7 @@
    "slug": "visionquest",
    "wikiWeeklyViews": 460923,
    "trending": true,
-   "trailerViews": 23783072,
+   "trailerViews": 23786502,
    "take": "Critics were mostly positive.",
    "takeSrc": "wiki",
    "takeArticle": "VisionQuest",
@@ -3323,7 +3323,7 @@
    "stillGood": true,
    "slug": "tulsa-king",
    "wikiWeeklyViews": 82327,
-   "trailerViews": 11447623,
+   "trailerViews": 11447863,
    "take": "Critics liked the humour and second half but criticised the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -3597,7 +3597,7 @@
    "stillGood": true,
    "slug": "mobland",
    "wikiWeeklyViews": 194908,
-   "trailerViews": 12369428,
+   "trailerViews": 12370663,
    "take": "Critics were split.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
@@ -3780,7 +3780,7 @@
    ],
    "theatricalHere": true,
    "slug": "ramayana",
-   "trailerViews": 20481996,
+   "trailerViews": 20486925,
    "verdict": ""
   },
   {
@@ -3936,7 +3936,7 @@
    ],
    "theatricalHere": true,
    "slug": "wild-horse-nine",
-   "trailerViews": 2770483,
+   "trailerViews": 2770667,
    "criticsTone": "positive",
    "criticsCount": 1,
    "verdict": ""
@@ -4077,7 +4077,7 @@
     },
     {
      "name": "Lal",
-     "character": null,
+     "character": "Stephen",
      "photo": "https://image.tmdb.org/t/p/w185/ds3eeWA56YFeeuWP6WUs1ok58FK.jpg"
     },
     {
@@ -4086,9 +4086,9 @@
      "photo": "https://image.tmdb.org/t/p/w185/gZxzckfurzV0oQOME8b1ATNoMHD.jpg"
     },
     {
-     "name": "John Vijay",
-     "character": null,
-     "photo": "https://image.tmdb.org/t/p/w185/1H4uUEI32DmZWfTGmWnXyu0BrU7.jpg"
+     "name": "Raj Priyan",
+     "character": "Sibi",
+     "photo": "https://image.tmdb.org/t/p/w185/ss6VaBehRdfWYbELImrxynCXfcF.jpg"
     }
    ],
    "theatricalHere": true,
@@ -4248,7 +4248,7 @@
    ],
    "theatricalHere": true,
    "slug": "ghost-soldier",
-   "trailerViews": 4325421,
+   "trailerViews": 4328740,
    "verdict": ""
   },
   {
@@ -4411,7 +4411,7 @@
    ],
    "theatricalHere": true,
    "slug": "ene-repeat",
-   "trailerViews": 280436,
+   "trailerViews": 280448,
    "verdict": ""
   },
   {
@@ -4576,7 +4576,7 @@
    "digitalDate": "2026-12-23",
    "digitalNote": "Netflix",
    "slug": "the-further-mis-adventures-of-cliff-booth",
-   "trailerViews": 29041864,
+   "trailerViews": 29117080,
    "verdict": ""
   },
   {
@@ -4722,7 +4722,7 @@
    ],
    "theatricalHere": true,
    "slug": "bokshi",
-   "trailerViews": 222752,
+   "trailerViews": 223898,
    "verdict": ""
   },
   {
@@ -4878,7 +4878,7 @@
    ],
    "theatricalHere": true,
    "slug": "king-2026",
-   "trailerViews": 49936976,
+   "trailerViews": 49946620,
    "verdict": ""
   }
  ],
@@ -6477,6 +6477,212 @@
      }
     },
     {
+     "title": "Akka",
+     "genre": "Drama / Crime",
+     "language": "Tamil",
+     "released": "2026-10-30",
+     "review": "In a kingdom ruled by women, matriarch Bhavani faces her biggest threat in Rudra, a ruthless rebel eyeing her land and legacy.",
+     "rating": null,
+     "scores": [
+      {
+       "source": "TMDB",
+       "score": "New release"
+      }
+     ],
+     "votes": 0,
+     "verdict": "Just released — verdict soon",
+     "poster": "https://image.tmdb.org/t/p/w342/tdnHaR0vlKMQbjmaCs2V3LDmzSd.jpg",
+     "isRecent": true,
+     "isFresh": true,
+     "kind": "tv",
+     "tmdbId": 243555,
+     "popularity": 42.9683,
+     "episodes": {
+      "count": 5,
+      "seasons": 1,
+      "limited": false,
+      "season": 1,
+      "next": null,
+      "list": [
+       {
+        "e": 1,
+        "name": "The Sisterhood",
+        "date": "2026-10-30",
+        "runtime": 46
+       },
+       {
+        "e": 2,
+        "name": "Wounds and Scars",
+        "date": "2026-10-30",
+        "runtime": 32
+       },
+       {
+        "e": 3,
+        "name": "A Challenge Wrapped in Blood",
+        "date": "2026-10-30",
+        "runtime": 30
+       },
+       {
+        "e": 4,
+        "name": "A Heart Turned",
+        "date": "2026-10-30",
+        "runtime": 34
+       },
+       {
+        "e": 5,
+        "name": "A Queen for All",
+        "date": "2026-10-30",
+        "runtime": 39
+       }
+      ]
+     },
+     "cert": "A",
+     "trailer": "https://www.youtube.com/watch?v=NwJhml1_D54",
+     "providers": [
+      "Netflix"
+     ],
+     "cast": [
+      "Keerthy Suresh",
+      "Radhika Apte",
+      "Tanvi Azmi",
+      "B. Jayashree"
+     ],
+     "director": "Dharmaraj Shetty",
+     "runtime": null,
+     "imdbVotes": null,
+     "trailerDate": "2026-10-19T05:30:21.000Z",
+     "imdbId": "tt29625288",
+     "seasons": 1,
+     "freshDate": "2026-10-30",
+     "badge": "New show",
+     "similar": [
+      {
+       "title": "Power Book IV: Force",
+       "slug": "power-book-iv-force",
+       "poster": "https://image.tmdb.org/t/p/w342/yzL4Tqbw2JA9MCsHJWFC4xV1IYU.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "The Patient",
+       "slug": "the-patient",
+       "poster": "https://image.tmdb.org/t/p/w342/fB1848j0pvNnYilXB0ho5OCfiIz.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "Criminal Record",
+       "slug": "criminal-record",
+       "poster": "https://image.tmdb.org/t/p/w342/kpnfeVRExCutHXFVXzaSdT8tAJl.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "This City Is Ours",
+       "slug": "this-city-is-ours",
+       "poster": "https://image.tmdb.org/t/p/w342/75BwofwAZbf6GlhP2m6NPpP3bW2.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "Gone",
+       "slug": "gone",
+       "poster": "https://image.tmdb.org/t/p/w342/qnxKB5HlkAZZcyIiITIV7dAUX7u.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "Good Girls",
+       "slug": "good-girls",
+       "poster": "https://image.tmdb.org/t/p/w342/wpgg6G3UHXepH2Zgpt4W60d6gxR.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "Good Behavior",
+       "slug": "good-behavior",
+       "poster": "https://image.tmdb.org/t/p/w342/qnXx9TMHCfOHgEZ5vv76pPmIwTS.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "Goliath",
+       "slug": "goliath",
+       "poster": "https://image.tmdb.org/t/p/w342/b7ygC3GRaq4xc0nkWdGnydtMfvD.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "Wentworth",
+       "slug": "wentworth",
+       "poster": "https://image.tmdb.org/t/p/w342/3nikr0NE3t8UMgI1Ba6hXaeEgKr.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "Queen of the South",
+       "slug": "queen-of-the-south",
+       "poster": "https://image.tmdb.org/t/p/w342/rzdC5EHkkKJE6OPVdh6gT1pR1c9.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "Mayans M.C.",
+       "slug": "mayans-m-c",
+       "poster": "https://image.tmdb.org/t/p/w342/510A0upV9WRAynEgs1E2B3eBxi5.jpg",
+       "language": "English",
+       "kind": "tv"
+      },
+      {
+       "title": "Sneaky Pete",
+       "slug": "sneaky-pete",
+       "poster": "https://image.tmdb.org/t/p/w342/nNpcea9lLHI4iv8QpOIvHveVnT9.jpg",
+       "language": "English",
+       "kind": "tv"
+      }
+     ],
+     "backdrop": "https://image.tmdb.org/t/p/w780/cVUKFfws4upCB4ytz5uGIONIiRc.jpg",
+     "backdropPath": "/cVUKFfws4upCB4ytz5uGIONIiRc.jpg",
+     "posterPath": "/tdnHaR0vlKMQbjmaCs2V3LDmzSd.jpg",
+     "fullReview": "In a kingdom ruled by women, matriarch Bhavani faces her biggest threat in Rudra, a ruthless rebel eyeing her land and legacy.",
+     "castPics": [
+      {
+       "name": "Keerthy Suresh",
+       "character": "Bhavani",
+       "photo": "https://image.tmdb.org/t/p/w185/fTdgSinsAitdujBBEUEA72GY0pv.jpg"
+      },
+      {
+       "name": "Radhika Apte",
+       "character": "Rudra",
+       "photo": "https://image.tmdb.org/t/p/w185/wKPybRcSYcbgDiJZwELudrRNf0r.jpg"
+      },
+      {
+       "name": "Tanvi Azmi",
+       "character": "Mutthakka",
+       "photo": "https://image.tmdb.org/t/p/w185/zKxZCZahNstKxkF7YPa2DqgadWC.jpg"
+      },
+      {
+       "name": "B. Jayashree",
+       "character": "Duggamma",
+       "photo": "https://image.tmdb.org/t/p/w185/gayp1aarqRRXleAfiu1pWbJxOoZ.jpg"
+      },
+      {
+       "name": "Nivedita Bhargava",
+       "character": "Subbamma",
+       "photo": "https://image.tmdb.org/t/p/w185/zGFHvqzfo0K2gdajhbnQG0n9UHz.jpg"
+      },
+      {
+       "name": "Anshumaan Pushkar",
+       "character": "Amar",
+       "photo": "https://image.tmdb.org/t/p/w185/ktbqCXjoqLuD96tTkHo1PVqVi14.jpg"
+      }
+     ],
+     "platform": "Netflix",
+     "ottSince": "2026-10-31",
+     "ottFreshDate": "2026-10-30",
+     "slug": "akka"
+    },
+    {
      "title": "#Love",
      "genre": "Drama / Comedy",
      "language": "Tamil",
@@ -7595,13 +7801,6 @@
      "badge": null,
      "similar": [
       {
-       "title": "Eradication",
-       "slug": "eradication",
-       "poster": "https://image.tmdb.org/t/p/w342/6XZYA9VtCcidCU8Hus0J0V9wFhY.jpg",
-       "language": "English",
-       "kind": "movie"
-      },
-      {
        "title": "Play Dead",
        "slug": "play-dead",
        "poster": "https://image.tmdb.org/t/p/w342/zeiwFQzyMNp6JBwCfSspG5ZcoLp.jpg",
@@ -7675,6 +7874,13 @@
        "title": "Don't Move",
        "slug": "don-t-move",
        "poster": "https://image.tmdb.org/t/p/w342/cRDJxdnRb7ikKd6fVJTrGeaL34v.jpg",
+       "language": "English",
+       "kind": "movie"
+      },
+      {
+       "title": "The Jester",
+       "slug": "the-jester",
+       "poster": "https://image.tmdb.org/t/p/w342/zZzW0wUcyLXBLMSGasdvtLefwsL.jpg",
        "language": "English",
        "kind": "movie"
       }
@@ -9129,8 +9335,8 @@
        "kind": "movie"
       }
      ],
-     "backdrop": "https://image.tmdb.org/t/p/w780/cn5RbvKzrYskQhDkofDaJYjcv1D.jpg",
-     "backdropPath": "/cn5RbvKzrYskQhDkofDaJYjcv1D.jpg",
+     "backdrop": "https://image.tmdb.org/t/p/w780/fvfXiUaexUqCitmOftGBXgNO6Of.jpg",
+     "backdropPath": "/fvfXiUaexUqCitmOftGBXgNO6Of.jpg",
      "posterPath": "/wRKg0WoPV0D3bCl1B5jJtcRdU1Z.jpg",
      "fullReview": "Follows Avarachan, his children and the various family and social relationships that shape their lives.",
      "castPics": [
@@ -9877,287 +10083,6 @@
    }
   },
   {
-   "title": "American Horror Story",
-   "genre": "Drama / Mystery",
-   "language": "English",
-   "released": "2011-10-05",
-   "review": "An anthology horror drama series centering on different characters and locations, including a house with a murderous past, an asylum, a witch coven, a freak…",
-   "rating": 8.1,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "8.1/10"
-    }
-   ],
-   "votes": 6273,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/yCkPLQ10qKIUgRBXmQVVMF1h96d.jpg",
-   "isRecent": false,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 1413,
-   "popularity": 159.6129,
-   "episodes": {
-    "count": 145,
-    "seasons": 13,
-    "limited": false,
-    "season": 13,
-    "next": null,
-    "list": [
-     {
-      "e": 1,
-      "name": "13",
-      "date": "2026-09-24",
-      "runtime": 34
-     },
-     {
-      "e": 2,
-      "name": "1:13 AM",
-      "date": "2026-09-24",
-      "runtime": 33
-     },
-     {
-      "e": 3,
-      "name": "Rauhnacht",
-      "date": "2026-09-24",
-      "runtime": 23
-     },
-     {
-      "e": 4,
-      "name": "Is That All There Is?",
-      "date": "2026-10-01",
-      "runtime": 30
-     },
-     {
-      "e": 5,
-      "name": "Date Night",
-      "date": "2026-10-01",
-      "runtime": 27
-     },
-     {
-      "e": 6,
-      "name": "The Return of Devil's Night",
-      "date": "2026-10-01",
-      "runtime": 25
-     },
-     {
-      "e": 7,
-      "name": "The Baddest Witch of Them All",
-      "date": "2026-10-08",
-      "runtime": 24
-     },
-     {
-      "e": 8,
-      "name": "Hell No",
-      "date": "2026-10-08",
-      "runtime": 31
-     },
-     {
-      "e": 9,
-      "name": "The Devil Is in the Details",
-      "date": "2026-10-15",
-      "runtime": 34
-     },
-     {
-      "e": 10,
-      "name": "The Prodigal Son",
-      "date": "2026-10-15",
-      "runtime": 25
-     },
-     {
-      "e": 11,
-      "name": "Madison's Happy Ending",
-      "date": "2026-10-22",
-      "runtime": 32
-     },
-     {
-      "e": 12,
-      "name": "Sisters in Arms",
-      "date": "2026-10-22",
-      "runtime": 32
-     },
-     {
-      "e": 13,
-      "name": "Devil of a Good Time",
-      "date": "2026-10-29",
-      "runtime": 39
-     }
-    ]
-   },
-   "cert": "A",
-   "trailer": "https://www.youtube.com/watch?v=nLJR2twdK00",
-   "providers": [
-    "JioHotstar"
-   ],
-   "cast": [
-    "Sarah Paulson",
-    "Evan Peters",
-    "Angela Bassett",
-    "Kathy Bates"
-   ],
-   "director": "Ryan Murphy",
-   "runtime": null,
-   "imdbVotes": null,
-   "trailerDate": "2021-07-08T17:55:47.000Z",
-   "imdbId": "tt1844624",
-   "seasons": 13,
-   "freshDate": "2026-09-24",
-   "badge": null,
-   "similar": [
-    {
-     "title": "Guillermo del Toro's Cabinet of Curiosities",
-     "slug": "guillermo-del-toro-s-cabinet-of-curiosities",
-     "poster": "https://image.tmdb.org/t/p/w342/a91e9hpWwfCqxJI4xM9Q2RhuxgI.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "American Horror Stories",
-     "slug": "american-horror-stories",
-     "poster": "https://image.tmdb.org/t/p/w342/8b9FGJ9WhpkeGFOHYgKjPT5AXS6.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Motherland: Fort Salem",
-     "slug": "motherland-fort-salem",
-     "poster": "https://image.tmdb.org/t/p/w342/s2dBDw3ns9rss51ikDtcINehMQM.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Them",
-     "slug": "them",
-     "poster": "https://image.tmdb.org/t/p/w342/2JIrVunDSjldv7Jv2uNKrrqwfej.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Haunting of Bly Manor",
-     "slug": "the-haunting-of-bly-manor",
-     "poster": "https://image.tmdb.org/t/p/w342/vIXQ8UymmQ7zJEPrKJP3s3fSbhR.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Mayfair Witches",
-     "slug": "mayfair-witches",
-     "poster": "https://image.tmdb.org/t/p/w342/eDl1veju2Hf3tyFmGAedtGXb9Yv.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Sanctuary: A Witch's Tale",
-     "slug": "sanctuary-a-witch-s-tale",
-     "poster": "https://image.tmdb.org/t/p/w342/iZllgPmOXS5PadAs4mDp6JhQJod.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Lore",
-     "slug": "lore",
-     "poster": "https://image.tmdb.org/t/p/w342/xNixoyzlSfJVy3Lp7AB1Vwrg2Va.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Masters of Horror",
-     "slug": "masters-of-horror",
-     "poster": "https://image.tmdb.org/t/p/w342/vgTy1Lfi5P1yD7ZvsuoPKYvxwzv.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Creepshow",
-     "slug": "creepshow",
-     "poster": "https://image.tmdb.org/t/p/w342/fassm77VqtSDHv9x17eJ3DkGVml.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Freddy's Nightmares",
-     "slug": "freddy-s-nightmares",
-     "poster": "https://image.tmdb.org/t/p/w342/tISTXELQn3ZFC8mgBwEH77xKXkZ.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Terror",
-     "slug": "the-terror",
-     "poster": "https://image.tmdb.org/t/p/w342/fUVn5mScv83FfwrRUUR694yA7bd.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/5G4Bnc4Q0YUK1bwLEUYmIsmm2Ib.jpg",
-   "backdropPath": "/5G4Bnc4Q0YUK1bwLEUYmIsmm2Ib.jpg",
-   "posterPath": "/yCkPLQ10qKIUgRBXmQVVMF1h96d.jpg",
-   "fullReview": "An anthology horror drama series centering on different characters and locations, including a house with a murderous past, an asylum, a witch coven, a freak show, a hotel, a farmhouse in Roanoke, a cult, the apocalypse and a summer camp.",
-   "castPics": [
-    {
-     "name": "Sarah Paulson",
-     "character": "Cordelia Goode / Sally McKenna / Ms. Wilhemina Venable / Tuberculosis Karen / Mamie Eisenhower",
-     "photo": "https://image.tmdb.org/t/p/w185/tJnhBV516yrekR3hTDUw15UMbxS.jpg"
-    },
-    {
-     "name": "Evan Peters",
-     "character": "Tate Langdon / James Patrick March / Kai Anderson",
-     "photo": "https://image.tmdb.org/t/p/w185/m9okq20ca2Md38i2ekJeKs3vTwa.jpg"
-    },
-    {
-     "name": "Angela Bassett",
-     "character": "Marie Laveau",
-     "photo": "https://image.tmdb.org/t/p/w185/tKnuviliyeKNGlo26IU5gIrJAtd.jpg"
-    },
-    {
-     "name": "Kathy Bates",
-     "character": "Delphine LaLaurie",
-     "photo": "https://image.tmdb.org/t/p/w185/3MsayDvY73uXGVbCFHyy1ABTacV.jpg"
-    },
-    {
-     "name": "Emma Roberts",
-     "character": "Madison Montgomery",
-     "photo": "https://image.tmdb.org/t/p/w185/utggW2yIufP3A5CGdT8H5mXyGLs.jpg"
-    },
-    {
-     "name": "Billie Lourd",
-     "character": "Mallory / Winter Anderson",
-     "photo": "https://image.tmdb.org/t/p/w185/1u8bZL6ZXu5iDbPO3Z0Spetyt34.jpg"
-    }
-   ],
-   "platform": "JioHotstar",
-   "ottSince": "2026-09-25",
-   "ottFreshDate": "2026-09-24",
-   "slug": "american-horror-story",
-   "take": "Critics liked the visuals and production design but criticised the second half.",
-   "takeSrc": "wiki",
-   "takeAspects": [
-    "visuals",
-    "production design"
-   ],
-   "takeArticle": "American Horror Story",
-   "criticsTone": "positive",
-   "criticsCount": 3,
-   "reception": {
-    "rt": {
-     "pct": 72
-    },
-    "ratings": {
-     "n": 3,
-     "median": 3
-    },
-    "asOf": "2026-10-31",
-    "article": "American Horror Story"
-   },
-   "fcScore": {
-    "verdict": "Must watch",
-    "reason": "Audiences and critics agree.",
-    "audience": "Loved",
-    "critics": "positive",
-    "basis": "both"
-   }
-  },
-  {
    "title": "The Terminal List",
    "genre": "Action & Adventure / Drama",
    "language": "English",
@@ -10654,6 +10579,206 @@
    }
   },
   {
+   "title": "Ali G: Who Iz I?",
+   "genre": "Comedy",
+   "language": "English",
+   "released": "2026-10-22",
+   "review": "After twenty years spent \"chillin', tokin' and bonin'\", Ali G is shocked to discover that his long-term girlfriend, Julie, is 8 months pregnant.",
+   "rating": 6,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "6.0/10"
+    }
+   ],
+   "votes": 83,
+   "verdict": "Skip",
+   "poster": "https://image.tmdb.org/t/p/w342/uTyVxPeWX8Ai30IQoyDDQONNcq.jpg",
+   "isRecent": false,
+   "isFresh": false,
+   "kind": "movie",
+   "tmdbId": 1727734,
+   "popularity": 103.9137,
+   "franchise": {
+    "c": {
+     "id": 1727735,
+     "name": "Ali G Collection"
+    },
+    "u": []
+   },
+   "cert": null,
+   "trailer": "https://www.youtube.com/watch?v=pV32AcPa-iA",
+   "providers": [
+    "Prime Video"
+   ],
+   "cast": [
+    "Sacha Baron Cohen",
+    "Morgana Robinson",
+    "Alpha Miknas",
+    "Clive Russell"
+   ],
+   "director": "Sacha Baron Cohen",
+   "runtime": 89,
+   "imdbVotes": null,
+   "trailerDate": "2026-10-09T13:00:04.000Z",
+   "imdbId": "tt43655467",
+   "seasons": null,
+   "freshDate": "2026-10-22",
+   "badge": null,
+   "similar": [
+    {
+     "title": "Accident Man: Hitman's Holiday",
+     "slug": "accident-man-hitman-s-holiday",
+     "poster": "https://image.tmdb.org/t/p/w342/8XF5EIDUOZv1p9orukdyERvv2Qn.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Babes",
+     "slug": "babes",
+     "poster": "https://image.tmdb.org/t/p/w342/1Cg4G1iQpisGXmWqns5uo4I6fPk.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Balls Up",
+     "slug": "balls-up",
+     "poster": "https://image.tmdb.org/t/p/w342/xwvJ3WzdJ1OCuDoY8LAxBUlQyig.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Seriously Single",
+     "slug": "seriously-single",
+     "poster": "https://image.tmdb.org/t/p/w342/qptLj4WxATqp3MZq97JmhYjtc9B.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Beverly Hills Cop: Axel F",
+     "slug": "beverly-hills-cop-axel-f",
+     "poster": "https://image.tmdb.org/t/p/w342/yE0iZBxkL8aKYNkkeHoUzx5M88c.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Coming 2 America",
+     "slug": "coming-2-america",
+     "poster": "https://image.tmdb.org/t/p/w342/nWBPLkqNApY5pgrJFMiI9joSI30.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "My Spy The Eternal City",
+     "slug": "my-spy-the-eternal-city",
+     "poster": "https://image.tmdb.org/t/p/w342/fRBfkzSrcyrnUfVgpEtTurEEiac.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Me Time",
+     "slug": "me-time",
+     "poster": "https://image.tmdb.org/t/p/w342/voNDXnX1GoIY3ZaKLlLjoiParFk.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Wake Up Dead Man: A Knives Out Mystery",
+     "slug": "wake-up-dead-man-a-knives-out-mystery",
+     "poster": "https://image.tmdb.org/t/p/w342/iV9LM8aUb83BjCCx2RUnKE5sSQg.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Eenie Meanie",
+     "slug": "eenie-meanie",
+     "poster": "https://image.tmdb.org/t/p/w342/12Va3oO3oYUdOd75zM57Nx1976a.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Driver's Ed",
+     "slug": "driver-s-ed",
+     "poster": "https://image.tmdb.org/t/p/w342/hHbzSzjJnmcq02l2razSScBEVBf.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Shane Gillis: Beautiful Dogs",
+     "slug": "shane-gillis-beautiful-dogs",
+     "poster": "https://image.tmdb.org/t/p/w342/8SYsQOur3wAfh1LJf6rvTFpIPHy.jpg",
+     "language": "English",
+     "kind": "movie"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/hJcGJLi34zE4RhzsiDR6f7pw50K.jpg",
+   "backdropPath": "/hJcGJLi34zE4RhzsiDR6f7pw50K.jpg",
+   "posterPath": "/uTyVxPeWX8Ai30IQoyDDQONNcq.jpg",
+   "fullReview": "After twenty years spent \"chillin', tokin' and bonin'\", Ali G is shocked to discover that his long-term girlfriend, Julie, is 8 months pregnant. Faced with an extra mouth to feed, he gets off his batty and heads to America to reclaim his former glory… but soon encounters adversaries who will ultimately threaten his and his child's very existence.",
+   "castPics": [
+    {
+     "name": "Sacha Baron Cohen",
+     "character": "Ali G / Nira Cain-N'Degeocello / Erran Morad",
+     "photo": "https://image.tmdb.org/t/p/w185/bGzXHu8zwWqUY5gEExSh3deQd2j.jpg"
+    },
+    {
+     "name": "Morgana Robinson",
+     "character": "Julie",
+     "photo": "https://image.tmdb.org/t/p/w185/guBJRfTPeLBd3RxbhzUIi3cl242.jpg"
+    },
+    {
+     "name": "Alpha Miknas",
+     "character": "Manu",
+     "photo": "https://image.tmdb.org/t/p/w185/iIfNQnMSnifN33yIZRR279YnA59.jpg"
+    },
+    {
+     "name": "Clive Russell",
+     "character": "Malcolm 'Rocky' Atkins",
+     "photo": "https://image.tmdb.org/t/p/w185/eC37Kmdo5YKNG2MyirCG4tWDxCS.jpg"
+    },
+    {
+     "name": "A$AP Rocky",
+     "character": "A$AP Rocky",
+     "photo": "https://image.tmdb.org/t/p/w185/gL0NFnIrqLosSbdxAHExOHAMkFH.jpg"
+    },
+    {
+     "name": "Rihanna",
+     "character": "Rihanna",
+     "photo": "https://image.tmdb.org/t/p/w185/piXUA7L0gWQNtnDPXtBe24C9FF6.jpg"
+    }
+   ],
+   "theatrical": false,
+   "platform": "Prime Video",
+   "ottSince": "2026-10-30",
+   "ottFreshDate": "2026-10-22",
+   "slug": "ali-g-who-iz-i",
+   "take": "Critics didn't like it.",
+   "takeSrc": "wiki",
+   "takeArticle": "Ali G: Who Iz I?",
+   "criticsTone": "negative",
+   "reception": {
+    "rt": {
+     "pct": 42,
+     "n": 33,
+     "avg": 4.8
+    },
+    "mc": {
+     "score": 38,
+     "n": 13
+    },
+    "asOf": "2026-10-31",
+    "article": "Ali G: Who Iz I?"
+   },
+   "hook": "The follow-up to ‘Ali G Indahouse’.",
+   "fcScore": {
+    "verdict": "Skip",
+    "reason": "Audiences and critics agree: skip it.",
+    "audience": "Lukewarm",
+    "critics": "negative",
+    "basis": "both"
+   }
+  },
+  {
    "title": "Matargashti",
    "genre": "Drama",
    "language": "Hindi",
@@ -11022,6 +11147,212 @@
     "critics": "positive",
     "basis": "critics"
    }
+  },
+  {
+   "title": "Akka",
+   "genre": "Drama / Crime",
+   "language": "Tamil",
+   "released": "2026-10-30",
+   "review": "In a kingdom ruled by women, matriarch Bhavani faces her biggest threat in Rudra, a ruthless rebel eyeing her land and legacy.",
+   "rating": null,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "New release"
+    }
+   ],
+   "votes": 0,
+   "verdict": "Just released — verdict soon",
+   "poster": "https://image.tmdb.org/t/p/w342/tdnHaR0vlKMQbjmaCs2V3LDmzSd.jpg",
+   "isRecent": true,
+   "isFresh": true,
+   "kind": "tv",
+   "tmdbId": 243555,
+   "popularity": 42.9683,
+   "episodes": {
+    "count": 5,
+    "seasons": 1,
+    "limited": false,
+    "season": 1,
+    "next": null,
+    "list": [
+     {
+      "e": 1,
+      "name": "The Sisterhood",
+      "date": "2026-10-30",
+      "runtime": 46
+     },
+     {
+      "e": 2,
+      "name": "Wounds and Scars",
+      "date": "2026-10-30",
+      "runtime": 32
+     },
+     {
+      "e": 3,
+      "name": "A Challenge Wrapped in Blood",
+      "date": "2026-10-30",
+      "runtime": 30
+     },
+     {
+      "e": 4,
+      "name": "A Heart Turned",
+      "date": "2026-10-30",
+      "runtime": 34
+     },
+     {
+      "e": 5,
+      "name": "A Queen for All",
+      "date": "2026-10-30",
+      "runtime": 39
+     }
+    ]
+   },
+   "cert": "A",
+   "trailer": "https://www.youtube.com/watch?v=NwJhml1_D54",
+   "providers": [
+    "Netflix"
+   ],
+   "cast": [
+    "Keerthy Suresh",
+    "Radhika Apte",
+    "Tanvi Azmi",
+    "B. Jayashree"
+   ],
+   "director": "Dharmaraj Shetty",
+   "runtime": null,
+   "imdbVotes": null,
+   "trailerDate": "2026-10-19T05:30:21.000Z",
+   "imdbId": "tt29625288",
+   "seasons": 1,
+   "freshDate": "2026-10-30",
+   "badge": "New show",
+   "similar": [
+    {
+     "title": "Power Book IV: Force",
+     "slug": "power-book-iv-force",
+     "poster": "https://image.tmdb.org/t/p/w342/yzL4Tqbw2JA9MCsHJWFC4xV1IYU.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Patient",
+     "slug": "the-patient",
+     "poster": "https://image.tmdb.org/t/p/w342/fB1848j0pvNnYilXB0ho5OCfiIz.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Criminal Record",
+     "slug": "criminal-record",
+     "poster": "https://image.tmdb.org/t/p/w342/kpnfeVRExCutHXFVXzaSdT8tAJl.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "This City Is Ours",
+     "slug": "this-city-is-ours",
+     "poster": "https://image.tmdb.org/t/p/w342/75BwofwAZbf6GlhP2m6NPpP3bW2.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Gone",
+     "slug": "gone",
+     "poster": "https://image.tmdb.org/t/p/w342/qnxKB5HlkAZZcyIiITIV7dAUX7u.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Good Girls",
+     "slug": "good-girls",
+     "poster": "https://image.tmdb.org/t/p/w342/wpgg6G3UHXepH2Zgpt4W60d6gxR.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Good Behavior",
+     "slug": "good-behavior",
+     "poster": "https://image.tmdb.org/t/p/w342/qnXx9TMHCfOHgEZ5vv76pPmIwTS.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Goliath",
+     "slug": "goliath",
+     "poster": "https://image.tmdb.org/t/p/w342/b7ygC3GRaq4xc0nkWdGnydtMfvD.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Wentworth",
+     "slug": "wentworth",
+     "poster": "https://image.tmdb.org/t/p/w342/3nikr0NE3t8UMgI1Ba6hXaeEgKr.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Queen of the South",
+     "slug": "queen-of-the-south",
+     "poster": "https://image.tmdb.org/t/p/w342/rzdC5EHkkKJE6OPVdh6gT1pR1c9.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Mayans M.C.",
+     "slug": "mayans-m-c",
+     "poster": "https://image.tmdb.org/t/p/w342/510A0upV9WRAynEgs1E2B3eBxi5.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Sneaky Pete",
+     "slug": "sneaky-pete",
+     "poster": "https://image.tmdb.org/t/p/w342/nNpcea9lLHI4iv8QpOIvHveVnT9.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/cVUKFfws4upCB4ytz5uGIONIiRc.jpg",
+   "backdropPath": "/cVUKFfws4upCB4ytz5uGIONIiRc.jpg",
+   "posterPath": "/tdnHaR0vlKMQbjmaCs2V3LDmzSd.jpg",
+   "fullReview": "In a kingdom ruled by women, matriarch Bhavani faces her biggest threat in Rudra, a ruthless rebel eyeing her land and legacy.",
+   "castPics": [
+    {
+     "name": "Keerthy Suresh",
+     "character": "Bhavani",
+     "photo": "https://image.tmdb.org/t/p/w185/fTdgSinsAitdujBBEUEA72GY0pv.jpg"
+    },
+    {
+     "name": "Radhika Apte",
+     "character": "Rudra",
+     "photo": "https://image.tmdb.org/t/p/w185/wKPybRcSYcbgDiJZwELudrRNf0r.jpg"
+    },
+    {
+     "name": "Tanvi Azmi",
+     "character": "Mutthakka",
+     "photo": "https://image.tmdb.org/t/p/w185/zKxZCZahNstKxkF7YPa2DqgadWC.jpg"
+    },
+    {
+     "name": "B. Jayashree",
+     "character": "Duggamma",
+     "photo": "https://image.tmdb.org/t/p/w185/gayp1aarqRRXleAfiu1pWbJxOoZ.jpg"
+    },
+    {
+     "name": "Nivedita Bhargava",
+     "character": "Subbamma",
+     "photo": "https://image.tmdb.org/t/p/w185/zGFHvqzfo0K2gdajhbnQG0n9UHz.jpg"
+    },
+    {
+     "name": "Anshumaan Pushkar",
+     "character": "Amar",
+     "photo": "https://image.tmdb.org/t/p/w185/ktbqCXjoqLuD96tTkHo1PVqVi14.jpg"
+    }
+   ],
+   "platform": "Netflix",
+   "ottSince": "2026-10-31",
+   "ottFreshDate": "2026-10-30",
+   "slug": "akka"
   },
   {
    "title": "#Love",
@@ -12864,8 +13195,8 @@
      "kind": "movie"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/cn5RbvKzrYskQhDkofDaJYjcv1D.jpg",
-   "backdropPath": "/cn5RbvKzrYskQhDkofDaJYjcv1D.jpg",
+   "backdrop": "https://image.tmdb.org/t/p/w780/fvfXiUaexUqCitmOftGBXgNO6Of.jpg",
+   "backdropPath": "/fvfXiUaexUqCitmOftGBXgNO6Of.jpg",
    "posterPath": "/wRKg0WoPV0D3bCl1B5jJtcRdU1Z.jpg",
    "fullReview": "Follows Avarachan, his children and the various family and social relationships that shape their lives.",
    "castPics": [
@@ -12925,5 +13256,5 @@
    "hook": "Thamby's directorial debut."
   }
  ],
- "trackedFilms": 1429
+ "trackedFilms": 1431
 }

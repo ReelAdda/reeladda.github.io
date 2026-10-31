@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-31T16:55:03.303Z",
+ "generatedAt": "2026-10-31T17:59:54.471Z",
  "country": "us",
  "pick": "Clayface",
  "theatres": [
@@ -171,7 +171,7 @@
    "digitalDate": "2026-12-08",
    "slug": "wildwood",
    "wikiWeeklyViews": 629959,
-   "trailerViews": 19931694,
+   "trailerViews": 19935290,
    "take": "Critics loved it.",
    "takeSrc": "wiki",
    "takeArticle": "Wildwood (film)",
@@ -365,7 +365,7 @@
    "slug": "clayface",
    "wikiWeeklyViews": 1009870,
    "trending": true,
-   "trailerViews": 368080,
+   "trailerViews": 368489,
    "take": "Critics liked the direction and humour but criticised the twists.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -566,7 +566,7 @@
    "digitalNote": "Netflix",
    "slug": "la-bola-negra",
    "wikiWeeklyViews": 95150,
-   "trailerViews": 4270664,
+   "trailerViews": 4273232,
    "take": "Critics loved it, especially the ambition and emotional weight.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -852,6 +852,13 @@
      "kind": "movie"
     },
     {
+     "title": "Monster Hunter",
+     "slug": "monster-hunter",
+     "poster": "https://image.tmdb.org/t/p/w342/1UCOF11QCw8kcqvce8LKOO6pimh.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "The Hunger Games: The Ballad of Songbirds & Snakes",
      "slug": "the-hunger-games-the-ballad-of-songbirds-snakes",
      "poster": "https://image.tmdb.org/t/p/w342/mBaXZ95R2OxueZhvQbcEWy2DqyO.jpg",
@@ -859,16 +866,9 @@
      "kind": "movie"
     },
     {
-     "title": "Black Adam",
-     "slug": "black-adam",
-     "poster": "https://image.tmdb.org/t/p/w342/rCtreCr4xiYEWDQTebybolIh6Xe.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Wonder Woman 1984",
-     "slug": "wonder-woman-1984",
-     "poster": "https://image.tmdb.org/t/p/w342/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg",
+     "title": "Mulan",
+     "slug": "mulan",
+     "poster": "https://image.tmdb.org/t/p/w342/aKx1ARwG55zZ0GpRvU2WrGrCG9o.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -887,13 +887,6 @@
      "kind": "movie"
     },
     {
-     "title": "Crouching Tiger, Hidden Dragon: Sword of Destiny",
-     "slug": "crouching-tiger-hidden-dragon-sword-of-destiny",
-     "poster": "https://image.tmdb.org/t/p/w342/te3aeAyhkfqgpa5BSTq3oNxGqQD.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Masters of the Universe",
      "slug": "masters-of-the-universe",
      "poster": "https://image.tmdb.org/t/p/w342/gaUecXFd31V68yOTJPJYaB9YhAf.jpg",
@@ -901,16 +894,9 @@
      "kind": "movie"
     },
     {
-     "title": "Futurama: Bender's Game",
-     "slug": "futurama-bender-s-game",
-     "poster": "https://image.tmdb.org/t/p/w342/bx8OVOBn5WP9TJJuOpRzyMCdzzb.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "A Knight's Tale",
-     "slug": "a-knight-s-tale",
-     "poster": "https://image.tmdb.org/t/p/w342/srb1XnrlDZHcdpjBKqUu4qAzxKU.jpg",
+     "title": "Crouching Tiger, Hidden Dragon: Sword of Destiny",
+     "slug": "crouching-tiger-hidden-dragon-sword-of-destiny",
+     "poster": "https://image.tmdb.org/t/p/w342/te3aeAyhkfqgpa5BSTq3oNxGqQD.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -918,6 +904,20 @@
      "title": "The Big Brawl",
      "slug": "the-big-brawl",
      "poster": "https://image.tmdb.org/t/p/w342/jFl2hmGWFX9mw0NvOOn08Zr8bn5.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Warcraft",
+     "slug": "warcraft",
+     "poster": "https://image.tmdb.org/t/p/w342/eGi5aoxaZveqNLtE7BZJCuWwR3G.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "A Knight's Tale",
+     "slug": "a-knight-s-tale",
+     "poster": "https://image.tmdb.org/t/p/w342/srb1XnrlDZHcdpjBKqUu4qAzxKU.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -962,7 +962,7 @@
    "digitalDate": "2026-12-01",
    "slug": "street-fighter",
    "wikiWeeklyViews": 321186,
-   "trailerViews": 35481930,
+   "trailerViews": 35486328,
    "take": "Critics were split. They praised the performances and criticised the humour.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1155,7 +1155,7 @@
    "theatricalHere": true,
    "slug": "sense-and-sensibility",
    "wikiWeeklyViews": 118980,
-   "trailerViews": 1921027,
+   "trailerViews": 1921653,
    "take": "Critics were mostly positive.",
    "takeSrc": "wiki",
    "takeArticle": "Sense and Sensibility (2026 film)",
@@ -1350,7 +1350,7 @@
    "theatricalHere": true,
    "slug": "whalefall",
    "wikiWeeklyViews": 126347,
-   "trailerViews": 3152515,
+   "trailerViews": 3154147,
    "take": "Critics were split. They praised the tension and performances and criticised the story.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1549,7 +1549,7 @@
    "ottSince": "2026-10-24",
    "ottFreshDate": "2026-10-23",
    "slug": "surviving-hurricane-otis",
-   "trailerViews": 126038,
+   "trailerViews": 126522,
    "fcScore": {
     "verdict": "Worth a watch",
     "reason": "Audiences like it.",
@@ -1732,7 +1732,7 @@
    "ottSince": "2026-10-31",
    "ottFreshDate": "2026-10-31",
    "slug": "apocalypse-z-new-world",
-   "trailerViews": 1205514
+   "trailerViews": 1210325
   },
   {
    "title": "Crystal Lake",
@@ -1969,7 +1969,7 @@
    "slug": "crystal-lake",
    "wikiWeeklyViews": 296927,
    "trending": true,
-   "trailerViews": 21967364,
+   "trailerViews": 21968923,
    "take": "Critics liked the ambition but criticised the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2245,7 +2245,7 @@
    "slug": "visionquest",
    "wikiWeeklyViews": 460923,
    "trending": true,
-   "trailerViews": 23783072,
+   "trailerViews": 23786502,
    "take": "Critics were mostly positive.",
    "takeSrc": "wiki",
    "takeArticle": "VisionQuest",
@@ -2519,7 +2519,7 @@
    "stillGood": true,
    "slug": "tulsa-king",
    "wikiWeeklyViews": 82327,
-   "trailerViews": 11447623,
+   "trailerViews": 11447863,
    "take": "Critics liked the humour and second half but criticised the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2768,7 +2768,7 @@
    "stillGood": true,
    "slug": "the-terminal-list",
    "wikiWeeklyViews": 255382,
-   "trailerViews": 12657932,
+   "trailerViews": 12658577,
    "take": "Critics were split, and most complaints were about the writing.",
    "takeSrc": "wiki",
    "takeArticle": "The Terminal List",
@@ -3021,7 +3021,7 @@
    "stillGood": true,
    "slug": "cyberpunk-edgerunners",
    "wikiWeeklyViews": 72480,
-   "trailerViews": 7773899,
+   "trailerViews": 7774216,
    "take": "Reviewers praised the action and visuals.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -3303,7 +3303,7 @@
    "stillGood": true,
    "slug": "mobland",
    "wikiWeeklyViews": 194908,
-   "trailerViews": 12369428,
+   "trailerViews": 12370663,
    "take": "Critics were split.",
    "takeSrc": "wiki",
    "takeArticle": "MobLand",
@@ -3492,7 +3492,7 @@
    "ottFreshDate": "2026-10-08",
    "stillGood": true,
    "slug": "therapy-done-right",
-   "trailerViews": 668492,
+   "trailerViews": 668619,
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences love it.",
@@ -3956,7 +3956,7 @@
    ],
    "theatricalHere": true,
    "slug": "godzilla-minus-zero",
-   "trailerViews": 7547689,
+   "trailerViews": 7553826,
    "criticsTone": "positive",
    "verdict": ""
   },
@@ -4120,7 +4120,7 @@
    ],
    "theatricalHere": true,
    "slug": "ramayana-rise-of-a-legend",
-   "trailerViews": 20481996,
+   "trailerViews": 20486925,
    "verdict": ""
   },
   {
@@ -4276,7 +4276,7 @@
    ],
    "theatricalHere": true,
    "slug": "ghost-soldier",
-   "trailerViews": 4325421,
+   "trailerViews": 4328740,
    "verdict": ""
   },
   {
@@ -4597,7 +4597,7 @@
    ],
    "theatricalHere": true,
    "slug": "the-hunger-games-sunrise-on-the-reaping",
-   "trailerViews": 188725,
+   "trailerViews": 188835,
    "verdict": ""
   },
   {
@@ -4753,7 +4753,7 @@
    ],
    "theatricalHere": true,
    "slug": "hexed",
-   "trailerViews": 108137,
+   "trailerViews": 108437,
    "verdict": ""
   },
   {
@@ -4918,7 +4918,7 @@
    ],
    "theatricalHere": true,
    "slug": "avengers-doomsday",
-   "trailerViews": 51406791,
+   "trailerViews": 51417403,
    "verdict": ""
   },
   {
@@ -5081,7 +5081,7 @@
    ],
    "theatricalHere": true,
    "slug": "dune-part-three",
-   "trailerViews": 24310287,
+   "trailerViews": 24432288,
    "verdict": ""
   }
  ],
@@ -6293,7 +6293,7 @@
      "score": "6.0/10"
     }
    ],
-   "votes": 80,
+   "votes": 83,
    "verdict": "Skip",
    "poster": "https://image.tmdb.org/t/p/w342/uTyVxPeWX8Ai30IQoyDDQONNcq.jpg",
    "isRecent": false,
@@ -6481,5 +6481,5 @@
    }
   }
  ],
- "trackedFilms": 1256
+ "trackedFilms": 1257
 }
