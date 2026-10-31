@@ -2,20 +2,29 @@
  "date": "2026-10-31",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
+ "pagesDisagreeing": 2,
  "high": 1,
  "correctable": 1,
  "byField": {
+  "genres": 1,
   "platform": 1
  },
  "rows": [
   {
+   "field": "genres",
+   "severity": "low",
+   "page": "Horror / Thriller",
+   "tmdb": "Horror, Science Fiction",
+   "code": "au",
+   "slug": "night-of-the-living-dead"
+  },
+  {
    "field": "platform",
    "severity": "high",
-   "page": "JioHotstar, Vi Movies & TV",
-   "tmdb": "Vi Movies & TV",
-   "code": "in",
-   "slug": "akhanda"
+   "page": "Prime Video, Movistar Plus+, FlixOlé, Tivify",
+   "tmdb": "Prime Video, Movistar Plus+, FlixOlé",
+   "code": "es",
+   "slug": "before-i-go-to-sleep"
   }
  ]
 }
