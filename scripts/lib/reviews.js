@@ -7,8 +7,8 @@
 // Indian OTT titles never get one. Chaar Yaar was eight days old, reviewed by half a dozen outlets,
 // and the page said "too early". The reviews existed; the pipeline couldn't see them.
 //
-// What: every build reads the review feeds below (headline, link, date, summary: what RSS is
-// for, nothing fetched from the articles), keeps the items whose headline is a review, and matches
+// What: every build reads the review feeds below (headline, link and date only: never the
+// description, nothing fetched from the articles), keeps the items whose headline is a review, and matches
 // them to titles released in the last REVIEW_WINDOW_DAYS by title, date and language. A film's
 // page then lists the outlets, linking out, with a star rating only when the feed itself states
 // one (few do: 26 of 527 review items on 31 Oct 2026). The result lives in reviews.json, keyed by
@@ -27,10 +27,11 @@ const REVIEW_WINDOW_DAYS = 60;    // reviews are matched to titles released this
 const REVIEW_LEAD_DAYS = 14;      // a review may run before the release date
 const FEED_TIMEOUT_MS = 15000;
 const UA = "Mozilla/5.0 (compatible; FilmyChillBot/1.0; +https://filmychill.com/about/; filmychill.contact@gmail.com)";
-// Not read, by the outlet's own feed terms: Onmanorama ("personal use", "no commercial use without
-// express consent", onmanorama.com/rss.html, read 31 Oct 2026). Rediff says "free for individuals and
-// non-profit organisations" and forbids nothing; kept, the owner's call. An outlet that asks to be
-// removed comes off the list above; its stored links are dropped at the next build (refreshReviews).
+// Not read, by the outlets' own feed terms (owner's call, 31 Oct 2026): Onmanorama ("personal use",
+// "no commercial use without express consent", onmanorama.com/rss.html) and Rediff ("free for
+// individuals and non-profit organisations", rediff.com/rss). An outlet that asks to be removed
+// comes off the list above; its stored links are dropped at the next build (refreshReviews).
+// Only the headline, link and date are used; the description field is never read for anything.
 
 // The feeds. `langs`: the film languages an outlet's reviews are about; "any" for national press.
 // Every address answered with items on 31 Oct 2026; one that stops answering is skipped that run
@@ -41,7 +42,6 @@ const FEEDS = [
   { name: "Indian Express", url: "https://indianexpress.com/section/entertainment/tamil/feed/", langs: ["Tamil"] },
   { name: "Indian Express", url: "https://indianexpress.com/section/entertainment/telugu/feed/", langs: ["Telugu"] },
   { name: "Indian Express", url: "https://indianexpress.com/section/entertainment/malayalam/feed/", langs: ["Malayalam"] },
-  { name: "Rediff", url: "https://www.rediff.com/rss/moviesreviewsrss.xml", langs: "any" },
   { name: "Hindustan Times", url: "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml", langs: "any" },
   { name: "NDTV", url: "https://feeds.feedburner.com/ndtvmovies-latest", langs: "any" },
   { name: "Firstpost", url: "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml", langs: "any" },
@@ -78,10 +78,9 @@ function parseFeed(xml, feed) {
     const title = dec((/<title[^>]*>([\s\S]*?)<\/title>/.exec(it) || [])[1]);
     const link = dec(((/<link[^>]*>([\s\S]*?)<\/link>/.exec(it) || [])[1] || (/<link[^>]*href="([^"]+)"/.exec(it) || [])[1] || ""));
     const when = dec((/<(?:pubDate|published|updated|dc:date)>([\s\S]*?)<\//.exec(it) || [])[1]);
-    const summary = dec((/<(?:description|summary|content:encoded|content)[^>]*>([\s\S]*?)<\/(?:description|summary|content:encoded|content)>/.exec(it) || [])[1]).slice(0, 600);
     const t = Date.parse(when);
     if (!title || !/^https?:\/\//.test(link) || !Number.isFinite(t)) continue;
-    out.push({ outlet: feed.name, langs: feed.langs, title, link, date: new Date(t).toISOString().slice(0, 10), summary });
+    out.push({ outlet: feed.name, langs: feed.langs, title, link, date: new Date(t).toISOString().slice(0, 10) });
   }
   return out;
 }
@@ -164,7 +163,8 @@ function matchReviews(items, films, today = new Date().toISOString().slice(0, 10
       if (!langOk && (ambiguous || Array.isArray(it.langs))) continue;   // a regional outlet reviewing another language's film: not this one
       const list = out.get(f.key) || [];
       if (list.some((x) => x.u === it.link)) continue;
-      list.push({ o: it.outlet, u: it.link, h: it.title.slice(0, 160), d: it.date, ...(parseStars(`${it.title} ${it.summary}`) != null ? { s: parseStars(`${it.title} ${it.summary}`) } : {}) });
+      const stars = parseStars(it.title);           // headline only, never the description
+      list.push({ o: it.outlet, u: it.link, h: it.title.slice(0, 160), d: it.date, ...(stars != null ? { s: stars } : {}) });
       out.set(f.key, list);
     }
   }

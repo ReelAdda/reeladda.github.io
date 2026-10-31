@@ -10489,7 +10489,7 @@ test("plain wording: answers the sweeps rewrite are matched in both forms; summa
 
 group("published reviews from the outlets' feeds (lib/reviews.js, 31 Oct 2026)");
 const RV_XML = `<?xml version="1.0"?><rss><channel>
-<item><title><![CDATA[Jailer 2 review: Rajinikanth shines, but the sequel struggles]]></title><link>https://example.org/jailer-2-review</link><pubDate>Thu, 16 Oct 2026 10:00:00 +0530</pubDate><description><![CDATA[Nelson's sequel. Rating: 3/5]]></description></item>
+<item><title><![CDATA[Jailer 2 review: Rajinikanth shines, but the sequel struggles (3/5)]]></title><link>https://example.org/jailer-2-review</link><pubDate>Thu, 16 Oct 2026 10:00:00 +0530</pubDate><description><![CDATA[Nelson's sequel. Rating: 3/5]]></description></item>
 <item><title>Review: Aadarsha Kutumbam &#8211; A Decent Family Entertainer</title><link>https://example.org/ak</link><pubDate>Fri, 31 Oct 2026 08:00:00 +0530</pubDate><description>123telugu.com Rating : 2.75/5 Starring</description></item>
 <item><title>Officials Review Development Works in Narsingi</title><link>https://example.org/civic</link><pubDate>Fri, 31 Oct 2026 08:00:00 +0530</pubDate><description></description></item>
 <item><title>Jailer 2 box office: day 3</title><link>https://example.org/bo</link><pubDate>Sat, 18 Oct 2026 08:00:00 +0530</pubDate></item>
@@ -10500,7 +10500,7 @@ test("feed parsing: items, CDATA, entities and dates; a broken item is skipped",
   const RV = require("./lib/reviews.js");
   const items = RV.parseFeed(RV_XML, { name: "Test Outlet", langs: "any" });
   assert.strictEqual(items.length, 5);
-  assert.deepStrictEqual([items[0].title, items[0].date, items[1].title], ["Jailer 2 review: Rajinikanth shines, but the sequel struggles", "2026-10-16", "Review: Aadarsha Kutumbam - A Decent Family Entertainer"]);
+  assert.deepStrictEqual([items[0].title, items[0].date, items[1].title], ["Jailer 2 review: Rajinikanth shines, but the sequel struggles (3/5)", "2026-10-16", "Review: Aadarsha Kutumbam - A Decent Family Entertainer"]);
   assert.ok(RV.isReview("Jailer 2 review: x") && RV.isReview("Meethe Mein Kya Hai Movie Review: दिवाली") && RV.isReview("जेलर 2 रिव्यू") && !RV.isReview("Jailer 2 box office"));
 });
 test("star ratings: only what the feed states, on a 5-point scale", () => {
@@ -10522,7 +10522,7 @@ test("matching: the title as whole words next to 'review', inside the window, wi
   const m = RV.matchReviews(items, films, "2026-10-31");
   assert.deepStrictEqual([...m.keys()], ["movie:1", "movie:2"]);
   assert.deepStrictEqual(m.get("movie:1").map((x) => [x.o, x.d, x.s]), [["Test Outlet", "2026-10-16", 3], ["Test Outlet", "2026-10-20", undefined]]);
-  assert.strictEqual(m.get("movie:2")[0].s, 2.75);
+  assert.strictEqual(m.get("movie:2")[0].s, undefined, "a rating in the description is never read: headline only (owner, 31 Oct)");
   // A Telugu outlet does not get matched to a Hindi film of the same title; a national one does.
   const te = RV.parseFeed(RV_XML, { name: "Telugu Outlet", langs: ["Telugu"] });
   assert.deepStrictEqual([...RV.matchReviews(te, [{ key: "movie:9", title: "Jailer 2", language: "Hindi", released: "2026-10-15" }], "2026-10-31").keys()], []);
