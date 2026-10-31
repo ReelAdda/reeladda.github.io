@@ -4087,6 +4087,7 @@ test("India footer links languages + about (never a retired week snapshot); othe
   assert.ok(!indiaLinks.includes('href="/week/'), "week snapshots are retired (26 Oct 2026)");
   const usLinks = U.buildMoreLinks("us");
   assert.ok(usLinks.includes('href="/about/"') && !usLinks.includes("/tamil/"));
+  for (const links of [indiaLinks, usLinks]) assert.ok(links.includes('<li><a href="https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j">WhatsApp channel</a></li><li><a href="https://www.instagram.com/filmychillofficial/">Instagram</a></li>'), "the FilmyChill column: WhatsApp channel, then Instagram (31 Oct 2026)");
 });
 
 // ---------------- take variants ----------------

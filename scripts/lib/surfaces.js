@@ -381,6 +381,7 @@ function buildMoreLinks(code, data = null) {
     li("/data/", "Streaming data"),
     code === "in" ? li("/embed/", "Embed widget") : "",
     li("https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j", "WhatsApp channel"),
+    li("https://www.instagram.com/filmychillofficial/", "Instagram"),
   ].filter(Boolean);
 
   const others = COUNTRIES.filter((c) => c.code !== code).map((c) => {
