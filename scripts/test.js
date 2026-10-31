@@ -10298,11 +10298,19 @@ test("language pages: a film that hasn't opened is under 'Coming soon', and the 
   assert.ok(/<h3>On Netflix<\/h3>[\s\S]*?<div class="rm">Netflix · Drama/.test(html), "a streaming title names its platform");
   assert.ok(/<h3>Waiting<\/h3>[\s\S]*?<div class="rm">Not on OTT yet · Drama/.test(html), "one that isn't says so");
 });
-test("Coming to OTT: a date with no named service says 'Platform not announced' where the platform goes", () => {
+test("Coming to OTT: an unnamed platform is said as a digital release, a VOD note as digital stores (31 Oct 2026)", () => {
   const row = (slug, genre, d, platform) => ({ slug, title: slug.toUpperCase(), genre, date: inDays(d), platform, kind: "movie" });
-  const html = U.buildComingPage([row("rv", "Horror", 5, null), row("nf", "Drama", 6, "Netflix"), row("x3", "Drama", 7, "Netflix")], A_IN);
-  assert.ok(/<div class="rm">Platform not announced · Horror<\/div>/.test(html), String(html.match(/<div class="rm">[^<]*/g)));
-  assert.ok(/<div class="rm">Netflix · Drama<\/div>/.test(html));
+  const html = U.buildComingPage([row("rv", "Horror", 5, null), row("nf", "Drama", 6, "Netflix"), row("vd", "Action", 7, "VOD"), row("sl", "Drama", 8, "Sonyliv")], A_IN);
+  const rm = String(html.match(/<div class="rm">[^<]*/g));
+  assert.ok(/<div class="rm">Digital release, platform not named yet · Horror<\/div>/.test(html), rm);
+  assert.ok(!/Platform not announced/.test(html), "the old wording is gone");
+  assert.ok(/<div class="rm">Netflix · Drama<\/div>/.test(html), rm);
+  assert.ok(/<div class="rm">digital stores · Action<\/div>/.test(html) && /Streaming from [^<]* on digital stores/.test(html), rm);
+  assert.ok(/<div class="rm">Sony LIV · Drama<\/div>/.test(html), "notes are canonicalised: " + rm);
+  assert.ok(/RV \([^)]*, platform not named yet\), NF \([^)]*, Netflix\), VD \([^)]*, digital stores\)/.test(html), "the FAQ says the same: " + (html.match(/What's coming[\s\S]{0,400}/) || [""])[0].replace(/<[^>]+>/g, " ").slice(0, 300));
+  const R = require("./lib/rules.js");
+  assert.deepStrictEqual(["VOD", "pvod", "Digital", "Netflix", ""].map(R.digitalNoteName), ["digital stores", "digital stores", "digital stores", "Netflix", null]);
+  assert.strictEqual(require("./lib/pagekit.js").whereLabel({ digitalDate: inDays(5), digitalNote: "VOD" }, A_IN), `Streaming from ${require("./lib/core.js").fmtDateShort(inDays(5), Date.now(), "en-IN")} on digital stores`);
 });
 test("film pages: one name per service in the pills, on pages Google sees (tidy-names)", () => {
   const R = require("./lib/rollout.js"), GH = require("./lib/googlehide.js"), Fp = require("./lib/filmpage.js"), S = require("./lib/sitemap.js"), IN = require("./lib/core.js").COUNTRIES[0];

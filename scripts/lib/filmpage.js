@@ -57,7 +57,7 @@ const {
   streamPagePath,
   ytIdOf,
 } = require("./pagekit.js");
-const { countryNameFor, dedupeProviders, hasLanguageWindow, streamVocab, streamWindowEstimate, streamWindowShort, titleWithCountry } = require("./rules.js");
+const { countryNameFor, dedupeProviders, digitalNoteName, hasLanguageWindow, streamVocab, streamWindowEstimate, streamWindowShort, titleWithCountry } = require("./rules.js");
 
 // ============================================================
 // PER-FILM STATIC PAGES — one SEO-indexable page per film,
@@ -266,7 +266,7 @@ function descContext(item, cfg, opts) {
 // A digital date announced and still ahead.
 function descDigitalUpcoming({ item, yr, country, fullDate }) {
   const when = fullDate(item.digitalDate);
-  const on = item.digitalNote ? ` on ${item.digitalNote}` : "";
+  const on = digitalNoteName(item.digitalNote) ? ` on ${digitalNoteName(item.digitalNote)}` : "";
   return fitDesc([
     `${item.title}${yr} starts streaming${on} in ${country} on ${when}. The verdict, runtime and cast — and whether it's worth the wait.`,
     `${item.title} streams${on} in ${country} from ${when} — verdict, runtime and cast.`,
@@ -277,7 +277,7 @@ function descDigitalUpcoming({ item, yr, country, fullDate }) {
 // The announced digital date has passed and it isn't showing yet.
 function descDigitalPassed({ item, yr, country, fullDate }) {
   const when = fullDate(item.digitalDate);
-  const on = item.digitalNote ? ` on ${canonProvider(item.digitalNote)}` : "";
+  const on = digitalNoteName(item.digitalNote) ? ` on ${digitalNoteName(item.digitalNote)}` : "";
   return fitDesc([
     `${item.title}${yr} was due to stream${on} in ${country} from ${when} but isn't showing yet. We check twice a day and update this page the moment it lands.`,
     `${item.title} was due to stream${on} in ${country} from ${when} — not showing yet. We update this page the moment it lands.`,
@@ -647,7 +647,7 @@ function filmTitleTag(item, cfg = null) {
   if (item.kind !== "tv" && (digitalUpcoming(item) || digitalPassed(item))) {
     const code = (cfg && cfg.code) || "in";
     const d = fmtDateShort(item.digitalDate, Date.now(), localeFor(code));
-    const on = item.digitalNote ? ` on ${canonProvider(item.digitalNote)}` : "";
+    const on = digitalNoteName(item.digitalNote) ? ` on ${digitalNoteName(item.digitalNote)}` : "";
     const label = V.word === "OTT" ? "OTT Release Date" : "Streaming Date";
     return fitTitle([
       `${item.title}${yr} ${label}: ${d}${on} | FilmyChill`,
@@ -1587,7 +1587,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       return `<!--SW:pending--><!--SW:due=${e(due)}--><h2>${e(V.heading(item.title))}</h2><p>${opens} ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens${item._plain ? ". This page" : " — this page"} updates automatically the day it starts streaming.${usual}</p><!--/SW:pending-->`;
     }
     if (digitalUpcoming(item)) {
-      const on = item.digitalNote ? ` on ${e(item.digitalNote)}` : "";
+      const on = digitalNoteName(item.digitalNote) ? ` on ${e(digitalNoteName(item.digitalNote))}` : "";
       return `<!--SW:pending--><!--SW:digital=${e(item.digitalDate)}|${e(item.digitalNote || "")}--><h2>${e(V.heading(item.title))}</h2>`
         + `<p><strong>Streaming from ${e(fmtDateFull(item.digitalDate, localeFor(code)))}${on}.</strong> ${e(digitalAnnounceText(item.title, item.digitalDate, item.digitalNote, country, cfg))} This page switches to \u201cstreaming now\u201d the day it lands.</p><!--/SW:pending-->`;
     }

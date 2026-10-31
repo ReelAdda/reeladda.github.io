@@ -34,7 +34,7 @@ const {
   whereLabel,
 } = require("./pagekit.js");
 const { popularBlockFor } = require("./searchtop.js");
-const { countryNameFor, streamVocab } = require("./rules.js");
+const { DIGITAL_UNNAMED, countryNameFor, digitalNoteName, streamVocab } = require("./rules.js");
 const { ottWeekUrl } = require("./weekly.js");
 
 // ============================================================================
@@ -90,10 +90,13 @@ function buildComingPage(items, cfg, { now = Date.now(), hasToday = true } = {})
   const groups = [["This week", []], ["Next week", []], ["Later", []]];
   for (const x of items) {
     const w = wk(x.date);
-    // TMDB's digital date sometimes names no service: the card says so where the platform goes,
-    // rather than leaving the slot to the genre (29 Oct 2026: 12 cards in three editions).
-    const row = { ...x, hook: `Streaming from ${fmtDateFull(x.date, loc)}${x.platform ? ` on ${x.platform}` : ""}`,
-      ...(x.platform ? {} : { where: "Platform not announced" }) };
+    // TMDB's digital date often names no service outside India (0 of 16 US dates, 31 Oct 2026),
+    // and a US "digital" date usually means rental and purchase across every store. The card
+    // names the service when the record does, "digital stores" when the note says VOD, and
+    // otherwise says the date is a digital release whose platform isn't named yet.
+    const name = digitalNoteName(x.platform);
+    const row = { ...x, platform: name, hook: `Streaming from ${fmtDateFull(x.date, loc)}${name ? ` on ${name}` : ""}`,
+      ...(name ? {} : { where: DIGITAL_UNNAMED }) };
     (w === thisWk ? groups[0] : w === nextWk ? groups[1] : groups[2])[1].push(row);
   }
   const sections = groups.filter(([, xs]) => xs.length).map(([h, xs]) => ({ h2: h, items: xs }));
@@ -102,7 +105,7 @@ function buildComingPage(items, cfg, { now = Date.now(), hasToday = true } = {})
   const plain = require("./humanprose.js").plainOn(comingUrl(code));
   const faqs = [{
     q: `What's coming to ${V.word} in ${country} next?`,
-    a: items.slice(0, 5).map((x) => `${x.title} (${fmtDateShort(x.date, now, loc)}${x.platform ? `, ${x.platform}` : ""})`).join(", ") + (n > 5 ? `, and ${n - 5} more.` : "."),
+    a: items.slice(0, 5).map((x) => { const p = digitalNoteName(x.platform); return `${x.title} (${fmtDateShort(x.date, now, loc)}${p ? `, ${p}` : ", platform not named yet"})`; }).join(", ") + (n > 5 ? `, and ${n - 5} more.` : "."),
   }, {
     q: `Are these dates confirmed?`,
     a: `Yes${plain ? ". Every" : " — every"} date here was announced by the platform or studio and published on TMDB. Estimates are never listed. Each page switches to "streaming now" the day the title lands.`,

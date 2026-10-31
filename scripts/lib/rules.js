@@ -435,7 +435,22 @@ function countryListForProse() {
 // the bridge. Every priorityLang across every market is in LANG, so this covers all of them.
 const LANG_CODE_BY_NAME = Object.fromEntries(Object.entries(LANG).map(([c, n]) => [n, c]));
 
+// The platform behind an announced digital date, as the page should name it (31 Oct 2026). TMDB's
+// release record carries an optional note: Indian contributors write the service ("Netflix"),
+// US ones rarely write anything, and a few write "VOD". A note naming a service is that service;
+// "VOD", "Digital", "PVOD", "EST" or "TVOD" mean digital rental and purchase, not one platform;
+// no note gives null, and the caller says the platform isn't named rather than inventing one.
+function digitalNoteName(note) {
+  const n = String(note || "").trim();
+  if (!n) return null;
+  if (/^(vod|pvod|tvod|est|digital|digital release|digital hd)$/i.test(n)) return "digital stores";
+  return canonProvider(n);
+}
+const DIGITAL_UNNAMED = "Digital release, platform not named yet";
+
 module.exports = {
+  DIGITAL_UNNAMED,
+  digitalNoteName,
   OUTAGE_MIN_CHECKS,
   OUTAGE_SHARE,
   looksLikeOutage,

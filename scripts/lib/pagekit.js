@@ -21,7 +21,7 @@ const {
 const { cardPaths } = require("./cards.js");
 const { releaseState } = require("./release.js");
 const { freshLabel, THEATRE_WINDOW_FALLBACK_DAYS } = require("./freshness.js");
-const { canonProvider, countryNameFor, streamVocab, streamWindowEstimate } = require("./rules.js");
+const { canonProvider, countryNameFor, digitalNoteName, streamVocab, streamWindowEstimate } = require("./rules.js");
 const { USE_IMDB } = require("./tmdb.js");
 const { VPILL_CSS, rowScoreLine } = require("./meter.js");
 const { POPULAR_CSS } = require("./searchtop.js");
@@ -102,7 +102,8 @@ function cspWith(policy) {
 // ============================================================================
 function digitalAnnounceText(title, date, note, country, cfg) {
   const d = fmtDateFull(date, localeFor((cfg && cfg.code) || "in"));
-  return `${title} is scheduled to start streaming${note ? ` on ${note}` : ""} in ${country} on ${d}.`;
+  const name = digitalNoteName(note);   // a service, "digital stores" for a VOD note, or null (lib/rules.js)
+  return `${title} is scheduled to start streaming${name ? ` on ${name}` : ""} in ${country} on ${d}.`;
 }
 function digitalUpcoming(item) {
   return !!(item && item.digitalDate && releaseState(item.digitalDate) !== "released"
@@ -360,7 +361,7 @@ function whereLabel(f, cfg, { now = Date.now() } = {}) {
   if (st === "In theatres") return "In theatres";
   if ((f.rentBuy || []).length) return "Rent or buy";
   const today = new Date(now).toISOString().slice(0, 10);
-  if (f.digitalDate && f.digitalDate >= today) return `Streaming from ${fmtDateShort(f.digitalDate, now, localeFor(code))}${f.digitalNote ? ` on ${canonProvider(f.digitalNote)}` : ""}`;
+  if (f.digitalDate && f.digitalDate >= today) { const name = digitalNoteName(f.digitalNote); return `Streaming from ${fmtDateShort(f.digitalDate, now, localeFor(code))}${name ? ` on ${name}` : ""}`; }
   if (f.where === "theatrical" || f.where === "announced" || /not streaming yet|arrival pending|^Not on /i.test(st)) return ott ? "Not on OTT yet" : "Not streaming yet";
   return "";
 }
