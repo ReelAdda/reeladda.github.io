@@ -8294,16 +8294,11 @@ test("Grow: its loader and exactly its origins on every page, off in one setting
   const film = '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; connect-src \'self\' https://firestore.googleapis.com; script-src \'self\'; img-src \'self\' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src \'none\'"><title>X</title></head><body><p>x</p></body></html>';
   const on = G.ensureGrow(film, true);
   const csp = /content="([^"]*)"/.exec(on)[1];
-  // Grow's own snippet, byte for byte (its installation check looks for it), inside the one
-  // time-zone guard that keeps it off in Europe and the UK (2 Nov 2026), in <head> after the policy.
-  assert.ok(G.GROW_TAG.startsWith('<script data-grow-initializer="">if(!/^(?:Europe\\/|Atlantic\\/(?:Reykjavik|Faroe|Canary|Madeira|Azores|Jan_Mayen))/.test(') && G.GROW_TAG.includes('{!(function(){window.growMe||') && G.GROW_TAG.includes('"data-grow-faves-site-id","' + G.GROW_SITE_ID + '"') && G.GROW_TAG.endsWith("})();}</script>"), "the dashboard's snippet inside the region guard");
+  // Grow's own snippet, byte for byte (its installation check looks for it), in <head> after the policy.
+  assert.ok(G.GROW_TAG.startsWith('<script data-grow-initializer="">!(function(){window.growMe||') && G.GROW_TAG.includes('"data-grow-faves-site-id","' + G.GROW_SITE_ID + '"'), "the dashboard's snippet");
   assert.ok(on.includes(G.GROW_TAG + "\n</head>") && on.indexOf(G.GROW_TAG) > on.indexOf("Content-Security-Policy"), "in <head>, after the policy");
   assert.strictEqual(G.GROW_HASH, "'sha256-" + require("crypto").createHash("sha256").update(G.GROW_CODE, "utf8").digest("base64") + "'", "allowed by the exact hash of its code");
-  // The guard runs in a browser: Europe/London stays out, Asia/Kolkata loads.
-  const guard = G.GROW_CODE.slice(0, G.GROW_CODE.indexOf("{!(function") + 1);
-  const runs = (tz) => new Function("Intl", `${guard} return true; } return false;`)({ DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: tz }) }) });
-  assert.deepStrictEqual(["Asia/Kolkata", "America/New_York", "Europe/London", "Europe/Berlin", "Atlantic/Reykjavik", ""].map(runs), [true, true, false, false, false, true]);
-  for (const old of ['<script src="/js/grow.js" defer></script>', '<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="' + G.GROW_SITE_ID + '" defer></script>', '<script data-grow-initializer="">' + G.GROW_SNIPPET + '</script>'])
+  for (const old of ['<script src="/js/grow.js" defer></script>', '<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="' + G.GROW_SITE_ID + '" defer></script>'])
     assert.strictEqual(G.ensureGrow(film.replace("</body>", old + "\n</body>"), true), on, "an earlier loader is replaced: " + old.slice(0, 40));
   assert.ok(csp.includes("script-src 'self' " + G.GROW_HASH + " https://faves.grow.me;"), "scripts: the snippet's hash and faves.grow.me, nothing else");
   assert.ok(!/script-src[^;]*'unsafe-inline'/.test(csp), "never 'unsafe-inline' for scripts");
