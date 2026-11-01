@@ -178,52 +178,101 @@ function isoWeekNum(d = new Date()) {
 // cinema? X is the one to book", "X can wait"), both marks of machine-written text, and it was
 // signed "Editor's note" though code writes it. The choice of titles is unchanged; `seed` and
 // `short` stay for callers.
+// Three sentences, not one line (owner, 1 Nov 2026): what the pick is and where it is, why
+// (the critics' sentence the film page carries, else the score's reason), then the alternative
+// and the skip in one breath. Every clause is a field the cards don't show (kind, director,
+// since when, the take); nothing is invented, and a missing field is left out, never guessed.
+//   "Top pick: Clayface, an English horror film directed by James Watkins, in cinemas since
+//    23 Oct. Audiences and critics agree. To stream: Dexter: Resurrection, a crime series on
+//    Prime Video, new this week; skip Street Fighter: neither audiences nor critics are sold."
+const NOTE_GENRE = {
+  movie: { comedy: "comedy", drama: "drama", thriller: "thriller", documentary: "documentary", horror: "horror film", action: "action film", adventure: "adventure film", crime: "crime film", mystery: "mystery", romance: "romance", family: "family film", fantasy: "fantasy film", animation: "animated film", "science fiction": "science-fiction film", "sci-fi": "science-fiction film", war: "war film", western: "western", history: "historical film", "tv movie": "TV film" },
+  tv: { comedy: "comedy series", drama: "drama series", crime: "crime series", animation: "animated series", documentary: "documentary series", reality: "reality series", mystery: "mystery series", "sci-fi & fantasy": "sci-fi series", "sci-fi": "sci-fi series", "action & adventure": "action series", kids: "children's series", family: "family series", "war & politics": "war series", western: "western series", soap: "soap", talk: "talk show" },
+};
+// "a horror film", "a Hindi comedy", "a French crime series"; "a film" / "a series" when the genre
+// is unknown. English is left out: "an English crime series" reads as "from England" in the UK
+// and US editions, and the cards name the language anyway. A bare language code is left out too.
+function noteKind(x) {
+  const tv = x.kind === "tv";
+  const g = String(x.genre || "").split(" / ")[0].trim().toLowerCase();
+  const word = NOTE_GENRE[tv ? "tv" : "movie"][g] || (tv ? "series" : "film");
+  const lang = x.language && !/^[a-z]{2,3}$/.test(x.language) && x.language !== "English" ? x.language : "";
+  const phrase = [lang, word].filter(Boolean).join(" ");
+  return `${/^[aeiou]/i.test(phrase) ? "an" : "a"} ${phrase}`;
+}
 function buildEditorNote(data, cfg, seed = null, { short = false } = {}) {
   void seed; void short;
+  const code = (cfg && cfg.code) || "in";
+  const now = Date.now();
   const th = ((data && data.theatres) || []).map((x) => ({ ...x, _cinema: true }));
   const ott = ((data && data.ott) || []).filter((x) => !x.stillGood).map((x) => ({ ...x, _cinema: false }));
   const LEVEL = { "Must watch": 2, "Worth a watch": 1 };
   // Same "actually new" test as Pick of the Week (choosePick in lib/surfaces.js): a March
   // season newly listed in September is not this week's recommendation.
-  const todayIso = new Date().toISOString().slice(0, 10);
-  const cutoff = new Date(Date.now() - 21 * 864e5).toISOString().slice(0, 10);
+  const todayIso = new Date(now).toISOString().slice(0, 10);
+  const cutoff = new Date(now - 21 * 864e5).toISOString().slice(0, 10);
+  const weekAgo = new Date(now - 7 * 864e5).toISOString().slice(0, 10);
   const isNew = (x) => { const d = String(x.freshDate || x.released || "").slice(0, 10); return d >= cutoff && d <= todayIso; };
   const good = (x) => x.fcScore && LEVEL[x.fcScore.verdict] && !x.fcScore.early && isNew(x);
   const best = (list, not) => list.filter((x) => good(x) && !not.has(x.title))
     .sort((a, b) => LEVEL[b.fcScore.verdict] - LEVEL[a.fcScore.verdict] || rankValue(b) - rankValue(a))[0] || null;
-  // "Clayface, in cinemas" / "Lupin on Netflix": where to see it, said once.
-  const at = (x) => (x._cinema ? `${x.title}, in cinemas` : `${x.title} ${x.platform ? `on ${x.platform}` : "streaming"}`);
+  const { plainReason } = require("./reception.js");
+  const { plainTakeText } = require("./editorial.js");
+  // The cinema date, only when it is in the past and recent enough to be this run.
+  const opened = (x) => {
+    const d = String(x.released || "").slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || d > todayIso || d < cutoff) return "";
+    return d === todayIso ? "today" : fmtDateShort(d, now, localeFor(code));
+  };
+  const streamingAt = (x) => `on ${x.platform ? canonProvider(x.platform) : "streaming"}${String(x.freshDate || "").slice(0, 10) >= weekAgo ? ", new this week" : ""}`;
+  // The pick: kind, director (films only; a series' field holds its creator), where and since when.
+  const pickDesc = (x) => {
+    const dir = !x._cinema || x.kind === "tv" || !x.director ? "" : ` directed by ${x.director},`;
+    if (x._cinema) { const d = opened(x); return `${noteKind(x)}${dir} in cinemas${d ? ` ${d === "today" ? "from today" : `since ${d}`}` : ""}`; }
+    return `${noteKind(x)} ${streamingAt(x)}`;
+  };
+  // The alternative: kind and where, one clause.
+  const altDesc = (x) => {
+    if (x._cinema) { const d = opened(x); return `${noteKind(x)}${d ? ` that opened ${d}` : " in cinemas"}`; }
+    return `${noteKind(x)} ${streamingAt(x)}`;
+  };
+  // Why: the critics' sentence the film page carries, else the score's own reason.
+  const why = (x) => {
+    const t = x.take ? plainTakeText(String(x.take)).trim() : "";
+    const r = plainReason(x.fcScore && x.fcScore.reason).trim();
+    const s = t || r;
+    return s ? (/[.!?]$/.test(s) ? s : `${s}.`) : "";
+  };
+  const skipWhy = (x) => plainReason(x.fcScore && x.fcScore.reason).trim().replace(/\.+$/, "").replace(/[:;,]?\s*skip it$/i, "").replace(/^[A-Z]/, (c) => c.toLowerCase());
 
   const all = [...th, ...ott];
   const flagship = data && data.pick ? all.find((x) => x.title === data.pick) || null : null;
   const used = new Set();
-  const parts = [];
-
-  if (flagship) {
-    used.add(flagship.title);
-    parts.push(`Top pick: ${at(flagship)}.`);
-  }
-
-  // The labelled alternative, from the other side of the page. With no pick it leads instead.
   const otherSide = flagship ? (flagship._cinema ? ott : th) : th;
+  if (flagship) used.add(flagship.title);
   const alt = best(otherSide, used);
-  if (alt) {
-    used.add(alt.title);
-    parts.push(!flagship ? `Top pick: ${at(alt)}.` : alt._cinema ? `In cinemas: ${alt.title}.` : `To stream: ${at(alt)}.`);
-  }
+  if (alt) used.add(alt.title);
+  const lead = flagship || alt;
+  if (!lead) return null; // nothing trustworthy to say
+  const second = flagship ? alt : null;
+
+  const sentences = [`Top pick: ${lead.title}, ${pickDesc(lead)}.`];
+  const reason = why(lead);
+  if (reason) sentences.push(reason);
 
   // A Skip worth knowing about beats a third recommendation.
   const skip = all.find((x) => x.fcScore && x.fcScore.verdict === "Skip" && !x.fcScore.early && !used.has(x.title));
-  if (skip) {
-    parts.push(`Skip ${skip.title}.`);
-  } else {
+  const altClause = second ? `${second._cinema ? "In cinemas" : "To stream"}: ${second.title}, ${altDesc(second)}` : "";
+  let tail = skip ? `skip ${skip.title}${skipWhy(skip) ? `: ${skipWhy(skip)}` : ""}` : "";
+  if (!skip) {
     const sameSide = flagship ? (flagship._cinema ? th : ott) : ott;
     const also = best(sameSide, used);
-    if (also) parts.push(also._cinema ? `Also in cinemas: ${also.title}.` : `Also streaming: ${at(also)}.`);
+    if (also) tail = `also ${also._cinema ? "in cinemas" : "streaming"}: ${also.title}, ${altDesc(also)}`;
   }
-
-  if (!parts.length || (!flagship && !alt)) return null; // nothing trustworthy to say
-  return parts.slice(0, 3).join(" ");
+  if (altClause && tail) sentences.push(`${altClause}; ${tail}.`);
+  else if (altClause) sentences.push(`${altClause}.`);
+  else if (tail) sentences.push(`${tail.replace(/^[a-z]/, (c) => c.toUpperCase())}.`);
+  return sentences.slice(0, 3).join(" ");
 }
 
 function ssrEditorNote(data, cfg) {

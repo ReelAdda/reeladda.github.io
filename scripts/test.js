@@ -4479,7 +4479,7 @@ test("composeTmdbTake: aspects produce viewer-labelled, seeded, digit-free lines
 });
 test("take pools are plain at the source, and any older take is made plain at render (1 Nov 2026)", () => {
   const HP = require("./lib/humanprose.js"), ED = require("./lib/editorial.js");
-  const signs = (t) => HP.scanProse(HP.siteProse(`<html><body><main><p class="take">${t}</p></main></body></html>`)).map((f) => f.id);
+  const signs = (t) => HP.scanProse(HP.siteProse(`<html><body><main><p class="take">${t}</p></main></body></html>`)).map((f) => f.rule);
   // The lint: every line every pool can write, with sample aspects, shows no sign (no spaced dash, no retired flourish).
   const lines = [];
   for (const pool of Object.values(ED.TAKE_VARIANTS)) lines.push(...pool);
@@ -4506,7 +4506,7 @@ test("take pools are plain at the source, and any older take is made plain at re
     const html = Fp.buildFilmPage({ ...PC.films().streaming, take: "Critics are split — praise for the visuals, pushback on the writing.", takeCounter: "Audiences disagree — most ratings are warm." }, new Date().toISOString().slice(0, 10), new Set(), IN);
     assert.ok(!/Critics are split — /.test(html) && /Critics are split: praise for the visuals, pushback on the writing\./.test(html), "plain on the page");
     assert.ok(!/Audiences disagree — /.test(html), "the counterpoint too (where a page shows it)");
-    assert.deepStrictEqual(HP.scanProse(HP.siteProse(html)).filter((f) => f.id === "em-dash"), [], "no dash sign on the page");
+    assert.deepStrictEqual(HP.scanProse(HP.siteProse(html)).filter((f) => f.rule === "em-dash"), [], "no dash sign on the page");
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }
 });
 test("composeTmdbTake: viewer takes never trigger a counterpoint (takeSrc guard)", () => {
@@ -4758,26 +4758,36 @@ const _noteData = () => ({ generatedAt: _d(0), pick: "Slow Horses",
     { title: "Old Favourite", platform: "Netflix", kind: "tv", rating: 8.9, votes: 9000, freshDate: _d(200), stillGood: true, fcScore: _sc("Must watch", "Audiences love it.") },
   ] });
 
-test("the note opens with the Pick of the Week, then a labelled alternative from the other side", () => {
+test("the note opens with the Pick of the Week (what and where), says why, then the alternative from the other side", () => {
   const n = U.buildEditorNote(_noteData(), { code: "in" }, 1);
-  assert.ok(/^Top pick: Slow Horses on Apple TV\. In cinemas: Runner\./.test(n), n);
+  assert.ok(/^Top pick: Slow Horses, a series on Apple TV\. Audiences and critics agree\. In cinemas: Runner, a film that opened \d{1,2} \w{3}(?: \d{4})?; skip Flop: audiences and critics agree\.$/.test(n), n);
   assert.ok((n.match(/Slow Horses/g) || []).length === 1, "the pick is never recommended twice");
+  // Kind, director and the critics' sentence come from the item's own fields; nothing is guessed.
+  const rich = _noteData();
+  rich.pick = "Runner";
+  rich.theatres[0] = { ...rich.theatres[0], language: "Hindi", genre: "Comedy / Drama", director: "Aakash Kaushik", take: "Critics liked it, especially the humour." };
+  const r = U.buildEditorNote(rich, { code: "in" }, 1);
+  assert.ok(/^Top pick: Runner, a Hindi comedy directed by Aakash Kaushik, in cinemas since \d{1,2} \w{3}(?: \d{4})?\. Critics liked it, especially the humour\. To stream: /.test(r), r);
+  assert.strictEqual(U.buildEditorNote({ ..._noteData(), pick: "Slow Horses", ott: _noteData().ott.map((x) => (x.title === "Slow Horses" ? { ...x, language: "English", genre: "Action & Adventure / Drama", freshDate: _d(2) } : x)) }, { code: "in" }).split(". ")[0], "Top pick: Slow Horses, an action series on Apple TV, new this week", "a series: no director, English left out, 'new this week' inside seven days");
+  assert.ok(/^Top pick: Slow Horses, a French crime series on Apple TV\./.test(U.buildEditorNote({ ..._noteData(), ott: _noteData().ott.map((x) => (x.title === "Slow Horses" ? { ...x, language: "French", genre: "Crime / Drama" } : x)) }, { code: "uk" })), "other languages are named");
 });
-test("the note is plain: one wording for every week, no numbers, no hype, no question hooks", () => {
+test("the note is plain: one wording for every week, no numbers, no hype, no question hooks, three sentences at most", () => {
   const first = U.buildEditorNote(_noteData(), { code: "in" }, 0);
   for (let seed = 0; seed < 12; seed++) {
     const n = U.buildEditorNote(_noteData(), { code: "in" }, seed);
     assert.strictEqual(n, first, "no rotating phrasings: " + n);
     assert.ok(!/\d\.\d|[?!—]|exciting|something for everyone|lineup|I watched|we watched/i.test(n), n);
-    assert.ok(n.split(/(?<=\.) /).length <= 4 && n.length < 200, n);
+    assert.ok(n.split(/(?<=\.) (?=[A-Z])/).length <= 3 && n.length < 420, n);
   }
+  const HP = require("./lib/humanprose.js");
+  assert.deepStrictEqual(HP.scanProse(first), [], "no sign of machine writing in the note");
 });
-test("a Skip is called out; with none, one more title from the pick's own side", () => {
+test("a Skip is called out with its reason; with none, one more title from the pick's own side", () => {
   const n = U.buildEditorNote(_noteData(), { code: "in" }, 1);
-  assert.ok(/Skip Flop\.$/.test(n), n);
+  assert.ok(/; skip Flop: audiences and critics agree\.$/.test(n), n);
   const noSkip = _noteData(); noSkip.theatres = noSkip.theatres.filter((x) => x.title !== "Flop");
   const m = U.buildEditorNote(noSkip, { code: "in" }, 1);
-  assert.ok(/Also streaming: American Horror Story on JioHotstar\.$/.test(m), m);
+  assert.ok(/ In cinemas: Runner, a film that opened [^.;]+; also streaming: American Horror Story, a series on JioHotstar\.$/.test(m), m);
 });
 test("only current, properly scored titles are recommended — never an older standout or a few-ratings score", () => {
   const d = _noteData();
@@ -4792,14 +4802,14 @@ test("editor's note: nothing trustworthy -> null; a pick in cinemas gets a strea
   assert.strictEqual(U.buildEditorNote({ theatres: [{ title: "X", rating: 7, votes: 3 }], ott: [] }, { code: "in" }), null);
   const pickInCinemas = { ..._noteData(), pick: "Runner" };
   const n = U.buildEditorNote(pickInCinemas, { code: "in" }, 2);
-  assert.ok(/^Top pick: Runner, in cinemas\. To stream: (Slow Horses on Apple TV|American Horror Story on JioHotstar)\./.test(n), n);
+  assert.ok(/^Top pick: Runner, a film in cinemas since \d{1,2} \w{3}(?: \d{4})?\. Audiences love it; critics are split\. To stream: (Slow Horses, a series on Apple TV|American Horror Story, a series on JioHotstar); skip Flop: audiences and critics agree\.$/.test(n), n);
 });
 test("ssrEditorNote: escaped, and labelled \"Editor's note\" (the owner's call, 31 Oct 2026)", () => {
   const d = { ..._noteData(), pick: "A & B" };
   d.ott[0] = { ...d.ott[0], title: "A & B" };
   const html = U.ssrEditorNote(d, { code: "us" });
   assert.ok(html.includes('class="ednote"') && html.includes("A &amp; B"), html);
-  assert.ok(/<b>Editor's note · <\/b>Top pick: A &amp; B on Apple TV\./.test(html), html);
+  assert.ok(/<b>Editor's note · <\/b>Top pick: A &amp; B, a series on Apple TV\./.test(html), html);
   assert.strictEqual(U.ssrEditorNote({ theatres: [], ott: [] }, { code: "us" }), "");
 });
 
@@ -10513,7 +10523,7 @@ test("the last pass and its inverse: exact, idempotent, and only on pages drawn 
     assert.ok(!/—/.test(p), `plain: ${p}`);
     assert.strictEqual(HP.humanWording(p), p, `idempotent: ${t}`);
     assert.strictEqual(HP.machineWording(p), html, `inverse: ${t}`);
-    assert.deepStrictEqual(HP.scanProse(HP.siteProse(`<html><body><main><p class="take">${t.replace(/—/g, ":")}</p></main></body></html>`)).filter((f) => f.id === "em-dash"), [], "sanity: the scanner's dash rule is what fires");
+    assert.deepStrictEqual(HP.scanProse(HP.siteProse(`<html><body><main><p class="take">${t.replace(/—/g, ":")}</p></main></body></html>`)).filter((f) => f.rule === "em-dash"), [], "sanity: the scanner's dash rule is what fires");
   }
   // Plain copy that merely resembles a template is left alone: the inverse never invents a dash.
   assert.strictEqual(HP.machineWording("Critics loved it, with special praise for the cast and the score; the sequel less so."), "Critics loved it, with special praise for the cast and the score; the sequel less so.");
@@ -10557,6 +10567,19 @@ test("plain wording: answers the sweeps rewrite are matched in both forms; summa
   assert.strictEqual(E.composePlainTake({ tone: "mixed" }), null, "no aspect and no figure: nothing to say");
   assert.strictEqual(E.plainPoolTake("Reviews don't come much warmer than this."), "Critics loved it.");
   assert.strictEqual(E.composePlainTmdbTake({ lean: "positive", praised: ["action"] }), "Early viewer reviews on TMDB are positive, with praise for the action.");
+});
+
+test("plain wording: the structure tells added 1 Nov 2026 fire on their sentences and on nothing the site writes", () => {
+  const HP = require("./lib/humanprose.js");
+  const ids = (t) => HP.scanProse(t).map((f) => f.rule);
+  assert.deepStrictEqual(ids("Here's the thing: the sequel is longer. It turns out the humour carries it."), ["throat-clearing", "throat-clearing"]);
+  assert.deepStrictEqual(ids("A sequel nobody asked for. Full stop. Let that sink in."), ["emphasis-crutch", "emphasis-crutch"]);
+  assert.deepStrictEqual(ids("In this section we look at the cast. Plot twist: the villain is the lead."), ["meta-commentary", "meta-commentary"]);
+  assert.deepStrictEqual(ids("It works. Not because of the script. Because of the cast. That's it. That's the review."), ["binary-contrast", "binary-contrast"]);
+  assert.deepStrictEqual(ids("A quietly devastating drama set in a liminal space, with the soft hum of the city behind it."), ["mood-cliche", "mood-cliche", "mood-cliche"]);
+  assert.deepStrictEqual(ids("The date should be treated as a plan rather than a promise. This does not establish that it streams. To sum up, wait."), ["rather-than", "hedge", "hedge", "summary"]);
+  // The site's own sentences in those shapes stay clean.
+  for (const ok of ["Critics liked it, especially the humour and story.", "Top pick: Clayface, an English horror film directed by James Watkins, in cinemas since 23 Oct.", "Not streaming yet: no OTT release date in our sources yet.", "Opened in cinemas 2 Oct, not streaming yet", "This page updates the day it starts streaming.", "It is on Netflix in India."]) assert.deepStrictEqual(ids(ok), [], ok);
 });
 
 group("published reviews from the outlets' feeds (lib/reviews.js, 31 Oct 2026)");

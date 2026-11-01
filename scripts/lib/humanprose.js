@@ -76,9 +76,16 @@ const RULES = [
   // A short question answered in the same breath ("Staying in? Put on…"): a hook, not a question
   // the reader asked. FAQ questions sit on their own line and never match.
   { id: "question-hook", re: /(?:^|[.!:][ \t]+)(?:[A-Z][\w'’]*)(?:[ \t]+[\w'’]+){0,4}\?[ \t]+[A-Z]/gm, fix: "State the answer; drop the question that sets it up." },
-  { id: "hedge", re: /\bit(?:'|’)?s (?:important|worth) (?:to note|noting)\b|\bbased on (?:the )?available information\b|\bnot widely (?:available|documented)\b/gi, fix: "Say what is known and where it came from." },
+  { id: "hedge", re: /\bit(?:'|’)?s (?:important|worth) (?:to note|noting)\b|\bit is worth noting\b|\bbased on (?:the )?available information\b|\bnot widely (?:available|documented)\b|\bdoes not(?: by itself)? establish that\b|\bshould not be confused with\b|\bshould be (?:treated|read|seen) as [^.]{1,60}\brather than\b/gi, fix: "Say what is known and where it came from." },
   { id: "chatbot", re: /\bI hope this helps\b|\blet me know\b|\bas an AI\b|\bas of my last (?:knowledge|training)\b|\b(?:Certainly|Of course)!/gi, fix: "Remove: it's addressed to a chatbot user." },
-  { id: "summary", re: /(?:^|[.!?]\s+)(?:In summary|In conclusion|Overall|Ultimately|In short)[,:]/gm, fix: "Delete the recap." },
+  { id: "summary", re: /(?:^|[.!?]\s+)(?:In summary|In conclusion|Overall|Ultimately|In short|To sum up|All in all)[,:]/gm, fix: "Delete the recap." },
+  // Structure tells (1 Nov 2026; Pangram's pattern data and the anti-slop lists): setup before the
+  // point, emphasis that adds nothing, announcements of content, staged contrasts, mood clichés.
+  { id: "throat-clearing", re: /\b(?:Here(?:'|’)s the thing|It turns out|The (?:uncomfortable|hard|simple|honest) truth is|At its core|In today(?:'|’)s (?:world|fast-paced|digital)|Let(?:'|’)s (?:be honest|face it|dive in))\b/g, fix: "Start with the point." },
+  { id: "emphasis-crutch", re: /\b(?:Full stop\.|Let that sink in|Read that again|Make no mistake[,:])/g, fix: "Delete it; the claim stands on its own." },
+  { id: "meta-commentary", re: /\bIn this section\b|\bLet me walk you through\b|\bPlot twist:|\bTL;DR\b/g, fix: "Give the content, not the announcement." },
+  { id: "binary-contrast", re: /\bNot because [^.!?]{2,60}\. Because\b|\bThat(?:'|’)s it\. That(?:'|’)s the\b/g, fix: "State the positive thing on its own." },
+  { id: "mood-cliche", re: /\bquietly (?:devastating|powerful|radical|brilliant|profound|confident|moving)\b|\b(?:soft|low|distant) hum of\b|\bliminal\b|\bspectral\b/gi, fix: "Describe the thing itself." },
   { id: "placeholder", re: /\[(?:insert|placeholder|your)[^\]]*\]|\{\{\s*\w+\s*\}\}|\bundefined\b|\bNaN\b|\bTODO\b|\bLorem ipsum\b/g, fix: "Fill in or remove." },
   { id: "markdown", re: /\*\*[^*\n]{2,60}\*\*|```|\[[^\]\n]{1,60}\]\(https?:/g, fix: "Render it, don't show raw Markdown." },
   { id: "retired", re: /worth your evening|verdict inside|nothing to plan around|threaded through|seasons deep|one-night sampler|scheduling gymnastics|you know what you(?:'|’)re getting|promising, not proven|early signal rather than|circling back|took the heat|fault line|drubbing|love-it-or-hate-it|the audience counterpoint|an honest word/gi, fix: "A retired flourish: write the fact." },
