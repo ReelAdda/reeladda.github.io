@@ -9333,12 +9333,16 @@ test("a frozen page is rendered with TMDB's recorded facts; a page in this week'
     process.chdir(root); fsx.mkdirSync("jp/movie", { recursive: true });
     const JP = require("./lib/core.js").COUNTRIES.find((c) => c.code === "jp");
     const item = { title: "A Minecraft Movie", slug: "a-minecraft-movie", kind: "movie", released: "2025-04-25", language: "English", providers: ["U-NEXT"], platform: "U-NEXT", rentBuy: [] };
-    for (const s of ["a-minecraft-movie", "current-film"]) fsx.writeFileSync(`jp/movie/${s}.html`, Mg.renderFrozen({ ...item, slug: s }, JP, { asOf: "2026-09-01", knownSlugs: new Set() }));
-    Fa.writeFacts("jp", new Map(["a-minecraft-movie", "current-film"].map((s) => [s, { slug: s, updated: "2026-09-01", item: Fa.extractFacts(fsx.readFileSync(`jp/movie/${s}.html`, "utf8"), s) }])));
+    for (const s of ["a-minecraft-movie", "current-film", "dune-catalogue"]) fsx.writeFileSync(`jp/movie/${s}.html`, Mg.renderFrozen({ ...item, slug: s, ...(s === "dune-catalogue" ? { title: "Dune", released: "2026-11-11", providers: [], platform: "Theatres" } : {}) }, JP, { asOf: "2026-09-01", knownSlugs: new Set() }));
+    Fa.writeFacts("jp", new Map(["a-minecraft-movie", "current-film", "dune-catalogue"].map((s) => [s, { slug: s, updated: "2026-09-01", item: Fa.extractFacts(fsx.readFileSync(`jp/movie/${s}.html`, "utf8"), s) }])));
     const truth = { at: "2026-10-16", providers: ["Amazon Prime Video", "Hulu"], rentBuy: [], released: "2025-04-25" };
-    const man = { jp: { "a-minecraft-movie": { rendered: "2026-10-14", archivedOn: "2026-06-01", truth }, "current-film": { rendered: "2026-10-14", truth } } };
+    // A catalogue page is frozen too (1 Nov 2026, Dune in the Philippines): its truth record applies.
+    const man = { jp: { "a-minecraft-movie": { rendered: "2026-10-14", archivedOn: "2026-06-01", truth }, "current-film": { rendered: "2026-10-14", truth },
+      "dune-catalogue": { rendered: "2026-10-12", catalog: true, released: "2021-09-15", truth: { at: "2026-10-22", providers: ["HBO Max"], rentBuy: [], released: "2021-09-15" } } } };
     const r = Mg.renderMigrated(man, JP, { today: "2026-10-16" });
-    assert.strictEqual(r.corrected, 1); assert.deepStrictEqual(r.fields, { providers: 1 });
+    assert.strictEqual(r.corrected, 2); assert.deepStrictEqual(r.fields, { providers: 2, released: 1 });
+    const dune = fsx.readFileSync("jp/movie/dune-catalogue.html", "utf8");
+    assert.ok(/"datePublished":"2021-09-15"/.test(dune) && !/2026-11-11|Not out yet/.test(dune) && />HBO Max</.test(dune), "the catalogue page takes TMDB's date and platform");
     const fixed = fsx.readFileSync("jp/movie/a-minecraft-movie.html", "utf8");
     assert.ok(/<span class="pill">Amazon Prime Video<\/span><span class="pill">Hulu<\/span>/.test(fixed) && !/>U-NEXT</.test(fixed), "platforms now TMDB's");
     assert.ok(/Availability as of 16 Oct 2026/.test(fixed), "dated by the check that saw the change");

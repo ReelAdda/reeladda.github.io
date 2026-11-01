@@ -214,7 +214,9 @@ function renderMigrated(manifest, cfg, { today, mode = null, modes = null, liste
       out = { ...out, language: langName(out.language) };     // a bare code from a build that couldn't name it
       if (count) res.fields.language = (res.fields.language || 0) + 1;
     }
-    if (e.archivedOn && e.truth) {
+    // Catalogue pages are frozen too (1 Nov 2026: Dune in the Philippines kept a 2026 re-release
+    // date, with "Not out yet" under a Must watch, because its truth record never applied).
+    if ((e.archivedOn || e.catalog) && e.truth) {
       const t = applyTruth(out, e.truth);
       if (t.changed.length) {
         out = t.item;
