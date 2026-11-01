@@ -10587,6 +10587,9 @@ test("matching: the title as whole words next to 'review', inside the window, wi
   // One-word titles count only in the headline convention: "Hope review: …" or "Review: Hope".
   assert.ok(M("‘Hope’ review: Na Hong-jin's thriller", "Hope") && M("Hope movie review: a slow burn", "Hope") && M("OTT Review: Akka - Telugu-dubbed series", "Akka"), "one-word forms");
   assert.ok(!M("Officials Review Development Works", "Officials") && !M("New hope for the review of flood works", "Hope") && !M("Carrie Coon on her review habits", "Carrie"), "one-word negatives");
+  // Not a critic's review (1 Nov 2026): reaction roundups, trailer and song reviews.
+  for (const h of ["Pehla Pyaar Doosri Baar movie X review: Kunal Vaid-starrer rom-com wins hearts", "Scene Trailer Review", "Jailer 2 Twitter review: fans go wild", "Jailer 2 audience review: first day first show reactions", "Jailer 2 song review: Anirudh delivers"]) assert.ok(!RV.isReview(h) && !M(h, "Jailer 2") && !M(h, "Pehla Pyaar Doosri Baar"), h);
+  assert.ok(RV.isReview("Pehla Pyaar Doosri Baar review: This Luv Ranjan-backed rom-com struggles to find its spark"));
   // 31 Oct dry run: "#Love" must not take "Cyberpunk: Edgerunners 2 series review: Love and art…" or "Review: ‘Love Always’…".
   assert.ok(M("#Love Review: Romcom With No Spark", "#Love") && !M("‘Cyberpunk: Edgerunners 2’ series review: Love and art in the time of technofascism", "#Love") && !M("Review: ‘Love Always’ takes its title way too seriously", "#Love") && !M("Love Review: Romcom", "#Love"), "a leading # must be in the headline, and the title ends the segment");
   const items = RV.parseFeed(RV_XML, { name: "Test Outlet", langs: "any" });

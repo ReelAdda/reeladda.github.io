@@ -85,7 +85,11 @@ function parseFeed(xml, feed) {
   return out;
 }
 
-const isReview = (title) => REVIEW_WORD.test(title);
+// Not a critic's review, though the headline says "review": social-media reaction roundups
+// ("Pehla Pyaar Doosri Baar movie X review: fans…", Zee News), trailer and song reviews, first-show
+// crowd pieces (1 Nov 2026).
+const NOT_REVIEW = /\b(?:x|twitter|audience|public|fans?|netizens?|viewers?|trailer|teaser|song|album|first day first show|fdfs|box office|critics(?:'|’)?\s+(?:round-?up|roundup))\s+(?:movie\s+|film\s+)?review/i;
+const isReview = (title) => REVIEW_WORD.test(title) && !NOT_REVIEW.test(title);
 
 // Pure: a star rating the feed itself states, out of 5, or null. "Rating : 2.75/5", "3/5",
 // "3.5 stars", "★★★☆☆". Ten-point scales are converted; anything odd is left out.
@@ -107,6 +111,7 @@ const norm = (s) => String(s || "").toLowerCase().replace(/[‘’“”'"]/g, "
 // with the title right after). Short titles (under 4 letters, or a single common word) need the
 // headline to start with them, or the match is refused.
 function headlineMatches(headline, title) {
+  if (NOT_REVIEW.test(String(headline || ""))) return false;
   const h = norm(headline), t = norm(title);
   if (t.length < 3) return false;
   const re = new RegExp(`(^|\\s)${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+")}(\\s|$)`);
