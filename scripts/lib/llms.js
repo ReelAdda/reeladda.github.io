@@ -41,7 +41,8 @@ function buildLlmsTxt(dataByCode) {
   const ind = dataByCode.in || {};
   const gen = ind.generatedAt || new Date().toISOString();
   const day = gen.slice(0, 10);
-  const line = (it) => `- ${it.title}${it.language && it.language !== "English" ? ` (${it.language})` : ""}${it.platform && it.platform !== "Theatres" ? ` — on ${it.platform}` : ""}${it.rating != null && llmsRatingConfident(it) ? ` — rated ${Number(it.rating).toFixed(1)}/10` : ""}${it.slug ? ` — https://filmychill.com${filmPagePath("in", it.slug)}` : ""}`;
+  // FilmyChill's own fields (2 Nov 2026): the verdict, not TMDB's rating (see buildLlmsFullTxt).
+  const line = (it) => `- ${it.title}${it.language && it.language !== "English" ? ` (${it.language})` : ""}${it.platform && it.platform !== "Theatres" ? ` — on ${it.platform}` : ""}${it.fcScore && it.fcScore.verdict ? ` — ${it.fcScore.verdict}` : ""}${it.slug ? ` — https://filmychill.com${filmPagePath("in", it.slug)}` : ""}`;
   const theatres = (ind.theatres || []).slice(0, 7).map(line).join("\n");
   const ott = (ind.ott || []).filter((x) => !x.stillGood).slice(0, 6).map(line).join("\n");
   const langs = LANGUAGE_PAGES.map(([name, slug]) => `- [New ${name} movies & OTT this week](https://filmychill.com/${slug}/)`).join("\n");
@@ -85,8 +86,11 @@ function buildLlmsFullTxt(dataByCode) {
   const lines = [
     "# FilmyChill — full current picks (machine-readable companion to /llms.txt)", "",
     `Generated: ${new Date().toISOString()}. Rebuilt twice daily. No pay-for-placement.`,
-    "Sources: TMDB (film data, ratings; streaming availability via JustWatch), Wikipedia (critical reception), YouTube (trailer statistics).",
-    "Fields: rating is the TMDB audience average out of 10; the verdict is the FilmyChill Score (audience ratings and critics' reception combined), the same verdict each film's page shows; the critics' line is distilled from published review coverage, never quoted.", "",
+    "Sources: TMDB (film data; streaming availability via JustWatch), Wikipedia (critical reception), YouTube (trailer statistics). This file uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.",
+    // FilmyChill's own fields only (2 Nov 2026): TMDB's terms count handing its content on in a
+    // data set as a commercial use, so the rating, vote count, runtime, certificate and credits
+    // stay on the pages. The verdict and the critics' line are FilmyChill's; the page has the rest.
+    "Fields: the verdict is the FilmyChill Score (audience ratings and critics' reception combined), the same verdict each film's page shows; the critics' line is distilled from published review coverage, never quoted. Ratings, runtimes, certificates and credits are on each film's page.", "",
   ];
   for (const cfg of COUNTRIES) {
     const data = dataByCode[cfg.code];
@@ -108,21 +112,17 @@ function buildLlmsFullTxt(dataByCode) {
       lines.push("", `### ${label}`, "");
       list.forEach((it, i) => {
         const facts = [
-          it.kind === "tv" ? "Series" : "Film", it.language, it.genre,
-          it.runtime ? `${it.runtime} min` : null, it.cert || null,
+          it.kind === "tv" ? "Series" : "Film", it.language,
           it.released ? `released ${it.released}` : null,
           it.platform && it.platform !== "Theatres" ? `on ${it.platform}` : null,
-          it.rating != null ? `rated ${Number(it.rating).toFixed(1)}/10 (${it.votes || 0} votes${llmsRatingConfident(it) ? "" : " — early, low confidence"})` : null,
           // One verdict per film: a scored film states it once, on its FilmyChill Score line
           // below; this slot only says why there is no verdict yet.
           it.fcScore ? null : (it.verdict || null),
         ].filter(Boolean).join(" · ");
         lines.push(`${i + 1}. ${it.title} — ${facts}`);
-        if (it.fcScore) lines.push(`   FilmyChill Score: ${it.fcScore.verdict} — ${it.fcScore.reason} (${it.fcScore.early ? `based on only ${it.fcScore.votes} ratings` : "combines audience ratings and critics' reception"})`);
+        if (it.fcScore) lines.push(`   FilmyChill Score: ${it.fcScore.verdict} — ${it.fcScore.reason} (${it.fcScore.early ? "an early read from few ratings" : "combines audience ratings and critics' reception"})`);
         if (it.take) lines.push(`   Critics: ${it.take}${it.takeArticle ? ` [source: en.wikipedia.org/wiki/${String(it.takeArticle).replace(/ /g, "_")}]` : ""}`);
         if (it.hook) lines.push(`   Context: ${it.hook}`);
-        // A series' "director" is TMDB's created_by (lib/enrich.js): its creator.
-        if (it.director) lines.push(`   ${it.kind === "tv" ? "Creator" : "Director"}: ${it.director}`);
         lines.push(`   URL: ${filmPageUrl(cfg.code, it.slug)}`);
       });
     }

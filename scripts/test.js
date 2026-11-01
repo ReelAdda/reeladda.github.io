@@ -260,7 +260,7 @@ test("default mode is tmdb (no env override)", () => {
 test("IMDb mode: footer credits TMDB for data AND IMDb for ratings (required wording)", () => {
   const f = U.footerAttribution(true); // explicit IMDb mode — deterministic, no env needed
   assert.ok(/Film data from/.test(f), "TMDB credited for film data");
-  assert.ok(/not endorsed or certified by TMDB/.test(f), "TMDB disclaimer present");
+  assert.ok(/uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB/.test(f) && /<img src="\/tmdb\.svg" alt="TMDB"/.test(f), "TMDB's notice and logo present (its terms, read 2 Nov 2026)");
   assert.ok(/courtesy of <a[^>]*>IMDb/.test(f), "IMDb credited for ratings");
   assert.ok(/Used with permission/.test(f), "IMDb's required verbatim wording present");
 });
@@ -2171,7 +2171,7 @@ test("every footer kind carries the notice and Privacy · Copyright", () => {
   for (const imdb of [false, true]) {
     const f = U.footerAttribution(imdb);
     assert.ok(f.endsWith(`${P.NO_HOSTING_NOTICE}<br><a href="/privacy/">Privacy</a> · <a href="/dmca/">Copyright</a> · `), "film, hub, weekly, homepage credit");
-    assert.ok(f.includes("This product uses the TMDB API but is not endorsed or certified by TMDB."), "TMDB's wording untouched");
+    assert.ok(f.includes("This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB."), "TMDB's wording untouched");
   }
   assert.ok(/doesn't host or stream any films or shows/.test(P.NO_HOSTING_NOTICE));
   const G = require("./lib/graph.js");
@@ -4575,8 +4575,9 @@ const LLMS_DATA = { in: { generatedAt: "2026-07-13T06:00:00.000Z",
         { title: "Old Hit", slug: "old-hit", platform: "Prime Video", stillGood: true }] } };
 test("contains this week's actual picks with platforms, ratings, and film URLs", () => {
   const md = U.buildLlmsTxt(LLMS_DATA);
-  assert.ok(md.includes("Alpha (Hindi)") && md.includes("rated 7.1/10"));
+  assert.ok(md.includes("Alpha (Hindi)") && !/rated 7\.1/.test(md), "FilmyChill's own fields, not TMDB's rating (2 Nov 2026)");
   assert.ok(md.includes("Ikka (Hindi) — on Netflix"));
+  assert.ok(U.buildLlmsTxt({ in: { ...LLMS_DATA.in, theatres: [{ ...LLMS_DATA.in.theatres[0], fcScore: { verdict: "Must watch" } }] } }).includes("Alpha (Hindi) — Must watch — https://filmychill.com/movie/alpha.html"), "the verdict rides");
   assert.ok(md.includes("https://filmychill.com/movie/alpha.html"));
 });
 test("only genuinely-new OTT titles — stillGood items excluded from the fresh list", () => {
@@ -4881,10 +4882,12 @@ test("buildPlatformHubPage: title, country-scoped links, ItemList + FAQ, no emoj
   assert.ok(html.includes('"ItemList"') && html.includes('"numberOfItems":6'));
   assert.ok(!/[\u{1F300}-\u{1FAFF}]/u.test(html));
 });
-test("indexNowUrls: hubs, this week's film pages, llms-full ride the ping; deduped", () => {
-  const urls = U.indexNowUrls([{ code: "in" }], { in: { theatres: [{ slug: "the-odyssey" }],
+test("indexNowUrls: only the pages that change every build; hubs and film pages ride on a changed lastmod, not by default (2 Nov 2026)", () => {
+  const urls = U.indexNowUrls([{ code: "in" }, { code: "us" }], { in: { theatres: [{ slug: "the-odyssey" }],
     ott: [{ slug: "p", title: "P", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "b", title: "B", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "c", title: "C", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "d", title: "D", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "e", title: "E", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "f", title: "F", platform: "JioHotstar", providers: ["JioHotstar"] }] } });
-  assert.ok(urls.includes("https://filmychill.com/movie/the-odyssey.html") && urls.includes("https://filmychill.com/new-on-jiohotstar/") && urls.includes("https://filmychill.com/llms-full.txt"));
+  assert.ok(!urls.includes("https://filmychill.com/movie/the-odyssey.html") && !urls.includes("https://filmychill.com/new-on-jiohotstar/") && !urls.includes("https://filmychill.com/llms-full.txt"), "no unchanged-page pings");
+  assert.ok(urls.includes("https://filmychill.com/") && urls.includes("https://filmychill.com/us/new-on-ott/") && urls.includes("https://filmychill.com/tamil/"));
+  assert.ok(urls.length < 60, "a few dozen URLs a run, not nine hundred: " + urls.length);
   assert.strictEqual(new Set(urls).size, urls.length);
 });
 test("film page shows up to six similar titles", () => {
@@ -4901,8 +4904,11 @@ test("llms-full.txt: one fetch answers the week with provenance", () => {
     rating: 7.7, votes: 1200, verdict: "Must watch", take: "Critics loved it.", takeArticle: "The Odyssey (2026 film)",
     hook: "Nolan epic.", director: "Christopher Nolan", slug: "the-odyssey" }], ott: [] } };
   const s = U.buildLlmsFullTxt(data);
-  assert.ok(s.includes("rated 7.7/10") && s.includes("Critics: Critics loved it"));
+  // FilmyChill's own fields only (2 Nov 2026): no TMDB rating, votes, runtime, certificate or credits in the data set.
+  assert.ok(!/rated 7\.7|1200 votes|173 min|· A ·|Christopher Nolan|Adventure/.test(s), s.split("\n").slice(0, 12).join("\n"));
+  assert.ok(s.includes("The Odyssey — Film · English · released 2026-07-10 · Must watch") && s.includes("Critics: Critics loved it"));
   assert.ok(s.includes("en.wikipedia.org/wiki/The_Odyssey_(2026_film)") && s.includes("https://filmychill.com/movie/the-odyssey.html"));
+  assert.ok(s.includes("not endorsed, certified, or otherwise approved by TMDB"));
   assert.ok(!/<[a-z]/.test(s));
 });
 test("llms machine appendix lists llms-full, feed, every country's JSON", () => {
@@ -8288,11 +8294,16 @@ test("Grow: its loader and exactly its origins on every page, off in one setting
   const film = '<html><head><meta http-equiv="Content-Security-Policy" content="default-src \'self\'; connect-src \'self\' https://firestore.googleapis.com; script-src \'self\'; img-src \'self\' https://image.tmdb.org data:; frame-src https://www.youtube-nocookie.com; object-src \'none\'"><title>X</title></head><body><p>x</p></body></html>';
   const on = G.ensureGrow(film, true);
   const csp = /content="([^"]*)"/.exec(on)[1];
-  // Grow's own snippet, byte for byte (its installation check looks for it), in <head> after the policy.
-  assert.ok(G.GROW_TAG.startsWith('<script data-grow-initializer="">!(function(){window.growMe||') && G.GROW_TAG.includes('"data-grow-faves-site-id","' + G.GROW_SITE_ID + '"'), "the dashboard's snippet");
+  // Grow's own snippet, byte for byte (its installation check looks for it), inside the one
+  // time-zone guard that keeps it off in Europe and the UK (2 Nov 2026), in <head> after the policy.
+  assert.ok(G.GROW_TAG.startsWith('<script data-grow-initializer="">if(!/^(?:Europe\\/|Atlantic\\/(?:Reykjavik|Faroe|Canary|Madeira|Azores|Jan_Mayen))/.test(') && G.GROW_TAG.includes('{!(function(){window.growMe||') && G.GROW_TAG.includes('"data-grow-faves-site-id","' + G.GROW_SITE_ID + '"') && G.GROW_TAG.endsWith("})();}</script>"), "the dashboard's snippet inside the region guard");
   assert.ok(on.includes(G.GROW_TAG + "\n</head>") && on.indexOf(G.GROW_TAG) > on.indexOf("Content-Security-Policy"), "in <head>, after the policy");
   assert.strictEqual(G.GROW_HASH, "'sha256-" + require("crypto").createHash("sha256").update(G.GROW_CODE, "utf8").digest("base64") + "'", "allowed by the exact hash of its code");
-  for (const old of ['<script src="/js/grow.js" defer></script>', '<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="' + G.GROW_SITE_ID + '" defer></script>'])
+  // The guard runs in a browser: Europe/London stays out, Asia/Kolkata loads.
+  const guard = G.GROW_CODE.slice(0, G.GROW_CODE.indexOf("{!(function") + 1);
+  const runs = (tz) => new Function("Intl", `${guard} return true; } return false;`)({ DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone: tz }) }) });
+  assert.deepStrictEqual(["Asia/Kolkata", "America/New_York", "Europe/London", "Europe/Berlin", "Atlantic/Reykjavik", ""].map(runs), [true, true, false, false, false, true]);
+  for (const old of ['<script src="/js/grow.js" defer></script>', '<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="' + G.GROW_SITE_ID + '" defer></script>', '<script data-grow-initializer="">' + G.GROW_SNIPPET + '</script>'])
     assert.strictEqual(G.ensureGrow(film.replace("</body>", old + "\n</body>"), true), on, "an earlier loader is replaced: " + old.slice(0, 40));
   assert.ok(csp.includes("script-src 'self' " + G.GROW_HASH + " https://faves.grow.me;"), "scripts: the snippet's hash and faves.grow.me, nothing else");
   assert.ok(!/script-src[^;]*'unsafe-inline'/.test(csp), "never 'unsafe-inline' for scripts");

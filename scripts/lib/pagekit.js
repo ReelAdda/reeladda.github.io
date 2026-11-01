@@ -556,15 +556,19 @@ const FOOTER_LINKS = '<a href="/privacy/">Privacy</a> · <a href="/dmca/">Copyri
 function footerAttribution(useImdb = USE_IMDB, { plain = false } = {}) {
   return footerAttributionText(useImdb).replace(NO_HOSTING_NOTICE, plain ? NO_HOSTING_PLAIN : NO_HOSTING_NOTICE);
 }
+// TMDB's terms (read 2 Nov 2026) ask for the logo and this wording: "uses TMDB and the TMDB APIs
+// but is not endorsed, certified, or otherwise approved by TMDB." The logo is TMDB's own short
+// mark (/tmdb.svg, from themoviedb.org/about/logos-attribution), unaltered, 11px tall.
+const TMDB_NOTICE = `<img src="/tmdb.svg" alt="TMDB" width="88" height="11" style="height:11px;width:auto;vertical-align:-1px" loading="lazy"> This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.`;
 function footerAttributionText(useImdb) {
-  // Required wording kept verbatim (TMDB's disclaimer; IMDb's "Used with permission" when its
+  // Required wording kept verbatim (TMDB's notice; IMDb's "Used with permission" when its
   // ratings are shown); only the layout is compact: credits on one line, the notice below.
   const tmdb = `<a href="https://www.themoviedb.org" rel="noopener" target="_blank">TMDB</a>`;
   const jw = `<a href="https://www.justwatch.com" rel="noopener" target="_blank">JustWatch</a>`;
   if (useImdb) {
-    return `Film data from ${tmdb} · Where-to-watch data by ${jw} · Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>${WIKI_NOTICE}<br>${NO_HOSTING_NOTICE}<br>${FOOTER_LINKS}`;
+    return `Film data from ${tmdb} · Where-to-watch data by ${jw} · Ratings information courtesy of <a href="https://www.imdb.com" rel="noopener" target="_blank">IMDb</a> (https://www.imdb.com). Used with permission.<br>${TMDB_NOTICE}<br>${WIKI_NOTICE}<br>${NO_HOSTING_NOTICE}<br>${FOOTER_LINKS}`;
   }
-  return `Film data and ratings from ${tmdb} · Where-to-watch data by ${jw}<br>This product uses the TMDB API but is not endorsed or certified by TMDB.<br>${WIKI_NOTICE}<br>${NO_HOSTING_NOTICE}<br>${FOOTER_LINKS}`;
+  return `Film data and ratings from ${tmdb} · Where-to-watch data by ${jw}<br>${TMDB_NOTICE}<br>${WIKI_NOTICE}<br>${NO_HOSTING_NOTICE}<br>${FOOTER_LINKS}`;
 }
 // Critics' figures and reception on film pages are summarised and adapted from English Wikipedia
 // (CC BY-SA 4.0 asks for attribution, a link to the licence and a note that the text was adapted;

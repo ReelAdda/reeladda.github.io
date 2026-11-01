@@ -609,14 +609,16 @@ function buildRssFeed(data, cfg) {
   const rfc822 = (d) => (d ? new Date(d) : new Date());
   const itemXml = items.map(({ x, when }) => {
     const url = filmPageUrl(code, x.slug);
-    const bits = [x.platform, x.language, x.rating != null ? `★ ${Number(x.rating).toFixed(1)}` : null, x.verdict]
-      .filter(Boolean).join(" · ");
+    // The description is FilmyChill's own line (2 Nov 2026): platform, language, verdict. The
+    // TMDB synopsis and rating stay on the site; a feed is syndication, and TMDB's terms don't
+    // cover passing its content on. Plain punctuation, no dashes.
+    const bits = [x.platform, x.language, x.verdict ? String(x.verdict).replace(/\s+—\s+/g, ": ") : null].filter(Boolean).join(" · ");
     return `  <item>
     <title>${e(x.title)}${x.platform ? ` — ${e(x.platform)}` : ""}</title>
     <link>${e(url)}</link>
     <guid isPermaLink="false">${e(url)}::${e(when)}</guid>
     <pubDate>${rfc822(when).toUTCString()}</pubDate>
-    <description>${e([bits, x.review].filter(Boolean).join(" — "))}</description>
+    <description>${e(bits)}</description>
   </item>`;
   }).join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>

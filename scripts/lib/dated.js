@@ -455,19 +455,19 @@ function writeWeekPage(data) {
   console.log(`Week snapshot: /week/${slug}/${prevExists ? " → chained to previous week" : ""}`);
 }
 
-// IndexNow payload, regenerated each run so DYNAMIC urls (the current week snapshot)
-// and every configured country/language page get pinged without ever editing the
-// workflow again. The key is public by design — IndexNow proves ownership via the
-// matching KEY.txt served from the repo root, not by keeping the key secret.
+// IndexNow payload, regenerated each run. The key is public by design — IndexNow proves ownership
+// via the matching KEY.txt served from the repo root, not by keeping the key secret.
+// Only what changed (2 Nov 2026). Until then the base list carried every hub and every current
+// film page (~900 URLs) twice a day whether or not they changed: ~1,800 "nothing changed" pings a
+// day, which is the one pattern Bing's guidance says can get a key's pings deprioritised. Now the
+// base list is the pages that change every build by construction (home, New on OTT and the
+// language pages); hubs and film pages ride only when their sitemap lastmod is today
+// (lib/sitemap.js extendIndexNowWithChanged), and hidden pages are announced once.
 function indexNowUrls(builtCountries, dataByCode = {}) {
-  const urls = ["https://filmychill.com/", "https://filmychill.com/new-on-ott/",
-    "https://filmychill.com/data/", "https://filmychill.com/llms-full.txt"];
+  void dataByCode;
+  const urls = ["https://filmychill.com/", "https://filmychill.com/new-on-ott/", "https://filmychill.com/data/"];
   for (const cfg of builtCountries) {
     if (cfg.code !== "in") urls.push(`https://filmychill.com/${cfg.code}/`, `https://filmychill.com/${cfg.code}/new-on-ott/`);
-    const d = dataByCode[cfg.code];
-    if (!d) continue;
-    for (const h of hubsFor(d)) urls.push(hubUrl(cfg.code, h.slug));
-    for (const it of [...(d.theatres || []), ...(d.ott || [])]) if (it.slug) urls.push(filmPageUrl(cfg.code, it.slug));
   }
   for (const [, slug] of LANGUAGE_PAGES) urls.push(`https://filmychill.com/${slug}/`);
   return [...new Set(urls)].slice(0, 900);

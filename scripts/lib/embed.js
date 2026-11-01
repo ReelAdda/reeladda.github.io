@@ -77,11 +77,14 @@ function buildEmbedPage(data, cfg, updatedHuman) {
   .fcw-f { display: block; padding: 9px 14px; text-align: center; font-size: 11px;
            text-decoration: none; color: #716A8C; border-top: 1px solid #EADFCE; background: #fff; }
   .fcw-f b { color: #4038C7; }
+  .fcw-a { padding: 6px 14px 8px; font-size: 10px; line-height: 1.5; color: #716A8C; background: #fff; border-top: 1px solid #EADFCE; }
+  .fcw-a img { height: 9px; width: auto; vertical-align: -1px; }
 </style></head><body>
 <div class="fcw">
   <div class="fcw-h"><b>FILMY<i>CHILL</i></b><span>New on OTT · ${e(m.name)}</span></div>
   ${items.map((it) => embedRow(it, code)).join("\n")}
   <a class="fcw-f" href="${e(home)}" target="_blank" rel="noopener">Updated ${e(updatedHuman)} · see all on <b>filmychill.com</b> →</a>
+  <div class="fcw-a"><img src="https://filmychill.com/tmdb.svg" alt="TMDB"> Film data from TMDB, where-to-watch data by JustWatch. This widget uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.</div>
 </div>
 </body></html>`;
 }

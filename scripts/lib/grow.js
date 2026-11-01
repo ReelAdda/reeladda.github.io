@@ -45,15 +45,23 @@ const GROW_SITE_ID = process.env.GROW_SITE_ID === undefined
   ? "U2l0ZToxZTkwZjRlNS1kNTZiLTQ1M2UtOTA4Yy00NmYxNmIyNTZhOWE="
   : String(process.env.GROW_SITE_ID).trim();
 const GROW_ON = !!GROW_SITE_ID;
-// Grow's snippet exactly as its dashboard gives it (only the site ID varies).
-const GROW_CODE = '!(function(){window.growMe||((window.growMe=function(e){window.growMe._.push(e);}),(window.growMe._=[]));var e=document.createElement("script");(e.type="text/javascript"),(e.src="https://faves.grow.me/main.js"),(e.defer=!0),e.setAttribute("data-grow-faves-site-id","'
+// Grow's snippet exactly as its dashboard gives it (only the site ID varies), inside one guard
+// (2 Nov 2026): Grow sets its own cookies, so it does not load for visitors in Europe and the
+// UK, where that needs consent the site doesn't ask for. The browser's time zone stands in for
+// the region (every EEA, UK and Swiss zone is Europe/* or one of the five Atlantic islands);
+// a few countries outside the EEA on Europe/* time are left out too, which costs nothing.
+// The snippet itself stays byte for byte, so Grow's installation check still finds it.
+const GROW_SNIPPET = '!(function(){window.growMe||((window.growMe=function(e){window.growMe._.push(e);}),(window.growMe._=[]));var e=document.createElement("script");(e.type="text/javascript"),(e.src="https://faves.grow.me/main.js"),(e.defer=!0),e.setAttribute("data-grow-faves-site-id","'
   + GROW_SITE_ID + '");var t=document.getElementsByTagName("script")[0];t.parentNode.insertBefore(e,t);})();';
+const GROW_REGION_GUARD = 'if(!/^(?:Europe\\/|Atlantic\\/(?:Reykjavik|Faroe|Canary|Madeira|Azores|Jan_Mayen))/.test((function(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||""}catch(e){return ""}})())){';
+const GROW_CODE = GROW_REGION_GUARD + GROW_SNIPPET + '}';
 const GROW_TAG = `<script data-grow-initializer="">${GROW_CODE}</script>`;
 const GROW_HASH = `'sha256-${crypto.createHash("sha256").update(GROW_CODE, "utf8").digest("base64")}'`;
 // Earlier loaders, taken off any page that still has one.
 const OLD_TAGS = [
   '<script src="/js/grow.js" defer></script>',
   `<script src="https://faves.grow.me/main.js" data-grow-faves-site-id="${GROW_SITE_ID}" defer></script>`,
+  `<script data-grow-initializer="">${GROW_SNIPPET}</script>`,   // the unguarded loader (to 2 Nov 2026)
 ];
 const GROW_SOURCES = {
   "script-src": [GROW_HASH, "https://faves.grow.me"],
@@ -89,4 +97,4 @@ function addGrowToPages(files, { root = ".", on = GROW_ON } = {}) {
   return res;
 }
 
-module.exports = { GROW_CODE, GROW_HASH, GROW_ON, GROW_SITE_ID, GROW_SOURCES, GROW_TAG, addGrowToPages, ensureGrow, growCsp };
+module.exports = { GROW_CODE, GROW_HASH, GROW_ON, GROW_SITE_ID, GROW_SNIPPET, GROW_SOURCES, GROW_TAG, addGrowToPages, ensureGrow, growCsp };
