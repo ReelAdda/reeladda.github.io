@@ -2,38 +2,9 @@
  "date": "2026-11-01",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 3,
- "high": 2,
- "correctable": 2,
- "byField": {
-  "streaming": 1,
-  "platform": 1,
-  "lead actor": 1
- },
- "rows": [
-  {
-   "field": "streaming",
-   "severity": "high",
-   "page": "not streaming",
-   "tmdb": "on Netflix",
-   "code": "ae",
-   "slug": "meethe-mein-kya-hai"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Super Channel Plus, Super Channel, fuboTV",
-   "tmdb": "Super Channel, fuboTV",
-   "code": "ca",
-   "slug": "hotel-for-dogs"
-  },
-  {
-   "field": "lead actor",
-   "severity": "medium",
-   "page": "Cleo",
-   "tmdb": "Cleo Pires, Rafael Infante, Tony Ramos",
-   "code": "br",
-   "slug": "if-i-were-you-3"
-  }
- ]
+ "pagesDisagreeing": 0,
+ "high": 0,
+ "correctable": 0,
+ "byField": {},
+ "rows": []
 }
