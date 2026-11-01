@@ -10454,6 +10454,33 @@ test("the last pass and its inverse: exact, idempotent, and only on pages drawn 
   assert.strictEqual(HP.humanWording(plain), plain, "idempotent");
   assert.strictEqual(HP.machineWording(plain), sweeps, "the exact inverse");
   assert.strictEqual(HP.machineWording(sweeps), sweeps, "the inverse leaves the sweeps' wording alone");
+  // The critics' summaries with a dash (1 Nov 2026: 396 pages): every template, both apostrophe
+  // forms, aspects with spaces; plain, idempotent, and the exact inverse so lib/facts.js reads the
+  // same take back from either page.
+  const takes = [
+    "Critics loved it — special praise for the performances.", "A critical darling — reviewers kept coming back to the second half.",
+    "Mostly good reviews — the music impressed, even if the pacing didn't.", "Mostly good reviews — the music impressed, even if the pacing didn&#39;t.",
+    "Reviewers responded well — the lead performance came in for particular praise.", "Critics mostly approved — the length was the common complaint.",
+    "Critics are split — praise for the visuals, pushback on the writing.", "Critics can't agree — high marks for the cast, complaints about the script.",
+    "Opinion is split — the direction is the bright spot either way.", "Critics liked it — high marks for the action, though the ending kept them arguing.",
+    "A well-reviewed outing, strongest on the performances — only the pacing drew real argument.", "Critics are split — the lead won praise, the plot is the fault line.",
+    "Reviews swing both ways — kind to the cast, at war over the tone.", "Critics are mostly positive — except when it comes to the runtime.",
+    "Most critics approved — just don't ask them about the third act.", "Critics can&#39;t agree on this one — least of all about the humour.",
+    "Genuinely divisive — critics can't settle this one.", "Genuinely divisive — critics can&#39;t settle this one.", "Truly divisive — for every critic who bought in, one checked out.",
+    "The soundtrack works, per reviewers — the story less so.", "Critics kept circling back to the chemistry — in a good way.",
+    "Viewer word on TMDB runs warm — reviews keep coming back to the performances.", "Viewer word on TMDB runs cool — most gripes point at the pacing.",
+    "Early viewer reviews on TMDB skew positive — love for the cast, gripes about the length.", "First viewer reviews on TMDB run mixed — viewers rate the action far above the writing.",
+  ];
+  for (const t of takes) {
+    const html = `<p class="take">${t}</p><div class="fa">FilmyChill Score: Worth a watch. It rates 7.1/10 from 200 audience ratings on TMDB. ${t}</div>`;
+    const p = HP.humanWording(html);
+    assert.ok(!/—/.test(p), `plain: ${p}`);
+    assert.strictEqual(HP.humanWording(p), p, `idempotent: ${t}`);
+    assert.strictEqual(HP.machineWording(p), html, `inverse: ${t}`);
+    assert.deepStrictEqual(HP.scanProse(HP.siteProse(`<html><body><main><p class="take">${t.replace(/—/g, ":")}</p></main></body></html>`)).filter((f) => f.id === "em-dash"), [], "sanity: the scanner's dash rule is what fires");
+  }
+  // Plain copy that merely resembles a template is left alone: the inverse never invents a dash.
+  assert.strictEqual(HP.machineWording("Critics loved it, with special praise for the cast and the score; the sequel less so."), "Critics loved it, with special praise for the cast and the score; the sequel less so.");
   // The pass: in the rollout and drawn from facts -> plain; anything else -> the sweeps' wording.
   const fsx = require("fs"), os = require("os"), path = require("path");
   const root = fsx.mkdtempSync(path.join(os.tmpdir(), "hp-"));

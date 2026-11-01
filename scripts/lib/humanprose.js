@@ -95,6 +95,56 @@ const RULES = [
 // ============================================================================
 const A = "(?:'|&#39;)";
 const ap = (m) => (m.includes("&#39;") ? "&#39;" : "'");
+// An aspect phrase ("performances", "second half"): no sentence punctuation, no tags.
+const X = "([^.,;:—<>]+?)";
+// [dash form → plain, plain form → dash], one pair per template. Each plain form occurs nowhere
+// else on a page, which keeps the inverse exact.
+const TAKE_DASHES = [
+  [[new RegExp(`Critics loved it — special praise for the ${X}\\.`, "g"), (m, p) => `Critics loved it, with special praise for the ${p}.`],
+    [new RegExp(`Critics loved it, with special praise for the ${X}\\.`, "g"), (m, p) => `Critics loved it — special praise for the ${p}.`]],
+  [[new RegExp(`A critical darling — reviewers kept coming back to the ${X}\\.`, "g"), (m, p) => `A critical darling: reviewers kept coming back to the ${p}.`],
+    [new RegExp(`A critical darling: reviewers kept coming back to the ${X}\\.`, "g"), (m, p) => `A critical darling — reviewers kept coming back to the ${p}.`]],
+  [[new RegExp(`Mostly good reviews — the ${X} impressed, even if the ${X} didn${A}t\\.`, "g"), (m, p, c) => `Mostly good reviews: the ${p} impressed, even if the ${c} didn${ap(m)}t.`],
+    [new RegExp(`Mostly good reviews: the ${X} impressed, even if the ${X} didn${A}t\\.`, "g"), (m, p, c) => `Mostly good reviews — the ${p} impressed, even if the ${c} didn${ap(m)}t.`]],
+  [[new RegExp(`Reviewers responded well — the ${X} came in for particular praise\\.`, "g"), (m, p) => `Reviewers responded well, and the ${p} came in for particular praise.`],
+    [new RegExp(`Reviewers responded well, and the ${X} came in for particular praise\\.`, "g"), (m, p) => `Reviewers responded well — the ${p} came in for particular praise.`]],
+  [[new RegExp(`Critics mostly approved — the ${X} was the common complaint\\.`, "g"), (m, c) => `Critics mostly approved; the ${c} was the common complaint.`],
+    [new RegExp(`Critics mostly approved; the ${X} was the common complaint\\.`, "g"), (m, c) => `Critics mostly approved — the ${c} was the common complaint.`]],
+  [[new RegExp(`Critics are split — praise for the ${X}, pushback on the ${X}\\.`, "g"), (m, p, c) => `Critics are split: praise for the ${p}, pushback on the ${c}.`],
+    [new RegExp(`Critics are split: praise for the ${X}, pushback on the ${X}\\.`, "g"), (m, p, c) => `Critics are split — praise for the ${p}, pushback on the ${c}.`]],
+  [[new RegExp(`Critics can${A}t agree — high marks for the ${X}, complaints about the ${X}\\.`, "g"), (m, p, c) => `Critics can${ap(m)}t agree: high marks for the ${p}, complaints about the ${c}.`],
+    [new RegExp(`Critics can${A}t agree: high marks for the ${X}, complaints about the ${X}\\.`, "g"), (m, p, c) => `Critics can${ap(m)}t agree — high marks for the ${p}, complaints about the ${c}.`]],
+  [[new RegExp(`Opinion is split — the ${X} is the bright spot either way\\.`, "g"), (m, p) => `Opinion is split, and the ${p} is the bright spot either way.`],
+    [new RegExp(`Opinion is split, and the ${X} is the bright spot either way\\.`, "g"), (m, p) => `Opinion is split — the ${p} is the bright spot either way.`]],
+  [[new RegExp(`Critics liked it — high marks for the ${X}, though the ${X} kept them arguing\\.`, "g"), (m, p, d) => `Critics liked it: high marks for the ${p}, though the ${d} kept them arguing.`],
+    [new RegExp(`Critics liked it: high marks for the ${X}, though the ${X} kept them arguing\\.`, "g"), (m, p, d) => `Critics liked it — high marks for the ${p}, though the ${d} kept them arguing.`]],
+  [[new RegExp(`A well-reviewed outing, strongest on the ${X} — only the ${X} drew real argument\\.`, "g"), (m, p, d) => `A well-reviewed outing, strongest on the ${p}; only the ${d} drew real argument.`],
+    [new RegExp(`A well-reviewed outing, strongest on the ${X}; only the ${X} drew real argument\\.`, "g"), (m, p, d) => `A well-reviewed outing, strongest on the ${p} — only the ${d} drew real argument.`]],
+  [[new RegExp(`Critics are split — the ${X} won praise, the ${X} is the fault line\\.`, "g"), (m, p, d) => `Critics are split: the ${p} won praise, the ${d} is the fault line.`],
+    [new RegExp(`Critics are split: the ${X} won praise, the ${X} is the fault line\\.`, "g"), (m, p, d) => `Critics are split — the ${p} won praise, the ${d} is the fault line.`]],
+  [[new RegExp(`Reviews swing both ways — kind to the ${X}, at war over the ${X}\\.`, "g"), (m, p, d) => `Reviews swing both ways: kind to the ${p}, at war over the ${d}.`],
+    [new RegExp(`Reviews swing both ways: kind to the ${X}, at war over the ${X}\\.`, "g"), (m, p, d) => `Reviews swing both ways — kind to the ${p}, at war over the ${d}.`]],
+  [[new RegExp(`Critics are mostly positive — except when it comes to the ${X}\\.`, "g"), (m, d) => `Critics are mostly positive, except when it comes to the ${d}.`],
+    [new RegExp(`Critics are mostly positive, except when it comes to the ${X}\\.`, "g"), (m, d) => `Critics are mostly positive — except when it comes to the ${d}.`]],
+  [[new RegExp(`Most critics approved — just don${A}t ask them about the ${X}\\.`, "g"), (m, d) => `Most critics approved; just don${ap(m)}t ask them about the ${d}.`],
+    [new RegExp(`Most critics approved; just don${A}t ask them about the ${X}\\.`, "g"), (m, d) => `Most critics approved — just don${ap(m)}t ask them about the ${d}.`]],
+  [[new RegExp(`Critics can${A}t agree on this one — least of all about the ${X}\\.`, "g"), (m, d) => `Critics can${ap(m)}t agree on this one, least of all about the ${d}.`],
+    [new RegExp(`Critics can${A}t agree on this one, least of all about the ${X}\\.`, "g"), (m, d) => `Critics can${ap(m)}t agree on this one — least of all about the ${d}.`]],
+  [[new RegExp(`Genuinely divisive — critics can${A}t settle this one\\.`, "g"), (m) => `Genuinely divisive: critics can${ap(m)}t settle this one.`],
+    [new RegExp(`Genuinely divisive: critics can${A}t settle this one\\.`, "g"), (m) => `Genuinely divisive — critics can${ap(m)}t settle this one.`]],
+  [[/Truly divisive — for every critic who bought in, one checked out\./g, () => "Truly divisive: for every critic who bought in, one checked out."],
+    [/Truly divisive: for every critic who bought in, one checked out\./g, () => "Truly divisive — for every critic who bought in, one checked out."]],
+  [[new RegExp(`The ${X} works, per reviewers — the ${X} less so\\.`, "g"), (m, p, c) => `The ${p} works, per reviewers; the ${c} less so.`],
+    [new RegExp(`The ${X} works, per reviewers; the ${X} less so\\.`, "g"), (m, p, c) => `The ${p} works, per reviewers — the ${c} less so.`]],
+  [[new RegExp(`Critics kept circling back to the ${X} — in a good way\\.`, "g"), (m, p) => `Critics kept circling back to the ${p}, in a good way.`],
+    [new RegExp(`Critics kept circling back to the ${X}, in a good way\\.`, "g"), (m, p) => `Critics kept circling back to the ${p} — in a good way.`]],
+  [[new RegExp(`Viewer word on TMDB runs ${X} — (reviews keep coming back to the|most gripes point at the) ${X}\\.`, "g"), (m, lw, mid, p) => `Viewer word on TMDB runs ${lw}; ${mid} ${p}.`],
+    [new RegExp(`Viewer word on TMDB runs ${X}; (reviews keep coming back to the|most gripes point at the) ${X}\\.`, "g"), (m, lw, mid, p) => `Viewer word on TMDB runs ${lw} — ${mid} ${p}.`]],
+  [[new RegExp(`Early viewer reviews on TMDB skew ${X} — love for the ${X}, gripes about the ${X}\\.`, "g"), (m, lw, p, c) => `Early viewer reviews on TMDB skew ${lw}: love for the ${p}, gripes about the ${c}.`],
+    [new RegExp(`Early viewer reviews on TMDB skew ${X}: love for the ${X}, gripes about the ${X}\\.`, "g"), (m, lw, p, c) => `Early viewer reviews on TMDB skew ${lw} — love for the ${p}, gripes about the ${c}.`]],
+  [[new RegExp(`First viewer reviews on TMDB run ${X} — viewers rate the ${X} far above the ${X}\\.`, "g"), (m, lw, p, c) => `First viewer reviews on TMDB run ${lw}: viewers rate the ${p} far above the ${c}.`],
+    [new RegExp(`First viewer reviews on TMDB run ${X}: viewers rate the ${X} far above the ${X}\\.`, "g"), (m, lw, p, c) => `First viewer reviews on TMDB run ${lw} — viewers rate the ${p} far above the ${c}.`]],
+];
 const HUMAN_RULES = [
   // Cinema run, in the "where to watch" answer: "…and may still be showing — check local cinema listings."
   { fwd: [/ and may still be showing — check local cinema listings/g, () => " and may still be showing, so check local cinema listings"],
@@ -142,6 +192,11 @@ const HUMAN_RULES = [
   // …and its unconfirmed form: "We keep looking — this page updates the day it arrives."
   { fwd: [/We keep looking — this page updates the day it arrives\./g, () => "We keep looking, and this page updates the day it arrives."],
     rev: [/We keep looking, and this page updates the day it arrives\./g, () => "We keep looking — this page updates the day it arrives."] },
+  // The critics' summaries (lib/editorial.js ASPECT_VARIANTS / TAKE_VARIANTS) that carry a dash.
+  // They are cached in takes.json and quoted in the FAQ answer and the page, so the plain form is
+  // made here, after the last writer, and read back by lib/facts.js through the inverse.
+  // 1 Nov 2026: 396 pages in the rollout still showed one of these.
+  ...TAKE_DASHES.map(([dash, plain]) => ({ fwd: [dash[0], dash[1]], rev: [plain[0], plain[1]] })),
 ];
 // Pure: the plain wording. Idempotent.
 function humanWording(html) {
