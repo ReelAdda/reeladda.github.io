@@ -27,11 +27,14 @@ const REVIEW_WINDOW_DAYS = 60;    // reviews are matched to titles released this
 const REVIEW_LEAD_DAYS = 14;      // a review may run before the release date
 const FEED_TIMEOUT_MS = 15000;
 const UA = "Mozilla/5.0 (compatible; FilmyChillBot/1.0; +https://filmychill.com/about/; filmychill.contact@gmail.com)";
-// Not read, by the outlets' own feed terms (owner's call, 31 Oct 2026): Onmanorama ("personal use",
-// "no commercial use without express consent", onmanorama.com/rss.html) and Rediff ("free for
-// individuals and non-profit organisations", rediff.com/rss). An outlet that asks to be removed
-// comes off the list above; its stored links are dropped at the next build (refreshReviews).
-// Only the headline, link and date are used; the description field is never read for anything.
+// Not read, by its own feed terms: Onmanorama ("personal use", "no commercial use without express
+// consent", onmanorama.com/rss.html, read 31 Oct 2026). Rediff's page says its feeds are "available
+// free for individuals and non-profit organisations" and forbids nothing; it was off the list for a
+// day and came back on 2 Nov 2026 (owner's call): with it, 8 of the 12 Hindi titles in the window
+// had a review link, without it 5. An outlet that asks to be removed comes off the list above; its
+// stored links are dropped at the next build (refreshReviews). Only the headline, link and date are
+// used; the description field is never read for anything. The page links out with an ordinary link
+// (no nofollow): a review we chose to cite is an editorial reference, and the outlet gets the credit.
 
 // The feeds. `langs`: the film languages an outlet's reviews are about; "any" for national press.
 // Every address answered with items on 31 Oct 2026; one that stops answering is skipped that run
@@ -42,6 +45,7 @@ const FEEDS = [
   { name: "Indian Express", url: "https://indianexpress.com/section/entertainment/tamil/feed/", langs: ["Tamil"] },
   { name: "Indian Express", url: "https://indianexpress.com/section/entertainment/telugu/feed/", langs: ["Telugu"] },
   { name: "Indian Express", url: "https://indianexpress.com/section/entertainment/malayalam/feed/", langs: ["Malayalam"] },
+  { name: "Rediff", url: "https://www.rediff.com/rss/moviesreviewsrss.xml", langs: "any" },
   { name: "Hindustan Times", url: "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml", langs: "any" },
   { name: "NDTV", url: "https://feeds.feedburner.com/ndtvmovies-latest", langs: "any" },
   { name: "Firstpost", url: "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml", langs: "any" },

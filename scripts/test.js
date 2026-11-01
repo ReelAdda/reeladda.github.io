@@ -10670,7 +10670,7 @@ test("film page: the review links join the score card's own sentence, one link p
     R.useRolloutConfig({ features: { ...PC.ALL_ON.features, reviews: { percent: 100 } } });
     const on = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
     // One sentence, not a second row (owner, 31 Oct): "...; 3 reviews out, in The Hindu and Rediff (3/5)."
-    assert.ok(!/<!--FC:reviews=/.test(off) && !/fcsb-rv"/.test(off) && /Too early<\/span>: no audience ratings yet; 3 reviews out, in <a href="https:\/\/www\.thehindu\.com\/x" rel="noopener nofollow" target="_blank">The Hindu<\/a> and <a href="https:\/\/www\.rediff\.com\/x"[^>]*>Rediff<\/a> \(3\/5\)\.<!--FC:reviews=3--> <a href="\/about\/#score">/.test(on), (on.match(/fcsb-mini">.{0,400}/) || [""])[0]);
+    assert.ok(!/<!--FC:reviews=/.test(off) && !/fcsb-rv"/.test(off) && /Too early<\/span>: no audience ratings yet; 3 reviews out, in <a href="https:\/\/www\.thehindu\.com\/x" rel="noopener" target="_blank">The Hindu<\/a> and <a href="https:\/\/www\.rediff\.com\/x"[^>]*>Rediff<\/a> \(3\/5\)\.<!--FC:reviews=3--> <a href="\/about\/#score">/.test(on), (on.match(/fcsb-mini">.{0,400}/) || [""])[0]);
     assert.ok(!/fcsb-rv"/.test(on) && !/reviews are out/.test(on), "no second row, no repeated count");
     assert.ok(/<summary>Where are the reviews of Fresh\?<\/summary><div class="fa">Published reviews so far: The Hindu and Rediff\. The links are in the FilmyChill score card on this page\./.test(on), "FAQ");
     // A score from audience ratings alone, no critics' reading: the links join the Audience · Critics line.

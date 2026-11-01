@@ -930,7 +930,7 @@ function reviewLinks(item) {
   for (const r of rv) {
     if (!r || !r.o || !r.u || seen.has(r.o)) continue;
     seen.add(r.o);
-    parts.push(`<a href="${e(r.u)}" rel="noopener nofollow" target="_blank">${e(r.o)}</a>${typeof r.s === "number" ? ` (${e(String(r.s))}/5)` : ""}`);
+    parts.push(`<a href="${e(r.u)}" rel="noopener" target="_blank">${e(r.o)}</a>${typeof r.s === "number" ? ` (${e(String(r.s))}/5)` : ""}`);
   }
   return { n: rv.length, parts, mark: rv.length ? `<!--FC:reviews=${rv.length}-->` : "" };
 }

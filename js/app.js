@@ -156,7 +156,7 @@ function fcSignals(item) {
   // The published reviews, one link per outlet (item.rv, set only where the card has no critics'
   // reading): what the card's "Read the reviews" line promised.
   const rv = (item.rv || []).filter((r) => r && r.o && /^https?:\/\//.test(r.u || ''));
-  const links = rv.length ? `<div class="fcs-sig fcs-rv"><b>Reviews:</b> ${rv.map((r) => `<a href="${esc(r.u)}" rel="noopener nofollow" target="_blank">${esc(r.o)}</a>`).join(' · ')}</div>` : '';
+  const links = rv.length ? `<div class="fcs-sig fcs-rv"><b>Reviews:</b> ${rv.map((r) => `<a href="${esc(r.u)}" rel="noopener" target="_blank">${esc(r.o)}</a>`).join(' · ')}</div>` : '';
   // With a score, the line under the card (scoreLineHtml) says the audience and critics parts;
   // this only adds the buzz figures for a title that has no score yet.
   if (s) return links;
