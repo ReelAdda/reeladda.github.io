@@ -240,11 +240,17 @@ async function refreshReviews({ films, file = REVIEWS_FILE, fetchImpl = fetch, n
 
 // For page builders: the reviews of one film, newest last, or []. Cached for the run.
 let cache = null;
+// Fallback outlets (owner, 2 Nov 2026): shown only for a film no other outlet on the list has
+// reviewed. Rediff's feed covers nearly every Indian release, so without this it would sit beside
+// every other name; with it, it fills the gaps (3 of the 12 Hindi titles in the window today).
+const FALLBACK_OUTLETS = new Set(["Rediff"]);
 function reviewsFor(kind, tmdbId, file = REVIEWS_FILE) {
   if (!tmdbId) return [];
   if (!cache) cache = loadReviews(file);
   const v = cache.films && cache.films[`${kind === "tv" ? "tv" : "movie"}:${tmdbId}`];
-  return v && Array.isArray(v.items) ? v.items : [];
+  const items = v && Array.isArray(v.items) ? v.items : [];
+  const first = items.filter((i) => i && !FALLBACK_OUTLETS.has(i.o));
+  return first.length ? first : items;
 }
 function useReviews(obj) { cache = obj || null; }   // tests
 
@@ -279,4 +285,4 @@ function reviewsCardText(rv) {
   return `Read the reviews: ${shown}${more > 0 ? ` and ${more} more` : ""} →`;
 }
 
-module.exports = { FEEDS, REVIEWS_FILE, REVIEW_WINDOW_DAYS, fetchFeed, headlineMatches, isReview, loadReviews, matchReviews, outlets, parseFeed, parseStars, refreshReviews, reviewsCardText, reviewsFor, starAverage, useReviews, wantsReviews };
+module.exports = { FALLBACK_OUTLETS, FEEDS, REVIEWS_FILE, REVIEW_WINDOW_DAYS, fetchFeed, headlineMatches, isReview, loadReviews, matchReviews, outlets, parseFeed, parseStars, refreshReviews, reviewsCardText, reviewsFor, starAverage, useReviews, wantsReviews };

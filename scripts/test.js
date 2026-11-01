@@ -10662,21 +10662,27 @@ test("film page: the review links join the score card's own sentence, one link p
   const R = require("./lib/rollout.js"), RV = require("./lib/reviews.js"), Fp = require("./lib/filmpage.js"), F = require("./lib/facts.js"), S = require("./lib/sitemap.js"), IN = require("./lib/core.js").COUNTRIES[0];
   const PC = require("./lib/prosecheck.js");
   const it = { ...PC.films().unrated, tmdbId: 4242, released: hpDay(-8), votes: 0, rating: null };
-  const reviews = { films: { "movie:4242": { items: [{ o: "The Hindu", u: "https://www.thehindu.com/x", h: "Fresh review", d: hpDay(-7) }, { o: "Rediff", u: "https://www.rediff.com/x", h: "Fresh Review", d: hpDay(-6), s: 3 }, { o: "Rediff", u: "https://www.rediff.com/y", h: "Fresh review again", d: hpDay(-5) }] } } };
+  const reviews = { films: { "movie:4242": { items: [{ o: "The Hindu", u: "https://www.thehindu.com/x", h: "Fresh review", d: hpDay(-7) }, { o: "123telugu", u: "https://www.123telugu.com/x", h: "Fresh Review", d: hpDay(-6), s: 3 }, { o: "123telugu", u: "https://www.123telugu.com/y", h: "Fresh review again", d: hpDay(-5) }] } } };
   try {
     RV.useReviews(reviews);
     R.useRolloutConfig({ features: { ...PC.ALL_ON.features, reviews: { percent: 0 } } });
     const off = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
     R.useRolloutConfig({ features: { ...PC.ALL_ON.features, reviews: { percent: 100 } } });
     const on = Fp.buildFilmPage(it, hpDay(0), new Set(), IN);
-    // One sentence, not a second row (owner, 31 Oct): "...; 3 reviews out, in The Hindu and Rediff (3/5)."
-    assert.ok(!/<!--FC:reviews=/.test(off) && !/fcsb-rv"/.test(off) && /Too early<\/span>: no audience ratings yet; 3 reviews out, in <a href="https:\/\/www\.thehindu\.com\/x" rel="noopener" target="_blank">The Hindu<\/a> and <a href="https:\/\/www\.rediff\.com\/x"[^>]*>Rediff<\/a> \(3\/5\)\.<!--FC:reviews=3--> <a href="\/about\/#score">/.test(on), (on.match(/fcsb-mini">.{0,400}/) || [""])[0]);
+    // One sentence, not a second row (owner, 31 Oct): "...; 3 reviews out, in The Hindu and 123telugu (3/5)."
+    assert.ok(!/<!--FC:reviews=/.test(off) && !/fcsb-rv"/.test(off) && /Too early<\/span>: no audience ratings yet; 3 reviews out, in <a href="https:\/\/www\.thehindu\.com\/x" rel="noopener" target="_blank">The Hindu<\/a> and <a href="https:\/\/www\.123telugu\.com\/x"[^>]*>123telugu<\/a> \(3\/5\)\.<!--FC:reviews=3--> <a href="\/about\/#score">/.test(on), (on.match(/fcsb-mini">.{0,400}/) || [""])[0]);
     assert.ok(!/fcsb-rv"/.test(on) && !/reviews are out/.test(on), "no second row, no repeated count");
-    assert.ok(/<summary>Where are the reviews of Fresh\?<\/summary><div class="fa">Published reviews so far: The Hindu and Rediff\. The links are in the FilmyChill score card on this page\./.test(on), "FAQ");
+    assert.ok(/<summary>Where are the reviews of Fresh\?<\/summary><div class="fa">Published reviews so far: The Hindu and 123telugu\. The links are in the FilmyChill score card on this page\./.test(on), "FAQ");
+    // Rediff is a fallback (owner, 2 Nov): shown only when no other outlet reviewed the film.
+    RV.useReviews({ films: { "movie:4242": { items: [{ o: "Rediff", u: "https://www.rediff.com/r", h: "Fresh review", d: hpDay(-7) }, { o: "The Hindu", u: "https://www.thehindu.com/x", h: "Fresh review", d: hpDay(-6) }] }, "movie:4243": { items: [{ o: "Rediff", u: "https://www.rediff.com/r2", h: "Alone review", d: hpDay(-7) }] } } });
+    assert.deepStrictEqual(RV.reviewsFor("movie", 4242).map((i) => i.o), ["The Hindu"], "another outlet exists: Rediff stays out");
+    assert.deepStrictEqual(RV.reviewsFor("movie", 4243).map((i) => i.o), ["Rediff"], "nobody else reviewed it: Rediff fills the gap");
+    assert.ok(/1 review out, in <a href="https:\/\/www\.thehindu\.com\/x"[^>]*>The Hindu<\/a>\.<!--FC:reviews=1-->/.test(Fp.buildFilmPage(it, hpDay(0), new Set(), IN)), "the page follows the reader");
+    RV.useReviews(reviews);
     // A score from audience ratings alone, no critics' reading: the links join the Audience · Critics line.
     const scored = Fp.buildFilmPage({ ...it, votes: 420, rating: 7.4, fcScore: { verdict: "Worth a watch", reason: "audience", audience: "positive", critics: "" } }, hpDay(0), new Set(), IN);
     const sline = (scored.match(/<p class="fcsb-line"><b>Audience:<\/b>[^\n]*/) || [""])[0];
-    assert.ok(/ · <b>Reviews:<\/b> <a href="https:\/\/www\.thehindu\.com\/x"[^>]*>The Hindu<\/a>, <a href="https:\/\/www\.rediff\.com\/x"[^>]*>Rediff<\/a> \(3\/5\)<!--FC:reviews=3--><\/p>/.test(sline) && !/fcsb-rv"/.test(scored), sline || (scored.match(/<section class="fcsb[\s\S]{0,600}/) || [""])[0]);
+    assert.ok(/ · <b>Reviews:<\/b> <a href="https:\/\/www\.thehindu\.com\/x"[^>]*>The Hindu<\/a>, <a href="https:\/\/www\.123telugu\.com\/x"[^>]*>123telugu<\/a> \(3\/5\)<!--FC:reviews=3--><\/p>/.test(sline) && !/fcsb-rv"/.test(scored), sline || (scored.match(/<section class="fcsb[\s\S]{0,600}/) || [""])[0]);
     // A score with a critics' reading already answers the question: no links, no FAQ, no marker (owner, 31 Oct).
     const critics = Fp.buildFilmPage({ ...it, votes: 420, rating: 7.4, fcScore: { verdict: "Worth a watch", reason: "both", audience: "positive", critics: "positive" } }, hpDay(0), new Set(), IN);
     assert.ok(!/<b>Reviews:<\/b>/.test(critics) && !/<!--FC:reviews=/.test(critics) && !/Where are the reviews of/.test(critics), "scored with critics: untouched");
