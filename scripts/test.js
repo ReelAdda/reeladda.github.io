@@ -4018,12 +4018,24 @@ test("filters to the requested language only, across all three sections", () => 
   assert.ok(html.includes("Tamil Hit") && html.includes("Tamil Stream") && html.includes("Tamil Soon"));
   assert.ok(!html.includes("Hindi Film"));
 });
-test("hub rows: 'Read the reviews: … →' under the pill line where item.rv is set (1 Nov 2026)", () => {
-  const data = { ...LANG_DATA, theatres: [{ ...LANG_DATA.theatres[0], rating: null, votes: 3, rv: [{ o: "The Hindu", u: "https://www.thehindu.com/x" }, { o: "Scroll", u: "https://scroll.in/y" }] }, LANG_DATA.theatres[1]] };
-  const html = U.buildLanguagePage(data, "Tamil", "tamil");
-  assert.ok(/<div class="rm">[^\n]*vpill[^\n]*<\/div>\s*<div class="rm srv">Read the reviews: The Hindu, Scroll →<\/div>/.test(html), (html.match(/Tamil Hit[\s\S]{0,600}/) || [""])[0]);
-  assert.ok(html.includes(".rm.srv { color:var(--indigo);"), "styled like the take line, underlined");
-  assert.ok(!/rm srv/.test(U.buildLanguagePage(LANG_DATA, "Tamil", "tamil")), "no outlets, no line");
+test("hub rows: the outlets' own links in a line under the row where the score can't speak for the title (2 Nov 2026)", () => {
+  const R = require("./lib/rollout.js"), RV = require("./lib/reviews.js");
+  try {
+    R.useRolloutConfig({ features: { reviews: { percent: 100 } } });
+    const data = { ...LANG_DATA, theatres: [{ ...LANG_DATA.theatres[0], rating: null, votes: 3, rv: [{ o: "The Hindu", u: "https://www.thehindu.com/x" }, { o: "Scroll", u: "https://scroll.in/y" }] }, LANG_DATA.theatres[1]] };
+    const html = U.buildLanguagePage(data, "Tamil", "tamil");
+    const m = /<div class="rowwrap"><a class="row" href="\/movie\/tamil-hit\.html">[\s\S]*?<\/a><div class="row-rv"><b>Reviews:<\/b> <a href="https:\/\/www\.thehindu\.com\/x" rel="noopener" target="_blank">The Hindu<\/a> · <a href="https:\/\/scroll\.in\/y" rel="noopener" target="_blank">Scroll<\/a><\/div><\/div>/.exec(html);
+    assert.ok(m, (html.match(/Tamil Hit[\s\S]{0,700}/) || [""])[0]);
+    assert.strictEqual((m[0].slice(0, m[0].indexOf("</a>")).match(/<a /g) || []).length, 1, "no link inside the row's link");
+    assert.ok(html.includes(".row-rv a { color:var(--indigo);"), "styled");
+    assert.ok(!/class="row-rv"/.test(U.buildLanguagePage(LANG_DATA, "Tamil", "tamil")), "no outlets, no line");
+    // A list built from another store carries no item.rv: the row looks the reviews up itself.
+    RV.useReviews({ films: { "movie:77": { items: [{ o: "Vikatan", u: "https://www.vikatan.com/v", h: "x", d: "2026-10-20" }] } } });
+    const looked = U.buildLanguagePage({ ...LANG_DATA, theatres: [{ ...LANG_DATA.theatres[0], tmdbId: 77, rating: null, votes: 3 }] }, "Tamil", "tamil");
+    assert.ok(/<div class="row-rv"><b>Reviews:<\/b> <a href="https:\/\/www\.vikatan\.com\/v"[^>]*>Vikatan<\/a><\/div>/.test(looked), "looked up by tmdbId");
+    // A Tamil title with a settled score and many ratings: no line.
+    assert.ok(!/class="row-rv"/.test(U.buildLanguagePage({ ...LANG_DATA, theatres: [{ ...LANG_DATA.theatres[0], tmdbId: 77, votes: 900, fcScore: { verdict: "Must watch", critics: "positive" } }] }, "Tamil", "tamil")));
+  } finally { RV.useReviews(null); R.useRolloutConfig(ROLLOUT_OFF); }
 });
 test("canonical, title, FAQ schema and take line present", () => {
   const html = U.buildLanguagePage(LANG_DATA, "Tamil", "tamil");
@@ -10679,8 +10691,8 @@ test("film page: the review links join the score card's own sentence, one link p
     assert.deepStrictEqual(RV.reviewsFor("movie", 4243).map((i) => i.o), ["Rediff"], "nobody else reviewed it: Rediff fills the gap");
     assert.ok(/1 review out, in <a href="https:\/\/www\.thehindu\.com\/x"[^>]*>The Hindu<\/a>\.<!--FC:reviews=1-->/.test(Fp.buildFilmPage(it, hpDay(0), new Set(), IN)), "the page follows the reader");
     RV.useReviews(reviews);
-    // A score from audience ratings alone, no critics' reading: the links join the Audience · Critics line.
-    const scored = Fp.buildFilmPage({ ...it, votes: 420, rating: 7.4, fcScore: { verdict: "Worth a watch", reason: "audience", audience: "positive", critics: "" } }, hpDay(0), new Set(), IN);
+    // A score from a few audience ratings (a non-English title under 50, owner 2 Nov): the links join the Audience · Critics line.
+    const scored = Fp.buildFilmPage({ ...it, votes: 40, rating: 7.4, fcScore: { verdict: "Worth a watch", reason: "audience", audience: "positive", critics: "" } }, hpDay(0), new Set(), IN);
     const sline = (scored.match(/<p class="fcsb-line"><b>Audience:<\/b>[^\n]*/) || [""])[0];
     assert.ok(/ · <b>Reviews:<\/b> <a href="https:\/\/www\.thehindu\.com\/x"[^>]*>The Hindu<\/a>, <a href="https:\/\/www\.123telugu\.com\/x"[^>]*>123telugu<\/a> \(3\/5\)<!--FC:reviews=3--><\/p>/.test(sline) && !/fcsb-rv"/.test(scored), sline || (scored.match(/<section class="fcsb[\s\S]{0,600}/) || [""])[0]);
     // A score with a critics' reading already answers the question: no links, no FAQ, no marker (owner, 31 Oct).
@@ -10696,7 +10708,11 @@ test("film page: the review links join the score card's own sentence, one link p
 test("cards: 'Read the reviews: A, B →' under the pill where the card has no critics' reading; data files carry item.rv; the homepage twin and its sheet links (31 Oct 2026)", () => {
   const RV = require("./lib/reviews.js"), W = require("./lib/weekly.js");
   // The rule, shared by the film page, the data files and the cards.
-  assert.deepStrictEqual([RV.wantsReviews({}), RV.wantsReviews({ fcScore: { critics: "" } }, false), RV.wantsReviews({ fcScore: { critics: "" } }, true), RV.wantsReviews({ fcScore: { critics: "positive" } }, false)], [true, true, false, false]);
+  assert.deepStrictEqual([RV.wantsReviews({}), RV.wantsReviews({ fcScore: { critics: "" } }, false), RV.wantsReviews({ fcScore: { critics: "" } }, true), RV.wantsReviews({ fcScore: { critics: "positive" } }, false)], [true, true, false, false], "English, or no language: only where the card has no critics' reading");
+  // Any other language (owner, 2 Nov 2026): no score, an early read, or under 50 ratings, whatever the critics said.
+  const hi = (x) => RV.wantsReviews({ language: "Hindi", ...x }, true);
+  assert.deepStrictEqual([hi({}), hi({ votes: 12, fcScore: { critics: "positive", early: true } }), hi({ votes: 40, fcScore: { critics: "positive" } }), hi({ votes: 400, fcScore: { critics: "positive" } }), hi({ votes: 400, fcScore: { critics: "" } })], [true, true, true, false, false]);
+  assert.strictEqual(RV.wantsReviews({ language: "English", votes: 12, fcScore: { critics: "positive", early: true } }, true), false, "English keeps the narrow rule");
   const rv = [{ o: "Indian Express", u: "https://indianexpress.com/x", h: "x", d: "2026-10-23" }, { o: "The Hindu", u: "https://www.thehindu.com/y", h: "y", d: "2026-10-23" }, { o: "The Hindu", u: "https://www.thehindu.com/y2", h: "y2", d: "2026-10-24" }];
   assert.deepStrictEqual(RV.outlets(rv), [{ o: "Indian Express", u: "https://indianexpress.com/x" }, { o: "The Hindu", u: "https://www.thehindu.com/y" }], "one entry per outlet, first link");
   assert.strictEqual(RV.reviewsCardText(rv), "Read the reviews: Indian Express, The Hindu →");

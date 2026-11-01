@@ -21,6 +21,7 @@
 // two films in the window needs the outlet's language to agree before a match counts.
 // ============================================================================
 const fs = require("fs");
+const { FEW_VOTES } = require("./score.js");
 
 const REVIEWS_FILE = "reviews.json";
 const REVIEW_WINDOW_DAYS = 60;    // reviews are matched to titles released this recently (or 14 days ahead)
@@ -266,6 +267,12 @@ function starAverage(items, min = 3) {
 // from Wikipedia. A page with a verdict and the critics' figures already answers the question.
 function wantsReviews(item, citedCritics = false) {
   const s = item && item.fcScore;
+  // Any language but English (owner, 2 Nov 2026): English titles have TMDB's numbers; a Hindi or
+  // Telugu release with no score, an early read or under FEW_VOTES ratings gets the links so the
+  // reader has something to go on, whatever the critics' reading says.
+  if (item && item.language && !/^english$/i.test(String(item.language))) {
+    return !s || !!s.early || Number(item.votes || 0) < FEW_VOTES;
+  }
   return !s || (!s.critics && !citedCritics);
 }
 // One entry per outlet, oldest first: [{ o, u }], what the data files carry as item.rv.

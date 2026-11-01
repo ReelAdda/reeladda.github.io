@@ -372,9 +372,20 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
   // Back-link copy follows the market ("theatres + OTT" in India/UAE, "theatres +
   // streaming" everywhere else) — platform hubs exist for every country.
   const V = streamVocab({ code });
-  // Under the pill line, the outlets whose reviews are out, for a title with no critics' reading
-  // (item.rv, lib/reviews.js): "Read the reviews: The Hindu →". Names only; the row is one link.
-  const rvLine = (it) => { const t = require("./reviews.js").reviewsCardText(it.rv); return t ? `<div class="rm srv">${e(t)}</div>` : ""; };
+  // The published reviews for a title the score can't yet speak for (lib/reviews.js wantsReviews:
+  // no score, an early read, or a non-English title under FEW_VOTES ratings). The row is one link,
+  // so the outlets' links sit in their own line directly under it (owner, 2 Nov 2026: real links on
+  // every hub, not names). item.rv comes from the data file; a list built from another store looks
+  // the reviews up here, so every listing page carries them.
+  const RV = require("./reviews.js");
+  const { inRollout } = require("./rollout.js");
+  const reviewsOf = (it) => {
+    if (!it || !inRollout("reviews", it.slug)) return [];
+    if (Array.isArray(it.rv)) return RV.outlets(it.rv);
+    if (!it.tmdbId || !RV.wantsReviews(it, !!it.reception)) return [];
+    return RV.outlets(RV.reviewsFor(it.kind, it.tmdbId));
+  };
+  const rvLinks = (list) => (list.length ? `<div class="row-rv"><b>Reviews:</b> ${list.map((r) => `<a href="${e(r.u)}" rel="noopener" target="_blank">${e(r.o)}</a>`).join(" · ")}</div>` : "");
   const rowFor = (it) => {
     const badge = it.badge || (it.isRecent ? "New release" : null);
     // Where to watch leads every card (29 Oct 2026): the platform, one name per service ("Sonyliv"
@@ -388,11 +399,12 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
         ${rowScoreLine(it)}
-        ${rvLine(it)}
         ${it.hook ? `<div class="rm hk">${e(it.hook)}</div>` : ""}
         ${it.take ? `<div class="rm tk">${e(it.take)}</div>` : ""}
       </div>`;
-    return it.slug ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
+    const row = it.slug ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
+    const links = rvLinks(reviewsOf(it));
+    return links ? `<div class="rowwrap">${row}${links}</div>` : row;
   };
   const sectionHtml = sections.filter((sec) => sec.items.length).map((sec) => `
   <section>
@@ -454,6 +466,10 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   .rm.tk { color:var(--indigo); font-weight:600; }
   .rm.hk { font-style:italic; }
   .rm.srv { color:var(--indigo); font-weight:600; text-decoration:underline; text-underline-offset:2px; }
+  .rowwrap { margin-bottom:10px; } .rowwrap .row { margin-bottom:0; border-radius:12px 12px 0 0; }
+  .row-rv { background:#fff; border:1px solid var(--line); border-top:0; border-radius:0 0 12px 12px; padding:8px 10px 10px 114px; font-size:13px; color:var(--mute); }
+  .row-rv a { color:var(--indigo); font-weight:600; }
+  @media (max-width:420px) { .row-rv { padding-left:10px; } }
   ${VPILL_CSS}
   ${POPULAR_CSS}
   .faq details { border-top:1px solid var(--line); padding:10px 0; }
