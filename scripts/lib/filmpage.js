@@ -1133,6 +1133,13 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // spaced em dashes, canned fit lines or rotating flourishes. By slug, so a stage rewrites a
   // share of the film pages and never all of them in one build.
   if (item && plainOn(item.slug)) item = { ...item, _plain: true };
+  // A cached critics' summary from before the plain pools (frozen pages render from their facts,
+  // with no stored analysis) is made plain here, whatever template it came from: no spaced dash,
+  // no retired flourish (lib/editorial.js plainTakeText). Self-correcting: nothing to list by hand.
+  if (item && item._plain && (item.take || item.takeCounter)) {
+    const { plainTakeText } = require("./editorial.js");
+    item = { ...item, ...(item.take ? { take: plainTakeText(item.take) } : {}), ...(item.takeCounter ? { takeCounter: plainTakeText(item.takeCounter) } : {}) };
+  }
   // Published reviews from the outlets' feeds (lib/reviews.js; rollout "reviews", 31 Oct 2026):
   // the page names the outlets and links out. Overlaid at render so frozen pages get them too.
   // Only where the card has no critics' reading of its own: no FilmyChill score yet, or a score

@@ -4477,6 +4477,38 @@ test("composeTmdbTake: aspects produce viewer-labelled, seeded, digit-free lines
   assert.strictEqual(U.composeTmdbTake({ lean: "mixed", praised: [], panned: [] }, 0),
     "Early viewer reviews on TMDB are mixed.");
 });
+test("take pools are plain at the source, and any older take is made plain at render (1 Nov 2026)", () => {
+  const HP = require("./lib/humanprose.js"), ED = require("./lib/editorial.js");
+  const signs = (t) => HP.scanProse(HP.siteProse(`<html><body><main><p class="take">${t}</p></main></body></html>`)).map((f) => f.id);
+  // The lint: every line every pool can write, with sample aspects, shows no sign (no spaced dash, no retired flourish).
+  const lines = [];
+  for (const pool of Object.values(ED.TAKE_VARIANTS)) lines.push(...pool);
+  for (const pool of Object.values(ED.TMDB_TAKE_VARIANTS)) lines.push(...pool);
+  for (const pool of Object.values(ED.ASPECT_VARIANTS)) for (const fn of pool) lines.push(fn("performances", "pacing", "ending"));
+  const bad = lines.filter((t) => signs(t).length);
+  assert.deepStrictEqual(bad, [], "a pool line with a sign of AI writing");
+  assert.ok(lines.length > 60);
+  // The render-time net, for sentences the older pools left in takes.json.
+  const P = ED.plainTakeText;
+  assert.strictEqual(P("Critics loved it — special praise for the visuals."), "Critics loved it: special praise for the visuals.");
+  assert.strictEqual(P("Reviewers were close to unanimous — this one landed."), "Reviewers were close to unanimous; this one landed.");
+  assert.strictEqual(P("Critics are split — the lead won praise, the plot is the fault line."), "Critics are split: the lead won praise, the plot divides them.");
+  assert.strictEqual(P("A divided reception: the cast won praise, the script took the heat."), "A divided reception: the cast won praise, the script drew the complaints.");
+  assert.strictEqual(P("A drubbing from reviewers, with the writing the main casualty."), "Reviewers were harsh, with the writing the main casualty.");
+  assert.strictEqual(P("Critics kept circling back to the chemistry — in a good way."), "Critics kept returning to the chemistry, approvingly.");
+  assert.strictEqual(P("Critics have been largely positive on this one."), "Critics were mostly positive.", "a pool line maps to its tone's plain sentence");
+  assert.strictEqual(P(P("Genuinely divisive — critics can't settle this one.")), P("Genuinely divisive — critics can't settle this one."), "idempotent");
+  for (const t of ["Critics loved it — special praise for the visuals.", "Reviews swing both ways — kind to the cast, at war over the tone.", "Critics couldn't agree — expect a love-it-or-hate-it watch."]) assert.deepStrictEqual(signs(P(t)), [], P(t));
+  // On a page in the plain rollout, a dash take in the facts never reaches the reader: not in the take line, not in the FAQ.
+  const Fp = require("./lib/filmpage.js"), R = require("./lib/rollout.js"), PC = require("./lib/prosecheck.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  try {
+    R.useRolloutConfig(PC.ALL_ON);
+    const html = Fp.buildFilmPage({ ...PC.films().streaming, take: "Critics are split — praise for the visuals, pushback on the writing.", takeCounter: "Audiences disagree — most ratings are warm." }, new Date().toISOString().slice(0, 10), new Set(), IN);
+    assert.ok(!/Critics are split — /.test(html) && /Critics are split: praise for the visuals, pushback on the writing\./.test(html), "plain on the page");
+    assert.ok(!/Audiences disagree — /.test(html), "the counterpoint too (where a page shows it)");
+    assert.deepStrictEqual(HP.scanProse(HP.siteProse(html)).filter((f) => f.id === "em-dash"), [], "no dash sign on the page");
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
+});
 test("composeTmdbTake: viewer takes never trigger a counterpoint (takeSrc guard)", () => {
   const t = U.composeTmdbTake({ lean: "negative", praised: [], panned: ["writing"] }, 2);
   assert.strictEqual(U.audienceCounterpoint({ take: t, takeSrc: "tmdb", rating: 8.5, votes: 900, tmdbId: 2 }), null);

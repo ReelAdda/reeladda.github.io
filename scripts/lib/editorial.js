@@ -569,7 +569,7 @@ function wikiViewsLabel(n) {
 const TAKE_VARIANTS = {
   acclaim: [
     `Critics loved this one; reception has been close to universal acclaim.`,
-    `Reviewers were close to unanimous — this one landed.`,
+    `Reviewers were close to unanimous: this one landed.`,
     `Almost nobody had a bad word for it.`,
     `The critical verdict is rare-air positive.`,
     `Wall-to-wall praise from the critics on this one.`,
@@ -590,12 +590,12 @@ const TAKE_VARIANTS = {
   mixed: [
     `Critics are genuinely split on this one.`,
     `Reviews are all over the map on this one.`,
-    `Critics couldn't agree — expect a love-it-or-hate-it watch.`,
+    `Critics couldn't agree; expect to love it or hate it.`,
     `Opinions split right down the middle on this one.`,
-    `One critic's favourite, the next one's skip — that kind of film.`,
+    `One critic's favourite, the next one's skip: that kind of film.`,
     `The reviews refuse to agree on this one.`,
-    `A split decision — ask three critics, get three answers.`,
-    `Genuinely divided — this is one that starts arguments.`,
+    `A split decision: ask three critics, get three answers.`,
+    `Genuinely divided; this is one that starts arguments.`,
   ],
   negative: [
     `Critics were not impressed with this one.`,
@@ -664,15 +664,15 @@ function isLegacyTake(take) {
 // digit-free. Wording is chosen so audienceCounterpoint's camp regexes still classify it.
 const ASPECT_VARIANTS = {
   acclaimP: [
-    (p) => `Critics loved it — special praise for the ${p}.`,
+    (p) => `Critics loved it, with special praise for the ${p}.`,
     (p) => `Near-universal acclaim, with the ${p} singled out most often.`,
     (p) => `Critics loved this one, and the ${p} drew the loudest praise.`,
-    (p) => `A critical darling — reviewers kept coming back to the ${p}.`,
+    (p) => `A critical darling: reviewers kept coming back to the ${p}.`,
     (p) => `Rave reviews across the board, especially for the ${p}.`,
   ],
   positivePC: [
     (p, c) => `Critics liked it: the ${p} won praise, though the ${c} drew some flak.`,
-    (p, c) => `Mostly good reviews — the ${p} impressed, even if the ${c} didn't.`,
+    (p, c) => `Mostly good reviews: the ${p} impressed, even if the ${c} didn't.`,
     (p, c) => `Critics came away positive, praising the ${p} while docking points for the ${c}.`,
     (p, c) => `The ${p} won critics over; the ${c} drew the odd complaint.`,
     (p, c) => `Reviews lean positive: strong marks for the ${p}, quibbles about the ${c}.`,
@@ -680,21 +680,21 @@ const ASPECT_VARIANTS = {
   positiveP: [
     (p) => `Critics liked it, especially the ${p}.`,
     (p) => `Good word from critics, with the ${p} earning most of the praise.`,
-    (p) => `Reviewers responded well — the ${p} came in for particular praise.`,
+    (p) => `Reviewers responded well, and the ${p} came in for particular praise.`,
     (p) => `Critics were won over, largely on the strength of the ${p}.`,
     (p) => `A well-reviewed outing; the ${p} stood out for critics.`,
   ],
   positiveC: [
     (c) => `Critics were broadly positive, with reservations about the ${c}.`,
     (c) => `Broadly positive reviews, though the ${c} drew grumbles.`,
-    (c) => `Critics mostly approved — the ${c} was the common complaint.`,
+    (c) => `Critics mostly approved; the ${c} was the common complaint.`,
     (c) => `A positive reception on balance, with the ${c} taking the knocks.`,
     (c) => `Reviewers liked it more than not, save for gripes about the ${c}.`,
   ],
   mixedPC: [
-    (p, c) => `Critics are split — praise for the ${p}, pushback on the ${c}.`,
-    (p, c) => `A divided reception: the ${p} won praise, the ${c} took the heat.`,
-    (p, c) => `Critics can't agree — high marks for the ${p}, complaints about the ${c}.`,
+    (p, c) => `Critics are split: praise for the ${p}, pushback on the ${c}.`,
+    (p, c) => `A divided reception: the ${p} won praise, the ${c} drew the complaints.`,
+    (p, c) => `Critics can't agree: high marks for the ${p}, complaints about the ${c}.`,
     (p, c) => `Reviews cut both ways: the ${p} impressed, the ${c} frustrated.`,
     (p, c) => `Half the critics point to the ${p}, the other half to the ${c}.`,
   ],
@@ -703,7 +703,7 @@ const ASPECT_VARIANTS = {
     (p) => `A divided verdict, with the ${p} the one thing most critics agreed on.`,
     (p) => `Reviews swing both ways; the ${p} earns praise even from the doubters.`,
     (p) => `Critics can't settle on this one, but the ${p} gets its due.`,
-    (p) => `Opinion is split — the ${p} is the bright spot either way.`,
+    (p) => `Opinion is split, and the ${p} is the bright spot either way.`,
   ],
   mixedC: [
     (c) => `Critics are split, with the ${c} drawing most complaints.`,
@@ -713,40 +713,40 @@ const ASPECT_VARIANTS = {
     (c) => `Opinion is split, and the ${c} is where it splits hardest.`,
   ],
   positivePDiv: [
-    (p, d) => `Critics liked it — high marks for the ${p}, though the ${d} kept them arguing.`,
+    (p, d) => `Critics liked it: high marks for the ${p}, though the ${d} kept them arguing.`,
     (p, d) => `Mostly good reviews: praise for the ${p}, real debate over the ${d}.`,
     (p, d) => `Critics came away positive on the ${p}; on the ${d}, they part ways.`,
-    (p, d) => `A well-reviewed outing, strongest on the ${p} — only the ${d} drew real argument.`,
+    (p, d) => `A well-reviewed outing, strongest on the ${p}; only the ${d} drew real argument.`,
   ],
   mixedPDiv: [
-    (p, d) => `Critics are split — the ${p} won praise, the ${d} is the fault line.`,
+    (p, d) => `Critics are split: the ${p} won praise, the ${d} divides them.`,
     (p, d) => `A divided verdict: credit for the ${p}, a genuine rift over the ${d}.`,
-    (p, d) => `Reviews swing both ways — kind to the ${p}, at war over the ${d}.`,
+    (p, d) => `Reviews swing both ways: kind to the ${p}, at war over the ${d}.`,
     (p, d) => `Critics can't agree here; the ${p} earns praise, the ${d} starts the arguing.`,
   ],
   positiveDiv: [
-    (d) => `Critics are mostly positive — except when it comes to the ${d}.`,
+    (d) => `Critics are mostly positive, except when it comes to the ${d}.`,
     (d) => `Mostly good reviews, with real disagreement only about the ${d}.`,
     (d) => `Positive on balance, but ask two critics about the ${d} and you'll get two answers.`,
-    (d) => `Most critics approved — just don't ask them about the ${d}.`,
+    (d) => `Most critics approved; just don't ask them about the ${d}.`,
   ],
   mixedDiv: [
     (d) => `Critics are split, nowhere more than over the ${d}.`,
-    (d) => `A divided verdict, with the ${d} right on the fault line.`,
+    (d) => `A divided verdict, with the ${d} at the centre of the disagreement.`,
     (d) => `Reviews swing both ways here, most sharply over the ${d}.`,
-    (d) => `Critics can't agree on this one — least of all about the ${d}.`,
+    (d) => `Critics can't agree on this one, least of all about the ${d}.`,
   ],
   mixedScore: [
-    () => `Genuinely divisive — critics can't settle this one.`,
-    () => `Truly divisive — for every critic who bought in, one checked out.`,
-    () => `A love-it-or-hate-it reception, right down the middle.`,
+    () => `Genuinely divisive: critics can't settle this one.`,
+    () => `Truly divisive: for every critic who bought in, one checked out.`,
+    () => `A reception split right down the middle.`,
     () => `Critics are split clean down the middle on this one.`,
   ],
   negativeC: [
     (c) => `Critics were rough on it, mostly over the ${c}.`,
     (c) => `The reviews were not kind, and the ${c} took the worst of it.`,
     (c) => `Critics came away cold, pointing mainly at the ${c}.`,
-    (c) => `A drubbing from reviewers, with the ${c} the main casualty.`,
+    (c) => `Reviewers were harsh, with the ${c} the main casualty.`,
     (c) => `Critics found little to love, least of all the ${c}.`,
   ],
   nonePC: [
@@ -754,13 +754,13 @@ const ASPECT_VARIANTS = {
     (p, c) => `The ${p} earned praise; the ${c} caught flak.`,
     (p, c) => `Critics highlighted the ${p}, with the ${c} the weak link.`,
     (p, c) => `Strong marks for the ${p}, less love for the ${c}.`,
-    (p, c) => `The ${p} works, per reviewers — the ${c} less so.`,
+    (p, c) => `The ${p} works, per reviewers; the ${c} less so.`,
   ],
   noneP: [
     (p) => `Reviewers singled out the ${p} for praise.`,
     (p) => `If critics agreed on one thing, it was the ${p}.`,
     (p) => `The ${p} drew the most notice from reviewers.`,
-    (p) => `Critics kept circling back to the ${p} — in a good way.`,
+    (p) => `Critics kept returning to the ${p}, approvingly.`,
     (p) => `The ${p} is what reviewers walked away talking about.`,
   ],
   noneC: [
@@ -869,6 +869,35 @@ function plainPoolTake(take) {
   if (!take) return null;
   const tone = Object.keys(TAKE_VARIANTS).find((k) => TAKE_VARIANTS[k].includes(take));
   return tone ? composePlainTake({ tone, score: true }) : null;
+}
+// Any take, plain (1 Nov 2026). The pools above are plain now, but takes.json still holds
+// sentences written by the older pools, and frozen pages render them from their facts with no
+// analysis to recompose from. So the page makes the sentence plain itself, generically: a pool
+// line maps to its tone's plain sentence; a spaced dash becomes a colon (a semicolon before a
+// clause that stands alone); the flourishes Wikipedia's guide lists as tells get the plain phrase
+// the pools now use. Idempotent. lib/filmpage.js applies it on every page in the plain rollout,
+// so a new template with a dash would still never reach a reader; the pool lint in scripts/test.js
+// keeps one from being written at all.
+const RETIRED_PHRASES = [
+  [/ took the heat\./g, " drew the complaints."],
+  [/ is the fault line\./g, " divides them."],
+  [/ right on the fault line\./g, " at the centre of the disagreement."],
+  [/^A love-it-or-hate-it reception, right down the middle\.$/g, "A reception split right down the middle."],
+  [/ expect a love-it-or-hate-it watch\./g, " expect to love it or hate it."],
+  [/^A drubbing from reviewers, with the (.+?) the main casualty\.$/g, "Reviewers were harsh, with the $1 the main casualty."],
+  [/^Critics kept circling back to the (.+?)(?: — in |, in | in )a good way\.$/g, "Critics kept returning to the $1, approvingly."],
+];
+function plainTakeText(take) {
+  if (!take) return take;
+  const pool = plainPoolTake(take);
+  if (pool) return pool;
+  let s = String(take);
+  for (const [re, to] of RETIRED_PHRASES) s = s.replace(re, to);
+  // "…unanimous — this one landed." → "…unanimous: this one landed."; a dash before a clause
+  // beginning with a pronoun or article that reads as its own statement takes a semicolon.
+  s = s.replace(/\s+[—–]\s+(?=([a-z]+))/g, (m, w) => (/^(this|that|it|they|nobody|expect)$/.test(w) ? "; " : ": "));
+  s = s.replace(/\s+[—–]\s+/g, ": ");
+  return s;
 }
 
 // English-Wikipedia reception section as plain text, or null if the article has none.
@@ -1038,19 +1067,19 @@ function mineViewerAspects(results) {
 const TMDB_ASPECT_VARIANTS = {
   P: [
     (lw, p) => `Early viewer reviews on TMDB skew ${lw}, with the ${p} getting most of the love.`,
-    (lw, p) => `Viewer word on TMDB runs ${lw} — reviews keep coming back to the ${p}.`,
+    (lw, p) => `Viewer word on TMDB runs ${lw}; reviews keep coming back to the ${p}.`,
     (lw, p) => `Early TMDB reviews skew ${lw}; viewers keep mentioning the ${p}.`,
     (lw, p) => `First viewer reviews on TMDB run ${lw}, with the warmest words for the ${p}.`,
   ],
   PC: [
-    (lw, p, c) => `Early viewer reviews on TMDB skew ${lw} — love for the ${p}, gripes about the ${c}.`,
+    (lw, p, c) => `Early viewer reviews on TMDB skew ${lw}: love for the ${p}, gripes about the ${c}.`,
     (lw, p, c) => `Viewer word on TMDB runs ${lw}: praise for the ${p}, knocks on the ${c}.`,
     (lw, p, c) => `Early TMDB reviews skew ${lw}, cheering the ${p} while flagging the ${c}.`,
-    (lw, p, c) => `First viewer reviews on TMDB run ${lw} — viewers rate the ${p} far above the ${c}.`,
+    (lw, p, c) => `First viewer reviews on TMDB run ${lw}: viewers rate the ${p} far above the ${c}.`,
   ],
   C: [
     (lw, c) => `Early viewer reviews on TMDB skew ${lw}, with the ${c} the common complaint.`,
-    (lw, c) => `Viewer word on TMDB runs ${lw} — most gripes point at the ${c}.`,
+    (lw, c) => `Viewer word on TMDB runs ${lw}; most gripes point at the ${c}.`,
     (lw, c) => `Early TMDB reviews skew ${lw}; the main complaint is about the ${c}.`,
     (lw, c) => `First viewer reviews on TMDB run ${lw}, and the loudest complaints are about the ${c}.`,
   ],
@@ -1173,6 +1202,8 @@ async function attachTakes(dataByCode) {
         // Plain wording (rollout "human-prose"): one sentence per shape, by the item's own slug.
         const plainTake = entry.a ? composePlainTake(entry.a)
           : entry.ta ? composePlainTmdbTake(entry.ta) : plainPoolTake(entry.take);
+        // No analysis and not a pool line (an aspect line from the older pools): plain generically.
+        const plainFallback = plainTake || plainTakeText(seededTake);
         for (const it of items) {
           // CONFIDENCE GATE — mirrors the one already on the rating. An isFresh item
           // (released within 7 days AND under 20 votes) renders "Just released — verdict
@@ -1193,7 +1224,7 @@ async function attachTakes(dataByCode) {
           // listed 10 by day three. cachedCriticsTone keeps the same rule for the score
           // step's cache fallback.
           if (entry.take && (takeConfident(it) || criticsSettled(entry.a))) {
-            it.take = (plainTake && require("./humanprose.js").plainOn(it.slug)) ? plainTake : seededTake;
+            it.take = require("./humanprose.js").plainOn(it.slug) ? plainFallback : seededTake;
             it.takeSrc = entry.src;
             if (takeAspects) it.takeAspects = takeAspects; // feeds the editor's note flourish
             if (entry.src === "wiki" && entry.article) it.takeArticle = entry.article; // provenance -> JSON-LD citation
@@ -1355,6 +1386,8 @@ module.exports = {
   composeTake,
   composeTmdbTake,
   plainPoolTake,
+  plainTakeText,
+  ASPECT_VARIANTS, TAKE_VARIANTS, TMDB_TAKE_VARIANTS,   // for the pool lint in scripts/test.js
   computeBuzz,
   criticRatings,
   criticsSettled,
