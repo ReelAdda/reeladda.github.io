@@ -4018,6 +4018,13 @@ test("filters to the requested language only, across all three sections", () => 
   assert.ok(html.includes("Tamil Hit") && html.includes("Tamil Stream") && html.includes("Tamil Soon"));
   assert.ok(!html.includes("Hindi Film"));
 });
+test("hub rows: 'Read the reviews: … →' under the pill line where item.rv is set (1 Nov 2026)", () => {
+  const data = { ...LANG_DATA, theatres: [{ ...LANG_DATA.theatres[0], rating: null, votes: 3, rv: [{ o: "The Hindu", u: "https://www.thehindu.com/x" }, { o: "Scroll", u: "https://scroll.in/y" }] }, LANG_DATA.theatres[1]] };
+  const html = U.buildLanguagePage(data, "Tamil", "tamil");
+  assert.ok(/<div class="rm">[^\n]*vpill[^\n]*<\/div>\s*<div class="rm srv">Read the reviews: The Hindu, Scroll →<\/div>/.test(html), (html.match(/Tamil Hit[\s\S]{0,600}/) || [""])[0]);
+  assert.ok(html.includes(".rm.srv { color:var(--indigo);"), "styled like the take line, underlined");
+  assert.ok(!/rm srv/.test(U.buildLanguagePage(LANG_DATA, "Tamil", "tamil")), "no outlets, no line");
+});
 test("canonical, title, FAQ schema and take line present", () => {
   const html = U.buildLanguagePage(LANG_DATA, "Tamil", "tamil");
   assert.ok(html.includes('rel="canonical" href="https://filmychill.com/tamil/"'));

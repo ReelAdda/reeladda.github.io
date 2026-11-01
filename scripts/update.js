@@ -2576,9 +2576,13 @@ async function main() {
     try {
       const RV = require("./lib/reviews.js");
       const seenKeys = new Set(), films = [];
+      // Every list an edition's pages read: the three sections, the per-language pools
+      // ({ theatres, ott } each) and the OTT overflow. The same objects the data file is written from.
+      const editionItems = (d) => [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || []), ...(d.ottExtra || []),
+        ...Object.values(d.langPools || {}).flatMap((p) => Array.isArray(p) ? p : [...(p.theatres || []), ...(p.ott || [])])];
       for (const cfg of builtCountries) {
         const d = dataByCode[cfg.code] || {};
-        for (const it of [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || []), ...Object.values(d.langPools || {}).flat()]) {
+        for (const it of editionItems(d)) {
           if (!it || !it.tmdbId) continue;
           const key = `${it.kind === "tv" ? "tv" : "movie"}:${it.tmdbId}`;
           if (seenKeys.has(key)) continue;
@@ -2593,7 +2597,7 @@ async function main() {
       let withRv = 0;
       for (const cfg of builtCountries) {
         const d = dataByCode[cfg.code] || {};
-        for (const it of [...(d.theatres || []), ...(d.ott || []), ...(d.comingSoon || []), ...Object.values(d.langPools || {}).flat()]) {
+        for (const it of editionItems(d)) {
           if (!it || !it.tmdbId || !inRollout("reviews", it.slug)) continue;
           const cited = !!it.reception && inRollout(RECEPTION_FEATURE, it.slug);
           const list = RV.wantsReviews(it, cited) ? RV.outlets(RV.reviewsFor(it.kind, it.tmdbId)) : [];

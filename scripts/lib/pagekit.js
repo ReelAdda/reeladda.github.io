@@ -372,6 +372,9 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
   // Back-link copy follows the market ("theatres + OTT" in India/UAE, "theatres +
   // streaming" everywhere else) — platform hubs exist for every country.
   const V = streamVocab({ code });
+  // Under the pill line, the outlets whose reviews are out, for a title with no critics' reading
+  // (item.rv, lib/reviews.js): "Read the reviews: The Hindu →". Names only; the row is one link.
+  const rvLine = (it) => { const t = require("./reviews.js").reviewsCardText(it.rv); return t ? `<div class="rm srv">${e(t)}</div>` : ""; };
   const rowFor = (it) => {
     const badge = it.badge || (it.isRecent ? "New release" : null);
     // Where to watch leads every card (29 Oct 2026): the platform, one name per service ("Sonyliv"
@@ -385,6 +388,7 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
         ${rowScoreLine(it)}
+        ${rvLine(it)}
         ${it.hook ? `<div class="rm hk">${e(it.hook)}</div>` : ""}
         ${it.take ? `<div class="rm tk">${e(it.take)}</div>` : ""}
       </div>`;
@@ -449,6 +453,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
   .rm.tk { color:var(--indigo); font-weight:600; }
   .rm.hk { font-style:italic; }
+  .rm.srv { color:var(--indigo); font-weight:600; text-decoration:underline; text-underline-offset:2px; }
   ${VPILL_CSS}
   ${POPULAR_CSS}
   .faq details { border-top:1px solid var(--line); padding:10px 0; }
