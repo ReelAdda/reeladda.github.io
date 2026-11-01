@@ -1,93 +1,93 @@
 {
  "_about": "Published reviews of recent titles, from the outlets' RSS feeds (lib/reviews.js): outlet, link, headline, date, and a star rating only when the feed states one. Keyed by kind:tmdbId; pruned 90 days after release.",
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "feeds": {
   "https://www.thehindu.com/entertainment/reviews/feeder/default.rss": {
-   "ok": "2026-10-31",
+   "ok": "2026-11-01",
    "items": 60
   },
   "https://indianexpress.com/section/entertainment/movie-review/feed/": {
-   "failed": "2026-10-31",
+   "failed": "2026-11-01",
    "error": "HTTP 403"
   },
   "https://indianexpress.com/section/entertainment/tamil/feed/": {
-   "failed": "2026-10-31",
+   "failed": "2026-11-01",
    "error": "HTTP 403"
   },
   "https://indianexpress.com/section/entertainment/telugu/feed/": {
-   "failed": "2026-10-31",
+   "failed": "2026-11-01",
    "error": "HTTP 403"
   },
   "https://indianexpress.com/section/entertainment/malayalam/feed/": {
-   "failed": "2026-10-31",
+   "failed": "2026-11-01",
    "error": "HTTP 403"
   },
   "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml": {
-   "ok": "2026-10-31",
-   "items": 90
+   "ok": "2026-11-01",
+   "items": 78
   },
   "https://feeds.feedburner.com/ndtvmovies-latest": {
-   "ok": "2026-10-31",
+   "ok": "2026-11-01",
    "items": 100
   },
   "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml": {
-   "failed": "2026-10-31",
+   "failed": "2026-11-01",
    "error": "HTTP 403"
   },
   "https://www.news18.com/rss/movies.xml": {
-   "failed": "2026-10-31",
+   "failed": "2026-11-01",
    "error": "HTTP 403"
   },
   "https://feeds.feedburner.com/ScrollinArticles.rss": {
-   "ok": "2026-10-31",
+   "ok": "2026-11-01",
    "items": 100
   },
   "https://www.koimoi.com/feed/": {
-   "failed": "2026-10-31",
+   "failed": "2026-11-01",
    "error": "HTTP 403"
   },
   "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms": {
-   "ok": "2026-10-31",
+   "ok": "2026-11-01",
    "items": 20
   },
   "https://www.indiatoday.in/rss/1206611": {
-   "ok": "2026-10-31",
+   "ok": "2026-11-01",
    "items": 20
   },
   "https://www.dnaindia.com/feeds/entertainment.xml": {
-   "ok": "2026-10-31",
+   "ok": "2026-11-01",
    "items": 20
   },
   "https://www.freepressjournal.in/stories.rss?section=entertainment": {
-   "ok": "2026-10-31",
-   "items": 36
+   "ok": "2026-11-01",
+   "items": 50
   },
   "https://www.123telugu.com/category/reviews/feed": {
-   "ok": "2026-10-31",
+   "ok": "2026-11-01",
    "items": 30
   },
   "https://www.telugu360.com/feed/": {
-   "ok": "2026-10-31",
+   "ok": "2026-11-01",
    "items": 10
   },
   "https://www.cinemaexpress.com/feed": {
-   "ok": "2026-10-31",
-   "items": 6
+   "ok": "2026-11-01",
+   "items": 4
   },
   "https://www.vikatan.com/feed": {
-   "ok": "2026-10-31",
-   "items": 3
+   "ok": "2026-11-01",
+   "items": 14
   },
   "https://www.prajavani.net/feed": {
-   "ok": "2026-10-31",
-   "items": 34
+   "ok": "2026-11-01",
+   "items": 108
   },
   "https://www.amarujala.com/rss/entertainment.xml": {
-   "ok": "2026-10-31",
+   "ok": "2026-11-01",
    "items": 40
   },
   "https://www.sangbadpratidin.in/feed/": {
-   "ok": "2026-10-31",
+   "ok": "2026-11-01",
    "items": 20
   }
  },
@@ -109,7 +109,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1496785": {
    "title": "Aadarsha Kutumbam House No: 47 - AK47",
@@ -122,7 +122,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1234139": {
    "title": "Jailer 2",
@@ -135,7 +135,7 @@
      "d": "2026-10-26"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1740967": {
    "title": "Orijinal",
@@ -148,7 +148,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1153576": {
    "title": "Street Fighter",
@@ -161,7 +161,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1375156": {
    "title": "Udta Teer",
@@ -174,7 +174,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1400940": {
    "title": "Clayface",
@@ -187,7 +187,7 @@
      "d": "2026-10-22"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1288069": {
    "title": "Tenzing",
@@ -200,7 +200,7 @@
      "d": "2026-10-21"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1058424": {
    "title": "Hope",
@@ -213,7 +213,7 @@
      "d": "2026-10-18"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1255833": {
    "title": "Whalefall",
@@ -239,7 +239,7 @@
      "d": "2026-10-16"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1389172": {
    "title": "Reporting Live",
@@ -252,7 +252,7 @@
      "d": "2026-10-09"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1281331": {
    "title": "The Social Reckoning",
@@ -265,7 +265,7 @@
      "d": "2026-10-09"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "tv:288673": {
    "title": "Carrie",
@@ -278,7 +278,7 @@
      "d": "2026-10-08"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1195803": {
    "title": "Wicker",
@@ -297,7 +297,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1802464": {
    "title": "Meethe Mein Kya Hai",
@@ -310,7 +310,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "movie:1395215": {
    "title": "Sigma",
@@ -323,7 +323,7 @@
      "d": "2026-10-02"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
   },
   "tv:243555": {
    "title": "Akka",
@@ -348,7 +348,20 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-10-31"
+   "updated": "2026-11-01"
+  },
+  "tv:289517": {
+   "title": "Dead-End Job",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "Hindustan Times",
+     "u": "https://www.hindustantimes.com/entertainment/web-series/dead-end-job-review-lee-jae-wook-netflix-horror-comedy-kdrama-turns-the-gig-economy-into-a-supernatural-nightmare-go-min-si-kim-min-ha-choi-hyun-wook-101793364577646.html",
+     "h": "Dead-End Job review: Lee Jae Wook's horror-comedy k-drama turns the gig economy into a supernatural nightmare",
+     "d": "2026-10-31"
+    }
+   ],
+   "updated": "2026-11-01"
   }
  }
 }
