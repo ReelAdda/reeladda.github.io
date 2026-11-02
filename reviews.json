@@ -1,97 +1,97 @@
 {
  "_about": "Published reviews of recent titles, from the outlets' RSS feeds (lib/reviews.js): outlet, link, headline, date, and a star rating only when the feed states one. Keyed by kind:tmdbId; pruned 90 days after release.",
- "fetched": "2026-11-01",
+ "fetched": "2026-11-02",
  "feeds": {
   "https://www.thehindu.com/entertainment/reviews/feeder/default.rss": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 60
   },
   "https://indianexpress.com/section/entertainment/movie-review/feed/": {
-   "failed": "2026-11-01",
+   "failed": "2026-11-02",
    "error": "HTTP 403"
   },
   "https://indianexpress.com/section/entertainment/tamil/feed/": {
-   "failed": "2026-11-01",
+   "failed": "2026-11-02",
    "error": "HTTP 403"
   },
   "https://indianexpress.com/section/entertainment/telugu/feed/": {
-   "failed": "2026-11-01",
+   "failed": "2026-11-02",
    "error": "HTTP 403"
   },
   "https://indianexpress.com/section/entertainment/malayalam/feed/": {
-   "failed": "2026-11-01",
+   "failed": "2026-11-02",
    "error": "HTTP 403"
   },
   "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml": {
-   "ok": "2026-11-01",
-   "items": 71
+   "ok": "2026-11-02",
+   "items": 70
   },
   "https://feeds.feedburner.com/ndtvmovies-latest": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 100
   },
   "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml": {
-   "failed": "2026-11-01",
+   "failed": "2026-11-02",
    "error": "HTTP 403"
   },
   "https://www.news18.com/rss/movies.xml": {
-   "failed": "2026-11-01",
+   "failed": "2026-11-02",
    "error": "HTTP 403"
   },
   "https://feeds.feedburner.com/ScrollinArticles.rss": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 100
   },
   "https://www.koimoi.com/feed/": {
-   "failed": "2026-11-01",
+   "failed": "2026-11-02",
    "error": "HTTP 403"
   },
   "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 20
   },
   "https://www.indiatoday.in/rss/1206611": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 20
   },
   "https://www.dnaindia.com/feeds/entertainment.xml": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 20
   },
   "https://www.freepressjournal.in/stories.rss?section=entertainment": {
-   "ok": "2026-11-01",
-   "items": 61
+   "ok": "2026-11-02",
+   "items": 82
   },
   "https://www.123telugu.com/category/reviews/feed": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 30
   },
   "https://www.telugu360.com/feed/": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 10
   },
   "https://www.cinemaexpress.com/feed": {
-   "ok": "2026-11-01",
-   "items": 4
+   "ok": "2026-11-02",
+   "items": 7
   },
   "https://www.vikatan.com/feed": {
-   "ok": "2026-11-01",
-   "items": 2
-  },
-  "https://www.prajavani.net/feed": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 24
   },
+  "https://www.prajavani.net/feed": {
+   "ok": "2026-11-02",
+   "items": 85
+  },
   "https://www.amarujala.com/rss/entertainment.xml": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 40
   },
   "https://www.sangbadpratidin.in/feed/": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 20
   },
   "https://www.rediff.com/rss/moviesreviewsrss.xml": {
-   "ok": "2026-11-01",
+   "ok": "2026-11-02",
    "items": 210
   }
  },
@@ -113,7 +113,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1496785": {
    "title": "Aadarsha Kutumbam House No: 47 - AK47",
@@ -126,7 +126,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1234139": {
    "title": "Jailer 2",
@@ -145,7 +145,7 @@
      "d": "2026-10-26"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1740967": {
    "title": "Orijinal",
@@ -158,7 +158,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1153576": {
    "title": "Street Fighter",
@@ -177,7 +177,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1375156": {
    "title": "Udta Teer",
@@ -196,7 +196,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1400940": {
    "title": "Clayface",
@@ -215,7 +215,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1288069": {
    "title": "Tenzing",
@@ -228,7 +228,7 @@
      "d": "2026-10-21"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1058424": {
    "title": "Hope",
@@ -241,7 +241,7 @@
      "d": "2026-10-18"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1255833": {
    "title": "Whalefall",
@@ -273,7 +273,7 @@
      "d": "2026-10-16"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1389172": {
    "title": "Reporting Live",
@@ -292,7 +292,7 @@
      "d": "2026-10-09"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1281331": {
    "title": "The Social Reckoning",
@@ -311,7 +311,7 @@
      "d": "2026-10-09"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "tv:288673": {
    "title": "Carrie",
@@ -324,7 +324,7 @@
      "d": "2026-10-08"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1195803": {
    "title": "Wicker",
@@ -343,7 +343,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1802464": {
    "title": "Meethe Mein Kya Hai",
@@ -362,7 +362,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1395215": {
    "title": "Sigma",
@@ -412,7 +412,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "tv:289517": {
    "title": "Dead-End Job",
@@ -438,7 +438,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1374689": {
    "title": "Pyre",
@@ -463,7 +463,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1606527": {
    "title": "418",
@@ -482,7 +482,7 @@
      "d": "2026-10-29"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:869152": {
    "title": "Titans",
@@ -495,7 +495,7 @@
      "d": "2026-10-22"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1389379": {
    "title": "Ranabaali",
@@ -514,7 +514,7 @@
      "d": "2026-10-18"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1428295": {
    "title": "Comrade Kalyan",
@@ -533,7 +533,7 @@
      "d": "2026-10-09"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "tv:336831": {
    "title": "The Traitors (Telugu)",
@@ -558,7 +558,7 @@
      "d": "2026-11-01"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "tv:337806": {
    "title": "Least Eligible Bachelor",
@@ -571,7 +571,7 @@
      "d": "2026-10-09"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1261763": {
    "title": "Don't Trouble the Trouble",
@@ -603,7 +603,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1772549": {
    "title": "Pehla Pyaar Doosri Baar",
@@ -616,7 +616,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "tv:338918": {
    "title": "Chaar Yaar",
@@ -629,7 +629,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "movie:1081010": {
    "title": "Prahaar: The Untold Story of Ujjwal Nikam",
@@ -642,7 +642,7 @@
      "d": "2026-10-16"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "tv:213375": {
    "title": "VisionQuest",
@@ -655,7 +655,7 @@
      "d": "2026-10-14"
     }
    ],
-   "updated": "2026-11-01"
+   "updated": "2026-11-02"
   },
   "tv:302882": {
    "title": "#Love",
@@ -669,6 +669,19 @@
     }
    ],
    "updated": "2026-11-01"
+  },
+  "movie:1800255": {
+   "title": "Enemy Of The Smuggler",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/enemy-of-the-smuggler-movie-review-t-samaya-murali-jd-chakravarthy-lal-saran-shakthi-smeha/article71652479.ece",
+     "h": "‘Enemy of the Smuggler’ movie review: A gritty premise weighed down by commercial compulsions",
+     "d": "2026-11-02"
+    }
+   ],
+   "updated": "2026-11-02"
   }
  }
 }
