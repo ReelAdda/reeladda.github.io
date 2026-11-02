@@ -21,7 +21,7 @@ const { sleep, tmdb } = require("./tmdb.js");
 // degrade gracefully: any failure means a missing badge, never a failed build.
 // ============================================================================
 const YT_API_KEY = process.env.YT_API_KEY || "";
-const WIKI_HEADERS = { "User-Agent": "FilmyChillBot/1.0 (https://filmychill.com; vikramksharma87@gmail.com)" };
+const WIKI_HEADERS = { "User-Agent": "FilmyChillBot/1.0 (https://filmychill.com; contact@filmychill.com)" };
 const BUZZ_TREND_MIN_DAILY = 10000; // avg daily en-wiki views that always count as trending
 const BUZZ_TREND_SPIKE = 1.5;       // ...or recent week >= 1.5x the prior week
 const BUZZ_SPIKE_FLOOR = 3000;      //    (with a floor, so 20 -> 40 views never "trends")

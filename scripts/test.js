@@ -2057,12 +2057,12 @@ test("A07 · About and Privacy give the contact address; the homepage Organizati
   const fsx = require("fs"), path = require("path");
   const about = fsx.readFileSync(path.join(__dirname, "..", "about", "index.html"), "utf8");
   const priv = fsx.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8");
-  assert.ok(/Corrections are genuinely welcome: email <a href="mailto:filmychill\.contact@gmail\.com">/.test(about), "corrections can actually be sent");
-  assert.ok(/mailto:filmychill\.contact@gmail\.com/.test(priv) && !/will be added to this page/.test(priv), "privacy placeholder replaced");
+  assert.ok(/Corrections are genuinely welcome: email <a href="mailto:contact@filmychill\.com">/.test(about), "corrections can actually be sent");
+  assert.ok(/mailto:contact@filmychill\.com/.test(priv) && !/will be added to this page/.test(priv), "privacy placeholder replaced");
   const S = require("./lib/surfaces.js");
   const ld = S.buildHomeJsonLd({ generatedAt: "2026-10-11T00:00:00Z", theatres: [], ott: [] }, { code: "in", name: "India", region: "IN" });
   const org = JSON.parse(ld)["@graph"].find((x) => x["@type"] === "Organization");
-  assert.deepStrictEqual(org.contactPoint, { "@type": "ContactPoint", contactType: "customer support", email: "filmychill.contact@gmail.com" });
+  assert.deepStrictEqual(org.contactPoint, { "@type": "ContactPoint", contactType: "customer support", email: "contact@filmychill.com" });
   assert.deepStrictEqual(org.sameAs, ["https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j", "https://www.instagram.com/filmychillofficial/"], "the WhatsApp channel and the official Instagram page (31 Oct 2026)");
 });
 test("A03 · a non-film sitemap URL keeps its date until its content changes", () => {
@@ -2159,7 +2159,7 @@ test("copyright page: exists, gives the contact address and what to send, asks t
   const fsx = require("fs"), path = require("path");
   const d = fsx.readFileSync(path.join(__dirname, "..", "dmca", "index.html"), "utf8");
   assert.ok(/<link rel="canonical" href="https:\/\/filmychill\.com\/dmca\/">/.test(d));
-  assert.ok(d.includes('<a href="mailto:filmychill.contact@gmail.com">filmychill.contact@gmail.com</a>'), "the address, as text and a link");
+  assert.ok(d.includes('<a href="mailto:contact@filmychill.com">contact@filmychill.com</a>'), "the address, as text and a link");
   assert.ok(/does not host, upload, stream or link to copies/.test(d) && /good faith/.test(d) && /Before filing a takedown with Google/.test(d));
   assert.ok(!/vikramksharma87/.test(d), "never the owner's personal address");
   const sm = fsx.readFileSync(path.join(__dirname, "lib", "sitemap.js"), "utf8");

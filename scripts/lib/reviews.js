@@ -27,7 +27,7 @@ const REVIEWS_FILE = "reviews.json";
 const REVIEW_WINDOW_DAYS = 60;    // reviews are matched to titles released this recently (or 14 days ahead)
 const REVIEW_LEAD_DAYS = 14;      // a review may run before the release date
 const FEED_TIMEOUT_MS = 15000;
-const UA = "Mozilla/5.0 (compatible; FilmyChillBot/1.0; +https://filmychill.com/about/; filmychill.contact@gmail.com)";
+const UA = "Mozilla/5.0 (compatible; FilmyChillBot/1.0; +https://filmychill.com/about/; contact@filmychill.com)";
 // Not read, by its own feed terms: Onmanorama ("personal use", "no commercial use without express
 // consent", onmanorama.com/rss.html, read 31 Oct 2026). Rediff's page says its feeds are "available
 // free for individuals and non-profit organisations" and forbids nothing; it was off the list for a
