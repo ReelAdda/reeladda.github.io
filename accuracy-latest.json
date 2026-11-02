@@ -2,62 +2,9 @@
  "date": "2026-11-02",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 6,
- "high": 6,
- "correctable": 6,
- "byField": {
-  "streaming": 2,
-  "platform": 3,
-  "release date": 1
- },
- "rows": [
-  {
-   "field": "streaming",
-   "severity": "high",
-   "page": "on JioHotstar",
-   "tmdb": "on no subscription service",
-   "code": "in",
-   "slug": "american-horror-story"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "HBO Max Amazon Channel, YouTube TV, TNT, TBS",
-   "tmdb": "HBO Max, YouTube TV",
-   "code": "us",
-   "slug": "batman-begins"
-  },
-  {
-   "field": "release date",
-   "severity": "high",
-   "page": "2026-12-24",
-   "tmdb": "2027-03-12",
-   "code": "ae",
-   "slug": "shakti-shalini"
-  },
-  {
-   "field": "streaming",
-   "severity": "high",
-   "page": "not streaming",
-   "tmdb": "on Netflix",
-   "code": "my",
-   "slug": "meethe-mein-kya-hai"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix, HBO Max",
-   "tmdb": "Netflix",
-   "code": "nz",
-   "slug": "justice-league"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Canal+, Cine+ OCS, SFR Play",
-   "tmdb": "Canal+, SFR Play",
-   "code": "fr",
-   "slug": "marie-antoinette"
-  }
- ]
+ "pagesDisagreeing": 0,
+ "high": 0,
+ "correctable": 0,
+ "byField": {},
+ "rows": []
 }
