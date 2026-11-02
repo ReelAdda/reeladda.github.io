@@ -78,7 +78,7 @@ function buildEmbedPage(data, cfg, updatedHuman) {
            text-decoration: none; color: #716A8C; border-top: 1px solid #EADFCE; background: #fff; }
   .fcw-f b { color: #4038C7; }
   .fcw-a { padding: 6px 14px 8px; font-size: 10px; line-height: 1.5; color: #716A8C; background: #fff; border-top: 1px solid #EADFCE; }
-  .fcw-a img { height: 9px; width: auto; vertical-align: -1px; }
+  .fcw-a img { height: 7px; width: auto; vertical-align: 0; }
 </style></head><body>
 <div class="fcw">
   <div class="fcw-h"><b>FILMY<i>CHILL</i></b><span>New on OTT · ${e(m.name)}</span></div>

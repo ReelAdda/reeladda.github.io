@@ -1390,6 +1390,8 @@ test("phones: headings wrap cleanly, language is one dropdown, badges share a li
   // follow moved to the footer.
   assert.ok(!/ednote-more/.test(src) && /<p class="ednote">|<!--SSR:EDNOTE-->/.test(src));
   assert.ok(/<a class="foot-follow" id="channelBtn"[^>]*>[\s\S]*?Follow on WhatsApp<\/a>/.test(src));
+  // The Instagram button beside it (owner, 2 Nov 2026): the official page, the icon from the sprite.
+  assert.ok(/<a class="foot-follow foot-ig" href="https:\/\/www\.instagram\.com\/filmychillofficial\/" target="_blank" rel="noopener" aria-label="Follow FilmyChill on Instagram">[\s\S]*?<use href="#igIcon"\/>[\s\S]*?Follow on Instagram<\/a>/.test(src) && src.includes('<symbol id="igIcon"'), "Follow on Instagram button with its icon");
 });
 
 // ---- FilmyChill Score on pages that are never rebuilt (lib/scoresweep.js) ----

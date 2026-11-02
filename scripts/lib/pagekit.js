@@ -559,7 +559,7 @@ function footerAttribution(useImdb = USE_IMDB, { plain = false } = {}) {
 // TMDB's terms (read 2 Nov 2026) ask for the logo and this wording: "uses TMDB and the TMDB APIs
 // but is not endorsed, certified, or otherwise approved by TMDB." The logo is TMDB's own short
 // mark (/tmdb.svg, from themoviedb.org/about/logos-attribution), unaltered, 11px tall.
-const TMDB_NOTICE = `<img src="/tmdb.svg" alt="TMDB" width="88" height="11" style="height:11px;width:auto;vertical-align:-1px" loading="lazy"> This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.`;
+const TMDB_NOTICE = `<img src="/tmdb.svg" alt="TMDB" width="62" height="8" style="height:8px;width:auto;vertical-align:0" loading="lazy"> This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.`;
 function footerAttributionText(useImdb) {
   // Required wording kept verbatim (TMDB's notice; IMDb's "Used with permission" when its
   // ratings are shown); only the layout is compact: credits on one line, the notice below.
