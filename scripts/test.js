@@ -8617,7 +8617,7 @@ test("layout audit: one content column and 44px targets on every page type (18 O
   const src = homeSource();
   // Homepage: the editor's note and the footer sit on the same column as the sections.
   assert.ok(/\.ednote \{ margin: 18px 0 4px; max-width: 720px;/.test(src), "editor's note left-aligned with the sections, not centred");
-  assert.ok(/\.foot-in \{ max-width: 1100px; margin: 0 auto; padding: 0 24px; \}/.test(src) && /footer \{ border-top: 1px solid var\(--line\); padding: 34px 0 24px;/.test(src), "footer on main's 1100px column and gutter");
+  assert.ok(/\.foot-in \{ max-width: 1100px; margin: 0 auto; padding: 0 24px; \}/.test(src) && /footer \{ border-top: 1px solid var\(--line\); padding: 28px 0 20px;/.test(src), "footer on main's 1100px column and gutter");
   assert.ok(/\.foot-in \{ padding: 0 16px; \}/.test(src), "and the phone gutter");
   assert.ok(/\.save-btn \{[^}]*width: 44px; height: 44px;/.test(src) && /\.pn-x \{[^}]*min-width:44px; min-height:44px;/.test(src), "bookmark and close buttons are 44px");
   assert.ok(/<option value="default">Trending<\/option>/.test(src) && /<select id="sortSel" aria-label="Sort by">/.test(src), "short sort labels, the select itself says 'Sort by'");

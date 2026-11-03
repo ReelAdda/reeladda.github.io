@@ -828,7 +828,9 @@ function renderCountryPage(templateHtml, cfg, data) {
   // Same lesson as the fc-page meta tag, now applied to the block that predated it.
   html = replaceBetween(html, "JSONLD",
     `<script type="application/ld+json">${buildHomeJsonLd(data, cfg)}</script>`);
-  html = replaceBetween(html, "ATTRIBUTION", footerAttribution(undefined, { plain: true }));   // plain wording, lib/humanprose.js
+  // Plain wording (lib/humanprose.js). The homepage states © in its own bar, so the credit ends
+  // at "Copyright" rather than on the trailing separator the other templates follow with "© …".
+  html = replaceBetween(html, "ATTRIBUTION", footerAttribution(undefined, { plain: true }).replace(/ · $/, ""));
   if (isIndia) {
     fs.writeFileSync("index.html", html);
   } else {

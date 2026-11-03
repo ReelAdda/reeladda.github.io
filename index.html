@@ -415,34 +415,45 @@
   @media (prefers-reduced-motion: reduce) { .skeleton::after { animation: none; } }
   .error-box { background: var(--card); border: 1px solid var(--coral); border-radius: 14px; padding: 24px;
     text-align: center; color: var(--mute); font-size: 14px; grid-column: 1 / -1; }
-  footer { border-top: 1px solid var(--line); padding: 34px 0 24px; color: var(--mute); font-size: 13px; line-height: 1.6; }
+  /* ---- Footer (3 Nov 2026: tighter, aligned; same content) ----
+     One 1100px column. Brand row: name and tagline left, the two follow buttons right, same size,
+     with a hairline under it. Link columns on a four-track grid; bottom bar: copyright left,
+     edition right; credits last, in small muted type. Phones: buttons share one row at equal
+     width, links in two columns. */
+  footer { border-top: 1px solid var(--line); padding: 28px 0 20px; color: var(--mute); font-size: 13px; line-height: 1.5; }
   footer a { color: var(--mute); text-decoration: none; }
   footer a:hover { color: var(--ink); text-decoration: underline; }
   .foot-in { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-  .foot-brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 24px; }
-  .foot-brand b { color: var(--indigo); font-size: 16px; }
-  footer a.foot-follow { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; margin-left: auto;
-    border-radius: 999px; background: #1A1633; color: #FFF7EC; font-weight: 700; text-decoration: none; }
+  .foot-brand { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding-bottom: 20px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
+  .foot-brand b { color: var(--indigo); font-size: 17px; letter-spacing: -.01em; }
+  .foot-brand > span { font-size: 13px; }
+  footer a.foot-follow { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; margin-left: auto;
+    border-radius: 999px; background: #1A1633; color: #FFF7EC; font-size: 13.5px; font-weight: 700; text-decoration: none; white-space: nowrap; }
   footer a.foot-follow:hover { text-decoration: none; filter: brightness(1.15); }
   /* The Instagram button (2 Nov 2026): the WhatsApp button's shape, Instagram's mark in its own colour on the chip. */
-  footer a.foot-follow.foot-ig { margin-left: 10px; }
+  footer a.foot-follow.foot-ig { margin-left: 0; }
   .ig-chip .wa-ic { color: #E1306C; fill: none; }
-  /* Phones: the brand row wraps, so the button starts its own line, aligned with the text above
-     (margin-left:auto pushed it to the far right there). */
-  @media (max-width: 720px) { footer a.foot-follow, footer a.foot-follow.foot-ig { margin-left: 0; margin-top: 8px; } .foot-brand { flex-direction: column; align-items: flex-start; } }
-  .foot-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 22px 24px; }
-  .foot-cols h3 { margin: 0 0 10px; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); }
+  .foot-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px 24px; }
+  .foot-cols h3 { margin: 0 0 8px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
   .foot-cols ul { list-style: none; margin: 0; padding: 0; }
-  .foot-cols li { margin: 0 0 7px; }
-  .foot-cols a { color: var(--ink); }
-  .foot-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 8px 16px; margin-top: 26px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 12px; }
+  .foot-cols li { margin: 0 0 4px; }
+  .foot-cols a { color: var(--ink); font-size: 14px; line-height: 1.75; }
+  .foot-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 16px; margin-top: 20px; padding-top: 4px; border-top: 1px solid var(--line); font-size: 12.5px; }
+  .foot-country { text-align: right; }
   .foot-country summary { cursor: pointer; list-style: none; color: var(--ink); display: inline-flex; align-items: center; min-height: 44px; }
   .foot-country summary::-webkit-details-marker { display: none; }
   .foot-country summary::after { content: " \25BE"; color: var(--mute); }
   .foot-country[open] summary::after { content: " \25B4"; }
-  .foot-country-list { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; max-width: 520px; }
-  .foot-credit { margin-top: 10px; font-size: 11.5px; line-height: 1.6; }
-  @media (max-width: 520px) { .foot-cols { grid-template-columns: 1fr 1fr; } }
+  .foot-country-list { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px 14px; margin: 0 0 8px; max-width: 520px; }
+  .foot-credit { margin-top: 2px; font-size: 11.5px; line-height: 1.65; max-width: 760px; }
+  /* Phones: name over tagline, the two buttons side by side at equal width, links in two columns. */
+  @media (max-width: 720px) {
+    .foot-brand { gap: 4px 10px; }
+    .foot-brand > span { flex-basis: 100%; }
+    footer a.foot-follow, footer a.foot-follow.foot-ig { margin: 8px 0 0; flex: 1 1 0; min-width: 0; padding: 0 10px; font-size: 13px; }
+    .foot-cols { grid-template-columns: 1fr 1fr; gap: 18px 16px; }
+    .foot-country, .foot-country-list { text-align: left; justify-content: flex-start; }
+  }
   @media (max-width: 480px) { .card { grid-template-columns: 72px 1fr 52px; gap: 12px; padding: 10px 12px; } .rank { font-size: 28px; } }
   /* ---- Phones: films within the first screen (Sept 2026 review) ----
      Section heads: the subtitle drops to its own line instead of crushing "In Theatres / Top 7".
