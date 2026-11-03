@@ -2,28 +2,20 @@
  "date": "2026-11-03",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 2,
- "high": 2,
- "correctable": 2,
+ "pagesDisagreeing": 1,
+ "high": 1,
+ "correctable": 1,
  "byField": {
-  "platform": 2
+  "platform": 1
  },
  "rows": [
   {
    "field": "platform",
    "severity": "high",
-   "page": "Sun Nxt, STARZPLAY",
-   "tmdb": "Sun Nxt",
-   "code": "ae",
-   "slug": "kannappa"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Hulu, U-NEXT, HBO Max on U-Next",
-   "tmdb": "Hulu, HBO Max on U-Next",
-   "code": "jp",
-   "slug": "rome"
+   "page": "Netflix, Prime Video, Hayu",
+   "tmdb": "Netflix, Hayu",
+   "code": "nz",
+   "slug": "shrek-2"
   }
  ]
 }
