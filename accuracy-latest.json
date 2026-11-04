@@ -1,21 +1,47 @@
 {
- "date": "2026-11-03",
+ "date": "2026-11-04",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
- "high": 1,
- "correctable": 1,
+ "pagesDisagreeing": 4,
+ "high": 3,
+ "correctable": 4,
  "byField": {
-  "platform": 1
+  "title": 1,
+  "platform": 2,
+  "streaming": 1
  },
  "rows": [
   {
+   "field": "title",
+   "severity": "low",
+   "page": "Donga Naa Koduku",
+   "tmdb": "DNK",
+   "code": "in",
+   "slug": "donga-naa-koduku"
+  },
+  {
    "field": "platform",
    "severity": "high",
-   "page": "Netflix, Prime Video, Hayu",
-   "tmdb": "Netflix, Hayu",
-   "code": "nz",
-   "slug": "shrek-2"
+   "page": "Shudder, Cultpix, AMC+, AMC Plus",
+   "tmdb": "Shudder, AMC+, AMC Plus",
+   "code": "au",
+   "slug": "halloween"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Paramount+, WOW, Sky Go, Wow Fiction",
+   "tmdb": "Paramount+, WOW, Sky Go, Filmlegenden",
+   "code": "de",
+   "slug": "saving-private-ryan"
+  },
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "on Netflix",
+   "tmdb": "rent/buy only",
+   "code": "ph",
+   "slug": "scarface"
   }
  ]
 }
