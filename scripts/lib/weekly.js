@@ -382,7 +382,9 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
   const n = freshItems.length;
   const base = `New ${V.Releases} This Week in ${countryName} (${range})`;
   // A count adds three characters; up to 65 still shows whole in Bing and Google.
-  const title = fitFirst([n >= 5 ? `${n} ${base}` : null, base], 65);
+  // A week spanning two months ("Nov 30 – Dec 6") with a long country name runs past the
+  // budget: then the range goes before the country, the query words never do.
+  const title = fitFirst([n >= 5 ? `${n} ${base}` : null, base, `New ${V.Releases} This Week in ${countryName}`], 65);
   // The description names the three highest-ranked new titles (never a Skip), which is what a
   // searcher scans the results for; it falls back to the platforms when there aren't three.
   const named = freshItems.filter((x) => !/^skip/i.test(String((x.fcScore && x.fcScore.verdict) || x.verdict || ""))).slice(0, 3).map((x) => x.title);

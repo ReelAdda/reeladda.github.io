@@ -69,6 +69,17 @@ function test(name, fn) {
 // that changes the working directory would leak it into every test after it.
 const ASYNC_TESTS = [];
 function testAsync(name, fn) { ASYNC_TESTS.push([name, fn, currentGroup]); }
+// A sync test run with the clock fixed at `iso` (4 Nov 2026). For tests whose fixtures carry
+// fixed dates and render through code that also reads the clock: without it they pass today and
+// fail on their own a few weeks later (the weekly future-date check, 30 days ahead, caught three).
+function testAt(iso, name, fn) {
+  test(name, () => {
+    const Real = global.Date, at = Real.parse(iso);
+    class Fixed extends Real { constructor(...a) { if (a.length) super(...a); else super(at); } static now() { return at; } }
+    global.Date = Fixed;
+    try { fn(); } finally { global.Date = Real; }
+  });
+}
 function group(title) { currentGroup = title; groupsSeen.add(title); console.log(`\n${title}`); }
 
 // ---------------- verdict() ----------------
@@ -9171,7 +9182,7 @@ test("a released film keeps its year in the title when only the 'unconfirmed' ta
   const mid = F.filmTitleTag({ title: "Dorothy", released: rel, kind: "movie", language: "Tamil", providers: [], platform: "Theatres" }, IN);
   assert.ok(/^Dorothy \(\d{4}\) OTT Release Date: Expected /.test(mid) && mid.length <= 60, mid);
 });
-test("redesign v2 (28 Oct 2026): four states of VisionQuest, every fact unchanged, no indigo fills, dark mode, contrast", () => {
+testAt("2026-10-28T12:00:00Z", "redesign v2 (28 Oct 2026): four states of VisionQuest, every fact unchanged, no indigo fills, dark mode, contrast", () => {
   const R = require("./lib/rollout.js"), F = require("./lib/facts.js"), Mg = require("./lib/migrate.js"), V2 = require("./lib/pagev2.js");
   const IN = require("./lib/core.js").COUNTRIES[0];
   const base = F.readFacts("in").get("visionquest");
@@ -9324,7 +9335,7 @@ test("Wikipedia reception figures (28 Oct 2026): parsed with counts, cached with
     assert.ok(!/Rotten Tomatoes/.test(F.buildFilmPage({ ...it, reception: undefined }, "2026-10-28", new Set(), IN)));
   } finally { R.useRolloutConfig(null); }
 });
-test("page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to-watch block at the top, the critics label follows its figure", () => {
+testAt("2026-10-28T12:00:00Z", "page v3 (28 Oct 2026): the owner's sequence, facts unchanged, the where-to-watch block at the top, the critics label follows its figure", () => {
   const R = require("./lib/rollout.js"), F = require("./lib/facts.js"), Fp = require("./lib/filmpage.js"), RC = require("./lib/reception.js"), V2 = require("./lib/pagev2.js"), IN = require("./lib/core.js").COUNTRIES[0];
   const rec = { rt: { pct: 91, n: 87 }, mc: { score: 64, n: 25 }, asOf: "2026-10-10" };
   const it = { title: "T", slug: "t", kind: "movie", released: "2026-10-01", language: "Hindi", genre: "Drama / Crime", runtime: 128, providers: ["Netflix"], rentBuy: ["Apple TV"], tmdbId: 1, rating: 7.8, votes: 500, trending: true, director: "D",
@@ -10409,7 +10420,7 @@ test("platform lists: a claim lists a title only on platforms its own page shows
   assert.deepStrictEqual(names("Prime Video"), ["agrees"], "its page says not streaming: off the list");
   assert.deepStrictEqual(names("Netflix"), ["unread"], "a platform its page doesn't show is dropped; a page the index can't read keeps its claim");
 });
-test("language pages: a film that hasn't opened is under 'Coming soon', and the back catalogue names each title's platform or status", () => {
+testAt("2026-10-29T12:00:00Z", "language pages: a film that hasn't opened is under 'Coming soon', and the back catalogue names each title's platform or status", () => {
   const th = (title, released) => ({ title, slug: title.toLowerCase().replace(/\W+/g, "-"), tmdbId: title.length, language: "Telugu", released, platform: "Theatres", genre: "Family" });
   const data = { generatedAt: "2026-10-29T06:00:00Z", theatres: [], ott: [], comingSoon: [], langPools: { Telugu: { theatres: [th("AK47", inDays(1)), th("Open Now", inDays(-6))], ott: [] } } };
   const archive = [
