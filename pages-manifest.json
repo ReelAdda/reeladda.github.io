@@ -3680,7 +3680,7 @@
    "srv": 1,
    "srAt": "2026-10-27",
    "truth": {
-    "at": "2026-10-28",
+    "at": "2026-11-04",
     "providers": [
      "Netflix",
      "Crunchyroll",
@@ -7466,7 +7466,7 @@
    "srAt": "2026-10-27"
   },
   "the-vvaan": {
-   "last": "2026-10-27",
+   "last": "2026-11-04",
    "tmdbId": 1384514,
    "released": "2026-09-25",
    "lang": "Hindi",
@@ -7480,7 +7480,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "b21e2f910090",
+   "fp": "09e9175fc7ce",
    "swept": "2026-11-04",
    "rendered": "2026-10-14",
    "truth": {
@@ -7505,7 +7505,11 @@
    "imdb": "tt34498564",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "digital": {
+    "date": "2026-11-06",
+    "note": "Prime Video"
+   }
   },
   "grand-theft-auto-vi-an-extended-look": {
    "last": "2026-10-18",
@@ -13227,7 +13231,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Resident Evil",
-   "fp": "efb570b4c0a5",
+   "fp": "8c342f5c9c20",
    "archivedOn": "2026-10-08",
    "pv": 13,
    "swept": "2026-11-04",
@@ -13242,12 +13246,13 @@
     "at": "2026-11-04",
     "providers": [],
     "rentBuy": [
+     "Apple TV Store",
      "Amazon Video"
     ],
     "released": "2026-09-17",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -14402,7 +14407,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-31",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "breaking-bad": {
    "last": "2026-10-25",
@@ -17502,7 +17508,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -30682,7 +30688,7 @@
    }
   },
   "asur": {
-   "last": "2026-10-27",
+   "last": "2026-11-04",
    "archivedOn": "2026-09-26",
    "pv": 13,
    "catalog": true,
@@ -30691,22 +30697,13 @@
    "lang": "Hindi",
    "kind": "tv",
    "title": "Asur",
-   "live": {
-    "since": "2026-09-26",
-    "providers": [
-     "JioHotstar"
-    ],
-    "lastCheck": "2026-11-04",
-    "misses": 1,
-    "confirmed": true
-   },
    "fcs": {
     "v": "Worth a watch",
     "at": "2026-10-24",
     "w": 8
    },
    "rel": 3,
-   "fp": "c2b046318c29",
+   "fp": "3de787bbbccb",
    "rendered": "2026-10-12",
    "truth": {
     "at": "2026-11-04",
@@ -47295,7 +47292,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -56611,7 +56609,29 @@
    "rel": 3,
    "rendered": "2026-10-19",
    "fp": "0cb8d78382e8",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Netflix",
+     "Prime Video"
+    ],
+    "rentBuy": [],
+    "released": "2005-04-29",
+    "title": "Kaal",
+    "language": "Hindi",
+    "runtime": 127,
+    "genre": "Action / Thriller",
+    "director": "Soham Shah",
+    "cast": [
+     "Ajay Devgn",
+     "John Abraham",
+     "Vivek Oberoi",
+     "Esha Deol",
+     "Lara Dutta",
+     "Vishal Malhotra"
+    ]
+   }
   },
   "sandeep-bhaiya": {
    "last": "2026-10-28",
@@ -57548,7 +57568,24 @@
    "fp": "59a79ffb7eb1",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "thandel": {
    "last": "2026-10-25",
@@ -58970,7 +59007,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -60982,7 +61018,7 @@
    "rel": 3
   },
   "ali-g-who-iz-i": {
-   "last": "2026-11-02",
+   "last": "2026-11-04",
    "tmdbId": 1727734,
    "released": "2026-10-22",
    "lang": "English",
@@ -60991,7 +61027,7 @@
    "srv": 1,
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "726799b25061",
+   "fp": "6f8c471e8852",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -61008,8 +61044,7 @@
     "at": "2026-10-31",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-01"
+   "rel": 3
   },
   "gunmaaster-g9": {
    "last": "2026-10-30",
@@ -61082,7 +61117,7 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
@@ -61092,7 +61127,7 @@
    "srAt": "2026-10-30",
    "epNext": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "95cda761817e",
+   "fp": "f1c09a474351",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -61109,8 +61144,7 @@
     "at": "2026-10-31",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-03"
+   "rel": 3
   },
   "ghosts": {
    "last": "2026-11-04",
@@ -61528,7 +61562,7 @@
    "srv": 1,
    "srAt": "2026-11-02",
    "rendered": "2026-11-02",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -61596,7 +61630,7 @@
    "srv": 1,
    "srAt": "2026-11-04",
    "rendered": "2026-11-04",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3
   },
   "the-gilded-age": {
@@ -62707,7 +62741,7 @@
    "srAt": "2026-10-27"
   },
   "spider-man-brand-new-day": {
-   "last": "2026-10-25",
+   "last": "2026-11-04",
    "archivedOn": "2026-08-21",
    "pv": 13,
    "released": "2026-07-27",
@@ -62715,7 +62749,7 @@
    "kind": "movie",
    "title": "Spider-Man: Brand New Day",
    "rel": 3,
-   "fp": "934d620bbd20",
+   "fp": "3428d029136c",
    "rendered": "2026-10-14",
    "tmdbId": 969681,
    "swept": "2026-11-04",
@@ -62723,9 +62757,9 @@
     "at": "2026-11-04",
     "providers": [],
     "rentBuy": [
-     "Amazon Video",
      "Apple TV Store",
-     "Google Play Movies"
+     "Google Play Movies",
+     "YouTube"
     ],
     "released": "2026-07-31",
     "title": "Spider-Man: Brand New Day",
@@ -63311,7 +63345,7 @@
    "lang": "Spanish",
    "kind": "movie",
    "title": "LA BOLA NEGRA",
-   "fp": "5f1f415deb85",
+   "fp": "0279e569697b",
    "rendered": "2026-10-13",
    "fcs": {
     "v": "Must watch",
@@ -64794,7 +64828,7 @@
     "released": "2026-09-18",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -66177,7 +66211,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -80557,7 +80591,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "late-night-with-seth-meyers": {
    "last": "2026-10-22",
@@ -83211,7 +83246,7 @@
    "rendered": "2026-10-13",
    "imdb": "tt0125659",
    "truth": {
-    "at": "2026-10-23",
+    "at": "2026-11-04",
     "providers": [
      "Prime Video",
      "HBO Max",
@@ -86081,7 +86116,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-11-04"
   },
   "ncis-los-angeles": {
    "last": "2026-10-28",
@@ -107058,7 +107094,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -108248,13 +108285,13 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "763ffa1df021",
+   "fp": "ccdc72158fd4",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -108296,8 +108333,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30",
-   "archivedOn": "2026-11-03"
+   "epNext": "2026-10-30"
   },
   "animals": {
    "last": "2026-10-29",
@@ -109880,7 +109916,7 @@
    },
    "imdb": "tt39328047",
    "truth": {
-    "at": "2026-10-21",
+    "at": "2026-11-04",
     "providers": [
      "Netflix"
     ],
@@ -116083,7 +116119,24 @@
    "fp": "f9c3c6816436",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "the-secret-lives-of-mormon-wives": {
    "last": "2026-10-22",
@@ -117424,7 +117477,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -117813,7 +117865,28 @@
    "rel": 3,
    "rendered": "2026-10-22",
    "fp": "7003dc082f27",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Hulu"
+    ],
+    "rentBuy": [],
+    "released": "1997-09-08",
+    "title": "Ally McBeal",
+    "language": "English",
+    "runtime": 43,
+    "genre": "Drama / Comedy",
+    "director": "David E. Kelley",
+    "cast": [
+     "Calista Flockhart",
+     "Greg Germann",
+     "Jane Krakowski",
+     "Peter MacNicol",
+     "Vonda Shepard",
+     "Lisa Nicole Carson"
+    ]
+   }
   },
   "julia-s-eyes": {
    "last": "2026-10-22",
@@ -119283,6 +119356,20 @@
    "srAt": "2026-11-04",
    "rendered": "2026-11-04",
    "fp": "224a929f11e3",
+   "fpv": 3
+  },
+  "the-remarried-empress": {
+   "last": "2026-11-04",
+   "tmdbId": 279246,
+   "released": "2026-11-03",
+   "lang": "Korean",
+   "kind": "tv",
+   "title": "The Remarried Empress",
+   "srv": 1,
+   "srAt": "2026-11-04",
+   "epNext": "2026-11-11",
+   "rendered": "2026-11-04",
+   "fp": "d4215cf0efb0",
    "fpv": 3
   }
  },
@@ -122353,7 +122440,7 @@
     "released": "2026-09-18",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -122393,7 +122480,7 @@
    "srAt": "2026-10-27"
   },
   "dhamaal-4": {
-   "last": "2026-10-18",
+   "last": "2026-11-04",
    "archivedOn": "2026-07-15",
    "pv": 13,
    "released": "2026-07-17",
@@ -122407,12 +122494,33 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "69a4c008eacc",
+   "fp": "1f9e2eb6a15c",
    "rendered": "2026-10-14",
    "imdb": "tt27548557",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2026-07-17",
+    "title": "Dhamaal 4",
+    "language": "Hindi",
+    "runtime": 143,
+    "genre": "Comedy",
+    "director": "Indra Kumar",
+    "cast": [
+     "Ajay Devgn",
+     "Arshad Warsi",
+     "Riteish Deshmukh",
+     "Javed Jaffrey",
+     "Sanjay Mishra",
+     "Ravi Kishan"
+    ]
+   }
   },
   "grand-blue-dreaming": {
    "last": "2026-10-28",
@@ -124191,7 +124299,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -126046,7 +126154,7 @@
    "srAt": "2026-10-27"
   },
   "spa-weekend": {
-   "last": "2026-11-03",
+   "last": "2026-11-04",
    "tmdbId": 1341138,
    "released": "2026-08-21",
    "lang": "English",
@@ -126061,15 +126169,15 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "fp": "c3ed8e2645c2",
+   "fp": "598608ddf57c",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-11-04",
     "providers": [],
     "rentBuy": [
      "Apple TV Store",
-     "Amazon Video",
-     "Sky Store"
+     "Rakuten TV",
+     "Amazon Video"
     ],
     "released": "2026-08-21",
     "title": "Spa Weekend",
@@ -137626,7 +137734,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-31",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "the-daily-show": {
    "last": "2026-10-27",
@@ -141583,7 +141692,7 @@
    "rendered": "2026-10-13",
    "imdb": "tt37971717",
    "truth": {
-    "at": "2026-10-17",
+    "at": "2026-11-04",
     "providers": [
      "Sky Go",
      "Now TV Cinema"
@@ -144429,7 +144538,8 @@
      "Nolan Almeida",
      "Ella Grace Helton"
     ]
-   }
+   },
+   "archivedOn": "2026-11-04"
   },
   "the-beekeeper": {
    "last": "2026-10-25",
@@ -163287,8 +163397,7 @@
      "Jeanne Tripplehorn",
      "Riley Keough"
     ]
-   },
-   "archivedOn": "2026-11-04"
+   }
   },
   "the-big-short": {
    "last": "2026-11-03",
@@ -166131,7 +166240,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -167230,13 +167340,13 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "189de481632b",
+   "fp": "0f954cb3483e",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -167278,8 +167388,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30",
-   "archivedOn": "2026-11-03"
+   "epNext": "2026-10-30"
   },
   "animals": {
    "last": "2026-10-27",
@@ -168284,7 +168393,31 @@
    "fp": "8026163593d0",
    "rendered": "2026-10-13",
    "imdb": "tt0835434",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "HBO Max"
+    ],
+    "rentBuy": [
+     "Apple TV Store",
+     "Amazon Video",
+     "Sky Store"
+    ],
+    "released": "2008-01-28",
+    "title": "In Treatment",
+    "language": "English",
+    "genre": "Drama",
+    "director": "Rodrigo García",
+    "cast": [
+     "Gabriel Byrne",
+     "Uzo Aduba",
+     "Dianne Wiest",
+     "Michelle Forbes",
+     "Blair Underwood",
+     "Mia Wasikowska"
+    ]
+   }
   },
   "five-nights-at-freddy-s-2": {
    "last": "2026-11-01",
@@ -169861,7 +169994,24 @@
    "fp": "432291b522c4",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "love-in-disguise": {
    "last": "2026-11-04",
@@ -171400,7 +171550,6 @@
    "rendered": "2026-10-29",
    "fp": "4a6ac840eb4e",
    "fpv": 3,
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-11-03",
@@ -171524,7 +171673,7 @@
    "rel": 3
   },
   "the-perfect-lie-2026": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 307478,
    "released": "2026-10-30",
    "lang": "Korean",
@@ -171534,9 +171683,8 @@
    "srAt": "2026-10-30",
    "epNext": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "bccb4e5a8e51",
+   "fp": "1ce7251173ab",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "live": {
     "since": "2026-10-31",
@@ -171608,7 +171756,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "33b5f150dc2f",
+   "fp": "229faad32d82",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -171637,7 +171785,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "4cd6557f88af",
+   "fp": "2ca04574e36c",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -174769,7 +174917,7 @@
     "released": "2026-09-17",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -176363,7 +176511,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -189105,7 +189253,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-31",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "the-daily-show": {
    "last": "2026-10-25",
@@ -195665,7 +195814,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-11-04"
   },
   "the-departed": {
    "last": "2026-10-25",
@@ -209775,7 +209925,7 @@
    "imdb": "tt14186672",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-28",
+    "at": "2026-11-04",
     "providers": [
      "Paramount+"
     ],
@@ -210884,7 +211034,7 @@
    "imdb": "tt3915174",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-28",
+    "at": "2026-11-04",
     "providers": [
      "BINGE",
      "Foxtel Now"
@@ -211800,7 +211950,7 @@
    "lang": "Spanish",
    "kind": "movie",
    "title": "LA BOLA NEGRA",
-   "fp": "2ef3c124f9b4",
+   "fp": "4e7a80d58600",
    "pv": 13,
    "fcs": {
     "v": "Worth a watch",
@@ -216131,7 +216281,7 @@
    "imdb": "tt3743822",
    "fpv": 3,
    "truth": {
-    "at": "2026-11-01",
+    "at": "2026-11-04",
     "providers": [
      "BINGE",
      "Foxtel Now",
@@ -217146,8 +217296,7 @@
      "Jeanne Tripplehorn",
      "Riley Keough"
     ]
-   },
-   "archivedOn": "2026-11-04"
+   }
   },
   "the-revenant": {
    "last": "2026-11-02",
@@ -222686,7 +222835,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "haunted-hotel": {
    "last": "2026-10-27",
@@ -222824,13 +222974,13 @@
    "srAt": "2026-10-28"
   },
   "avatar-seven-havens": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "189de481632b",
+   "fp": "0f954cb3483e",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -222872,8 +223022,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30",
-   "archivedOn": "2026-11-03"
+   "epNext": "2026-10-30"
   },
   "animals": {
    "last": "2026-10-27",
@@ -224032,7 +224181,24 @@
    "fp": "f266c42ffc33",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "godzilla-minus-zero": {
    "last": "2026-10-25",
@@ -225727,7 +225893,6 @@
    "rendered": "2026-10-30",
    "fp": "05caad22c83c",
    "fpv": 3,
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-11-03",
@@ -225852,7 +226017,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -225917,7 +226082,7 @@
    "srv": 1,
    "srAt": "2026-11-01",
    "rendered": "2026-11-01",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3
   },
   "the-gilded-age": {
@@ -231294,7 +231459,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -233929,7 +234094,7 @@
     "released": "2026-09-17",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -235206,7 +235371,7 @@
     "language": "French",
     "runtime": 85,
     "genre": "Animation / Comedy",
-    "director": "Nicolas Athané, Marco Nguyen",
+    "director": "Marco Nguyen, Nicolas Athané",
     "cast": [
      "Alex Ramirès",
      "Jéremy Gillet",
@@ -246532,7 +246697,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-31",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "ncis": {
    "last": "2026-10-27",
@@ -274193,7 +274359,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -275426,13 +275593,13 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "ce644aa64228",
+   "fp": "1264cb5048f4",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -275474,8 +275641,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30",
-   "archivedOn": "2026-11-03"
+   "epNext": "2026-10-30"
   },
   "animals": {
    "last": "2026-10-27",
@@ -283265,7 +283431,24 @@
    "fp": "8ad0d033943d",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "the-smurfs": {
    "last": "2026-10-28",
@@ -284526,7 +284709,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -286305,8 +286487,7 @@
     "at": "2026-11-01",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-04"
+   "rel": 3
   },
   "ungehor-am": {
    "last": "2026-11-01",
@@ -286551,7 +286732,7 @@
    "srv": 1,
    "srAt": "2026-11-02",
    "rendered": "2026-11-02",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -286580,7 +286761,7 @@
    "srv": 1,
    "srAt": "2026-11-04",
    "rendered": "2026-11-04",
-   "fp": "b54f6c80c879",
+   "fp": "d73b4769edbf",
    "fpv": 3
   },
   "ramayana-rise-of-a-legend": {
@@ -291332,7 +291513,7 @@
     "released": "2026-09-17",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -293314,9 +293495,9 @@
    "srAt": "2026-10-27"
   },
   "you-can-see-everything": {
-   "last": "2026-11-03",
+   "last": "2026-11-04",
    "tmdbId": 1765072,
-   "released": "2026-10-16",
+   "released": "2026-11-19",
    "lang": "English",
    "kind": "movie",
    "title": "You Can See Everything",
@@ -293327,7 +293508,7 @@
     "at": "2026-10-31",
     "w": 8
    },
-   "fp": "b02a6f8726fb",
+   "fp": "7cce13ea64e0",
    "rendered": "2026-10-14",
    "imdb": "tt45368240",
    "fpv": 3,
@@ -293352,8 +293533,7 @@
      "Christopher Abbott",
      "Lance Oppenheim"
     ]
-   },
-   "archivedOn": "2026-11-03"
+   }
   },
   "why-did-i-get-married-again": {
    "archivedOn": "2026-09-12",
@@ -309543,7 +309723,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-11-04"
   },
   "family-full-house-with-rohit-sharma": {
    "last": "2026-10-27",
@@ -320903,7 +321084,7 @@
    "imdb": "tt4337414",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-27",
+    "at": "2026-11-04",
     "providers": [
      "Sun Nxt"
     ],
@@ -335166,7 +335347,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -340375,7 +340557,28 @@
    "rendered": "2026-10-16",
    "fp": "efe396f4defc",
    "imdb": "tt12677092",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Prime Video"
+    ],
+    "rentBuy": [],
+    "released": "2020-09-01",
+    "title": "C U Soon",
+    "language": "Malayalam",
+    "runtime": 98,
+    "genre": "Thriller / Mystery",
+    "director": "Mahesh Narayanan",
+    "cast": [
+     "Roshan Mathew",
+     "Darshana Rajendran",
+     "Fahadh Faasil",
+     "Maala Parvathi",
+     "Saiju Kurup",
+     "Kottayam Ramesh"
+    ]
+   }
   },
   "tenzing": {
    "last": "2026-11-04",
@@ -344439,7 +344642,24 @@
    "fp": "8bd151408158",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "tamasha": {
    "last": "2026-10-27",
@@ -345786,7 +346006,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -346243,7 +346462,29 @@
    "rel": 3,
    "rendered": "2026-10-22",
    "fp": "563eada0f8c1",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Netflix",
+     "Prime Video",
+     "STARZPLAY"
+    ],
+    "rentBuy": [],
+    "released": "2004-05-31",
+    "title": "Peppa Pig",
+    "language": "English",
+    "genre": "Animation / Kids",
+    "director": "Neville Astley, Mark Baker",
+    "cast": [
+     "Alice May",
+     "Majesie lewton ll",
+     "John Sparkes",
+     "Richard Ridings",
+     "Morwenna Banks",
+     "David Graham"
+    ]
+   }
   },
   "laila-majnu": {
    "last": "2026-10-23",
@@ -346272,7 +346513,28 @@
    "rendered": "2026-10-22",
    "fp": "0883e9e622aa",
    "imdb": "tt8011276",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2018-09-07",
+    "title": "Laila Majnu",
+    "language": "Hindi",
+    "runtime": 139,
+    "genre": "Drama / Romance",
+    "director": "Sajid Ali",
+    "cast": [
+     "Triptii Dimri",
+     "Avinash Tiwary",
+     "Parmeet Sethi",
+     "Benjamin Gilani",
+     "Sumit Kaul",
+     "Sahiba Bali"
+    ]
+   }
   },
   "detective-ujjwalan": {
    "last": "2026-10-22",
@@ -347713,7 +347975,7 @@
    "rendered": "2026-10-29"
   },
   "ali-g-who-iz-i": {
-   "last": "2026-11-02",
+   "last": "2026-11-04",
    "tmdbId": 1727734,
    "released": "2026-10-22",
    "lang": "English",
@@ -347722,7 +347984,7 @@
    "srv": 1,
    "srAt": "2026-10-29",
    "rendered": "2026-10-29",
-   "fp": "b0d85651783d",
+   "fp": "6f8c471e8852",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -347739,8 +348001,7 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-01"
+   "rel": 3
   },
   "the-hunger-games-sunrise-on-the-reaping": {
    "last": "2026-11-04",
@@ -347777,7 +348038,7 @@
    "fpv": 3
   },
   "the-perfect-lie-2026": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 307478,
    "released": "2026-10-30",
    "lang": "Korean",
@@ -347787,9 +348048,8 @@
    "srAt": "2026-10-30",
    "epNext": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "bccb4e5a8e51",
+   "fp": "f127fa346e3c",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "live": {
     "since": "2026-10-30",
@@ -347874,7 +348134,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -347990,7 +348250,7 @@
    "srv": 1,
    "srAt": "2026-11-01",
    "rendered": "2026-11-01",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3
   },
   "akka": {
@@ -348112,7 +348372,25 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2026-11-27",
+    "title": "Gunmaaster G9",
+    "language": "Hindi",
+    "genre": "Action / Romance",
+    "director": "Aditya Datt",
+    "cast": [
+     "Emraan Hashmi",
+     "Genelia D'Souza",
+     "Aparshakti Khurana",
+     "Abhishek Singh",
+     "Snehill Dixit Mehra",
+     "Inayat Verma"
+    ]
+   }
   },
   "hail-mary": {
    "last": "2026-11-02",
@@ -348226,8 +348504,17 @@
    "srv": 1,
    "srAt": "2026-11-04",
    "rendered": "2026-11-04",
-   "fp": "685fcf544613",
-   "fpv": 3
+   "fp": "e3f74283f57c",
+   "fpv": 3,
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "imdb": "tt2321555",
+   "fcs": {
+    "v": "early",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "blind-game": {
    "last": "2026-11-04",
@@ -353368,14 +353655,14 @@
    "srAt": "2026-10-27"
   },
   "resident-evil": {
-   "last": "2026-10-24",
+   "last": "2026-11-04",
    "pv": 13,
    "tmdbId": 1423191,
    "released": "2026-09-18",
    "lang": "English",
    "kind": "movie",
    "title": "Resident Evil",
-   "fp": "62a4f025a80d",
+   "fp": "43708f44c245",
    "archivedOn": "2026-10-09",
    "swept": "2026-11-04",
    "fcs": {
@@ -353388,11 +353675,15 @@
    "truth": {
     "at": "2026-11-04",
     "providers": [],
-    "rentBuy": [],
+    "rentBuy": [
+     "Apple TV Store",
+     "CosmoGo",
+     "Amazon Video"
+    ],
     "released": "2026-09-18",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -366891,7 +367182,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-31",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "family-guy": {
    "last": "2026-10-22",
@@ -369034,7 +369326,7 @@
    "srAt": "2026-10-27"
   },
   "primetime": {
-   "last": "2026-10-28",
+   "last": "2026-11-04",
    "tmdbId": 1375441,
    "released": "2026-09-25",
    "lang": "English",
@@ -369048,13 +369340,17 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "47bda2f94c1a",
+   "fp": "eea4a14bf491",
    "swept": "2026-11-04",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-11-04",
     "providers": [],
-    "rentBuy": [],
+    "rentBuy": [
+     "Apple TV Store",
+     "CosmoGo",
+     "Amazon Video"
+    ],
     "released": "2026-09-25",
     "title": "Primetime",
     "language": "English",
@@ -372083,7 +372379,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt8069036",
    "truth": {
-    "at": "2026-10-24",
+    "at": "2026-11-04",
     "providers": [
      "Netflix"
     ],
@@ -374589,7 +374885,7 @@
    "srAt": "2026-10-30",
    "epNext": "2026-10-30",
    "truth": {
-    "at": "2026-11-03",
+    "at": "2026-11-04",
     "providers": [
      "Netflix",
      "Crunchyroll"
@@ -378827,7 +379123,7 @@
    "fpv": 3
   },
   "lutt-mubarak": {
-   "last": "2026-10-23",
+   "last": "2026-11-04",
    "tmdbId": 1776971,
    "released": "2026-09-25",
    "lang": "Punjabi",
@@ -378841,12 +379137,14 @@
     "at": "2026-10-23",
     "w": 8
    },
-   "fp": "226769237852",
+   "fp": "851be1217ed7",
    "swept": "2026-11-04",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-11-04",
-    "providers": [],
+    "providers": [
+     "KableOne"
+    ],
     "rentBuy": [],
     "released": "2026-09-25",
     "title": "Lutt Mubarak",
@@ -378864,7 +379162,17 @@
    "fpv": 3,
    "imdb": "tt39007156",
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "live": {
+    "since": "2026-11-04",
+    "providers": [
+     "KableOne"
+    ],
+    "lastCheck": "2026-11-04",
+    "misses": 0,
+    "arrived": "2026-11-04",
+    "prevCheck": "2026-11-04"
+   }
   },
   "unabomber": {
    "last": "2026-10-18",
@@ -391088,7 +391396,7 @@
     "w": 8
    },
    "rel": 2,
-   "fp": "5a288d87f129",
+   "fp": "60e95bfb9a08",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-10-17",
@@ -393515,7 +393823,7 @@
    "imdb": "tt3495030",
    "fpv": 3,
    "truth": {
-    "at": "2026-11-02",
+    "at": "2026-11-04",
     "providers": [
      "Netflix"
     ],
@@ -399176,7 +399484,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -400446,13 +400755,13 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "189de481632b",
+   "fp": "0f954cb3483e",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -400494,8 +400803,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30",
-   "archivedOn": "2026-11-03"
+   "epNext": "2026-10-30"
   },
   "animals": {
    "last": "2026-10-27",
@@ -401132,7 +401440,7 @@
     "language": "French",
     "runtime": 85,
     "genre": "Animation / Comedy",
-    "director": "Nicolas Athané, Marco Nguyen",
+    "director": "Marco Nguyen, Nicolas Athané",
     "cast": [
      "Alex Ramirès",
      "Jéremy Gillet",
@@ -401351,7 +401659,31 @@
    "fp": "3c7e83ecb2d0",
    "rendered": "2026-10-13",
    "imdb": "tt5764024",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Prime Video",
+     "Netflix"
+    ],
+    "rentBuy": [
+     "Apple TV Store"
+    ],
+    "released": "2017-01-12",
+    "title": "Ok Jaanu",
+    "language": "Hindi",
+    "runtime": 135,
+    "genre": "Drama / Romance",
+    "director": "Shaad Ali",
+    "cast": [
+     "Aditya Roy Kapur",
+     "Shraddha Kapoor",
+     "Leela Samson",
+     "Naseeruddin Shah",
+     "Kitu Gidwani",
+     "Jasmeet Singh Bhatia"
+    ]
+   }
   },
   "american-pie": {
    "last": "2026-10-22",
@@ -408116,7 +408448,8 @@
     "at": "2026-11-01",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "karz": {
    "last": "2026-10-22",
@@ -409289,7 +409622,7 @@
    "kind": "movie",
    "title": "Godzilla Minus Zero",
    "rendered": "2026-10-21",
-   "fp": "b900348eb0f7",
+   "fp": "dfefd0d94831",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt34384661",
@@ -409480,7 +409813,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -411325,7 +411657,7 @@
    "fpv": 3
   },
   "ali-g-who-iz-i": {
-   "last": "2026-11-02",
+   "last": "2026-11-04",
    "tmdbId": 1727734,
    "released": "2026-10-22",
    "lang": "English",
@@ -411334,9 +411666,8 @@
    "srv": 1,
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "b0d85651783d",
+   "fp": "6f8c471e8852",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "live": {
     "since": "2026-10-31",
@@ -411432,7 +411763,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -411509,7 +411840,7 @@
    "srv": 1,
    "srAt": "2026-11-01",
    "rendered": "2026-11-01",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3
   },
   "nakhrewaalii": {
@@ -414497,7 +414828,7 @@
     "released": "2026-09-17",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -415011,7 +415342,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -419364,7 +419695,7 @@
    "fp": "74cc055f88a9",
    "rendered": "2026-10-13",
    "truth": {
-    "at": "2026-10-18",
+    "at": "2026-11-04",
     "providers": [
      "Prime Video"
     ],
@@ -423446,7 +423777,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt0137523",
    "truth": {
-    "at": "2026-10-20",
+    "at": "2026-11-04",
     "providers": [
      "Netflix",
      "Disney+"
@@ -429619,7 +429950,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-31",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "ncis": {
    "last": "2026-10-22",
@@ -433457,7 +433789,7 @@
    "rendered": "2026-10-13",
    "imdb": "tt0292066",
    "truth": {
-    "at": "2026-10-24",
+    "at": "2026-11-04",
     "providers": [
      "Mewatch"
     ],
@@ -452261,8 +452593,10 @@
    "pv": 13,
    "swept": "2026-10-30",
    "truth": {
-    "at": "2026-10-30",
-    "providers": [],
+    "at": "2026-11-04",
+    "providers": [
+     "Netflix"
+    ],
     "rentBuy": [],
     "released": "2026-10-01",
     "title": "Baththa",
@@ -452272,8 +452606,8 @@
     "director": "Balaji Tharaneetharan",
     "cast": [
      "Vijay Sethupathi",
-     "Lijomol Jose",
      "Sai Prithviraj",
+     "Lijomol Jose",
      "Sahasra Sree",
      "Santhy Balachandran",
      "Arjun Chidambaram"
@@ -459747,7 +460081,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "traces-of-justice": {
    "last": "2026-10-26",
@@ -468798,7 +469133,24 @@
    "fp": "d23fb240a6e1",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "hell-s-kitchen": {
    "last": "2026-10-28",
@@ -470127,7 +470479,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -471661,7 +472012,25 @@
    "rel": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-01"
+   "archivedOn": "2026-11-01",
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2027-01-08",
+    "title": "Golmaal 5",
+    "language": "Hindi",
+    "genre": "Comedy / Adventure",
+    "director": "Rohit Shetty",
+    "cast": [
+     "Ajay Devgn",
+     "Akshay Kumar",
+     "Arshad Warsi",
+     "Kunal Kemmu",
+     "Shreyas Talpade",
+     "Tusshar Kapoor"
+    ]
+   }
   },
   "tigers-sniff-the-rose": {
    "last": "2026-11-04",
@@ -472086,7 +472455,7 @@
    "archivedOn": "2026-11-01"
   },
   "ali-g-who-iz-i": {
-   "last": "2026-11-02",
+   "last": "2026-11-04",
    "tmdbId": 1727734,
    "released": "2026-10-22",
    "lang": "English",
@@ -472095,9 +472464,8 @@
    "srv": 1,
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "f231b4423a34",
+   "fp": "95cbe62fb02d",
    "fpv": 3,
-   "archivedOn": "2026-11-01",
    "pv": 13,
    "live": {
     "since": "2026-10-31",
@@ -472159,7 +472527,7 @@
    "rel": 3
   },
   "the-perfect-lie-2026": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 307478,
    "released": "2026-10-30",
    "lang": "Korean",
@@ -472169,9 +472537,8 @@
    "srAt": "2026-10-30",
    "epNext": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "98c4cefd2255",
+   "fp": "92a8905bfd38",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "live": {
     "since": "2026-10-31",
@@ -472233,7 +472600,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "98d8876bb40e",
+   "fp": "588c43beaa61",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -472262,7 +472629,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "61971bf282ef",
+   "fp": "bbb88fc7a0df",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -472677,7 +473044,7 @@
     "released": "2026-09-16",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -485358,7 +485725,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-11-04"
   },
   "kanguva": {
    "last": "2026-10-25",
@@ -503783,7 +504151,7 @@
    "imdb": "tt17490712",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-30",
+    "at": "2026-11-04",
     "providers": [
      "HBO Max"
     ],
@@ -507997,7 +508365,7 @@
    },
    "imdb": "tt31841438",
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-11-04",
     "providers": [
      "Prime Video"
     ],
@@ -511610,7 +511978,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "scene": {
    "last": "2026-11-02",
@@ -513559,7 +513928,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt28443655",
    "truth": {
-    "at": "2026-10-18",
+    "at": "2026-11-04",
     "providers": [
      "HBO Max"
     ],
@@ -519689,7 +520058,8 @@
    },
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-31"
+   "srAt": "2026-10-31",
+   "archivedOn": "2026-11-04"
   },
   "maruthu": {
    "last": "2026-10-22",
@@ -521756,8 +522126,7 @@
    "imdb": "tt11743610",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-31",
-   "archivedOn": "2026-11-04"
+   "srAt": "2026-10-31"
   },
   "kalaga-thalaivan": {
    "last": "2026-10-25",
@@ -523814,8 +524183,7 @@
     "at": "2026-10-31",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-04"
+   "rel": 3
   },
   "will-you-still-be-my-friend": {
    "last": "2026-10-29",
@@ -523902,7 +524270,7 @@
    "rel": 3
   },
   "the-perfect-lie": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 307478,
    "released": "2026-10-30",
    "lang": "Korean",
@@ -523912,9 +524280,8 @@
    "srAt": "2026-10-30",
    "epNext": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "bccb4e5a8e51",
+   "fp": "f127fa346e3c",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "live": {
     "since": "2026-10-31",
@@ -523989,7 +524356,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -524018,7 +524385,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3
   },
   "nocturne": {
@@ -524318,7 +524685,7 @@
     "released": "2026-09-16",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -524571,7 +524938,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -526679,7 +527046,7 @@
    "rendered": "2026-10-13",
    "imdb": "tt12042730",
    "truth": {
-    "at": "2026-10-20",
+    "at": "2026-11-04",
     "providers": [
      "Prime Video"
     ],
@@ -536001,7 +536368,7 @@
    "rendered": "2026-10-11",
    "imdb": "tt26258204",
    "truth": {
-    "at": "2026-10-24",
+    "at": "2026-11-04",
     "providers": [
      "Netflix"
     ],
@@ -536936,7 +537303,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-11-04"
   },
   "filing-for-love": {
    "last": "2026-10-28",
@@ -546378,7 +546746,8 @@
     ]
    },
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "swept": "2026-11-04"
   },
   "true-detective": {
    "last": "2026-10-27",
@@ -557779,8 +558148,7 @@
      "Jeanne Tripplehorn",
      "Riley Keough"
     ]
-   },
-   "archivedOn": "2026-11-04"
+   }
   },
   "phantom": {
    "last": "2026-10-22",
@@ -562886,7 +563254,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "2-valid-ids": {
    "last": "2026-11-04",
@@ -564809,7 +565178,28 @@
    "fp": "ef3a591ba005",
    "rendered": "2026-10-12",
    "imdb": "tt1312221",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2025-10-17",
+    "title": "Frankenstein",
+    "language": "English",
+    "runtime": 150,
+    "genre": "Drama / Fantasy",
+    "director": "Guillermo del Toro",
+    "cast": [
+     "Oscar Isaac",
+     "Jacob Elordi",
+     "Christoph Waltz",
+     "Mia Goth",
+     "Felix Kammerer",
+     "Charles Dance"
+    ]
+   }
   },
   "love-death-robots": {
    "last": "2026-10-22",
@@ -566221,14 +566611,14 @@
    "srAt": "2026-10-27"
   },
   "godzilla-minus-zero": {
-   "last": "2026-10-25",
+   "last": "2026-11-04",
    "tmdbId": 1381071,
    "released": "2026-11-04",
    "lang": "Japanese",
    "kind": "movie",
    "title": "Godzilla Minus Zero",
    "rendered": "2026-10-14",
-   "fp": "ef80f3bd5625",
+   "fp": "bbba3fb3c5a6",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -566851,7 +567241,28 @@
    "rendered": "2026-10-14",
    "fp": "b9d4f63032fc",
    "imdb": "tt14447458",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Apple TV"
+    ],
+    "rentBuy": [],
+    "released": "2022-09-08",
+    "title": "Louis Armstrong's Black & Blues",
+    "language": "English",
+    "runtime": 104,
+    "genre": "Documentary / Music",
+    "director": "Sacha Jenkins",
+    "cast": [
+     "Louis Armstrong",
+     "Nas",
+     "Wynton Marsalis",
+     "Dwight D. Eisenhower",
+     "Orson Welles",
+     "Archie Shepp"
+    ]
+   }
   },
   "boom-boom-the-world-vs-boris-becker": {
    "last": "2026-10-22",
@@ -571819,7 +572230,24 @@
    "fp": "8bd151408158",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "knight-flower": {
    "last": "2026-10-28",
@@ -574884,7 +575312,6 @@
    "rendered": "2026-10-29",
    "fp": "6f8c471e8852",
    "fpv": 3,
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-11-03",
@@ -575082,7 +575509,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3
   },
   "collision-course": {
@@ -575095,7 +575522,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3
   },
   "the-gilded-age": {
@@ -575431,7 +575858,7 @@
     "released": "2026-09-17",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -577376,7 +577803,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-31",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "the-mentalist": {
    "last": "2026-10-23",
@@ -582112,7 +582540,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt0137523",
    "truth": {
-    "at": "2026-10-26",
+    "at": "2026-11-04",
     "providers": [
      "Netflix",
      "Disney+"
@@ -584557,7 +584985,7 @@
    "rendered": "2026-10-13",
    "imdb": "tt0455275",
    "truth": {
-    "at": "2026-10-23",
+    "at": "2026-11-04",
     "providers": [
      "Disney+"
     ],
@@ -587948,7 +588376,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-11-04"
   },
   "wwe-nxt": {
    "last": "2026-10-23",
@@ -614366,7 +614795,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "that-s-so-raven": {
    "last": "2026-10-28",
@@ -618754,7 +619184,24 @@
    "fp": "8ad0d033943d",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "klara-and-the-sun": {
    "last": "2026-11-04",
@@ -618776,7 +619223,26 @@
    "rel": 3,
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2026-10-22",
+    "title": "Klara and the Sun",
+    "language": "English",
+    "runtime": 116,
+    "genre": "Science Fiction / Drama",
+    "director": "Taika Waititi",
+    "cast": [
+     "Jenna Ortega",
+     "Mia Tharia",
+     "Amy Adams",
+     "Natasha Lyonne",
+     "Aran Murphy",
+     "Rachel House"
+    ]
+   }
   },
   "tomorrow-x-together-world-tour-act-tomorrow": {
    "last": "2026-10-25",
@@ -618812,7 +619278,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -620358,8 +620823,7 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-04"
+   "rel": 3
   },
   "wi-fi-love-in-the-palace": {
    "last": "2026-10-29",
@@ -620472,7 +620936,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -620501,7 +620965,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3
   },
   "the-birthday-gift": {
@@ -620673,7 +621137,7 @@
    "rel": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-11-03",
+   "last": "2026-11-04",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
@@ -620682,9 +621146,8 @@
    "srv": 1,
    "srAt": "2026-11-03",
    "rendered": "2026-11-03",
-   "fp": "50b2a02f552f",
+   "fp": "6d9db6ddfeee",
    "fpv": 3,
-   "archivedOn": "2026-11-03",
    "pv": 13,
    "live": {
     "since": "2026-11-03",
@@ -620905,7 +621368,7 @@
     "released": "2026-09-17",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -623860,7 +624323,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-31",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "the-mentalist": {
    "last": "2026-10-27",
@@ -633426,7 +633890,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-11-04"
   },
   "descendants-of-the-sun": {
    "last": "2026-10-28",
@@ -645357,7 +645822,7 @@
    "epNext": "2026-11-20"
   },
   "iris": {
-   "last": "2026-10-28",
+   "last": "2026-11-04",
    "archivedOn": "2026-09-27",
    "pv": 13,
    "catalog": true,
@@ -645384,17 +645849,17 @@
     "at": "2026-10-19",
     "w": 8
    },
-   "fp": "3abdd61e2003",
+   "fp": "511c4cf20edf",
    "rendered": "2026-10-12",
    "imdb": "tt1757202",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-27",
+    "at": "2026-11-04",
     "providers": [
      "wavve",
      "Watcha",
      "TVING",
-     "WeTV"
+     "Tencent Video"
     ],
     "rentBuy": [],
     "released": "2009-10-14",
@@ -647101,7 +647566,7 @@
    "imdb": "tt12763920",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-28",
+    "at": "2026-11-04",
     "providers": [
      "Netflix",
      "Watcha",
@@ -654777,8 +655242,7 @@
      "Jeanne Tripplehorn",
      "Riley Keough"
     ]
-   },
-   "archivedOn": "2026-11-04"
+   }
   },
   "unlocked": {
    "last": "2026-10-22",
@@ -659955,7 +660419,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -665041,7 +665506,7 @@
    "rendered": "2026-10-16",
    "fp": "fdc274d6b613",
    "truth": {
-    "at": "2026-10-18",
+    "at": "2026-11-04",
     "providers": [
      "Netflix",
      "TVING"
@@ -665571,7 +666036,8 @@
    "imdb": "tt12590266",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-31"
+   "srAt": "2026-10-31",
+   "archivedOn": "2026-11-04"
   },
   "hitman-agent-jun": {
    "last": "2026-10-22",
@@ -672019,7 +672485,6 @@
    "rendered": "2026-10-29",
    "fp": "6f8c471e8852",
    "fpv": 3,
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-11-03",
@@ -672091,7 +672556,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3
   },
   "collision-course": {
@@ -672104,7 +672569,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3
   },
   "nocturne": {
@@ -672608,7 +673073,7 @@
     "released": "2026-10-09",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -673237,7 +673702,7 @@
    "lang": "Japanese",
    "kind": "movie",
    "title": "Godzilla Minus Zero",
-   "fp": "b2b7950caf30",
+   "fp": "451c28ee3b3c",
    "rendered": "2026-10-12",
    "fpv": 3,
    "srv": 1,
@@ -675614,7 +676079,8 @@
    },
    "srv": 1,
    "srAt": "2026-10-31",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "the-mentalist": {
    "last": "2026-10-22",
@@ -691716,7 +692182,8 @@
    },
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-31"
+   "srAt": "2026-10-31",
+   "archivedOn": "2026-11-04"
   },
   "blue-box": {
    "last": "2026-10-28",
@@ -713274,7 +713741,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -723742,7 +724210,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -725798,8 +726265,7 @@
     "at": "2026-10-29",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-04"
+   "rel": 3
   },
   "the-potentials": {
    "last": "2026-10-31",
@@ -725824,7 +726290,7 @@
    "rel": 3
   },
   "the-perfect-lie": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 307478,
    "released": "2026-10-30",
    "lang": "Korean",
@@ -725834,9 +726300,8 @@
    "srAt": "2026-10-30",
    "epNext": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "bccb4e5a8e51",
+   "fp": "1ce7251173ab",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "live": {
     "since": "2026-10-31",
@@ -725865,7 +726330,16 @@
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
    "fp": "dfdb1c0603ad",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "imdb": "",
+   "fcs": {
+    "v": "early",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "apocalypse-z-new-world": {
    "last": "2026-11-04",
@@ -725877,7 +726351,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -725936,7 +726410,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -726102,6 +726576,19 @@
    "rendered": "2026-11-04",
    "fp": "153194ae7e03",
    "fpv": 3
+  },
+  "sandaime-j-soul-brothers-15th-anniversary-stadium-live-jsb-forever-one-the-movie": {
+   "last": "2026-11-04",
+   "tmdbId": 1807509,
+   "released": "2026-11-27",
+   "lang": "Japanese",
+   "kind": "movie",
+   "title": "SANDAIME J SOUL BROTHERS 15TH ANNIVERSARY STADIUM LIVE  \"JSB FOREVER ～ONE～\" THE MOVIE",
+   "srv": 1,
+   "srAt": "2026-11-04",
+   "rendered": "2026-11-04",
+   "fp": "8e395cbfe53f",
+   "fpv": 3
   }
  },
  "id": {
@@ -726181,7 +726668,7 @@
     "released": "2026-09-16",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -726435,7 +726922,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -738928,7 +739415,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "epNext": "2026-10-27"
+   "epNext": "2026-10-27",
+   "archivedOn": "2026-11-04"
   },
   "genie-make-a-wish": {
    "last": "2026-10-28",
@@ -749136,7 +749624,7 @@
    "imdb": "tt35378081",
    "fpv": 3,
    "truth": {
-    "at": "2026-11-02",
+    "at": "2026-11-04",
     "providers": [
      "Disney+"
     ],
@@ -755702,7 +756190,7 @@
    "srv": 1,
    "srAt": "2026-10-27",
    "truth": {
-    "at": "2026-11-02",
+    "at": "2026-11-04",
     "providers": [
      "Prime Video",
      "Disney+"
@@ -760626,8 +761114,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-31",
-   "archivedOn": "2026-11-04"
+   "epNext": "2026-10-31"
   },
   "war": {
    "last": "2026-10-30",
@@ -764745,7 +765232,28 @@
    "fp": "a563b28be46d",
    "rendered": "2026-10-13",
    "imdb": "tt32199328",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Prime Video"
+    ],
+    "rentBuy": [],
+    "released": "2025-02-07",
+    "title": "Newtopia",
+    "language": "Korean",
+    "runtime": 55,
+    "genre": "Sci-Fi & Fantasy / Action & Adventure",
+    "director": "Han Jin-won, Ji Ho-jin",
+    "cast": [
+     "Park Jeong-min",
+     "JISOO",
+     "Im Sung-jae",
+     "Kim Jun-han",
+     "Kang Young-suk",
+     "Lee Hak-ju"
+    ]
+   }
   },
   "the-bad-guys-2": {
    "last": "2026-10-22",
@@ -765294,7 +765802,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -774178,7 +774687,24 @@
    "fp": "194e3238a294",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "pretty-lethal": {
    "last": "2026-10-22",
@@ -775501,7 +776027,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -777041,8 +777566,7 @@
     "at": "2026-11-01",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-04"
+   "rel": 3
   },
   "wi-fi-love-in-the-palace": {
    "last": "2026-10-29",
@@ -777243,7 +777767,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -777272,7 +777796,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -777528,7 +778052,7 @@
    "srAt": "2026-11-04",
    "epNext": "2026-11-10",
    "rendered": "2026-11-04",
-   "fp": "153194ae7e03",
+   "fp": "f6d22cc0f780",
    "fpv": 3
   },
   "bass-x-machina": {
@@ -777607,7 +778131,7 @@
     "released": "2026-09-17",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -777897,7 +778421,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "marshals": {
    "last": "2026-10-27",
@@ -779584,7 +780109,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -780761,7 +781286,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "ben-hur-a-s-rie": {
    "last": "2026-10-27",
@@ -782243,8 +782769,8 @@
    "swept": "2026-11-04"
   },
   "avatar-seven-havens": {
-   "last": "2026-10-31",
-   "fp": "0cd28a78717d",
+   "last": "2026-11-04",
+   "fp": "6b4517dfc11a",
    "rendered": "2026-10-11",
    "pv": 13,
    "released": "2026-10-09",
@@ -782293,8 +782819,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30",
-   "archivedOn": "2026-11-03"
+   "epNext": "2026-10-30"
   },
   "animals": {
    "last": "2026-10-27",
@@ -790609,7 +791134,24 @@
    "fp": "8ad0d033943d",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "the-secret-diary-of-an-exchange-student": {
    "last": "2026-10-25",
@@ -791717,7 +792259,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -793730,7 +794271,7 @@
    "rel": 3
   },
   "ali-g-who-iz-i": {
-   "last": "2026-11-02",
+   "last": "2026-11-04",
    "tmdbId": 1727734,
    "released": "2026-10-22",
    "lang": "English",
@@ -793739,9 +794280,8 @@
    "srv": 1,
    "srAt": "2026-10-30",
    "rendered": "2026-10-30",
-   "fp": "58e6b191e8db",
+   "fp": "4d46646e1406",
    "fpv": 3,
-   "archivedOn": "2026-10-31",
    "pv": 13,
    "live": {
     "since": "2026-10-31",
@@ -794026,7 +794566,7 @@
    "srv": 1,
    "srAt": "2026-11-03",
    "rendered": "2026-11-03",
-   "fp": "fb51b60514a7",
+   "fp": "3f992799d140",
    "fpv": 3
   },
   "fogar-u": {
@@ -794052,7 +794592,7 @@
    "srv": 1,
    "srAt": "2026-11-04",
    "rendered": "2026-11-04",
-   "fp": "b54f6c80c879",
+   "fp": "d73b4769edbf",
    "fpv": 3
   },
   "stick": {
@@ -794096,7 +794636,7 @@
     "released": "2026-09-16",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -794162,7 +794702,7 @@
    "lang": "Spanish",
    "kind": "movie",
    "title": "LA BOLA NEGRA",
-   "fp": "7b005b8a3959",
+   "fp": "f41605dd2332",
    "rendered": "2026-10-12",
    "pv": 13,
    "swept": "2026-10-24",
@@ -794391,7 +794931,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "marshals": {
    "last": "2026-10-27",
@@ -796635,7 +797176,28 @@
    "fp": "84efa27beb05",
    "rendered": "2026-10-11",
    "imdb": "tt41617470",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2026-05-07",
+    "title": "Desire",
+    "language": "Spanish",
+    "runtime": 97,
+    "genre": "Mystery / Drama",
+    "director": "Teresa Simone",
+    "cast": [
+     "Ludwika Paleta",
+     "José María Yázpik",
+     "Óscar Casas",
+     "Leonardo Ortizgris",
+     "Matías Coronado",
+     "Pilar Pascual"
+    ]
+   }
   },
   "dreams-of-freedom": {
    "last": "2026-10-28",
@@ -796847,7 +797409,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -797213,7 +797775,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -798542,13 +799105,13 @@
    "fpv": 3
   },
   "avatar-seven-havens": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "189de481632b",
+   "fp": "0f954cb3483e",
    "rendered": "2026-10-11",
    "pv": 13,
    "fcs": {
@@ -798590,8 +799153,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30",
-   "archivedOn": "2026-11-03"
+   "epNext": "2026-10-30"
   },
   "the-platform-2": {
    "last": "2026-10-22",
@@ -801893,7 +802455,7 @@
    "fpv": 3
   },
   "in-the-mud": {
-   "last": "2026-10-25",
+   "last": "2026-11-04",
    "archivedOn": "2026-10-14",
    "pv": 13,
    "catalog": true,
@@ -801917,9 +802479,29 @@
    },
    "rel": 3,
    "rendered": "2026-10-14",
-   "fp": "155f1a8ddc0d",
+   "fp": "698106685cf1",
    "imdb": "tt32874331",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2025-08-14",
+    "title": "In the Mud",
+    "language": "Spanish",
+    "genre": "Crime / Drama",
+    "director": "Sebastián Ortega",
+    "cast": [
+     "Ana Garibaldi",
+     "Valentina Zenere",
+     "Rita Cortese",
+     "Lorena Vega",
+     "Carolina Ramírez",
+     "Gerardo Romano"
+    ]
+   }
   },
   "the-sheep-detectives": {
    "last": "2026-10-25",
@@ -807213,7 +807795,7 @@
    "kind": "movie",
    "title": "Godzilla Minus Zero",
    "rendered": "2026-10-20",
-   "fp": "d2a90dc16e51",
+   "fp": "48b79f941498",
    "pv": 13,
    "imdb": "tt34384661",
    "fcs": {
@@ -807430,7 +808012,24 @@
    "fp": "74e569a18d38",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "through-my-window-3-looking-at-you": {
    "last": "2026-10-22",
@@ -808653,7 +809252,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -809254,7 +809852,28 @@
    "rendered": "2026-10-22",
    "fp": "005bff72728f",
    "imdb": "tt11700260",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-04",
+    "providers": [
+     "Disney+"
+    ],
+    "rentBuy": [],
+    "released": "2021-09-04",
+    "title": "Official Competition",
+    "language": "Spanish",
+    "runtime": 114,
+    "genre": "Comedy / Drama",
+    "director": "Mariano Cohn, Gastón Duprat",
+    "cast": [
+     "Penélope Cruz",
+     "Antonio Banderas",
+     "Oscar Martínez",
+     "José Luis Gómez",
+     "Manolo Solo",
+     "Nagore Aranburu"
+    ]
+   }
   },
   "little-angel-face": {
    "last": "2026-11-04",
@@ -810318,14 +810937,14 @@
    }
   },
   "surviving-hurricane-otis": {
-   "last": "2026-11-02",
+   "last": "2026-11-04",
    "tmdbId": 1780005,
    "released": "2026-10-23",
    "lang": "Spanish",
    "kind": "movie",
    "title": "Surviving Hurricane Otis",
    "rendered": "2026-10-26",
-   "fp": "8ab15749bc8f",
+   "fp": "bccfc896d2d2",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -810633,7 +811252,7 @@
    "srv": 1,
    "srAt": "2026-10-29",
    "rendered": "2026-10-29",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt38793125",
@@ -810723,8 +811342,7 @@
     "at": "2026-10-31",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-04"
+   "rel": 3
   },
   "final-table": {
    "last": "2026-10-30",
@@ -810875,7 +811493,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "5f352210c2f5",
+   "fp": "4f4135610adc",
    "fpv": 3
   },
   "nocturne": {
@@ -811109,7 +811727,24 @@
    "srAt": "2026-11-04",
    "rendered": "2026-11-04",
    "fp": "9d42cd66a4bd",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-11-04",
+    "providers": [
+     "Apple TV"
+    ],
+    "lastCheck": "2026-11-04",
+    "misses": 0
+   },
+   "imdb": "tt6773088",
+   "fcs": {
+    "v": "early",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "the-devil-knows-your-name": {
    "last": "2026-11-04",
@@ -811122,6 +811757,19 @@
    "srAt": "2026-11-04",
    "rendered": "2026-11-04",
    "fp": "887280debd1c",
+   "fpv": 3
+  },
+  "bass-x-machina": {
+   "last": "2026-11-04",
+   "tmdbId": 314271,
+   "released": "2026-11-03",
+   "lang": "English",
+   "kind": "tv",
+   "title": "Bass X Machina",
+   "srv": 1,
+   "srAt": "2026-11-04",
+   "rendered": "2026-11-04",
+   "fp": "270dc122cee2",
    "fpv": 3
   }
  },
@@ -811184,7 +811832,7 @@
     "released": "2026-09-17",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -811292,7 +811940,7 @@
    "lang": "Spanish",
    "kind": "movie",
    "title": "La bola negra",
-   "fp": "483fb6582dea",
+   "fp": "de6547ff149f",
    "rendered": "2026-10-12",
    "archivedOn": "2026-10-16",
    "pv": 13,
@@ -811481,7 +812129,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "marshals": {
    "last": "2026-10-27",
@@ -813826,7 +814475,7 @@
     "language": "English",
     "runtime": 98,
     "genre": "Thriller",
-    "director": "Michael Spierig, Peter Spierig",
+    "director": "Peter Spierig, Michael Spierig",
     "cast": [
      "Harriet Slater",
      "Arsema Thomas",
@@ -814169,7 +814818,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "the-river-train": {
    "last": "2026-10-24",
@@ -821184,14 +821834,14 @@
    "archivedOn": "2026-11-02"
   },
   "avatar-seven-havens": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
    "rendered": "2026-10-18",
-   "fp": "bda3fef99c9e",
+   "fp": "d21bf1d40bbe",
    "pv": 13,
    "live": {
     "since": "2026-10-18",
@@ -821234,8 +821884,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30",
-   "archivedOn": "2026-11-03"
+   "epNext": "2026-10-30"
   },
   "back-to-the-future": {
    "last": "2026-11-04",
@@ -821269,7 +821918,7 @@
    "fpv": 3,
    "rendered": "2026-10-27",
    "truth": {
-    "at": "2026-10-30",
+    "at": "2026-11-04",
     "providers": [
      "Prime Video",
      "Movistar Plus+",
@@ -824094,7 +824743,7 @@
    "fpv": 3
   },
   "por-ella-soy-eva": {
-   "last": "2026-10-28",
+   "last": "2026-11-04",
    "archivedOn": "2026-10-19",
    "pv": 13,
    "catalog": true,
@@ -824114,16 +824763,17 @@
    "imdb": "tt2206767",
    "rel": 3,
    "rendered": "2026-10-19",
-   "fp": "dcc9cf59a2d1",
+   "fp": "ae4b93bf025a",
    "fcs": {
     "v": "Must watch",
     "at": "2026-10-20",
     "w": 8
    },
    "truth": {
-    "at": "2026-10-25",
+    "at": "2026-11-04",
     "providers": [
-     "Atresplayer"
+     "Atresplayer",
+     "ViX"
     ],
     "rentBuy": [],
     "released": "2012-02-20",
@@ -824689,7 +825339,24 @@
    "fp": "8ad0d033943d",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "tad-the-lost-explorer-and-the-secret-of-king-midas": {
    "last": "2026-10-25",
@@ -825772,7 +826439,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -827872,7 +828538,7 @@
    },
    "rel": 3,
    "truth": {
-    "at": "2026-10-30",
+    "at": "2026-11-04",
     "providers": [
      "Prime Video"
     ],
@@ -827956,8 +828622,7 @@
     "at": "2026-10-31",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-04"
+   "rel": 3
   },
   "falcons": {
    "last": "2026-10-30",
@@ -828526,7 +829191,7 @@
     "released": "2026-09-16",
     "title": "Resident Evil",
     "language": "English",
-    "runtime": 95,
+    "runtime": 94,
     "genre": "Horror / Science Fiction",
     "director": "Zach Cregger",
     "cast": [
@@ -828820,7 +829485,8 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-11-01"
+   "epNext": "2026-11-01",
+   "archivedOn": "2026-11-04"
   },
   "marshals": {
    "last": "2026-10-27",
@@ -831697,7 +832363,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-04"
   },
   "link-click": {
    "last": "2026-10-28",
@@ -833125,13 +833792,13 @@
    "srAt": "2026-10-28"
   },
   "avatar-seven-havens": {
-   "last": "2026-10-31",
+   "last": "2026-11-04",
    "tmdbId": 284833,
    "released": "2026-10-09",
    "lang": "English",
    "kind": "tv",
    "title": "Avatar: Seven Havens",
-   "fp": "189de481632b",
+   "fp": "0f954cb3483e",
    "rendered": "2026-10-11",
    "pv": 13,
    "fcs": {
@@ -833173,8 +833840,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30",
-   "archivedOn": "2026-11-03"
+   "epNext": "2026-10-30"
   },
   "animals": {
    "last": "2026-10-27",
@@ -842166,7 +842832,24 @@
    "fp": "8ad0d033943d",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "archivedOn": "2026-11-04",
+   "pv": 13,
+   "live": {
+    "since": "2026-10-28",
+    "providers": [
+     "Netflix"
+    ],
+    "lastCheck": "2026-10-28",
+    "misses": 0
+   },
+   "imdb": "tt12590266",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-04",
+    "w": 8
+   },
+   "rel": 3
   },
   "one-fine-morning": {
    "last": "2026-10-26",
@@ -843450,7 +844133,6 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-04",
    "pv": 13,
    "live": {
     "since": "2026-10-28",
@@ -845506,8 +846188,7 @@
     "at": "2026-10-31",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-04"
+   "rel": 3
   },
   "ghosts": {
    "last": "2026-11-04",
@@ -845777,7 +846458,7 @@
    "srv": 1,
    "srAt": "2026-11-02",
    "rendered": "2026-11-02",
-   "fp": "43dba7789a15",
+   "fp": "b3e4cbe1e64c",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -845832,7 +846513,7 @@
    "srv": 1,
    "srAt": "2026-11-04",
    "rendered": "2026-11-04",
-   "fp": "b54f6c80c879",
+   "fp": "d73b4769edbf",
    "fpv": 3
   },
   "stick": {
@@ -845846,7 +846527,7 @@
    "srAt": "2026-11-04",
    "epNext": "2026-11-10",
    "rendered": "2026-11-04",
-   "fp": "bbe041aea52f",
+   "fp": "bf72d4debac0",
    "fpv": 3
   }
  }

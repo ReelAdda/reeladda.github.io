@@ -2,47 +2,29 @@
  "date": "2026-11-04",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 4,
- "high": 3,
- "correctable": 3,
+ "pagesDisagreeing": 2,
+ "high": 2,
+ "correctable": 2,
  "byField": {
   "streaming": 1,
-  "platform": 1,
-  "runtime": 1,
-  "release date": 1
+  "platform": 1
  },
  "rows": [
   {
    "field": "streaming",
    "severity": "high",
-   "page": "on JioHotstar",
-   "tmdb": "on no subscription service",
-   "code": "in",
-   "slug": "asur"
+   "page": "not streaming",
+   "tmdb": "on Netflix",
+   "code": "uk",
+   "slug": "dhamaal-4"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "Netflix, Stan, HBO Max",
-   "tmdb": "Stan, HBO Max",
-   "code": "au",
-   "slug": "batman-begins"
-  },
-  {
-   "field": "runtime",
-   "severity": "medium",
-   "page": "140 min",
-   "tmdb": "150 min",
-   "code": "jp",
-   "slug": "dune-part-three"
-  },
-  {
-   "field": "release date",
-   "severity": "high",
-   "page": "2026-10-21",
-   "tmdb": "2026-03-05 / 2026-11-11",
-   "code": "fr",
-   "slug": "good-boy"
+   "page": "wavve, Watcha, TVING, WeTV",
+   "tmdb": "wavve, Watcha, TVING, Tencent Video",
+   "code": "kr",
+   "slug": "iris"
   }
  ]
 }
