@@ -670,7 +670,7 @@
    "agg": {
     "rt": {
      "pct": 96,
-     "n": 294,
+     "n": 295,
      "avg": 8.1
     },
     "mc": {
@@ -679,7 +679,7 @@
     }
    }
   },
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt34675596": {
@@ -3221,7 +3221,7 @@
     }
    }
   },
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tv:328818": {
@@ -3711,7 +3711,7 @@
     }
    }
   },
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "movie:1756558": {
@@ -4261,7 +4261,7 @@
     }
    }
   },
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt44101690": {
@@ -4574,7 +4574,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-10-06",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tv:299939": {
@@ -5333,9 +5333,19 @@
     "kind": "rt",
     "value": 56
    },
-   "toneSrc": "summary"
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 56,
+     "n": 41
+    },
+    "mc": {
+     "score": 52,
+     "n": 25
+    }
+   }
   },
-  "checked": "2026-10-15",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt38097205": {
@@ -5547,7 +5557,7 @@
     "median": 3
    }
   },
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt0096697": {
@@ -5560,7 +5570,7 @@
    "praised": [],
    "panned": []
   },
-  "checked": "2026-10-29",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt39379365": {
@@ -7088,7 +7098,7 @@
     }
    }
   },
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt14976292": {
@@ -7445,7 +7455,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "movie:1710034": {
@@ -50242,7 +50252,7 @@
    "agg": {
     "rt": {
      "pct": 77,
-     "n": 206,
+     "n": 213,
      "avg": 6.6
     },
     "mc": {
@@ -50251,7 +50261,7 @@
     }
    }
   },
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt13611778": {
@@ -57356,7 +57366,7 @@
     }
    }
   },
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt48841911": {
@@ -65761,7 +65771,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt43702035": {
@@ -71373,7 +71383,7 @@
   "src": null,
   "hook": null,
   "article": "Karma (2026 film)",
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt9145880": {
@@ -77384,7 +77394,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tv:337038": {
@@ -93500,14 +93510,14 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt10759484": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt37959568": {
@@ -97166,7 +97176,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "movie:1676129": {
@@ -97442,7 +97452,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt45854934": {
@@ -97864,7 +97874,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "movie:1813886": {
@@ -98019,7 +98029,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-03",
+  "checked": "2026-11-04",
   "v": 6
  },
  "tt39961089": {
@@ -98161,6 +98171,87 @@
     }
    }
   },
+  "checked": "2026-11-04",
+  "v": 6,
+  "cat": true
+ },
+ "tt31710249": {
+  "take": "Critics liked it, especially the music.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Stick (TV series)",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "music"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 81
+   },
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 81,
+     "season": 1
+    },
+    "mc": {
+     "score": 62,
+     "n": 27
+    }
+   }
+  },
+  "checked": "2026-11-04",
+  "v": 6
+ },
+ "tt39957390": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-11-04",
+  "v": 6
+ },
+ "tt39325975": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "The Remarried Empress",
+  "checked": "2026-11-04",
+  "v": 6
+ },
+ "tt44878818": {
+  "take": null,
+  "src": null,
+  "checked": "2026-11-04",
+  "v": 6,
+  "cat": true
+ },
+ "tt39973370": {
+  "take": null,
+  "src": null,
+  "checked": "2026-11-04",
+  "v": 6,
+  "cat": true
+ },
+ "tt45979221": {
+  "take": null,
+  "src": null,
+  "checked": "2026-11-04",
+  "v": 6,
+  "cat": true
+ },
+ "tt37539458": {
+  "take": null,
+  "src": null,
+  "checked": "2026-11-04",
+  "v": 6,
+  "cat": true
+ },
+ "tt43612906": {
+  "take": null,
+  "src": null,
   "checked": "2026-11-04",
   "v": 6,
   "cat": true
