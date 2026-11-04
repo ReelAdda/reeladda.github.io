@@ -4824,7 +4824,10 @@ test("ssrEditorNote: escaped, and labelled \"Editor's note\" (the owner's call, 
   d.ott[0] = { ...d.ott[0], title: "A & B" };
   const html = U.ssrEditorNote(d, { code: "us" });
   assert.ok(html.includes('class="ednote"') && html.includes("A &amp; B"), html);
-  assert.ok(/<b>Editor's note · <\/b>Top pick: A &amp; B, a series on Apple TV\./.test(html), html);
+  assert.ok(/<b>Editor's note · <\/b><strong>Top pick:<\/strong> A &amp; B, a series on Apple TV\./.test(html), html);
+  // Each section label in bold (owner, 3 Nov 2026), and nothing else.
+  assert.ok(/<strong>In cinemas:<\/strong> Runner, /.test(html) && /; <strong>skip<\/strong> Flop: /.test(html), html);
+  assert.strictEqual((html.match(/<strong>/g) || []).length, 3, "three labels, three bolds");
   assert.strictEqual(U.ssrEditorNote({ theatres: [], ott: [] }, { code: "us" }), "");
 });
 

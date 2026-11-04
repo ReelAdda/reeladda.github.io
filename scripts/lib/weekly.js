@@ -285,7 +285,11 @@ function ssrEditorNote(data, cfg) {
   if (!note) return "";
   // One plain paragraph (Oct 2026 redesign); the date already sits in the "Updated" pill. Always
   // labelled "Editor's note": the owner's call (31 Oct 2026), after a day as "This week's picks".
-  return `<p class="ednote"><b>Editor's note · </b>${escHtml(note)}</p>`;
+  // The note's section labels in bold (owner, 3 Nov 2026): "Top pick:", "To stream:", "In cinemas:",
+  // "Also streaming:", "Also in cinemas:" and "Skip", so each part of the note stands out. Only the
+  // labels the generated note writes; a hand-written note is left as written.
+  const labels = /(^|[.;] )((?:Top pick|To stream|In cinemas|Also streaming|Also in cinemas):|[Ss]kip(?= ))/g;
+  return `<p class="ednote"><b>Editor's note · </b>${escHtml(note).replace(labels, "$1<strong>$2</strong>")}</p>`;
 }
 
 // RELEASE CALENDAR (25 Oct 2026). Every film page released in the last RECENT_DAYS or still to
