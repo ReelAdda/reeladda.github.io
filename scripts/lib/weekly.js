@@ -269,10 +269,10 @@ function buildEditorNote(data, cfg, seed = null, { short = false } = {}) {
     const also = best(sameSide, used);
     if (also) tail = `also ${also._cinema ? "in cinemas" : "streaming"}: ${also.title}, ${altDesc(also)}`;
   }
-  if (altClause && tail) sentences.push(`${altClause}; ${tail}.`);
-  else if (altClause) sentences.push(`${altClause}.`);
-  else if (tail) sentences.push(`${tail.replace(/^[a-z]/, (c) => c.toUpperCase())}.`);
-  return sentences.slice(0, 3).join(" ");
+  // Each section its own sentence, starting with a capital (owner, 3 Nov 2026): "In cinemas: …. Skip …."
+  if (altClause) sentences.push(`${altClause}.`);
+  if (tail) sentences.push(`${tail.replace(/^[a-z]/, (c) => c.toUpperCase())}.`);
+  return sentences.slice(0, 4).join(" ");
 }
 
 function ssrEditorNote(data, cfg) {

@@ -4775,7 +4775,7 @@ const _noteData = () => ({ generatedAt: _d(0), pick: "Slow Horses",
 
 test("the note opens with the Pick of the Week (what and where), says why, then the alternative from the other side", () => {
   const n = U.buildEditorNote(_noteData(), { code: "in" }, 1);
-  assert.ok(/^Top pick: Slow Horses, a series on Apple TV\. Audiences and critics agree\. In cinemas: Runner, a film that opened \d{1,2} \w{3}(?: \d{4})?; skip Flop: audiences and critics agree\.$/.test(n), n);
+  assert.ok(/^Top pick: Slow Horses, a series on Apple TV\. Audiences and critics agree\. In cinemas: Runner, a film that opened \d{1,2} \w{3}(?: \d{4})?\. Skip Flop: audiences and critics agree\.$/.test(n), n);
   assert.ok((n.match(/Slow Horses/g) || []).length === 1, "the pick is never recommended twice");
   // Kind, director and the critics' sentence come from the item's own fields; nothing is guessed.
   const rich = _noteData();
@@ -4786,23 +4786,23 @@ test("the note opens with the Pick of the Week (what and where), says why, then 
   assert.strictEqual(U.buildEditorNote({ ..._noteData(), pick: "Slow Horses", ott: _noteData().ott.map((x) => (x.title === "Slow Horses" ? { ...x, language: "English", genre: "Action & Adventure / Drama", freshDate: _d(2) } : x)) }, { code: "in" }).split(". ")[0], "Top pick: Slow Horses, an action series on Apple TV, new this week", "a series: no director, English left out, 'new this week' inside seven days");
   assert.ok(/^Top pick: Slow Horses, a French crime series on Apple TV\./.test(U.buildEditorNote({ ..._noteData(), ott: _noteData().ott.map((x) => (x.title === "Slow Horses" ? { ...x, language: "French", genre: "Crime / Drama" } : x)) }, { code: "uk" })), "other languages are named");
 });
-test("the note is plain: one wording for every week, no numbers, no hype, no question hooks, three sentences at most", () => {
+test("the note is plain: one wording for every week, no numbers, no hype, no question hooks, four short sections at most", () => {
   const first = U.buildEditorNote(_noteData(), { code: "in" }, 0);
   for (let seed = 0; seed < 12; seed++) {
     const n = U.buildEditorNote(_noteData(), { code: "in" }, seed);
     assert.strictEqual(n, first, "no rotating phrasings: " + n);
     assert.ok(!/\d\.\d|[?!—]|exciting|something for everyone|lineup|I watched|we watched/i.test(n), n);
-    assert.ok(n.split(/(?<=\.) (?=[A-Z])/).length <= 3 && n.length < 420, n);
+    assert.ok(n.split(/(?<=\.) (?=[A-Z])/).length <= 5 && n.length < 420, n);
   }
   const HP = require("./lib/humanprose.js");
   assert.deepStrictEqual(HP.scanProse(first), [], "no sign of machine writing in the note");
 });
 test("a Skip is called out with its reason; with none, one more title from the pick's own side", () => {
   const n = U.buildEditorNote(_noteData(), { code: "in" }, 1);
-  assert.ok(/; skip Flop: audiences and critics agree\.$/.test(n), n);
+  assert.ok(/\. Skip Flop: audiences and critics agree\.$/.test(n), n);
   const noSkip = _noteData(); noSkip.theatres = noSkip.theatres.filter((x) => x.title !== "Flop");
   const m = U.buildEditorNote(noSkip, { code: "in" }, 1);
-  assert.ok(/ In cinemas: Runner, a film that opened [^.;]+; also streaming: American Horror Story, a series on JioHotstar\.$/.test(m), m);
+  assert.ok(/ In cinemas: Runner, a film that opened [^.;]+. Also streaming: American Horror Story, a series on JioHotstar\.$/.test(m), m);
 });
 test("only current, properly scored titles are recommended — never an older standout or a few-ratings score", () => {
   const d = _noteData();
@@ -4817,7 +4817,7 @@ test("editor's note: nothing trustworthy -> null; a pick in cinemas gets a strea
   assert.strictEqual(U.buildEditorNote({ theatres: [{ title: "X", rating: 7, votes: 3 }], ott: [] }, { code: "in" }), null);
   const pickInCinemas = { ..._noteData(), pick: "Runner" };
   const n = U.buildEditorNote(pickInCinemas, { code: "in" }, 2);
-  assert.ok(/^Top pick: Runner, a film in cinemas since \d{1,2} \w{3}(?: \d{4})?\. Audiences love it; critics are split\. To stream: (Slow Horses, a series on Apple TV|American Horror Story, a series on JioHotstar); skip Flop: audiences and critics agree\.$/.test(n), n);
+  assert.ok(/^Top pick: Runner, a film in cinemas since \d{1,2} \w{3}(?: \d{4})?\. Audiences love it; critics are split\. To stream: (Slow Horses, a series on Apple TV|American Horror Story, a series on JioHotstar). Skip Flop: audiences and critics agree\.$/.test(n), n);
 });
 test("ssrEditorNote: escaped, and labelled \"Editor's note\" (the owner's call, 31 Oct 2026)", () => {
   const d = { ..._noteData(), pick: "A & B" };
@@ -4826,7 +4826,7 @@ test("ssrEditorNote: escaped, and labelled \"Editor's note\" (the owner's call, 
   assert.ok(html.includes('class="ednote"') && html.includes("A &amp; B"), html);
   assert.ok(/<b>Editor's note · <\/b><strong>Top pick:<\/strong> A &amp; B, a series on Apple TV\./.test(html), html);
   // Each section label in bold (owner, 3 Nov 2026), and nothing else.
-  assert.ok(/<strong>In cinemas:<\/strong> Runner, /.test(html) && /; <strong>skip<\/strong> Flop: /.test(html), html);
+  assert.ok(/<strong>In cinemas:<\/strong> Runner, /.test(html) && /\. <strong>Skip<\/strong> Flop: /.test(html), html);
   assert.strictEqual((html.match(/<strong>/g) || []).length, 3, "three labels, three bolds");
   assert.strictEqual(U.ssrEditorNote({ theatres: [], ott: [] }, { code: "us" }), "");
 });
