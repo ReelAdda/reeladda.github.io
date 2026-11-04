@@ -2342,7 +2342,7 @@ test("hub and /new-on-ott/ titles and descriptions stay inside Google's budget",
   const page = U.buildOttWeekPage({ ott: items, ottExtra: [], theatres: [] }, { code: "ph", name: "Philippines", region: "PH" }, [{ code: "ph", region: "PH" }]);
   const title = (/<title>([^<]*)/.exec(page) || [])[1].replace(/&amp;/g, "&");
   const desc = (/name="description" content="([^"]*)"/.exec(page) || [])[1];
-  assert.ok(/^New .* This Week in/.test(title), "query words kept: " + title);
+  assert.ok(/^(?:\d+ )?New .* This Week in/.test(title) && title.length <= 65, "query words kept: " + title);
   assert.ok(desc.length <= 160, desc.length + " " + desc);
 });
 
@@ -3344,10 +3344,53 @@ const OTT_WEEK_DATA = {
 };
 const OTT_WEEK_COUNTRIES = [{ code: "in", region: "IN" }, { code: "us", region: "US" }];
 
-test("buildOttWeekPage: keyword-first title with country + month, canonical to /new-on-ott/", () => {
+test("buildOttWeekPage: keyword-first title with country + the exact week, canonical to /new-on-ott/", () => {
   const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
-  assert.ok(html.includes("<title>New OTT Releases This Week in India (July 2026)"));
+  assert.ok(html.includes("<title>New OTT Releases This Week in India (29 Jun – 5 Jul)"), (html.match(/<title>[^<]*/) || [""])[0]);
   assert.ok(html.includes('<link rel="canonical" href="https://filmychill.com/new-on-ott/">'));
+});
+test("buildOttWeekPage: count from 5 new titles, and three named non-Skip titles in the description (4 Nov 2026)", () => {
+  const mk = (i, verdict) => ({ title: `Film ${i}`, slug: `film-${i}`, platform: "Netflix", language: "Hindi", kind: "movie", freshDate: "2026-06-30", verdict, fcScore: verdict ? { verdict } : null });
+  const data = { generatedAt: "2026-07-01T07:54:26.326Z", ott: [mk(1, "Skip"), mk(2, "Must watch"), mk(3, "Worth a watch"), mk(4, null), mk(5, "Worth a watch"), mk(6, null)] };
+  const html = U.buildOttWeekPage(data, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
+  assert.ok(html.includes("<title>6 New OTT Releases This Week in India (29 Jun – 5 Jul)"), (html.match(/<title>[^<]*/) || [""])[0]);
+  const d = (html.match(/<meta name="description" content="([^"]*)/) || [])[1];
+  assert.strictEqual(d, "6 new OTT releases this week: Film 2, Film 3, Film 4 + 3 more. Ratings, verdicts and what to skip.");
+  // US wording and the market's date order.
+  const us = U.buildOttWeekPage(data, { code: "us", name: "United States" }, OTT_WEEK_COUNTRIES);
+  assert.ok(us.includes("<title>6 New Streaming Releases This Week in the US (Jun 29 – Jul 5)"), (us.match(/<title>[^<]*/) || [""])[0]);
+});
+test("released last week: the previous Monday–Sunday, films only, best verdict first, hidden pages out, gated at 5 (4 Nov 2026)", () => {
+  const LW = require("./lib/lastweek.js");
+  assert.deepStrictEqual(LW.lastWeekBounds(Date.parse("2026-11-04T10:00:00Z")), { from: "2026-10-26", to: "2026-11-01" });
+  assert.deepStrictEqual(LW.lastWeekBounds(Date.parse("2026-11-02T01:00:00Z")), { from: "2026-10-26", to: "2026-11-01" }, "a Monday shows the week just ended");
+  const f = (slug, released, extra = {}) => ({ title: slug.toUpperCase(), slug, kind: "movie", released, platform: "Theatres", providers: [], ...extra });
+  const data = { theatres: [f("a", "2026-10-28", { fcScore: { verdict: "Worth a watch" }, rating: 7, votes: 300 }), f("old", "2026-10-20"), f("h", "2026-10-29")],
+    ott: [f("b", "2026-10-30", { providers: ["Netflix"], platform: "Netflix", fcScore: { verdict: "Must watch" } }), { ...f("s", "2026-10-27"), kind: "tv" }] };
+  const facts = new Map([["c", { slug: "c", item: f("c", "2026-11-01", { votes: 4 }) }], ["a", { slug: "a", item: f("a", "2026-10-28") }]]);
+  const items = LW.lastWeekItems({ data, facts, manifest: { c: { fcs: { v: "Skip" } } }, index: [{ slug: "c", poster: "p.jpg" }], from: "2026-10-26", to: "2026-11-01", hidden: (s) => s === "h" });
+  assert.deepStrictEqual(items.map((x) => x.slug), ["b", "a", "c"], "Must watch, Worth a watch, Skip; no series, no older film, no hidden page, no duplicate");
+  assert.strictEqual(items[2].poster, "p.jpg");
+  assert.strictEqual(items[2].fcScore.verdict, "Skip", "a page the lists no longer carry takes its verdict from the manifest");
+  const more = [...items, f("d", "2026-10-29"), f("e", "2026-10-30"), f("g", "2026-10-31")];
+  const html = LW.buildLastWeekPage(more, { code: "in", name: "India" }, { from: "2026-10-26", to: "2026-11-01", now: Date.parse("2026-11-04T10:00:00Z") });
+  assert.ok(html.includes("<title>6 Movies Released Last Week in India (26 Oct – 1 Nov)"), (html.match(/<title>[^<]*/) || [""])[0]);
+  assert.ok(html.includes('<link rel="canonical" href="https://filmychill.com/released-last-week/">'));
+  assert.ok(/<h2>Released in cinemas <span class="cnt">5<\/span><\/h2>/.test(html) && /<h2>Released on OTT <span class="cnt">1<\/span><\/h2>/.test(html));
+  const d = (html.match(/<meta name="description" content="([^"]*)/) || [])[1];
+  assert.ok(/: B, A, C and 3 more, with verdicts now the ratings are in\.$/.test(d), d);
+  // Most of the list without a verdict: the description doesn't claim the verdicts are in.
+  const unscored = [...more.map((x) => ({ ...x, fcScore: null })), f("i", "2026-10-28"), f("j", "2026-10-28")];
+  const d2 = (LW.buildLastWeekPage(unscored, { code: "in", name: "India" }, { from: "2026-10-26", to: "2026-11-01" }).match(/<meta name="description" content="([^"]*)/) || [])[1];
+  assert.ok(/ and 5 more, with ratings and where to watch\.$/.test(d2), d2);
+  // Plain wording as the live site renders it (the footer's plain form needs the rollout on).
+  const HP = require("./lib/humanprose.js"), R = require("./lib/rollout.js"), PC = require("./lib/prosecheck.js");
+  try {
+    R.useRolloutConfig(PC.ALL_ON);
+    const live = LW.buildLastWeekPage(more, { code: "in", name: "India" }, { from: "2026-10-26", to: "2026-11-01", now: Date.parse("2026-11-04T10:00:00Z") });
+    assert.deepStrictEqual(HP.scanProse(HP.siteProse(live)), [], "plain wording");
+  } finally { R.useRolloutConfig(ROLLOUT_OFF); }
+  assert.ok(require("./lib/pagetypes.js").pageTypeOf("released-last-week/index.html").id === "released last week" && require("./site.js").isGenerated("released-last-week"));
 });
 test("buildOttWeekPage: groups by platform, biggest platform first", () => {
   const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
@@ -6786,7 +6829,8 @@ test("a full week keeps the completeness claim", () => {
     ottExtra: Array.from({ length: 4 }, (_, i) => _ow(`E${i}`, i + 20, "JioHotstar")),
   };
   const html = U.buildOttWeekPage(data, _owCfg, [_owCfg]);
-  assert.ok(/Every new movie and web series/.test(html), "a 10-title page keeps the stronger claim");
+  // Since 4 Nov 2026 the description leads with the count and three names; the count is the claim.
+  assert.ok(/<meta name="description" content="10 new OTT releases this week: /.test(html), (html.match(/<meta name="description"[^>]*>/) || [""])[0]);
 });
 
 group("pool items are first-class — slugs and film pages");

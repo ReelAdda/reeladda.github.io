@@ -188,6 +188,9 @@ function writeDatedOttPages(data, cfg, manifest, records = null) {
   } else if (fs.existsSync(cp)) {
     fs.rmSync(cp.slice(0, cp.lastIndexOf("/")), { recursive: true, force: true });
   }
+  // "Movies released last week" (lib/lastweek.js), with the page index this step already read.
+  try { require("./lastweek.js").writeLastWeekPage(data, cfg, manifest, idx); }
+  catch (e) { console.warn(`  released-last-week [${code}]: ${e.message}`); }
   const tp = todayPath(code);
   if (hasWeek) {
     fs.mkdirSync(tp.slice(0, tp.lastIndexOf("/")), { recursive: true });

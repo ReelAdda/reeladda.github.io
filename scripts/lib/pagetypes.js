@@ -32,6 +32,8 @@ const PAGE_TYPES = [
   { id: "platform hub", match: re(`${ED}new-on-[a-z0-9-]+/index\\.html`),
     gate: "6 current titles to create, 5 to keep (lib/hubs.js HUB_MIN_NEW/HUB_MIN_KEEP)",
     links: "homepage, weekly page, film pages", google: "yes", exit: "removed below 5 titles; links swept" },
+  { id: "released last week", match: re(`${ED}released-last-week/index\\.html`),
+    gate: "one per edition with 5+ films released the previous week (lib/lastweek.js LAST_WEEK_MIN)", links: "footer", google: "yes", exit: "removed below 5 films" },
   { id: "coming to OTT", match: re(`${ED}coming-to-ott/index\\.html`),
     gate: "one per edition with dated arrivals", links: "footer", google: "yes", exit: "removed when empty" },
   { id: "platform list", match: re(`${ED}streaming/[^/]+/index\\.html`),

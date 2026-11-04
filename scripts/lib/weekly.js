@@ -30,6 +30,7 @@ const {
   footerAttribution,
   hubOgImage,
   ogImageTag,
+  weekRangeFor,
   whereLabel,
 } = require("./pagekit.js");
 const { streamVocab } = require("./rules.js");
@@ -371,18 +372,28 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
   // past 170 on 13 country pages. Both now degrade: platforms trimmed first, then dropped,
   // the query words ("New … Releases This Week in …") always kept.
   const two = platforms.slice(0, 2).join(", ");
-  const base = `New ${V.Releases} This Week in ${countryName} (${monthYear})`;
-  const title = fitFirst([
-    `${base} — ${platformNames || "Streaming"} | FilmyChill`,
-    `${base} — ${platformNames || "Streaming"}`,
-    two ? `${base} — ${two}` : null,
-    base,
-  ], 60);
+  void monthYear;
+  // Count, exact week and names (4 Nov 2026). Bing put this page around position 5–8 for "ott
+  // releases this week" with 0.6% CTR; the platform hubs' pattern ("7 New on Netflix in India
+  // This Week (2–8 Nov)") is concrete and dated, and "November 2026" read stale by mid-month.
+  // The count is this week's arrivals only (never the "Still worth it" carry-overs), shown from
+  // 5 upwards so an early-week page never looks thin; the query words stay intact and early.
+  const range = weekRangeFor(gen, code);
+  const n = freshItems.length;
+  const base = `New ${V.Releases} This Week in ${countryName} (${range})`;
+  // A count adds three characters; up to 65 still shows whole in Bing and Google.
+  const title = fitFirst([n >= 5 ? `${n} ${base}` : null, base], 65);
+  // The description names the three highest-ranked new titles (never a Skip), which is what a
+  // searcher scans the results for; it falls back to the platforms when there aren't three.
+  const named = freshItems.filter((x) => !/^skip/i.test(String((x.fcScore && x.fcScore.verdict) || x.verdict || ""))).slice(0, 3).map((x) => x.title);
   // Same rule as the language pages: only claim completeness when the page can back it.
   const thin = freshItems.length < 8;
   const lead = thin ? "New movies and web series" : "Every new movie and web series";
   const dash = plain ? "," : " —";   // plain wording: a comma (lib/humanprose.js)
   const desc = fitFirst([
+    named.length === 3 ? `${n >= 5 ? `${n} new ${V.releases}` : "New"} this week: ${named.join(", ")}${n > 3 ? ` + ${n - 3} more` : ""}. Ratings, verdicts and what to skip.` : null,
+    named.length === 3 ? `${n >= 5 ? `${n} new` : "New"} this week: ${named.join(", ")}${n > 3 ? ` + ${n - 3} more` : ""}. Ratings, verdicts and what to skip.` : null,
+    named.length === 3 ? `${n >= 5 ? `${n} new ${V.releases}` : "New"} this week: ${named.slice(0, 2).join(", ")}${n > 2 ? ` + ${n - 2} more` : ""}. Ratings, verdicts and what to skip.` : null,
     `${lead} streaming in ${countryName} this week${platformNames ? ` on ${platformNames}` : ""}${dash} with ratings, verdicts and where to watch. Updated twice daily.`,
     `${lead} streaming in ${countryName} this week${two ? ` on ${two}` : ""}${dash} with ratings, verdicts and where to watch. Updated twice daily.`,
     `${lead} streaming in ${countryName} this week${dash} with ratings, verdicts and where to watch. Updated twice daily.`,

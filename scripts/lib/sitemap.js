@@ -516,6 +516,8 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   for (const c of countries) {
     if (fs.existsSync(comingPath(c.code))) datedUrls.push(`  <url><loc>${comingUrl(c.code)}</loc><lastmod>${lm(comingUrl(c.code), comingPath(c.code))}</lastmod><priority>0.7</priority></url>`);
     if (fs.existsSync(todayPath(c.code))) datedUrls.push(`  <url><loc>${todayUrl(c.code)}</loc><lastmod>${lm(todayUrl(c.code), todayPath(c.code))}</lastmod><priority>0.7</priority></url>`);
+    const LW = require("./lastweek.js");
+    if (fs.existsSync(LW.lastWeekPath(c.code))) datedUrls.push(`  <url><loc>${LW.lastWeekUrl(c.code)}</loc><lastmod>${lm(LW.lastWeekUrl(c.code), LW.lastWeekPath(c.code))}</lastmod><priority>0.7</priority></url>`);
   }
   const peopleUrls = [];
   for (const c of countries) {

@@ -365,6 +365,7 @@ function buildMoreLinks(code, data = null) {
     li(`${base}/new-on-ott/`, `New on ${V.word} this week`),
     fs.existsSync(todayPath(code)) ? li(todayUrl(code).replace("https://filmychill.com", ""), `New on ${V.word} today`) : "",
     fs.existsSync(comingPath(code)) ? li(comingUrl(code).replace("https://filmychill.com", ""), `Coming to ${V.word}`) : "",
+    fs.existsSync(require("./lastweek.js").lastWeekPath(code)) ? li(require("./lastweek.js").lastWeekUrl(code).replace("https://filmychill.com", ""), "Released last week") : "",
     fs.existsSync(ottMonthPath(code, thisMonth)) ? li(`${base}/new-on-ott/${thisMonth}/`, "This month") : "",
   ].filter(Boolean);
 
