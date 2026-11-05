@@ -2,13 +2,13 @@
  "date": "2026-11-05",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 4,
- "high": 4,
- "correctable": 4,
+ "pagesDisagreeing": 3,
+ "high": 2,
+ "correctable": 2,
  "byField": {
   "streaming": 1,
-  "platform": 3,
-  "genres": 1
+  "lead actor": 1,
+  "platform": 1
  },
  "rows": [
   {
@@ -20,36 +20,20 @@
    "slug": "an-egg-rescue"
   },
   {
-   "field": "platform",
-   "severity": "high",
-   "page": "WeTV",
-   "tmdb": "Tencent Video",
-   "code": "sg",
-   "slug": "fantasy-magician"
+   "field": "lead actor",
+   "severity": "medium",
+   "page": "Jackson Yee",
+   "tmdb": "Jackson Yi Yangqianxi, Tian Yu, Helen Chen",
+   "code": "my",
+   "slug": "nice-view"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "HBO Max",
-   "tmdb": "Netflix",
-   "code": "ph",
-   "slug": "black-bag"
-  },
-  {
-   "field": "genres",
-   "severity": "low",
-   "page": "Drama / Mystery",
-   "tmdb": "Mystery, Thriller",
-   "code": "ph",
-   "slug": "black-bag"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "wavve, Watcha, WeTV",
-   "tmdb": "wavve, Watcha, Tencent Video",
-   "code": "kr",
-   "slug": "oh-my-venus"
+   "page": "Netflix, WeTV",
+   "tmdb": "Netflix, Tencent Video",
+   "code": "id",
+   "slug": "descendants-of-the-sun"
   }
  ]
 }
