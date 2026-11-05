@@ -1,12 +1,13 @@
 {
- "date": "2026-11-04",
+ "date": "2026-11-05",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 2,
+ "pagesDisagreeing": 3,
  "high": 2,
  "correctable": 2,
  "byField": {
   "streaming": 1,
+  "director": 1,
   "platform": 1
  },
  "rows": [
@@ -14,17 +15,25 @@
    "field": "streaming",
    "severity": "high",
    "page": "not streaming",
-   "tmdb": "on Netflix",
-   "code": "uk",
-   "slug": "dhamaal-4"
+   "tmdb": "on Paramount+",
+   "code": "us",
+   "slug": "gone-girl"
+  },
+  {
+   "field": "director",
+   "severity": "medium",
+   "page": "Frant Gwo",
+   "tmdb": "Frant Guo Fan",
+   "code": "sg",
+   "slug": "the-wandering-earth"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "wavve, Watcha, TVING, WeTV",
-   "tmdb": "wavve, Watcha, TVING, Tencent Video",
-   "code": "kr",
-   "slug": "iris"
+   "page": "Netflix, HBO Max",
+   "tmdb": "HBO Max",
+   "code": "nz",
+   "slug": "batman-begins"
   }
  ]
 }

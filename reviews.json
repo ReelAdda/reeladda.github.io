@@ -1,98 +1,98 @@
 {
  "_about": "Published reviews of recent titles, from the outlets' RSS feeds (lib/reviews.js): outlet, link, headline, date, and a star rating only when the feed states one. Keyed by kind:tmdbId; pruned 90 days after release.",
- "fetched": "2026-11-04",
+ "fetched": "2026-11-05",
  "feeds": {
   "https://www.thehindu.com/entertainment/reviews/feeder/default.rss": {
-   "ok": "2026-11-04",
+   "ok": "2026-11-05",
    "items": 60
   },
   "https://indianexpress.com/section/entertainment/movie-review/feed/": {
-   "failed": "2026-11-04",
+   "failed": "2026-11-05",
    "error": "HTTP 403"
   },
   "https://indianexpress.com/section/entertainment/tamil/feed/": {
-   "failed": "2026-11-04",
+   "failed": "2026-11-05",
    "error": "HTTP 403"
   },
   "https://indianexpress.com/section/entertainment/telugu/feed/": {
-   "failed": "2026-11-04",
+   "failed": "2026-11-05",
    "error": "HTTP 403"
   },
   "https://indianexpress.com/section/entertainment/malayalam/feed/": {
-   "failed": "2026-11-04",
+   "failed": "2026-11-05",
    "error": "HTTP 403"
   },
   "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml": {
-   "ok": "2026-11-04",
-   "items": 88
+   "ok": "2026-11-05",
+   "items": 81
   },
   "https://feeds.feedburner.com/ndtvmovies-latest": {
-   "ok": "2026-11-04",
+   "ok": "2026-11-05",
    "items": 100
   },
   "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml": {
-   "failed": "2026-11-04",
+   "failed": "2026-11-05",
    "error": "HTTP 403"
   },
   "https://www.news18.com/rss/movies.xml": {
-   "failed": "2026-11-04",
+   "failed": "2026-11-05",
    "error": "HTTP 403"
   },
   "https://feeds.feedburner.com/ScrollinArticles.rss": {
-   "ok": "2026-11-04",
+   "ok": "2026-11-05",
    "items": 100
   },
   "https://www.koimoi.com/feed/": {
-   "failed": "2026-11-04",
+   "failed": "2026-11-05",
    "error": "HTTP 403"
   },
   "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms": {
-   "ok": "2026-11-04",
+   "ok": "2026-11-05",
    "items": 20
   },
   "https://www.indiatoday.in/rss/1206611": {
-   "ok": "2026-11-04",
+   "ok": "2026-11-05",
    "items": 20
   },
   "https://www.dnaindia.com/feeds/entertainment.xml": {
-   "ok": "2026-11-04",
+   "ok": "2026-11-05",
    "items": 20
   },
   "https://www.freepressjournal.in/stories.rss?section=entertainment": {
-   "ok": "2026-11-04",
-   "items": 46
+   "ok": "2026-11-05",
+   "items": 92
   },
   "https://www.123telugu.com/category/reviews/feed": {
-   "ok": "2026-11-04",
+   "ok": "2026-11-05",
    "items": 30
   },
   "https://www.telugu360.com/feed/": {
-   "ok": "2026-11-04",
+   "ok": "2026-11-05",
    "items": 10
   },
   "https://www.cinemaexpress.com/feed": {
-   "ok": "2026-11-04",
-   "items": 0
+   "ok": "2026-11-05",
+   "items": 8
   },
   "https://www.vikatan.com/feed": {
-   "ok": "2026-11-04",
-   "items": 1
+   "ok": "2026-11-05",
+   "items": 20
   },
   "https://www.prajavani.net/feed": {
-   "ok": "2026-11-04",
-   "items": 25
+   "ok": "2026-11-05",
+   "items": 133
   },
   "https://www.amarujala.com/rss/entertainment.xml": {
-   "ok": "2026-11-04",
+   "ok": "2026-11-05",
    "items": 40
   },
   "https://www.sangbadpratidin.in/feed/": {
-   "ok": "2026-11-04",
+   "ok": "2026-11-05",
    "items": 20
   },
   "https://www.rediff.com/rss/moviesreviewsrss.xml": {
-   "ok": "2026-11-04",
-   "items": 210
+   "ok": "2026-11-05",
+   "items": 213
   }
  },
  "films": {
@@ -113,7 +113,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1496785": {
    "title": "Aadarsha Kutumbam House No: 47 - AK47",
@@ -126,11 +126,11 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1234139": {
    "title": "Jailer 2",
-   "released": "2026-10-15",
+   "released": "2026-10-16",
    "items": [
     {
      "o": "Rediff",
@@ -145,7 +145,7 @@
      "d": "2026-10-26"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1740967": {
    "title": "Orijinal",
@@ -158,7 +158,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1153576": {
    "title": "Street Fighter",
@@ -177,7 +177,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1375156": {
    "title": "Udta Teer",
@@ -196,7 +196,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1400940": {
    "title": "Clayface",
@@ -215,7 +215,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1288069": {
    "title": "Tenzing",
@@ -241,7 +241,7 @@
      "d": "2026-10-18"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1255833": {
    "title": "Whalefall",
@@ -273,7 +273,7 @@
      "d": "2026-10-16"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1389172": {
    "title": "Reporting Live",
@@ -292,7 +292,7 @@
      "d": "2026-10-09"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1281331": {
    "title": "The Social Reckoning",
@@ -328,7 +328,7 @@
   },
   "movie:1195803": {
    "title": "Wicker",
-   "released": "2026-10-30",
+   "released": "2026-11-05",
    "items": [
     {
      "o": "NDTV",
@@ -362,7 +362,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1395215": {
    "title": "Sigma",
@@ -412,7 +412,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "tv:289517": {
    "title": "Dead-End Job",
@@ -438,7 +438,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1374689": {
    "title": "Pyre",
@@ -463,7 +463,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1606527": {
    "title": "418",
@@ -482,7 +482,7 @@
      "d": "2026-10-29"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:869152": {
    "title": "Titans",
@@ -495,7 +495,7 @@
      "d": "2026-10-22"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1389379": {
    "title": "Ranabaali",
@@ -514,7 +514,7 @@
      "d": "2026-10-18"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1428295": {
    "title": "Comrade Kalyan",
@@ -533,7 +533,7 @@
      "d": "2026-10-09"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "tv:336831": {
    "title": "The Traitors (Telugu)",
@@ -558,7 +558,7 @@
      "d": "2026-11-01"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "tv:337806": {
    "title": "Least Eligible Bachelor",
@@ -571,7 +571,7 @@
      "d": "2026-10-09"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1261763": {
    "title": "Don't Trouble the Trouble",
@@ -616,7 +616,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "tv:338918": {
    "title": "Chaar Yaar",
@@ -629,7 +629,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1081010": {
    "title": "Prahaar: The Untold Story of Ujjwal Nikam",
@@ -642,7 +642,7 @@
      "d": "2026-10-16"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "tv:213375": {
    "title": "VisionQuest",
@@ -655,7 +655,7 @@
      "d": "2026-10-14"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "tv:302882": {
    "title": "#Love",
@@ -675,13 +675,19 @@
    "released": "2026-10-30",
    "items": [
     {
+     "o": "Cinema Express",
+     "u": "https://www.cinemaexpress.com/tamil/review/2026/Oct/30/enemy-of-the-smuggler-review",
+     "h": "Enemy of the Smuggler Movie Review: Peddles convoluted storytelling",
+     "d": "2026-10-30"
+    },
+    {
      "o": "The Hindu",
      "u": "https://www.thehindu.com/entertainment/movies/enemy-of-the-smuggler-movie-review-t-samaya-murali-jd-chakravarthy-lal-saran-shakthi-smeha/article71652479.ece",
      "h": "‘Enemy of the Smuggler’ movie review: A gritty premise weighed down by commercial compulsions",
      "d": "2026-11-02"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:1453407": {
    "title": "Gajab Raat",
@@ -700,7 +706,7 @@
      "d": "2026-10-24"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
   },
   "movie:656908": {
    "title": "Ramayana: Rise of a Legend",
@@ -711,9 +717,59 @@
      "u": "https://www.dnaindia.com/bollywood/report-ramayana-movie-review-ranbir-kapoor-yash-nitesh-tiwari-namit-malhotra-sai-pallavi-bring-most-impactful-detailed-visually-rich-take-on-indian-epic-since-ramanand-sagar-s-ramayan-3223558",
      "h": "Ramayana movie review: Ranbir Kapoor, Yash, Nitesh bring the most impactful, detailed, visually rich take on Indian epic since Ramanand Sagar's Ramayan",
      "d": "2026-11-04"
+    },
+    {
+     "o": "Amar Ujala",
+     "u": "https://www.amarujala.com/entertainment/ramayana-part-1-movie-review-yash-ravana-ranbir-kapoor-raam-sai-pallavi-ravi-dubey-sunny-deol-namit-malhotra-2026-11-05",
+     "h": "Ramayana Movie Review: इमोशन नहीं यह वीएफएक्स वाली ‘रामायण’ है; रावण बनकर छाए यश, जानें कहां कमजोर पड़े रणबीर?",
+     "d": "2026-11-05"
+    },
+    {
+     "o": "Free Press Journal",
+     "u": "https://www.freepressjournal.in/entertainment/ramayana-review-yash-steals-the-show-as-ravana-in-nitesh-tiwaris-visually-stunning-retelling-but-ranbir-kapoor-and-sai-pallavi",
+     "h": "Ramayana Review: Yash Steals The Show As Ravana In Nitesh Tiwari's Visually Stunning Retelling, But Ranbir Kapoor And Sai Pallavi...",
+     "d": "2026-11-05"
+    },
+    {
+     "o": "NDTV",
+     "u": "https://www.ndtv.com/entertainment/ramayana-review-spectacle-overshadows-substance-in-ranbir-kapoor-and-yash-film-3-stars-12285603#publisher=newsstand",
+     "h": "Ramayana Review: Spectacle Overshadows Substance In Ranbir Kapoor And Yash Film",
+     "d": "2026-11-05"
     }
    ],
-   "updated": "2026-11-04"
+   "updated": "2026-11-05"
+  },
+  "tv:292741": {
+   "title": "Nocturne",
+   "released": "2026-10-29",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/nocturne-series-review-stephen-graham-apple-tv-liev-schreiber-zazie-beetz-rory-culkin-poorna-jagannathan/article71669054.ece",
+     "h": "‘Nocturne’ series review: Stephen Graham’s Hannibal-esque monster makes for killer television",
+     "d": "2026-11-05"
+    }
+   ],
+   "updated": "2026-11-05"
+  },
+  "movie:1810711": {
+   "title": "Dilwali Diwali",
+   "released": "2026-11-05",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/dilwali-diwali-review-charming-enough/20261105.htm",
+     "h": "Dilwali Diwali Review: Charming Enough",
+     "d": "2026-11-05"
+    },
+    {
+     "o": "Scroll",
+     "u": "https://scroll.in/reel/1096857/dilwali-diwali-review-for-once-a-film-is-too-short-to-release-its-ambitions?utm_source=rss&utm_medium=public",
+     "h": "‘Dilwali Diwali’ review: For once, a film is too short to release its ambitions",
+     "d": "2026-11-05"
+    }
+   ],
+   "updated": "2026-11-05"
   }
  }
 }
