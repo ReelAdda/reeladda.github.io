@@ -62,6 +62,9 @@ jobs:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
           # Visitors' votes (scripts/lib/votes.js). Optional: without it, votes aren't read.
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # Arrival alerts (scripts/lib/alerts.js): the public push key goes into each homepage so
+          # visitors can turn alerts on. A repository variable, not a secret: it is meant to be public.
+          VAPID_PUBLIC_KEY: ${{ vars.VAPID_PUBLIC_KEY }}
           # Optional: enables "trailer views" social proof on cards. Create a free key in
           # Google Cloud Console (YouTube Data API v3) and add it as a repo secret named
           # YT_API_KEY. If absent, the build simply skips trailer stats — nothing breaks.
@@ -233,3 +236,14 @@ jobs:
       - name: Live site check
         if: ${{ !cancelled() && (steps.site.outputs.changed == 'true' || github.event_name == 'workflow_dispatch') }}
         run: node scripts/livecheck.js
+
+      # Arrival alerts (scripts/alerts.js): one ping to readers whose saved film started streaming.
+      # After the live check on purpose, so every alert opens a page that already says so; skipped
+      # when anything before it failed. Never fails the run (the script always exits 0).
+      - name: Send arrival alerts
+        if: ${{ success() && steps.site.outputs.changed == 'true' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          VAPID_PUBLIC_KEY: ${{ vars.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+        run: node scripts/alerts.js

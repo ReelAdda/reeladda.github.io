@@ -665,7 +665,11 @@ function homeScript(file = APP_JS) {
   return { tag: `<script>${src}</script>`, hash: `'sha256-${crypto.createHash("sha256").update(src, "utf8").digest("base64")}'` };
 }
 // The homepage policy, allowing the inlined script by its hash when there is one.
-const homeCsp = (script) => (script ? HOME_CSP.replace("script-src 'self'", `script-src 'self' ${script.hash}`) : HOME_CSP);
+const homeCsp = (script, alerts = false) => {
+  let p = script ? HOME_CSP.replace("script-src 'self'", `script-src 'self' ${script.hash}`) : HOME_CSP;
+  if (alerts) p = p.replace("connect-src 'self'", `connect-src 'self' ${require("./vote.js").VOTE_CONNECT.join(" ")}`);
+  return p;
+};
 
 // ============================================================================
 // PICK OF THE WEEK, SERVER-RENDERED.
@@ -763,13 +767,16 @@ function heroPreload(data) {
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   const V = streamVocab(cfg);
+  // Arrival alerts: offered only with the rollout switch on and the public push key set.
+  const { alertsEnabled, publicKey: alertsPublicKey } = require("./alerts.js");
+  const alertsOn = alertsEnabled();
   let html = templateHtml;
   html = replaceBetween(html, "HEAD", buildHeadTags(cfg, USE_IMDB, data));
   // fc-stream-word rides along with fc-page: the client script renders a few strings at
   // runtime (My List tracking states, watchlist alerts) and must use the same word this
   // page is written in, without re-deriving it from a duplicated country list.
   html = replaceBetween(html, "PAGECODE",
-    `<meta name="fc-page" content="${cfg.code}"><meta name="fc-stream-word" content="${escHtml(V.word)}"><meta name="fc-locale" content="${escHtml(localeFor(cfg.code))}">`);
+    `<meta name="fc-page" content="${cfg.code}"><meta name="fc-stream-word" content="${escHtml(V.word)}"><meta name="fc-locale" content="${escHtml(localeFor(cfg.code))}">${alertsOn ? `<meta name="fc-push-key" content="${escHtml(alertsPublicKey())}">` : ""}`);
   // Visible copy that names the concept. India/UAE keep "OTT"; every other market reads
   // "streaming" — the word its visitors actually use and search with.
   html = replaceBetween(html, "TAGLINE", `New movies &amp; ${escHtml(V.releases)} this week`);
@@ -787,7 +794,9 @@ function renderCountryPage(templateHtml, cfg, data) {
   // Analytics and the policy that has to allow it are rendered together: turning GC_SITE off
   // strips the tag AND closes the CSP hole in the same build (see analyticsTag/cspWith).
   const script = homeScript();
-  html = replaceBetween(html, "CSP", `<meta http-equiv="Content-Security-Policy" content="${cspWith(homeCsp(script))}">`);
+  // Arrival alerts (lib/alerts.js): the opt-in talks to Firebase (anonymous ID, Firestore), as
+  // the film pages' vote button does, so the homepage may reach the same endpoints when it is on.
+  html = replaceBetween(html, "CSP", `<meta http-equiv="Content-Security-Policy" content="${cspWith(homeCsp(script, alertsOn))}">`);
   html = replaceBetween(html, "APPJS", script ? script.tag : `<script src="/js/app.js"></script>`);
   html = replaceBetween(html, "ANALYTICS", analyticsTag());
   html = replaceBetween(html, "LASTSCAN", escHtml(ssrLastScan(data, cfg)));

@@ -62,6 +62,11 @@
    "since": "2026-10-31",
    "what": "published reviews from the outlets' own RSS feeds (lib/reviews.js, reviews.json; headline, link and date only; 22 feeds, Onmanorama and Rediff excluded by their feed terms): the score card's own sentence names the outlets and links out ('…; 3 reviews out, in X, Y and Z.' / ' · Reviews: X, Y'), a star rating only where the headline states one; an FAQ names them. Only where the card has no critics' reading (no score, or an audience-only score with nothing cited). All languages, every edition's page for the film. Mock-up 31 Oct; switched to 100% at once on 31 Oct 2026 at the owner's go (about 5 pages that day)."
   },
+  "arrival-alerts": {
+   "percent": 100,
+   "since": "2026-11-05",
+   "what": "arrival alerts (lib/alerts.js, js/app.js, sw.js): after saving a film that isn't streaming yet, the homepage offers one web-push ping for when it starts streaming in that edition; a switch under My List turns it on or off. The build sends after the deploy and the live check, from the manifest's verified live state, at most one alert per reader a day, never the same film twice. A site-wide switch, not per film: any percent above 0 is on, 0 removes the offer at the next build and stops sending. Needs VAPID_PUBLIC_KEY (variable) and VAPID_PRIVATE_KEY (secret); without them nothing is offered. Mock-up 5 Nov; every edition at once at the owner's request."
+  },
   "page-v3": {
    "percent": 100,
    "since": "2026-10-28",

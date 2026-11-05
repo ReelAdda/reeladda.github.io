@@ -164,6 +164,13 @@
   .install-nudge .in-btn { margin-left:auto; background:var(--indigo); color:#fff; border:none; border-radius:999px;
     font-size:12.5px; font-weight:700; padding:8px 14px; cursor:pointer; white-space:nowrap; font-family:inherit; }
   .install-nudge .in-x { background:none; border:none; font-size:15px; color:var(--mute); cursor:pointer; padding:0 0 0 4px; }
+  .install-nudge .in-btn:disabled { opacity:.6; cursor:default; }
+  .fc-bell { flex:none; width:20px; height:20px; fill:var(--indigo); }
+  #alertRow:empty { display:none; }
+  .alert-row { display:flex; align-items:center; gap:8px; margin:-4px 0 14px; font-size:13px; color:var(--ink); }
+  .alert-row span { flex:1; } .alert-row b { color:var(--indigo); }
+  .alert-btn { min-height:44px; background:none; border:1px solid var(--line); color:var(--ink); border-radius:999px;
+    font-size:12.5px; font-weight:600; padding:6px 14px; cursor:pointer; white-space:nowrap; font-family:inherit; }
   select { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px;
     font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; }
   .share-btn { margin-left: auto; background: var(--indigo); color: #fff; border: none; border-radius: 999px;
@@ -569,6 +576,7 @@
       <h2>My List</h2>
       <span class="sub">Saved on this device · <!--SSR:MYLISTSUB-->tracked until they hit OTT<!--/SSR:MYLISTSUB--></span>
     </div>
+    <div id="alertRow"></div>
     <div class="grid ott" id="mylistGrid"></div>
   </section>
 

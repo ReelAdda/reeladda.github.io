@@ -33,10 +33,13 @@ function toggleSave(listKey, i) {
   if (!item) return;
   let wl = loadWL();
   const wasEmpty = wl.length === 0;
-  if (wl.some(x => wlKey(x) === wlKey(item))) wl = wl.filter(x => wlKey(x) !== wlKey(item));
-  else wl.push(item);
+  const added = !wl.some(x => wlKey(x) === wlKey(item));
+  if (!added) wl = wl.filter(x => wlKey(x) !== wlKey(item));
+  else wl.push(Object.assign({}, item, { savedAt: new Date().toISOString().slice(0, 10) }));
   saveWL(wl);
   render();
+  if (alertState() === 'on') syncAlertsSoon();
+  if (added && offerAlerts(item)) return;
   if (wasEmpty && wl.length === 1) showInstallNudge('personalBar', 'Saved — we\'ll show its ' + FC_STREAM.word + ' status in My List the day it lands', ' · add FilmyChill to your home screen so the alert finds you');
 }
 function updateWLCount() { document.getElementById('wlCount').textContent = loadWL().length; }
@@ -405,6 +408,7 @@ function render() {
   const wl = loadWL();
   const mySec = document.getElementById('mylistSection');
   mySec.style.display = wl.length ? 'block' : 'none';
+  renderAlertRow();
   document.getElementById('mylistGrid').innerHTML = wl.map((it, i) => card(it, i, 'wl')).join('');
   const t = myListOnly ? [] : applyFilters(DATA.theatres);
   const o = myListOnly ? [] : applyFilters(DATA.ott);
@@ -1026,6 +1030,176 @@ fetch('/data-' + code + '.json?v=' + Date.now())
   });
 } // end loadCountryData
 
+// ---- Arrival alerts (5 Nov 2026) ----
+// One ping when a saved film starts streaming in this edition. Offered only when the build
+// wrote the push key (<meta name="fc-push-key">, rollout "arrival-alerts"). Turning it on
+// stores this browser's push subscription, the saved films' keys with the day each was saved,
+// and the edition in Firestore under an anonymous ID (alerts/<uid>; firestore.rules lets a
+// browser write and delete only its own record, and read none). The daily build sends the
+// pings after the pages say the film is streaming (scripts/lib/alerts.js). Turning it off
+// deletes the record. In this browser: filmychill-alerts = on | off | dismissed.
+const FC_PUSH_KEY = (() => {
+  const m = document.querySelector('meta[name="fc-push-key"]');
+  const k = (m && m.getAttribute('content')) || '';
+  return /^[A-Za-z0-9_-]{86,88}$/.test(k) ? k : '';
+})();
+const FB_KEY = 'AIzaSyBtwIPmt1uONvkZ8pmnhcZK6E6pRjd3yk0', FB_PROJECT = 'filmychill-ca2b3';
+const FB_COMMIT = 'https://firestore.googleapis.com/v1/projects/' + FB_PROJECT + '/databases/(default)/documents:commit';
+const BELL = '<svg class="fc-bell" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg>';
+let alertOfferedThisSession = false;
+
+function pushSupported() { return !!(FC_PUSH_KEY && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window); }
+function alertState() { try { return localStorage.getItem('filmychill-alerts') || ''; } catch { return ''; } }
+function setAlertState(v) { try { localStorage.setItem('filmychill-alerts', v); } catch {} }
+function filmKeyOf(it) { return it && /^\d{1,9}$/.test(String(it.tmdbId || '')) ? (it.kind === 'tv' ? 'tv-' : 'movie-') + it.tmdbId : null; }
+function isStreamingItem(it) { return !!(it && ((it.providers && it.providers.length) || (it.platform && it.platform !== 'Theatres'))); }
+
+function fbPost(url, body, headers, form) {
+  return fetch(url, {
+    method: 'POST',
+    headers: Object.assign({ 'Content-Type': form ? 'application/x-www-form-urlencoded' : 'application/json' }, headers || {}),
+    body: form ? body : JSON.stringify(body)
+  }).then(r => r.json().then(j => { if (!r.ok) throw new Error((j.error && j.error.message) || r.status); return j; }));
+}
+// The same anonymous identity the film pages' vote button uses (js/vote.js), kept in this browser.
+function fbIdentity() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem('fcvote:auth') || 'null'); } catch {}
+  if (saved && saved.idToken && saved.exp > Date.now() + 60000) return Promise.resolve(saved);
+  const keep = (id, rt, uid, secs) => {
+    const a = { idToken: id, rt: rt, uid: uid, exp: Date.now() + Number(secs || 3600) * 1000 };
+    try { localStorage.setItem('fcvote:auth', JSON.stringify(a)); } catch {}
+    return a;
+  };
+  if (saved && saved.rt) {
+    return fbPost('https://securetoken.googleapis.com/v1/token?key=' + FB_KEY, 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(saved.rt), null, true)
+      .then(j => keep(j.id_token, j.refresh_token, j.user_id, j.expires_in));
+  }
+  return fbPost('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FB_KEY, { returnSecureToken: true })
+    .then(j => keep(j.idToken, j.refreshToken, j.localId, j.expiresIn));
+}
+const alertDoc = (uid) => 'projects/' + FB_PROJECT + '/databases/(default)/documents/alerts/' + uid;
+
+function alertFilms() {
+  let since = new Date().toISOString().slice(0, 10);
+  try { since = localStorage.getItem('filmychill-alerts-since') || since; } catch {}
+  const films = {};
+  for (const it of loadWL()) {
+    const k = filmKeyOf(it);
+    if (k && Object.keys(films).length < 200) films[k] = /^\d{4}-\d{2}-\d{2}$/.test(it.savedAt || '') ? it.savedAt : since;
+  }
+  return films;
+}
+function writeAlertRecord(sub) {
+  return fbIdentity().then(a => {
+    const fields = {};
+    for (const [k, d] of Object.entries(alertFilms())) fields[k] = { stringValue: d };
+    return fbPost(FB_COMMIT, { writes: [{
+      update: { name: alertDoc(a.uid), fields: { sub: { stringValue: JSON.stringify(sub) }, films: { mapValue: { fields } }, c: { stringValue: FC_PAGE || 'in' } } },
+      updateTransforms: [{ fieldPath: 't', setToServerValue: 'REQUEST_TIME' }]
+    }] }, { Authorization: 'Bearer ' + a.idToken });
+  });
+}
+function keyBytes(s) {
+  const b = atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(b, c => c.charCodeAt(0));
+}
+// This browser's push subscription; with create, a new one when there is none (or it was made
+// for another key, after a key change).
+function pushSubscription(create) {
+  return navigator.serviceWorker.register('/sw.js').then(() => navigator.serviceWorker.ready).then(reg =>
+    reg.pushManager.getSubscription().then(s => {
+      const want = keyBytes(FC_PUSH_KEY);
+      const had = s && s.options && s.options.applicationServerKey ? new Uint8Array(s.options.applicationServerKey) : null;
+      const same = !had || (had.length === want.length && had.every((x, i) => x === want[i]));
+      if (s && same) return s;
+      if (!create) return null;
+      return (s ? s.unsubscribe() : Promise.resolve()).then(() => reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: want }));
+    }));
+}
+function turnOnAlerts() {
+  return Notification.requestPermission().then(p => {
+    if (p !== 'granted') { setAlertState('dismissed'); return 'blocked'; }
+    try { if (!localStorage.getItem('filmychill-alerts-since')) localStorage.setItem('filmychill-alerts-since', new Date().toISOString().slice(0, 10)); } catch {}
+    return pushSubscription(true).then(sub => writeAlertRecord(sub.toJSON())).then(() => {
+      setAlertState('on');
+      try { localStorage.setItem('filmychill-alerts-sync', new Date().toISOString().slice(0, 10)); } catch {}
+      fcTrack('alerts', 'on');
+      return 'on';
+    });
+  });
+}
+function turnOffAlerts() {
+  setAlertState('off');
+  fcTrack('alerts', 'off');
+  pushSubscription(false).then(s => s && s.unsubscribe()).catch(() => {});
+  return fbIdentity().then(a => fbPost(FB_COMMIT, { writes: [{ delete: alertDoc(a.uid) }] }, { Authorization: 'Bearer ' + a.idToken })).catch(() => {});
+}
+// Keep the stored list of saved films in step with My List (and the subscription fresh).
+let alertSyncTimer = null;
+function syncAlertsSoon() { clearTimeout(alertSyncTimer); alertSyncTimer = setTimeout(syncAlerts, 1500); }
+function syncAlerts() {
+  if (!pushSupported() || alertState() !== 'on') return;
+  if (Notification.permission !== 'granted') { setAlertState('off'); renderAlertRow(); return; }
+  pushSubscription(true).then(sub => writeAlertRecord(sub.toJSON())).then(() => {
+    try { localStorage.setItem('filmychill-alerts-sync', new Date().toISOString().slice(0, 10)); } catch {}
+  }).catch(() => {});
+}
+
+// After saving a film that isn't streaming yet: offer the ping (or, on an iPhone outside the
+// home-screen app, where Safari allows no web notifications, the way to get it). True if shown.
+function offerAlerts(item) {
+  if (!FC_PUSH_KEY || alertOfferedThisSession || isStreamingItem(item) || !filmKeyOf(item) || alertState()) return false;
+  const host = document.getElementById('personalBar');
+  if (!host) return false;
+  const old = document.getElementById('installNudge'); if (old) old.remove();
+  const prev = document.getElementById('alertNudge'); if (prev) prev.remove();
+  if (pushSupported()) {
+    if (Notification.permission === 'denied') return false;
+    alertOfferedThisSession = true;
+    host.insertAdjacentHTML('beforeend', `<div class="install-nudge" id="alertNudge">${BELL}<span><b>Saved. Want a ping when ${esc(item.title)} is streaming?</b>One alert when it reaches ${esc(FC_STREAM.word)}, with our verdict. Nothing else.</span>
+    <button class="in-btn" data-click="alertsYes" data-arg="${esc(item.title)}">Ping me</button>
+    <button class="in-x" data-click="alertsNo" aria-label="Dismiss">×</button></div>`);
+    return true;
+  }
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !isStandalone()) {
+    try { if (localStorage.getItem('filmychill-install-dismissed')) return false; } catch { return false; }
+    alertOfferedThisSession = true;
+    nudgeShownThisSession = true;
+    host.insertAdjacentHTML('beforeend', installNudgeHtml('Saved. Want a ping when ' + item.title + ' is streaming?', ' Add FilmyChill to your home screen first: iPhones only allow alerts from home-screen apps.'));
+    return true;
+  }
+  return false;
+}
+function alertsYes(el) {
+  const title = el.dataset.arg || 'it';
+  const bar = document.getElementById('alertNudge');
+  el.disabled = true;
+  const say = (msg) => { if (bar) bar.innerHTML = BELL + '<span><b>' + esc(msg) + '</b></span>'; setTimeout(() => { const b = document.getElementById('alertNudge'); if (b) b.remove(); }, 6000); };
+  turnOnAlerts().then(r => {
+    say(r === 'on' ? 'Done. We\'ll ping you when ' + title + ' is streaming.' : 'Notifications are blocked for this site, so no ping. You\'ll still see it in My List the day it lands.');
+    renderAlertRow();
+  }).catch(() => { setAlertState(''); say('Alerts couldn\'t be turned on just now. You can try again from My List.'); renderAlertRow(); });
+}
+function alertsNo() {
+  setAlertState('dismissed');
+  const b = document.getElementById('alertNudge'); if (b) b.remove();
+  renderAlertRow();
+}
+function alertsToggle() {
+  if (alertState() === 'on') { turnOffAlerts(); renderAlertRow(); return; }
+  turnOnAlerts().then(renderAlertRow).catch(() => { setAlertState(''); renderAlertRow(); });
+}
+// The switch under My List's heading.
+function renderAlertRow() {
+  const el = document.getElementById('alertRow');
+  if (!el) return;
+  if (!pushSupported() || Notification.permission === 'denied') { el.innerHTML = ''; return; }
+  el.innerHTML = alertState() === 'on'
+    ? `<div class="alert-row">${BELL}<span><b>Alerts on</b> · one ping when a saved film starts streaming</span><button class="alert-btn" data-click="alertsToggle">Turn off</button></div>`
+    : `<div class="alert-row">${BELL}<span>Get one ping when a saved film starts streaming</span><button class="alert-btn" data-click="alertsToggle">Turn on</button></div>`;
+}
+
 // ---- Event wiring (Oct 2026): one listener per event type, actions named in data attributes.
 // The innermost element with the attribute wins, so a button inside a card runs its own action
 // and not the card's (what event.stopPropagation() did inline).
@@ -1055,6 +1229,9 @@ const ACTIONS = {
   closeInstallHelp: () => closeInstallHelp(),
   dismissInstall: () => dismissInstall(),
   heroTap: (el) => heroTap(el),
+  alertsYes: (el) => alertsYes(el),
+  alertsNo: () => alertsNo(),
+  alertsToggle: () => alertsToggle(),
 };
 function runAction(attr, ev) {
   const el = ev.target && ev.target.closest ? ev.target.closest('[' + attr + ']') : null;
@@ -1071,3 +1248,9 @@ document.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') runAction
 // The site's service worker (/sw.js): pages network-first, this week's data and posters cached,
 // so the homepage and a saved list open offline. Registered after load, clear of the first paint.
 if ('serviceWorker' in navigator) addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
+// Alerts on: refresh the stored record once a day (push services rotate subscriptions).
+addEventListener('load', () => {
+  let last = '';
+  try { last = localStorage.getItem('filmychill-alerts-sync') || ''; } catch {}
+  if (alertState() === 'on' && last !== new Date().toISOString().slice(0, 10)) setTimeout(syncAlerts, 3000);
+});

@@ -9252,7 +9252,9 @@ test("PWA (28 Oct 2026): manifest, service worker, offline page, registration on
   assert.ok(/const CACHE = "fc-\d{4}-\d{2}-\d{2}"/.test(sw), "a dated cache name to bump");
   assert.ok(/req\.mode === "navigate"/.test(sw) && /networkFirst\(req, new Request\(url\.origin \+ url\.pathname\), \{ fallback: "\/offline\/" \}\)/.test(sw), "pages: network first, offline fallback");
   assert.ok(/isData\(url\)\) \{ e\.respondWith\(networkFirst/.test(sw) && /isStatic\(url\)\) \{ e\.respondWith\(staleWhileRevalidate/.test(sw) && /isPoster\(url\)\) \{ e\.respondWith\(cacheFirstCapped/.test(sw));
-  assert.ok(!/addEventListener\("(?:push|sync|periodicsync|notificationclick)"/.test(sw), "no push, no background work");
+  // Push arrived with arrival alerts (5 Nov 2026), and nothing else: no background sync.
+  assert.ok(!/addEventListener\("(?:sync|periodicsync)"/.test(sw), "no background work");
+  assert.strictEqual((sw.match(/addEventListener\("(?:push|notificationclick)"/g) || []).length, 2, "push only for arrival alerts");
   assert.ok(/if \(req\.method !== "GET"\) return;/.test(sw) && !/googletagmanager|youtube|firestore/.test(sw), "only GETs; third parties pass through");
   const off = read("offline/index.html");
   assert.ok(/<meta name="robots" content="noindex">/.test(off) && /You're offline/.test(off) && /href="\/"/.test(off));
@@ -10803,6 +10805,155 @@ test("near-copy check: the v3 header is stripped like the old one (30 Oct 2026)"
   assert.strictEqual(t, "x");
   assert.strictEqual(G.mainText('<body><div class="top"><a href="/">FILMY</a></div><h1>X</h1></body>'), "x");
 });
+
+group("arrival alerts (lib/alerts.js, 5 Nov 2026)");
+{
+  const A = require("./lib/alerts.js");
+  const KEY = "B" + "x".repeat(86);   // 87 characters, the shape of a P-256 public key
+  const live = (since, extra = {}) => ({ since, providers: ["Prime Video"], lastCheck: since, misses: 0, ...extra });
+  const entry = (over = {}) => ({ title: "Clayface", kind: "movie", tmdbId: 1400940, fcs: { v: "Worth a watch" }, live: live("2026-11-05"), ...over });
+  const sub = { endpoint: "https://fcm.googleapis.com/fcm/send/x", keys: { p256dh: "p", auth: "a" } };
+
+  test("a film counts as arrived only when its page says so, recently and without a missed check", () => {
+    assert.deepStrictEqual(A.arrivalOf(entry(), "2026-11-05"), { since: "2026-11-05", providers: ["Prime Video"] });
+    assert.strictEqual(A.arrivalOf(entry({ live: live("2026-11-05", { misses: 1 }) }), "2026-11-05"), null, "the last check missed it");
+    assert.strictEqual(A.arrivalOf(entry({ live: live("2026-10-01") }), "2026-11-05"), null, "older than 14 days");
+    assert.strictEqual(A.arrivalOf(entry({ live: live("2026-11-06") }), "2026-11-05"), null, "a date ahead of today");
+    assert.strictEqual(A.arrivalOf(entry({ live: { since: "2026-11-05", providers: [] } }), "2026-11-05"), null, "no platform");
+    assert.strictEqual(A.arrivalOf(entry({ live: undefined }), "2026-11-05"), null, "not streaming");
+    assert.strictEqual(A.arrivalOf(entry({ catalog: true }), "2026-11-05"), null, "a catalogue page's build day is not an arrival");
+    assert.ok(A.arrivalOf(entry({ catalog: true, archivedOn: "2026-10-01" }), "2026-11-05"), "a real arrival after the page was archived");
+  });
+
+  test("pickAlerts: saved before it arrived, in that edition, once per film and at most once a day", () => {
+    const manifest = { in: { clayface: entry() }, uk: { clayface: entry({ live: undefined }) } };
+    const base = { uid: "u1", sub, c: "in", films: { "movie-1400940": "2026-11-01" } };
+    const one = A.pickAlerts({ subs: [base], manifest, today: "2026-11-05" });
+    assert.strictEqual(one.length, 1);
+    assert.deepStrictEqual(one[0].payload, { title: "Clayface is now on Prime Video", body: "Worth a watch. Tap for the verdict.", url: "/movie/clayface.html", tag: "fc-clayface" });
+    assert.strictEqual(A.pickAlerts({ subs: [{ ...base, films: { "movie-1400940": "2026-11-06" } }], manifest, today: "2026-11-06" }).length, 0, "saved after it was already streaming");
+    assert.strictEqual(A.pickAlerts({ subs: [{ ...base, c: "uk" }], manifest, today: "2026-11-05" }).length, 0, "not streaming in the reader's edition");
+    assert.strictEqual(A.pickAlerts({ subs: [base], sent: { u1: { films: { "movie-1400940": "2026-11-05" } } }, manifest, today: "2026-11-06" }).length, 0, "never the same film twice");
+    assert.strictEqual(A.pickAlerts({ subs: [base], sent: { u1: { films: {}, last: "2026-11-05" } }, manifest, today: "2026-11-05" }).length, 0, "one alert a day");
+    assert.strictEqual(A.pickAlerts({ subs: [{ ...base, films: { "bad key": "2026-11-01", "movie-1400940": "yesterday" } }], manifest, today: "2026-11-05" }).length, 0, "malformed keys and days are ignored");
+    // Two arrivals: the newer one goes today, the other on a later day.
+    const two = { in: { clayface: entry(), hope: entry({ title: "Hope", tmdbId: 7, live: live("2026-11-03") }) } };
+    const pick = A.pickAlerts({ subs: [{ ...base, films: { "movie-1400940": "2026-11-01", "movie-7": "2026-11-01" } }], manifest: two, today: "2026-11-05" });
+    assert.strictEqual(pick.length, 1);
+    assert.strictEqual(pick[0].key, "movie-1400940");
+    const us = A.pickAlerts({ subs: [{ ...base, c: "us" }], manifest: { us: { clayface: entry() } }, today: "2026-11-05", hasReviews: () => true });
+    assert.strictEqual(us[0].payload.url, "/us/movie/clayface.html", "another edition's film page");
+    assert.strictEqual(us[0].payload.body, "Worth a watch. Tap for the verdict and reviews.", "reviews named only when there are some");
+  });
+
+  test("the notification's wording: the approved line, an honest Skip, and no verdict claimed without one", () => {
+    const a = { since: "2026-11-05", providers: ["Netflix", "Netflix", "Prime Video", "Zee5"] };
+    assert.strictEqual(A.alertPayload(entry({ fcs: { v: "Must watch" } }), "clayface", "in", a).title, "Clayface is now on Netflix and Prime Video", "two platforms at most, no repeats");
+    assert.strictEqual(A.alertPayload(entry({ fcs: { v: "Skip" } }), "clayface", "in", a).body, "Our verdict: Skip. Tap to see why.");
+    assert.strictEqual(A.alertPayload(entry({ fcs: { v: "early" } }), "clayface", "in", a).body, "Tap for the ratings so far and where to watch.");
+    for (const v of ["Must watch", "Worth a watch", "Skip", null]) {
+      const p = A.alertPayload(entry({ fcs: v ? { v } : undefined }), "clayface", "in", a, { hasReviews: true });
+      assert.ok(!/—|–/.test(p.title + p.body), "no dashes in the alert");
+    }
+  });
+
+  test("stored subscriptions and sent lists are checked and kept small", () => {
+    assert.ok(A.parseSubscription(JSON.stringify({ endpoint: sub.endpoint, expirationTime: null, keys: sub.keys })));
+    assert.strictEqual(A.parseSubscription(JSON.stringify({ endpoint: "http://x", keys: sub.keys })), null, "https only");
+    assert.strictEqual(A.parseSubscription(JSON.stringify({ endpoint: sub.endpoint })), null, "keys required");
+    assert.strictEqual(A.parseSubscription("not json"), null);
+    assert.deepStrictEqual(A.nextSent({ films: { old: "2025-01-01", recent: "2026-10-01" } }, "movie-1", "2026-11-05"),
+      { films: { recent: "2026-10-01", "movie-1": "2026-11-05" }, last: "2026-11-05" }, "films older than a year drop off");
+  });
+
+  test("alerts are on only with the switch and a real public key", () => {
+    const on = { features: { "arrival-alerts": { percent: 100 } } }, off = { features: { "arrival-alerts": { percent: 0 } } };
+    assert.strictEqual(A.alertsEnabled({ VAPID_PUBLIC_KEY: KEY }, on), true);
+    assert.strictEqual(A.alertsEnabled({ VAPID_PUBLIC_KEY: KEY }, off), false, "switch off");
+    assert.strictEqual(A.alertsEnabled({}, on), false, "no key");
+    assert.strictEqual(A.alertsEnabled({ VAPID_PUBLIC_KEY: "short" }, on), false, "not a key");
+    assert.ok(require("../rollout.json").features["arrival-alerts"].percent > 0, "switched on in rollout.json");
+  });
+
+  test("homepage: the push key and the Firebase endpoints only when alerts are on", () => {
+    const S = require("./lib/surfaces.js"), R = require("./lib/rollout.js");
+    const fsx = require("fs"), path = require("path");
+    const tpl = fsx.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+    const render = (key) => inTempDirSync(() => {
+      const quiet = console.log, prev = process.env.VAPID_PUBLIC_KEY;
+      console.log = () => {};
+      if (key) process.env.VAPID_PUBLIC_KEY = key; else delete process.env.VAPID_PUBLIC_KEY;
+      R.useRolloutConfig({ features: { "arrival-alerts": { percent: 100 } } });
+      try { S.renderCountryPage(tpl, { code: "nz", name: "New Zealand" }, { theatres: [], ott: [], comingSoon: [] }); }
+      finally { console.log = quiet; R.resetRolloutCache(); if (prev === undefined) delete process.env.VAPID_PUBLIC_KEY; else process.env.VAPID_PUBLIC_KEY = prev; }
+      return fsx.readFileSync("nz/index.html", "utf8");
+    });
+    const on = render(KEY), off = render(null);
+    assert.ok(on.includes(`<meta name="fc-push-key" content="${KEY}">`), "key written");
+    const csp = (h) => h.match(/http-equiv="Content-Security-Policy" content="([^"]*)"/)[1];
+    assert.ok(/connect-src 'self' https:\/\/identitytoolkit\.googleapis\.com https:\/\/securetoken\.googleapis\.com https:\/\/firestore\.googleapis\.com/.test(csp(on)), "Firebase allowed");
+    assert.ok(!/<meta name="fc-push-key" content="/.test(off) && !csp(off).includes("firestore"), "nothing offered without a key");
+    assert.ok(on.includes('<div id="alertRow"></div>'), "the My List switch's place");
+  });
+
+  test("homepage script: offered after saving a film that isn't streaming, with a way out", () => {
+    const app = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "app.js"), "utf8");
+    const offer = (app.match(/function offerAlerts\(item\) \{[\s\S]*?\n\}/) || [""])[0];
+    assert.ok(/isStreamingItem\(item\)/.test(offer) && /alertState\(\)\) return false/.test(offer), "not for films already streaming, not twice");
+    assert.ok(/Want a ping when \$\{esc\(item\.title\)\} is streaming\?<\/b>One alert when it reaches \$\{esc\(FC_STREAM\.word\)\}, with our verdict\. Nothing else\./.test(offer), "the approved wording");
+    assert.ok(/if \(added && offerAlerts\(item\)\) return;/.test(app), "after a save, not on page load");
+    for (const a of ["alertsYes", "alertsNo", "alertsToggle"]) assert.ok(new RegExp(`${a}: \\(`).test(app), `${a} is wired`);
+    assert.ok(/Notification\.requestPermission\(\)/.test(app) && /writes: \[\{ delete: alertDoc\(a\.uid\) \}\]/.test(app), "asks permission; Turn off deletes the record");
+    assert.ok(/savedAt: new Date\(\)\.toISOString\(\)\.slice\(0, 10\)/.test(app), "each save records its day");
+  });
+
+  test("service worker and Firestore rules: same-site pages only, readers' records closed", () => {
+    const fsx = require("fs"), path = require("path");
+    const sw = fsx.readFileSync(path.join(__dirname, "..", "sw.js"), "utf8");
+    assert.ok(/addEventListener\("push"/.test(sw) && /addEventListener\("notificationclick"/.test(sw), "both handlers");
+    assert.ok(/if \(url\.origin !== self\.location\.origin\) url = new URL\("\/", self\.location\.origin\);/.test(sw), "never opens another site");
+    const rules = fsx.readFileSync(path.join(__dirname, "..", "firestore.rules"), "utf8");
+    const block = (rules.match(/match \/alerts\/\{uid\} \{[\s\S]*?\n    \}/) || [""])[0];
+    assert.ok(/allow read: if false;/.test(block) && /request\.auth\.uid == uid/.test(block) && /hasOnly\(\['sub', 'films', 'c', 't'\]\)/.test(block), "own record only, no reads");
+    assert.ok(!/alertSent/.test(rules.replace(/\/\/.*$/gm, "")), "the sent lists are covered by the closed catch-all");
+    const wf = fsx.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8");
+    assert.ok(wf.indexOf("name: Send arrival alerts") > wf.indexOf("name: Live site check"), "sent after the live check");
+  });
+
+  testAsync("sendAlerts: sends, records what it sent, and removes a subscription the push service says is gone", async () => {
+    const docs = { alerts: {
+      u1: { sub: JSON.stringify(sub), films: { "movie-1400940": "2026-11-01" }, c: "in" },
+      u2: { sub: JSON.stringify({ ...sub, endpoint: "https://gone.example/x" }), films: { "movie-1400940": "2026-11-01" }, c: "in" },
+    }, alertSent: {} };
+    const col = (name) => ({
+      get: async () => ({ docs: Object.entries(docs[name]).map(([id, d]) => ({ id, data: () => d })) }),
+      doc: (id) => ({ set: async (v) => { docs[name][id] = v; }, delete: async () => { delete docs[name][id]; } }),
+    });
+    const admin = { connect: () => ({ collection: col }) };
+    const pushed = [];
+    const webpush = { setVapidDetails() {}, sendNotification: async (s, body) => {
+      if (s.endpoint.includes("gone")) { const e = new Error("gone"); e.statusCode = 410; throw e; }
+      pushed.push(JSON.parse(body));
+    } };
+    const R = require("./lib/rollout.js");
+    R.useRolloutConfig({ features: { "arrival-alerts": { percent: 100 } } });
+    try {
+      const env = { VAPID_PUBLIC_KEY: KEY, VAPID_PRIVATE_KEY: "k", FIREBASE_SERVICE_ACCOUNT: "{}" };
+      const res = await A.sendAlerts({ env, admin, webpush, today: "2026-11-05", manifest: { in: { clayface: entry() } } });
+      assert.deepStrictEqual({ sent: res.sent, gone: res.gone, failed: res.failed }, { sent: 1, gone: 1, failed: 0 });
+      assert.strictEqual(pushed[0].title, "Clayface is now on Prime Video");
+      assert.deepStrictEqual(docs.alertSent.u1, { films: { "movie-1400940": "2026-11-05" }, last: "2026-11-05" });
+      assert.ok(!docs.alerts.u2, "the dead subscription's record is deleted");
+      const again = await A.sendAlerts({ env, admin, webpush, today: "2026-11-05", manifest: { in: { clayface: entry() } } });
+      assert.strictEqual(again.sent, 0, "a second run the same day sends nothing");
+      const notes = [];
+      const none = await A.sendAlerts({ env: { VAPID_PUBLIC_KEY: KEY }, admin, webpush, note: (m) => notes.push(m) });
+      assert.strictEqual(none.enabled, false);
+      assert.ok(/VAPID_PRIVATE_KEY/.test(notes[0]), "says which secret is missing");
+    } finally { R.resetRolloutCache(); }
+  });
+}
+
 
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");

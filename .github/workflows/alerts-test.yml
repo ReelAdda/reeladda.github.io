@@ -1,0 +1,28 @@
+name: Arrival alerts test
+# Run by hand (Actions -> Arrival alerts test -> Run workflow) right after turning alerts on in
+# a browser: sends "FilmyChill alerts are on" to every subscription written in the last hour,
+# so the whole chain (keys, Firestore, the push service, the service worker) is proven with a
+# real notification. Records nothing, builds nothing, publishes nothing.
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Same pinned actions as update.yml; bump all workflows together.
+      - name: Checkout site
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24"
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Send a test alert
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          VAPID_PUBLIC_KEY: ${{ vars.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+        run: node scripts/alerts.js --test

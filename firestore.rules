@@ -7,7 +7,8 @@ rules_version = '2';
 //   votes/<film>__<uid>   film = "movie-123" | "tv-456", v = 1 | -1, c = country code,
 //                          t = the server's time of the write (set by the request, not the client)
 // Nobody can read votes from a browser; the build reads them with its service account,
-// which bypasses these rules. Everything else in the database is closed.
+// which bypasses these rules. Visitors who turn on arrival alerts may also write and delete
+// their own alerts/<uid> record (below). Everything else in the database is closed.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -19,6 +20,28 @@ service cloud.firestore {
         && request.resource.data.film is string
         && request.resource.data.film.matches('^(movie|tv)-[0-9]{1,9}$')
         && request.resource.data.v in [1, -1]
+        && request.resource.data.c is string
+        && request.resource.data.c.matches('^[a-z]{2}$')
+        && request.resource.data.t == request.time;
+    }
+
+    // Arrival alerts (5 Nov 2026, scripts/lib/alerts.js). One record per anonymous visitor who
+    // turned alerts on: alerts/<uid> = { sub, films, c, t }
+    //   sub    the browser's push subscription (JSON text from PushSubscription.toJSON())
+    //   films  saved films' keys ("movie-123" / "tv-456") -> the day each was saved
+    //   c      the FilmyChill edition, t the server's time of the write
+    // A visitor may write and delete only their own record and read none. The build reads them
+    // with its service account and keeps what it sent in alertSent/<uid>, closed below.
+    match /alerts/{uid} {
+      allow read: if false;
+      allow delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['sub', 'films', 'c', 't'])
+        && request.resource.data.sub is string
+        && request.resource.data.sub.size() < 2000
+        && request.resource.data.sub.matches('^[{]"endpoint":"https://.*')
+        && request.resource.data.films is map
+        && request.resource.data.films.size() <= 200
         && request.resource.data.c is string
         && request.resource.data.c.matches('^[a-z]{2}$')
         && request.resource.data.t == request.time;

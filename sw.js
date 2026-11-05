@@ -8,7 +8,8 @@
  *   - Stylesheets, scripts, fonts, icons: stale-while-revalidate (instant, refreshed behind).
  *   - TMDB posters and backdrops: cache first, capped, so a saved list opens offline.
  * Everything else (analytics, YouTube, Firestore votes) passes straight through and is never
- * cached. No push, no background sync, nothing that runs when the site isn't open.
+ * cached. No background sync. One thing runs when the site isn't open: an arrival alert
+ * (push and notificationclick, at the end), and only for readers who turned alerts on.
  *
  * Pages are rebuilt twice a day; the network-first rule keeps "Page updated" honest. CACHE is
  * bumped by hand when the rules here change, which drops every old cache on activate.
@@ -79,4 +80,28 @@ self.addEventListener("fetch", (e) => {
   if (isData(url)) { e.respondWith(networkFirst(req, new Request(url.origin + url.pathname), { timeout: 6000 })); return; }
   if (isStatic(url)) { e.respondWith(staleWhileRevalidate(req)); return; }
   if (isPoster(url)) { e.respondWith(cacheFirstCapped(req)); return; }
+});
+
+// Arrival alerts (5 Nov 2026, scripts/lib/alerts.js): show the ping the build sends, and open
+// the film's page when it is tapped. Only paths on this site are opened.
+self.addEventListener("push", (e) => {
+  let d = null;
+  try { d = e.data ? e.data.json() : null; } catch (err) { d = null; }
+  if (!d || typeof d.title !== "string") return;
+  e.waitUntil(self.registration.showNotification(d.title, {
+    body: typeof d.body === "string" ? d.body : "",
+    icon: "/icon-192.png",
+    tag: typeof d.tag === "string" ? d.tag : undefined,
+    data: { url: typeof d.url === "string" ? d.url : "/" },
+  }));
+});
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  let url;
+  try { url = new URL((e.notification.data && e.notification.data.url) || "/", self.location.origin); } catch (err) { url = new URL("/", self.location.origin); }
+  if (url.origin !== self.location.origin) url = new URL("/", self.location.origin);
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+    for (const w of wins) if (w.url === url.href && "focus" in w) return w.focus();
+    return self.clients.openWindow(url.href);
+  }));
 });
