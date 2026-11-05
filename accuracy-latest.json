@@ -2,20 +2,54 @@
  "date": "2026-11-05",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
- "high": 1,
- "correctable": 1,
+ "pagesDisagreeing": 4,
+ "high": 4,
+ "correctable": 4,
  "byField": {
-  "platform": 1
+  "streaming": 1,
+  "platform": 3,
+  "genres": 1
  },
  "rows": [
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "not streaming",
+   "tmdb": "on fuboTV",
+   "code": "us",
+   "slug": "an-egg-rescue"
+  },
   {
    "field": "platform",
    "severity": "high",
    "page": "WeTV",
    "tmdb": "Tencent Video",
    "code": "sg",
-   "slug": "princess-agents"
+   "slug": "fantasy-magician"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "HBO Max",
+   "tmdb": "Netflix",
+   "code": "ph",
+   "slug": "black-bag"
+  },
+  {
+   "field": "genres",
+   "severity": "low",
+   "page": "Drama / Mystery",
+   "tmdb": "Mystery, Thriller",
+   "code": "ph",
+   "slug": "black-bag"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "wavve, Watcha, WeTV",
+   "tmdb": "wavve, Watcha, Tencent Video",
+   "code": "kr",
+   "slug": "oh-my-venus"
   }
  ]
 }

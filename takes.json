@@ -9530,7 +9530,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-11-03",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt38672588": {
@@ -41451,7 +41451,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt14178824": {
@@ -97603,7 +97603,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt33402927": {
@@ -97662,7 +97662,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "movie:1752654": {
@@ -98401,5 +98401,90 @@
   "hook": null,
   "checked": "2026-11-05",
   "v": 6
+ },
+ "tt27995113": {
+  "take": "Critics liked it, especially the ambition.",
+  "src": "wiki",
+  "hook": null,
+  "article": "Black Doves",
+  "a": {
+   "tone": "positive",
+   "praised": [
+    "ambition"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 92
+   },
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 92,
+     "n": 71,
+     "avg": 7.5
+    },
+    "mc": {
+     "score": 78,
+     "n": 31
+    }
+   }
+  },
+  "checked": "2026-11-05",
+  "v": 6
+ },
+ "tt30291387": {
+  "take": "Critics came away cold, pointing mainly at the performances.",
+  "src": "wiki",
+  "hook": null,
+  "article": "All's Fair (2025 TV series)",
+  "a": {
+   "tone": "negative",
+   "praised": [],
+   "panned": [
+    "performances"
+   ],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 6
+   },
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 6
+    },
+    "mc": {
+     "score": 17,
+     "n": 15
+    }
+   }
+  },
+  "checked": "2026-11-05",
+  "v": 6
+ },
+ "tt37458193": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Minha Melhor Amiga",
+  "checked": "2026-11-05",
+  "v": 6
+ },
+ "tt38515310": {
+  "take": null,
+  "src": null,
+  "article": "A Dog's Perfect Christmas",
+  "checked": "2026-11-05",
+  "v": 6,
+  "cat": true
+ },
+ "tt44090225": {
+  "take": null,
+  "src": null,
+  "checked": "2026-11-05",
+  "v": 6,
+  "cat": true
  }
 }
