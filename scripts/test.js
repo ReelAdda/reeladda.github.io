@@ -10996,7 +10996,7 @@ group("score card: the method link inside the card, the sentence gone (rollout s
       assert.strictEqual(F.scoreLink(`<body>${off}</body>`), `<body>${on}</body>`, "the pass turns the old card into exactly the new one");
     } finally { R.resetRolloutCache(); }
     const cfg = require("../rollout.json").features["score-link"];
-    assert.deepStrictEqual(cfg.schedule.map((s) => s.percent), [10, 25, 50, 100], "rolled out in stages");
+    assert.strictEqual(cfg.percent, 100, "every film page, at the owner's request (5 Nov 2026)");
   });
 
   test("the vote box still finds its place on a card with no note", () => {
