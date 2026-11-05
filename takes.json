@@ -3926,7 +3926,7 @@
     }
    }
   },
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt39567879": {
@@ -5905,7 +5905,7 @@
     }
    }
   },
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "movie:1777082": {
@@ -7276,7 +7276,7 @@
   "src": null,
   "hook": null,
   "article": "Take Charge of My Heart",
-  "checked": "2026-11-01",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt35854736": {
@@ -8155,7 +8155,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "movie:1790414": {
@@ -18523,7 +18523,7 @@
   "src": null,
   "hook": null,
   "article": "Dragon Ball Super: Beerus",
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt0278866": {
@@ -45929,7 +45929,7 @@
   "src": null,
   "hook": "Premiered at the Tokyo International Film Festival.",
   "article": "Big World (film)",
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt27436132": {
@@ -50265,12 +50265,35 @@
   "v": 6
  },
  "tt13611778": {
-  "take": null,
-  "src": null,
+  "take": "The direction works, per reviewers; the writing less so.",
+  "src": "wiki",
+  "hook": null,
   "article": "The Mongoose (film)",
-  "checked": "2026-10-20",
-  "v": 6,
-  "cat": true
+  "a": {
+   "tone": null,
+   "praised": [
+    "direction"
+   ],
+   "panned": [
+    "writing"
+   ],
+   "divided": [
+    "action"
+   ],
+   "score": {
+    "kind": "rt",
+    "value": 33
+   },
+   "agg": {
+    "rt": {
+     "pct": 33,
+     "n": 24,
+     "avg": 5
+    }
+   }
+  },
+  "checked": "2026-11-05",
+  "v": 6
  },
  "tt32329539": {
   "take": null,
@@ -56224,7 +56247,7 @@
   "src": null,
   "hook": null,
   "article": "Love in Disguise (TV series)",
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt43658893": {
@@ -56232,7 +56255,7 @@
   "src": null,
   "hook": null,
   "article": "Paradise Lost (2026 film)",
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt47597140": {
@@ -71461,7 +71484,7 @@
   "src": null,
   "hook": "Lee Yong-jae's directorial debut.",
   "article": "Ugly Duckling Ms. Maeng",
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt0050974": {
@@ -97483,7 +97506,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt38999812": {
@@ -98098,7 +98121,7 @@
   "src": null,
   "hook": null,
   "article": "Final Interview",
-  "checked": "2026-11-04",
+  "checked": "2026-11-05",
   "v": 6
  },
  "tt37740990": {
@@ -98371,5 +98394,12 @@
   "checked": "2026-11-05",
   "v": 6,
   "cat": true
+ },
+ "tt39375825": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-11-05",
+  "v": 6
  }
 }

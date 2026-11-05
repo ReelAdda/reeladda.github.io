@@ -2,38 +2,20 @@
  "date": "2026-11-05",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 3,
- "high": 2,
- "correctable": 2,
+ "pagesDisagreeing": 1,
+ "high": 1,
+ "correctable": 1,
  "byField": {
-  "streaming": 1,
-  "director": 1,
   "platform": 1
  },
  "rows": [
   {
-   "field": "streaming",
-   "severity": "high",
-   "page": "not streaming",
-   "tmdb": "on Paramount+",
-   "code": "us",
-   "slug": "gone-girl"
-  },
-  {
-   "field": "director",
-   "severity": "medium",
-   "page": "Frant Gwo",
-   "tmdb": "Frant Guo Fan",
-   "code": "sg",
-   "slug": "the-wandering-earth"
-  },
-  {
    "field": "platform",
    "severity": "high",
-   "page": "Netflix, HBO Max",
-   "tmdb": "HBO Max",
-   "code": "nz",
-   "slug": "batman-begins"
+   "page": "WeTV",
+   "tmdb": "Tencent Video",
+   "code": "sg",
+   "slug": "princess-agents"
   }
  ]
 }
