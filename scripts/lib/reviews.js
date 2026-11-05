@@ -29,7 +29,11 @@ const REVIEW_LEAD_DAYS = 14;      // a review may run before the release date
 const FEED_TIMEOUT_MS = 15000;
 const UA = "Mozilla/5.0 (compatible; FilmyChillBot/1.0; +https://filmychill.com/about/; contact@filmychill.com)";
 // Not read, by its own feed terms: Onmanorama ("personal use", "no commercial use without express
-// consent", onmanorama.com/rss.html, read 31 Oct 2026). Rediff's page says its feeds are "available
+// consent", onmanorama.com/rss.html, read 31 Oct 2026). Removed on 5 Nov 2026 by their RSS pages'
+// terms (owner's call): Indian Express ("strictly for personal and non-commercial use",
+// indianexpress.com/rss/), NDTV ("for use by individuals for personal, non-commercial use",
+// ndtv.com/rss) and India Today ("restrains the user from putting the RSS feeds to commercial use
+// without express consent", indiatoday.in/rss). Rediff's page says its feeds are "available
 // free for individuals and non-profit organisations" and forbids nothing; it was off the list for a
 // day and came back on 2 Nov 2026 (owner's call): with it, 8 of the 12 Hindi titles in the window
 // had a review link, without it 5. An outlet that asks to be removed comes off the list above; its
@@ -42,19 +46,13 @@ const UA = "Mozilla/5.0 (compatible; FilmyChillBot/1.0; +https://filmychill.com/
 // and its last items kept (see refreshReviews).
 const FEEDS = [
   { name: "The Hindu", url: "https://www.thehindu.com/entertainment/reviews/feeder/default.rss", langs: "any" },
-  { name: "Indian Express", url: "https://indianexpress.com/section/entertainment/movie-review/feed/", langs: "any" },
-  { name: "Indian Express", url: "https://indianexpress.com/section/entertainment/tamil/feed/", langs: ["Tamil"] },
-  { name: "Indian Express", url: "https://indianexpress.com/section/entertainment/telugu/feed/", langs: ["Telugu"] },
-  { name: "Indian Express", url: "https://indianexpress.com/section/entertainment/malayalam/feed/", langs: ["Malayalam"] },
   { name: "Rediff", url: "https://www.rediff.com/rss/moviesreviewsrss.xml", langs: "any" },
   { name: "Hindustan Times", url: "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml", langs: "any" },
-  { name: "NDTV", url: "https://feeds.feedburner.com/ndtvmovies-latest", langs: "any" },
   { name: "Firstpost", url: "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml", langs: "any" },
   { name: "News18", url: "https://www.news18.com/rss/movies.xml", langs: "any" },
   { name: "Scroll", url: "https://feeds.feedburner.com/ScrollinArticles.rss", langs: "any" },
   { name: "Koimoi", url: "https://www.koimoi.com/feed/", langs: "any" },
   { name: "Times of India", url: "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms", langs: "any" },
-  { name: "India Today", url: "https://www.indiatoday.in/rss/1206611", langs: "any" },
   { name: "DNA", url: "https://www.dnaindia.com/feeds/entertainment.xml", langs: "any" },
   { name: "Free Press Journal", url: "https://www.freepressjournal.in/stories.rss?section=entertainment", langs: "any" },
   { name: "123telugu", url: "https://www.123telugu.com/category/reviews/feed", langs: ["Telugu"] },
