@@ -5234,7 +5234,9 @@ test("data page states sample size and refuses to invent a median", () => {
   ], "26 August 2026", { inCinemas: 7 });
   assert.ok(/Films<\/th>/.test(withData), "sample size is published next to every median");
   assert.ok(/attribution/i.test(withData), "reuse terms are stated");
-  assert.ok(/3 cinema releases tracked/.test(withData) && /7 more are in cinemas now/.test(withData));
+  assert.ok(/across 3 films we saw arrive/.test(withData) && /7 more films are in cinemas now/.test(withData), "measured count and films still in cinemas, each labelled");
+  assert.ok(/Which number to quote/.test(withData) && /This is the headline figure/.test(withData), "the page says which figure to quote");
+  assert.ok(/Cite as:/.test(withData), "a citation line");
   assert.ok(/Correction, 4 October 2026/.test(withData), "the old figure's flaw is stated, not buried");
 });
 
@@ -7046,16 +7048,38 @@ test("data page: India section keeps measured and TMDB figures apart, with count
   const recs = Array.from({ length: 6 }, (_, i) => ({ c: "in", k: "movie", id: i + 1, th: "2026-08-01", first: `2026-09-${String(10 + i).padStart(2, "0")}`, lang: "Telugu", seen: i ? `2026-09-${String(10 + i).padStart(2, "0")}T00:00:00Z` : "2026-08-27T00:00:00Z" }));
   const films = {};
   for (let i = 0; i < 25; i++) films[i] = { t: "H" + i, lang: "Hindi", votes: 50, th: "2025-02-01", dig: "2025-04-01" };
-  const html = S2.indiaDataSection(recs, IND.digitalStats({ films }, { today: "2026-10-17" }));
-  assert.ok(/India: from cinema to streaming/.test(html));
-  assert.ok(/Measured by FilmyChill/.test(html) && /From TMDB&#39;s digital release dates|From TMDB's digital release dates/.test(html));
+  const dg = IND.digitalStats({ films }, { today: "2026-10-17" });
+  const html = S2.indiaDataSection(recs, dg) + S2.tmdbIndiaSection(dg);
+  assert.ok(/India: measured by FilmyChill/.test(html));
+  assert.ok(/From TMDB&#39;s digital release dates|From TMDB's digital release dates/.test(html));
   assert.ok(/<td>Telugu<\/td><td class="n">\d+<\/td><td class="n">6\*<\/td>/.test(html), "a small measured group is marked");
   assert.ok(/<td>Hindi<\/td><td class="n">59<\/td><td class="n">25<\/td>/.test(html), "Hindi from digital dates, 59 days");
   assert.ok(/Coverage: 100% of films with 20 or more ratings/.test(html));
-  const thin = S2.indiaDataSection(recs, IND.digitalStats({ films: { 1: films[1] } }, { today: "2026-10-17" }));
+  const thin = S2.tmdbIndiaSection(IND.digitalStats({ films: { 1: films[1] } }, { today: "2026-10-17" }));
   assert.ok(!/digital release dates,/.test(thin), "too few dated films: the TMDB table isn't shown");
   const csv = S2.buildDigitalCsv({ films: { 7: { t: 'A "B"', lang: "Hindi", th: "2025-02-01", dig: "2025-04-01", note: "Netflix" }, 8: { t: "No", th: "2025-01-01" } } });
   assert.strictEqual(csv, 'tmdb_id,title,language,cinema_release_in,digital_release_in,platform_note,window_days\n7,"A ""B""","Hindi",2025-02-01,2025-04-01,"Netflix",59\n');
+});
+test("data page: every table's rows plus its small-group line add up to the total stated above it (5 Nov 2026)", () => {
+  const mk = (i, lang, p) => ({ c: "us", k: "movie", id: 100 + i, th: "2026-09-01", first: `2026-10-${String(1 + i).padStart(2, "0")}`, lang, p, seen: "2026-10-01T00:00:00Z" });
+  const recs = [{ c: "us", k: "movie", id: 1, th: "2026-08-01", first: "2026-08-20", lang: "English", p: "Netflix", seen: "2026-08-20T00:00:00Z" }];
+  for (let i = 0; i < 4; i++) recs.push(mk(i, "English", "Netflix"));
+  for (let i = 4; i < 6; i++) recs.push(mk(i, "Korean", "Viu"));
+  const html = U.buildDataPage(recs, "5 November 2026", { inCinemas: 2 });
+  assert.ok(/across 6 films we saw arrive/.test(html), "6 measured");
+  assert.ok(/<td>English<\/td><td class="n">\d+<\/td><td class="n">4<\/td>/.test(html) && /plus 2 films in languages with fewer than 3 films/.test(html), "4 in a row + 2 in the line = 6");
+  assert.ok(/plus 2 films in platforms with fewer than 3 films/.test(html), "the platform table too");
+  assert.ok(!/plus 0 film/.test(html), "no empty line");
+  const IND2 = require("./lib/indiadata.js");
+  assert.deepStrictEqual(["ZEE5", "Zee5", "Hotstar", "Disney+ Hotstar", "Amazon Prime Video", "Prime Video", "", "Sony Liv"].map(IND2.platformOf), ["ZEE5", "ZEE5", "JioHotstar", "JioHotstar", "Prime Video", "Prime Video", null, "Sony LIV"], "one name per service");
+  const films = {};
+  for (let i = 0; i < 22; i++) films[i] = { t: "F" + i, lang: i < 20 ? "Hindi" : "Tamil", votes: 30, th: "2025-01-01", dig: "2025-03-02", note: i < 6 ? "Netflix" : i < 8 ? "Zee5" : "" };
+  const d = IND2.digitalStats({ films }, { today: "2026-11-05" });
+  const sec = require("./lib/surfaces.js").tmdbIndiaSection(d);
+  assert.ok(/TMDB names the platform for 8 of the 22 films; the other 14 are counted above but not here/.test(sec), "named and unnamed both stated");
+  assert.ok(/plus 2 films in platforms with fewer than 5 films/.test(sec) && /plus 2 films in languages with fewer than 5 films/.test(sec), "Zee5 (2) and Tamil (2) accounted for");
+  const chart = require("./lib/surfaces.js").medianBarChart([{ key: "Telugu", median: 28, n: 184 }, { key: "Hindi", median: 56, n: 160 }], { title: "T", source: "S" });
+  assert.ok(/<svg [^>]*role="img"/.test(chart) && /Telugu 28 days, Hindi 56 days/.test(chart) && !/<script/.test(chart), "an accessible chart with no script");
 });
 test("early arrivals: a placeholder or unconfirmed short window is never published (Drishyam, Oct 2026)", () => {
   const starts = { us: "2026-08-27" };

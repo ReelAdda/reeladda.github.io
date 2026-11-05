@@ -139,6 +139,21 @@ function digitalWindow(f) {
 }
 
 // Pure: the published figures. Groups under PUBLISH_MIN films are kept but flagged.
+// TMDB's free-text platform note, one name per service (contributors write "ZEE5" and "Zee5",
+// "Hotstar" and "JioHotstar"). Null when the note is empty.
+const PLATFORM_NAMES = [
+  [/^(amazon )?prime( video)?$/i, "Prime Video"], [/^amazon prime video$/i, "Prime Video"], [/^netflix$/i, "Netflix"],
+  [/^zee ?5$/i, "ZEE5"], [/^(jio ?hotstar|hotstar|disney\+ ?hotstar)$/i, "JioHotstar"], [/^sony ?liv$/i, "Sony LIV"],
+  [/^sun ?nxt$/i, "Sun NXT"], [/^aha$/i, "aha"], [/^hoichoi$/i, "Hoichoi"], [/^jio ?cinema$/i, "JioCinema"],
+  [/^etv ?win$/i, "ETV Win"], [/^manorama ?max$/i, "ManoramaMAX"], [/^chaupal$/i, "Chaupal"], [/^youtube$/i, "YouTube"],
+];
+function platformOf(note) {
+  const n = String(note || "").trim();
+  if (!n) return null;
+  for (const [re, name] of PLATFORM_NAMES) if (re.test(n)) return name;
+  return n;
+}
+
 function digitalStats(store, { today = iso(Date.now()) } = {}) {
   const films = Object.values((store && store.films) || {}).filter((f) => f && f.th && f.th <= today);
   const rows = films.map((f) => ({ f, w: digitalWindow(f) }));
@@ -161,6 +176,9 @@ function digitalStats(store, { today = iso(Date.now()) } = {}) {
     from: ths[0] || null, to: ths[ths.length - 1] || null,
     byLanguage: group((f) => f.lang),
     byYear: group((f) => String(f.th).slice(0, 4)).sort((a, b) => a.key.localeCompare(b.key)),
+    // By platform, where TMDB's note names one (many entries leave it blank).
+    byPlatform: group((f) => platformOf(f.note)).sort((a, b) => a.median - b.median || b.n - a.n),
+    platformNamed: ok.filter((x) => platformOf(x.f.note)).length,
     excluded: why,
   };
 }
@@ -221,5 +239,5 @@ async function runDigitalBackfill({ api, today, budget = 300, store = readJson(D
 
 module.exports = {
   CENSUS_FILE, DIGITAL_FILE, INDIAN_LANGS, PUBLISH_MIN,
-  digitalStats, digitalWindow, digitalWindows, indiaCinemaCensus, runDigitalBackfill,
+  digitalStats, digitalWindow, digitalWindows, indiaCinemaCensus, platformOf, runDigitalBackfill,
 };

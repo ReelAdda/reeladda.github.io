@@ -439,9 +439,38 @@ function streamingPagesFor(code) {
 // pages said 6–8 weeks. It now counts films that opened in cinemas in that country, from
 // arrivals we actually saw (windowStats / cinemaWindowDays in lib/history.js), and says so.
 // ============================================================================
-// India, the site's largest audience, on its own: what we measured, and what TMDB's digital
-// release dates say for earlier years, side by side and never mixed (lib/indiadata.js). Every
-// row carries its film count; a group under PUBLISH_MIN films is marked as an early reading.
+// The data page (rewritten 5 Nov 2026 so every count on it adds up). Two sources, never mixed:
+// FilmyChill's own daily checks in every country, and TMDB's digital release dates for India.
+// A box at the top says which figure is which; every table says how many films its hidden
+// small groups hold, so its rows reach the total stated above it; every count comes from the
+// same stats object as the median beside it.
+const DP_SMALL = "plus {n} film{s} in {what} with fewer than {min} films, counted in the total but not given a row";
+const plusLine = (n, what, min) => (n > 0
+  ? `<p class="plus">${DP_SMALL.replace("{n}", String(n)).replace("{s}", n === 1 ? "" : "s").replace("{what}", what).replace("{min}", String(min))}.</p>` : "");
+const sumN = (rows) => rows.reduce((a, r) => a + r.n, 0);
+const dayHuman = (x) => new Date(`${x}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+const monthHuman = (x) => new Date(`${x}T00:00:00Z`).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
+
+// Pure: a horizontal bar chart (inline SVG, no script) of median days by group.
+function medianBarChart(rows, { title, source }) {
+  const e = escHtml;
+  const max = Math.max(...rows.map((r) => r.median), 1);
+  const rowH = 38, top = 8, labelW = 100, barW = 280, h = top + rows.length * rowH + 6;
+  const bars = rows.map((r, i) => {
+    const y = top + i * rowH, w = Math.max(4, Math.round((r.median / max) * barW));
+    return `<text x="${labelW - 10}" y="${y + 20}" text-anchor="end" class="cl">${e(r.key)}</text>`
+      + `<rect x="${labelW}" y="${y + 6}" width="${w}" height="20" rx="4" class="cb"></rect>`
+      + `<text x="${labelW + w + 8}" y="${y + 21}" class="cv">${r.median} days</text>`
+      + `<text x="${labelW + w + 8 + String(r.median).length * 10 + 52}" y="${y + 21}" class="cn">${r.n} films</text>`;
+  }).join("");
+  return `<figure class="chart"><figcaption>${e(title)}</figcaption>
+  <svg viewBox="0 0 560 ${h}" role="img" aria-label="${e(title)}: ${e(rows.map((r) => `${r.key} ${r.median} days`).join(", "))}">${bars}</svg>
+  <div class="src">${e(source)}</div></figure>`;
+}
+
+// India, the site's largest audience: what we measured, and what TMDB's digital release dates
+// say for earlier years, side by side and never mixed (lib/indiadata.js). Every row carries its
+// film count; a group under PUBLISH_MIN films is marked as an early reading.
 function indiaDataSection(records, digital) {
   const e = escHtml;
   const m = windowStats(records, { code: "in" });
@@ -449,38 +478,62 @@ function indiaDataSection(records, digital) {
   const table = (head, rows, extra = null) => `<table><thead><tr><th>${e(head)}</th><th class="n">Median days</th><th class="n">Films</th>${extra ? `<th class="n">${e(extra)}</th>` : ""}</tr></thead><tbody>`
     + rows.map((r) => `<tr><td>${e(r.key)}</td><td class="n">${r.median}</td><td class="n">${fmtN(r)}</td>${extra ? `<td class="n">${r.of}</td>` : ""}</tr>`).join("") + "</tbody></table>";
   const measuredRows = m.byLanguage.map((r) => ({ ...r, small: r.n < PUBLISH_MIN }));
-  let out = `<h2 id="india">India: from cinema to streaming</h2>
-  <h3>Measured by FilmyChill</h3>`;
+  let out = `<h3 id="india">India: measured by FilmyChill</h3>`;
   out += measuredRows.length
-    ? `<p class="sub">${e(String(m.measured))} films we saw arrive on streaming in India${m.overall != null ? `, median ${m.overall} days` : ""}. Since October 2026 every Indian-language film in Indian cinemas is tracked, not only the ones on our lists.</p>${table("Language", measuredRows)}`
+    ? `<p class="sub">${e(String(m.measured))} films we saw arrive on streaming in India${m.overall != null ? `, median ${m.overall} days` : ""}. Since October 2026 every Indian-language film in Indian cinemas is tracked, not only the ones on our lists. Languages with few measured films (Hindi among them, so far) have no row yet.</p>${table("Language", measuredRows)}${plusLine(m.measured - sumN(measuredRows), "languages", 3)}`
     : `<p class="sub">Not enough films measured yet.</p>`;
+  out += `<p class="plus">* Fewer than ${PUBLISH_MIN} films: an early reading, not a finding.</p>`;
+  return out;
+}
+
+// TMDB's digital release dates for India: the longer record, a different source.
+function tmdbIndiaSection(digital) {
+  const e = escHtml;
   const d = digital;
-  if (d && d.measured >= PUBLISH_MIN) {
-    const yr = (x) => new Date(`${x}T00:00:00Z`).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
-    const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
-    out += `<h3>From TMDB's digital release dates, ${e(yr(d.from))} to ${e(yr(d.to))}</h3>
+  if (!d || d.measured < PUBLISH_MIN) return "";
+  const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
+  const fmtN = (r) => `${r.n}${r.small ? "*" : ""}`;
+  const table = (head, rows, extra = null) => `<table><thead><tr><th>${e(head)}</th><th class="n">Median days</th><th class="n">Films</th>${extra ? `<th class="n">${e(extra)}</th>` : ""}</tr></thead><tbody>`
+    + rows.map((r) => `<tr><td>${e(r.key)}</td><td class="n">${r.median}</td><td class="n">${fmtN(r)}</td>${extra ? `<td class="n">${r.of}</td>` : ""}</tr>`).join("") + "</tbody></table>";
+  let out = `<h2 id="tmdb">From TMDB's digital release dates: India, ${e(monthHuman(d.from))} to ${e(monthHuman(d.to))}</h2>
   <p class="sub">Median ${d.overall} days across ${e(String(d.measured))} Indian-language films that opened in Indian cinemas.
   Coverage: ${pct(d.notable.measured, d.notable.films)}% of films with 20 or more ratings on TMDB have a usable digital date
   (${e(String(d.notable.measured))} of ${e(String(d.notable.films))}); ${pct(d.measured, d.films)}% of all ${e(String(d.films))}.</p>
-  ${table("Language", d.byLanguage, "Released")}
-  ${d.byYear.length ? table("Cinema release year", d.byYear, "Released") : ""}`;
+  <h3>By language</h3>${table("Language", d.byLanguage, "Released")}${plusLine(d.measured - sumN(d.byLanguage), "languages", 5)}`;
+  if (d.byPlatform && d.byPlatform.length) {
+    out += `<h3>By platform</h3>
+  <p class="sub">TMDB names the platform for ${e(String(d.platformNamed))} of the ${e(String(d.measured))} films; the other ${e(String(d.measured - d.platformNamed))} are counted above but not here.</p>
+  ${table("Platform", d.byPlatform)}${plusLine(d.platformNamed - sumN(d.byPlatform), "platforms", 5)}`;
   }
-  out += `<p class="sub">* Fewer than ${PUBLISH_MIN} films: an early reading, not a finding.</p>`;
+  if (d.byYear.length) out += `<h3>By cinema release year</h3>${table("Cinema release year", d.byYear, "Released")}${plusLine(d.measured - sumN(d.byYear), "years", 5)}`;
+  out += `<p class="plus">* Fewer than ${PUBLISH_MIN} films: an early reading, not a finding.</p>`;
   return out;
 }
 
 function buildDataPage(records, updatedHuman, { inCinemas = 0, digital = null } = {}) {
   const e = escHtml;
   const s = windowStats(records);
+  const india = windowStats(records, { code: "in" });
+  const starts = Object.values(observationStarts(records)).filter(Boolean).sort();
+  const since = starts.length ? dayHuman(starts[0]) : null;
+  const unmeasured = s.total - s.measured;
   const row = (r) => `<tr><td>${e(r.key)}</td><td class="n">${r.median}</td><td class="n">${r.n}</td></tr>`;
-  const table = (title, rows) => !rows.length ? "" :
-    `<h2>${e(title)}</h2><table><thead><tr><th>${title.includes("language") ? "Language" : "Platform"}</th>`
-    + `<th class="n">Median days</th><th class="n">Films</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>`;
+  const table = (title, head, rows, what) => !rows.length ? "" :
+    `<h3>${e(title)}</h3><table><thead><tr><th>${head}</th>`
+    + `<th class="n">Median days</th><th class="n">Films</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>${plusLine(s.measured - sumN(rows), what, 3)}`;
+  const d = digital && digital.measured >= PUBLISH_MIN ? digital : null;
+  const topLangs = india.byLanguage.slice().sort((a, b) => b.n - a.n).slice(0, 2).map((r) => r.key);
+  const chartRows = d ? d.byLanguage.filter((r) => !r.small).slice().sort((a, b) => a.median - b.median) : [];
+  const quote = [
+    s.overall != null ? `<li><b>${s.overall} days</b>: the median for ${e(String(s.measured))} films in ${COUNTRIES.length} countries whose move from cinema to streaming FilmyChill saw itself${since ? `, since ${e(since)}` : ""}. This is the headline figure on this page.</li>` : "",
+    d ? `<li><b>${d.overall} days</b>: the median for ${e(String(d.measured))} Indian-language films, from TMDB's digital release dates, ${e(monthHuman(d.from))} to ${e(monthHuman(d.to))}. The longer record for India.</li>` : "",
+    india.overall != null ? `<li><b>${india.overall} days</b>: India from FilmyChill's own checks, ${e(String(india.measured))} films since October 2026. An early reading${topLangs.length ? `, mostly ${e(topLangs.join(" and "))} films so far` : ""}.</li>` : "",
+  ].filter(Boolean).join("\n    ");
   return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 ${analyticsTag()}
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How long films take to reach streaming — FilmyChill data</title>
-<meta name="description" content="How many days films take to go from their cinema release to streaming, measured daily by FilmyChill across ${e(String(s.total))} cinema releases in ${COUNTRIES.length} countries. Free to use with attribution.">
+<meta name="description" content="Days from cinema release to streaming: ${e(String(s.measured))} films FilmyChill saw arrive in ${COUNTRIES.length} countries${d ? `, and ${e(String(d.measured))} Indian films from TMDB's release dates` : ""}. Free to use with attribution.">
 ${ICON_LINKS}
 <link rel="canonical" href="https://filmychill.com/data/">
 <meta name="robots" content="max-image-preview:large">
@@ -489,27 +542,45 @@ ${ICON_LINKS}
 <style>
   body { font-family: system-ui,-apple-system,sans-serif; max-width: 780px; margin: 0 auto;
          padding: 26px 18px 70px; background: #FFF7EC; color: #1A1633; line-height: 1.65; }
-  h1 { font-size: 28px; margin-bottom: 6px; } h2 { font-size: 19px; margin-top: 32px; }
-  .sub { color: #6B6890; font-size: 14px; }
-  .big { font-size: 46px; font-weight: 800; color: #4038C7; margin: 18px 0 2px; }
-  table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 15px; }
+  h1 { font-size: 28px; margin-bottom: 6px; } h2 { font-size: 21px; margin-top: 38px; } h3 { font-size: 16px; margin: 24px 0 4px; }
+  .sub { color: #5E5A80; font-size: 14px; }
+  .plus { color: #5E5A80; font-size: 13px; margin: 6px 0 0; }
+  .big { font-size: 46px; font-weight: 800; color: #4038C7; margin: 14px 0 2px; }
+  .quote { background: #fff; border: 1px solid #E7DFD0; border-radius: 12px; padding: 14px 18px; margin-top: 20px; }
+  .quote .qh { font-weight: 700; } .quote ul { margin: 6px 0 0; padding-left: 20px; } .quote li { margin: 6px 0; }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 15px; }
   th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #E7DFD0; }
-  th { font-size: 13px; color: #6B6890; font-weight: 600; } .n { text-align: right; }
+  th { font-size: 13px; color: #5E5A80; font-weight: 600; } .n { text-align: right; }
+  .chart { margin: 26px 0 0; } .chart figcaption { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .chart svg { width: 100%; max-width: 640px; height: auto; display: block; }
+  .chart .cl { font-size: 16px; fill: #1A1633; } .chart .cb { fill: #4038C7; } .chart .cv { font-size: 16px; font-weight: 700; fill: #1A1633; } .chart .cn { font-size: 15px; fill: #5E5A80; }
+  .chart .src { font-size: 12px; color: #5E5A80; }
   .method { background: #fff; border-radius: 10px; padding: 14px 16px; margin-top: 26px; font-size: 14px; }
+  .cite { background: #fff; border-left: 4px solid #FFAD1F; padding: 10px 14px; font-size: 14px; }
   a { color: #4038C7; } code { background: #fff; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
-  footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #E7DFD0; font-size: 13px; color: #6B6890; }
+  footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #E7DFD0; font-size: 13px; color: #5E5A80; }
 </style></head><body>
   <h1>How long does a film take to reach streaming?</h1>
-  <div class="sub">Measured by FilmyChill, updated ${e(updatedHuman)} · ${e(String(s.total))} cinema releases tracked across ${COUNTRIES.length} countries</div>
+  <div class="sub">Updated ${e(updatedHuman)} · two sources, kept apart: FilmyChill's own daily checks in ${COUNTRIES.length} countries, and TMDB's digital release dates for India</div>
 
+  ${quote ? `<div class="quote"><div class="qh">Which number to quote</div>
+  <ul>
+    ${quote}
+  </ul></div>` : ""}
+
+  ${chartRows.length >= 3 ? medianBarChart(chartRows, { title: "Median days from cinema to streaming, Indian-language films", source: `Source: TMDB digital release dates for India, ${monthHuman(d.from)} to ${monthHuman(d.to)}; ${d.measured} films. Compiled by FilmyChill.` }) : ""}
+
+  <h2 id="measured">FilmyChill's own measurements${since ? `, since ${e(since)}` : ""}</h2>
   ${s.overall != null ? `<div class="big">${s.overall} days</div>
-  <div class="sub">median from cinema release to first streaming sighting, across ${e(String(s.measured))} films we saw arrive${inCinemas ? ` · ${e(String(inCinemas))} more are in cinemas now` : ""}</div>` :
+  <div class="sub">median from cinema release to first streaming sighting, across ${e(String(s.measured))} films we saw arrive in ${COUNTRIES.length} countries.${unmeasured > 0 ? ` Our archive holds ${e(String(s.total))} cinema releases that reached streaming; the other ${e(String(unmeasured))} have no usable window: they were already streaming when we started watching their country, a later check disproved the sighting, the gap ran over two years, or a very short window is still waiting for a confirming check.` : ""}${inCinemas ? ` ${e(String(inCinemas))} more films are in cinemas now and join the figures when they reach streaming.` : ""}</div>` :
   `<p>Not enough measured films yet to publish a median. The archive is still filling.</p>`}
 
-  ${table("Median window by language", s.byLanguage)}
-  ${table("Median window by platform", s.byPlatform)}
+  ${table("By language", "Language", s.byLanguage, "languages")}
+  ${table("By platform", "Platform", s.byPlatform, "platforms")}
 
   ${indiaDataSection(records, digital)}
+
+  ${tmdbIndiaSection(digital)}
 
   <div class="method">
     <b>Method.</b> FilmyChill checks streaming availability every day in ${COUNTRIES.length} countries and records the
@@ -517,15 +588,15 @@ ${ICON_LINKS}
     the window runs from that country's cinema release (TMDB's theatrical date for it) to our first sighting
     on a streaming service. TV series and straight-to-streaming films are left out, and so are films that
     were already streaming when we started watching a country, because we never saw them arrive. Gaps over
-    two years are excluded, and groups with fewer than three films are not shown. Films still in cinemas join
-    the figures when they reach streaming, so while the archive is young the medians lean towards faster
-    releases. This is a record of when a film became <i>visible to us</i>, which is normally the day it
-    drops but is not a studio announcement.
+    two years are excluded. Groups too small for their own row are counted in each total, and the line under
+    each table says how many. Films still in cinemas join the figures when they reach streaming, so while the
+    archive is young the medians lean towards faster releases. This is a record of when a film became
+    <i>visible to us</i>, which is normally the day it drops but is not a studio announcement.
     <br><br><b>India.</b> Measured figures cover every Indian-language film TMDB lists as opening in Indian
     cinemas, from October 2026; earlier, only films on our own lists were followed. A film already streaming
-    when we began following it is left out. The second India table uses a different source: the digital release
+    when we began following it is left out. The TMDB figures use a different source: the digital release
     date TMDB's contributors record for India, which for Indian films is normally the streaming premiere. It
-    reaches back to 2023, but it is volunteer-entered, so we publish its coverage beside it and never mix it
+    reaches back further, but it is volunteer-entered, so we publish its coverage beside it and never mix it
     with our own measurements. Films whose digital date comes before their cinema date, or more than a year
     after it, are left out. The rows behind it are in <a href="/data/india-digital-windows.csv">this CSV</a>.
     <br><br><b>Correction, 4 October 2026.</b> Earlier versions of this page also counted TV series,
@@ -536,6 +607,7 @@ ${ICON_LINKS}
   <p>The full record is available as <a href="/data/streaming-windows.csv">CSV</a>, free to use for any
   purpose including commercially, with attribution to FilmyChill and a link to this page. No API key,
   no signup. If you're writing something and want a cut we don't publish here, ask.</p>
+  <p class="cite"><b>Cite as:</b> FilmyChill, "How long does a film take to reach streaming?", updated ${e(updatedHuman)}, https://filmychill.com/data/</p>
 
   <footer><a href="/">← FilmyChill</a> · <a href="/about/">About</a></footer>
 </body></html>`;
@@ -866,6 +938,8 @@ module.exports = {
   buildDataPage,
   buildDigitalCsv,
   indiaDataSection,
+  medianBarChart,
+  tmdbIndiaSection,
   buildHeadTags,
   buildHomeJsonLd,
   buildMoreLinks,
