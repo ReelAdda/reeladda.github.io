@@ -62,6 +62,12 @@
    "since": "2026-10-31",
    "what": "published reviews from the outlets' own RSS feeds (lib/reviews.js, reviews.json; headline, link and date only; 22 feeds, Onmanorama and Rediff excluded by their feed terms): the score card's own sentence names the outlets and links out ('…; 3 reviews out, in X, Y and Z.' / ' · Reviews: X, Y'), a star rating only where the headline states one; an FAQ names them. Only where the card has no critics' reading (no score, or an audience-only score with nothing cited). All languages, every edition's page for the film. Mock-up 31 Oct; switched to 100% at once on 31 Oct 2026 at the owner's go (about 5 pages that day)."
   },
+  "score-link": {
+   "percent": 0,
+   "schedule": [{ "from": "2026-11-05T12:00", "percent": 10 }, { "from": "2026-11-06T12:00", "percent": 25 }, { "from": "2026-11-07T12:00", "percent": 50 }, { "from": "2026-11-08T12:00", "percent": 100 }],
+   "since": "2026-11-05",
+   "what": "the score card's explanatory sentence ('The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score.') removed; its 'How the score works' link moves to the end of the card's Audience/Critics line (lib/filmpage.js fcScoreSection, scoreLink). Every film page including hidden ones, by slug, in stages: 10% at the 5 Nov afternoon build, 25% 6 Nov, 50% 7 Nov, 100% 8 Nov. Presentation only: not in the facts fingerprint, no sitemap date moves. Mock-up (option A) approved 5 Nov 2026."
+  },
   "arrival-alerts": {
    "percent": 100,
    "since": "2026-11-05",

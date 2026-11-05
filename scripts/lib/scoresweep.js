@@ -187,7 +187,10 @@ function injectVote(html, item, code) {
   const widget = voteWidgetHtml(item, code);
   if (!widget) return html;
   // After the card's note, or after the compact line on a page with no score yet.
-  const m = html.match(/<p class="fcsb-note">[\s\S]*?<\/p>|<section class="fcsb fcsb-compact" id="filmychill-score">[\s\S]*?<\/section>/);
+  // A card whose note moved into it (rollout "score-link") is the anchor itself, but only
+  // when there is no note: a card always comes before its note.
+  const m = html.match(/<p class="fcsb-note">[\s\S]*?<\/p>|<section class="fcsb fcsb-compact" id="filmychill-score">[\s\S]*?<\/section>/)
+    || html.match(/<section class="fcsb" id="filmychill-score">[\s\S]*?<\/section>/);
   if (!m) return html;
   const at = m.index + m[0].length;
   return cspAllowVotes(html.slice(0, at) + "\n  " + widget + html.slice(at));

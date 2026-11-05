@@ -10955,6 +10955,61 @@ group("arrival alerts (lib/alerts.js, 5 Nov 2026)");
 }
 
 
+group("score card: the method link inside the card, the sentence gone (rollout score-link, 5 Nov 2026)");
+{
+  const F = require("./lib/filmpage.js"), W = require("./lib/scoresweep.js"), R = require("./lib/rollout.js");
+  const HOW = '<a href="/about/#score">How the score works</a>';
+  const NOTE = `<p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. ${HOW}</p>`;
+  const card = (line) => `<section class="fcsb" id="filmychill-score">\n    <div class="fcsb-label">FilmyChill score</div>\n    ${line}\n  </section>`;
+  const LINE = '<p class="fcsb-line"><b>Audience:</b> 729 ratings on TMDB · <b>Critics:</b> positive, 95% on Rotten Tomatoes</p>';
+  const VOTE = '<div class="fcvote" data-film="tv-1" data-c="in" hidden></div>';
+
+  test("scoreLink: the link joins the card's line, the note goes, the vote box stays put, idempotent", () => {
+    const page = `<body>${card(LINE)}\n  ${NOTE}\n  ${VOTE}<h2>X</h2></body>`;
+    const out = F.scoreLink(page);
+    assert.ok(out.includes(`95% on Rotten Tomatoes · ${HOW}</p>`), "at the end of the Audience/Critics line");
+    assert.ok(!/fcsb-note/.test(out) && !/No studio or platform/.test(out), "the sentence is gone");
+    assert.strictEqual((out.match(/How the score works/g) || []).length, 1, "one link");
+    assert.ok(/<\/section>\n  <div class="fcvote"/.test(out), "the vote box right under the card");
+    assert.strictEqual(F.scoreLink(out), out, "a second pass changes nothing");
+    assert.strictEqual(F.scoreLink("<body><h2>No card</h2></body>"), "<body><h2>No card</h2></body>");
+  });
+
+  test("scoreLink: an older card with no Audience/Critics line keeps the link alone under it", () => {
+    const rows = card('<div class="fcsb-rows"><div class="fcsb-row">Audience</div></div>');
+    const out = F.scoreLink(`<body>${rows}\n  ${NOTE}<h2>X</h2></body>`);
+    assert.ok(out.includes(`</section>\n  <p class="fcsb-note">${HOW}</p>`) && !/No studio/.test(out));
+    assert.strictEqual(F.scoreLink(out), out);
+  });
+
+  test("the template writes the same card for pages in the rollout, and the note for the rest", () => {
+    const item = { slug: "clayface", title: "Clayface", kind: "movie", rating: 7.4, votes: 900,
+      fcScore: { verdict: "Worth a watch", reason: "Critics are warmer than audiences.", audience: "Liked", critics: "positive" } };
+    try {
+      R.useRolloutConfig({ features: { "page-v3": { percent: 100 }, "score-link": { percent: 100 } } });
+      const on = F.fcScoreSection(item);
+      assert.ok(/ · <a href="\/about\/#score">How the score works<\/a><\/p>\n  <\/section>$/.test(on) && !/fcsb-note/.test(on), "link in the line, no note");
+      assert.strictEqual(F.scoreLink(`<body>${on}</body>`), `<body>${on}</body>`, "the pass leaves a fresh render alone");
+      R.useRolloutConfig({ features: { "page-v3": { percent: 100 }, "score-link": { percent: 0 } } });
+      const off = F.fcScoreSection(item);
+      assert.ok(off.includes(NOTE), "outside the rollout: unchanged");
+      assert.strictEqual(F.scoreLink(`<body>${off}</body>`), `<body>${on}</body>`, "the pass turns the old card into exactly the new one");
+    } finally { R.resetRolloutCache(); }
+    const cfg = require("../rollout.json").features["score-link"];
+    assert.deepStrictEqual(cfg.schedule.map((s) => s.percent), [10, 25, 50, 100], "rolled out in stages");
+  });
+
+  test("the vote box still finds its place on a card with no note", () => {
+    const item = { tmdbId: 5, kind: "movie", released: "2026-01-01" };
+    const html = `<html><head><meta http-equiv="Content-Security-Policy" content="default-src 'self';"></head><body>${card(LINE.replace("</p>", ` · ${HOW}</p>`))}<h2>X</h2></body></html>`;
+    const out = W.injectVote(html, item, "in");
+    assert.ok(/<\/section>\n  <div class="fcvote" data-film="movie-5"/.test(out), "right under the card");
+    const withNote = `<html><head><meta http-equiv="Content-Security-Policy" content="default-src 'self';"></head><body>${card(LINE)}\n  ${NOTE}<h2>X</h2></body></html>`;
+    assert.ok(W.injectVote(withNote, item, "in").indexOf("fcvote") > W.injectVote(withNote, item, "in").indexOf("fcsb-note"), "after the note where there still is one");
+  });
+}
+
+
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");
   for (const [name, fn, grp] of ASYNC_TESTS) {

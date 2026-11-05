@@ -2918,6 +2918,12 @@ async function main() {
       const t = applyLeanTrim(filmPageFiles());
       if (t.changed) console.log(`Lean pages: ${t.changed} "not streaming yet" lead(s) trimmed`);
     } catch (e) { stageFailed("lean trim", e); }
+    // The score card's method link moves into the card and the sentence under it goes (rollout
+    // "score-link", lib/filmpage.js scoreLink): every film page, hidden ones included.
+    try {
+      const sl = require("./lib/filmpage.js").applyScoreLink(filmPageFiles());
+      if (sl.changed) console.log(`Score link: ${sl.changed} of ${sl.pages} switched page(s) updated`);
+    } catch (e) { stageFailed("score link", e, { optional: true }); }
     // Plain wording, then the audit (lib/humanprose.js; rollout.json "human-prose"). The sweeps'
     // sentences go plain after the last writer, on pages drawn from their facts; then every page
     // the rollout has switched is scanned for signs of AI writing. A hit is flagged in the run

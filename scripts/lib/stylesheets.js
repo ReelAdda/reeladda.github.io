@@ -188,7 +188,7 @@ const escDecode = (s) => s.replace(/&#39;/g, "'").replace(/&amp;/g, "&");
 // line fcScoreSection now writes, built from the card's own stamp and audience row, and the
 // answer moves above it. Live renders and the score sweep produce the same markup; this
 // reaches the pages neither rebuilds. Styles come inline first if the page has a shared file.
-const EARLY_CARD_RE = /<section class="fcsb" id="filmychill-score">(?:(?!<\/section>)[\s\S])*?<span class="fcsb-stamp fcsb-early">([^<]+)<\/span>[\s\S]*?<\/section>\s*<p class="fcsb-note">[\s\S]*?<\/p>/;
+const EARLY_CARD_RE = /<section class="fcsb" id="filmychill-score">(?:(?!<\/section>)[\s\S])*?<span class="fcsb-stamp fcsb-early">([^<]+)<\/span>[\s\S]*?<\/section>(?:\s*<p class="fcsb-note">[\s\S]*?<\/p>)?/;
 const FCSB_CSS_RE = /  \/\* FilmyChill Score \(lib\/fcscore\.js\) \*\/[\s\S]*?\.fcsb-note \{[^\n]*\}(\n  \.fcsb-conf \{[^\n]*\})?/;
 function compactEarlyScore(html, root = ".") {
   if (!EARLY_CARD_RE.test(html)) return html;

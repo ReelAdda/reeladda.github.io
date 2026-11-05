@@ -569,6 +569,7 @@ const INTENT_TITLES = "intent-titles";
 const VISIBLE_SIMILAR = "visible-similar";
 // Five page fixes from the VisionQuest audit (30 Oct 2026), in stages; see buildFilmPage.
 const PAGE_FIXES = "page-fixes-30oct";
+const SCORE_LINK = "score-link";
 const wikiUrl = (article) => `https://en.wikipedia.org/wiki/${encodeURIComponent(String(article).replace(/ /g, "_"))}`;
 const CINEMA_TITLE_DAYS = 28;
 const STREAMING_DATE_TITLE_DAYS = 365;
@@ -1090,7 +1091,10 @@ function fcScoreSection(item) {
       ? e(cited).replace("per Wikipedia", `per <a href="${wikiUrl(article)}" rel="noopener" target="_blank">Wikipedia</a>`)
       : e(cited)) : "";
     const criPart = !cri.none || cited ? ` · <b>Critics:</b> ${e(criLabel)}${cited ? `${item._plain ? "," : " —"} ${citedHtml}` : ""}` : "";
-    const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}${reviewsClause(item)}</p>` : "";
+    // The method link inside the card, after the figures it explains (rollout "score-link",
+    // 5 Nov 2026): the sentence under the card is gone, the link stays (scoreLink below).
+    const linkIn = v3 && !!item.slug && inRollout(SCORE_LINK, item.slug);
+    const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}${reviewsClause(item)}${linkIn ? ` · ${SCORE_HOW}` : ""}</p>` : "";
     // The two halves as a marker too (<!--FC:fcs=audience|critics-->): lib/facts.js read them from
     // the rows' tags, which the v3 line replaces; without them a frozen render lost the ring.
     const fcsMark = `<!--FC:fcs=${e(s && s.audience ? s.audience : "")}|${e(s && s.critics ? s.critics : "")}-->`;
@@ -1099,8 +1103,46 @@ function fcScoreSection(item) {
     <div class="fcsb-verdict">${ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
     <p class="fcsb-why">${e(s ? RC.plainReason(s.reason) : none.why)}</p>
     ${v3 ? line : `<div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>${reviewsClause(item) ? `<p class="fcsb-line fcsb-rv">${reviewsClause(item).replace(/^ · /, "")}</p>` : ""}`}
-  </section>
-  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. <a href="/about/#score">How the score works</a></p>`;
+  </section>${linkIn ? "" : `
+  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. ${SCORE_HOW}</p>`}`;
+}
+
+// SCORE LINK (5 Nov 2026, rollout "score-link"). The pages no builder rewrites get the same
+// change after the last writer: the note under the score card ("The FilmyChill Score combines
+// … How the score works") goes, and its link moves to the end of the card's Audience/Critics
+// line, exactly as fcScoreSection now writes it. A card with no such line (older layouts) keeps
+// the link alone under it. Pure and idempotent.
+const SCORE_HOW = '<a href="/about/#score">How the score works</a>';
+const SCORE_NOTE_RE = /\n?[ \t]*<p class="fcsb-note">[^<]*<a href="\/about\/#score">How the score works<\/a><\/p>/;
+function scoreLink(html) {
+  const s = String(html);
+  const m = SCORE_NOTE_RE.exec(s);
+  if (!m) return s;
+  const sec = s.lastIndexOf('<section class="fcsb', m.index);
+  const end = s.lastIndexOf("</section>", m.index);
+  if (sec < 0 || end < sec) return s;
+  const li = s.lastIndexOf('<p class="fcsb-line', end);
+  const close = li > sec ? s.indexOf("</p>", li) : -1;
+  if (close < 0 || close > end) {
+    const bare = `\n  <p class="fcsb-note">${SCORE_HOW}</p>`;
+    return m[0] === bare ? s : s.slice(0, m.index) + bare + s.slice(m.index + m[0].length);
+  }
+  const withLink = s.slice(0, close) + ` · ${SCORE_HOW}` + s.slice(close, m.index);
+  return withLink + s.slice(m.index + m[0].length);
+}
+function applyScoreLink(files, { root = ".", included = (slug) => inRollout(SCORE_LINK, slug) } = {}) {
+  const res = { pages: 0, changed: 0 };
+  for (const rel of files) {
+    const mm = /(?:^|\/)movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
+    if (!mm || !included(mm[1])) continue;
+    const file = require("path").join(root, rel);
+    let html;
+    try { html = require("fs").readFileSync(file, "utf8"); } catch { continue; }
+    res.pages++;
+    const next = scoreLink(html);
+    if (next !== html) { require("fs").writeFileSync(file, next); res.changed++; }
+  }
+  return res;
 }
 
 // The measured window as the "FilmyChill data" line words it. Shared with the frozen-page
@@ -1782,6 +1824,9 @@ function generatePages(data, cfg, allSlugSets) {
 
 module.exports = {
   PAGE_FIXES,
+  SCORE_LINK,
+  applyScoreLink,
+  scoreLink,
   VISIBLE_SIMILAR,
   resetFranchiseIndex,
   simGridHtml,
