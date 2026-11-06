@@ -277,20 +277,22 @@ function buildEditorNote(data, cfg, seed = null, { short = false } = {}) {
 }
 
 function ssrEditorNote(data, cfg) {
-  let note = null;
+  let note = null, human = false;
   if (cfg && cfg.code === "in" && fs.existsSync("editor-note.txt")) {
     const line = fs.readFileSync("editor-note.txt", "utf8").trim();
-    if (line) note = line; // the human's line always wins
+    if (line) { note = line; human = true; } // the human's line always wins
   }
   if (!note) note = buildEditorNote(data, cfg, null, { short: true });
   if (!note) return "";
-  // One plain paragraph (Oct 2026 redesign); the date already sits in the "Updated" pill. Always
-  // labelled "Editor's note": the owner's call (31 Oct 2026), after a day as "This week's picks".
+  // One plain paragraph (Oct 2026 redesign); the date already sits in the "Updated" pill. Labelled
+  // "Editor's note" only when a person wrote it (editor-note.txt); the generated note reads "This
+  // week at a glance" (6 Nov 2026, trust review: the site is automated and says so, and an
+  // "Editor's note" over machine text claimed an editor that doesn't exist).
   // The note's section labels in bold (owner, 3 Nov 2026): "Top pick:", "To stream:", "In cinemas:",
   // "Also streaming:", "Also in cinemas:" and "Skip", so each part of the note stands out. Only the
   // labels the generated note writes; a hand-written note is left as written.
   const labels = /(^|[.;] )((?:Top pick|To stream|In cinemas|Also streaming|Also in cinemas):|[Ss]kip(?= ))/g;
-  return `<p class="ednote"><b>Editor's note · </b>${escHtml(note).replace(labels, "$1<strong>$2</strong>")}</p>`;
+  return `<p class="ednote"><b>${human ? "Editor's note" : "This week at a glance"} · </b>${escHtml(note).replace(labels, "$1<strong>$2</strong>")}</p>`;
 }
 
 // RELEASE CALENDAR (25 Oct 2026). Every film page released in the last RECENT_DAYS or still to

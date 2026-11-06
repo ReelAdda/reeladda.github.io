@@ -63,7 +63,7 @@ const { heroDialInner } = require("./meter.js");
 const { popularBlockFor } = require("./searchtop.js");
 
 // About page lastmod for the sitemap — bump manually when about/index.html changes.
-const ABOUT_LASTMOD = "2026-10-19";
+const ABOUT_LASTMOD = "2026-11-06";
 
 // The About page is hand-written, but ONE sentence in it is a fact the config owns: which
 // countries the site covers. It drifted — the page still said "India (plus the US, UK,
@@ -301,7 +301,6 @@ function buildHomeJsonLd(data, cfg) {
       url: "https://filmychill.com/",
       publisher: { "@id": "https://filmychill.com/#org" },
       author: { "@type": "Person", name: "Vikram Sharma" },
-      datePublished: "2026-01-01",
       dateModified: data.generatedAt || `${date}T00:00:00.000Z`,
     },
     {

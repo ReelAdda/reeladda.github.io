@@ -129,7 +129,7 @@ ${blurbLines.map((l, i) => `<text x="64" y="${blurbTop + i * 36}" font-family="I
 <text x="64" y="${CARD_H - 34}" font-family="Inter" font-size="23" fill="#6E6A96">filmychill.com</text>
 ${scoreStr
   ? `<text x="992" y="286" text-anchor="middle" font-family="Anton" font-size="168" fill="#FFAD1F">${scoreStr}</text>
-<text x="992" y="330" text-anchor="middle" font-family="Inter" font-size="26" fill="#8F8BB8">${e(voteCountLabel(votes))}</text>`
+<text x="992" y="330" text-anchor="middle" font-family="Inter" font-size="22" fill="#8F8BB8">TMDB audience · ${e(voteCountLabel(votes))}</text>`
   : isRecent(item)
     ? `<text x="992" y="272" text-anchor="middle" font-family="Anton" font-size="104" fill="#FFAD1F">NEW</text>
 <text x="992" y="322" text-anchor="middle" font-family="Inter" font-size="26" fill="#8F8BB8">too early to rate</text>`

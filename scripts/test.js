@@ -3153,7 +3153,7 @@ test("about: the country sentence is rebuilt from config, not hand-typed", () =>
   assert.ok(!patched.includes("plus the US, UK, Australia and Germany"), "stale hand-typed list gone");
 });
 test("about: documents the confidence gate the code actually enforces", () => {
-  assert.ok(/no rating, no verdict and no critics' take/.test(ABOUT_SRC), "gate is described");
+  assert.ok(/no rating, no verdict and no critics' summary/.test(ABOUT_SRC), "gate is described");
   // The page must not promise something takeConfident() doesn't do.
   assert.strictEqual(U.takeConfident({ isFresh: true }), false);
   assert.strictEqual(U.takeConfident({ isFresh: false, votes: 9 }), true);
@@ -4873,12 +4873,13 @@ test("editor's note: nothing trustworthy -> null; a pick in cinemas gets a strea
   const n = U.buildEditorNote(pickInCinemas, { code: "in" }, 2);
   assert.ok(/^Top pick: Runner, a film in cinemas since \d{1,2} \w{3}(?: \d{4})?\. Audiences love it; critics are split\. To stream: (Slow Horses, a series on Apple TV|American Horror Story, a series on JioHotstar). Skip Flop: audiences and critics agree\.$/.test(n), n);
 });
-test("ssrEditorNote: escaped, and labelled \"Editor's note\" (the owner's call, 31 Oct 2026)", () => {
+test("ssrEditorNote: escaped, and labelled \"This week at a glance\" when generated (trust review, 6 Nov 2026)", () => {
   const d = { ..._noteData(), pick: "A & B" };
   d.ott[0] = { ...d.ott[0], title: "A & B" };
   const html = U.ssrEditorNote(d, { code: "us" });
   assert.ok(html.includes('class="ednote"') && html.includes("A &amp; B"), html);
-  assert.ok(/<b>Editor's note · <\/b><strong>Top pick:<\/strong> A &amp; B, a series on Apple TV\./.test(html), html);
+  assert.ok(/<b>This week at a glance · <\/b><strong>Top pick:<\/strong> A &amp; B, a series on Apple TV\./.test(html), html);
+  assert.ok(!/Editor/.test(html), "no editor is claimed for generated text");
   // Each section label in bold (owner, 3 Nov 2026), and nothing else.
   assert.ok(/<strong>In cinemas:<\/strong> Runner, /.test(html) && /\. <strong>Skip<\/strong> Flop: /.test(html), html);
   assert.strictEqual((html.match(/<strong>/g) || []).length, 3, "three labels, three bolds");
@@ -7108,6 +7109,25 @@ test("a film inside its cinema window never reads 'Theatrical run ended' (Ramaya
   const old = A.archivePatchHtml(page("2026-09-01"), "India", cfg, { released: "2026-09-01" }, now).html;
   assert.ok(/Theatrical run ended/.test(old), "past the window: the run has ended");
 });
+test("trust copy: About and Privacy never repeat a statement the code contradicts (trust review, 6 Nov 2026)", () => {
+  const fsx = require("fs"), path = require("path");
+  const read = (p) => fsx.readFileSync(path.join(__dirname, "..", p), "utf8");
+  const about = read("about/index.html"), privacy = read("privacy/index.html");
+  const banned = [
+    [about, "verdict soon", "no card says it any more"],
+    [about, "never sent anywhere", "arrival alerts send My List films to Firestore"],
+    [about, "editorial rankings", "the rankings are automated"],
+    [about, "in our own words", "the critics' summary is machine-written"],
+    [about, "YouTube trailer statistics", "trending uses Wikipedia readership and TMDB popularity"],
+    [about, "refreshed daily", "the lists are rebuilt twice a day"],
+    [about, "Critics' take", "film pages have no such line"],
+    [privacy, "No cookies", "Google Analytics and Grow set cookies"],
+    [privacy, "trailer plays", "no event records them"],
+    [privacy, "searches on the site", "no event records them"],
+  ];
+  for (const [page, phrase, why] of banned) assert.ok(!page.includes(phrase), `"${phrase}" is back: ${why}`);
+  assert.ok(!/datePublished: "2026-01-01"/.test(read("scripts/lib/surfaces.js")), "no invented site start date");
+});
 test("early arrivals: a placeholder or unconfirmed short window is never published (Drishyam, Oct 2026)", () => {
   const starts = { us: "2026-08-27" };
   const four = { c: "us", k: "movie", id: 1, th: "2026-10-02", rel: "2026-10-02", first: "2026-10-06" };
@@ -8144,7 +8164,7 @@ test("attachTakes reads every list that gets a film page, through readCritics, w
   assert.ok(/attachFcScores\(dataByCode, \{ toneFor: cachedCriticsTone, countFor: cachedCriticsCount \}\)/.test(up), "the cache fallback is the gated one, and brings the review count");
 });
 test("About page states the ratings rule and the five-review exception the code applies", () => {
-  assert.ok(/no rating, no verdict and no critics' take/.test(ABOUT_SRC), "the gate is still described");
+  assert.ok(/no rating, no verdict and no critics' summary/.test(ABOUT_SRC), "the gate is still described");
   assert.ok(/three or more critics' ratings decide it: a median of 3\.5 out of 5 or higher is positive, 2\.5 or higher is mixed, anything lower is negative/.test(ABOUT_SRC));
   assert.ok(/once five or more published reviews are listed in the film's Wikipedia article, the critics' side shows in the first week too/.test(ABOUT_SRC));
   assert.strictEqual(EDT.RATINGS_MIN, 3);
