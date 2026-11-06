@@ -111,7 +111,7 @@ function mergeStubHtml({ code, to, title }) {
 <!--FC:merged-->
 <h1>${e(title)} has moved</h1>
 <p>${e(title)} now has a single page on FilmyChill, with its verdict, cast, runtime and where to watch it in ${e(country)}. This address was an older copy of it.</p>
-<p><a href="${e(filmUrlPath(code, to))}">Go to ${e(title)} — where to watch and review →</a></p>
+<p><a href="${e(filmUrlPath(code, to))}">Go to ${e(title)}: where to watch, and our verdict →</a></p>
 <p><small>If you are not taken there automatically, use the link above. Bookmarks to this address keep working.</small></p>
 </body>
 </html>

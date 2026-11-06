@@ -346,6 +346,7 @@ async function enrich(kind, id, region = "IN") {
 
 module.exports = {
   isPreListed,
+  REGION_CERTS,
   certAudience,
   certFor,
   digitalReleaseFor,

@@ -735,8 +735,9 @@ function filmTitleTag(item, cfg = null) {
   // A SERIES ON AIR (lib/series.js, 27 Oct 2026): the searches while it runs are "episode 5 release
   // date", "how many episodes", "<show> episode schedule" — every competing page led with the
   // schedule. While a next episode is due the title says the page has it.
-  const epNext = item.kind === "tv" && item.episodes && item.episodes.next && item.episodes.next.date;
-  if (epNext && epNext >= new Date().toISOString().slice(0, 10)) {
+  // The timeline's rule for "next" (lib/series.js nextDrop): the season list's date wins over TMDB's show-level one.
+  const epNext = item.kind === "tv" && item.episodes && require("./series.js").nextDrop(item.episodes, new Date().toISOString().slice(0, 10));
+  if (epNext) {
     return fitTitle([
       `${item.title}${yr}: Episode Schedule & Where to Watch in ${country} | FilmyChill`,
       `${item.title}${yr}: Episode Schedule & Where to Watch in ${country}`,
@@ -1056,7 +1057,7 @@ function fcScoreSection(item) {
     const aud = s && s.audience
       ? { tag: s.audience, sub: s.early
         ? (lean ? "Few ratings, so weighted toward an average film" : `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings — few ratings, so weighted toward an average film`)
-        : (lean ? `From ${votes} ratings on TMDB` : `★ ${Number(item.rating).toFixed(1)} from ${votes} ratings on TMDB`) }
+        : (lean ? `From ${votes} rating${votes === "1" ? "" : "s"} on TMDB` : `★ ${Number(item.rating).toFixed(1)} from ${votes} rating${votes === "1" ? "" : "s"} on TMDB`) }
       : item.rating != null && item.votes
         ? { tag: "Too few ratings", sub: `★ ${Number(item.rating).toFixed(1)} from ${votes} rating${Number(item.votes) === 1 ? "" : "s"} — counts from ${scoreNeed(item)}`, none: true }
         // A count but no average yet (TMDB publishes one later): never "no audience ratings".
@@ -1084,8 +1085,8 @@ function fcScoreSection(item) {
     // One fact once (28 Oct 2026): the ring carries the audience number; the line names its
     // source and count without repeating it, then the critics' side when there is one.
     const nVotes = Number(item.votes || 0);
-    const audPart = item.rating != null && nVotes ? `<b>Audience:</b> ${e(nVotes.toLocaleString("en-IN"))} ratings on TMDB`
-      : nVotes ? `<b>Audience:</b> ${e(nVotes.toLocaleString("en-IN"))} ratings on TMDB, no average yet` : `<b>Audience:</b> not rated on TMDB yet`;
+    const audPart = item.rating != null && nVotes ? `<b>Audience:</b> ${e(nVotes.toLocaleString("en-IN"))} rating${nVotes === 1 ? "" : "s"} on TMDB`
+      : nVotes ? `<b>Audience:</b> ${e(nVotes.toLocaleString("en-IN"))} rating${nVotes === 1 ? "" : "s"} on TMDB, no average yet` : `<b>Audience:</b> not rated on TMDB yet`;
     // "per Wikipedia" links the article the figures came from (CC BY-SA asks for the source).
     // The reception record carries its article too (30 Oct 2026): v3 and frozen pages have no take.
     const article = item.takeArticle || (item._fix30 && item.reception && item.reception.article) || "";

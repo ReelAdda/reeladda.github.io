@@ -183,8 +183,8 @@ function receptionLine(rec, fmt, tone) {
   const paren = (bits) => (bits.filter(Boolean).length ? ` (${bits.filter(Boolean).join(', ')})` : '');
   const rt = rec.rt && !contradicts(rec.rt.pct, tone) ? rec.rt : null;
   const mc = rec.mc && !contradicts(rec.mc.score, tone) ? rec.mc : null;
-  if (rt) parts.push(`${rt.pct}% on Rotten Tomatoes${paren([rt.n ? `${rt.n} reviews` : '', rt.season ? `season ${rt.season}` : ''])}`);
-  else if (mc) parts.push(`Metacritic ${mc.score}/100${paren([mc.n ? `${mc.n} critics` : '', mc.season ? `season ${mc.season}` : ''])}`);
+  if (rt) parts.push(`${rt.pct}% on Rotten Tomatoes${paren([rt.n ? `${rt.n} review${rt.n === 1 ? '' : 's'}` : '', rt.season ? `season ${rt.season}` : ''])}`);
+  else if (mc) parts.push(`Metacritic ${mc.score}/100${paren([mc.n ? `${mc.n} critic${mc.n === 1 ? '' : 's'}` : '', mc.season ? `season ${mc.season}` : ''])}`);
   if (rec.ratings && rec.ratings.n) parts.push(`${rec.ratings.n} published rating${rec.ratings.n === 1 ? '' : 's'}${rec.ratings.median != null && rec.ratings.n >= 3 ? `, median ${rec.ratings.median}/5` : ''}`);
   if (!parts.length) return '';
   return `${parts.join(' and ')}, per Wikipedia${rec.asOf ? `, ${fmt(rec.asOf)}` : ''}`;
@@ -199,7 +199,7 @@ function toneFromFigure(rec) {
 function scoreLineHtml(item) {
   const s = item.fcScore;
   const votes = Number(item.votes || 0);
-  const aud = item.rating != null && votes ? `<b>Audience:</b> ${votes.toLocaleString('en-IN')} ratings on TMDB` : votes ? `<b>Audience:</b> ${votes.toLocaleString('en-IN')} ratings on TMDB, no average yet` : '<b>Audience:</b> not rated on TMDB yet';
+  const aud = item.rating != null && votes ? `<b>Audience:</b> ${votes.toLocaleString('en-IN')} rating${votes === 1 ? '' : 's'} on TMDB` : votes ? `<b>Audience:</b> ${votes.toLocaleString('en-IN')} rating${votes === 1 ? '' : 's'} on TMDB, no average yet` : '<b>Audience:</b> not rated on TMDB yet';
   const tone = s && s.critics ? s.critics : null;
   const cited = item.reception ? receptionLine(item.reception, fmtDate, tone) : '';
   const label = tone || (cited ? toneFromFigure(item.reception) : null);

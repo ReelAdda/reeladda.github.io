@@ -56,8 +56,8 @@ function receptionLine(rec, fmt = (d) => d, { tone = null, plain = false } = {})
   const paren = (bits) => (bits.filter(Boolean).length ? ` (${bits.filter(Boolean).join(", ")})` : "");
   const rt = rec.rt && !contradicts(rec.rt.pct, tone) ? rec.rt : null;
   const mc = rec.mc && !contradicts(rec.mc.score, tone) ? rec.mc : null;
-  if (rt) parts.push(`${rt.pct}% on Rotten Tomatoes${paren([rt.n ? `${rt.n} reviews` : "", rt.season ? `season ${rt.season}` : ""])}`);
-  else if (mc) parts.push(`Metacritic ${mc.score}/100${paren([mc.n ? `${mc.n} critics` : "", mc.season ? `season ${mc.season}` : ""])}`);
+  if (rt) parts.push(`${rt.pct}% on Rotten Tomatoes${paren([rt.n ? `${rt.n} review${rt.n === 1 ? "" : "s"}` : "", rt.season ? `season ${rt.season}` : ""])}`);
+  else if (mc) parts.push(`Metacritic ${mc.score}/100${paren([mc.n ? `${mc.n} critic${mc.n === 1 ? "" : "s"}` : "", mc.season ? `season ${mc.season}` : ""])}`);
   if (rec.ratings && rec.ratings.n) parts.push(`${rec.ratings.n} published rating${rec.ratings.n === 1 ? "" : "s"}${rec.ratings.median != null && rec.ratings.n >= 3 ? `, median ${rec.ratings.median}/5` : ""}`);
   if (!parts.length) return "";
   return `${parts.join(plain ? " and " : " · ")}${plain ? "," : " —"} per Wikipedia${rec.asOf ? `, ${fmt(rec.asOf)}` : ""}`;

@@ -332,6 +332,114 @@ const TH_NOW = new Date("2026-07-02T00:00:00Z").getTime();
 const thFilm = (title, release_date) => ({ title, release_date });
 const daysAgo = (n) => new Date(TH_NOW - n * 864e5).toISOString().slice(0, 10);
 
+test("In theatres never lists a film that hasn't opened in the edition's market (You Can See Everything, Singapore, 6 Nov 2026)", () => {
+  const Fr = require("./lib/freshness.js");
+  assert.strictEqual(Fr.notOpenYet({ released: "2026-11-26" }, "2026-11-06"), true, "opens in three weeks: not in cinemas");
+  assert.strictEqual(Fr.notOpenYet({ released: "2026-11-06" }, "2026-11-06"), false, "opening day counts");
+  assert.strictEqual(Fr.notOpenYet({ released: "2026-10-20" }, "2026-11-06"), false);
+  assert.strictEqual(Fr.notOpenYet({}, "2026-11-06"), false, "no date: the other gates decide");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.strictEqual((src.match(/if \(notOpenYet\(item, editionToday\(cfg\.code\)\)\)/g) || []).length, 4, "homepage list and language-page bench, in both builders (the split proof compares them), on the edition's own date");
+  // The edition's own date: at the evening build a film opening tomorrow-UTC has already opened in Asia.
+  const eve = Date.parse("2026-11-06T20:00:00Z");
+  assert.deepStrictEqual(["sg", "nz", "in", "uk", "us"].map((c) => Fr.editionToday(c, eve)), ["2026-11-07", "2026-11-07", "2026-11-07", "2026-11-06", "2026-11-06"]);
+  assert.strictEqual(Fr.notOpenYet({ released: "2026-11-07" }, Fr.editionToday("sg", eve)), false, "Singapore opening day: open, though UTC is still the 6th");
+  assert.strictEqual(Fr.notOpenYet({ released: "2026-11-07" }, Fr.editionToday("uk", eve)), true, "the UK at the same moment: not yet");
+  assert.ok(require("./lib/core.js").COUNTRIES.every((c) => Fr.EDITION_TZ[c.code]), "every edition has a time zone");
+  // The build's self-audit checks the list it actually wrote, so a new path into the list is caught too.
+  const A = require("./lib/audit.js"), now = Date.parse("2026-11-06T12:00:00Z");
+  const sg = { theatres: [{ title: "Clayface", released: "2026-10-23" }, { title: "You Can See Everything", released: "2026-11-26" }], ott: [] };
+  assert.deepStrictEqual(A.auditData("sg", sg, now).filter((f) => f.check === "in-theatres-not-open"),
+    [{ check: "in-theatres-not-open", url: "sg", detail: "You Can See Everything: listed in theatres, opens 2026-11-26" }]);
+  assert.strictEqual(A.auditData("sg", { theatres: [{ title: "Clayface", released: "2026-11-06" }], ott: [] }, now).length, 0, "opening day is fine");
+});
+
+// ---- 6 Nov 2026 visitor scan: each finding fixed at its source and guarded here ----
+test("a Mexican or Spanish 'A' (all ages) is not India's adults-only A: the repair pass leaves a listed page alone (Sense and Sensibility, Mexico, 6 Nov 2026)", () => {
+  const Ar = require("./lib/archive.js"), core = require("./lib/core.js");
+  const C = (c) => core.COUNTRIES.find((k) => k.code === c);
+  const page = (cert) => `<html><body><table class="gtk"><tr><td>Watch with family?</td><td>${cert}</td></tr></table></body></html>`;
+  const cert = (code, row) => Ar.crossCountryLeak(page(row), C(code)).includes("India certificate");
+  assert.strictEqual(cert("mx", "A · Yes, family friendly"), false, "Mexico's own A, read Mexico's way");
+  assert.strictEqual(cert("es", "A · Yes — family friendly"), false, "Spain's own A, either dash form");
+  assert.strictEqual(cert("mx", "A · Adults only"), true, "an A read India's way on a Mexican page is India's");
+  assert.strictEqual(cert("us", "A · Adults only"), true, "the US has no A rating: it can only be India's");
+  assert.strictEqual(cert("uk", "A · Yes, family friendly"), true, "nor has the UK");
+  assert.strictEqual(cert("es", "UA 13+ · Older kids & up"), true, "UA exists only in India");
+  assert.strictEqual(cert("in", "A · Adults only"), false, "India's own page");
+});
+
+test("a list's verdict and the film's own page always agree, whatever wrote the page (6 Nov 2026)", () => {
+  const A = require("./lib/audit.js");
+  const pages = { "mx/movie/sense-and-sensibility.html": '<span class="fcsb-mini-v">Too early</span>', "mx/movie/lupin.html": '<span class="fcsb-stamp fcsb-must">Must watch</span>' };
+  const read = (p) => { if (!(p in pages)) throw new Error("no page"); return pages[p]; };
+  const data = { theatres: [{ slug: "sense-and-sensibility", title: "Sense and Sensibility", fcScore: { verdict: "Worth a watch" } }],
+    ott: [{ slug: "lupin", title: "Lupin", fcScore: { verdict: "Must watch" } }, { slug: "no-page", title: "X", fcScore: { verdict: "Skip" } }, { slug: "unscored", title: "Y" }] };
+  assert.deepStrictEqual(A.auditListVsPage("mx", data, read),
+    [{ check: "list-verdict-vs-page", url: "mx/sense-and-sensibility", detail: "Sense and Sensibility: list Worth a watch, page Too early" }]);
+  assert.ok(/findings\.push\(\.\.\.auditListVsPage\(cfg\.code, dataByCode\[cfg\.code\]\)\)/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "audit.js"), "utf8")), "the build's audit runs it for every edition");
+});
+
+test("episode guide: one source decides 'Next' and 'out' (The Assassin, 6 Nov 2026)", () => {
+  const S = require("./lib/series.js");
+  // TMDB's show-level next episode says 6 Nov; the season's own list dates E1–E6 to 5 Nov.
+  const ep = { count: 6, seasons: 2, season: 2, next: { s: 2, e: 1, name: "Episode 1", date: "2026-11-06" },
+    list: [1, 2, 3, 4, 5, 6].map((e) => ({ e, name: `Episode ${e}`, date: "2026-11-05", runtime: 50 })) };
+  const item = { kind: "tv", title: "The Assassin", episodes: ep };
+  assert.strictEqual(S.nextDrop(ep, "2026-11-06"), null, "on the 6th the drop is out: nothing is next");
+  const html = S.episodesHtml(item, (d) => d, "2026-11-06", { v2: true });
+  assert.ok(!/class="next"/.test(html) && !/eptag/.test(html) && (html.match(/<li class="out">/g) || []).length === 6, "all six out, none tagged Next");
+  assert.ok(/All 6 episodes out/.test(html));
+  assert.strictEqual(S.fitFromData(item, null, (d) => d, "2026-11-06"), null, "no 'new episodes until 5 Nov' on the 6th");
+  // On the drop day itself the six are next, together.
+  assert.deepStrictEqual(S.nextDrop(ep, "2026-11-05").nums, [1, 2, 3, 4, 5, 6]);
+  // A next episode the list doesn't hold keeps TMDB's date.
+  assert.strictEqual(S.nextDrop({ ...ep, list: [] }, "2026-11-06").date, "2026-11-06");
+});
+
+test("wording: counts of one in the singular, one 'the', one full stop (6 Nov 2026 scan)", () => {
+  const S = require("./lib/series.js"), RC = require("./lib/reception.js"), A = require("./lib/audit.js");
+  // "All 1 episodes out" and "all 1 episodes with dates"
+  const one = { count: 1, seasons: 1, season: 1, next: null, list: [{ e: 1, name: "Pilot", date: "2026-10-01" }] };
+  assert.ok(/All 1 episode out/.test(S.episodesHtml({ kind: "tv", episodes: one }, (d) => d, "2026-11-06", { v2: true })));
+  // "the The Avengers series"
+  const fr = (id, name) => ({ c: { id, name }, u: [] });
+  const idx = [{ slug: "a", title: "A", released: "2012-05-04", franchise: fr(1, "The Avengers Collection") }, { slug: "b", title: "B", released: "2015-05-01", franchise: fr(1, "The Avengers Collection") },
+    { slug: "c", title: "C", released: "2004-08-27", franchise: fr(2, "Dhoom Collection") }, { slug: "d", title: "D", released: "2006-11-24", franchise: fr(2, "Dhoom Collection") }];
+  assert.strictEqual(S.franchiseSiblings(idx[1], idx).heading, "More in The Avengers series");
+  assert.strictEqual(S.franchiseSiblings(idx[3], idx).heading, "More in the Dhoom series");
+  // "(1 reviews)"
+  assert.strictEqual(RC.receptionLine({ rt: { pct: 80, n: 1 } }), "80% on Rotten Tomatoes (1 review) — per Wikipedia");
+  // The film page: "1 rating on TMDB"; the cast answer ends once after "Jr."
+  const F = require("./lib/filmpage.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const it = { title: "Dexter", slug: "dexter-x", kind: "tv", released: "2006-10-01", language: "English", genre: "Crime", providers: ["Netflix"], rentBuy: [], tmdbId: 1405,
+    rating: 8.2, votes: 1, director: "James Manos Jr.", cast: ["Michael C. Hall", "Jennifer Carpenter"], castPics: [],
+    fcScore: { verdict: "Worth a watch", reason: "Critics are positive.", audience: null, critics: "positive", basis: "critics" } };
+  const page = F.buildFilmPage(it, "2026-11-06", new Set(), IN);
+  assert.ok(!/\b1 ratings\b/.test(page) && !/Jr\.\./.test(page), (/.{40}(?:1 ratings|Jr\.\.).{20}/.exec(page) || [""])[0]);
+  assert.strictEqual(A.wordingSlip(page), null, "the build's page check finds nothing");
+  // The build's check on every page catches each slip, wherever a new one comes from.
+  for (const bad of ["Audience: 1 ratings on TMDB", "All 1 episodes out", "More in the The Dark Knight series", "created by James Manos Jr.. When", "directed by Girish A. D.. When"]) {
+    assert.ok(A.wordingSlip(`<p>${bad}</p>`), bad);
+  }
+  for (const fine of ["Oh..! Sukumari", "a tale of second chances.. happy", "21 ratings on TMDB", "11 episodes", "More in the Dhoom series"]) {
+    assert.strictEqual(A.wordingSlip(`<p>${fine}</p>`), null, fine);
+  }
+  // The page left at a merged duplicate's address: no spaced dash.
+  const stub = require("./lib/merges.js").mergeStubHtml({ code: "in", to: "drishyam-3", title: "Drishyam: The Conclusion" });
+  assert.ok(/Go to Drishyam: The Conclusion: where to watch, and our verdict →/.test(stub) && !/ — /.test(stub));
+});
+
+test("the vote note says what a vote does on every film page, old ones included (6 Nov 2026)", () => {
+  const fsx = require("fs"), p = require("path");
+  const NOTE = "Your vote is counted toward a future audience score. No sign-up.";
+  const js = fsx.readFileSync(p.join(__dirname, "..", "js", "vote.js"), "utf8");
+  assert.ok(js.includes(`note.textContent = "${NOTE}"`), "the browser script sets it on every page it shows");
+  assert.ok(js.indexOf("note.textContent") > js.indexOf("box.hidden = false"), "after the box is shown");
+  assert.ok(fsx.readFileSync(p.join(__dirname, "lib", "filmpage.js"), "utf8").includes(`const VOTE_NOTE = "${NOTE}";`), "the same words the pages are written with");
+  for (const page of ["about", "privacy"]) assert.ok(/future audience score/.test(fsx.readFileSync(p.join(__dirname, "..", page, "index.html"), "utf8")), page + " says the same");
+});
+
 test("filterTheatreFresh: month-old now_playing film is dropped (Obsession case)", () => {
   // 9 fresh films so the strict window has enough to stand on its own
   const pool = [thFilm("Obsession", "2026-05-29"), // 34 days old

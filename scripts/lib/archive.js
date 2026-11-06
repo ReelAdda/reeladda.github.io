@@ -76,7 +76,19 @@ function crossCountryLeak(html, cfg) {
     const name = m.slice(1).find(Boolean);
     if (markets.has(name) && !own.has(name) && markets.get(name) !== code) reasons.push(`names ${name}`);
   }
-  if (code !== "in" && /<td>Watch with family\?<\/td><td>(?:A|UA[^<·]*|U\/A[^<·]*) ·/.test(html)) reasons.push("India certificate");
+  // India's certificates on another edition's page. "UA …" and "U/A …" exist only in India; a bare
+  // "A" is also Mexico's and Spain's all-ages rating, so it is India's only when the page reads it
+  // India's way (Sense and Sensibility, Mexico, 6 Nov 2026: "A · Yes, family friendly" was taken
+  // for India's adults-only A, and the repair pass rebuilt a listed page without its verdict).
+  const cm = code !== "in" && /<td>Watch with family\?<\/td><td>(A|UA[^<·]*|U\/A[^<·]*) · ([^<]*)</.exec(html);
+  if (cm) {
+    const norm = (s) => String(s).replace(/ — /g, ", ").trim();
+    const region = (cfg && cfg.region) || (COUNTRIES.find((c) => c.code === code) || {}).region || null;
+    const E = require("./enrich.js");
+    const board = E.REGION_CERTS[String(region || "").toUpperCase()] || {};
+    const ownA = cm[1].trim().toUpperCase() === "A" && board.A && norm(cm[2]) === norm(E.certAudience("A", region).label);
+    if (!ownA) reasons.push("India certificate");
+  }
   return [...new Set(reasons)];
 }
 

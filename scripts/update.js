@@ -219,6 +219,8 @@ const {
   THEATRE_MIN_POOL,
   THEATRE_WINDOW_DAYS,
   THEATRE_WINDOW_FALLBACK_DAYS,
+  editionToday,
+  notOpenYet,
 } = require("./lib/freshness.js");
 const {
   buildOttMonthPage,
@@ -832,6 +834,13 @@ async function buildTheatres(cfg) {
       console.log(`  theatres: dropped ${item.title} — digital-only release, no theatrical run in ${cfg.region}`);
       continue;
     }
+    // Not open in this market yet (6 Nov 2026, You Can See Everything in Singapore: 26 Nov): the pool
+    // is gated on TMDB's worldwide date, and enrich then gives the film this market's own cinema date.
+    // It belongs in Coming Soon, never under "Releases from the past three weeks"; the bench refills.
+    if (notOpenYet(item, editionToday(cfg.code))) {
+      console.log(`  theatres: dropped ${item.title} — opens ${item.released} in ${cfg.region}, not yet`);
+      continue;
+    }
     // A platform page that went up before the film opened is a placeholder: it's in cinemas,
     // so its page must not say "streaming" (see isPreListed in lib/enrich.js).
     if ((item.providers || []).length) {
@@ -866,6 +875,7 @@ async function buildTheatres(cfg) {
       try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); withImdb(item); }
       catch (e) { console.warn(`enrich bench movie ${m.id}: ${e.message}`); continue; }
       if (item.theatrical === false) continue;      // same digital-only gate as the homepage
+      if (notOpenYet(item, editionToday(cfg.code))) continue;     // and the same not-open-yet gate
       if (onPage.has(item.tmdbId)) continue;        // already shown, don't duplicate
       (langTheatres[name] = langTheatres[name] || []).push(item);
       await sleep(150);
@@ -1745,6 +1755,13 @@ function assembleCountry(cfg, { theatres, langTheatres }, { ott, ottOverflow, su
       console.log(`  theatres: dropped ${item.title} — digital-only release, no theatrical run in ${cfg.region}`);
       continue;
     }
+    // Not open in this market yet (6 Nov 2026, You Can See Everything in Singapore: 26 Nov): the pool
+    // is gated on TMDB's worldwide date, and enrich then gives the film this market's own cinema date.
+    // It belongs in Coming Soon, never under "Releases from the past three weeks"; the bench refills.
+    if (notOpenYet(item, editionToday(cfg.code))) {
+      console.log(`  theatres: dropped ${item.title} — opens ${item.released} in ${cfg.region}, not yet`);
+      continue;
+    }
     // A platform page that went up before the film opened is a placeholder: it's in cinemas,
     // so its page must not say "streaming" (see isPreListed in lib/enrich.js).
     if ((item.providers || []).length) {
@@ -1779,6 +1796,7 @@ function assembleCountry(cfg, { theatres, langTheatres }, { ott, ottOverflow, su
       try { Object.assign(item, await enrich("movie", m.id, cfg.watchRegion)); withImdb(item); }
       catch (e) { console.warn(`enrich bench movie ${m.id}: ${e.message}`); continue; }
       if (item.theatrical === false) continue;      // same digital-only gate as the homepage
+      if (notOpenYet(item, editionToday(cfg.code))) continue;     // and the same not-open-yet gate
       if (onPage.has(item.tmdbId)) continue;        // already shown, don't duplicate
       (langTheatres[name] = langTheatres[name] || []).push(item);
       await sleep(150);

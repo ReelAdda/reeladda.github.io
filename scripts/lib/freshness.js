@@ -139,6 +139,29 @@ function freshnessWindowLabel(items, now = Date.now(), bound = THEATRE_WINDOW_FA
   const WORD = { 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven" };
   return `${verb} ${past} ${WORD[weeks] || weeks} weeks`;
 }
+// The edition's own calendar date. A film opens on the market's date, not UTC's: at the evening
+// build (~20:00 UTC) it is already tomorrow in Singapore, Seoul or Sydney, and a film opening there
+// that day must count as open. One zone per edition (the US and Canada use the eastern zone, where
+// the day starts first on the mainland; Australia Sydney; Brazil São Paulo; Mexico Mexico City).
+const EDITION_TZ = {
+  in: "Asia/Kolkata", us: "America/New_York", uk: "Europe/London", au: "Australia/Sydney", de: "Europe/Berlin",
+  ae: "Asia/Dubai", ca: "America/Toronto", sg: "Asia/Singapore", my: "Asia/Kuala_Lumpur", ph: "Asia/Manila",
+  nz: "Pacific/Auckland", kr: "Asia/Seoul", jp: "Asia/Tokyo", id: "Asia/Jakarta", br: "America/Sao_Paulo",
+  mx: "America/Mexico_City", es: "Europe/Madrid", fr: "Europe/Paris",
+};
+function editionToday(code, now = Date.now()) {
+  const tz = EDITION_TZ[code];
+  if (!tz) return new Date(now).toISOString().slice(0, 10);
+  try { return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(now)); }
+  catch { return new Date(now).toISOString().slice(0, 10); }
+}
+// Pure: has this film not opened in the edition's market yet? `item.released` is the market's own
+// cinema date once enrich has run (lib/enrich.js regionalRelease); `todayStr` is the edition's
+// date, YYYY-MM-DD (editionToday).
+function notOpenYet(item, todayStr) {
+  const d = item && item.released ? String(item.released).slice(0, 10) : "";
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) && d > todayStr;
+}
 function filterTheatreFresh(pool, now = Date.now()) {
   const within = (m, days) => {
     if (!m.release_date) return false;
@@ -260,6 +283,9 @@ function capTrending(dataByCode) {
 }
 
 module.exports = {
+  EDITION_TZ,
+  editionToday,
+  notOpenYet,
   ARRIVAL_BADGE_DAYS,
   ARRIVAL_MAX_RELEASE_AGE,
   ARRIVAL_MIN_RELEASE_AGE,

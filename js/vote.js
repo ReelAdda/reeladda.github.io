@@ -75,6 +75,12 @@
   }
 
   box.hidden = false;
+  // One line for what a vote does, on every page whatever its age (6 Nov 2026): the About and
+  // Privacy pages say votes count toward a future audience score, kept separate from the
+  // FilmyChill Verdict, and pages written before that said they "help the FilmyChill Score".
+  // Twin of VOTE_NOTE in scripts/lib/filmpage.js.
+  var note = box.querySelector(".fcvote-q small");
+  if (note) note.textContent = "Your vote is counted toward a future audience score. No sign-up.";
   var prev = store.get(KEY);
   if (prev === "1" || prev === "-1") show(prev);
 

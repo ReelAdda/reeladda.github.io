@@ -251,7 +251,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
       q: `Is ${item.title} worth watching?`,
       // Self-contained on purpose: featured snippets and AI answer engines quote this text
       // out of context, so "see above" is a dead reference the moment it leaves the page.
-      a: trim(`${verdictLabel}.${item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10${Number(item.votes) ? ` from ${Number(item.votes).toLocaleString("en-IN")} audience ratings on TMDB` : " on audience ratings"}.` : ""}${item.take ? ` ${item.take}` : ""}${fitAfterVerdict ? ` ${fitAfterVerdict.text}` : ""}`, 420),
+      a: trim(`${verdictLabel}.${item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10${Number(item.votes) ? ` from ${Number(item.votes).toLocaleString("en-IN")} audience rating${Number(item.votes) === 1 ? "" : "s"} on TMDB` : " on audience ratings"}.` : ""}${item.take ? ` ${item.take}` : ""}${fitAfterVerdict ? ` ${fitAfterVerdict.text}` : ""}`, 420),
     });
   } else if (fit) {
     // Previously an unrated or brand-new title got NO answer to the site's central question.
@@ -355,7 +355,7 @@ function olderTitleFaqs(item, cfg, nowMs) {
   const cast = (Array.isArray(item.cast) ? item.cast : []).map((c) => (typeof c === "string" ? c : c && c.name)).filter(Boolean).slice(0, 4);
   if (cast.length) {
     const names = cast.length > 1 ? `${cast.slice(0, -1).join(", ")} and ${cast[cast.length - 1]}` : cast[0];
-    out.push({ q: `Who is in the cast of ${t}?`, a: `${t} stars ${names}${item.director ? `, ${tv && item._fix30 ? "created" : "directed"} by ${item.director}` : ""}.` });
+    out.push({ q: `Who is in the cast of ${t}?`, a: `${t} stars ${names}${item.director ? `, ${tv && item._fix30 ? "created" : "directed"} by ${item.director}` : ""}${item.director && /\.$/.test(String(item.director)) ? "" : "."}` });   // "Jr.", "A. D.": one full stop
   }
   out.push({ q: tv ? `When did ${t} first air?` : `When did ${t} come out?`, a: `${t} ${tv ? "first aired" : "was released"} on ${fmtDateFull(item.released.slice(0, 10), localeFor(cfg && cfg.code))}.` });
   return out;

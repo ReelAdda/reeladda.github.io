@@ -40,12 +40,39 @@ function auditData(code, data, now = Date.now()) {
     const age = p ? daysSince(p.freshDate || p.released, now) : null;
     if (p && age != null && age > 21) out.push({ check: "pick-not-new", url: code, detail: `${p.title} (${Math.round(age)} days old)` });
   }
+  // In Theatres says "Releases from the past three weeks": a film that hasn't opened in this
+  // market yet contradicts it (You Can See Everything, 8 editions, 6 Nov 2026; the builder's gate
+  // is lib/freshness.js notOpenYet). Checked on the list the build wrote, whatever filled it.
+  const today = require("./freshness.js").editionToday(code, now); // the market's own date, as the builder's gate uses
+  for (const x of data.theatres || []) {
+    const d = x && x.released ? String(x.released).slice(0, 10) : "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d) && d > today) out.push({ check: "in-theatres-not-open", url: code, detail: `${x.title}: listed in theatres, opens ${d}` });
+  }
   // A cinema release listed as streaming within two weeks of opening: possibly a platform's
   // placeholder page that slipped past isPreListed.
   for (const x of data.ott || []) {
     if (x.kind !== "movie" || !x.theatricalHere || !(x.providers || []).length) continue;
     const age = daysSince(x.released, now);
     if (age != null && age >= 0 && age < 14) out.push({ check: "streaming-right-after-cinema", url: code, detail: `${x.title}: in cinemas ${x.released}, listed on ${x.providers[0]}` });
+  }
+  return out;
+}
+
+// A list's verdict against the film's own page in the same edition (Sense and Sensibility,
+// Mexico, 6 Nov 2026: the homepage card said "Worth a watch", its page "Too early", after a later
+// pass rewrote the page). Whatever the cause, the two must agree. `read(path)` is for tests.
+function auditListVsPage(code, data, read = (p) => fs.readFileSync(p, "utf8")) {
+  const out = [];
+  if (!data) return out;
+  for (const k of ["theatres", "ott", "ottExtra"]) for (const x of data[k] || []) {
+    if (!x || !x.slug || !x.fcScore || !x.fcScore.verdict) continue;
+    let html;
+    try { html = read(filmPagePath(code, x.slug).replace(/^\//, "")); } catch { continue; }
+    const page = (/class="fcsb-stamp fcsb-(?:must|worth|skip)">([^<]+)</.exec(html) || [])[1] || null;
+    if (page !== x.fcScore.verdict) {
+      const shown = page || (/class="fcsb-mini-v">([^<]+)</.exec(html) || /class="fcsb-stamp fcsb-early">([^<]+)</.exec(html) || [])[1] || "no verdict";
+      out.push({ check: "list-verdict-vs-page", url: `${code}/${x.slug}`, detail: `${x.title}: list ${x.fcScore.verdict}, page ${shown}` });
+    }
   }
   return out;
 }
@@ -195,7 +222,21 @@ function auditPage(html, { released = null, now = Date.now() } = {}) {
   const stamp = /class="fcsb-stamp[^"]*">(Must watch|Worth a watch|Skip)</.exec(html);
   const faq = /worth watching\?<\/summary><div class="fa">FilmyChill (?:Score|Verdict): (Must watch|Worth a watch|Skip)/.exec(html);
   if (stamp && faq && stamp[1] !== faq[1]) out.push({ check: "faq-vs-score-verdict", detail: `score ${stamp[1]}, FAQ ${faq[1]}` });
+  const slip = wordingSlip(html);
+  if (slip) out.push({ check: "wording-slip", detail: slip });
   return out;
+}
+
+// Pure: the first wording slip on a page, or null (6 Nov 2026 visitor scan). Each came from a
+// template joining two pieces without looking: a count of one in the plural ("1 ratings",
+// "All 1 episodes"), a series name that starts with "The" after "the", a name ending in a full
+// stop before the sentence's own ("James Manos Jr.."). Synopses are TMDB's and not judged
+// (lower-case "chances.. happy" is left alone; only a capital or "Jr" before ".." counts).
+function wordingSlip(html) {
+  const text = String(html).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ")
+    .replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/\s+/g, " ");
+  const m = /\b1 (?:ratings|reviews|critics|episodes|seasons)\b|\bAll 1 episodes\b|\bMore in the The\b|\b(?:Jr|Sr|[A-Z])\.\.(?![.!?])/.exec(text);
+  return m ? text.slice(Math.max(0, m.index - 30), m.index + m[0].length + 15).trim() : null;
 }
 
 // Findings that put something false in front of a visitor: these turn the run red (and email),
@@ -207,6 +248,7 @@ function runAudit({ dataByCode = {}, pagesManifest = {}, countries = [], now = D
   const findings = [];
   for (const cfg of countries) {
     findings.push(...auditData(cfg.code, dataByCode[cfg.code], now));
+    findings.push(...auditListVsPage(cfg.code, dataByCode[cfg.code]));
     const m = pagesManifest[cfg.code] || {};
     let index = null, bySlug = null;
     for (const [slug, e] of Object.entries(m)) {
@@ -288,4 +330,4 @@ function runAudit({ dataByCode = {}, pagesManifest = {}, countries = [], now = D
   return { findings, byCheck };
 }
 
-module.exports = { FALSE_CLAIMS, auditData, auditIntegrity, auditManifest, auditPage, runAudit, shownDate, textSimilarity };
+module.exports = { FALSE_CLAIMS, auditData, auditIntegrity, auditListVsPage, wordingSlip, auditManifest, auditPage, runAudit, shownDate, textSimilarity };

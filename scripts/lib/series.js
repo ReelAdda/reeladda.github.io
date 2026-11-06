@@ -122,7 +122,7 @@ function franchiseSiblings(item, index, { visible = () => true, max = 6 } = {}) 
     return { heading, kind, items: all.slice(from, from + max), total: all.length };
   };
   if (fr.c) {
-    const r = pick((f) => f.c && f.c.id === fr.c.id, `More in the ${seriesName(fr.c)} series`, "collection");
+    const r = pick((f) => f.c && f.c.id === fr.c.id, `More in ${/^the /i.test(seriesName(fr.c)) ? "" : "the "}${seriesName(fr.c)} series`, "collection");
     if (r) return r;
   }
   for (const u of fr.u || []) {
@@ -135,11 +135,17 @@ function franchiseSiblings(item, index, { visible = () => true, max = 6 } = {}) 
 // Pure: the next drop — every episode of the current season released on the next episode's date
 // (two at once: "E5 & E6"). Dates, never "today": the page is static and read for days.
 function nextDrop(ep, today = new Date().toISOString().slice(0, 10)) {
-  if (!ep || !ep.next || !ep.next.date || ep.next.date < today) return null;
-  const same = (ep.list || []).filter((x) => x.date === ep.next.date).map((x) => x.e).sort((a, b) => a - b);
+  if (!ep || !ep.next || !ep.next.date) return null;
+  // The season's own list dates the episode when it has it: TMDB's show-level "next episode" can
+  // disagree (The Assassin S2, 6 Nov 2026: next E1 on 6 Nov, the season list E1–E6 on 5 Nov, so the
+  // page tagged E1 "Next" beside E2–E6 already out). One source decides both "Next" and "out".
+  const listed = (ep.list || []).find((x) => x.e === ep.next.e && (!ep.season || !ep.next.s || ep.next.s === ep.season));
+  const date = listed && listed.date ? listed.date : ep.next.date;
+  if (date < today) return null;
+  const same = (ep.list || []).filter((x) => x.date === date).map((x) => x.e).sort((a, b) => a - b);
   const nums = same.length ? same : [ep.next.e];
   const label = nums.length === 1 ? `E${nums[0]}` : nums.length === 2 ? `E${nums[0]} & E${nums[1]}` : `E${nums[0]}–E${nums[nums.length - 1]}`;
-  return { nums, date: ep.next.date, label, name: nums.length === 1 ? ep.next.name : "", season: ep.next.s };
+  return { nums, date, label, name: nums.length === 1 ? ep.next.name : "", season: ep.next.s };
 }
 
 // Pure: the meta description of a series on air — its schedule, the thing people come for. Never
@@ -157,7 +163,7 @@ function seriesDescription(item, fmt, today = new Date().toISOString().slice(0, 
   const verdict = item.fcScore && item.fcScore.verdict ? ` FilmyChill verdict: ${item.fcScore.verdict}.` : "";
   const finale = last && last > nd.date ? `, finale ${fmt(last)}` : "";
   const whose = airLabel ? ` (original air date${finale ? "s" : ""})` : "";
-  return `${item.title}: all ${ep.count} episodes with dates. ${nd.label} out ${fmt(nd.date)}${finale}${whose}.${verdict}`;
+  return `${item.title}: all ${ep.count} episode${ep.count === 1 ? "" : "s"} with dates. ${nd.label} out ${fmt(nd.date)}${finale}${whose}.${verdict}`;
 }
 
 // Pure: the "Episodes" section (series only). `fmt(date)` formats a date for the edition.
@@ -191,7 +197,7 @@ function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10), 
     const out = dated.filter((x) => x.date <= today).length;
     const last = dated.map((x) => x.date).sort().pop();
     const done = dated.length === ep.count && out === ep.count;
-    head = `<div class="ephead"><h2>Episodes</h2><span class="lbl">${done ? `All ${ep.count} episodes out${last ? ` · finale ${e(fmt(last))}` : ""}` : `${out} of ${ep.count} out`}</span></div>`
+    head = `<div class="ephead"><h2>Episodes</h2><span class="lbl">${done ? `All ${ep.count} episode${ep.count === 1 ? "" : "s"} out${last ? ` · finale ${e(fmt(last))}` : ""}` : `${out} of ${ep.count} out`}</span></div>`
       + (done ? "" : `<div class="epbar"><i data-pct="${Math.round(100 * out / ep.count)}"></i></div>`);
   }
   return head + intro + next
@@ -210,7 +216,7 @@ function releaseCadence(ep, fmt) {
   const last = fmt(dates[dates.length - 1]);
   // Every sentence says whose dates these are: TMDB's original air dates, not a local schedule.
   const tail = " Original air dates.";
-  if (dates.length === 1) return `All ${ep.count} episodes were released together on ${last}.${tail}`;
+  if (dates.length === 1) return ep.count === 1 ? `Released on ${last}.${tail}` : `All ${ep.count} episodes were released together on ${last}.${tail}`;
   const gaps = dates.slice(1).map((d, i) => (Date.parse(d) - Date.parse(dates[i])) / 864e5);
   if (!gaps.every((g) => g >= 6 && g <= 8)) return null;
   const words = ["", "One", "Two", "Three", "Four"];
@@ -267,7 +273,7 @@ function fitFromData(item, franchise, fmt, today = new Date().toISOString().slic
   if (ep && ep.count) {
     const dates = (ep.list || []).map((x) => x.date).filter(Boolean).sort();
     const last = dates.length ? dates[dates.length - 1] : null;
-    if (ep.next && ep.next.date >= today && last) {
+    if (nextDrop(ep, today) && last) {   // the same rule as the timeline's "Next" tag
       out.bestFor = `following it week by week — new episodes until ${fmt(last)}`;
       out.bingeFrom = `${fmt(last)}, when the finale is out`;
     } else if (ep.limited && last && last <= today) {
