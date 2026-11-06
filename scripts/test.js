@@ -7095,6 +7095,19 @@ test("near-copy threshold: 0.85 by film once its stage of near-copy-085 is on, e
   assert.deepStrictEqual(cfg.schedule.map((x) => x.percent), [50, 100], "two stages");
   assert.ok(cfg.schedule[0].from > "2026-11-05T23:59", "never in the same build as the score-link switch");
 });
+test("a film inside its cinema window never reads 'Theatrical run ended' (Ramayana, 6 Nov 2026)", () => {
+  const A = require("./lib/archive.js");
+  const cfg = { code: "in", name: "India" };
+  const page = (released) => `<script type="application/ld+json">{"@type":"Movie","datePublished":"${released}"}</script><div class="sub"><span class="pill">In theatres</span></div><p>It&#39;s in theatres in India now — best caught on the big screen.</p>`;
+  const now = Date.parse("2026-11-06T10:00:00Z");
+  const fresh = A.archivePatchHtml(page("2026-11-05"), "India", cfg, { released: "2026-11-05" }, now).html;
+  assert.ok(!/Theatrical run ended|had its theatrical run/.test(fresh), "one day after release: still showing");
+  assert.ok(/Opened in cinemas 5 Nov/.test(fresh) && /It opened in theatres in India on 5 Nov/.test(fresh), "says when it opened instead");
+  const fromPage = A.archivePatchHtml(page("2026-11-05"), "India", cfg, null, now).html;
+  assert.ok(!/Theatrical run ended/.test(fromPage), "the page's own release date is used when there is no record");
+  const old = A.archivePatchHtml(page("2026-09-01"), "India", cfg, { released: "2026-09-01" }, now).html;
+  assert.ok(/Theatrical run ended/.test(old), "past the window: the run has ended");
+});
 test("early arrivals: a placeholder or unconfirmed short window is never published (Drishyam, Oct 2026)", () => {
   const starts = { us: "2026-08-27" };
   const four = { c: "us", k: "movie", id: 1, th: "2026-10-02", rel: "2026-10-02", first: "2026-10-06" };

@@ -11,6 +11,7 @@ const {
   COUNTRY_PAGE_META,
   escHtml,
   fmtDateFull,
+  fmtDateShort,
   ldJson,
   localeFor,
 } = require("./core.js");
@@ -25,6 +26,7 @@ const {
   GC_SITE,
   OPEN_PILL_RE,
   settleReleasedCopy,
+  theatreRunState,
 } = require("./pagekit.js");
 const { countryNameFor, streamVocab, titleWithCountry } = require("./rules.js");
 const { sleep, tmdb } = require("./tmdb.js");
@@ -655,8 +657,15 @@ function visibleText(html) {
     .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-function archivePatchHtml(html, countryName, cfg = null, item = null) {
+function archivePatchHtml(html, countryName, cfg = null, item = null, now = Date.now()) {
   const V = streamVocab(cfg);
+  // Inside its cinema window a film is still showing: never "theatrical run ended" (6 Nov 2026,
+  // Ramayana: Rise of a Legend read "Theatrical run ended" the day after it opened, because the
+  // facts renderer, lib/migrate.js renderFrozen, runs every page through this patch). The open
+  // forms below are the ones settleReleasedCopy moves to "ended" once the window closes.
+  const released = String((item && item.released) || (/"datePublished":"(d{4}-d{2}-d{2})/.exec(html) || [])[1] || "").slice(0, 10);
+  const open = theatreRunState(released || null, now) === "open";
+  const openedOn = open ? fmtDateShort(released, now, localeFor((cfg && cfg.code) || "in")) : "";
   // Pages frozen BEFORE the per-country vocabulary split carry India's "OTT" wording
   // in every market, so we match both the country's current word and the legacy one.
   // Replacements always use the country's current vocabulary.
@@ -666,14 +675,17 @@ function archivePatchHtml(html, countryName, cfg = null, item = null) {
   ];
   const swaps = [
     [`It&#39;s in theatres in ${countryName} now — best caught on the big screen.`,
-     `It had its theatrical run in ${countryName} — check back here for its ${V.arrival}.`],
+     open ? `It opened in theatres in ${countryName} on ${escHtml(openedOn)} — check back here for its ${V.arrival}.`
+       : `It had its theatrical run in ${countryName} — check back here for its ${V.arrival}.`],
     [`<span class="pill">In theatres</span>`,
-     `<span class="pill">Theatrical run ended — ${V.arrival} pending</span>`],
+     open ? `<span class="pill">Opened in cinemas ${escHtml(openedOn)} — not streaming yet</span>`
+       : `<span class="pill">Theatrical run ended — ${V.arrival} pending</span>`],
   ];
   for (const v of variants) {
     swaps.push([
       `is currently playing in theatres across ${countryName}. ${v.article} ${v.release} hasn&#39;t been announced yet.`,
-      `has finished its theatrical run in ${countryName}. Its ${V.release} hasn&#39;t been announced yet — check back soon.`,
+      open ? `opened in theatres in ${countryName} on ${escHtml(openedOn)} and may still be showing — check local cinema listings. Its ${V.release} hasn&#39;t been announced yet — check back soon.`
+        : `has finished its theatrical run in ${countryName}. Its ${V.release} hasn&#39;t been announced yet — check back soon.`,
     ]);
   }
   let out = html, changed = false;
