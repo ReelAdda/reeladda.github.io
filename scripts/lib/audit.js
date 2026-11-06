@@ -128,7 +128,7 @@ function auditIntegrity(html, { entry = null, now = Date.now() } = {}) {
 }
 
 // Pure, over the whole manifest: identity problems no single page shows.
-function auditManifest(pagesManifest) {
+function auditManifest(pagesManifest, read = (p) => fs.readFileSync(p, "utf8")) {
   const out = [];
   const byFilm = new Map();
   for (const [code, m] of Object.entries(pagesManifest || {})) {
@@ -179,8 +179,20 @@ function auditManifest(pagesManifest) {
     }
   }
   for (const list of verdicts.values()) {
-    const set = [...new Set(list.map((x) => x.v))];
-    if (set.length > 1) out.push({ check: "verdict-differs-across-editions", url: `${list[0].code}/${list[0].slug}`, detail: list.map((x) => `${x.code} ${x.v}`).join(", ").slice(0, 120) });
+    if (new Set(list.map((x) => x.v)).size < 2) continue;
+    // The stored verdict can lag the page (6 Nov 2026: six films reported, every page agreed), so
+    // a difference is confirmed on the pages themselves; the detail groups editions by verdict so
+    // the odd one out is named (a flat list cut at 120 characters hid it).
+    const onPage = list.map((x) => {
+      let h = null;
+      try { h = read(filmPagePath(x.code, x.slug).replace(/^\//, "")); } catch { /* no page: keep the record */ }
+      const s = h && /class="fcsb-stamp fcsb-(?:must|worth|skip)">([^<]+)</.exec(h);
+      return { ...x, v: s ? s[1] : h ? null : x.v };
+    }).filter((x) => x.v);
+    const by = new Map();
+    for (const x of onPage) by.set(x.v, (by.get(x.v) || []).concat(x.code));
+    if (by.size > 1) out.push({ check: "verdict-differs-across-editions", url: `${onPage[0].code}/${onPage[0].slug}`,
+      detail: [...by.entries()].sort((a, b) => a[1].length - b[1].length).map(([v, codes]) => `${v}: ${codes.join(", ")}`).join(" · ") });
   }
   for (const [slug, films] of bySlug) {
     if (films.size > 1) out.push({ check: "address-shared-by-different-films", url: slug, detail: [...films.entries()].map(([k, c]) => `${k} [${c.join(",")}]`).join(" | ").slice(0, 140) });

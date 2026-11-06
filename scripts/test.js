@@ -5101,6 +5101,16 @@ test("buildPlatformHubPage: title, country-scoped links, ItemList + FAQ, no emoj
   assert.ok(html.includes('"ItemList"') && html.includes('"numberOfItems":6'));
   assert.ok(!/[\u{1F300}-\u{1FAFF}]/u.test(html));
 });
+test("platform hub FAQ: the rating named as TMDB's, a verdict only when it is one, no spaced dash (6 Nov 2026)", () => {
+  const mk = (slug, r, verdict) => ({ title: slug.toUpperCase(), slug, kind: "movie", platform: "Netflix", providers: ["Netflix"], rating: r, votes: 100, language: "English", genre: "Drama", verdict });
+  const faqOf = (top) => {
+    const data = { generatedAt: "2026-07-19T04:00:00Z", ott: [top, mk("bbb", 7.1), mk("ccc", 6.4), mk("ddd", 6.1), mk("eee", 6.0), mk("fff", 5.9)] };
+    const html = U.buildPlatformHubPage(data, { code: "us", name: "United States" }, U.hubsFor(data)[0]);
+    return (/AAA is the top-rated new arrival[^"<]*/.exec(html) || [""])[0];
+  };
+  assert.strictEqual(faqOf(mk("aaa", 8.2, "Must watch")), "AAA is the top-rated new arrival on Netflix, at 8.2/10 on TMDB. FilmyChill Verdict: Must watch.");
+  assert.strictEqual(faqOf(mk("aaa", 8.2, "Not enough ratings")), "AAA is the top-rated new arrival on Netflix, at 8.2/10 on TMDB.", "a placeholder is not a verdict");
+});
 test("indexNowUrls: only the pages that change every build; hubs and film pages ride on a changed lastmod, not by default (2 Nov 2026)", () => {
   const urls = U.indexNowUrls([{ code: "in" }, { code: "us" }], { in: { theatres: [{ slug: "the-odyssey" }],
     ott: [{ slug: "p", title: "P", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "b", title: "B", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "c", title: "C", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "d", title: "D", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "e", title: "E", platform: "JioHotstar", providers: ["JioHotstar"] }, { slug: "f", title: "F", platform: "JioHotstar", providers: ["JioHotstar"] }] } });
@@ -8804,7 +8814,7 @@ test("audit: intent, repetition, borrowed text, cross-edition verdicts and share
   assert.ok(checks(page({ title: "X", story: long, body: "<p>short</p>" })).includes("mostly-borrowed-text"));
   const man = { in: { "law-order": { tmdbId: 1588472, kind: "movie", fcs: { v: "Skip" } }, moana: { tmdbId: 7, fcs: { v: "Worth a watch" } } },
     us: { "law-order": { tmdbId: 549, kind: "tv", fcs: { v: "Worth a watch" } } }, ae: { moana: { tmdbId: 7, fcs: { v: "Must watch" } } } };
-  const m = A.auditManifest(man).map((f) => f.check);
+  const m = A.auditManifest(man, () => { throw new Error("no pages: the records decide"); }).map((f) => f.check);
   assert.ok(m.includes("verdict-differs-across-editions") && m.includes("address-shared-by-different-films"));
   assert.ok(A.textSimilarity("a b c d e f g h", "a b c d e f g h") === 1 && A.textSimilarity("a b c d e f", "p q r s t u") === 0);
 });
@@ -9381,8 +9391,15 @@ test("the self-audit catches every kind of finding from the 17 Oct integrity aud
   assert.deepStrictEqual(checks(pg({ title: "Fine (2026) — Review", desc: "Fine is streaming in India", body: '<!--SW:stream--><p class="answer">Fine is streaming in India on Netflix.</p>' }), { kind: "movie", lang: "English", last: "2026-10-17" }), [], "a consistent page has no findings");
   const man = { in: { godfather: { tmdbId: 1, released: "2025-08-01", lang: "English" }, a: { tmdbId: 7, lang: "Hindi" }, b: { tmdbId: 7, lang: "Hindi" } },
     us: { godfather: { tmdbId: 1, released: "1972-03-24", lang: "English" }, w: { tmdbId: 9, lang: "Portuguese" } }, sg: { w: { tmdbId: 9, lang: "English" } } };
-  const mf = A.auditManifest(man).map((f) => f.check);
+  const mf = A.auditManifest(man, () => { throw new Error("no pages"); }).map((f) => f.check);
   assert.ok(mf.includes("year-later-than-other-editions") && mf.includes("two-pages-one-film") && mf.includes("language-differs-across-editions"));
+  // Cross-edition verdicts are confirmed on the pages (stored records lag them), and the odd edition is named (6 Nov 2026).
+  const vm = { us: { x: { tmdbId: 5, fcs: { v: "Skip" } } }, uk: { x: { tmdbId: 5, fcs: { v: "Worth a watch" } } }, ca: { x: { tmdbId: 5, fcs: { v: "Skip" } } } };
+  const stamp = (v) => `<span class="fcsb-stamp fcsb-${v === "Skip" ? "skip" : "worth"}">${v}</span>`;
+  const agree = { "us/movie/x.html": stamp("Skip"), "uk/movie/x.html": stamp("Skip"), "ca/movie/x.html": stamp("Skip") };
+  const vd = (pages) => A.auditManifest(vm, (p) => { if (!(p in pages)) throw new Error("none"); return pages[p]; }).filter((f) => f.check === "verdict-differs-across-editions");
+  assert.deepStrictEqual(vd(agree), [], "the record said Worth a watch, the page says Skip like the rest: no finding");
+  assert.deepStrictEqual(vd({ ...agree, "uk/movie/x.html": stamp("Worth a watch") }).map((f) => f.detail), ["Worth a watch: uk · Skip: us, ca"], "the odd edition first, by name");
   assert.strictEqual(A.shownDate("Oct 1, 2026"), "2026-10-01");
   assert.strictEqual(A.shownDate("25 Sept 2026"), "2026-09-25");
 });

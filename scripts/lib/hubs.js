@@ -546,7 +546,9 @@ function buildPlatformHubPage(data, cfg, hub) {
   const faqs = [{ q: `What's new on ${hub.name} in ${countryName} this week?`, a: `New on ${hub.name} this week: ${claimSet.map((t) => t.title).join(", ")}.` }];
   const best = claimSet.filter((x) => x.rating != null).sort((a, b) => b.rating - a.rating)[0];
   if (best) faqs.push({ q: `What's the best new title on ${hub.name} right now?`,
-    a: `${best.title} is the top-rated new arrival on ${hub.name} at ${Number(best.rating).toFixed(1)}/10${best.verdict ? ` — ${best.verdict}` : ""}.` });
+    // The rating is TMDB's, said so; the verdict only when it is one (not "Not enough ratings"),
+    // in its own sentence (no spaced dash: lib/humanprose.js flagged 15 hubs, 6 Nov 2026).
+    a: `${best.title} is the top-rated new arrival on ${hub.name}, at ${Number(best.rating).toFixed(1)}/10 on TMDB.${/^(Must watch|Worth a watch|Skip)$/.test(best.verdict || "") ? ` FilmyChill Verdict: ${best.verdict}.` : ""}` });
   if (carried.length) faqs.push({ q: `What else is worth watching on ${hub.name} right now?`,
     a: `Still worth your time from earlier weeks: ${carried.map((t) => t.title).join(", ")}.` });
 
