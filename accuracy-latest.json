@@ -2,38 +2,9 @@
  "date": "2026-11-06",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 3,
- "high": 1,
- "correctable": 2,
- "byField": {
-  "rent/buy": 1,
-  "platform": 1,
-  "runtime": 1
- },
- "rows": [
-  {
-   "field": "rent/buy",
-   "severity": "medium",
-   "page": "none",
-   "tmdb": "Amazon Video",
-   "code": "us",
-   "slug": "de-gaulle-r-sistance"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix, WeTV",
-   "tmdb": "Netflix, Tencent Video",
-   "code": "my",
-   "slug": "falling-into-your-smile"
-  },
-  {
-   "field": "runtime",
-   "severity": "medium",
-   "page": "126 min",
-   "tmdb": "118 min",
-   "code": "fr",
-   "slug": "bunker"
-  }
- ]
+ "pagesDisagreeing": 0,
+ "high": 0,
+ "correctable": 0,
+ "byField": {},
+ "rows": []
 }

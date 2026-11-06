@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-06T08:40:51.418Z",
+ "generatedAt": "2026-11-06T11:03:25.634Z",
  "country": "mx",
  "pick": "Wildwood",
  "theatres": [
@@ -72,6 +72,13 @@
      "kind": "movie"
     },
     {
+     "title": "The Secret Kingdom",
+     "slug": "the-secret-kingdom",
+     "poster": "https://image.tmdb.org/t/p/w342/dteXMzVY53GBHUgrR7vigAartsP.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "The Lord of the Rings",
      "slug": "the-lord-of-the-rings",
      "poster": "https://image.tmdb.org/t/p/w342/liW0mjvTyLs7UCumaHhx3PpU4VT.jpg",
@@ -79,9 +86,9 @@
      "kind": "movie"
     },
     {
-     "title": "Bionicle 2: Legends of Metru Nui",
-     "slug": "bionicle-2-legends-of-metru-nui",
-     "poster": "https://image.tmdb.org/t/p/w342/z7PwIVnWYjXIRlOaByXMW6CmteV.jpg",
+     "title": "Mythica: A Quest for Heroes",
+     "slug": "mythica-a-quest-for-heroes",
+     "poster": "https://image.tmdb.org/t/p/w342/n75lUF6T2uvy1ZhVyjmdfaTfDT5.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -114,16 +121,9 @@
      "kind": "movie"
     },
     {
-     "title": "Beowulf",
-     "slug": "beowulf",
-     "poster": "https://image.tmdb.org/t/p/w342/7QsWYyJAV97N9jOh21pdRIqJeJq.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "Labyrinth",
-     "slug": "labyrinth",
-     "poster": "https://image.tmdb.org/t/p/w342/pejayhTVBEL4w8YKSfrhOjjWVlH.jpg",
+     "title": "Peter Pan",
+     "slug": "peter-pan",
+     "poster": "https://image.tmdb.org/t/p/w342/6QdU3TZZrIvXFzoHOwafZAynFjB.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -168,7 +168,7 @@
    "slug": "wildwood",
    "wikiWeeklyViews": 422482,
    "trending": true,
-   "trailerViews": 20085342,
+   "trailerViews": 20087513,
    "take": "Critics loved it.",
    "takeSrc": "wiki",
    "takeArticle": "Wildwood (film)",
@@ -250,13 +250,6 @@
      "kind": "movie"
     },
     {
-     "title": "Wire Room",
-     "slug": "wire-room",
-     "poster": "https://image.tmdb.org/t/p/w342/b9ykj4v8ykjRoGB7SpI1OuxblNU.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Absolution",
      "slug": "absolution",
      "poster": "https://image.tmdb.org/t/p/w342/urQRTWxekNi6OS7RP5vWblEssQj.jpg",
@@ -267,6 +260,13 @@
      "title": "Monsters of Man",
      "slug": "monsters-of-man",
      "poster": "https://image.tmdb.org/t/p/w342/sENLgxCVtZqCMQIeuLep8FmdInr.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Wire Room",
+     "slug": "wire-room",
+     "poster": "https://image.tmdb.org/t/p/w342/b9ykj4v8ykjRoGB7SpI1OuxblNU.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -299,16 +299,16 @@
      "kind": "movie"
     },
     {
-     "title": "Code of Silence",
-     "slug": "code-of-silence",
-     "poster": "https://image.tmdb.org/t/p/w342/yE1Xh7Q7M6uDrm28ib0MMcuhO4L.jpg",
+     "title": "Dark Angel",
+     "slug": "dark-angel",
+     "poster": "https://image.tmdb.org/t/p/w342/zwsesgAluQKDmdAA2nhlEc4FhFd.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Repo Men",
-     "slug": "repo-men",
-     "poster": "https://image.tmdb.org/t/p/w342/1ZA5kEKuA6HgbyzZXXlyU4piNI.jpg",
+     "title": "Code of Silence",
+     "slug": "code-of-silence",
+     "poster": "https://image.tmdb.org/t/p/w342/yE1Xh7Q7M6uDrm28ib0MMcuhO4L.jpg",
      "language": "English",
      "kind": "movie"
     },
@@ -359,7 +359,7 @@
    "theatricalHere": true,
    "slug": "runner",
    "wikiWeeklyViews": 27587,
-   "trailerViews": 1811095,
+   "trailerViews": 1811096,
    "take": "Critics were split.",
    "takeSrc": "wiki",
    "takeArticle": "Runner (2026 American film)",
@@ -548,7 +548,7 @@
     }
    ],
    "slug": "the-awakening",
-   "trailerViews": 53688,
+   "trailerViews": 54022,
    "fcScore": {
     "verdict": "Skip",
     "reason": "Audiences are lukewarm on it.",
@@ -722,7 +722,7 @@
    "slug": "clayface",
    "wikiWeeklyViews": 455383,
    "trending": true,
-   "trailerViews": 389241,
+   "trailerViews": 389595,
    "take": "Critics liked the direction and humour but criticised the visuals.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -807,6 +807,13 @@
      "kind": "movie"
     },
     {
+     "title": "Godzilla 2000: Millennium",
+     "slug": "godzilla-2000-millennium",
+     "poster": "https://image.tmdb.org/t/p/w342/7BrjFxV0j5VzZRfVYeYbFXMUweB.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
      "title": "Godzilla vs. Biollante",
      "slug": "godzilla-vs-biollante",
      "poster": "https://image.tmdb.org/t/p/w342/dAr3SzPTfKP23uILP4BBiML8MVG.jpg",
@@ -821,9 +828,9 @@
      "kind": "movie"
     },
     {
-     "title": "Godzilla 2000: Millennium",
-     "slug": "godzilla-2000-millennium",
-     "poster": "https://image.tmdb.org/t/p/w342/7BrjFxV0j5VzZRfVYeYbFXMUweB.jpg",
+     "title": "Godzilla: Planet of the Monsters",
+     "slug": "godzilla-planet-of-the-monsters",
+     "poster": "https://image.tmdb.org/t/p/w342/hAuZ7g6TqDLv5fOqXIPgYRguOkm.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
@@ -835,23 +842,9 @@
      "kind": "movie"
     },
     {
-     "title": "Godzilla vs. Gigan",
-     "slug": "godzilla-vs-gigan",
-     "poster": "https://image.tmdb.org/t/p/w342/pNQro37cFrg4Lfz5DUbRFZlMG3y.jpg",
-     "language": "Japanese",
-     "kind": "movie"
-    },
-    {
      "title": "Destroy All Monsters",
      "slug": "destroy-all-monsters",
      "poster": "https://image.tmdb.org/t/p/w342/24r1hsRisfUidwLF67J0iMuWh7p.jpg",
-     "language": "Japanese",
-     "kind": "movie"
-    },
-    {
-     "title": "Shin Godzilla",
-     "slug": "shin-godzilla",
-     "poster": "https://image.tmdb.org/t/p/w342/jPNShaWZMpVF0iQ7j1dvTuZLD20.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
@@ -870,16 +863,23 @@
      "kind": "movie"
     },
     {
-     "title": "The War of the Gargantuas",
-     "slug": "the-war-of-the-gargantuas",
-     "poster": "https://image.tmdb.org/t/p/w342/q8EH0y601mhYJmchoTRoo92Q0FS.jpg",
+     "title": "Godzilla vs. Mechagodzilla II",
+     "slug": "godzilla-vs-mechagodzilla-ii",
+     "poster": "https://image.tmdb.org/t/p/w342/ezZnnAit1N1Nj9sewMFQ1xy33YQ.jpg",
      "language": "Japanese",
      "kind": "movie"
     },
     {
-     "title": "Godzilla vs. Mechagodzilla II",
-     "slug": "godzilla-vs-mechagodzilla-ii",
-     "poster": "https://image.tmdb.org/t/p/w342/ezZnnAit1N1Nj9sewMFQ1xy33YQ.jpg",
+     "title": "Rodan",
+     "slug": "rodan",
+     "poster": "https://image.tmdb.org/t/p/w342/mSrpaNrAIH2u0tiYvjca8yakj28.jpg",
+     "language": "Japanese",
+     "kind": "movie"
+    },
+    {
+     "title": "Gamera 2: Advent of Legion",
+     "slug": "gamera-2-advent-of-legion",
+     "poster": "https://image.tmdb.org/t/p/w342/xPBtoCLUN0raEKywuiSId6SSRAc.jpg",
      "language": "Japanese",
      "kind": "movie"
     }
@@ -923,7 +923,7 @@
    "theatricalHere": true,
    "slug": "godzilla-minus-zero",
    "wikiWeeklyViews": 273463,
-   "trailerViews": 321045,
+   "trailerViews": 370152,
    "take": "Critics liked the visuals and production design but criticised the tone.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -995,13 +995,6 @@
    "badge": null,
    "similar": [
     {
-     "title": "Girls Like Girls",
-     "slug": "girls-like-girls",
-     "poster": "https://image.tmdb.org/t/p/w342/gbP30EOIwUW0HZY9BwQMTRrk8uX.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Howards End",
      "slug": "howards-end",
      "poster": "https://image.tmdb.org/t/p/w342/1009nhfj28VhhQnVadtjkOacduX.jpg",
@@ -1051,13 +1044,6 @@
      "kind": "movie"
     },
     {
-     "title": "Lady Chatterley's Lover",
-     "slug": "lady-chatterley-s-lover",
-     "poster": "https://image.tmdb.org/t/p/w342/6RwYNmcMfsTmOtnNm5PC6LNuy0K.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "The Man in the Moon",
      "slug": "the-man-in-the-moon",
      "poster": "https://image.tmdb.org/t/p/w342/57r0TXlqV5GIn4h0Htgh81OZou9.jpg",
@@ -1075,6 +1061,20 @@
      "title": "Anna Karenina",
      "slug": "anna-karenina",
      "poster": "https://image.tmdb.org/t/p/w342/6YWh035E2jhiWs57A2LMg1c9mv4.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Women in Love",
+     "slug": "women-in-love",
+     "poster": "https://image.tmdb.org/t/p/w342/uHfThxdQC99LLoe2jKZ1u3vIge2.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Heiress",
+     "slug": "the-heiress",
+     "poster": "https://image.tmdb.org/t/p/w342/1oN0zsjw3iS1HaOLoZbmptzrD1W.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1118,7 +1118,7 @@
    "theatricalHere": true,
    "slug": "sense-and-sensibility",
    "wikiWeeklyViews": 96448,
-   "trailerViews": 1955660,
+   "trailerViews": 1956151,
    "take": "Critics were mostly positive.",
    "takeSrc": "wiki",
    "takeArticle": "Sense and Sensibility (2026 film)",
@@ -1178,7 +1178,7 @@
     "John Malkovich",
     "Sam Rockwell",
     "Steve Buscemi",
-    "Tom Waits"
+    "Parker Posey"
    ],
    "director": "Martin McDonagh",
    "runtime": 117,
@@ -1225,13 +1225,6 @@
      "kind": "movie"
     },
     {
-     "title": "Red Right Hand",
-     "slug": "red-right-hand",
-     "poster": "https://image.tmdb.org/t/p/w342/vfEG79SQIg3p6B8rBLVeIo2BBhb.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "The Last Days of American Crime",
      "slug": "the-last-days-of-american-crime",
      "poster": "https://image.tmdb.org/t/p/w342/ygCQnDEqUEIamBpdQdDYnFfxvgM.jpg",
@@ -1272,6 +1265,13 @@
      "poster": "https://image.tmdb.org/t/p/w342/4ejNFbCgLMDAuy7jFQmc7cr6UAW.jpg",
      "language": "English",
      "kind": "movie"
+    },
+    {
+     "title": "Breaking In",
+     "slug": "breaking-in",
+     "poster": "https://image.tmdb.org/t/p/w342/nuCxJwcQOEKYoiHTgcf4em8TxWv.jpg",
+     "language": "English",
+     "kind": "movie"
     }
    ],
    "backdrop": "https://image.tmdb.org/t/p/w780/b17UWf3LqHgKolQkXckne32qv0.jpg",
@@ -1295,11 +1295,6 @@
      "photo": "https://image.tmdb.org/t/p/w185/n0pZumkrcZrAPMoPq684RhYnjPV.jpg"
     },
     {
-     "name": "Tom Waits",
-     "character": "Jim",
-     "photo": "https://image.tmdb.org/t/p/w185/kmPOnRmxUgL0rjIUF98uToQrQKB.jpg"
-    },
-    {
      "name": "Parker Posey",
      "character": "Marge",
      "photo": "https://image.tmdb.org/t/p/w185/yoFt75JfGUqQ6EV8qN6fckQuElk.jpg"
@@ -1308,12 +1303,17 @@
      "name": "Mariana di Girolamo",
      "character": "Monica",
      "photo": "https://image.tmdb.org/t/p/w185/niEEPw3RezaA0SvMXbaZXl3rqvD.jpg"
+    },
+    {
+     "name": "Ailín Salas",
+     "character": "Alicia",
+     "photo": "https://image.tmdb.org/t/p/w185/bZWFFUdjs8oMX4sVfCaKi17aFrd.jpg"
     }
    ],
    "theatricalHere": true,
    "slug": "wild-horse-nine",
    "wikiWeeklyViews": 141708,
-   "trailerViews": 2813667,
+   "trailerViews": 2815416,
    "take": "Critics liked it, especially the performances and writing.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1389,7 +1389,7 @@
       "date": "2026-11-01",
       "runtime": 50,
       "rating": 7.5,
-      "votes": 25
+      "votes": 26
      },
      {
       "e": 2,
@@ -1531,16 +1531,16 @@
      "kind": "tv"
     },
     {
-     "title": "Sherlock & Daughter",
-     "slug": "sherlock-daughter",
-     "poster": "https://image.tmdb.org/t/p/w342/ifh5NNMzUEqErsHmeKjjGblbOav.jpg",
+     "title": "Nightsleeper",
+     "slug": "nightsleeper",
+     "poster": "https://image.tmdb.org/t/p/w342/twMzmcKkJpftjhYyrPXETddN08R.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Nightsleeper",
-     "slug": "nightsleeper",
-     "poster": "https://image.tmdb.org/t/p/w342/twMzmcKkJpftjhYyrPXETddN08R.jpg",
+     "title": "Sherlock & Daughter",
+     "slug": "sherlock-daughter",
+     "poster": "https://image.tmdb.org/t/p/w342/ifh5NNMzUEqErsHmeKjjGblbOav.jpg",
      "language": "English",
      "kind": "tv"
     },
@@ -1593,7 +1593,7 @@
    "ottFreshDate": "2026-11-01",
    "slug": "dexter-resurrection",
    "wikiWeeklyViews": 140886,
-   "trailerViews": 9486089,
+   "trailerViews": 9486471,
    "take": "Critics liked the performances but criticised the second half.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1629,7 +1629,7 @@
      "score": "6.1/10"
     }
    ],
-   "votes": 124,
+   "votes": 123,
    "verdict": "Skip",
    "poster": "https://image.tmdb.org/t/p/w342/wXln4DUrwcyjcFPwgQxFPYTlG1Z.jpg",
    "isRecent": true,
@@ -1790,7 +1790,7 @@
    "ottSince": "2026-10-31",
    "ottFreshDate": "2026-10-31",
    "slug": "apocalypse-z-new-world",
-   "trailerViews": 1393982,
+   "trailerViews": 1396175,
    "fcScore": {
     "verdict": "Skip",
     "reason": "Audiences are lukewarm on it.",
@@ -1800,228 +1800,237 @@
    }
   },
   {
-   "title": "Ghosts",
-   "genre": "Comedy / Sci-Fi & Fantasy",
+   "title": "Black Doves",
+   "genre": "Action & Adventure / Mystery",
    "language": "English",
-   "released": "2021-10-07",
-   "review": "Samantha and Jay throw caution to the wind when they convert their recently inherited country estate into a bed-and-breakfast. Call it mislaid plans.",
-   "rating": 8.1,
+   "released": "2024-12-05",
+   "review": "When a spy posing as a politician's wife learns her lover has been murdered, an old assassin friend joins her on a quest for truth — and vengeance.",
+   "rating": 7,
    "scores": [
     {
      "source": "TMDB",
-     "score": "8.1/10"
+     "score": "7.0/10"
     }
    ],
-   "votes": 511,
-   "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/8yBQYa6AdvMY5H9CiAv0HkvF3UE.jpg",
+   "votes": 468,
+   "verdict": "Worth a watch",
+   "poster": "https://image.tmdb.org/t/p/w342/srlsyEfIBz2MNWBndVc3opOaNGS.jpg",
    "isRecent": true,
    "isFresh": false,
    "kind": "tv",
-   "tmdbId": 126027,
-   "popularity": 74.5399,
+   "tmdbId": 225385,
+   "popularity": 72.6249,
    "episodes": {
-    "count": 98,
-    "seasons": 6,
+    "count": 12,
+    "seasons": 2,
     "limited": false,
-    "season": 6,
-    "next": {
-     "s": 6,
-     "e": 3,
-     "name": "Died Hard: A Ghosts Christmas (1)",
-     "date": "2026-12-10"
-    },
+    "season": 2,
+    "next": null,
     "list": [
      {
       "e": 1,
-      "name": "Halloween 6: The Mirror (1)",
-      "date": "2026-10-29",
-      "runtime": 21
+      "name": "Black Door",
+      "date": "2026-11-05",
+      "runtime": 50
      },
      {
       "e": 2,
-      "name": "Halloween 6: The Mirror (2)",
-      "date": "2026-10-29",
-      "runtime": 21
+      "name": "Put Your Head on My Shoulder",
+      "date": "2026-11-05",
+      "runtime": 54
      },
      {
       "e": 3,
-      "name": "Died Hard: A Ghosts Christmas (1)",
-      "date": "2026-12-10",
-      "runtime": null
+      "name": "P Is for Poison",
+      "date": "2026-11-05",
+      "runtime": 49
      },
      {
       "e": 4,
-      "name": "Died Hard: A Ghosts Christmas (2)",
-      "date": "2026-12-10",
-      "runtime": null
+      "name": "The Opportunity to Become Savage",
+      "date": "2026-11-05",
+      "runtime": 57
+     },
+     {
+      "e": 5,
+      "name": "Murder Mix",
+      "date": "2026-11-05",
+      "runtime": 46
+     },
+     {
+      "e": 6,
+      "name": "Peace Summit",
+      "date": "2026-11-05",
+      "runtime": 54
      }
     ]
    },
-   "cert": null,
-   "trailer": "https://www.youtube.com/watch?v=kaOCCmwAhGc",
+   "cert": "C",
+   "trailer": "https://www.youtube.com/watch?v=shzJzjVscno",
    "providers": [
-    "Netflix",
-    "Paramount+",
-    "Universal+"
+    "Netflix"
    ],
    "cast": [
-    "Rose McIver",
-    "Utkarsh Ambudkar",
-    "Brandon Scott Jones",
-    "Danielle Pinnock"
+    "Keira Knightley",
+    "Ben Whishaw",
+    "Sarah Lancashire",
+    "Andrew Buchan"
    ],
-   "director": "Joe Port",
+   "director": "Joe Barton",
    "runtime": null,
    "imdbVotes": null,
-   "trailerDate": "2021-12-10T20:18:17.000Z",
-   "imdbId": "tt11379026",
-   "seasons": 6,
-   "freshDate": "2026-10-29",
+   "trailerDate": "2024-11-21T16:00:02.000Z",
+   "imdbId": "tt27995113",
+   "seasons": 2,
+   "freshDate": "2026-11-05",
    "badge": "New season",
    "similar": [
     {
-     "title": "Close Enough",
-     "slug": "close-enough",
-     "poster": "https://image.tmdb.org/t/p/w342/8aNYMcMyhv1m0MKibgCVmJrAeLs.jpg",
+     "title": "Gangs of London",
+     "slug": "gangs-of-london",
+     "poster": "https://image.tmdb.org/t/p/w342/fVgwa6wGw9ddGM5O7mqrrwB6gHK.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Mork & Mindy",
-     "slug": "mork-mindy",
-     "poster": "https://image.tmdb.org/t/p/w342/6qZsNHd5Kafc9AMQyKR5W6RRqIf.jpg",
+     "title": "Citadel",
+     "slug": "citadel",
+     "poster": "https://image.tmdb.org/t/p/w342/5MHtxPEfmN4b0rHzfEZRcm6v9WI.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Mighty Boosh",
-     "slug": "the-mighty-boosh",
-     "poster": "https://image.tmdb.org/t/p/w342/dKlYEo7mc1XLN2PutYlRuTLUXlC.jpg",
+     "title": "Reacher",
+     "slug": "reacher",
+     "poster": "https://image.tmdb.org/t/p/w342/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Garth Marenghi's Darkplace",
-     "slug": "garth-marenghi-s-darkplace",
-     "poster": "https://image.tmdb.org/t/p/w342/4aSD7ssvpkmNqOxenPiWaLpq4vg.jpg",
+     "title": "The Night Agent",
+     "slug": "the-night-agent",
+     "poster": "https://image.tmdb.org/t/p/w342/4c5yUNcaff4W4aPrkXE6zr7papX.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The Jeffersons",
-     "slug": "the-jeffersons",
-     "poster": "https://image.tmdb.org/t/p/w342/iFjIaWr9qDKMLnnh8tHwO6Tzp6D.jpg",
+     "title": "Slow Horses",
+     "slug": "slow-horses",
+     "poster": "https://image.tmdb.org/t/p/w342/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Rose Red",
-     "slug": "rose-red",
-     "poster": "https://image.tmdb.org/t/p/w342/ouXBuWzhwvKmYhw5qO1XFvmifPs.jpg",
+     "title": "Nemesis",
+     "slug": "nemesis",
+     "poster": "https://image.tmdb.org/t/p/w342/NY7ZwSMw5PjoJdK2CObqiTj7Bm.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "American Housewife",
-     "slug": "american-housewife",
-     "poster": "https://image.tmdb.org/t/p/w342/uDXPOk3fx1kPM1tQdrTdE2f76p2.jpg",
+     "title": "Legends",
+     "slug": "legends",
+     "poster": "https://image.tmdb.org/t/p/w342/eYYTgBtsvvA3fC1feyvoqv0G9Gl.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Reba",
-     "slug": "reba",
-     "poster": "https://image.tmdb.org/t/p/w342/3pdrwxTNxKdwuc95vOotrbnvJVa.jpg",
+     "title": "Bodies",
+     "slug": "bodies",
+     "poster": "https://image.tmdb.org/t/p/w342/qWX71nLvoLsBNPEjddZMC75lq6I.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "The King of Queens",
-     "slug": "the-king-of-queens",
-     "poster": "https://image.tmdb.org/t/p/w342/vXs300Yvjy4Kr0iHgBtajHkYbAt.jpg",
+     "title": "Who Is Erin Carter?",
+     "slug": "who-is-erin-carter",
+     "poster": "https://image.tmdb.org/t/p/w342/1FCsjYtEtuine1TUssIFjy6vmJW.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Arrested Development",
-     "slug": "arrested-development",
-     "poster": "https://image.tmdb.org/t/p/w342/p4r4RD7RsNcJVoz0H6z3dBoTBtW.jpg",
+     "title": "The Day of the Jackal",
+     "slug": "the-day-of-the-jackal",
+     "poster": "https://image.tmdb.org/t/p/w342/tYLecM3WSEjlkKhkGiH5G68Dprm.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "Tyler Perry's House of Payne",
-     "slug": "tyler-perry-s-house-of-payne",
-     "poster": "https://image.tmdb.org/t/p/w342/2NdUdJnZnwI6skvm6OXWrK2D42U.jpg",
+     "title": "Miss Scarlet",
+     "slug": "miss-scarlet",
+     "poster": "https://image.tmdb.org/t/p/w342/9pbxTckwvaTXMABenkcmO1VhQi8.jpg",
      "language": "English",
      "kind": "tv"
     },
     {
-     "title": "One Day at a Time",
-     "slug": "one-day-at-a-time",
-     "poster": "https://image.tmdb.org/t/p/w342/zheJWmmDRUYuApz83ZVrrPUjL2F.jpg",
+     "title": "NCIS: Tony & Ziva",
+     "slug": "ncis-tony-ziva",
+     "poster": "https://image.tmdb.org/t/p/w342/zNIANQsAs2kbxbzbTTe5dTBzhKe.jpg",
      "language": "English",
      "kind": "tv"
     }
    ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/p5FOkor90VRBJEEhUMFdFdkixfe.jpg",
-   "backdropPath": "/p5FOkor90VRBJEEhUMFdFdkixfe.jpg",
-   "posterPath": "/8yBQYa6AdvMY5H9CiAv0HkvF3UE.jpg",
-   "fullReview": "Samantha and Jay throw caution to the wind when they convert their recently inherited country estate into a bed-and-breakfast. Call it mislaid plans. Not only is the place falling apart, but it’s also inhabited by spirits of previous residents -- whom only Samantha can see and hear.",
+   "backdrop": "https://image.tmdb.org/t/p/w780/uyL0MH8gtDlChQKpfpkVoUP41VY.jpg",
+   "backdropPath": "/uyL0MH8gtDlChQKpfpkVoUP41VY.jpg",
+   "posterPath": "/srlsyEfIBz2MNWBndVc3opOaNGS.jpg",
+   "fullReview": "When a spy posing as a politician's wife learns her lover has been murdered, an old assassin friend joins her on a quest for truth — and vengeance.",
    "castPics": [
     {
-     "name": "Rose McIver",
-     "character": "Samantha Arondekar",
-     "photo": "https://image.tmdb.org/t/p/w185/7oswXIUIGAZphpZMBhuXoUgOIJi.jpg"
+     "name": "Keira Knightley",
+     "character": "Helen Webb",
+     "photo": "https://image.tmdb.org/t/p/w185/bRC1B2VwV0wK3ElciFAK6QZf2wD.jpg"
     },
     {
-     "name": "Utkarsh Ambudkar",
-     "character": "Jay Arondekar",
-     "photo": "https://image.tmdb.org/t/p/w185/vUW5bFrkjWikNFzh5B6F11r5C3X.jpg"
+     "name": "Ben Whishaw",
+     "character": "Sam Young",
+     "photo": "https://image.tmdb.org/t/p/w185/e74Cz65ifeNb9zHfUTvF5rTix0d.jpg"
     },
     {
-     "name": "Brandon Scott Jones",
-     "character": "Isaac Higgintoot",
-     "photo": "https://image.tmdb.org/t/p/w185/lgw6q8nuBLDet1VUIEbuS5FX9eJ.jpg"
+     "name": "Sarah Lancashire",
+     "character": "Mrs. Reed",
+     "photo": "https://image.tmdb.org/t/p/w185/aDYVBAAbUgPyZ3qCyQnEfR807Np.jpg"
     },
     {
-     "name": "Danielle Pinnock",
-     "character": "Alberta Haynes",
-     "photo": "https://image.tmdb.org/t/p/w185/hFMGpNsziDjtFvrkQ6KCJSiRN4e.jpg"
+     "name": "Andrew Buchan",
+     "character": "Wallace",
+     "photo": "https://image.tmdb.org/t/p/w185/3HvxEwBYJT2C07zJzTecOCYayo6.jpg"
     },
     {
-     "name": "Richie Moriarty",
-     "character": "Pete Martino",
-     "photo": "https://image.tmdb.org/t/p/w185/cXQMQvEzZwALyfHuHUaq9bHvelY.jpg"
-    },
-    {
-     "name": "Asher Grodman",
-     "character": "Trevor Lefkowitz",
-     "photo": "https://image.tmdb.org/t/p/w185/vB7oRsWlQ5dIGsh2hdEG3OIdYUh.jpg"
+     "name": "Ella Lily Hyland",
+     "character": "Williams",
+     "photo": "https://image.tmdb.org/t/p/w185/u1F8to9aP5zKMW0LSHeOl7bkaF0.jpg"
     }
    ],
    "platform": "Netflix",
-   "ottSince": "2026-10-30",
-   "ottFreshDate": "2026-10-29",
-   "slug": "ghosts",
-   "wikiWeeklyViews": 80720,
-   "trailerViews": 235293,
-   "take": "Critics were mostly positive.",
+   "ottSince": "2026-11-05",
+   "ottFreshDate": "2026-11-05",
+   "slug": "black-doves",
+   "wikiWeeklyViews": 83402,
+   "trailerViews": 477545,
+   "take": "Critics liked it, especially the ambition.",
    "takeSrc": "wiki",
-   "takeArticle": "Ghosts (American TV series)",
+   "takeAspects": [
+    "ambition"
+   ],
+   "takeArticle": "Black Doves",
    "criticsTone": "positive",
    "reception": {
     "rt": {
-     "pct": 93
+     "pct": 92,
+     "n": 71,
+     "avg": 7.5
+    },
+    "mc": {
+     "score": 78,
+     "n": 31
     },
     "asOf": "2026-11-06",
-    "article": "Ghosts (American TV series)"
+    "article": "Black Doves"
    },
    "fcScore": {
-    "verdict": "Must watch",
-    "reason": "Audiences and critics agree.",
-    "audience": "Loved",
+    "verdict": "Worth a watch",
+    "reason": "Critics are warmer than audiences.",
+    "audience": "Liked",
     "critics": "positive",
     "basis": "both"
    }
@@ -2194,7 +2203,7 @@
    "ottFreshDate": "2026-10-30",
    "slug": "collision-course",
    "wikiWeeklyViews": 46054,
-   "trailerViews": 431818,
+   "trailerViews": 433120,
    "take": "Reviewers praised the music and second half.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2425,7 +2434,7 @@
    "slug": "dead-end-job",
    "wikiWeeklyViews": 169671,
    "trending": true,
-   "trailerViews": 2594223,
+   "trailerViews": 2598902,
    "hook": "Premiered at the Busan International Film Festival.",
    "fcScore": {
     "verdict": "Must watch",
@@ -2450,7 +2459,7 @@
    ],
    "votes": 2915,
    "verdict": "Must watch",
-   "poster": "https://image.tmdb.org/t/p/w342/rOYLWCdAifpUtPlTf1WHxyaxeMt.jpg",
+   "poster": "https://image.tmdb.org/t/p/w342/y13WOeZ2rz2Ezpws0RJ0I8sQpG4.jpg",
    "isRecent": false,
    "isFresh": false,
    "kind": "tv",
@@ -2678,7 +2687,7 @@
    "stillGood": true,
    "slug": "tulsa-king",
    "wikiWeeklyViews": 67124,
-   "trailerViews": 11468032,
+   "trailerViews": 11468406,
    "take": "Critics liked the humour and second half but criticised the originality.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -2800,13 +2809,6 @@
      "kind": "movie"
     },
     {
-     "title": "Emancipation",
-     "slug": "emancipation",
-     "poster": "https://image.tmdb.org/t/p/w342/AkdNXEquLf4GIkwh1dcSB7j0FTY.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Trees of Peace",
      "slug": "trees-of-peace",
      "poster": "https://image.tmdb.org/t/p/w342/2McwkzqZ5uOZsBOGEjCDRni8Qf7.jpg",
@@ -2824,6 +2826,13 @@
      "title": "Lone Survivor",
      "slug": "lone-survivor",
      "poster": "https://image.tmdb.org/t/p/w342/zaBIrloyhGK7iNTZMb3f9SARsl8.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Blindness",
+     "slug": "blindness",
+     "poster": "https://image.tmdb.org/t/p/w342/deBsx5IxyqCC217j3VY24TkkE0Z.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -2870,7 +2879,7 @@
    "ottFreshDate": "2026-10-23",
    "stillGood": true,
    "slug": "surviving-hurricane-otis",
-   "trailerViews": 152876,
+   "trailerViews": 153172,
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences love it.",
@@ -3106,7 +3115,7 @@
    "stillGood": true,
    "slug": "cyberpunk-edgerunners",
    "wikiWeeklyViews": 45118,
-   "trailerViews": 7795730,
+   "trailerViews": 7796071,
    "take": "Reviewers praised the action and visuals.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -3356,7 +3365,7 @@
    "stillGood": true,
    "slug": "lupin",
    "wikiWeeklyViews": 91170,
-   "trailerViews": 6881868,
+   "trailerViews": 6882449,
    "take": "Critics liked it, especially the performances and writing.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -3631,7 +3640,7 @@
    "slug": "visionquest",
    "wikiWeeklyViews": 477464,
    "trending": true,
-   "trailerViews": 23994819,
+   "trailerViews": 23998712,
    "take": "Critics were mostly positive.",
    "takeSrc": "wiki",
    "takeArticle": "VisionQuest",
@@ -3667,7 +3676,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/hz2Hv8tPToHvQ7HaxzqeLvahmcJ.jpg",
    "kind": "movie",
    "tmdbId": 656908,
-   "popularity": 42.7397,
+   "popularity": 117.3475,
    "franchise": {
     "c": {
      "id": 1389156,
@@ -3818,7 +3827,7 @@
    ],
    "theatricalHere": true,
    "slug": "ramayana-rise-of-a-legend",
-   "trailerViews": 20880732,
+   "trailerViews": 20903553,
    "criticsTone": "positive",
    "criticsCount": 7,
    "verdict": "",
@@ -3846,7 +3855,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/6H2N59jJW1hZEzn2ZdrMvJw5vNI.jpg",
    "kind": "movie",
    "tmdbId": 1567605,
-   "popularity": 21.2763,
+   "popularity": 21.8291,
    "cert": "B-15",
    "trailer": "https://www.youtube.com/watch?v=l_Ozo1xUgbU",
    "providers": [],
@@ -3896,13 +3905,6 @@
      "kind": "movie"
     },
     {
-     "title": "Anastasia: Once Upon a Time",
-     "slug": "anastasia-once-upon-a-time",
-     "poster": "https://image.tmdb.org/t/p/w342/1g9R5lpmJ77kRcx4agxc3oIzN1C.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Harry Potter and the Deathly Hallows: Part 1",
      "slug": "harry-potter-and-the-deathly-hallows-part-1",
      "poster": "https://image.tmdb.org/t/p/w342/iGoXIpQb7Pot00EEdwpwPajheZ5.jpg",
@@ -3938,16 +3940,23 @@
      "kind": "movie"
     },
     {
-     "title": "Pan",
-     "slug": "pan",
-     "poster": "https://image.tmdb.org/t/p/w342/w8i0mZR7MEL7c3bXSsuYg7VJsew.jpg",
+     "title": "Jack the Giant Slayer",
+     "slug": "jack-the-giant-slayer",
+     "poster": "https://image.tmdb.org/t/p/w342/9jSI7saUX9Qz0JLh19jX2ulEwL7.jpg",
      "language": "English",
      "kind": "movie"
     },
     {
-     "title": "Jack the Giant Slayer",
-     "slug": "jack-the-giant-slayer",
-     "poster": "https://image.tmdb.org/t/p/w342/9jSI7saUX9Qz0JLh19jX2ulEwL7.jpg",
+     "title": "The Lord of the Rings: The Two Towers",
+     "slug": "the-lord-of-the-rings-the-two-towers",
+     "poster": "https://image.tmdb.org/t/p/w342/5VTN0pR8gcqV3EPUHHfMGnJYN9L.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "The Lord of the Rings: The Fellowship of the Ring",
+     "slug": "the-lord-of-the-rings-the-fellowship-of-the-ring",
+     "poster": "https://image.tmdb.org/t/p/w342/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -3990,7 +3999,7 @@
    ],
    "theatricalHere": true,
    "slug": "ebenezer",
-   "trailerViews": 15633883,
+   "trailerViews": 15639877,
    "verdict": ""
   },
   {
@@ -4002,7 +4011,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/jNcZH8yplxttRlf0wwqfGGMKHxX.jpg",
    "kind": "movie",
    "tmdbId": 1300968,
-   "popularity": 38.7999,
+   "popularity": 37.7056,
    "franchise": {
     "c": {
      "id": 1701563,
@@ -4108,9 +4117,9 @@
      "kind": "movie"
     },
     {
-     "title": "Mortal Engines",
-     "slug": "mortal-engines",
-     "poster": "https://image.tmdb.org/t/p/w342/gLhYg9NIvIPKVRTtvzCWnp1qJWG.jpg",
+     "title": "The 5th Wave",
+     "slug": "the-5th-wave",
+     "poster": "https://image.tmdb.org/t/p/w342/4Dd79cz5qxKNoKWg1xsfrpOchEr.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -4153,7 +4162,7 @@
    ],
    "theatricalHere": true,
    "slug": "the-hunger-games-sunrise-on-the-reaping",
-   "trailerViews": 198878,
+   "trailerViews": 199105,
    "verdict": ""
   },
   {
@@ -4298,7 +4307,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/Ap8QwmKfSjYbWC4XIP8w9pdn72O.jpg",
    "kind": "movie",
    "tmdbId": 1765072,
-   "popularity": 69.4693,
+   "popularity": 66.7288,
    "cert": "B-15",
    "trailer": "https://www.youtube.com/watch?v=IEx8D1Wb__U",
    "providers": [],
@@ -4442,7 +4451,7 @@
    ],
    "theatricalHere": true,
    "slug": "you-can-see-everything",
-   "trailerViews": 80420,
+   "trailerViews": 80629,
    "criticsTone": "acclaim",
    "verdict": ""
   },
@@ -4455,7 +4464,7 @@
    "poster": "https://image.tmdb.org/t/p/w342/whk02IOeEHz8KCYZGm3fF92zg0v.jpg",
    "kind": "movie",
    "tmdbId": 1074074,
-   "popularity": 6.9963,
+   "popularity": 7.1253,
    "cert": "B",
    "trailer": "https://www.youtube.com/watch?v=2I5LLG2XBco",
    "providers": [],
@@ -4498,13 +4507,6 @@
      "kind": "movie"
     },
     {
-     "title": "The Official Story",
-     "slug": "the-official-story",
-     "poster": "https://image.tmdb.org/t/p/w342/kkeUKaETggOrR0eW9nzPOIoZkZH.jpg",
-     "language": "Spanish",
-     "kind": "movie"
-    },
-    {
      "title": "The Fabelmans",
      "slug": "the-fabelmans",
      "poster": "https://image.tmdb.org/t/p/w342/h7llKkqkkJtJrTOaDLuVeUYDQ7I.jpg",
@@ -4540,13 +4542,6 @@
      "kind": "movie"
     },
     {
-     "title": "A Taste of Honey",
-     "slug": "a-taste-of-honey",
-     "poster": "https://image.tmdb.org/t/p/w342/5psrZNVZ9E6Eck7OtpO47A8zTbQ.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
      "title": "Mommie Dearest",
      "slug": "mommie-dearest",
      "poster": "https://image.tmdb.org/t/p/w342/3Amv5uQfadEonn7SmYLfNnoeOSu.jpg",
@@ -4557,6 +4552,20 @@
      "title": "Synecdoche, New York",
      "slug": "synecdoche-new-york",
      "poster": "https://image.tmdb.org/t/p/w342/5UwdhrjXhUgsiDhe1dpS9z4yj7q.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "A Taste of Honey",
+     "slug": "a-taste-of-honey",
+     "poster": "https://image.tmdb.org/t/p/w342/5psrZNVZ9E6Eck7OtpO47A8zTbQ.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
+     "title": "Killer's Kiss",
+     "slug": "killer-s-kiss",
+     "poster": "https://image.tmdb.org/t/p/w342/rLbad0lscycS4R3qTSrKguZ0Zz5.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -4599,7 +4608,7 @@
    ],
    "theatricalHere": true,
    "slug": "the-beloved",
-   "trailerViews": 108652,
+   "trailerViews": 108657,
    "verdict": ""
   },
   {
@@ -4762,7 +4771,7 @@
    ],
    "theatricalHere": true,
    "slug": "dune-part-three",
-   "trailerViews": 28157321,
+   "trailerViews": 28178198,
    "verdict": ""
   },
   {
@@ -4927,246 +4936,12 @@
    ],
    "theatricalHere": true,
    "slug": "avengers-doomsday",
-   "trailerViews": 52114515,
+   "trailerViews": 52129276,
    "verdict": ""
   }
  ],
  "langPools": {},
  "ottExtra": [
-  {
-   "title": "Black Doves",
-   "genre": "Action & Adventure / Mystery",
-   "language": "English",
-   "released": "2024-12-05",
-   "review": "When a spy posing as a politician's wife learns her lover has been murdered, an old assassin friend joins her on a quest for truth — and vengeance.",
-   "rating": 7,
-   "scores": [
-    {
-     "source": "TMDB",
-     "score": "7.0/10"
-    }
-   ],
-   "votes": 467,
-   "verdict": "Worth a watch",
-   "poster": "https://image.tmdb.org/t/p/w342/srlsyEfIBz2MNWBndVc3opOaNGS.jpg",
-   "isRecent": true,
-   "isFresh": false,
-   "kind": "tv",
-   "tmdbId": 225385,
-   "popularity": 72.6249,
-   "episodes": {
-    "count": 12,
-    "seasons": 2,
-    "limited": false,
-    "season": 2,
-    "next": null,
-    "list": [
-     {
-      "e": 1,
-      "name": "Black Door",
-      "date": "2026-11-05",
-      "runtime": 50
-     },
-     {
-      "e": 2,
-      "name": "Put Your Head on My Shoulder",
-      "date": "2026-11-05",
-      "runtime": 54
-     },
-     {
-      "e": 3,
-      "name": "P Is for Poison",
-      "date": "2026-11-05",
-      "runtime": 49
-     },
-     {
-      "e": 4,
-      "name": "The Opportunity to Become Savage",
-      "date": "2026-11-05",
-      "runtime": 57
-     },
-     {
-      "e": 5,
-      "name": "Murder Mix",
-      "date": "2026-11-05",
-      "runtime": 46
-     },
-     {
-      "e": 6,
-      "name": "Peace Summit",
-      "date": "2026-11-05",
-      "runtime": 54
-     }
-    ]
-   },
-   "cert": "C",
-   "trailer": "https://www.youtube.com/watch?v=shzJzjVscno",
-   "providers": [
-    "Netflix"
-   ],
-   "cast": [
-    "Keira Knightley",
-    "Ben Whishaw",
-    "Sarah Lancashire",
-    "Andrew Buchan"
-   ],
-   "director": "Joe Barton",
-   "runtime": null,
-   "imdbVotes": null,
-   "trailerDate": "2024-11-21T16:00:02.000Z",
-   "imdbId": "tt27995113",
-   "seasons": 2,
-   "freshDate": "2026-11-05",
-   "badge": "New season",
-   "similar": [
-    {
-     "title": "Gangs of London",
-     "slug": "gangs-of-london",
-     "poster": "https://image.tmdb.org/t/p/w342/fVgwa6wGw9ddGM5O7mqrrwB6gHK.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Citadel",
-     "slug": "citadel",
-     "poster": "https://image.tmdb.org/t/p/w342/5MHtxPEfmN4b0rHzfEZRcm6v9WI.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Reacher",
-     "slug": "reacher",
-     "poster": "https://image.tmdb.org/t/p/w342/f1VCQIG2iCyOookdgOzwtUpwWC0.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Night Agent",
-     "slug": "the-night-agent",
-     "poster": "https://image.tmdb.org/t/p/w342/4c5yUNcaff4W4aPrkXE6zr7papX.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Slow Horses",
-     "slug": "slow-horses",
-     "poster": "https://image.tmdb.org/t/p/w342/AdYr4DjOgXvDUMwu6vEhZy1Rnxk.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Nemesis",
-     "slug": "nemesis",
-     "poster": "https://image.tmdb.org/t/p/w342/NY7ZwSMw5PjoJdK2CObqiTj7Bm.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Legends",
-     "slug": "legends",
-     "poster": "https://image.tmdb.org/t/p/w342/eYYTgBtsvvA3fC1feyvoqv0G9Gl.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Bodies",
-     "slug": "bodies",
-     "poster": "https://image.tmdb.org/t/p/w342/qWX71nLvoLsBNPEjddZMC75lq6I.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Who Is Erin Carter?",
-     "slug": "who-is-erin-carter",
-     "poster": "https://image.tmdb.org/t/p/w342/1FCsjYtEtuine1TUssIFjy6vmJW.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "The Day of the Jackal",
-     "slug": "the-day-of-the-jackal",
-     "poster": "https://image.tmdb.org/t/p/w342/tYLecM3WSEjlkKhkGiH5G68Dprm.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "Miss Scarlet",
-     "slug": "miss-scarlet",
-     "poster": "https://image.tmdb.org/t/p/w342/9pbxTckwvaTXMABenkcmO1VhQi8.jpg",
-     "language": "English",
-     "kind": "tv"
-    },
-    {
-     "title": "NCIS: Tony & Ziva",
-     "slug": "ncis-tony-ziva",
-     "poster": "https://image.tmdb.org/t/p/w342/zNIANQsAs2kbxbzbTTe5dTBzhKe.jpg",
-     "language": "English",
-     "kind": "tv"
-    }
-   ],
-   "backdrop": "https://image.tmdb.org/t/p/w780/uyL0MH8gtDlChQKpfpkVoUP41VY.jpg",
-   "backdropPath": "/uyL0MH8gtDlChQKpfpkVoUP41VY.jpg",
-   "posterPath": "/srlsyEfIBz2MNWBndVc3opOaNGS.jpg",
-   "fullReview": "When a spy posing as a politician's wife learns her lover has been murdered, an old assassin friend joins her on a quest for truth — and vengeance.",
-   "castPics": [
-    {
-     "name": "Keira Knightley",
-     "character": "Helen Webb",
-     "photo": "https://image.tmdb.org/t/p/w185/bRC1B2VwV0wK3ElciFAK6QZf2wD.jpg"
-    },
-    {
-     "name": "Ben Whishaw",
-     "character": "Sam Young",
-     "photo": "https://image.tmdb.org/t/p/w185/e74Cz65ifeNb9zHfUTvF5rTix0d.jpg"
-    },
-    {
-     "name": "Sarah Lancashire",
-     "character": "Mrs. Reed",
-     "photo": "https://image.tmdb.org/t/p/w185/aDYVBAAbUgPyZ3qCyQnEfR807Np.jpg"
-    },
-    {
-     "name": "Andrew Buchan",
-     "character": "Wallace",
-     "photo": "https://image.tmdb.org/t/p/w185/3HvxEwBYJT2C07zJzTecOCYayo6.jpg"
-    },
-    {
-     "name": "Ella Lily Hyland",
-     "character": "Williams",
-     "photo": "https://image.tmdb.org/t/p/w185/u1F8to9aP5zKMW0LSHeOl7bkaF0.jpg"
-    }
-   ],
-   "platform": "Netflix",
-   "ottSince": "2026-11-05",
-   "ottFreshDate": "2026-11-05",
-   "slug": "black-doves",
-   "take": "Critics liked it, especially the ambition.",
-   "takeSrc": "wiki",
-   "takeAspects": [
-    "ambition"
-   ],
-   "takeArticle": "Black Doves",
-   "criticsTone": "positive",
-   "reception": {
-    "rt": {
-     "pct": 92,
-     "n": 71,
-     "avg": 7.5
-    },
-    "mc": {
-     "score": 78,
-     "n": 31
-    },
-    "asOf": "2026-11-06",
-    "article": "Black Doves"
-   },
-   "fcScore": {
-    "verdict": "Worth a watch",
-    "reason": "Critics are warmer than audiences.",
-    "audience": "Liked",
-    "critics": "positive",
-    "basis": "both"
-   }
-  },
   {
    "title": "The Gilded Age",
    "genre": "Drama",
@@ -5463,8 +5238,8 @@
       "name": "Episode 1",
       "date": "2026-11-03",
       "runtime": 52,
-      "rating": 7.7,
-      "votes": 67
+      "rating": 7.8,
+      "votes": 72
      },
      {
       "e": 2,
@@ -6279,6 +6054,273 @@
     "audience": "Lukewarm",
     "critics": null,
     "basis": "audience"
+   }
+  },
+  {
+   "title": "Stick",
+   "genre": "Comedy / Drama",
+   "language": "English",
+   "released": "2025-06-03",
+   "review": "Pryce Cahill was headed for golf greatness when an on-course meltdown derailed his career. Now struggling to stay afloat, he goes all in to mentor Santi—a…",
+   "rating": 7.3,
+   "scores": [
+    {
+     "source": "TMDB",
+     "score": "7.3/10"
+    }
+   ],
+   "votes": 142,
+   "verdict": "Worth a watch",
+   "poster": "https://image.tmdb.org/t/p/w342/y8EWrf5Ry1WmYksWT7MOPWexvr5.jpg",
+   "isRecent": true,
+   "isFresh": false,
+   "kind": "tv",
+   "tmdbId": 248830,
+   "popularity": 42.8263,
+   "episodes": {
+    "count": 20,
+    "seasons": 2,
+    "limited": false,
+    "season": 2,
+    "next": {
+     "s": 2,
+     "e": 3,
+     "name": "Chip Off the Old Butch",
+     "date": "2026-11-10"
+    },
+    "list": [
+     {
+      "e": 1,
+      "name": "Sirens in Soft Spikes",
+      "date": "2026-11-03",
+      "runtime": 29
+     },
+     {
+      "e": 2,
+      "name": "Don't Be Summer Mayonnaise",
+      "date": "2026-11-03",
+      "runtime": 35
+     },
+     {
+      "e": 3,
+      "name": "Chip Off the Old Butch",
+      "date": "2026-11-10",
+      "runtime": 37
+     },
+     {
+      "e": 4,
+      "name": "The Boog",
+      "date": "2026-11-17",
+      "runtime": null
+     },
+     {
+      "e": 5,
+      "name": "Go Time!",
+      "date": "2026-11-24",
+      "runtime": null
+     },
+     {
+      "e": 6,
+      "name": "Jung and the Restless",
+      "date": "2026-12-01",
+      "runtime": null
+     },
+     {
+      "e": 7,
+      "name": "Bogey Nights",
+      "date": "2026-12-08",
+      "runtime": null
+     },
+     {
+      "e": 8,
+      "name": "Fast Greens Do Not Hold",
+      "date": "2026-12-15",
+      "runtime": null
+     },
+     {
+      "e": 9,
+      "name": "Let 'er Rip",
+      "date": "2026-12-22",
+      "runtime": null
+     },
+     {
+      "e": 10,
+      "name": "Episode 10",
+      "date": "2026-12-29",
+      "runtime": null
+     }
+    ]
+   },
+   "cert": "B-15",
+   "trailer": "https://www.youtube.com/watch?v=72oB_zVF_6o",
+   "providers": [
+    "Apple TV"
+   ],
+   "cast": [
+    "Owen Wilson",
+    "Peter Dager",
+    "Lilli Kay",
+    "Mariana Treviño"
+   ],
+   "director": "Jason Keller",
+   "runtime": null,
+   "imdbVotes": null,
+   "trailerDate": "2025-05-08T13:59:52.000Z",
+   "imdbId": "tt31710249",
+   "seasons": 2,
+   "freshDate": "2026-11-03",
+   "badge": "New season",
+   "similar": [
+    {
+     "title": "Shrinking",
+     "slug": "shrinking",
+     "poster": "https://image.tmdb.org/t/p/w342/zEFKMNPBKq6JG7uuDkzTQ9WwErn.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Fleishman Is in Trouble",
+     "slug": "fleishman-is-in-trouble",
+     "poster": "https://image.tmdb.org/t/p/w342/hxDaeEiH3JeACOTQdiZys8tse7.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The White Lotus",
+     "slug": "the-white-lotus",
+     "poster": "https://image.tmdb.org/t/p/w342/gbSaK9v1CbcYH1ISgbM7XObD2dW.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Four Seasons",
+     "slug": "the-four-seasons",
+     "poster": "https://image.tmdb.org/t/p/w342/w09XeYl096pwES8riRMZwEA9rnh.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "My Life with the Walter Boys",
+     "slug": "my-life-with-the-walter-boys",
+     "poster": "https://image.tmdb.org/t/p/w342/dQOwpTpBQEqRUcev4423LrU32G6.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "The Lake",
+     "slug": "the-lake",
+     "poster": "https://image.tmdb.org/t/p/w342/ucCICS60CK5tfA50BXoQbEf8rKN.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Single Drunk Female",
+     "slug": "single-drunk-female",
+     "poster": "https://image.tmdb.org/t/p/w342/oZ4AIq36U3SNkoHU7uQYVnNzqXk.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Everything Sucks!",
+     "slug": "everything-sucks",
+     "poster": "https://image.tmdb.org/t/p/w342/t1u1Ff43QnMCecao2lzx5wpR7Xg.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Ballers",
+     "slug": "ballers",
+     "poster": "https://image.tmdb.org/t/p/w342/WyIazPyjmcFMC42nWEpI0jr56x.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Bates Motel",
+     "slug": "bates-motel",
+     "poster": "https://image.tmdb.org/t/p/w342/xXKcfZE7ulYxgjjYv51s0zDG69s.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Grace and Frankie",
+     "slug": "grace-and-frankie",
+     "poster": "https://image.tmdb.org/t/p/w342/3aD3PaSeF8eHJFLliLlWYw4EcPt.jpg",
+     "language": "English",
+     "kind": "tv"
+    },
+    {
+     "title": "Crazy Ex-Girlfriend",
+     "slug": "crazy-ex-girlfriend",
+     "poster": "https://image.tmdb.org/t/p/w342/pvYh3fdrRvreWmqw4onWJJmRXf5.jpg",
+     "language": "English",
+     "kind": "tv"
+    }
+   ],
+   "backdrop": "https://image.tmdb.org/t/p/w780/2Bt2uXrIOQASBAsni2AGGqCCF14.jpg",
+   "backdropPath": "/2Bt2uXrIOQASBAsni2AGGqCCF14.jpg",
+   "posterPath": "/y8EWrf5Ry1WmYksWT7MOPWexvr5.jpg",
+   "fullReview": "Pryce Cahill was headed for golf greatness when an on-course meltdown derailed his career. Now struggling to stay afloat, he goes all in to mentor Santi—a teenage phenom with immense potential—and maybe save himself.",
+   "castPics": [
+    {
+     "name": "Owen Wilson",
+     "character": "Pryce Cahill",
+     "photo": "https://image.tmdb.org/t/p/w185/5A46lNOwmpX77jAdhyKxU7e2Hub.jpg"
+    },
+    {
+     "name": "Peter Dager",
+     "character": "Santi",
+     "photo": "https://image.tmdb.org/t/p/w185/iYo3oUqaWcrQizMFPyWJtlW8xrT.jpg"
+    },
+    {
+     "name": "Lilli Kay",
+     "character": "Zero",
+     "photo": "https://image.tmdb.org/t/p/w185/21wRVVOMT3eQnLCioxxOnPD4r60.jpg"
+    },
+    {
+     "name": "Mariana Treviño",
+     "character": "Elena",
+     "photo": "https://image.tmdb.org/t/p/w185/4pSXXgiK0AtJA9JyF3Vc43Tcqug.jpg"
+    },
+    {
+     "name": "Marc Maron",
+     "character": "Mitts",
+     "photo": "https://image.tmdb.org/t/p/w185/xzRBK8hR6693VQWmr3Wx2UVoA5P.jpg"
+    },
+    {
+     "name": "Rhea Seehorn",
+     "character": "Amanda",
+     "photo": "https://image.tmdb.org/t/p/w185/tql4gvY8NfYvmAdmdp1olkwJnrq.jpg"
+    }
+   ],
+   "platform": "Apple TV",
+   "ottSince": "2026-11-04",
+   "ottFreshDate": "2026-11-03",
+   "slug": "stick",
+   "take": "Critics liked it, especially the music.",
+   "takeSrc": "wiki",
+   "takeAspects": [
+    "music"
+   ],
+   "takeArticle": "Stick (TV series)",
+   "criticsTone": "positive",
+   "reception": {
+    "rt": {
+     "pct": 81,
+     "season": 1
+    },
+    "mc": {
+     "score": 62,
+     "n": 27
+    },
+    "asOf": "2026-11-06",
+    "article": "Stick (TV series)"
+   },
+   "fcScore": {
+    "verdict": "Worth a watch",
+    "reason": "Critics are warmer than audiences.",
+    "audience": "Liked",
+    "critics": "positive",
+    "basis": "both"
    }
   }
  ],
