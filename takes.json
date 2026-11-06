@@ -3976,7 +3976,7 @@
     }
    }
   },
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt32547691": {
@@ -7020,7 +7020,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt45692999": {
@@ -7862,7 +7862,7 @@
     }
    }
   },
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt39140225": {
@@ -9530,7 +9530,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt38672588": {
@@ -15448,7 +15448,7 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-11-04",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt5433140": {
@@ -40433,7 +40433,7 @@
     "value": 100
    }
   },
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt2049403": {
@@ -50261,7 +50261,7 @@
     }
    }
   },
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt13611778": {
@@ -67358,7 +67358,7 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 94
+    "value": 95
    },
    "toneSrc": "summary",
    "ratings": {
@@ -67367,17 +67367,17 @@
    },
    "agg": {
     "rt": {
-     "pct": 94,
-     "n": 129,
+     "pct": 95,
+     "n": 160,
      "avg": 8.2
     },
     "mc": {
-     "score": 77,
-     "n": 34
+     "score": 78,
+     "n": 46
     }
    }
   },
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt5259966": {
@@ -76309,7 +76309,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt37421560": {
@@ -78698,7 +78698,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt11285908": {
@@ -90698,7 +90698,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt48242205": {
@@ -96541,7 +96541,7 @@
    "divided": [],
    "score": null
   },
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt34877127": {
@@ -97458,7 +97458,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "movie:1811490": {
@@ -97500,7 +97500,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt45591708": {
@@ -97747,14 +97747,14 @@
     }
    }
   },
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt37522541": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt39391346": {
@@ -97819,7 +97819,7 @@
   "src": null,
   "hook": "Premiered at the Busan International Film Festival.",
   "article": "Dead-End Job",
-  "checked": "2026-11-05",
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt38589433": {
@@ -98088,11 +98088,19 @@
   "cat": true
  },
  "tt38192494": {
-  "take": null,
-  "src": null,
+  "take": "Reviewers found plenty to like here.",
+  "src": "wiki",
   "hook": null,
   "article": "Scene (2026 film)",
-  "checked": "2026-11-05",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "toneSrc": "lead"
+  },
+  "checked": "2026-11-06",
   "v": 6
  },
  "tt39346312": {
@@ -98477,10 +98485,10 @@
  "tt38515310": {
   "take": null,
   "src": null,
+  "hook": "Based on the novel by W. Bruce Cameron.",
   "article": "A Dog's Perfect Christmas",
-  "checked": "2026-11-05",
-  "v": 6,
-  "cat": true
+  "checked": "2026-11-06",
+  "v": 6
  },
  "tt44090225": {
   "take": null,
@@ -98662,5 +98670,13 @@
   "checked": "2026-11-06",
   "v": 6,
   "cat": true
+ },
+ "tt18933846": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Nooru Kodi Vaanavil",
+  "checked": "2026-11-06",
+  "v": 6
  }
 }

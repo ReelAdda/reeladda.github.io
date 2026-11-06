@@ -2,62 +2,38 @@
  "date": "2026-11-06",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 6,
- "high": 5,
- "correctable": 6,
+ "pagesDisagreeing": 3,
+ "high": 1,
+ "correctable": 2,
  "byField": {
-  "platform": 4,
-  "title": 1,
-  "release date": 1
+  "rent/buy": 1,
+  "platform": 1,
+  "runtime": 1
  },
  "rows": [
   {
-   "field": "platform",
-   "severity": "high",
-   "page": "Sky Go, Now TV",
-   "tmdb": "Now TV",
-   "code": "uk",
-   "slug": "cia"
+   "field": "rent/buy",
+   "severity": "medium",
+   "page": "none",
+   "tmdb": "Amazon Video",
+   "code": "us",
+   "slug": "de-gaulle-r-sistance"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "Shudder, Cultpix",
-   "tmdb": "Shudder",
-   "code": "uk",
-   "slug": "halloween"
+   "page": "Netflix, WeTV",
+   "tmdb": "Netflix, Tencent Video",
+   "code": "my",
+   "slug": "falling-into-your-smile"
   },
   {
-   "field": "title",
-   "severity": "low",
-   "page": "Telugu",
-   "tmdb": "Kurukshetra: The Great War of Mahabharata",
-   "code": "ca",
-   "slug": "kurukshetra-the-great-war-of-mahabharata"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "WeTV",
-   "tmdb": "Tencent Video",
-   "code": "sg",
-   "slug": "be-somebody"
-  },
-  {
-   "field": "release date",
-   "severity": "high",
-   "page": "2026-12-24",
-   "tmdb": "2026-02-06 / 2026-12-31",
-   "code": "mx",
-   "slug": "kraken"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Paramount+",
-   "tmdb": "Molotov TV",
+   "field": "runtime",
+   "severity": "medium",
+   "page": "126 min",
+   "tmdb": "118 min",
    "code": "fr",
-   "slug": "beauty-and-the-beast"
+   "slug": "bunker"
   }
  ]
 }
