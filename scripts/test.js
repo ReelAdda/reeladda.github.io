@@ -1317,15 +1317,18 @@ test("homepage template renders the score panel client-side, like the SSR card",
 test("share card and llms.txt carry the FilmyChill Score", () => {
   const C = require("./lib/cards.js");
   const svg = C.shareCardSvg(FCS_ITEM, { code: "in", name: "India" });
-  assert.ok(/FILMYCHILL SCORE/.test(svg) && />WORTH A WATCH</.test(svg));
-  assert.ok(!/FILMYCHILL SCORE/.test(C.shareCardSvg({ ...FCS_ITEM, fcScore: undefined }, { code: "in" })));
+  assert.ok(svg.includes('CHILL</tspan><tspan fill="#FFF7EC" dx="7">VERDICT</tspan>') && />WORTH A WATCH</.test(svg));
+  assert.ok(!/FILMYCHILL SCORE|>VERDICT</.test(C.shareCardSvg({ ...FCS_ITEM, fcScore: undefined }, { code: "in" })));
   const L = require("fs").readFileSync(require("path").join(__dirname, "lib", "llms.js"), "utf8");
-  assert.ok(/FilmyChill Score: \$\{it\.fcScore\.verdict\}/.test(L));
+  assert.ok(/FilmyChill Verdict: \$\{it\.fcScore\.verdict\}/.test(L) && !/FilmyChill Score/.test(L));
 });
 
-test("About page explains the score at the anchor film pages link to", () => {
+test("About page explains the verdict at the anchor film pages link to (renamed 6 Nov 2026)", () => {
   const about = require("fs").readFileSync(require("path").join(__dirname, "..", "about", "index.html"), "utf8");
-  assert.ok(/<h2 id="score">The FilmyChill Score<\/h2>/.test(about) && /50 or more people/.test(about));
+  assert.ok(/<h2 id="score">How the FilmyChill Verdict works<\/h2>/.test(about) && /50 or more people/.test(about) && /It is a verdict, not a number/.test(about));
+  for (const p of ["about", "privacy", "dmca"]) {
+    assert.ok(!/FilmyChill Score/.test(require("fs").readFileSync(require("path").join(__dirname, "..", p, "index.html"), "utf8")), p + ": the old name is gone");
+  }
 });
 
 // ---- Chill-o-meter (lib/meter.js): the score's visual mark ----
@@ -1347,7 +1350,9 @@ test("the gauge is gone from the homepage and film pages: the audience-rating ri
   assert.ok(!/fcm-|class="fcm"/.test(src), "no Chill-o-meter sprite or icon left on the homepage");
   // 28 Oct 2026: the sheet's pill row already shows "★ 8.6/10 (199 ratings)", so the panel is the
   // verdict pill alone — one fact once.
-  assert.ok(src.includes("<span class=\"fcs-v\">${ratingDial(item)}${verdictPill(s.verdict)}</span>"), "the detail sheet: ring + pill, like the cards");
+  // 6 Nov 2026: two labelled halves, the FilmyChill Verdict lockup over the pill, "TMDB audience" over the ring, as on film pages.
+  assert.ok(src.includes("${scoreHalves(ratingDial(item), verdictPill(s.verdict))}") && src.includes("${VERDICT_LOCKUP}${pill}") && src.includes('<span class="fey">TMDB audience</span>'), "the detail sheet: the two labelled halves");
+  assert.ok(src.includes("const VERDICT_LOCKUP = '" + require("./lib/brand.js").VERDICT_LOCKUP + "';"), "the page script's lockup is the server's, byte for byte");
 
   const fp = require("fs").readFileSync(require("path").join(__dirname, "lib", "filmpage.js"), "utf8");
   assert.ok(!/meterSvg|fcsb-m\b/.test(fp), "film pages draw no gauge");
@@ -1360,13 +1365,33 @@ test("SSR card and film page carry the verdict colours and the rating ring; the 
   const W = require("./lib/weekly.js"), C = require("./lib/cards.js");
   const it = { ...FCS_ITEM };
   const card = W.ssrCard(it, 0, "in");
-  assert.ok(/<span class="vpill vp-worth">Worth a watch<\/span>/.test(card) && /class="dial dial-worth"/.test(card), card);
+  assert.ok(/<span class="vpill vp-worth">Worth a watch<\/span>/.test(card) && /class="dial dial-aud"/.test(card) && !/dial-worth/.test(card), card);
   const none = W.ssrCard({ ...it, fcScore: undefined }, 0, "in");
   assert.ok(/class="vpill vp-early"/.test(none) && /<div class="dial-note">(?:Few ratings|Not rated yet)<\/div>/.test(none) && !/class="dial /.test(none), "no score: a grey pill and the evidence as text, never a ring");
   const page = U.buildFilmPage(it, "2026-09-28", new Set(["the-love-hypothesis"]), { code: "in", name: "India" });
-  assert.ok(/<div class="fcsb-verdict"><div class="dial dial-worth" style="--p:\d+%" role="img" aria-label="Audience rating [\d.]+ out of 10"><span>[\d.]+<\/span><\/div><span class="fcsb-stamp fcsb-worth">/.test(page), "film page: the same ring as the homepage cards");
+  // Until the "score-halves" rollout reaches a page, its card keeps the verdict-coloured ring (no churn).
+  assert.ok(/<div class="fcsb-verdict"><div class="dial dial-worth" style="--p:\d+%" role="img" aria-label="Audience rating [\d.]+ out of 10"><span>[\d.]+<\/span><\/div><span class="fcsb-stamp fcsb-worth">/.test(page), "film page before score-halves: the old card, byte for byte");
+  // In the rollout: the builder's card and the conversion pass's card are the same bytes (no churn either way).
+  const R = require("./lib/rollout.js"), Fp = require("./lib/filmpage.js"), prevCfg = R.peekRolloutConfig();
+  try {
+    R.useRolloutConfig({ features: { "score-halves": { percent: 100 } } });
+    const on = U.buildFilmPage(it, "2026-09-28", new Set(["the-love-hypothesis"]), { code: "in", name: "India" });
+    assert.ok(on.includes('<div class="fcsb-verdict fcsb-halves"><div class="fh">' + require("./lib/brand.js").VERDICT_LOCKUP + '<span class="fcsb-stamp fcsb-worth">')
+      && /<div class="fh fa"><span class="fey">TMDB audience<\/span><div class="dial dial-aud" style="--p:\d+%" role="img" aria-label="TMDB audience rating [\d.]+ out of 10">/.test(on), "film page in score-halves: the verdict lockup and the TMDB ring, neutral");
+    assert.ok(!/FilmyChill Score/.test(on.replace(/\/\* FilmyChill Score \(lib\/fcscore\.js\) \*\//, "")) && /FilmyChill Verdict: Worth a watch/.test(on) && on.includes(">How the verdict works</a>"), "the page says Verdict everywhere: card, FAQ, link");
+    assert.ok(on.includes("Score halves (lib/filmpage.js SCORE_HALVES)") && !on.includes('<div class="fcsb-label">'), "its CSS; no old label");
+    const conv = Fp.scoreHalves(page);
+    assert.ok(conv.includes('<div class="fcsb-verdict fcsb-halves">') && conv.includes("Score halves (lib/filmpage.js SCORE_HALVES)"), "the pass converts an old page");
+    const cardOf = (h) => h.slice(h.indexOf('<section class="fcsb"'), h.indexOf("</section>", h.indexOf('<section class="fcsb"')));
+    assert.strictEqual(cardOf(conv), cardOf(on), "converted card = the builder's card");
+    assert.strictEqual(Fp.scoreHalves(conv), conv, "idempotent");
+    assert.strictEqual(Fp.scoreHalves(on), on, "a page the builder wrote in the new form is left alone");
+    const linked = page.replace(/<style>[\s\S]*?<\/style>/g, "").replace("</head>", '<link rel="stylesheet" href="/css/fp-0123456789.css"></head>');
+    assert.strictEqual(Fp.scoreHalves(linked, { root: "/no-such-root" }), linked, "its shared stylesheet missing: the page is left as it was, never half converted");
+  } finally { R.useRolloutConfig(prevCfg); }
   const svg = C.shareCardSvg(it, { code: "in", name: "India" });
-  assert.ok(/<svg x="852" y="396" width="44" height="28" viewBox="2\.5 7 27 17">/.test(svg) && /stroke="#FFF7EC"/.test(svg));
+  // 6 Nov 2026: the brand mark and the two-colour FILMYCHILL VERDICT, as on the site (the gauge is gone everywhere).
+  assert.ok(/<svg x="858" y="397" width="26" height="26" viewBox="0 0 100 100">/.test(svg) && /<tspan fill="#FFF7EC">FILMY<\/tspan><tspan fill="#FFAD1F">CHILL<\/tspan><tspan fill="#FFF7EC" dx="7">VERDICT<\/tspan>/.test(svg) && !/viewBox="2\.5 7 27 17"/.test(svg));
 });
 
 // ---- Pick of the Week + phone layout (Sept 2026 homepage review) ----
@@ -1590,6 +1615,32 @@ test("vote button: only for released films with a TMDB id, hidden until the scri
   assert.strictEqual(V.voteWidgetHtml({ kind: "movie", tmdbId: 123, released: "2026-12-01" }, "in", "2026-09-30"), "", "not out yet: nothing to vote on");
   assert.strictEqual(V.voteWidgetHtml({ kind: "tv", title: "no id" }, "in"), "");
   assert.strictEqual(V.voteKey({ kind: "tv", tmdbId: 9 }), "tv-9");
+});
+
+test("one meaning for the score (6 Nov 2026): neutral TMDB ring on hubs and cards, real card links, honest vote note", () => {
+  const M = require("./lib/meter.js"), V = require("./lib/vote.js"), R = require("./lib/rollout.js"), prevCfg = R.peekRolloutConfig();
+  const it = { title: "T", slug: "t", rating: 7.7, votes: 900, fcScore: { verdict: "Worth a watch", audience: "Liked", basis: "audience" } };
+  // Hub rows: the ring with "TMDB" above it in its own column; the row text no longer repeats "★ 7.7".
+  assert.strictEqual(M.rowRing(it), '<div class="hring"><span class="hey">TMDB</span><div class="hd" style="--p:77%" role="img" aria-label="TMDB audience rating 7.7 out of 10"><span>7.7</span></div></div>');
+  assert.strictEqual(M.rowRing({ title: "x", votes: 3 }), "", "no rating: no ring");
+  assert.ok(!/★/.test(M.rowScoreLine(it)) && /vp-worth/.test(M.rowScoreLine(it)));
+  assert.ok(/\.row \{ grid-template-columns:92px 1fr auto; \}/.test(M.ROW_RING_CSS) || /grid-template-columns:\s*92px 1fr auto/.test(M.ROW_RING_CSS));
+  for (const f of ["pagekit.js", "weekly.js"]) {
+    const src = require("fs").readFileSync(require("path").join(__dirname, "lib", f), "utf8");
+    assert.ok(src.includes("${rowRing(it)}") && src.includes("${ROW_RING_CSS}"), f + ": hub rows carry the ring");
+  }
+  // Homepage: cards are links to the film page; a plain click opens the sheet, a modified click the page.
+  const src = homeSource();
+  assert.ok(src.includes('<div class="cw"><a class="card has-save" href="${esc(href)}" data-click="openDetail"'), "the card is an <a href>");
+  assert.ok(/if \(el\.tagName === 'A'\) \{ if \(ev && \(ev\.metaKey \|\| ev\.ctrlKey \|\| ev\.shiftKey \|\| ev\.altKey\)\) return; if \(ev\) ev\.preventDefault\(\); \}/.test(src));
+  assert.ok(src.includes(">Creator<") || /'Creator'/.test(src), "a series' sheet says Creator");
+  // Vote box: says what the vote does today, on the pages in the rollout only.
+  try {
+    R.useRolloutConfig({ features: { "score-halves": { percent: 100 } } });
+    assert.ok(V.voteWidgetHtml({ kind: "movie", tmdbId: 1, slug: "t", released: "2026-01-01" }, "in", "2026-09-30").includes("Your vote is counted toward a future audience score. No sign-up."));
+    R.useRolloutConfig({ features: {} });
+    assert.ok(V.voteWidgetHtml({ kind: "movie", tmdbId: 1, slug: "t", released: "2026-01-01" }, "in", "2026-09-30").includes("Your vote helps the FilmyChill Score. No sign-up."), "outside the rollout: unchanged bytes");
+  } finally { R.useRolloutConfig(prevCfg); }
 });
 
 test("film pages carry the button and allow exactly the vote endpoints", () => {
@@ -5104,7 +5155,7 @@ test("scored card: FilmyChill verdict pill, its reason, and the audience rating 
   const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: 7.9, votes: 900, verdict: "Must watch", slug: "t", runtime: 128,
     fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" } }, 0, "in");
   assert.ok(/<span class="vpill vp-must">Must watch<\/span><div class="sreason">Audiences and critics agree<\/div>/.test(html), html);
-  assert.ok(html.includes('<div class="dial dial-must" style="--p:79%" role="img" aria-label="Audience rating 7.9 out of 10"><span>7.9</span></div>'), "the rating sits in the dial, coloured by the verdict");
+  assert.ok(html.includes('<div class="dial dial-aud" style="--p:79%" role="img" aria-label="TMDB audience rating 7.9 out of 10"><span>7.9</span></div>'), "the rating sits in the dial, one neutral colour: it is TMDB's, not the verdict");
   assert.ok(!/★/.test(html), "and not twice");
   assert.ok(/<div class="meta">Hindi · Action · 2h 8m<\/div>/.test(html), "short details line");
   assert.ok(/<span class="rank">1<\/span>/.test(html) && !/fcs-label|fcs-sig/.test(html), "rank on the poster; no boxed panel, no second ratings line");
@@ -6085,6 +6136,8 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
   const F = require("./lib/filmpage.js");
   const X = require("./lib/facts.js");
   const fsx = require("fs");
+  // The original series page, every rollout off (it used to get that only by reading rollout.json from a temp dir).
+  require("./lib/rollout.js").useRolloutConfig({ features: {} });
   // TMDB shapes (VisionQuest, Oct 2026).
   const tv = { number_of_episodes: 8, number_of_seasons: 1, type: "Miniseries",
     next_episode_to_air: { season_number: 1, episode_number: 7, name: "Forever", air_date: "2099-11-04" },
@@ -7508,7 +7561,7 @@ test("one verdict per film: item.verdict follows the FilmyChill Score into data.
   assert.strictEqual(thin.verdict, "Not enough ratings", "12 votes can't be a 'Must watch' anywhere");
   assert.strictEqual(fresh.verdict, "Just released — verdict soon");
   const txt = U.buildLlmsFullTxt({ in: { generatedAt: "2026-10-04", theatres: [{ ...scored, slug: "runner" }], ott: [] } });
-  const runner = txt.split("\n").filter((l) => /Runner|FilmyChill Score:/.test(l)).join("\n");
+  const runner = txt.split("\n").filter((l) => /Runner|FilmyChill Verdict:/.test(l)).join("\n");
   assert.ok(!/Must watch/.test(runner), "no second, contradicting verdict");
   assert.strictEqual((runner.match(new RegExp(scored.fcScore.verdict, "g")) || []).length, 1, "the verdict is stated once, on the score line");
 });
@@ -8368,8 +8421,9 @@ test("redesign: dial and pill markup are the same on the server and in the page 
   assert.strictEqual(M.dialRating({ rating: 7.5, votes: 400 }), null, "no verdict, no number: the dial only ever sits beside a FilmyChill verdict");
   assert.strictEqual(M.dialRating({ fcScore: { verdict: "Worth a watch", audience: null, basis: "critics" }, rating: 6.3, votes: 10 }), null, "a rating the verdict didn't use gets no ring");
   // The legend says what the number is — never "FilmyChill Score out of 10".
-  assert.ok(src.includes("Ring = audience rating out of 10, shown once enough people have rated · colour = FilmyChill verdict") && !/FilmyChill Score out of 10/i.test(src));
-  assert.ok(/<div class="hero-dial-label">Audience<\/div>/.test(M.heroDialInner({ fcScore: { verdict: "Must watch", audience: "Loved", basis: "audience" }, rating: 8, votes: 50 })));
+  // 6 Nov 2026: the key above the lists says which is which; the bottom legend is gone.
+  assert.ok(src.includes("Worth a watch</span> " + require("./lib/brand.js").VERDICT_LOCKUP + "</span>") && src.includes("TMDB audience rating out of 10</span></div>") && !src.includes('<p class="dial-legend">') && !/FilmyChill Score out of 10/i.test(src));
+  assert.ok(/<div class="hero-dial-label">TMDB audience<\/div>/.test(M.heroDialInner({ fcScore: { verdict: "Must watch", audience: "Loved", basis: "audience" }, rating: 8, votes: 50 })));
 });
 test("redesign: verdict pills on the language hubs and /new-on-ott/, same colours as the homepage (Oct 2026)", () => {
   const M = require("./lib/meter.js");
@@ -9490,7 +9544,7 @@ testAt("2026-10-28T12:00:00Z", "page v3 (28 Oct 2026): the owner's sequence, fac
     const vm = require("vm"), ctx = {}; vm.createContext(ctx);
     vm.runInContext([fnSrc("contradicts"), fnSrc("receptionLine"), fnSrc("toneFromFigure")].join("\n"), ctx);
     for (const [r, tone] of [[rec, "positive"], [rec, "negative"], [{ rt: { pct: 39 }, mc: { score: 71 } }, "positive"], [{ ratings: { n: 4, median: 2.5 } }, null], [{ rt: { pct: 77, n: 44, season: 1 } }, null]]) {
-      assert.strictEqual(ctx.receptionLine(r, (d) => d, tone), RC.receptionLine(r, (d) => d, { tone }), JSON.stringify([r, tone]));
+      assert.strictEqual(ctx.receptionLine(r, (d) => d, tone), RC.receptionLine(r, (d) => d, { tone, plain: true }), JSON.stringify([r, tone]));
       assert.strictEqual(ctx.toneFromFigure(r), RC.toneFromFigure(r));
     }
     assert.ok(/\$\{scoreLineHtml\(item\)\}/.test(src) && /\.fcs-line \{/.test(require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8")));

@@ -23,7 +23,7 @@ const { releaseState } = require("./release.js");
 const { freshLabel, THEATRE_WINDOW_FALLBACK_DAYS } = require("./freshness.js");
 const { canonProvider, countryNameFor, digitalNoteName, streamVocab, streamWindowEstimate } = require("./rules.js");
 const { USE_IMDB } = require("./tmdb.js");
-const { VPILL_CSS, rowScoreLine } = require("./meter.js");
+const { VPILL_CSS, ROW_RING_CSS, rowRing, rowScoreLine } = require("./meter.js");
 const { POPULAR_CSS } = require("./searchtop.js");
 
 function img(path, size = "w342") {
@@ -401,7 +401,8 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
         ${rowScoreLine(it)}
         ${it.hook ? `<div class="rm hk">${e(it.hook)}</div>` : ""}
         ${it.take ? `<div class="rm tk">${e(it.take)}</div>` : ""}
-      </div>`;
+      </div>
+      ${rowRing(it)}`;
     const row = it.slug ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
     const links = rvLinks(reviewsOf(it));
     return links ? `<div class="rowwrap">${row}${links}</div>` : row;
@@ -463,6 +464,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
   .badge { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); background:var(--marigold); border-radius:5px; padding:3px 7px; font-weight:800; }
   .badge.trend { background:#D93A28; color:#fff; }
   .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
+${ROW_RING_CSS}
   .rm.tk { color:var(--indigo); font-weight:600; }
   .rm.hk { font-style:italic; }
   .rm.srv { color:var(--indigo); font-weight:600; text-decoration:underline; text-underline-offset:2px; }

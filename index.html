@@ -128,7 +128,7 @@
   /* Audience-rating dial, top right of the hero (Oct 2026 redesign). */
   .hero-dial { position: absolute; top: 18px; right: 18px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
   .hero-dial:empty { display: none; }
-  .dial.dial-hero { width: 68px; height: 68px; background: conic-gradient(#3FD08A var(--p, 0%), rgba(255,255,255,0.18) 0); }
+  .dial.dial-hero { width: 68px; height: 68px; background: conic-gradient(#FFF7EC var(--p, 0%), rgba(255,255,255,0.18) 0); }
   .dial.dial-hero span { width: 54px; height: 54px; background: var(--indigo); color: #fff; font-size: 21px; }
   .hero-dial-label { font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #E4E1FF; }
 
@@ -247,7 +247,7 @@
   .poster { display: block; width: 72px; height: 106px; object-fit: cover; border-radius: 10px; background: var(--bg); }
   .poster.ph { display: flex; align-items: center; justify-content: center; font-family: 'Anton', sans-serif; font-size: 34px; color: #C9C2E6; background: linear-gradient(160deg, #EDEAFB, #DCD8F4); }
   .rank { position: absolute; left: -5px; bottom: -7px; font-family: 'Anton', sans-serif; font-size: 32px; line-height: 1; color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; }
-  .grid .card:first-child .rank { color: var(--marigold); }
+  .grid > :first-child .rank { color: var(--marigold); }
   .cb { min-width: 0; padding-top: 2px; }
   .cchips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
   .cchip { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #F1EFFC; color: var(--indigo); white-space: nowrap; }
@@ -268,15 +268,43 @@
   .dial span { width: 38px; height: 38px; border-radius: 50%; background: #FFFFFF; display: grid; place-items: center;
     font-family: 'Anton', sans-serif; font-size: 15px; line-height: 1; color: var(--ink); }
   .dial-must { --dc: #1E7A4C; } .dial-worth { --dc: #D18A00; } .dial-skip { --dc: #D93A28; }
+  /* One meaning for the score (6 Nov 2026): the ring is TMDB's audience rating, one neutral colour,
+     labelled TMDB; only the verdict pill (the FilmyChill Verdict) carries the verdict's colour. */
+  .dial-aud { --dc: #4038C7; }
+  .card .dial { position: relative; margin-top: 14px; }
+  .card .dial::before { content: 'TMDB'; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 3px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: .08em; color: var(--mute); }
+  .readkey { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 12.5px; color: var(--mute);
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; margin: 14px 0 4px; }
+  .readkey .k { display: inline-flex; align-items: center; gap: 6px; }
+  .readkey .kd { width: 16px; height: 16px; border-radius: 50%; flex: 0 0 16px; background: conic-gradient(#4038C7 70%, #EFE6D6 0);
+    -webkit-mask: radial-gradient(circle, transparent 4px, #000 5px); mask: radial-gradient(circle, transparent 4px, #000 5px); }
+  /* The detail sheet's score in two labelled halves, as on film pages. */
+  .fcs-head.fcs-halves { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 6px 16px; }
+  .fcs-halves .fh { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; } .fcs-halves .fa { align-items: center; }
+  .fcs-halves .fey { font-size: 11px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: #8A5800; }
+  .fcs-halves .fa .fey { color: var(--mute); }
+  .fcs-halves .vpill { font-family: 'Inter', sans-serif; text-transform: none; letter-spacing: 0; font-size: 13.5px; padding: 4px 10px; }
+  .fcs-halves .dial { width: 46px; height: 46px; } .fcs-halves .dial span { width: 36px; height: 36px; font-size: 15px; }
+  .fcs-halves .dial-note { width: auto; font-size: 11.5px; text-align: center; }
+  /* The FilmyChill Verdict lockup (scripts/lib/brand.js VERDICT_CSS): the mark and the two-colour wordmark. */
+  .fcv { display:inline-flex; align-items:center; font-family:'Anton',Impact,sans-serif; font-weight:400; font-size:15px; letter-spacing:1px; line-height:1; text-transform:uppercase; color:var(--indigo,#4038C7); white-space:nowrap; vertical-align:middle; }
+  .fcv .fcv-m { width:1.1em; height:1.1em; flex:none; margin-right:.25em; }
+  .fcv b { font-weight:400; color:var(--marigold,#FFAD1F); -webkit-text-stroke:.6px var(--indigo,#4038C7); }
+  .fcv i { font-style:normal; color:var(--ink,#1A1633); margin-left:.3em; }
+  .fcs-halves .fa .fey { line-height: 15px; }
+  .readkey .fcv { font-size: 14px; }
+  /* A card the page script draws: the link, with its save button beside it (a button can't sit in a link). */
+  .cw { position: relative; }
   /* No counted audience rating: no circle — the evidence as plain text (lib/meter.js). */
   .dial-note { align-self: center; justify-self: end; width: 58px; text-align: center; font-size: 10.5px; font-weight: 700;
     line-height: 1.25; color: #8C85A3; }
-  .save-btn ~ .dial-note { align-self: end; margin-bottom: 8px; }
+  .has-save .dial-note { align-self: end; margin-bottom: 8px; }
   .fcs-v .dial-note { width: auto; font-size: 11.5px; text-align: left; }
   .hero-note { max-width: 96px; text-align: center; font-size: 11px; font-weight: 700; line-height: 1.3; color: #E4E1FF; }
   /* Cards with a save button (top right): the dial sits at the bottom, clear of it. */
   .rev { color: var(--mute); font-size: 12.5px; font-weight: 600; margin-left: 4px; }
-  .save-btn ~ .dial { align-self: end; }
+  .has-save .dial { align-self: end; }
   .title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-right: 40px; }
   .card h3 { font-size: 16.5px; font-weight: 800; line-height: 1.25; }
   .platform { font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: #fff;
@@ -580,6 +608,7 @@
     <div class="grid ott" id="mylistGrid"></div>
   </section>
 
+  <div class="readkey"><span class="k"><span class="vpill vp-worth">Worth a watch</span> <span class="fcv"><svg class="fcv-m" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="37" fill="none" stroke="#EFE6D6" stroke-width="13"/><circle cx="50" cy="50" r="37" fill="none" stroke="#FFAD1F" stroke-width="13" stroke-linecap="round" stroke-dasharray="176 300" transform="rotate(38 50 50)"/><path d="M42 33 Q40 32 40 35 L40 65 Q40 68 42 67 L66 52.5 Q68 50 66 47.5 Z" fill="#4038C7"/></svg>Filmy<b>Chill</b><i>Verdict</i></span></span><span class="k"><span class="kd" aria-hidden="true"></span> TMDB audience rating out of 10</span></div>
   <section>
     <div class="section-head">
       <h2>In Theatres</h2><span class="count" id="theatreCount"><!--SSR:TCOUNT-->TOP 7<!--/SSR:TCOUNT--></span>
@@ -801,7 +830,6 @@
     </div>
 </section>
   <!--SSR:POPULAR--><!--/SSR:POPULAR-->
-  <p class="dial-legend"><span class="dial-mini" aria-hidden="true"></span>Ring = audience rating out of 10, shown once enough people have rated · colour = FilmyChill verdict</p>
 </main>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true">

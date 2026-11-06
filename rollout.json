@@ -62,6 +62,12 @@
    "since": "2026-10-31",
    "what": "published reviews from the outlets' own RSS feeds (lib/reviews.js, reviews.json; headline, link and date only; 22 feeds, Onmanorama and Rediff excluded by their feed terms): the score card's own sentence names the outlets and links out ('…; 3 reviews out, in X, Y and Z.' / ' · Reviews: X, Y'), a star rating only where the headline states one; an FAQ names them. Only where the card has no critics' reading (no score, or an audience-only score with nothing cited). All languages, every edition's page for the film. Mock-up 31 Oct; switched to 100% at once on 31 Oct 2026 at the owner's go (about 5 pages that day)."
   },
+  "score-halves": {
+   "percent": 0,
+   "schedule": [{ "from": "2026-11-08T00:00", "percent": 10 }, { "from": "2026-11-09T00:00", "percent": 25 }, { "from": "2026-11-10T00:00", "percent": 50 }, { "from": "2026-11-11T00:00", "percent": 100 }],
+   "since": "2026-11-06",
+   "what": "one meaning for the score on film pages (lib/filmpage.js SCORE_HALVES): the score card in two labelled halves, 'FilmyChill Score' over the verdict stamp and 'TMDB audience' over the ring, the ring in one neutral colour; the vote box says a vote counts toward a future audience score. Every film page by slug, hidden ones included, in stages that start after the near-copy stages end (7 Nov): 10% at the 8 Nov morning build, then 25% / 50% / 100% on 9 / 10 / 11 Nov, so no build carries two staged changes. Homepages, hubs and the detail sheet changed at once (under 500 pages). Mock-up approved 6 Nov 2026."
+  },
   "near-copy-085": {
    "percent": 0,
    "schedule": [{ "from": "2026-11-06T12:00", "percent": 50 }, { "from": "2026-11-07T12:00", "percent": 100 }],

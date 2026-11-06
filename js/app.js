@@ -187,7 +187,7 @@ function receptionLine(rec, fmt, tone) {
   else if (mc) parts.push(`Metacritic ${mc.score}/100${paren([mc.n ? `${mc.n} critics` : '', mc.season ? `season ${mc.season}` : ''])}`);
   if (rec.ratings && rec.ratings.n) parts.push(`${rec.ratings.n} published rating${rec.ratings.n === 1 ? '' : 's'}${rec.ratings.median != null && rec.ratings.n >= 3 ? `, median ${rec.ratings.median}/5` : ''}`);
   if (!parts.length) return '';
-  return `${parts.join(' · ')} — per Wikipedia${rec.asOf ? `, ${fmt(rec.asOf)}` : ''}`;
+  return `${parts.join(' and ')}, per Wikipedia${rec.asOf ? `, ${fmt(rec.asOf)}` : ''}`;
 }
 function toneFromFigure(rec) {
   const v = rec && rec.rt ? rec.rt.pct : rec && rec.mc ? rec.mc.score : null;
@@ -203,14 +203,22 @@ function scoreLineHtml(item) {
   const tone = s && s.critics ? s.critics : null;
   const cited = item.reception ? receptionLine(item.reception, fmtDate, tone) : '';
   const label = tone || (cited ? toneFromFigure(item.reception) : null);
-  const cri = label ? ` · <b>Critics:</b> ${esc(label)}${cited ? ' — ' + esc(cited) : ''}` : '';
+  const cri = label ? ` · <b>Critics:</b> ${esc(label)}${cited ? ', ' + esc(cited) : ''}` : '';
   return `<div class="fcs-line">${aud}${cri}</div>`;
+}
+// One meaning for the score (6 Nov 2026): two labelled halves, the FilmyChill Verdict lockup over the verdict
+// and "TMDB audience" over the ring, as on film pages (lib/filmpage.js halvesBlock).
+// The FilmyChill Verdict lockup: twin of VERDICT_LOCKUP in scripts/lib/brand.js.
+const VERDICT_LOCKUP = '<span class="fcv"><svg class="fcv-m" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="37" fill="none" stroke="#EFE6D6" stroke-width="13"/><circle cx="50" cy="50" r="37" fill="none" stroke="#FFAD1F" stroke-width="13" stroke-linecap="round" stroke-dasharray="176 300" transform="rotate(38 50 50)"/><path d="M42 33 Q40 32 40 35 L40 65 Q40 68 42 67 L66 52.5 Q68 50 66 47.5 Z" fill="#4038C7"/></svg>Filmy<b>Chill</b><i>Verdict</i></span>';
+function scoreHalves(dial, pill) {
+  const right = /class="dial /.test(dial) ? `<div class="fh fa"><span class="fey">TMDB audience</span>${dial}</div>` : (dial ? `<div class="fh fa">${dial}</div>` : '');
+  return `<div class="fcs-head fcs-halves"><div class="fh">${VERDICT_LOCKUP}${pill}</div>${right}</div>`;
 }
 function fcScoreHtml(item) {
   const s = item.fcScore;
   const none = noScoreText(item);
-  if (!s) return `<div class="fcs fcs-early"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${ratingDial(item)}${verdictPill(none.label, 'early')}</span></div><div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
-  return `<div class="fcs"><div class="fcs-head"><span class="fcs-label">FilmyChill score</span><span class="fcs-v">${ratingDial(item)}${verdictPill(s.verdict)}</span></div><div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
+  if (!s) return `<div class="fcs fcs-early">${scoreHalves(ratingDial(item), verdictPill(none.label, 'early'))}<div class="fcs-why">${esc(none.why)}</div></div>` + fcSignals(item);
+  return `<div class="fcs">${scoreHalves(ratingDial(item), verdictPill(s.verdict))}<div class="fcs-why">${esc(s.reason)}${s.early ? ' <span class="fcs-tag">Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings</span>' : ''}</div></div>` + fcSignals(item);
 }
 
 // CLEANER CARDS (Oct 2026). One card used to stack a coloured badge for everything, a boxed
@@ -262,13 +270,13 @@ function ratingDial(item) {
   const r = dialRating(item);
   if (r == null) { const t = evidenceLabel(item); return t ? '<div class="dial-note">' + esc(t) + '</div>' : ''; }
   const v = r.toFixed(1);
-  return `<div class="dial dial-${verdictLevel(item.fcScore.verdict)}" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div>`;
+  return `<div class="dial dial-aud" style="--p:${Math.round(r * 10)}%" role="img" aria-label="TMDB audience rating ${v} out of 10"><span>${v}</span></div>`;
 }
 function heroDialInner(item) {
   const r = dialRating(item);
   if (r == null) { const t = evidenceLabel(item); return t ? '<div class="hero-note">' + esc(t) + '</div>' : ''; }
   const v = r.toFixed(1);
-  return `<div class="dial dial-hero" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div><div class="hero-dial-label">Audience</div>`;
+  return `<div class="dial dial-hero" style="--p:${Math.round(r * 10)}%" role="img" aria-label="TMDB audience rating ${v} out of 10"><span>${v}</span></div><div class="hero-dial-label">TMDB audience</div>`;
 }
 // Twin of reviewsCardText in scripts/lib/reviews.js: the outlets whose reviews are out, for a
 // title with no critics' reading (item.rv in data.json). Names only on the card; the detail
@@ -315,8 +323,12 @@ function card(item, i, listKey) {
   const art = item.poster
     ? `<img class="poster" src="${esc(item.poster)}" alt="${esc(item.title)} poster" width="150" height="200" loading="lazy">`
     : `<div class="poster ph" aria-hidden="true">${esc((item.title || '?').charAt(0).toUpperCase())}</div>`;
-  return `<div class="card" data-click="openDetail" data-enter="openDetail" data-list="${listKey}" data-i="${i}" tabindex="0">
-    <button class="save-btn${saved ? ' saved' : ''}" data-click="toggleSave" data-list="${listKey}" data-i="${i}" aria-label="${saved ? 'Remove from' : 'Add to'} My List"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${BOOKMARK_PATH}"/></svg></button>
+  // A real link to the film's page (6 Nov 2026): it used to be a clickable <div>, so a rendered
+  // homepage kept 8 of its 25 film links and Google, which follows only <a href>, lost the rest.
+  // A plain click still opens the detail sheet (ACTIONS.openDetail); a new-tab click follows the link.
+  // The save button sits beside the link, in the wrapper: a button can't be inside a link.
+  const href = filmPagePath(item.slug || slugify(item.title));
+  return `<div class="cw"><a class="card has-save" href="${esc(href)}" data-click="openDetail" data-list="${listKey}" data-i="${i}">
     <div class="pw">${art}<span class="rank">${i + 1}</span></div>
     <div class="cb">
       <h3>${esc(item.title)}</h3>
@@ -326,7 +338,7 @@ function card(item, i, listKey) {
       ${cardScore(item)}
     </div>
     ${ratingDial(item)}
-  </div>`;
+  </a><button class="save-btn${saved ? ' saved' : ''}" data-click="toggleSave" data-list="${listKey}" data-i="${i}" aria-label="${saved ? 'Remove from' : 'Add to'} My List"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${BOOKMARK_PATH}"/></svg></button></div>`;
 }
 
 // Mirrors releaseState() in scripts/update.js, but against the VISITOR'S calendar day.
@@ -618,7 +630,7 @@ function openDetail(listKey, i, via) {
       ${scoreLineHtml(item)}
       <div class="review">${esc(item.fullReview || item.review || 'No description available.')}</div>
       <div class="credits">
-        ${item.director ? `<b>Director:</b> ${esc(item.director)}` : ''}
+        ${item.director ? `<b>${item.kind === 'tv' ? 'Creator' : 'Director'}:</b> ${esc(item.director)}` : ''}
       </div>
       ${(item.castPics && item.castPics.length) ? `<div class="cast-strip">${item.castPics.map(c => `<div class="cast-card"><img src="${esc(c.photo)}" alt="${esc(c.name)}" width="64" height="64" loading="lazy"><div class="cast-name">${esc(c.name)}</div>${c.character ? `<div class="cast-role">${esc(c.character)}</div>` : ''}</div>`).join('')}</div>`
         : (item.cast && item.cast.length) ? `<div class="credits"><b>Cast:</b> ${esc(item.cast.join(', '))}</div>` : ''}
@@ -1213,7 +1225,11 @@ const ACTIONS = {
   closeMood: () => closeMood(),
   setMoodTime: (el) => setMoodTime(el.dataset.arg, el),
   moodPick: (el) => moodPick(el.dataset.arg),
-  openDetail: (el) => openDetail(el.dataset.list, Number(el.dataset.i), el.dataset.via),
+  openDetail: (el, ev) => {
+    // A card that is a link: a plain click opens the sheet; Ctrl/Cmd/Shift-click opens the page as usual.
+    if (el.tagName === 'A') { if (ev && (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey)) return; if (ev) ev.preventDefault(); }
+    openDetail(el.dataset.list, Number(el.dataset.i), el.dataset.via);
+  },
   toggleSave: (el) => toggleSave(el.dataset.list, Number(el.dataset.i)),
   soonClick: (el, ev) => soonClick(ev, Number(el.dataset.i)),
   removeById: (el) => { const n = document.getElementById(el.dataset.arg); if (n) n.remove(); },

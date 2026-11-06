@@ -19,7 +19,7 @@ const {
 const { rankValue } = require("./score.js");
 const { releaseState } = require("./release.js");
 const { trailerViewsLabel, wikiViewsLabel } = require("./editorial.js");
-const { VPILL_CSS, ratingDial, rowScoreLine, verdictPill } = require("./meter.js");
+const { VPILL_CSS, ratingDial, ROW_RING_CSS, rowRing, rowScoreLine, verdictPill } = require("./meter.js");
 const { earlyReadLabel, noScoreText } = require("./fcscore.js");
 const { freshLabel } = require("./freshness.js");
 const {
@@ -477,7 +477,8 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
         ${rowScoreLine(it, trailerViewsLabel(it.trailerViews) ? " · " + e(trailerViewsLabel(it.trailerViews)) : "")}
-      </div>`;
+      </div>
+      ${rowRing(it)}`;
     return it.slug
       ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>`
       : `<div class="row">${inner}</div>`;
@@ -572,6 +573,7 @@ ${ogImageTag(hubOgImage(freshItems, cfg))}
   .badge { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); background:var(--marigold); border-radius:5px; padding:3px 7px; font-weight:800; }
   .badge.trend { background:#D93A28; color:#fff; }
   .rm { color:var(--mute); font-size:13px; margin-top:4px; } .rm b { color:var(--indigo); }
+${ROW_RING_CSS}
   ${VPILL_CSS}
   .calh { font-size:14.5px; margin:16px 0 6px; } .cal { list-style:none; padding:0; margin:0; columns:2; column-gap:24px; }
   .cal li { break-inside:avoid; padding:4px 0; font-size:14.5px; } .cal a { color:var(--indigo); text-decoration:none; } .cal .rm { font-size:12.5px; }

@@ -36,7 +36,7 @@ function voteWidgetHtml(item, code, today = new Date().toISOString().slice(0, 10
   if (item.released && String(item.released).slice(0, 10) > today) return "";
   const e = escHtml;
   return `<div class="fcvote" data-film="${e(key)}" data-c="${e(code || "in")}" hidden>
-    <div class="fcvote-q">Watched it? Was it worth it?<small>Your vote helps the FilmyChill Score. No sign-up.</small></div>
+    <div class="fcvote-q">Watched it? Was it worth it?<small>${require("./rollout.js").inRollout("score-halves", item.slug) ? "Your vote is counted toward a future audience score. No sign-up." : "Your vote helps the FilmyChill Score. No sign-up."}</small></div>
     <div class="fcvote-b"><button type="button" data-v="1">${THUMB(false)}Worth it</button><button type="button" data-v="-1">${THUMB(true)}Not worth it</button></div>
     <div class="fcvote-done" hidden></div>
   </div>

@@ -8,6 +8,7 @@ const { writeIfChanged } = require("./writeif.js");
 const { earlyReadLabel, isRecent, noScoreText, notOutYet, scoreNeed } = require("./fcscore.js");
 const { VOTE_CONNECT, VOTE_CSS, voteWidgetHtml } = require("./vote.js");
 const { ratingDial } = require("./meter.js");
+const { VERDICT_CSS, VERDICT_LOCKUP } = require("./brand.js");
 const fs = require("fs");
 const {
   COUNTRIES,
@@ -913,9 +914,10 @@ function franchiseRowHtml(fr, item, code) {
 // The score line for a page with no score yet. `label` and `audience` come from the item on a
 // live render, or from the page's own card on a frozen one (see compactEarlyScore).
 // `sep`: ":" on plain-wording pages (rollout "human-prose"); lib/facts.js reads either form.
-function compactScoreHtml(label, audience, tail = ", no critics' verdict yet.", sep = " —") {
+// `verdict` (rollout "score-halves"): the FilmyChill Verdict lockup and "How the verdict works".
+function compactScoreHtml(label, audience, tail = ", no critics' verdict yet.", sep = " —", verdict = false) {
   const e = escHtml;
-  return `<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">FilmyChill score</span> <span class="fcsb-mini-v">${e(label)}</span>${sep} ${e(audience)}${tail} <a href="/about/#score">How scoring works</a></p></section>`;
+  return `<section class="fcsb fcsb-compact" id="filmychill-score"><p class="fcsb-mini"><span class="fcsb-mini-k">${verdict ? VERDICT_LOCKUP : "FilmyChill score"}</span> <span class="fcsb-mini-v">${e(label)}</span>${sep} ${e(audience)}${tail} <a href="/about/#score">${verdict ? "How the verdict works" : "How scoring works"}</a></p></section>`;
 }
 // Time words ("so far", "yet") only for a film that's actually new; an older film gets the plain
 // count ("only 12 audience ratings"), never a hint that more are on the way (Oct 2026).
@@ -1035,7 +1037,7 @@ function fcScoreSection(item) {
       const n = Number(item.votes || 0);
       return compactScoreHtml(none.label, n > 0
         ? `${n.toLocaleString("en-IN")} audience rating${n === 1 ? "" : "s"} so far, all from before its release`
-        : "nobody has seen it yet", ". The score comes once people have watched it.", item._plain ? ":" : " —");
+        : "nobody has seen it yet", scoreHalvesOn(item) ? ". The verdict comes once people have watched it." : ". The score comes once people have watched it.", item._plain ? ":" : " —", scoreHalvesOn(item));
     }
     const s = item.fcScore || null;
     // No score yet: one line instead of a card of empty rows (832 pages led with four
@@ -1045,7 +1047,7 @@ function fcScoreSection(item) {
       const rvTail = reviewsTail(item);
       return compactScoreHtml(none.label, audiencePhrase(item.votes, isRecent(item)),
         none.label === "Critics split" ? `, and the critics' reviews are divided${rvTail || "."}`
-          : rvTail || (isRecent(item) ? undefined : ", and no settled critics' verdict."), item._plain ? ":" : " —");
+          : rvTail || (isRecent(item) ? undefined : ", and no settled critics' verdict."), item._plain ? ":" : " —", scoreHalvesOn(item));
     }
     const votes = item.votes ? Number(item.votes).toLocaleString("en-IN") : "0";
     // Lean layout (LEAN_PAGE): the ring carries the rating and the count is said once — in the
@@ -1094,17 +1096,96 @@ function fcScoreSection(item) {
     // The method link inside the card, after the figures it explains (rollout "score-link",
     // 5 Nov 2026): the sentence under the card is gone, the link stays (scoreLink below).
     const linkIn = v3 && !!item.slug && inRollout(SCORE_LINK, item.slug);
-    const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}${reviewsClause(item)}${linkIn ? ` · ${SCORE_HOW}` : ""}</p>` : "";
+    const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}${reviewsClause(item)}${linkIn ? ` · ${scoreHalvesOn(item) ? VERDICT_HOW : SCORE_HOW}` : ""}</p>` : "";
     // The two halves as a marker too (<!--FC:fcs=audience|critics-->): lib/facts.js read them from
     // the rows' tags, which the v3 line replaces; without them a frozen render lost the ring.
     const fcsMark = `<!--FC:fcs=${e(s && s.audience ? s.audience : "")}|${e(s && s.critics ? s.critics : "")}-->`;
     return `<section class="fcsb" id="filmychill-score">${RC.receptionMark(item.reception)}${fcsMark}
-    <div class="fcsb-label">FilmyChill score</div>
-    <div class="fcsb-verdict">${ratingDial(item)}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>
+    ${scoreHalvesOn(item)
+      ? halvesBlock(ratingDial(item), `<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>`, s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : "")
+      : `<div class="fcsb-label">FilmyChill score</div>
+    <div class="fcsb-verdict">${ratingDial(item, { neutral: false })}<span class="fcsb-stamp fcsb-${lvl}">${e(s ? s.verdict : none.label)}</span>${s && s.early ? ` <span class="fcsb-conf">${e(earlyReadLabel(s))}</span>` : ""}</div>`}
     <p class="fcsb-why">${e(s ? RC.plainReason(s.reason) : none.why)}</p>
     ${v3 ? line : `<div class="fcsb-rows">${row("Audience", aud)}${row("Critics", cri)}</div>${reviewsClause(item) ? `<p class="fcsb-line fcsb-rv">${reviewsClause(item).replace(/^ · /, "")}</p>` : ""}`}
   </section>${linkIn ? "" : `
-  <p class="fcsb-note">The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. ${SCORE_HOW}</p>`}`;
+  <p class="fcsb-note">${scoreHalvesOn(item) ? `The FilmyChill Verdict combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a verdict. ${VERDICT_HOW}` : `The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score. ${SCORE_HOW}`}</p>`}`;
+}
+
+// ONE MEANING FOR THE SCORE (6 Nov 2026, rollout "score-halves"; mock-up approved by the owner).
+// The card's heading sat over both the ring and the verdict, so TMDB's number read as FilmyChill's.
+// Now two labelled halves: "FilmyChill Score" over the verdict stamp, "TMDB audience" over the ring,
+// which is drawn in the one neutral colour everywhere (lib/meter.js ratingDial). The vote box says
+// what a vote does today: it isn't part of the score yet (About: "collected quietly for now").
+// The builder writes it for films in the rollout; scoreHalves() brings pages no builder rewrites
+// to exactly the same markup and styles, before the end-of-build pass moves styles to /css/.
+const SCORE_HALVES = "score-halves";
+const scoreHalvesOn = (item) => !!(item && item.slug) && inRollout(SCORE_HALVES, item.slug);
+const SCORE_HALVES_CSS = [
+  "  /* Score halves (lib/filmpage.js SCORE_HALVES) */",
+  "  .fcsb-halves { display:grid; grid-template-columns:1fr auto; align-items:start; gap:6px 18px; }",
+  "  .fcsb-halves .fh { display:flex; flex-direction:column; align-items:flex-start; gap:8px; } .fcsb-halves .fa { align-items:center; }",
+  "  .fcsb-halves .fey { font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; } .fcsb-halves .fa .fey { color:var(--mute); }",
+  "  .fcsb-verdict .dial-aud { --dc:#4038C7; } .fcsb-halves .dial { margin:0; } .fcsb-halves .dial::after { content:none; }",
+  "  .fcsb-halves .fa .fey { line-height:15px; } .fcsb-mini-k .fcv { margin-top:-2px; }",
+  VERDICT_CSS,
+].join("\n");
+const SCORE_HALVES_MARK = "Score halves (lib/filmpage.js SCORE_HALVES)";
+const VOTE_NOTE_OLD = "Your vote helps the FilmyChill Score. No sign-up.";
+const VOTE_NOTE = "Your vote is counted toward a future audience score. No sign-up.";
+// Pure: the two halves. `dial` is the ring or the evidence note (or empty), `stamp` the verdict.
+function halvesBlock(dial, stamp, conf = "") {
+  const right = /class="dial /.test(dial) ? `<div class="fh fa"><span class="fey">TMDB audience</span>${dial}</div>` : (dial ? `<div class="fh fa">${dial}</div>` : "");
+  return `<div class="fcsb-verdict fcsb-halves"><div class="fh">${VERDICT_LOCKUP}${stamp}${conf}</div>${right}</div>`;
+}
+// The name, everywhere the builder writes it on a page in the rollout (6 Nov 2026, owner: the
+// verdict is a verdict, not a number, so it is the FilmyChill Verdict). [old, new], applied in order.
+const VERDICT_RENAMES = [
+  ['<span class="fey">FilmyChill Score</span>', VERDICT_LOCKUP],
+  ['<span class="fcsb-mini-k">FilmyChill score</span>', `<span class="fcsb-mini-k">${VERDICT_LOCKUP}</span>`],
+  [">How scoring works</a>", ">How the verdict works</a>"],
+  [">How the score works</a>", ">How the verdict works</a>"],
+  [". The score comes once people have watched it.", ". The verdict comes once people have watched it."],
+  ["The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score.",
+    "The FilmyChill Verdict combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a verdict."],
+  ["FilmyChill Score: ", "FilmyChill Verdict: "],
+  ["title=\"The FilmyChill Score combines audience ratings and critics' reception\"", "title=\"The FilmyChill Verdict combines audience ratings and critics' reception\""],
+  [VOTE_NOTE_OLD, VOTE_NOTE],
+];
+// Pure-ish (reads the page's shared stylesheet when it has one): a page in the old form, made the
+// form the builder now writes. Idempotent.
+const OLD_CARD_RE = /<div class="fcsb-label">FilmyChill score<\/div>\s*<div class="fcsb-verdict">((?:<div class="dial [^"]*"[^>]*><span>[^<]*<\/span><\/div>|<div class="dial-note">[^<]*<\/div>)?)(<span class="fcsb-stamp [^"]+">[^<]*<\/span>)((?: <span class="fcsb-conf">[^<]*<\/span>)?)<\/div>/;
+function scoreHalves(html, { root = "." } = {}) {
+  const orig = String(html);
+  let s = orig;
+  const m = OLD_CARD_RE.exec(s);
+  if (m) {
+    const dial = m[1].replace(/class="dial dial-(?:must|worth|skip|early|aud)"/, 'class="dial dial-aud"').replace(/aria-label="Audience rating /, 'aria-label="TMDB audience rating ');
+    s = s.replace(m[0], halvesBlock(dial, m[2], m[3]));
+  }
+  for (const [a, b] of VERDICT_RENAMES) if (s.includes(a)) s = s.split(a).join(b);
+  if (s === orig && (!/fcsb-halves|class="fcv"/.test(s) || s.includes(SCORE_HALVES_MARK))) return orig;
+  if (/fcsb-halves|class="fcv"/.test(s) && !s.includes(SCORE_HALVES_MARK)) {
+    if (/<link rel="stylesheet" href="\/css\/fp-[0-9a-f]{10}\.css">/.test(s)) s = require("./stylesheets.js").inlineStyles(s, root);
+    if (s.includes(FCSB_CSS)) s = s.replace(FCSB_CSS, FCSB_CSS + "\n" + SCORE_HALVES_CSS);
+    else if (s.includes("</style>")) s = s.replace("</style>", SCORE_HALVES_CSS + "\n</style>");
+    // All or nothing: never a converted card without its styles (a shared stylesheet missing on disk).
+    else return orig;
+  }
+  return s;
+}
+function applyScoreHalves(files, { root = ".", included = (slug) => inRollout(SCORE_HALVES, slug) } = {}) {
+  const res = { pages: 0, changed: 0 };
+  for (const rel of files) {
+    const mm = /(?:^|\/)movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
+    if (!mm || !included(mm[1])) continue;
+    const file = require("path").join(root, rel);
+    let html;
+    try { html = require("fs").readFileSync(file, "utf8"); } catch { continue; }
+    res.pages++;
+    const next = scoreHalves(html, { root });
+    if (next !== html) { require("fs").writeFileSync(file, next); res.changed++; }
+  }
+  return res;
 }
 
 // SCORE LINK (5 Nov 2026, rollout "score-link"). The pages no builder rewrites get the same
@@ -1113,7 +1194,9 @@ function fcScoreSection(item) {
 // line, exactly as fcScoreSection now writes it. A card with no such line (older layouts) keeps
 // the link alone under it. Pure and idempotent.
 const SCORE_HOW = '<a href="/about/#score">How the score works</a>';
-const SCORE_NOTE_RE = /\n?[ \t]*<p class="fcsb-note">[^<]*<a href="\/about\/#score">How the score works<\/a><\/p>/;
+// Rollout "score-halves" (6 Nov 2026): the same link, named for the verdict; the anchor stays.
+const VERDICT_HOW = '<a href="/about/#score">How the verdict works</a>';
+const SCORE_NOTE_RE = /\n?[ \t]*<p class="fcsb-note">[^<]*<a href="\/about\/#score">How the (?:score|verdict) works<\/a><\/p>/;
 function scoreLink(html) {
   const s = String(html);
   const m = SCORE_NOTE_RE.exec(s);
@@ -1121,13 +1204,15 @@ function scoreLink(html) {
   const sec = s.lastIndexOf('<section class="fcsb', m.index);
   const end = s.lastIndexOf("</section>", m.index);
   if (sec < 0 || end < sec) return s;
+  // The link keeps the name the note gave it (rollout "score-halves" calls it the verdict).
+  const how = /How the verdict works/.test(m[0]) ? VERDICT_HOW : SCORE_HOW;
   const li = s.lastIndexOf('<p class="fcsb-line', end);
   const close = li > sec ? s.indexOf("</p>", li) : -1;
   if (close < 0 || close > end) {
-    const bare = `\n  <p class="fcsb-note">${SCORE_HOW}</p>`;
+    const bare = `\n  <p class="fcsb-note">${how}</p>`;
     return m[0] === bare ? s : s.slice(0, m.index) + bare + s.slice(m.index + m[0].length);
   }
-  const withLink = s.slice(0, close) + ` · ${SCORE_HOW}` + s.slice(close, m.index);
+  const withLink = s.slice(0, close) + ` · ${how}` + s.slice(close, m.index);
   return withLink + s.slice(m.index + m[0].length);
 }
 function applyScoreLink(files, { root = ".", included = (slug) => inRollout(SCORE_LINK, slug) } = {}) {
@@ -1430,7 +1515,7 @@ ${(() => { const base = `  :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream
   .rating-early .cdot, .rating-early .cbar i { background:#E39A1C; } .rating-early .ctag { background:rgba(227,154,28,.15); color:#B87910; }
   .rating-few { color:var(--mute); font-weight:600; font-size:15px; } .rating-few .cdot, .rating-few .cbar i { background:#C4BEDA; } .rating-few .ctag { display:none; }
   .verdict { display:inline-block; background:rgba(64,56,199,.08); color:var(--indigo); font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; margin-top:8px; }
-${FCSB_CSS}
+${FCSB_CSS}${scoreHalvesOn(item) ? "\n" + SCORE_HALVES_CSS : ""}
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
   .fit dt { font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--indigo); margin-top:12px; }
@@ -1824,8 +1909,13 @@ function generatePages(data, cfg, allSlugSets) {
 
 module.exports = {
   PAGE_FIXES,
+  SCORE_HALVES,
+  SCORE_HALVES_CSS,
   SCORE_LINK,
+  applyScoreHalves,
   applyScoreLink,
+  halvesBlock,
+  scoreHalves,
   scoreLink,
   VISIBLE_SIMILAR,
   resetFranchiseIndex,

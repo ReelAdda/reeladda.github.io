@@ -120,8 +120,8 @@ function refreshHead(html, item) {
 const FAQ_LEADS = [
   /^It's too early for a verdict(?: —|\.) .+? doesn't have enough ratings yet\./,
   /^There aren't enough ratings for a verdict on .+?\./,
-  /^FilmyChill Score: [^.—]+\. [^.]*\.(?: It rates \d+(?:\.\d)?\/10 on audience ratings\.)?/,
-  /^FilmyChill Score: [^.]*\.(?: It rates \d+(?:\.\d)?\/10 on audience ratings\.)?/,
+  /^FilmyChill (?:Score|Verdict): [^.—]+\. [^.]*\.(?: It rates \d+(?:\.\d)?\/10 on audience ratings\.)?/,
+  /^FilmyChill (?:Score|Verdict): [^.]*\.(?: It rates \d+(?:\.\d)?\/10 on audience ratings\.)?/,
   /^(?:Must watch|Worth a watch|Decent one-time watch|Skip unless curious)\.(?: It rates \d+(?:\.\d)?\/10 on audience ratings\.)?/,
 ];
 function faqLead(item, s) {
@@ -130,7 +130,7 @@ function faqLead(item, s) {
   const few = s.early ? ` (based on only ${Number(s.votes).toLocaleString("en-IN")} ratings)` : "";
   const rates = item.rating != null ? ` It rates ${Number(item.rating).toFixed(1)}/10 on audience ratings.` : "";
   const plain = require("./humanprose.js").plainOn(item.slug);
-  return `FilmyChill Score: ${s.verdict}${plain ? "." : " —"} ${reason}${few}.${rates}`;
+  return `${require("./rollout.js").inRollout("score-halves", item.slug) ? "FilmyChill Verdict" : "FilmyChill Score"}: ${s.verdict}${plain ? "." : " —"} ${reason}${few}.${rates}`;
 }
 function relead(text, lead) {
   if (lead == null) return null;

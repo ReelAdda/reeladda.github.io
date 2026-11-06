@@ -237,7 +237,7 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   // Plain wording (rollout "human-prose", lib/humanprose.js): full stops instead of spaced em
   // dashes, and no canned "fit" line after the facts.
   const plain = !!(item._plain || plainOn(item.slug));
-  const verdictLabel = item.fcScore ? `FilmyChill Score: ${item.fcScore.verdict}${plain ? "." : " —"} ${require("./reception.js").plainReason(item.fcScore.reason).replace(/\.$/, "")}${item.fcScore.early ? ` (based on only ${Number(item.fcScore.votes).toLocaleString("en-IN")} ratings)` : ""}` : (item.verdict || "");
+  const verdictLabel = item.fcScore ? `${require("./rollout.js").inRollout("score-halves", item.slug) ? "FilmyChill Verdict" : "FilmyChill Score"}: ${item.fcScore.verdict}${plain ? "." : " —"} ${require("./reception.js").plainReason(item.fcScore.reason).replace(/\.$/, "")}${item.fcScore.early ? ` (based on only ${Number(item.fcScore.votes).toLocaleString("en-IN")} ratings)` : ""}` : (item.verdict || "");
 
   // Q1: worth watching. Verdict + reception + the fit line (see whyWatch) — the last part
   // is what stops this answer reading like every other page's answer, and it's the bit an

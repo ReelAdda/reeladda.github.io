@@ -49,6 +49,8 @@ function rolloutConfig() { return cached || (cached = loadRollout()); }
 function resetRolloutCache() { cached = null; }
 // Tests and previews: use this config instead of rollout.json (null goes back to the file).
 function useRolloutConfig(config) { cached = config || null; }
+// Tests: the config in use now, or null when none is loaded yet (to put it back afterwards).
+function peekRolloutConfig() { return cached; }
 
 // Is this film's page in the rollout of this feature? `config` for tests; the build reads the file.
 function inRollout(feature, slug, config = rolloutConfig(), nowMs = Date.now()) {
@@ -62,4 +64,4 @@ function rolloutSummary(config = rolloutConfig()) {
   return f.length ? f.join(", ") : "none";
 }
 
-module.exports = { ROLLOUT_FILE, bucketOf, inRollout, loadRollout, percentOf, resetRolloutCache, rolloutConfig, rolloutSummary, useRolloutConfig };
+module.exports = { ROLLOUT_FILE, bucketOf, inRollout, loadRollout, peekRolloutConfig, percentOf, resetRolloutCache, rolloutConfig, rolloutSummary, useRolloutConfig };

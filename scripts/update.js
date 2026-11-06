@@ -2804,6 +2804,12 @@ async function main() {
           return cinemaClaim(byKey.get(`${code}:${e.kind === "tv" ? "tv" : "movie"}:${e.tmdbId}`), starts);
         };
         const fromFacts = (code, slug) => !!(pagesManifest[code] && pagesManifest[code][slug] && pagesManifest[code][slug].rendered);
+        // The score card's two labelled halves (rollout "score-halves", lib/filmpage.js), on pages
+        // no builder rewrote this run: before styles move out, since it adds the card's rules.
+        try {
+          const sh = require("./lib/filmpage.js").applyScoreHalves(filmPageFiles());
+          if (sh.changed) console.log(`Score halves: ${sh.changed} of ${sh.pages} switched page(s) updated`);
+        } catch (e) { stageFailed("score halves", e, { optional: true }); }
         const f = finishFilmPages(filmPageFiles(), { fcdataClaim, fromFacts });
         console.log(`Film pages finished: ${f.pages} checked (${f.fromFacts} rendered from facts, ${f.pages - f.fromFacts} still frozen), ${f.externalized} moved to shared styles,${f.footerLinked} footers given the notice and Privacy · Copyright links, ${f.iconed} icon tags added, `
           + `${f.retitled.length - f.notYetFixed} titles given their country, ${f.notYetFixed} 'not streaming yet' titles corrected on pages that stream, ${f.timeWordsFixed} outdated release wordings settled, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, `

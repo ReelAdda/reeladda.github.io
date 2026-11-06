@@ -143,7 +143,7 @@ function v2ScorePill(item) {
   const s = item.fcScore;
   const r = s ? dialRating(item) : null;
   if (!s || !s.verdict) return `<span class="spill soon">${DIAL_ICON}Verdict soon</span>`;
-  return `<span class="spill" title="The FilmyChill Score combines audience ratings and critics' reception">${DIAL_ICON}${r != null ? `<span class="sn">${r.toFixed(1)}</span>` : ""}${e(s.verdict)}</span>`;
+  return `<span class="spill" title="The FilmyChill Verdict combines audience ratings and critics' reception">${DIAL_ICON}${r != null ? `<span class="sn">${r.toFixed(1)}</span>` : ""}${e(s.verdict)}</span>`;
 }
 
 // Pure: the primary call to action, in its four states, plus the actions row and the provenance

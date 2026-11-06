@@ -193,7 +193,7 @@ function auditPage(html, { released = null, now = Date.now() } = {}) {
   const b = /<b>Audience<\/b><small>★ ([\d.]+) from/.exec(html);
   if (h && b && Number(h[1]).toFixed(1) !== Number(b[1]).toFixed(1)) out.push({ check: "header-vs-score-rating", detail: `header ${h[1]} vs score ${b[1]}` });
   const stamp = /class="fcsb-stamp[^"]*">(Must watch|Worth a watch|Skip)</.exec(html);
-  const faq = /worth watching\?<\/summary><div class="fa">FilmyChill Score: (Must watch|Worth a watch|Skip)/.exec(html);
+  const faq = /worth watching\?<\/summary><div class="fa">FilmyChill (?:Score|Verdict): (Must watch|Worth a watch|Skip)/.exec(html);
   if (stamp && faq && stamp[1] !== faq[1]) out.push({ check: "faq-vs-score-verdict", detail: `score ${stamp[1]}, FAQ ${faq[1]}` });
   return out;
 }

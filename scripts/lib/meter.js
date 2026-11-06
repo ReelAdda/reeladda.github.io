@@ -104,29 +104,46 @@ function evidenceLabel(item) {
   if (votes >= FEW_VOTES && item.rating == null) return "No rating yet"; // a count but no usable average
   return votes > 0 ? "Few ratings" : "Not rated yet";
 }
-// A card's slot: the ring (a CSS conic-gradient filled to the rating, coloured by the verdict),
-// or the evidence as text.
-function ratingDial(item) {
+// A card's slot: the ring (a CSS conic-gradient filled to the rating), or the evidence as text.
+// One meaning for the score (6 Nov 2026): the ring is TMDB's audience rating, always in the one
+// neutral colour ("dial-aud") and labelled TMDB, and only the verdict pill carries the verdict's
+// colour. `neutral: false` keeps the old verdict-coloured ring for film pages outside the rollout
+// (lib/filmpage.js SCORE_HALVES): their shared stylesheet has no dial-aud rule yet.
+function ratingDial(item, { neutral = true } = {}) {
   const r = dialRating(item);
   if (r == null) { const t = evidenceLabel(item); return t ? `<div class="dial-note">${escHtml(t)}</div>` : ""; }
   const v = r.toFixed(1);
-  return `<div class="dial dial-${meterLevel(item.fcScore.verdict)}" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div>`;
+  const cls = neutral ? "dial-aud" : `dial-${meterLevel(item.fcScore.verdict)}`;
+  return `<div class="dial ${cls}" style="--p:${Math.round(r * 10)}%" role="img" aria-label="${neutral ? "TMDB audience" : "Audience"} rating ${v} out of 10"><span>${v}</span></div>`;
 }
+// The hub rows' ring (language and platform hubs, /new-on-ott/): the same ring, "TMDB" above it,
+// in its own column on the right of the row. Nothing when there is no rating to draw.
+function rowRing(item) {
+  const r = dialRating(item);
+  if (r == null) return "";
+  const v = r.toFixed(1);
+  return `<div class="hring"><span class="hey">TMDB</span><div class="hd" style="--p:${Math.round(r * 10)}%" role="img" aria-label="TMDB audience rating ${v} out of 10"><span>${v}</span></div></div>`;
+}
+const ROW_RING_CSS = "  .row { grid-template-columns:92px 1fr auto; } .hring { align-self:center; display:flex; flex-direction:column; align-items:center; gap:3px; }"
+  + " .hring .hey { font-size:9.5px; font-weight:800; letter-spacing:.08em; color:var(--mute); }"
+  + " .hring .hd { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; background:conic-gradient(#4038C7 var(--p,0%), #EFE6D6 0); }"
+  + " .hring .hd span { width:36px; height:36px; border-radius:50%; background:#fff; display:grid; place-items:center; font-weight:800; font-size:14px; color:#1A1633; }";
 // The hero's larger dial, labelled; the evidence as text without one; empty when there's nothing.
 function heroDialInner(item) {
   const r = dialRating(item);
   if (r == null) { const t = evidenceLabel(item); return t ? `<div class="hero-note">${escHtml(t)}</div>` : ""; }
   const v = r.toFixed(1);
-  return `<div class="dial dial-hero" style="--p:${Math.round(r * 10)}%" role="img" aria-label="Audience rating ${v} out of 10"><span>${v}</span></div><div class="hero-dial-label">Audience</div>`;
+  return `<div class="dial dial-hero" style="--p:${Math.round(r * 10)}%" role="img" aria-label="TMDB audience rating ${v} out of 10"><span>${v}</span></div><div class="hero-dial-label">TMDB audience</div>`;
 }
-// The list pages' version (language and platform hubs, /new-on-ott/): the same two jobs on one
-// line — "★ 7.5 [Worth a watch]" when the rating counts, "[Worth a watch] 12 critic reviews" or
-// "[Critics split] Few ratings" when it doesn't. `extra` is appended (e.g. trailer views).
+// The list pages' verdict line (language and platform hubs, /new-on-ott/): the FilmyChill Score
+// pill, and the evidence as text when there is no rating to draw ("[Worth a watch] 12 critic
+// reviews", "[Critics split] Few ratings"). The rating itself is the ring (rowRing), not "★ 7.5"
+// here (6 Nov 2026). `extra` is appended (e.g. trailer views).
 function rowScoreLine(item, extra = "") {
   const r = dialRating(item);
   const pill = item.fcScore ? verdictPill(item.fcScore.verdict) : verdictPill(noScoreText(item).label, "early");
   const note = r == null ? evidenceLabel(item) : "";
-  return `<div class="rm">${r != null ? `<b>★ ${r.toFixed(1)}</b> ` : ""}${pill}${note ? ` <span class="rev">${escHtml(note)}</span>` : ""}${extra}</div>`;
+  return `<div class="rm">${pill}${note ? ` <span class="rev">${escHtml(note)}</span>` : ""}${extra}</div>`;
 }
 
-module.exports = { METER_ZONES, VPILL_CSS, dialRating, evidenceLabel, heroDialInner, meterInner, meterLevel, meterSvg, meterSymbols, ratingDial, rowScoreLine, verdictPill };
+module.exports = { METER_ZONES, ROW_RING_CSS, VPILL_CSS, dialRating, rowRing, evidenceLabel, heroDialInner, meterInner, meterLevel, meterSvg, meterSymbols, ratingDial, rowScoreLine, verdictPill };

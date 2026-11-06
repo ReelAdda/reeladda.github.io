@@ -124,7 +124,7 @@ async function syncVotes({ dataByCode = {}, note = () => {}, env = process.env, 
   const ag = agreement(agg, verdictByFilm);
   const totalVotes = Object.values(agg).reduce((s, a) => s + (a.up || 0) + (a.down || 0), 0);
   note(`votes: ${fetched} new this run · ${totalVotes} total across ${res.films} films` +
-    (ag.judged ? ` · voters agree with the FilmyChill Score on ${ag.agreed} of ${ag.judged} films with 10+ votes` : ""));
+    (ag.judged ? ` · voters agree with the FilmyChill Verdict on ${ag.agreed} of ${ag.judged} films with 10+ votes` : ""));
 
   if (fetched) state.lastT = new Date(last.toMillis ? last.toMillis() : Date.parse(last)).toISOString();
   fs.writeFileSync(VOTES_STATE_FILE, JSON.stringify(state, null, 1));
