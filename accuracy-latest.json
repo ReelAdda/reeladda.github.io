@@ -1,39 +1,63 @@
 {
- "date": "2026-11-05",
+ "date": "2026-11-06",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 3,
- "high": 2,
- "correctable": 2,
+ "pagesDisagreeing": 6,
+ "high": 5,
+ "correctable": 6,
  "byField": {
-  "streaming": 1,
-  "lead actor": 1,
-  "platform": 1
+  "platform": 4,
+  "title": 1,
+  "release date": 1
  },
  "rows": [
   {
-   "field": "streaming",
+   "field": "platform",
    "severity": "high",
-   "page": "not streaming",
-   "tmdb": "on fuboTV",
-   "code": "us",
-   "slug": "an-egg-rescue"
-  },
-  {
-   "field": "lead actor",
-   "severity": "medium",
-   "page": "Jackson Yee",
-   "tmdb": "Jackson Yi Yangqianxi, Tian Yu, Helen Chen",
-   "code": "my",
-   "slug": "nice-view"
+   "page": "Sky Go, Now TV",
+   "tmdb": "Now TV",
+   "code": "uk",
+   "slug": "cia"
   },
   {
    "field": "platform",
    "severity": "high",
-   "page": "Netflix, WeTV",
-   "tmdb": "Netflix, Tencent Video",
-   "code": "id",
-   "slug": "descendants-of-the-sun"
+   "page": "Shudder, Cultpix",
+   "tmdb": "Shudder",
+   "code": "uk",
+   "slug": "halloween"
+  },
+  {
+   "field": "title",
+   "severity": "low",
+   "page": "Telugu",
+   "tmdb": "Kurukshetra: The Great War of Mahabharata",
+   "code": "ca",
+   "slug": "kurukshetra-the-great-war-of-mahabharata"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "WeTV",
+   "tmdb": "Tencent Video",
+   "code": "sg",
+   "slug": "be-somebody"
+  },
+  {
+   "field": "release date",
+   "severity": "high",
+   "page": "2026-12-24",
+   "tmdb": "2026-02-06 / 2026-12-31",
+   "code": "mx",
+   "slug": "kraken"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Paramount+",
+   "tmdb": "Molotov TV",
+   "code": "fr",
+   "slug": "beauty-and-the-beast"
   }
  ]
 }
