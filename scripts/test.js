@@ -7081,6 +7081,20 @@ test("data page: every table's rows plus its small-group line add up to the tota
   const chart = require("./lib/surfaces.js").medianBarChart([{ key: "Telugu", median: 28, n: 184 }, { key: "Hindi", median: 56, n: 160 }], { title: "T", source: "S" });
   assert.ok(/<svg [^>]*role="img"/.test(chart) && /Telugu 28 days, Hindi 56 days/.test(chart) && !/<script/.test(chart), "an accessible chart with no script");
 });
+test("near-copy threshold: 0.85 by film once its stage of near-copy-085 is on, else 0.90 (5 Nov 2026)", () => {
+  const G = require("./lib/googlehide.js"), R = require("./lib/rollout.js");
+  const before = R.rolloutConfig();   // tests after this one rely on what earlier ones set
+  try {
+    R.useRolloutConfig({ features: { "near-copy-085": { percent: 0 } } });
+    assert.strictEqual(G.nearCopyThreshold("visionquest"), 0.9);
+    R.useRolloutConfig({ features: { "near-copy-085": { percent: 100 } } });
+    assert.strictEqual(G.nearCopyThreshold("visionquest"), 0.85);
+    assert.strictEqual(G.nearCopyThreshold(""), 0.9, "no slug: the safe threshold");
+  } finally { R.useRolloutConfig(before); }
+  const cfg = require("../rollout.json").features["near-copy-085"];
+  assert.deepStrictEqual(cfg.schedule.map((x) => x.percent), [50, 100], "two stages");
+  assert.ok(cfg.schedule[0].from > "2026-11-05T23:59", "never in the same build as the score-link switch");
+});
 test("early arrivals: a placeholder or unconfirmed short window is never published (Drishyam, Oct 2026)", () => {
   const starts = { us: "2026-08-27" };
   const four = { c: "us", k: "movie", id: 1, th: "2026-10-02", rel: "2026-10-02", first: "2026-10-06" };

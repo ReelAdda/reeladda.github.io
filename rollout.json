@@ -62,6 +62,12 @@
    "since": "2026-10-31",
    "what": "published reviews from the outlets' own RSS feeds (lib/reviews.js, reviews.json; headline, link and date only; 22 feeds, Onmanorama and Rediff excluded by their feed terms): the score card's own sentence names the outlets and links out ('…; 3 reviews out, in X, Y and Z.' / ' · Reviews: X, Y'), a star rating only where the headline states one; an FAQ names them. Only where the card has no critics' reading (no score, or an audience-only score with nothing cited). All languages, every edition's page for the film. Mock-up 31 Oct; switched to 100% at once on 31 Oct 2026 at the owner's go (about 5 pages that day)."
   },
+  "near-copy-085": {
+   "percent": 0,
+   "schedule": [{ "from": "2026-11-06T12:00", "percent": 50 }, { "from": "2026-11-07T12:00", "percent": 100 }],
+   "since": "2026-11-05",
+   "what": "near-copy editions hidden from Google at 0.85 similarity instead of 0.90, by film (lib/googlehide.js nearCopyThreshold). At 0.90 the rule hides 129 editions today, and 2,001 visible pairs sit at 0.80 to 0.90. At 0.85 it hides 552 editions of 180 films (India never; the edition with the most clicks stays), 423 more than today, and their sister pages lose them from hreflang. Two stages so no build changes more than about 700 pages: 50% at the 6 Nov afternoon build (390 hidden, after the score-link build), 100% on 7 Nov (552). Owner's call, 5 Nov 2026."
+  },
   "score-link": {
    "percent": 100,
    "since": "2026-11-05",

@@ -247,6 +247,12 @@ function applyGoogleHidePaths(files, { root = ".", hidden = pathHidden } = {}) {
 // edition that gains a local difference (its own platform, date or price) is visible again.
 // ============================================================================
 const NEAR_COPY = 0.9;
+// 0.85 by film, in stages (rollout "near-copy-085", 5 Nov 2026). At 0.90 the rule hides 129
+// editions; the visible pairs then top out at 0.899, and 2,001 of them sit at 0.80 to 0.90. A
+// shingle score understates likeness, since one changed word breaks five runs (VisionQuest
+// India/UK: 96% the same words, 0.75). At 0.85: 552 editions of 180 films, 423 more than today.
+const NEAR_COPY_STAGE = "near-copy-085", NEAR_COPY_LOWER = 0.85;
+const nearCopyThreshold = (slug) => (inRollout(NEAR_COPY_STAGE, slug) ? NEAR_COPY_LOWER : NEAR_COPY);
 function mainText(html) {
   let s = String(html).replace(/[\s\S]*?<body[^>]*>/, "").replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->/g, " ");
   s = s.replace(/<footer[\s\S]*?<\/footer>/g, " ").replace(/<nav[\s\S]*?<\/nav>/g, " ").replace(/<div class="top(?: [^"]*)?">[\s\S]*?<\/div>/, " ");   // "top v3" too (30 Oct 2026): the v3 header was compared as text
@@ -261,7 +267,7 @@ function similarity(a, b) { let n = 0; for (const x of a) if (b.has(x)) n++; ret
 
 // Returns Set("code/slug") of editions to hide. `skip(code, slug, entry)` marks pages already
 // hidden or noindexed (never compared, never chosen as the visible one).
-function nearCopyEditions(files, manifest, { root = ".", threshold = NEAR_COPY, skip = () => false, top = null, order = null } = {}) {
+function nearCopyEditions(files, manifest, { root = ".", threshold = null, skip = () => false, top = null, order = null } = {}) {
   const { COUNTRIES } = require("./core.js");
   const rank = order || COUNTRIES.map((c) => c.code);
   let searchTop = top;
@@ -287,11 +293,13 @@ function nearCopyEditions(files, manifest, { root = ".", threshold = NEAR_COPY, 
       if (NOINDEX_META.test(html.slice(0, 4096).replace(GOOGLEBOT_TAG, ""))) continue;   // noindexed for every crawler
       pages.push({ ...x, sh: shingleSet(mainText(html)) });
     }
+    // The film's threshold: 0.85 once its stage of "near-copy-085" is on, else 0.90.
+    const limit = threshold != null ? threshold : nearCopyThreshold(pages.length ? pages[0].slug : "");
     // Groups of editions joined by near-copy pairs (union-find).
     const parent = pages.map((_, i) => i);
     const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])));
     for (let i = 0; i < pages.length; i++) for (let j = i + 1; j < pages.length; j++) {
-      if (similarity(pages[i].sh, pages[j].sh) >= threshold) parent[find(i)] = find(j);
+      if (similarity(pages[i].sh, pages[j].sh) >= limit) parent[find(i)] = find(j);
     }
     const groups = new Map();
     pages.forEach((p, i) => { const r = find(i); if (!groups.has(r)) groups.set(r, []); groups.get(r).push(p); });
@@ -306,5 +314,5 @@ function nearCopyEditions(files, manifest, { root = ".", threshold = NEAR_COPY, 
 
 module.exports = {
   CURRENT_DAYS, EPISODE_GRACE_DAYS, currentEntry, factsOf, releaseCurrent, useFactsLookup,
-  NEAR_COPY, WEEKLY_HIDE_DAYS, listedHidden, mainText, nearCopyEditions, similarity, shingleSet,
+  NEAR_COPY, NEAR_COPY_LOWER, NEAR_COPY_STAGE, WEEKLY_HIDE_DAYS, nearCopyThreshold, listedHidden, mainText, nearCopyEditions, similarity, shingleSet,
   applyGoogleHidePaths, pathHidden, peoplePageFiles, BINGBOT_TAG, HIDE_TAG, GOOGLEBOT_TAG, HIDE_FEATURE, HIDE_FILE, NOINDEX_META, addGooglebotNoindex, applyGoogleHide, googleEligible, googleHidden, loadHidden, removeGooglebotNoindex, useHiddenList };
