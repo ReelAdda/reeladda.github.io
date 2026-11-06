@@ -136,7 +136,7 @@ ${scoreStr
     : `<text x="992" y="272" text-anchor="middle" font-family="Anton" font-size="104" fill="#8F8BB8">—</text>
 <text x="992" y="322" text-anchor="middle" font-family="Inter" font-size="26" fill="#8F8BB8">too few ratings</text>`}
 <rect x="864" y="378" width="256" height="4" fill="#FFAD1F" fill-opacity="0.5"/>
-${fcs ? `<svg x="858" y="397" width="26" height="26" viewBox="0 0 100 100">${require("./brand.js").brandShape("rgba(255,255,255,.22)", "#FFF7EC")}</svg><text x="892" y="419" font-family="Anton" font-size="24" letter-spacing="1.2"><tspan fill="#FFF7EC">FILMY</tspan><tspan fill="#FFAD1F">CHILL</tspan><tspan fill="#FFF7EC" dx="7">VERDICT</tspan></text>` : ""}
+${fcs ? `<text x="992" y="419" text-anchor="middle" font-family="Anton" font-size="24" letter-spacing="1.2"><tspan fill="#FFF7EC">FILMY</tspan><tspan fill="#FFAD1F">CHILL</tspan><tspan fill="#FFF7EC" dx="7">VERDICT</tspan></text>` : ""}
 ${wrapForCard(verdict || "FRESH RELEASE", 44, 360, 2, "anton").map((l, i) =>
   `<text x="992" y="${(fcs ? 466 : 446) + i * 52}" text-anchor="middle" font-family="Anton" font-size="44" fill="#FFF7EC">${e(l)}</text>`).join("\n")}
 </svg>`;

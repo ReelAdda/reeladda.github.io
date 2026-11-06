@@ -55,18 +55,20 @@ function addBrandToPages(files, { root = "." } = {}) {
   return res;
 }
 
-// The FilmyChill Verdict lockup (6 Nov 2026, owner): the mark beside the two-colour wordmark, as in
-// the homepage header, then "Verdict". Wherever the verdict is labelled: film-page score card,
-// compact card, detail sheet, homepage key. Its own class (not brand-mark: ensureBrandMark keys on that).
+// The FilmyChill Verdict label (6 Nov 2026, owner): the two-colour wordmark, then "Verdict".
+// Wherever the verdict is labelled: film-page score card, compact card, detail sheet.
+// No mark (the owner keeps the icon for the homepage header). Colours for a light card: indigo
+// FILMY, the dark marigold CHILL (bright marigold is unreadable on cream), ink VERDICT; on dark,
+// the light link indigo and the bright marigold.
 // Twin in js/app.js (VERDICT_LOCKUP); styles in VERDICT_CSS here and in index.html.
-const VERDICT_LOCKUP = `<span class="fcv"><svg class="fcv-m" viewBox="0 0 100 100" aria-hidden="true">${shape("#EFE6D6", "#4038C7")}</svg>Filmy<b>Chill</b><i>Verdict</i></span>`;
+const VERDICT_LOCKUP = `<span class="fcv">Filmy<b>Chill</b><i>Verdict</i></span>`;
+const VERDICT_DARK = ".fcv { color:#B3AEFF; } .fcv b { color:#FFAD1F; } .fcv i { color:#F4F1FF; }";
 const VERDICT_CSS = [
-  "  .fcv { display:inline-flex; align-items:center; font-family:'Anton',Impact,sans-serif; font-weight:400; font-size:15px; letter-spacing:1px; line-height:1; text-transform:uppercase; color:var(--indigo,#4038C7); white-space:nowrap; vertical-align:middle; }",
-  "  .fcv .fcv-m { width:1.1em; height:1.1em; flex:none; margin-right:.25em; }",
-  "  .fcv b { font-weight:400; color:var(--marigold,#FFAD1F); -webkit-text-stroke:.6px var(--indigo,#4038C7); }",
+  "  .fcv { display:inline-block; font-family:'Anton',Impact,sans-serif; font-weight:400; font-size:15px; letter-spacing:1px; line-height:1; text-transform:uppercase; color:#4038C7; white-space:nowrap; vertical-align:middle; }",
+  "  .fcv b { font-weight:400; color:#8A5900; }",
   "  .fcv i { font-style:normal; color:var(--ink,#1A1633); margin-left:.3em; }",
-  "  @media (prefers-color-scheme: dark) { :root:not([data-theme=\"light\"]) .fcv b { -webkit-text-stroke:0; } }",
-  "  :root[data-theme=\"dark\"] .fcv b { -webkit-text-stroke:0; }",
+  `  @media (prefers-color-scheme: dark) { ${VERDICT_DARK.replace(/(^|\} )\.fcv/g, "$1:root:not([data-theme=\"light\"]) .fcv")} }`,
+  `  ${VERDICT_DARK.replace(/(^|\} )\.fcv/g, "$1:root[data-theme=\"dark\"] .fcv")}`,
 ].join("\n");
 
 module.exports = { MARK_HOME, MARK_TOP, VERDICT_CSS, VERDICT_LOCKUP, brandShape: shape, addBrandToPages, ensureBrandMark };

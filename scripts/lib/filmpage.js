@@ -1126,7 +1126,7 @@ const SCORE_HALVES_CSS = [
   "  .fcsb-halves .fh { display:flex; flex-direction:column; align-items:flex-start; gap:8px; } .fcsb-halves .fa { align-items:center; }",
   "  .fcsb-halves .fey { font-size:11px; font-weight:700; letter-spacing:1.3px; text-transform:uppercase; color:#8A5800; } .fcsb-halves .fa .fey { color:var(--mute); }",
   "  .fcsb-verdict .dial-aud { --dc:#4038C7; } .fcsb-halves .dial { margin:0; } .fcsb-halves .dial::after { content:none; }",
-  "  .fcsb-halves .fa .fey { line-height:15px; } .fcsb-mini-k .fcv { margin-top:-2px; }",
+  "  .fcsb-halves .fa .fey { line-height:15px; }",
   VERDICT_CSS,
 ].join("\n");
 const SCORE_HALVES_MARK = "Score halves (lib/filmpage.js SCORE_HALVES)";

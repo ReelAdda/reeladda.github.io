@@ -274,11 +274,6 @@
   .card .dial { position: relative; margin-top: 14px; }
   .card .dial::before { content: 'TMDB'; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 3px;
     font-size: 9.5px; font-weight: 800; letter-spacing: .08em; color: var(--mute); }
-  .readkey { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 12.5px; color: var(--mute);
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; margin: 14px 0 4px; }
-  .readkey .k { display: inline-flex; align-items: center; gap: 6px; }
-  .readkey .kd { width: 16px; height: 16px; border-radius: 50%; flex: 0 0 16px; background: conic-gradient(#4038C7 70%, #EFE6D6 0);
-    -webkit-mask: radial-gradient(circle, transparent 4px, #000 5px); mask: radial-gradient(circle, transparent 4px, #000 5px); }
   /* The detail sheet's score in two labelled halves, as on film pages. */
   .fcs-head.fcs-halves { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 6px 16px; }
   .fcs-halves .fh { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; } .fcs-halves .fa { align-items: center; }
@@ -288,12 +283,10 @@
   .fcs-halves .dial { width: 46px; height: 46px; } .fcs-halves .dial span { width: 36px; height: 36px; font-size: 15px; }
   .fcs-halves .dial-note { width: auto; font-size: 11.5px; text-align: center; }
   /* The FilmyChill Verdict lockup (scripts/lib/brand.js VERDICT_CSS): the mark and the two-colour wordmark. */
-  .fcv { display:inline-flex; align-items:center; font-family:'Anton',Impact,sans-serif; font-weight:400; font-size:15px; letter-spacing:1px; line-height:1; text-transform:uppercase; color:var(--indigo,#4038C7); white-space:nowrap; vertical-align:middle; }
-  .fcv .fcv-m { width:1.1em; height:1.1em; flex:none; margin-right:.25em; }
-  .fcv b { font-weight:400; color:var(--marigold,#FFAD1F); -webkit-text-stroke:.6px var(--indigo,#4038C7); }
+  .fcv { display:inline-block; font-family:'Anton',Impact,sans-serif; font-weight:400; font-size:15px; letter-spacing:1px; line-height:1; text-transform:uppercase; color:#4038C7; white-space:nowrap; vertical-align:middle; }
+  .fcv b { font-weight:400; color:#8A5900; }
   .fcv i { font-style:normal; color:var(--ink,#1A1633); margin-left:.3em; }
   .fcs-halves .fa .fey { line-height: 15px; }
-  .readkey .fcv { font-size: 14px; }
   /* A card the page script draws: the link, with its save button beside it (a button can't sit in a link). */
   .cw { position: relative; }
   /* No counted audience rating: no circle — the evidence as plain text (lib/meter.js). */
@@ -608,7 +601,6 @@
     <div class="grid ott" id="mylistGrid"></div>
   </section>
 
-  <div class="readkey"><span class="k"><span class="vpill vp-worth">Worth a watch</span> <span class="fcv"><svg class="fcv-m" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="37" fill="none" stroke="#EFE6D6" stroke-width="13"/><circle cx="50" cy="50" r="37" fill="none" stroke="#FFAD1F" stroke-width="13" stroke-linecap="round" stroke-dasharray="176 300" transform="rotate(38 50 50)"/><path d="M42 33 Q40 32 40 35 L40 65 Q40 68 42 67 L66 52.5 Q68 50 66 47.5 Z" fill="#4038C7"/></svg>Filmy<b>Chill</b><i>Verdict</i></span></span><span class="k"><span class="kd" aria-hidden="true"></span> TMDB audience rating out of 10</span></div>
   <section>
     <div class="section-head">
       <h2>In Theatres</h2><span class="count" id="theatreCount"><!--SSR:TCOUNT-->TOP 7<!--/SSR:TCOUNT--></span>

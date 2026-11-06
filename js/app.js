@@ -208,8 +208,8 @@ function scoreLineHtml(item) {
 }
 // One meaning for the score (6 Nov 2026): two labelled halves, the FilmyChill Verdict lockup over the verdict
 // and "TMDB audience" over the ring, as on film pages (lib/filmpage.js halvesBlock).
-// The FilmyChill Verdict lockup: twin of VERDICT_LOCKUP in scripts/lib/brand.js.
-const VERDICT_LOCKUP = '<span class="fcv"><svg class="fcv-m" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="37" fill="none" stroke="#EFE6D6" stroke-width="13"/><circle cx="50" cy="50" r="37" fill="none" stroke="#FFAD1F" stroke-width="13" stroke-linecap="round" stroke-dasharray="176 300" transform="rotate(38 50 50)"/><path d="M42 33 Q40 32 40 35 L40 65 Q40 68 42 67 L66 52.5 Q68 50 66 47.5 Z" fill="#4038C7"/></svg>Filmy<b>Chill</b><i>Verdict</i></span>';
+// The FilmyChill Verdict label (no mark): twin of VERDICT_LOCKUP in scripts/lib/brand.js.
+const VERDICT_LOCKUP = '<span class="fcv">Filmy<b>Chill</b><i>Verdict</i></span>';
 function scoreHalves(dial, pill) {
   const right = /class="dial /.test(dial) ? `<div class="fh fa"><span class="fey">TMDB audience</span>${dial}</div>` : (dial ? `<div class="fh fa">${dial}</div>` : '');
   return `<div class="fcs-head fcs-halves"><div class="fh">${VERDICT_LOCKUP}${pill}</div>${right}</div>`;

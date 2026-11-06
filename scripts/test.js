@@ -1390,8 +1390,8 @@ test("SSR card and film page carry the verdict colours and the rating ring; the 
     assert.strictEqual(Fp.scoreHalves(linked, { root: "/no-such-root" }), linked, "its shared stylesheet missing: the page is left as it was, never half converted");
   } finally { R.useRolloutConfig(prevCfg); }
   const svg = C.shareCardSvg(it, { code: "in", name: "India" });
-  // 6 Nov 2026: the brand mark and the two-colour FILMYCHILL VERDICT, as on the site (the gauge is gone everywhere).
-  assert.ok(/<svg x="858" y="397" width="26" height="26" viewBox="0 0 100 100">/.test(svg) && /<tspan fill="#FFF7EC">FILMY<\/tspan><tspan fill="#FFAD1F">CHILL<\/tspan><tspan fill="#FFF7EC" dx="7">VERDICT<\/tspan>/.test(svg) && !/viewBox="2\.5 7 27 17"/.test(svg));
+  // 6 Nov 2026: the two-colour FILMYCHILL VERDICT, centred, no icon (the owner keeps the mark for the homepage header).
+  assert.ok(/<text x="992" y="419" text-anchor="middle" font-family="Anton" font-size="24" letter-spacing="1.2"><tspan fill="#FFF7EC">FILMY/.test(svg) && !/viewBox="0 0 100 100"/.test(svg) &&/<tspan fill="#FFF7EC">FILMY<\/tspan><tspan fill="#FFAD1F">CHILL<\/tspan><tspan fill="#FFF7EC" dx="7">VERDICT<\/tspan>/.test(svg) && !/viewBox="2\.5 7 27 17"/.test(svg));
 });
 
 // ---- Pick of the Week + phone layout (Sept 2026 homepage review) ----
@@ -8421,8 +8421,9 @@ test("redesign: dial and pill markup are the same on the server and in the page 
   assert.strictEqual(M.dialRating({ rating: 7.5, votes: 400 }), null, "no verdict, no number: the dial only ever sits beside a FilmyChill verdict");
   assert.strictEqual(M.dialRating({ fcScore: { verdict: "Worth a watch", audience: null, basis: "critics" }, rating: 6.3, votes: 10 }), null, "a rating the verdict didn't use gets no ring");
   // The legend says what the number is — never "FilmyChill Score out of 10".
-  // 6 Nov 2026: the key above the lists says which is which; the bottom legend is gone.
-  assert.ok(src.includes("Worth a watch</span> " + require("./lib/brand.js").VERDICT_LOCKUP + "</span>") && src.includes("TMDB audience rating out of 10</span></div>") && !src.includes('<p class="dial-legend">') && !/FilmyChill Score out of 10/i.test(src));
+  // 6 Nov 2026: the bottom legend is gone; the key line above the lists was removed too (owner,
+  // after the build): the cards' "TMDB" label and the sheet's halves say which is which.
+  assert.ok(!src.includes('class="readkey"') && !src.includes('<p class="dial-legend">') && !/FilmyChill Score out of 10/i.test(src));
   assert.ok(/<div class="hero-dial-label">TMDB audience<\/div>/.test(M.heroDialInner({ fcScore: { verdict: "Must watch", audience: "Loved", basis: "audience" }, rating: 8, votes: 50 })));
 });
 test("redesign: verdict pills on the language hubs and /new-on-ott/, same colours as the homepage (Oct 2026)", () => {
