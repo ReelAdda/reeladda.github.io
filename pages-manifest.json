@@ -2112,9 +2112,9 @@
    "rel": 3,
    "fp": "862b7e037d29",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-05-15",
@@ -2528,7 +2528,7 @@
    "fpv": 3
   },
   "obsession": {
-   "last": "2026-10-31",
+   "last": "2026-11-07",
    "pv": 13,
    "released": "2026-05-29",
    "lang": "English",
@@ -2541,7 +2541,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "f447b7c4f769",
+   "fp": "eca877862894",
    "rendered": "2026-10-14",
    "swept": "2026-10-31",
    "truth": {
@@ -2581,8 +2581,7 @@
     ],
     "lastCheck": "2026-10-31",
     "misses": 0
-   },
-   "archivedOn": "2026-11-07"
+   }
   },
   "off-campus": {
    "last": "2026-10-27",
@@ -5178,14 +5177,14 @@
    "srAt": "2026-10-27"
   },
   "meesaya-murukku-2": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "pv": 13,
    "tmdbId": 1538457,
    "released": "2026-09-25",
    "lang": "Tamil",
    "kind": "movie",
    "title": "Meesaya Murukku 2",
-   "fp": "d3e192de7901",
+   "fp": "df91750d86d6",
    "rendered": "2026-10-13",
    "archivedOn": "2026-10-16",
    "swept": "2026-11-07",
@@ -5197,7 +5196,9 @@
    "rel": 3,
    "truth": {
     "at": "2026-11-07",
-    "providers": [],
+    "providers": [
+     "Sony LIV"
+    ],
     "rentBuy": [],
     "released": "2026-09-25",
     "title": "Meesaya Murukku 2",
@@ -5221,6 +5222,16 @@
    "digital": {
     "date": "2026-11-06",
     "note": "Sony Liv"
+   },
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "Sony LIV"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0,
+    "arrived": "2026-11-07",
+    "prevCheck": "2026-11-07"
    }
   },
   "star-trek-strange-new-worlds": {
@@ -6211,14 +6222,14 @@
    "srAt": "2026-10-27"
   },
   "ramayana": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-05",
    "lang": "Hindi",
    "kind": "movie",
    "title": "Ramayana: Rise of a Legend",
    "pv": 5,
-   "fp": "e9d20ab5002f",
+   "fp": "0b92116d57ce",
    "rendered": "2026-10-13",
    "fpv": 3,
    "srv": 1,
@@ -7798,7 +7809,7 @@
    "srAt": "2026-10-27"
   },
   "forgotten-island": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1465063,
    "released": "2026-09-25",
    "lang": "English",
@@ -7812,13 +7823,15 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "36e459e46144",
+   "fp": "7eb6341eceec",
    "swept": "2026-11-07",
    "rendered": "2026-10-12",
    "truth": {
     "at": "2026-11-07",
     "providers": [],
     "rentBuy": [
+     "Apple TV Store",
+     "Zee5",
      "Amazon Video"
     ],
     "released": "2026-09-25",
@@ -26166,7 +26179,7 @@
    "srAt": "2026-10-27"
   },
   "heart-of-the-beast": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1263337,
    "released": "2026-09-25",
    "lang": "English",
@@ -26179,7 +26192,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "0ba63a7e7421",
+   "fp": "f08283444fb4",
    "archivedOn": "2026-10-10",
    "swept": "2026-11-07",
    "rendered": "2026-10-13",
@@ -26187,12 +26200,14 @@
     "at": "2026-11-07",
     "providers": [],
     "rentBuy": [
+     "Apple TV Store",
+     "Zee5",
      "Amazon Video"
     ],
     "released": "2026-09-25",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -38592,7 +38607,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "deac0bfb77a0",
+   "fp": "9db7085b7e24",
    "rendered": "2026-10-12",
    "pv": 13,
    "imdb": "tt34890576",
@@ -46326,7 +46341,7 @@
    "imdb": "tt0852863",
    "fpv": 3,
    "truth": {
-    "at": "2026-11-05",
+    "at": "2026-11-07",
     "providers": [
      "JioHotstar",
      "Vi Movies & TV"
@@ -46339,11 +46354,11 @@
     "director": "Dan Povenmire, Jeff 'Swampy' Marsh",
     "cast": [
      "Ashley French",
-     "Caroline Rhea",
      "Alyson Stoner",
-     "Dee Bradley Baker",
-     "Dan Povenmire",
-     "Jeff 'Swampy' Marsh"
+     "Caroline Rhea",
+     "Vincent Martella",
+     "Maulik Pancholy",
+     "Bobby Gaylor"
     ]
    }
   },
@@ -51950,7 +51965,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Wild Horse Nine",
-   "fp": "fd24a423172c",
+   "fp": "c2d685580f3d",
    "rendered": "2026-10-14",
    "fpv": 3,
    "srv": 1,
@@ -55210,14 +55225,14 @@
    "fpv": 3
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "27360d18850d",
+   "fp": "e43039340c22",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -60204,8 +60219,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "patakka-guddiyan": {
    "last": "2026-10-31",
@@ -62287,7 +62301,22 @@
     "w": 8
    },
    "rel": 3,
-   "archivedOn": "2026-11-06"
+   "archivedOn": "2026-11-06",
+   "truth": {
+    "at": "2026-11-07",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2026-10-29",
+    "title": "The Paper Flower",
+    "language": "Tamil",
+    "runtime": 75,
+    "genre": "Drama",
+    "director": "Chezhiyan",
+    "cast": [
+     "Parandhaga Cholan",
+     "Janani Shanbaha"
+    ]
+   }
   },
   "flowers-bloom-when-touched": {
    "last": "2026-10-30",
@@ -63103,7 +63132,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -63130,7 +63159,8 @@
     "at": "2026-11-06",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "dayangaram": {
    "last": "2026-11-04",
@@ -63252,7 +63282,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -63261,7 +63291,7 @@
    "srv": 1,
    "srAt": "2026-11-06",
    "rendered": "2026-11-06",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -63383,7 +63413,24 @@
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
    "fp": "7d018865ffca",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-11-07",
+   "pv": 13,
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "JioHotstar"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0
+   },
+   "imdb": "tt50389959",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-11-07",
+    "w": 8
+   },
+   "rel": 3
   },
   "baa-baa-black-sheep": {
    "last": "2026-11-07",
@@ -67336,7 +67383,7 @@
     "released": "2026-09-25",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -67572,7 +67619,7 @@
    "srAt": "2026-10-27"
   },
   "motor-city": {
-   "last": "2026-10-25",
+   "last": "2026-11-07",
    "archivedOn": "2026-07-27",
    "pv": 13,
    "released": "2026-07-24",
@@ -67580,13 +67627,16 @@
    "kind": "movie",
    "title": "Motor City",
    "rel": 3,
-   "fp": "8de99eedae14",
+   "fp": "34215081b441",
    "rendered": "2026-10-14",
    "tmdbId": 87513,
    "swept": "2026-11-07",
    "truth": {
     "at": "2026-11-07",
-    "providers": [],
+    "providers": [
+     "Philo",
+     "AMC+"
+    ],
     "rentBuy": [
      "Amazon Video",
      "Apple TV Store",
@@ -67615,7 +67665,18 @@
    "imdb": "tt2012616",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "Philo",
+     "AMC+"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0,
+    "arrived": "2026-11-07",
+    "prevCheck": "2026-11-07"
+   }
   },
   "other-mommy": {
    "last": "2026-10-31",
@@ -67729,7 +67790,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "705ffb888735",
+   "fp": "0a696b92f6e3",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "fcs": {
@@ -69276,7 +69337,28 @@
    "imdb": "tt36073210",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "truth": {
+    "at": "2026-11-07",
+    "providers": [
+     "Prime Video"
+    ],
+    "rentBuy": [],
+    "released": "2026-09-09",
+    "title": "Drawn Together",
+    "language": "Spanish",
+    "runtime": 104,
+    "genre": "Romance / Thriller",
+    "director": "Óscar Pedraza",
+    "cast": [
+     "Ester Expósito",
+     "Hugo Diego Garcia",
+     "Pablo Molinero",
+     "Lluís Homar",
+     "Joaquín Ferreira",
+     "Zoe Bonafonte"
+    ]
+   }
   },
   "tony": {
    "last": "2026-10-25",
@@ -89788,7 +89870,7 @@
    "fp": "6700cdf272d0",
    "rendered": "2026-10-13",
    "truth": {
-    "at": "2026-10-25",
+    "at": "2026-11-07",
     "providers": [
      "Netflix"
     ],
@@ -101097,9 +101179,8 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "c9984153c8b6",
+   "fp": "fd67d2fafa79",
    "rendered": "2026-10-13",
-   "archivedOn": "2026-10-16",
    "imdb": "tt37803364",
    "truth": {
     "at": "2026-10-20",
@@ -107359,7 +107440,7 @@
    "imdb": "tt11892272",
    "fpv": 3,
    "truth": {
-    "at": "2026-11-05",
+    "at": "2026-11-07",
     "providers": [
      "Netflix"
     ],
@@ -109412,7 +109493,7 @@
    "lang": "Japanese",
    "kind": "movie",
    "title": "Godzilla Minus Zero",
-   "fp": "1b8936ef499c",
+   "fp": "e23edec61000",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -114610,7 +114691,7 @@
     "title": "Sense and Sensibility",
     "language": "English",
     "runtime": 132,
-    "genre": "Romance / Drama",
+    "genre": "Drama / Romance",
     "director": "Georgia Oakley",
     "cast": [
      "Daisy Edgar-Jones",
@@ -115824,14 +115905,14 @@
    "rel": 3
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "799e6cffb5d1",
+   "fp": "93b5b227e9c6",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -118642,7 +118723,7 @@
    "kind": "movie",
    "title": "Wild Horse Nine",
    "rendered": "2026-10-20",
-   "fp": "13f3bae0aae5",
+   "fp": "96a26e4f3bde",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt15799564",
@@ -119834,14 +119915,14 @@
    "imdb": "tt21284358"
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-05",
    "lang": "Hindi",
    "kind": "movie",
    "title": "Ramayana: Rise of a Legend",
    "rendered": "2026-10-21",
-   "fp": "06ab1ce7c39c",
+   "fp": "b66d19997aec",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -120253,8 +120334,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "there-is-always-a-monster": {
    "last": "2026-10-25",
@@ -122125,7 +122205,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "desposados": {
    "last": "2026-11-02",
@@ -122327,7 +122408,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -122336,7 +122417,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "109dc745e80d",
+   "fp": "4ac82a82771e",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -122529,7 +122610,24 @@
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
    "fp": "d71664f9e88d",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-11-07",
+   "pv": 13,
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "HBO Max"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0
+   },
+   "imdb": "tt50389959",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-11-07",
+    "w": 8
+   },
+   "rel": 3
   },
   "kamen-rider": {
    "last": "2026-11-07",
@@ -123077,7 +123175,7 @@
    "imdb": "tt2861424",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-27",
+    "at": "2026-11-07",
     "providers": [
      "Netflix",
      "HBO Max",
@@ -123681,7 +123779,7 @@
    "srAt": "2026-10-27"
   },
   "the-end-of-oak-street": {
-   "last": "2026-10-18",
+   "last": "2026-11-07",
    "tmdbId": 1101383,
    "released": "2026-08-14",
    "lang": "English",
@@ -123696,11 +123794,13 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "fc32c7c57b4d",
+   "fp": "52537749683f",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-11-07",
-    "providers": [],
+    "providers": [
+     "HBO Max"
+    ],
     "rentBuy": [
      "Apple TV Store",
      "Rakuten TV",
@@ -123724,7 +123824,17 @@
    "imdb": "tt27165187",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "HBO Max"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0,
+    "arrived": "2026-11-07",
+    "prevCheck": "2026-11-07"
+   }
   },
   "digger": {
    "pv": 13,
@@ -126718,7 +126828,7 @@
     "released": "2026-09-23",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -127267,7 +127377,7 @@
     "w": 8
    },
    "rel": 2,
-   "fp": "03e1bb788f54",
+   "fp": "5fbdfe5f4467",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "truth": {
@@ -127961,7 +128071,7 @@
    "srAt": "2026-10-27"
   },
   "mutiny": {
-   "last": "2026-10-25",
+   "last": "2026-11-07",
    "pv": 13,
    "tmdbId": 1288445,
    "released": "2026-08-21",
@@ -127976,11 +128086,13 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "f34ec9592d4e",
+   "fp": "0f47c24681b5",
    "rendered": "2026-10-13",
    "truth": {
     "at": "2026-11-07",
-    "providers": [],
+    "providers": [
+     "Sky Go"
+    ],
     "rentBuy": [],
     "released": "2026-08-21",
     "title": "Mutiny",
@@ -128000,7 +128112,17 @@
    "imdb": "tt32338669",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "Sky Go"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0,
+    "arrived": "2026-11-07",
+    "prevCheck": "2026-11-07"
+   }
   },
   "lioness": {
    "last": "2026-10-27",
@@ -132734,7 +132856,7 @@
    "rendered": "2026-10-13",
    "imdb": "tt0203259",
    "truth": {
-    "at": "2026-10-18",
+    "at": "2026-11-07",
     "providers": [
      "Netflix",
      "Disney+",
@@ -164948,9 +165070,8 @@
    "lang": "Korean",
    "kind": "movie",
    "title": "Possible Love",
-   "fp": "9b19e05faa44",
+   "fp": "e0c7154c7d87",
    "rendered": "2026-10-13",
-   "archivedOn": "2026-10-15",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -166729,8 +166850,7 @@
      "Jeanne Tripplehorn",
      "Riley Keough"
     ]
-   },
-   "archivedOn": "2026-11-07"
+   }
   },
   "the-big-short": {
    "last": "2026-11-03",
@@ -172666,7 +172786,7 @@
    "imdb": "tt30274401",
    "fpv": 3,
    "truth": {
-    "at": "2026-11-01",
+    "at": "2026-11-07",
     "providers": [
      "Sky Go",
      "Now TV Cinema"
@@ -173535,14 +173655,14 @@
    "archivedOn": "2026-11-03"
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-05",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-13",
    "lang": "Hindi",
    "kind": "movie",
    "title": "Ramayana: Rise of a Legend",
    "rendered": "2026-10-16",
-   "fp": "12ea5f6f95f3",
+   "fp": "f32d8a096836",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -173876,14 +173996,14 @@
    "srAt": "2026-10-27"
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "213e2b6d60f8",
+   "fp": "90766a9cc88e",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -174160,7 +174280,7 @@
    "kind": "movie",
    "title": "Wild Horse Nine",
    "rendered": "2026-10-20",
-   "fp": "6b5f26470c98",
+   "fp": "7c080f0a3235",
    "pv": 13,
    "imdb": "tt15799564",
    "fcs": {
@@ -176189,7 +176309,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -176217,7 +176337,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "buddy": {
    "last": "2026-11-05",
@@ -176351,7 +176472,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -176360,7 +176481,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -176496,7 +176617,25 @@
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
    "fp": "0b28160d43be",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-11-07",
+   "pv": 13,
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "HBO Max",
+     "Now TV Cinema"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0
+   },
+   "imdb": "tt50389959",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-11-07",
+    "w": 8
+   },
+   "rel": 3
   },
   "kamen-rider": {
    "last": "2026-11-07",
@@ -180741,7 +180880,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "d15a8cafd222",
+   "fp": "beb11573a5c9",
    "fcs": {
     "v": "early",
     "at": "2026-10-21",
@@ -182995,7 +183134,7 @@
     "released": "2026-09-24",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -191779,7 +191918,7 @@
    "rendered": "2026-10-13",
    "imdb": "tt4712810",
    "truth": {
-    "at": "2026-10-22",
+    "at": "2026-11-07",
     "providers": [
      "Prime Video"
     ],
@@ -217200,7 +217339,7 @@
    "imdb": "tt1431045",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-11-07",
     "providers": [
      "Disney+"
     ],
@@ -218900,7 +219039,7 @@
    "lang": "Korean",
    "kind": "movie",
    "title": "Possible Love",
-   "fp": "4d17dc42f6a5",
+   "fp": "c367778c51e3",
    "rendered": "2026-10-13",
    "archivedOn": "2026-10-22",
    "pv": 13,
@@ -222022,8 +222161,7 @@
      "Jeanne Tripplehorn",
      "Riley Keough"
     ]
-   },
-   "archivedOn": "2026-11-07"
+   }
   },
   "the-revenant": {
    "last": "2026-11-02",
@@ -227892,7 +228030,7 @@
    "imdb": "tt2386490",
    "fpv": 3,
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [
      "Netflix",
      "Prime Video",
@@ -228765,7 +228903,7 @@
     "title": "Sense and Sensibility",
     "language": "English",
     "runtime": 132,
-    "genre": "Romance / Drama",
+    "genre": "Drama / Romance",
     "director": "Georgia Oakley",
     "cast": [
      "Daisy Edgar-Jones",
@@ -228952,14 +229090,14 @@
    "srAt": "2026-10-27"
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-05",
    "lang": "Hindi",
    "kind": "movie",
    "title": "Ramayana: Rise of a Legend",
    "rendered": "2026-10-16",
-   "fp": "6f1e52718e92",
+   "fp": "8f518775e6b9",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -229340,14 +229478,14 @@
    "srAt": "2026-10-28"
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "27360d18850d",
+   "fp": "e43039340c22",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -231702,7 +231840,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -231729,7 +231867,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "angel-in-white": {
    "last": "2026-11-07",
@@ -232039,7 +232178,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -232048,7 +232187,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -232200,7 +232339,7 @@
    "srv": 1,
    "srAt": "2026-11-06",
    "rendered": "2026-11-06",
-   "fp": "75e8b1f96ec4",
+   "fp": "e2005f31efc6",
    "fpv": 3
   },
   "the-assassin": {
@@ -232258,7 +232397,24 @@
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
    "fp": "5629129fbe91",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-11-07",
+   "pv": 13,
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "HBO Max"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0
+   },
+   "imdb": "tt50389959",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-11-07",
+    "w": 8
+   },
+   "rel": 3
   },
   "kamen-rider": {
    "last": "2026-11-07",
@@ -235188,7 +235344,7 @@
    "rendered": "2026-10-14",
    "swept": "2026-10-21",
    "truth": {
-    "at": "2026-10-21",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-12-17",
@@ -235196,7 +235352,7 @@
     "language": "German",
     "runtime": 104,
     "genre": "Drama",
-    "director": "Nader Saïvar",
+    "director": "Nader Saivar",
     "cast": [
      "Kida Khodr Ramadan",
      "Jael Cem Ilhan",
@@ -239857,7 +240013,7 @@
    "srAt": "2026-10-27"
   },
   "the-mongoose": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1294189,
    "released": "2026-10-29",
    "lang": "English",
@@ -239870,7 +240026,7 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "82a1c908270b",
+   "fp": "e130363ec038",
    "rendered": "2026-10-14",
    "imdb": "tt13611778",
    "fpv": 3,
@@ -239905,8 +240061,7 @@
      "Michael Chiklis",
      "Maurice Marvel Meredith"
     ]
-   },
-   "archivedOn": "2026-11-07"
+   }
   },
   "christy": {
    "last": "2026-11-04",
@@ -252598,7 +252753,7 @@
    "rendered": "2026-10-14",
    "imdb": "tt29623480",
    "truth": {
-    "at": "2026-11-05",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [
      "Apple TV Store",
@@ -262313,7 +262468,7 @@
     "released": "2026-09-24",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -263503,7 +263658,7 @@
    "rendered": "2026-10-12",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-26",
+    "at": "2026-11-07",
     "providers": [
      "Netflix"
     ],
@@ -275789,7 +275944,7 @@
    "imdb": "tt2119532",
    "fpv": 3,
    "truth": {
-    "at": "2026-11-02",
+    "at": "2026-11-07",
     "providers": [
      "Netflix",
      "Filmlegenden",
@@ -287065,14 +287220,14 @@
    }
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "958e96439469",
+   "fp": "cfd687e7572f",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -289169,7 +289324,7 @@
    "imdb": "tt0029583",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-11-07",
     "providers": [
      "Disney+",
      "Kixi"
@@ -291798,8 +291953,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "big-m-ck-gangsters-and-gold": {
    "last": "2026-10-27",
@@ -292141,7 +292295,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "899cf0ac255c",
+   "fp": "8ba0486f3ce2",
    "rendered": "2026-10-23",
    "fpv": 3,
    "srv": 1,
@@ -293890,7 +294044,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -293920,7 +294074,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "collision-course": {
    "last": "2026-11-07",
@@ -293965,7 +294120,7 @@
    "fpv": 3
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-05",
    "lang": "Hindi",
@@ -293974,7 +294129,7 @@
    "srv": 1,
    "srAt": "2026-11-04",
    "rendered": "2026-11-04",
-   "fp": "7738f96f61e9",
+   "fp": "62ee57bceab5",
    "fpv": 3
   },
   "stick": {
@@ -294111,7 +294266,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -294120,7 +294275,7 @@
    "srv": 1,
    "srAt": "2026-11-06",
    "rendered": "2026-11-06",
-   "fp": "7b534c7c08b0",
+   "fp": "445bb913b3d1",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -294163,7 +294318,24 @@
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
    "fp": "5629129fbe91",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-11-07",
+   "pv": 13,
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "HBO Max"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0
+   },
+   "imdb": "tt50389959",
+   "fcs": {
+    "v": "Worth a watch",
+    "at": "2026-11-07",
+    "w": 8
+   },
+   "rel": 3
   },
   "block-10": {
    "last": "2026-11-07",
@@ -295047,9 +295219,9 @@
    },
    "fp": "8d09b17ebee4",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-16",
@@ -295356,9 +295528,9 @@
    },
    "fp": "06893bb3948b",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-01",
@@ -295507,9 +295679,9 @@
    },
    "fp": "08f640d69441",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-03",
@@ -295701,9 +295873,9 @@
    },
    "fp": "d8618a646c7c",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-09",
@@ -296278,9 +296450,9 @@
    },
    "fp": "9654eba5027e",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-12",
@@ -296750,9 +296922,9 @@
    },
    "fp": "9103d9345965",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-18",
@@ -296893,9 +297065,9 @@
    },
    "fp": "8fc3351b8eeb",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-23",
@@ -296971,7 +297143,7 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "fp": "b6765c96d2db",
+   "fp": "a2bf1ac6cb70",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "fpv": 3,
@@ -297010,9 +297182,9 @@
    },
    "fp": "72360e6a5c4e",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-24",
@@ -297052,9 +297224,9 @@
    },
    "fp": "f8c5b16db6ba",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-24",
@@ -297413,9 +297585,9 @@
    },
    "fp": "79177af44506",
    "rendered": "2026-10-14",
-   "swept": "2026-11-06",
+   "swept": "2026-11-07",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-07-17",
@@ -329397,7 +329569,7 @@
    "imdb": "tt5815940",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-28",
+    "at": "2026-11-07",
     "providers": [
      "Sun Nxt"
     ],
@@ -334608,7 +334780,7 @@
    "srv": 1,
    "srAt": "2026-10-28",
    "truth": {
-    "at": "2026-10-30",
+    "at": "2026-11-07",
     "providers": [
      "STARZPLAY",
      "TOD"
@@ -348179,14 +348351,14 @@
    "fpv": 3
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-05",
    "lang": "Hindi",
    "kind": "movie",
    "title": "Ramayana: Rise of a Legend",
    "rendered": "2026-10-16",
-   "fp": "68e21b19a996",
+   "fp": "67027c806cdc",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -349556,7 +349728,7 @@
    "kind": "movie",
    "title": "Traveler's Hell",
    "rendered": "2026-10-17",
-   "fp": "eb2967dd7ebf",
+   "fp": "45828cb7da26",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-28"
@@ -349784,14 +349956,14 @@
    }
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "27360d18850d",
+   "fp": "e43039340c22",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -349893,7 +350065,28 @@
    "rendered": "2026-10-18",
    "fp": "00b7237a995d",
    "imdb": "tt2797242",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-07",
+    "providers": [
+     "Zee5"
+    ],
+    "rentBuy": [],
+    "released": "2013-05-03",
+    "title": "Bombay Talkies",
+    "language": "Hindi",
+    "runtime": 127,
+    "genre": "Drama / Romance",
+    "director": "Zoya Akhtar, Dibakar Banerjee",
+    "cast": [
+     "Rani Mukerji",
+     "Randeep Hooda",
+     "Saqib Saleem",
+     "Nawazuddin Siddiqui",
+     "Sadashiv Amrapurkar",
+     "Naman Jain"
+    ]
+   }
   },
   "malayankunju": {
    "last": "2026-10-22",
@@ -353082,7 +353275,28 @@
    "rendered": "2026-10-20",
    "fp": "6a066408e4b2",
    "imdb": "tt0422908",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-07",
+    "providers": [
+     "Sun Nxt"
+    ],
+    "rentBuy": [],
+    "released": "2002-01-14",
+    "title": "Pammal K. Sambandam",
+    "language": "Tamil",
+    "runtime": 160,
+    "genre": "Comedy / Drama",
+    "director": "Moulee",
+    "cast": [
+     "Kamal Haasan",
+     "Simran",
+     "Abbas",
+     "Sneha",
+     "Manivannan",
+     "Ravichandran"
+    ]
+   }
   },
   "cameraman-ganga-tho-rambabu": {
    "last": "2026-10-22",
@@ -353980,11 +354194,10 @@
    "kind": "movie",
    "title": "Scene",
    "rendered": "2026-10-21",
-   "fp": "d8c571b51497",
+   "fp": "786dafd9e022",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
-   "archivedOn": "2026-11-07",
    "pv": 13,
    "imdb": "tt38192494",
    "fcs": {
@@ -354387,8 +354600,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "maa-behen": {
    "last": "2026-10-25",
@@ -356835,7 +357047,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -356862,7 +357074,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "gunmaaster-g9": {
    "last": "2026-11-02",
@@ -356948,7 +357161,7 @@
    "srv": 1,
    "srAt": "2026-11-03",
    "rendered": "2026-11-03",
-   "fp": "bc70b84326c8",
+   "fp": "5acc306a1610",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt34384661",
@@ -357163,7 +357376,16 @@
     "at": "2026-11-06",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07",
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "OSN+"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0
+   }
   },
   "dilwali-diwali": {
    "last": "2026-11-07",
@@ -357293,7 +357515,7 @@
    "srv": 1,
    "srAt": "2026-11-06",
    "rendered": "2026-11-06",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -357397,7 +357619,26 @@
     "at": "2026-11-07",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "truth": {
+    "at": "2026-11-07",
+    "providers": [],
+    "rentBuy": [],
+    "released": "2027-01-28",
+    "title": "Strawberries",
+    "language": "Arabic",
+    "runtime": 101,
+    "genre": "Drama / Adventure",
+    "director": "Laïla Marrakchi",
+    "cast": [
+     "Nisrin Erradi",
+     "Hajar Graigaa",
+     "Hind Braik",
+     "Fatima Attif",
+     "Itsaso Arana",
+     "Larbi Ajbar"
+    ]
+   }
   },
   "one-year-to-live-buy-a-man": {
    "last": "2026-11-07",
@@ -357453,7 +357694,16 @@
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
    "fp": "38f4a7cdca7e",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-11-07",
+   "pv": 13,
+   "imdb": "tt15799564",
+   "fcs": {
+    "v": "Must watch",
+    "at": "2026-11-07",
+    "w": 8
+   },
+   "rel": 3
   },
   "baa-baa-black-sheep": {
    "last": "2026-11-07",
@@ -357466,6 +357716,19 @@
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
    "fp": "1fd314d1daac",
+   "fpv": 3
+  },
+  "campus-drivers": {
+   "last": "2026-11-07",
+   "tmdbId": 303044,
+   "released": "2026-11-06",
+   "lang": "French",
+   "kind": "tv",
+   "title": "Campus Drivers",
+   "srv": 1,
+   "srAt": "2026-11-07",
+   "rendered": "2026-11-07",
+   "fp": "7b1e0ef6b2ad",
    "fpv": 3
   }
  },
@@ -360505,7 +360768,7 @@
    "title": "Clayface",
    "tmdbId": 1400940,
    "rel": 2,
-   "fp": "0131f3a3b1c1",
+   "fp": "186af9238230",
    "fcs": {
     "v": "early",
     "at": "2026-10-20",
@@ -363117,7 +363380,7 @@
     "released": "2026-09-25",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -414148,7 +414411,7 @@
    "kind": "movie",
    "title": "Ramayana: Rise of a Legend",
    "rendered": "2026-10-16",
-   "fp": "d37f1c969ec7",
+   "fp": "59cc0a4682d2",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -415364,14 +415627,14 @@
    "fpv": 3
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "213e2b6d60f8",
+   "fp": "90766a9cc88e",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -419655,7 +419918,7 @@
    "kind": "movie",
    "title": "Godzilla Minus Zero",
    "rendered": "2026-10-21",
-   "fp": "1b8936ef499c",
+   "fp": "e23edec61000",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt34384661",
@@ -419861,8 +420124,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "tenzing": {
    "last": "2026-11-05",
@@ -422099,7 +422361,8 @@
     "at": "2026-11-07",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "the-birthday-gift": {
    "last": "2026-11-04",
@@ -422166,7 +422429,6 @@
    "rendered": "2026-11-04",
    "fp": "08f4f4856377",
    "fpv": 3,
-   "archivedOn": "2026-11-07",
    "pv": 13,
    "live": {
     "since": "2026-11-06",
@@ -422329,7 +422591,8 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "my-best-friend": {
    "last": "2026-11-05",
@@ -422398,11 +422661,11 @@
    "srv": 1,
    "srAt": "2026-11-06",
    "rendered": "2026-11-06",
-   "fp": "38f4a7cdca7e",
+   "fp": "06d840da69af",
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -422411,7 +422674,7 @@
    "srv": 1,
    "srAt": "2026-11-06",
    "rendered": "2026-11-06",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -425370,7 +425633,7 @@
     "at": "2026-10-20",
     "w": 8
    },
-   "fp": "a50a1db126e9",
+   "fp": "a1071e34a14e",
    "rendered": "2026-10-12",
    "imdb": "tt34890576",
    "fpv": 3,
@@ -427571,7 +427834,7 @@
     "released": "2026-09-24",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -429993,13 +430256,13 @@
    "srAt": "2026-10-27"
   },
   "the-dark-heaven": {
-   "last": "2026-10-24",
+   "last": "2026-11-07",
    "tmdbId": 1618200,
    "released": "2026-09-18",
    "lang": "Tamil",
    "kind": "movie",
    "title": "The Dark Heaven",
-   "fp": "8307c4132175",
+   "fp": "448803bdab26",
    "archivedOn": "2026-10-09",
    "pv": 13,
    "swept": "2026-11-07",
@@ -430012,7 +430275,9 @@
    "rendered": "2026-10-14",
    "truth": {
     "at": "2026-11-07",
-    "providers": [],
+    "providers": [
+     "Mewatch"
+    ],
     "rentBuy": [],
     "released": "2026-09-18",
     "title": "The Dark Heaven",
@@ -430032,7 +430297,17 @@
    "imdb": "",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-27"
+   "srAt": "2026-10-27",
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "Mewatch"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0,
+    "arrived": "2026-11-07",
+    "prevCheck": "2026-11-07"
+   }
   },
   "rage": {
    "last": "2026-10-23",
@@ -476163,14 +476438,14 @@
    "fpv": 3
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-05",
    "lang": "Hindi",
    "kind": "movie",
    "title": "Ramayana: Rise of a Legend",
    "rendered": "2026-10-16",
-   "fp": "09ee73f7b0d7",
+   "fp": "7446ced43844",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -477423,14 +477698,14 @@
    "fpv": 3
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "651a1b0bc74c",
+   "fp": "f01143231e71",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -479344,14 +479619,14 @@
    "fpv": 3
   },
   "where-the-mask-ends": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 300146,
    "released": "2026-10-16",
    "lang": "Chinese",
    "kind": "tv",
    "title": "Where the Mask Ends",
    "rendered": "2026-10-19",
-   "fp": "379642bc3b21",
+   "fp": "8764bdc9189e",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27",
@@ -481984,8 +482259,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "meat-the-future": {
    "last": "2026-11-07",
@@ -484458,7 +484732,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -484485,7 +484759,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "angel-in-white": {
    "last": "2026-11-07",
@@ -484552,7 +484827,6 @@
    "rendered": "2026-11-04",
    "fp": "e781a94604dd",
    "fpv": 3,
-   "archivedOn": "2026-11-07",
    "pv": 13,
    "live": {
     "since": "2026-11-06",
@@ -484715,7 +484989,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -484724,7 +484998,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "d707ac2c30fd",
+   "fp": "312cfafadb49",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -484770,7 +485044,8 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "my-best-friend": {
    "last": "2026-11-05",
@@ -489330,7 +489605,7 @@
     "released": "2026-09-24",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -500234,7 +500509,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt6362756",
    "truth": {
-    "at": "2026-10-25",
+    "at": "2026-11-07",
     "providers": [
      "Crunchyroll"
     ],
@@ -509693,7 +509968,7 @@
    "imdb": "tt1327801",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-27",
+    "at": "2026-11-07",
     "providers": [
      "Disney+"
     ],
@@ -514663,7 +514938,7 @@
    "imdb": "tt4052886",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-29",
+    "at": "2026-11-07",
     "providers": [
      "Netflix"
     ],
@@ -515666,7 +515941,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "a58642380099",
+   "fp": "865c9b0b3f0f",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -528274,7 +528549,7 @@
    "kind": "movie",
    "title": "Godzilla Minus Zero",
    "rendered": "2026-10-14",
-   "fp": "5acc306a1610",
+   "fp": "bc70b84326c8",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -529619,14 +529894,14 @@
    "fpv": 3
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-05",
    "lang": "Hindi",
    "kind": "movie",
    "title": "Ramayana: Rise of a Legend",
    "rendered": "2026-10-16",
-   "fp": "68e21b19a996",
+   "fp": "67027c806cdc",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -530569,11 +530844,10 @@
    "kind": "movie",
    "title": "SAYANG",
    "rendered": "2026-10-17",
-   "fp": "8ffa3338fbf4",
+   "fp": "48f0366a6db3",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-28",
-   "archivedOn": "2026-11-07",
    "pv": 13,
    "imdb": "tt43440269",
    "fcs": {
@@ -530602,7 +530876,8 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "film-1599189": {
    "last": "2026-10-17",
@@ -530884,14 +531159,14 @@
    "fpv": 3
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "651a1b0bc74c",
+   "fp": "f01143231e71",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -534571,14 +534846,14 @@
    "fpv": 3
   },
   "wild-horse-nine": {
-   "last": "2026-10-31",
+   "last": "2026-11-07",
    "tmdbId": 891621,
    "released": "2026-10-30",
    "lang": "English",
    "kind": "movie",
    "title": "Wild Horse Nine",
    "rendered": "2026-10-21",
-   "fp": "6aaa4f96f26f",
+   "fp": "b6e77452d5c3",
    "pv": 13,
    "imdb": "tt15799564",
    "fcs": {
@@ -535140,8 +535415,7 @@
    "imdb": "tt11743610",
    "fpv": 3,
    "srv": 1,
-   "srAt": "2026-10-31",
-   "archivedOn": "2026-11-07"
+   "srAt": "2026-10-31"
   },
   "kalaga-thalaivan": {
    "last": "2026-10-25",
@@ -537751,7 +538025,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -537778,7 +538052,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "sumpah-keramat-mat-kilau": {
    "last": "2026-11-03",
@@ -538049,7 +538324,8 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "the-greatest": {
    "last": "2026-11-07",
@@ -538147,7 +538423,7 @@
    "srv": 1,
    "srAt": "2026-11-06",
    "rendered": "2026-11-06",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -538177,9 +538453,8 @@
    "srAt": "2026-11-06",
    "epNext": "2026-11-06",
    "rendered": "2026-11-06",
-   "fp": "9ab60e735089",
+   "fp": "7b1e0ef6b2ad",
    "fpv": 3,
-   "archivedOn": "2026-11-07",
    "pv": 13,
    "live": {
     "since": "2026-11-06",
@@ -538250,7 +538525,7 @@
    "srv": 1,
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
-   "fp": "b62654cb7e65",
+   "fp": "bd036b086271",
    "fpv": 3
   },
   "film-1811193": {
@@ -539100,7 +539375,7 @@
     "released": "2026-09-23",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -549927,7 +550202,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt6608138",
    "truth": {
-    "at": "2026-10-24",
+    "at": "2026-11-07",
     "providers": [
      "Prime Video"
     ],
@@ -568432,7 +568707,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "33113ec5e84f",
+   "fp": "4ed96bda9f66",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -571850,8 +572125,7 @@
      "Jeanne Tripplehorn",
      "Riley Keough"
     ]
-   },
-   "archivedOn": "2026-11-07"
+   }
   },
   "phantom": {
    "last": "2026-10-22",
@@ -577305,13 +577579,15 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "b72b08f80f79",
+   "fp": "64e37177eec9",
    "rendered": "2026-10-13",
    "imdb": "tt17663992",
    "fpv": 3,
    "truth": {
     "at": "2026-11-07",
-    "providers": [],
+    "providers": [
+     "Prime Video"
+    ],
     "rentBuy": [
      "Apple TV Store"
     ],
@@ -577329,7 +577605,18 @@
      "Jack Champion",
      "Roger L. Jackson"
     ]
-   }
+   },
+   "swept": "2026-11-07",
+   "live": {
+    "since": "2026-11-07",
+    "providers": [
+     "Prime Video"
+    ],
+    "lastCheck": "2026-11-07",
+    "misses": 0
+   },
+   "srv": 1,
+   "srAt": "2026-11-07"
   },
   "ancient-aliens": {
    "last": "2026-10-28",
@@ -583345,7 +583632,7 @@
    "srAt": "2026-10-28",
    "archivedOn": "2026-11-03",
    "truth": {
-    "at": "2026-11-06",
+    "at": "2026-11-07",
     "providers": [],
     "rentBuy": [],
     "released": "2026-11-16",
@@ -583573,14 +583860,14 @@
    "fpv": 3
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "651a1b0bc74c",
+   "fp": "f01143231e71",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -583759,7 +584046,28 @@
    "rendered": "2026-10-18",
    "fp": "40514975f173",
    "imdb": "tt21874396",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-07",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2024-04-05",
+    "title": "Parasyte: The Grey",
+    "language": "Korean",
+    "runtime": 50,
+    "genre": "Sci-Fi & Fantasy / Action & Adventure",
+    "director": "Yeon Sang-ho",
+    "cast": [
+     "Jeon So-nee",
+     "Koo Kyo-hwan",
+     "Lee Jung-hyun",
+     "Kwon Hae-hyo",
+     "Kim In-kwon",
+     "Hwang Dong-hee"
+    ]
+   }
   },
   "the-boy-the-mole-the-fox-and-the-horse": {
    "last": "2026-10-22",
@@ -586603,7 +586911,28 @@
    "rendered": "2026-10-20",
    "fp": "0455062ad8c5",
    "imdb": "tt10262630",
-   "fpv": 3
+   "fpv": 3,
+   "truth": {
+    "at": "2026-11-07",
+    "providers": [
+     "Netflix"
+    ],
+    "rentBuy": [],
+    "released": "2020-04-29",
+    "title": "Extracurricular",
+    "language": "Korean",
+    "runtime": 55,
+    "genre": "Crime / Drama",
+    "director": "Gin Han-sai, Kim Jin-min",
+    "cast": [
+     "Kim Dong-hee",
+     "Park Ju-hyun",
+     "Jung Da-bin",
+     "Nam Yoon-su",
+     "Kim Yeo-jin",
+     "Choi Min-soo"
+    ]
+   }
   },
   "the-other-guys": {
    "last": "2026-10-22",
@@ -587023,7 +587352,7 @@
    "kind": "movie",
    "title": "Wild Horse Nine",
    "rendered": "2026-10-21",
-   "fp": "38f4a7cdca7e",
+   "fp": "06d840da69af",
    "pv": 13,
    "imdb": "tt15799564",
    "fcs": {
@@ -588117,14 +588446,14 @@
    }
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-05",
    "lang": "Hindi",
    "kind": "movie",
    "title": "Ramayana: Rise of a Legend",
    "rendered": "2026-10-22",
-   "fp": "b3088f8d8e93",
+   "fp": "70c8831f6bc4",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -590043,7 +590372,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -590070,7 +590399,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "snow-in-june": {
    "last": "2026-11-03",
@@ -590260,7 +590590,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -590269,7 +590599,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -590315,7 +590645,8 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "my-best-friend": {
    "last": "2026-11-05",
@@ -590357,9 +590688,8 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "c7a1f0769002",
+   "fp": "86235348ae0f",
    "fpv": 3,
-   "archivedOn": "2026-11-07",
    "pv": 13,
    "live": {
     "since": "2026-11-05",
@@ -590718,12 +591048,13 @@
     "w": 8
    },
    "rel": 3,
-   "fp": "99daf9e1e84a",
+   "fp": "09c5bee84705",
    "rendered": "2026-10-12",
    "truth": {
     "at": "2026-11-07",
     "providers": [],
     "rentBuy": [
+     "Neon TV",
      "Apple TV Store",
      "Amazon Video"
     ],
@@ -591449,7 +591780,7 @@
     "released": "2026-09-24",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -604565,7 +604896,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "0a7631004293",
+   "fp": "347121d191ff",
    "rendered": "2026-10-12",
    "pv": 13,
    "imdb": "tt34890576",
@@ -633978,14 +634309,14 @@
    "epNext": "2026-10-28"
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-05",
    "lang": "Hindi",
    "kind": "movie",
    "title": "Ramayana: Rise of a Legend",
    "rendered": "2026-10-16",
-   "fp": "68e21b19a996",
+   "fp": "67027c806cdc",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -634444,14 +634775,14 @@
    "srAt": "2026-10-28"
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "27360d18850d",
+   "fp": "e43039340c22",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -634821,7 +635152,7 @@
    "kind": "movie",
    "title": "Wild Horse Nine",
    "rendered": "2026-10-20",
-   "fp": "38f4a7cdca7e",
+   "fp": "06d840da69af",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt15799564",
@@ -634995,8 +635326,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "where-s-wanda": {
    "last": "2026-10-27",
@@ -636383,7 +636713,7 @@
     "title": "Sense and Sensibility",
     "language": "English",
     "runtime": 132,
-    "genre": "Romance / Drama",
+    "genre": "Drama / Romance",
     "director": "Georgia Oakley",
     "cast": [
      "Daisy Edgar-Jones",
@@ -636892,7 +637222,7 @@
    "rel": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -636919,7 +637249,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "angel-in-white": {
    "last": "2026-11-07",
@@ -637169,7 +637500,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -637178,7 +637509,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -637255,7 +637586,8 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "my-best-friend": {
    "last": "2026-11-05",
@@ -637669,7 +638001,7 @@
    "lang": "Korean",
    "kind": "movie",
    "title": "Possible Love",
-   "fp": "3311fcefd69e",
+   "fp": "24292e4981ea",
    "rendered": "2026-10-13",
    "archivedOn": "2026-10-14",
    "pv": 13,
@@ -671534,8 +671866,7 @@
      "Jeanne Tripplehorn",
      "Riley Keough"
     ]
-   },
-   "archivedOn": "2026-11-07"
+   }
   },
   "unlocked": {
    "last": "2026-10-22",
@@ -689257,14 +689588,14 @@
    "srAt": "2026-10-27"
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-26",
-   "fp": "32567a1b60a9",
+   "fp": "3d33011f2a15",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -689885,8 +690216,7 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-06"
+   "rel": 3
   },
   "very-very-strange-love": {
    "last": "2026-11-04",
@@ -689912,7 +690242,16 @@
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
    "fp": "298d1f85d1a5",
-   "fpv": 3
+   "fpv": 3,
+   "archivedOn": "2026-11-07",
+   "pv": 13,
+   "imdb": "tt36471253",
+   "fcs": {
+    "v": "early",
+    "at": "2026-11-07",
+    "w": 8
+   },
+   "rel": 3
   },
   "black-doves": {
    "last": "2026-11-07",
@@ -689929,7 +690268,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -689938,7 +690277,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -696093,7 +696432,7 @@
    "rendered": "2026-10-13",
    "imdb": "tt2861424",
    "truth": {
-    "at": "2026-10-22",
+    "at": "2026-11-07",
     "providers": [
      "Netflix",
      "HBO Max on U-Next"
@@ -699896,7 +700235,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt2261391",
    "truth": {
-    "at": "2026-10-23",
+    "at": "2026-11-07",
     "providers": [
      "Hulu",
      "U-NEXT"
@@ -704840,7 +705179,7 @@
     "released": "2026-09-25",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -711900,7 +712239,7 @@
    "fp": "4ab91830031c",
    "rendered": "2026-10-13",
    "truth": {
-    "at": "2026-10-27",
+    "at": "2026-11-07",
     "providers": [
      "Netflix",
      "Hulu"
@@ -731621,7 +731960,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "dc1190b21304",
+   "fp": "0eeda19c684f",
    "rendered": "2026-10-12",
    "pv": 13,
    "fcs": {
@@ -735525,7 +735864,8 @@
    "fpv": 3,
    "imdb": "tt41389717",
    "srv": 1,
-   "srAt": "2026-10-28"
+   "srAt": "2026-10-28",
+   "archivedOn": "2026-11-07"
   },
   "cursed-meme": {
    "last": "2026-10-25",
@@ -739157,7 +739497,7 @@
    "rendered": "2026-10-18",
    "fp": "bab2b1453953",
    "truth": {
-    "at": "2026-10-19",
+    "at": "2026-11-07",
     "providers": [
      "Hulu",
      "U-NEXT",
@@ -742590,8 +742930,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "the-testament-of-sister-new-devil": {
    "last": "2026-10-28",
@@ -744921,7 +745260,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -744949,7 +745288,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "the-birthday-gift": {
    "last": "2026-11-04",
@@ -745130,7 +745470,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -745139,7 +745479,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -745281,7 +745621,7 @@
    "srv": 1,
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
-   "fp": "bdf2bf555e1d",
+   "fp": "7120fe96dd7a",
    "fpv": 3
   },
   "campus-drivers": {
@@ -745295,6 +745635,19 @@
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
    "fp": "7b1e0ef6b2ad",
+   "fpv": 3
+  },
+  "three-millimeters-to-you": {
+   "last": "2026-11-07",
+   "tmdbId": 1527427,
+   "released": "2026-11-06",
+   "lang": "Japanese",
+   "kind": "movie",
+   "title": "Three Millimeters to You",
+   "srv": 1,
+   "srAt": "2026-11-07",
+   "rendered": "2026-11-07",
+   "fp": "d2fcf6a9b9ad",
    "fpv": 3
   }
  },
@@ -749557,7 +749910,7 @@
     "released": "2026-09-23",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -760943,7 +761296,7 @@
    "srAt": "2026-10-30",
    "epNext": "2026-10-30",
    "truth": {
-    "at": "2026-11-03",
+    "at": "2026-11-07",
     "providers": [
      "Netflix",
      "Crunchyroll"
@@ -761566,7 +761919,7 @@
    "rendered": "2026-10-12",
    "imdb": "tt14810692",
    "truth": {
-    "at": "2026-10-25",
+    "at": "2026-11-07",
     "providers": [
      "Vidio"
     ],
@@ -763611,7 +763964,7 @@
    "imdb": "tt3121722",
    "fpv": 3,
    "truth": {
-    "at": "2026-10-26",
+    "at": "2026-11-07",
     "providers": [
      "Netflix",
      "Netflix Kids",
@@ -776000,7 +776353,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "3c11b215f2c6",
+   "fp": "a72f6c084002",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -790983,14 +791336,14 @@
    "fpv": 3
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "b65d8f4adde6",
+   "fp": "5d00a0fdf897",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -794001,7 +794354,7 @@
    "kind": "movie",
    "title": "Godzilla Minus Zero",
    "rendered": "2026-10-20",
-   "fp": "d7bd25b312fc",
+   "fp": "5d42e43e9e51",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt34384661",
@@ -795553,8 +795906,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "red-zone-dead-city": {
    "last": "2026-10-22",
@@ -797383,7 +797735,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "d37f1c969ec7",
+   "fp": "59cc0a4682d2",
    "fpv": 3,
    "pv": 13,
    "truth": {
@@ -797633,7 +797985,7 @@
    "rel": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -797660,7 +798012,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "white-blast": {
    "last": "2026-11-03",
@@ -797871,7 +798224,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -797880,7 +798233,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -797956,7 +798309,8 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "at-friend-s-house": {
    "last": "2026-11-05",
@@ -798028,8 +798382,7 @@
     "at": "2026-11-06",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "very-very-strange-love": {
    "last": "2026-11-05",
@@ -798085,7 +798438,7 @@
    "srv": 1,
    "srAt": "2026-11-06",
    "rendered": "2026-11-06",
-   "fp": "38f4a7cdca7e",
+   "fp": "06d840da69af",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt15799564",
@@ -798228,13 +798581,13 @@
    "fpv": 3
   },
   "resident-evil": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1423191,
    "released": "2026-09-17",
    "lang": "English",
    "kind": "movie",
    "title": "Resident Evil",
-   "fp": "160166b387c1",
+   "fp": "c827d5bd07e4",
    "pv": 13,
    "swept": "2026-11-05",
    "fcs": {
@@ -798342,7 +798695,7 @@
     "released": "2026-09-24",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -806638,7 +806991,7 @@
    "kind": "movie",
    "title": "Clayface",
    "rendered": "2026-10-15",
-   "fp": "2af94c55e8e7",
+   "fp": "9fee97f1e01c",
    "pv": 13,
    "rel": 2,
    "truth": {
@@ -808255,14 +808608,14 @@
    "imdb": "tt34471143"
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "c8709eb3f4b3",
+   "fp": "4d7d478dd853",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -811612,7 +811965,7 @@
     "title": "Sense and Sensibility",
     "language": "English",
     "runtime": 132,
-    "genre": "Romance / Drama",
+    "genre": "Drama / Romance",
     "director": "Georgia Oakley",
     "cast": [
      "Daisy Edgar-Jones",
@@ -811644,7 +811997,7 @@
    "kind": "movie",
    "title": "Godzilla Minus Zero",
    "rendered": "2026-10-20",
-   "fp": "5bca7c4edeea",
+   "fp": "f2bfebf8258b",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -813015,8 +813368,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "fall": {
    "last": "2026-10-22",
@@ -815407,7 +815759,7 @@
    "rel": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -815435,7 +815787,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "talented": {
    "last": "2026-11-02",
@@ -815471,7 +815824,6 @@
    "rendered": "2026-11-03",
    "fp": "9cb543cb8586",
    "fpv": 3,
-   "archivedOn": "2026-11-07",
    "pv": 13,
    "live": {
     "since": "2026-11-06",
@@ -815598,7 +815950,7 @@
    "rel": 3
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-05",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-19",
    "lang": "Hindi",
@@ -815607,7 +815959,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "20d22a8d38ee",
+   "fp": "33f31b11bcc7",
    "fpv": 3
   },
   "cabras-da-peste-2-miami-vixe": {
@@ -815647,7 +815999,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -815656,7 +816008,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7b534c7c08b0",
+   "fp": "445bb913b3d1",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -815702,7 +816054,8 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "picaretas-n-o-v-o-pro-c-u": {
    "last": "2026-11-05",
@@ -815942,7 +816295,7 @@
     "released": "2026-09-24",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -822008,7 +822361,7 @@
    "imdb": "tt18350198",
    "fpv": 3,
    "truth": {
-    "at": "2026-11-02",
+    "at": "2026-11-07",
     "providers": [
      "Claro video"
     ],
@@ -824055,7 +824408,7 @@
    "kind": "movie",
    "title": "Clayface",
    "rendered": "2026-10-15",
-   "fp": "973efd783bf3",
+   "fp": "39945ef96336",
    "pv": 13,
    "truth": {
     "at": "2026-10-20",
@@ -826113,14 +826466,14 @@
    "fpv": 3
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "f4bcd361e2f3",
+   "fp": "2a7ae6c484bc",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -830844,8 +831197,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "how-i-met-your-mother": {
    "last": "2026-10-22",
@@ -833176,7 +833528,7 @@
    }
   },
   "ramayana-rise-of-a-legend": {
-   "last": "2026-11-05",
+   "last": "2026-11-07",
    "tmdbId": 656908,
    "released": "2026-11-12",
    "lang": "Hindi",
@@ -833185,7 +833537,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "408ac3b0e028",
+   "fp": "217ce3283552",
    "fpv": 3
   },
   "tigers-sniff-the-rose": {
@@ -833417,7 +833769,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -833444,7 +833796,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "my-friend-the-sun": {
    "last": "2026-11-06",
@@ -833625,7 +833978,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "1fc22d94daed",
+   "fp": "add49e027e52",
    "fpv": 3
   },
   "black-doves": {
@@ -833643,7 +833996,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -833652,7 +834005,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -833698,7 +834051,8 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "my-best-friend": {
    "last": "2026-11-05",
@@ -833816,6 +834170,19 @@
    "srAt": "2026-11-07",
    "rendered": "2026-11-07",
    "fp": "abeb9d661b30",
+   "fpv": 3
+  },
+  "campus-drivers": {
+   "last": "2026-11-07",
+   "tmdbId": 303044,
+   "released": "2026-11-06",
+   "lang": "French",
+   "kind": "tv",
+   "title": "Campus Drivers",
+   "srv": 1,
+   "srAt": "2026-11-07",
+   "rendered": "2026-11-07",
+   "fp": "7b1e0ef6b2ad",
    "fpv": 3
   }
  },
@@ -834088,7 +834455,7 @@
     "released": "2026-09-25",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -844360,14 +844727,14 @@
    "swept": "2026-11-07"
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "371d26191a7c",
+   "fp": "08d57a75eb7f",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -847660,7 +848027,7 @@
     "title": "Sense and Sensibility",
     "language": "English",
     "runtime": 132,
-    "genre": "Romance / Drama",
+    "genre": "Drama / Romance",
     "director": "Georgia Oakley",
     "cast": [
      "Daisy Edgar-Jones",
@@ -847685,7 +848052,7 @@
    "kind": "movie",
    "title": "Godzilla Minus Zero",
    "rendered": "2026-10-20",
-   "fp": "9f438c791491",
+   "fp": "e2bea6f208dc",
    "pv": 13,
    "imdb": "tt34384661",
    "fcs": {
@@ -849081,8 +849448,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "the-matrix": {
    "last": "2026-10-22",
@@ -850216,7 +850582,7 @@
    "lang": "English",
    "kind": "movie",
    "title": "Clayface",
-   "fp": "37a033ab4ecd",
+   "fp": "89997d6d912a",
    "rendered": "2026-10-24",
    "fpv": 3,
    "srv": 1,
@@ -851541,7 +851907,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "d37f1c969ec7",
+   "fp": "59cc0a4682d2",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt27988879",
@@ -851795,7 +852161,7 @@
    }
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -851823,7 +852189,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "desposados": {
    "last": "2026-11-02",
@@ -852019,7 +852386,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -852028,7 +852395,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -852074,7 +852441,8 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "my-best-friend": {
    "last": "2026-11-05",
@@ -852214,6 +852582,19 @@
     "w": 8
    },
    "rel": 3
+  },
+  "campus-drivers": {
+   "last": "2026-11-07",
+   "tmdbId": 303044,
+   "released": "2026-11-06",
+   "lang": "French",
+   "kind": "tv",
+   "title": "Campus Drivers",
+   "srv": 1,
+   "srAt": "2026-11-07",
+   "rendered": "2026-11-07",
+   "fp": "7b1e0ef6b2ad",
+   "fpv": 3
   }
  },
  "fr": {
@@ -852509,7 +852890,7 @@
     "released": "2026-09-23",
     "title": "Heart of the Beast",
     "language": "English",
-    "runtime": 101,
+    "runtime": 105,
     "genre": "Adventure / Thriller",
     "director": "David Ayer",
     "cast": [
@@ -854692,13 +855073,13 @@
    }
   },
   "moulin": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 1437925,
    "released": "2026-10-28",
    "lang": "French",
    "kind": "movie",
    "title": "Moulin",
-   "fp": "1d3cd9b8ab19",
+   "fp": "90d9f2a1a5f6",
    "pv": 13,
    "fcs": {
     "v": "Worth a watch",
@@ -859173,9 +859554,9 @@
    "fpv": 3
   },
   "doctor-x-mafia-in-white": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "rendered": "2026-10-12",
-   "fp": "131d87836211",
+   "fp": "49043669342a",
    "pv": 13,
    "released": "2026-10-09",
    "lang": "Korean",
@@ -859221,8 +859602,7 @@
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-30",
-   "epNext": "2026-10-30",
-   "archivedOn": "2026-11-04"
+   "epNext": "2026-10-30"
   },
   "a-private-life": {
    "last": "2026-10-26",
@@ -862702,14 +863082,14 @@
    "imdb": "tt14792896"
   },
   "dragon-ball-super-beerus": {
-   "last": "2026-11-04",
+   "last": "2026-11-07",
    "tmdbId": 312359,
    "released": "2026-10-11",
    "lang": "Japanese",
    "kind": "tv",
    "title": "Dragon Ball Super: Beerus",
    "rendered": "2026-10-18",
-   "fp": "958e96439469",
+   "fp": "cfd687e7572f",
    "pv": 13,
    "live": {
     "since": "2026-10-21",
@@ -866503,7 +866883,7 @@
    "kind": "movie",
    "title": "Godzilla Minus Zero",
    "rendered": "2026-10-20",
-   "fp": "5d42e43e9e51",
+   "fp": "d7bd25b312fc",
    "pv": 13,
    "fcs": {
     "v": "early",
@@ -867956,8 +868336,7 @@
     "at": "2026-11-04",
     "w": 8
    },
-   "rel": 3,
-   "archivedOn": "2026-11-07"
+   "rel": 3
   },
   "silo": {
    "last": "2026-10-25",
@@ -868513,7 +868892,7 @@
    "kind": "movie",
    "title": "Clayface",
    "rendered": "2026-10-22",
-   "fp": "02d1f2a953f6",
+   "fp": "f8f716d4fc1e",
    "fpv": 3,
    "srv": 1,
    "srAt": "2026-10-27"
@@ -870229,7 +870608,7 @@
    "srv": 1,
    "srAt": "2026-10-31",
    "rendered": "2026-10-31",
-   "fp": "d37f1c969ec7",
+   "fp": "59cc0a4682d2",
    "fpv": 3,
    "pv": 13,
    "imdb": "tt27988879",
@@ -870428,7 +870807,7 @@
    "fpv": 3
   },
   "the-gilded-age": {
-   "last": "2026-11-03",
+   "last": "2026-11-07",
    "tmdbId": 81723,
    "released": "2022-01-24",
    "lang": "English",
@@ -870455,7 +870834,8 @@
     "at": "2026-11-03",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "collision-course": {
    "last": "2026-11-07",
@@ -870598,7 +870978,7 @@
    "fpv": 3
   },
   "a-dog-s-perfect-christmas": {
-   "last": "2026-11-06",
+   "last": "2026-11-07",
    "tmdbId": 1570488,
    "released": "2026-11-04",
    "lang": "English",
@@ -870607,7 +870987,7 @@
    "srv": 1,
    "srAt": "2026-11-05",
    "rendered": "2026-11-05",
-   "fp": "7e20766f448e",
+   "fp": "846267743caf",
    "fpv": 3,
    "pv": 13,
    "live": {
@@ -870653,7 +871033,8 @@
     "at": "2026-11-05",
     "w": 8
    },
-   "rel": 3
+   "rel": 3,
+   "archivedOn": "2026-11-07"
   },
   "my-best-friend": {
    "last": "2026-11-05",
