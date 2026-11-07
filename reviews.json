@@ -1,0 +1,921 @@
+{
+ "_about": "Published reviews of recent titles, from the outlets' RSS feeds (lib/reviews.js): outlet, link, headline, date, and a star rating only when the feed states one. Keyed by kind:tmdbId; pruned 90 days after release.",
+ "fetched": "2026-11-07",
+ "feeds": {
+  "https://www.thehindu.com/entertainment/reviews/feeder/default.rss": {
+   "ok": "2026-11-07",
+   "items": 60
+  },
+  "https://indianexpress.com/section/entertainment/movie-review/feed/": {
+   "failed": "2026-11-05",
+   "error": "HTTP 403"
+  },
+  "https://indianexpress.com/section/entertainment/tamil/feed/": {
+   "failed": "2026-11-05",
+   "error": "HTTP 403"
+  },
+  "https://indianexpress.com/section/entertainment/telugu/feed/": {
+   "failed": "2026-11-05",
+   "error": "HTTP 403"
+  },
+  "https://indianexpress.com/section/entertainment/malayalam/feed/": {
+   "failed": "2026-11-05",
+   "error": "HTTP 403"
+  },
+  "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml": {
+   "ok": "2026-11-07",
+   "items": 80
+  },
+  "https://feeds.feedburner.com/ndtvmovies-latest": {
+   "ok": "2026-11-05",
+   "items": 100
+  },
+  "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml": {
+   "failed": "2026-11-07",
+   "error": "HTTP 403"
+  },
+  "https://www.news18.com/rss/movies.xml": {
+   "failed": "2026-11-07",
+   "error": "HTTP 403"
+  },
+  "https://feeds.feedburner.com/ScrollinArticles.rss": {
+   "ok": "2026-11-07",
+   "items": 100
+  },
+  "https://www.koimoi.com/feed/": {
+   "failed": "2026-11-07",
+   "error": "HTTP 403"
+  },
+  "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms": {
+   "ok": "2026-11-07",
+   "items": 20
+  },
+  "https://www.indiatoday.in/rss/1206611": {
+   "ok": "2026-11-05",
+   "items": 20
+  },
+  "https://www.dnaindia.com/feeds/entertainment.xml": {
+   "ok": "2026-11-07",
+   "items": 20
+  },
+  "https://www.freepressjournal.in/stories.rss?section=entertainment": {
+   "ok": "2026-11-07",
+   "items": 64
+  },
+  "https://www.123telugu.com/category/reviews/feed": {
+   "ok": "2026-11-07",
+   "items": 30
+  },
+  "https://www.telugu360.com/feed/": {
+   "ok": "2026-11-07",
+   "items": 10
+  },
+  "https://www.cinemaexpress.com/feed": {
+   "ok": "2026-11-07",
+   "items": 8
+  },
+  "https://www.vikatan.com/feed": {
+   "ok": "2026-11-07",
+   "items": 20
+  },
+  "https://www.prajavani.net/feed": {
+   "ok": "2026-11-07",
+   "items": 68
+  },
+  "https://www.amarujala.com/rss/entertainment.xml": {
+   "ok": "2026-11-07",
+   "items": 40
+  },
+  "https://www.sangbadpratidin.in/feed/": {
+   "ok": "2026-11-07",
+   "items": 20
+  },
+  "https://www.rediff.com/rss/moviesreviewsrss.xml": {
+   "ok": "2026-11-07",
+   "items": 215
+  }
+ },
+ "films": {
+  "movie:1503762": {
+   "title": "Sense and Sensibility",
+   "released": "2026-10-29",
+   "items": [
+    {
+     "o": "Hindustan Times",
+     "u": "https://www.hindustantimes.com/entertainment/hollywood/sense-and-sensibility-review-the-enduring-pleasures-of-jane-austen-classic-gets-a-perceptive-and-adaptation-101793432756674.html",
+     "h": "Sense and Sensibility review: The enduring pleasures of Jane Austen's classic gets a faithful and melancholic adaptation",
+     "d": "2026-10-31"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/sense-and-sensibility-movie-review-daisy-edgar-jones-shines-in-this-genteel-persuasion/article71643648.ece",
+     "h": "‘Sense and Sensibility’ movie review: Daisy Edgar-Jones shines in this genteel persuasion",
+     "d": "2026-10-31"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1496785": {
+   "title": "Aadarsha Kutumbam House No: 47 - AK47",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/aadarsha-kutumbam-house-no47-movie-review-venkatesh-anchors-trivikrams-family-drama/article71641841.ece",
+     "h": "‘Aadarsha Kutumbam-House No.47’ movie review: Venkatesh anchors Trivikram’s predictable yet entertaining family drama",
+     "d": "2026-10-30"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1234139": {
+   "title": "Jailer 2",
+   "released": "2026-10-16",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/jailer-2-review-rajinikanth-fanboy-fun-with-flawed-villains/20261015.htm",
+     "h": "Jailer 2 Review: Overstuffed But Fun!",
+     "d": "2026-10-15"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/jailer-2-movie-review-superstar-rajinikanth-nelson-shivarajkumar-mohanlal-anirudh-ravichander/article71587540.ece",
+     "h": "‘Jailer 2’ movie review: Rajinikanth’s flourishes elevate Nelson’s rousing herogasm",
+     "d": "2026-10-26"
+    }
+   ],
+   "updated": "2026-11-05"
+  },
+  "movie:1740967": {
+   "title": "Orijinal",
+   "released": "2026-10-29",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/orijinal-movie-review-a-time-travel-film-in-which-the-human-story-is-more-intriguing-than-the-time-travel/article71616842.ece",
+     "h": "‘Orijinal’ movie review: A time travel film in which the human story is more intriguing than the time travel",
+     "d": "2026-10-23"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1153576": {
+   "title": "Street Fighter",
+   "released": "2026-10-16",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/street-fighter-review-all-fists-no-fun/20261016.htm",
+     "h": "Street Fighter Review: All Fists, No Fun",
+     "d": "2026-10-16"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/street-fighter-movie-review-noah-centineo-andrew-schulz-vidyut-jammwal-cody-rhodes-roman-reigns-jason-momoa-50-cent/article71592175.ece",
+     "h": "‘Street Fighter’ movie review: Fists, fetishes and a fighting chance at cult status",
+     "d": "2026-10-23"
+    }
+   ],
+   "updated": "2026-11-05"
+  },
+  "movie:1375156": {
+   "title": "Udta Teer",
+   "released": "2026-10-23",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/udta-teer-review-misses-the-bullseye/20261023.htm",
+     "h": "Udta Teer Review: Misses The Bullseye",
+     "d": "2026-10-23"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/udta-teer-movie-review-ayushmann-khurrana-is-on-target-in-this-spy-misadventure/article71615236.ece",
+     "h": "‘Udta Teer’ movie review: Ayushmann Khurrana is on target in this spy misadventure",
+     "d": "2026-10-23"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1400940": {
+   "title": "Clayface",
+   "released": "2026-10-23",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/clayface-movie-review-tom-rhys-harries-shines-in-body-horror-thriller-clayface-review-clayface-ott-release/article71611386.ece",
+     "h": "‘Clayface’ movie review: Tom Rhys Harries shines in body-horror thriller",
+     "d": "2026-10-22"
+    },
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/clayface-review-bloody-good-fun/20261023.htm",
+     "h": "Clayface Review: Bloody Good Fun!",
+     "d": "2026-10-23"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1288069": {
+   "title": "Tenzing",
+   "released": "2026-10-15",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/tenzing-movie-review-genden-phuntsok-jennifer-peedom-tom-hiddleston-willem-dafoe-edmund-hillary/article71589471.ece",
+     "h": "‘Tenzing’ movie review: Genden Phuntsok is Mr. Amazing in Jennifer Peedom’s soulful ode to an overlooked hero",
+     "d": "2026-10-21"
+    }
+   ],
+   "updated": "2026-11-04"
+  },
+  "movie:1058424": {
+   "title": "Hope",
+   "released": "2026-10-23",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/hope-movie-review-na-hong-jin-hoyeon-korean-sci-fi-horror-movie/article71599282.ece",
+     "h": "‘Hope’ movie review: One Shibal After Another",
+     "d": "2026-10-18"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1255833": {
+   "title": "Whalefall",
+   "released": "2026-10-16",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/whalefall-movie-review-austin-abrams-is-a-fiercely-modern-jonah-in-this-whale-of-a-tale/article71592880.ece",
+     "h": "‘Whalefall’ movie review: Austin Abrams is a fiercely modern Jonah in this whale of a tale",
+     "d": "2026-10-16"
+    }
+   ],
+   "updated": "2026-10-31"
+  },
+  "movie:1654581": {
+   "title": "Nayyi Navelli",
+   "released": "2026-10-16",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/nayyi-navelli-review-muddled-mix-of-mythology-horror/20261016.htm",
+     "h": "Nayyi Navelli Review: Muddled Mess",
+     "d": "2026-10-16"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/nayyi-navelli-movie-review-yami-gautams-genre-neutral-offering-is-high-on-decibels-low-on-charms/article71591867.ece",
+     "h": "‘Nayyi Navelli’ movie review: Yami Gautam’s genre-neutral offering is high on decibels, low on charms",
+     "d": "2026-10-16"
+    }
+   ],
+   "updated": "2026-11-05"
+  },
+  "movie:1389172": {
+   "title": "Reporting Live",
+   "released": "2026-10-09",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/reporting-live-review-whistleblower-drama-lacks-punch/20261009.htm",
+     "h": "Reporting Live Review: Whistleblower Drama Lacks Punch",
+     "d": "2026-10-09"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/reporting-live-movie-review-lost-in-the-shifting-sands-parineeti-chopra-netflix/article71564548.ece",
+     "h": "‘Reporting Live’ movie review: Lost in the shifting sands",
+     "d": "2026-10-09"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1281331": {
+   "title": "The Social Reckoning",
+   "released": "2026-10-22",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/the-social-reckoning-review-aaron-sorkins-facebook-drama-is-a-timely-warning/20261009.htm",
+     "h": "The Social Reckoning Review: A Timely Warning",
+     "d": "2026-10-09"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/the-social-reckoning-movie-review-aaron-sorkin-facebook-files/article71563805.ece",
+     "h": "‘The Social Reckoning’ movie review: Aaron Sorkin can’t optimise the MSIs in his (Meta)stisised Facebook Files slop",
+     "d": "2026-10-09"
+    }
+   ],
+   "updated": "2026-11-03"
+  },
+  "tv:288673": {
+   "title": "Carrie",
+   "released": "2026-10-07",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/carrie-series-review-mike-flanagan-summer-h-howell-horror/article71555051.ece",
+     "h": "‘Carrie’ series review: Mike Flanagan finds humanity in horror",
+     "d": "2026-10-08"
+    }
+   ],
+   "updated": "2026-11-06"
+  },
+  "movie:1195803": {
+   "title": "Wicker",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "Scroll",
+     "u": "https://scroll.in/reel/1096763/wicker-review-an-exquisitely-crafted-fairy-tale-romance?utm_source=rss&utm_medium=public",
+     "h": "‘Wicker’ review: An exquisitely crafted fairy tale romance",
+     "d": "2026-10-30"
+    }
+   ],
+   "updated": "2026-11-03"
+  },
+  "movie:1802464": {
+   "title": "Meethe Mein Kya Hai",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/meethe-mein-kya-hai-review-low-key-diwali-drama/20261030.htm",
+     "h": "Meethe Mein Kya Hai Review: Low Key Diwali Drama",
+     "d": "2026-10-30"
+    },
+    {
+     "o": "Scroll",
+     "u": "https://scroll.in/reel/1096689/meethe-mein-kya-hai-review-a-pleasant-and-safe-diwali-offering?utm_source=rss&utm_medium=public",
+     "h": "‘Meethe Mein Kya Hai’ review: A pleasant and safe Diwali offering",
+     "d": "2026-10-30"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1395215": {
+   "title": "Sigma",
+   "released": "2026-10-02",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/sigma-movie-review-sundeep-kishan-anchors-jason-sanjays-debut-that-plays-too-safe/article71532321.ece",
+     "h": "‘Sigma’ movie review: Sundeep Kishan anchors Jason Sanjay’s debut that plays too safe",
+     "d": "2026-10-02"
+    },
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/sigma-review-how-not-to-make-a-heist-movie/20261003.htm",
+     "h": "Sigma Review: How Not To Make A Heist Movie",
+     "d": "2026-10-03"
+    }
+   ],
+   "updated": "2026-11-01"
+  },
+  "tv:243555": {
+   "title": "Akka",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/akka-review-a-girls-only-game-of-thrones/20261030.htm",
+     "h": "Akka Review: A Girls-Only Game of Thrones",
+     "d": "2026-10-30"
+    },
+    {
+     "o": "Scroll",
+     "u": "https://scroll.in/reel/1096718/akka-review-an-engrossing-bejewelled-catfight?utm_source=rss&utm_medium=public",
+     "h": "‘Akka’ review: An engrossing bejewelled catfight",
+     "d": "2026-10-30"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/akka-series-review-sisters-in-arms-keerthy-suresh-and-radhika-apte-hold-a-mirror-to-absolute-power/article71645081.ece",
+     "h": "‘Akka’ series review: Sisters in arms, Keerthy Suresh and Radhika Apte hold a mirror to absolute power",
+     "d": "2026-10-30"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "tv:289517": {
+   "title": "Dead-End Job",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "Hindustan Times",
+     "u": "https://www.hindustantimes.com/entertainment/web-series/dead-end-job-review-lee-jae-wook-netflix-horror-comedy-kdrama-turns-the-gig-economy-into-a-supernatural-nightmare-go-min-si-kim-min-ha-choi-hyun-wook-101793364577646.html",
+     "h": "Dead-End Job review: Lee Jae Wook's horror-comedy k-drama turns the gig economy into a supernatural nightmare",
+     "d": "2026-10-31"
+    }
+   ],
+   "updated": "2026-11-01"
+  },
+  "movie:1637705": {
+   "title": "#Cult",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/cult-movie-review-vishwak-sens-slasher-thriller-is-ambitious-but-lacks-finesse/article71644669.ece",
+     "h": "‘#Cult’ movie review: Vishwak Sen’s slasher thriller is ambitious but lacks finesse",
+     "d": "2026-10-31"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1374689": {
+   "title": "Pyre",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "Scroll",
+     "u": "https://scroll.in/reel/1096523/pyre-review-a-moving-tale-of-loneliness-and-endurance?utm_source=rss&utm_medium=public",
+     "h": "‘Pyre’ review: A moving tale of loneliness and endurance",
+     "d": "2026-10-29"
+    },
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/pyre-review-hauntingly-melancholic/20261030.htm",
+     "h": "Pyre Review: Hauntingly Melancholic",
+     "d": "2026-10-30"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/pyre-movie-review-an-ode-to-the-resilience-of-love/article71643904.ece",
+     "h": "‘Pyre’ movie review: An ode to the resilience of love",
+     "d": "2026-10-30"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1606527": {
+   "title": "418",
+   "released": "2026-10-23",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/418-movie-review-chaitra-j-achar-shines-in-a-promising-but-half-hearted-horror-saga/article71615232.ece",
+     "h": "‘418’ movie review: Chaitra J Achar shines in a promising but half-hearted horror saga",
+     "d": "2026-10-23"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:869152": {
+   "title": "Titans",
+   "released": "2026-10-22",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/titans-movie-review-jayasurya-starrer-fails-to-utilise-a-promising-concept-blending-humour-and-fantasy/article71612232.ece",
+     "h": "‘Titans’ movie review: Jayasurya-starrer fails to utilise a promising concept blending humour and fantasy",
+     "d": "2026-10-22"
+    }
+   ],
+   "updated": "2026-11-05"
+  },
+  "movie:1389379": {
+   "title": "Ranabaali",
+   "released": "2026-10-16",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/ranabaali-review-bland-forgettable-pre-independence-saga/20261016.htm",
+     "h": "Ranabaali Review: Bland, Forgettable",
+     "d": "2026-10-16"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/ranabaali-movie-review-vijay-deverakonda-rashmika-mandanna-rahul-sankrityan-arnold-vosloo/article71587870.ece",
+     "h": "‘Ranabaali’ movie review: Vijay Deverakonda, Rashmika Mandanna anchor a history-rich but overstuffed Rayalaseema drama",
+     "d": "2026-10-18"
+    }
+   ],
+   "updated": "2026-11-05"
+  },
+  "movie:1428295": {
+   "title": "Comrade Kalyan",
+   "released": "2026-10-09",
+   "items": [
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/sree-vishnu-comrade-kalyan-movie-review-and-rating.html",
+     "h": "Review: Sree Vishnu's Comrade Kalyan - A Decent Dose of Fun",
+     "d": "2026-10-09"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/comrade-kalyan-movie-review-sree-vishnus-brain-rot-comedy-delivers-a-few-good-laughs/article71563553.ece",
+     "h": "‘Comrade Kalyan’ movie review: Sree Vishnu’s brain-rot comedy delivers a few good laughs",
+     "d": "2026-10-09"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "tv:336831": {
+   "title": "The Traitors (Telugu)",
+   "released": "2026-10-14",
+   "items": [
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/the-traitors-telugu-review-and-rating.html",
+     "h": "OTT Review: The Traitors Telugu (3 Episodes) - Chinmayi’s Murder, Vidyullekha’s Exit and Ashika’s Strategy",
+     "d": "2026-10-15"
+    },
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/the-traitors-telugu-ott-review-and-rating.html",
+     "h": "OTT Review: The Traitors Telugu (Episodes 4–6) - Shravya Shines, Rahat’s Mind Games & a Big Win for Innocents",
+     "d": "2026-10-24"
+    },
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/the-traitors-telugu-ott-review-and-rating-2.html",
+     "h": "OTT Review: The Traitors Telugu (Episodes 7–9) – Shravya’s Shocking Twist, Ashika’s Exit & Innocents’ Struggle",
+     "d": "2026-11-01"
+    },
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/the-traitors-telugu-ott-review-and-rating-3.html",
+     "h": "The Traitors Telugu Finale Review: Who Won the Rs. 42.77 Lakh Prize Pot?",
+     "d": "2026-11-07"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "tv:337806": {
+   "title": "Least Eligible Bachelor",
+   "released": "2026-10-09",
+   "items": [
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/least-eligible-bachelor-telugu-web-series-on-etv-win.html",
+     "h": "OTT Review: Least Eligible Bachelor - Telugu Web Series on ETV Win",
+     "d": "2026-10-09"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1261763": {
+   "title": "Don't Trouble the Trouble",
+   "released": "2026-10-02",
+   "items": [
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/fahadh-faasils-dont-trouble-the-trouble-movie-review-and-rating.html",
+     "h": "Review: Don’t Trouble the Trouble - Works In Bits And Pieces",
+     "d": "2026-10-02"
+    },
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/dont-trouble-the-trouble-review-fafa-is-brilliant-but/20261003.htm",
+     "h": "Don't Trouble The Trouble Review: Brilliant FaFa But...",
+     "d": "2026-10-03"
+    }
+   ],
+   "updated": "2026-11-01"
+  },
+  "movie:1202167": {
+   "title": "Nakhrewaalii",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/nakhrewaalii-review-nakhra-of-a-movie/20261031.htm",
+     "h": "Nakhrewaalii Review: Nakhra Of A Movie",
+     "d": "2026-10-31"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1772549": {
+   "title": "Pehla Pyaar Doosri Baar",
+   "released": "2026-10-23",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/pehla-pyaar-doosri-baar-review-bumper-debut/20261023.htm",
+     "h": "Pehla Pyaar Doosri Baar Review: Bumper Debut",
+     "d": "2026-10-23"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "tv:338918": {
+   "title": "Chaar Yaar",
+   "released": "2026-10-23",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/chaar-yaar-review-dosti-crime-charming-mumbai/20261023.htm",
+     "h": "Chaar Yaar Review: Dosti, Crime, Charming Mumbai",
+     "d": "2026-10-23"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1081010": {
+   "title": "Prahaar: The Untold Story of Ujjwal Nikam",
+   "released": "2026-10-16",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/prahaar-the-untold-story-of-ujjwal-nikam-review-honest-film/20261016.htm",
+     "h": "Prahaar: The Untold Story of Ujjwal Nikam Review: Honest Film",
+     "d": "2026-10-16"
+    }
+   ],
+   "updated": "2026-11-05"
+  },
+  "tv:213375": {
+   "title": "VisionQuest",
+   "released": "2026-10-13",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/visionquest-review-paul-bettany-and-james-spader-shine-in-marvels-underwhelming-series/20261014.htm",
+     "h": "VisionQuest Review: Artificial Emotions",
+     "d": "2026-10-14"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "tv:302882": {
+   "title": "#Love",
+   "released": "2026-10-02",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/love-review-romcom-with-no-spark/20261002.htm",
+     "h": "#Love Review: Romcom With No Spark",
+     "d": "2026-10-02"
+    }
+   ],
+   "updated": "2026-11-01"
+  },
+  "movie:1800255": {
+   "title": "Enemy Of The Smuggler",
+   "released": "2026-10-30",
+   "items": [
+    {
+     "o": "Cinema Express",
+     "u": "https://www.cinemaexpress.com/tamil/review/2026/Oct/30/enemy-of-the-smuggler-review",
+     "h": "Enemy of the Smuggler Movie Review: Peddles convoluted storytelling",
+     "d": "2026-10-30"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/enemy-of-the-smuggler-movie-review-t-samaya-murali-jd-chakravarthy-lal-saran-shakthi-smeha/article71652479.ece",
+     "h": "‘Enemy of the Smuggler’ movie review: A gritty premise weighed down by commercial compulsions",
+     "d": "2026-11-02"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1453407": {
+   "title": "Gajab Raat",
+   "released": "2026-10-23",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/gajab-raat-review--manoj-bajpayee-saves-the-day/20261024.htm",
+     "h": "Gajab Raat Review: Manoj Bajpayee Saves The Day",
+     "d": "2026-10-24"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/gajab-raat-movie-review-manoj-bajpayee-lights-up-a-night-to-remember/article71617745.ece",
+     "h": "‘Gajab Raat’ movie review: Manoj Bajpayee lights up a night to remember",
+     "d": "2026-10-24"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:656908": {
+   "title": "Ramayana: Rise of a Legend",
+   "released": "2026-11-05",
+   "items": [
+    {
+     "o": "DNA",
+     "u": "https://www.dnaindia.com/bollywood/report-ramayana-movie-review-ranbir-kapoor-yash-nitesh-tiwari-namit-malhotra-sai-pallavi-bring-most-impactful-detailed-visually-rich-take-on-indian-epic-since-ramanand-sagar-s-ramayan-3223558",
+     "h": "Ramayana movie review: Ranbir Kapoor, Yash, Nitesh bring the most impactful, detailed, visually rich take on Indian epic since Ramanand Sagar's Ramayan",
+     "d": "2026-11-04"
+    },
+    {
+     "o": "Amar Ujala",
+     "u": "https://www.amarujala.com/entertainment/ramayana-part-1-movie-review-yash-ravana-ranbir-kapoor-raam-sai-pallavi-ravi-dubey-sunny-deol-namit-malhotra-2026-11-05",
+     "h": "Ramayana Movie Review: इमोशन नहीं यह वीएफएक्स वाली ‘रामायण’ है; रावण बनकर छाए यश, जानें कहां कमजोर पड़े रणबीर?",
+     "d": "2026-11-05"
+    },
+    {
+     "o": "Free Press Journal",
+     "u": "https://www.freepressjournal.in/entertainment/ramayana-review-yash-steals-the-show-as-ravana-in-nitesh-tiwaris-visually-stunning-retelling-but-ranbir-kapoor-and-sai-pallavi",
+     "h": "Ramayana Review: Yash Steals The Show As Ravana In Nitesh Tiwari's Visually Stunning Retelling, But Ranbir Kapoor And Sai Pallavi...",
+     "d": "2026-11-05"
+    },
+    {
+     "o": "Free Press Journal",
+     "u": "https://www.freepressjournal.in/entertainment/ramayana-review-both-nailed-it-bone-deep-sandeep-reddy-vanga-praises-ranbir-kapoor-and-yash-but-netizens-are-upset",
+     "h": "Ramayana Review: 'Both Nailed It Bone-Deep'; Sandeep Reddy Vanga Praises Ranbir Kapoor And Yash, But Netizens Are Upset",
+     "d": "2026-11-06"
+    }
+   ],
+   "updated": "2026-11-06"
+  },
+  "tv:292741": {
+   "title": "Nocturne",
+   "released": "2026-10-29",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/nocturne-series-review-stephen-graham-apple-tv-liev-schreiber-zazie-beetz-rory-culkin-poorna-jagannathan/article71669054.ece",
+     "h": "‘Nocturne’ series review: Stephen Graham’s Hannibal-esque monster makes for killer television",
+     "d": "2026-11-05"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1810711": {
+   "title": "Dilwali Diwali",
+   "released": "2026-11-05",
+   "items": [
+    {
+     "o": "Free Press Journal",
+     "u": "https://www.freepressjournal.in/entertainment/dilwali-diwali-review-mihir-ahuja-manoj-pahwa-and-neelu-kohli-bring-family-warmth-to-a-predictable-drama",
+     "h": "Dilwali Diwali Review: Mihir Ahuja, Manoj Pahwa And Neelu Kohli Bring Family Warmth To A Predictable Drama",
+     "d": "2026-11-05"
+    },
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/dilwali-diwali-review-charming-enough/20261105.htm",
+     "h": "Dilwali Diwali Review: Charming Enough",
+     "d": "2026-11-05"
+    },
+    {
+     "o": "Scroll",
+     "u": "https://scroll.in/reel/1096857/dilwali-diwali-review-for-once-a-film-is-too-short-to-release-its-ambitions?utm_source=rss&utm_medium=public",
+     "h": "‘Dilwali Diwali’ review: For once, a film is too short to release its ambitions",
+     "d": "2026-11-05"
+    },
+    {
+     "o": "Hindustan Times",
+     "u": "https://www.hindustantimes.com/entertainment/bollywood/dilwali-diwali-review-this-sweet-and-nostalgic-film-starring-manoj-pahwa-will-tug-at-your-heartstrings-netflix-101793965125261.html",
+     "h": "Dilwali Diwali review: This sweet and nostalgic film starring Manoj Pahwa will tug at your heartstrings",
+     "d": "2026-11-06"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1423191": {
+   "title": "Resident Evil",
+   "released": "2026-09-17",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/resident-evil-movie-review-zach-cregger-delivers-a-scary-bloody-and-surprisingly-funny-horror-ride/20260917.htm",
+     "h": "Resident Evil Review: Wicked Fun!",
+     "d": "2026-09-17"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1555847": {
+   "title": "Garividi Lakshmi",
+   "released": "2026-10-17",
+   "items": [
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/garividi-lakshmi-telugu-movie-review-and-rating.html",
+     "h": "Review: Garividi Lakshmi - Honest Attempt, Middling Execution",
+     "d": "2026-10-17"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/garividi-lakshmi-movie-review-anandhi-leads-a-compelling-biopic/article71595326.ece",
+     "h": "‘Garividi Lakshmi’ movie review: Anandhi leads a compelling biopic",
+     "d": "2026-10-19"
+    }
+   ],
+   "updated": "2026-11-06"
+  },
+  "movie:1327835": {
+   "title": "Mookuthi Amman 2",
+   "released": "2026-11-06",
+   "items": [
+    {
+     "o": "Cinema Express",
+     "u": "https://www.cinemaexpress.com/tamil/review/2026/Nov/06/mookuthi-amman-2-movie-review-a-systematic-desecration-of-the-amman-genre",
+     "h": "Mookuthi Amman 2 movie review: A systematic desecration of the amman genre",
+     "d": "2026-11-06"
+    },
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/mookuthi-amman-2-review-nayantharas-mythological-sequel-fails-to-impress/20261107.htm",
+     "h": "Mookuthi Amman 2 Review: Divine Intervention Needed!",
+     "d": "2026-11-07"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1402181": {
+   "title": "Scene",
+   "released": "2026-11-06",
+   "items": [
+    {
+     "o": "Cinema Express",
+     "u": "https://www.cinemaexpress.com/tamil/review/2026/Nov/06/scene-movie-review-suriya-jithus-quirky-experiment-subverts-superstardom-to-fantastic-effect",
+     "h": "Scene Movie Review: Suriya-Jithu’s quirky experiment subverts superstardom to fantastic effect",
+     "d": "2026-11-06"
+    },
+    {
+     "o": "Hindustan Times",
+     "u": "https://www.hindustantimes.com/entertainment/tamil-cinema/scene-movie-review-jithu-madhavan-follow-up-aavesham-unserious-hero-esque-film-suriya-nazriya-nazim-naslen-101793953191346.html",
+     "h": "Scene movie review: Jithu Madhavan ably follows up Aavesham with another unserious yet hero-esque film for Suriya",
+     "d": "2026-11-06"
+    },
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/suriyas-scene-review-jithu-madhavan-delivers-engaging-investigative-thriller/20261106.htm",
+     "h": "Scene Review: Suriya is The 'Scene'-Stealer!",
+     "d": "2026-11-06"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/scene-movie-review-suriya-jithu-madhavan-naslen-nazriya-nazim-sushin-shyam/article71673522.ece",
+     "h": "‘Scene’ movie review: Suriya redefines mass in Jithu Madhavan’s ‘scene’-tillating dark comedy",
+     "d": "2026-11-06"
+    },
+    {
+     "o": "Vikatan",
+     "u": "https://cinema.vikatan.com/kollywood/suriya-nazriya-and-naslen-starrer-scene-movie-review",
+     "h": "Scene Review: அட! புதிய பரிமாணத்தில் சூர்யா - ஜித்து மாதவன் காட்டும் ‘சீன்’ எப்படி?",
+     "d": "2026-11-06"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:926867": {
+   "title": "Nooru Kodi Vaanavil",
+   "released": "2026-11-06",
+   "items": [
+    {
+     "o": "Cinema Express",
+     "u": "https://www.cinemaexpress.com/tamil/review/2026/Nov/06/nooru-kodi-vaanavil-movie-review-this-stale-romance-struggles-to-find-its-hues",
+     "h": "Nooru Kodi Vaanavil Movie Review: This stale romance struggles to find its hues",
+     "d": "2026-11-06"
+    }
+   ],
+   "updated": "2026-11-06"
+  },
+  "movie:1612811": {
+   "title": "Disco",
+   "released": "2026-11-06",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/disco-movie-review-stylish-treatment-fails-to-paper-over-the-lack-of-substance-in-this-generic-mafia-story/article71674961.ece",
+     "h": "‘Disco’ movie review: Stylish treatment fails to paper over the lack of substance in this generic mafia story",
+     "d": "2026-11-06"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1803837": {
+   "title": "Summer Holidays",
+   "released": "2026-11-06",
+   "items": [
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/summer-holidays-telugu-movie-review-and-rating.html",
+     "h": "Review: Summer Holidays - A Nostalgic Ride With Familiar Moments",
+     "d": "2026-11-06"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/summer-holidays-movie-review-srikar-nayans-telugu-film-is-a-simplistic-yet-heartfelt-ode-to-rural-nostalgia/article71672853.ece",
+     "h": "‘Summer Holidays’ movie review: A simplistic yet heartfelt ode to rural nostalgia",
+     "d": "2026-11-06"
+    }
+   ],
+   "updated": "2026-11-07"
+  },
+  "movie:1555215": {
+   "title": "Baa Baa Black Sheep",
+   "released": "2026-10-09",
+   "items": [
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/telugu/news/baa-baa-black-sheep-movie-review-in-telugu.html",
+     "h": "Telugu Review : Baa Baa Black Sheep",
+     "d": "2026-10-09"
+    }
+   ],
+   "updated": "2026-11-07"
+  }
+ }
+}
