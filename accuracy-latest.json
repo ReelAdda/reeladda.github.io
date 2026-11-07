@@ -3,28 +3,27 @@
  "checked": 108,
  "errors": 0,
  "pagesDisagreeing": 2,
- "high": 1,
- "correctable": 1,
+ "high": 2,
+ "correctable": 2,
  "byField": {
-  "platform": 1,
-  "genres": 1
+  "platform": 2
  },
  "rows": [
   {
    "field": "platform",
    "severity": "high",
-   "page": "Netflix, WeTV",
-   "tmdb": "Netflix, Tencent Video",
-   "code": "my",
-   "slug": "filter"
+   "page": "Sky Go",
+   "tmdb": "Now TV Cinema",
+   "code": "uk",
+   "slug": "flushed-away"
   },
   {
-   "field": "genres",
-   "severity": "low",
-   "page": "Action & Adventure / Crime",
-   "tmdb": "Action & Adventure, Drama",
-   "code": "my",
-   "slug": "kudrat-1968-high-council"
+   "field": "platform",
+   "severity": "high",
+   "page": "Prime Video, Home of Horror",
+   "tmdb": "Prime Video, JustWatch TV Plus",
+   "code": "de",
+   "slug": "hagazussa"
   }
  ]
 }
