@@ -1,21 +1,30 @@
 {
- "date": "2026-11-06",
+ "date": "2026-11-07",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
- "high": 0,
+ "pagesDisagreeing": 2,
+ "high": 1,
  "correctable": 1,
  "byField": {
-  "rent/buy": 1
+  "platform": 1,
+  "genres": 1
  },
  "rows": [
   {
-   "field": "rent/buy",
-   "severity": "medium",
-   "page": "none",
-   "tmdb": "Apple TV Store, Amazon Video",
-   "code": "mx",
-   "slug": "resident-evil"
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, WeTV",
+   "tmdb": "Netflix, Tencent Video",
+   "code": "my",
+   "slug": "filter"
+  },
+  {
+   "field": "genres",
+   "severity": "low",
+   "page": "Action & Adventure / Crime",
+   "tmdb": "Action & Adventure, Drama",
+   "code": "my",
+   "slug": "kudrat-1968-high-council"
   }
  ]
 }
