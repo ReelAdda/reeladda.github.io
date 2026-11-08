@@ -242,6 +242,16 @@
  {
   "code": "us",
   "kind": "movie",
+  "tmdbId": 1801870,
+  "title": "Second Chance Holiday",
+  "released": "2026-11-17",
+  "language": "English",
+  "genre": "TV Movie / Romance",
+  "th": null
+ },
+ {
+  "code": "us",
+  "kind": "movie",
   "tmdbId": 1300968,
   "title": "The Hunger Games: Sunrise on the Reaping",
   "released": "2026-11-20",
@@ -257,16 +267,6 @@
   "released": "2026-11-25",
   "language": "English",
   "genre": "Adventure / Animation",
-  "th": "2026-11-25"
- },
- {
-  "code": "us",
-  "kind": "movie",
-  "tmdbId": 1457866,
-  "title": "THE FURTHER MIS-ADVENTURES OF CLIFF BOOTH",
-  "released": "2026-11-25",
-  "language": "English",
-  "genre": "Drama / Comedy",
   "th": "2026-11-25"
  },
  {
@@ -622,21 +622,21 @@
  {
   "code": "de",
   "kind": "movie",
-  "tmdbId": 1540151,
-  "title": "Block 10",
-  "released": "2026-11-05",
-  "language": "German",
-  "genre": "Drama",
-  "th": "2026-11-05"
- },
- {
-  "code": "de",
-  "kind": "movie",
   "tmdbId": 1447206,
   "title": "Ghost Song",
   "released": "2026-11-05",
   "language": "German",
   "genre": "Romance / Fantasy",
+  "th": "2026-11-05"
+ },
+ {
+  "code": "de",
+  "kind": "movie",
+  "tmdbId": 1540151,
+  "title": "Block 10",
+  "released": "2026-11-05",
+  "language": "German",
+  "genre": "Drama",
   "th": "2026-11-05"
  },
  {
@@ -2072,12 +2072,12 @@
  {
   "code": "br",
   "kind": "movie",
-  "tmdbId": 1375646,
-  "title": "Colony",
-  "released": "2026-10-22",
-  "language": "Korean",
-  "genre": "Horror / Action",
-  "th": "2026-10-22"
+  "tmdbId": 1381071,
+  "title": "Godzilla Minus Zero",
+  "released": "2026-11-05",
+  "language": "Japanese",
+  "genre": "Science Fiction / Horror",
+  "th": "2026-11-05"
  },
  {
   "code": "br",
@@ -2112,12 +2112,12 @@
  {
   "code": "br",
   "kind": "movie",
-  "tmdbId": 1381071,
-  "title": "Godzilla Minus Zero",
-  "released": "2026-11-05",
-  "language": "Japanese",
-  "genre": "Science Fiction / Horror",
-  "th": "2026-11-05"
+  "tmdbId": 1375646,
+  "title": "Colony",
+  "released": "2026-10-22",
+  "language": "Korean",
+  "genre": "Horror / Action",
+  "th": "2026-10-22"
  },
  {
   "code": "br",
@@ -2552,11 +2552,11 @@
  {
   "code": "fr",
   "kind": "movie",
-  "tmdbId": 1430841,
-  "title": "The Phantom of the Opera",
+  "tmdbId": 1544163,
+  "title": "Words of Love",
   "released": "2026-10-28",
   "language": "French",
-  "genre": "Thriller / Romance",
+  "genre": "Comedy / Drama",
   "th": "2026-10-28"
  },
  {
@@ -2702,6 +2702,16 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1374689,
+  "title": "Pyre",
+  "released": "2026-10-30",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1475799,
   "title": "Haiwaan",
   "released": "2026-09-11",
@@ -2722,19 +2732,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1374689,
-  "title": "Pyre",
-  "released": "2026-10-30",
-  "language": "Hindi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1792167,
-  "title": "Only Me",
-  "released": "2026-10-09",
+  "tmdbId": 1654566,
+  "title": "Vibe",
+  "released": "2026-09-18",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -2752,9 +2752,19 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1640396,
-  "title": "Prem Keetanu",
-  "released": "2026-10-02",
+  "tmdbId": 1792167,
+  "title": "Only Me",
+  "released": "2026-10-09",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1785611,
+  "title": "Tu Hai Meri Kiran",
+  "released": "2026-10-23",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -2772,26 +2782,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1371023,
-  "title": "Chand Mera Dil",
-  "released": "2026-05-22",
-  "language": "Hindi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1654566,
-  "title": "Vibe",
-  "released": "2026-09-18",
-  "language": "Hindi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1215889,
   "title": "Daayra",
   "released": "2026-09-18",
@@ -2802,9 +2792,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1696678,
-  "title": "Sahan",
-  "released": "2026-05-20",
+  "tmdbId": 1806232,
+  "title": "Tum Mere Ho",
+  "released": "2026-10-23",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -2812,9 +2802,49 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1785611,
-  "title": "Tu Hai Meri Kiran",
-  "released": "2026-10-23",
+  "tmdbId": 1640396,
+  "title": "Prem Keetanu",
+  "released": "2026-10-02",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1371023,
+  "title": "Chand Mera Dil",
+  "released": "2026-05-22",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1081010,
+  "title": "Prahaar: The Untold Story of Ujjwal Nikam",
+  "released": "2026-10-16",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1169537,
+  "title": "Batwara 1947",
+  "released": "2026-08-13",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1696678,
+  "title": "Sahan",
+  "released": "2026-05-20",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -2842,39 +2872,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1169537,
-  "title": "Batwara 1947",
-  "released": "2026-08-13",
-  "language": "Hindi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1081010,
-  "title": "Prahaar: The Untold Story of Ujjwal Nikam",
-  "released": "2026-10-16",
-  "language": "Hindi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1389153,
   "title": "Jeevan Bheema Yojana",
   "released": "2026-09-04",
-  "language": "Hindi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1564177,
-  "title": "Dongri: Gangster's Paradise",
-  "released": "2026-10-09",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -2895,6 +2895,16 @@
   "tmdbId": 1640649,
   "title": "Love Lottery",
   "released": "2026-09-25",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1564177,
+  "title": "Dongri: Gangster's Paradise",
+  "released": "2026-10-09",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -3062,6 +3072,16 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1765342,
+  "title": "Mahaprabhu Jagannath",
+  "released": "2026-08-28",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1720201,
   "title": "Dulhaniya Le Aaeegi",
   "released": "2026-07-24",
@@ -3072,8 +3092,48 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1738850,
+  "title": "Indrajaal",
+  "released": "2026-07-24",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1740946,
+  "title": "The Bose Files: Sach Ya Sazish",
+  "released": "2026-07-30",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1713546,
   "title": "Jeena Dil Se",
+  "released": "2026-05-29",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1713420,
+  "title": "Uttar Da Puttar",
+  "released": "2026-07-24",
+  "language": "Hindi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1206167,
+  "title": "Return of the Jungle",
   "released": "2026-05-29",
   "language": "Hindi",
   "genre": null,
@@ -3092,19 +3152,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1713420,
-  "title": "Uttar Da Puttar",
-  "released": "2026-07-24",
-  "language": "Hindi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1732803,
-  "title": "Mahun Dilwala Tahun Dilwali",
-  "released": "2026-06-12",
+  "tmdbId": 1710034,
+  "title": "Afreet - A Never Ending Night",
+  "released": "2026-10-14",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -3122,9 +3172,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1740946,
-  "title": "The Bose Files: Sach Ya Sazish",
-  "released": "2026-07-30",
+  "tmdbId": 1732803,
+  "title": "Mahun Dilwala Tahun Dilwali",
+  "released": "2026-06-12",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -3142,8 +3192,8 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1206167,
-  "title": "Return of the Jungle",
+  "tmdbId": 1690372,
+  "title": "Krishna Aur Chitthi",
   "released": "2026-05-29",
   "language": "Hindi",
   "genre": null,
@@ -3162,19 +3212,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1710034,
-  "title": "Afreet - A Never Ending Night",
-  "released": "2026-10-14",
-  "language": "Hindi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1690372,
-  "title": "Krishna Aur Chitthi",
-  "released": "2026-05-29",
+  "tmdbId": 1703919,
+  "title": "Teesri Begum",
+  "released": "2026-05-22",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -3192,16 +3232,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1703919,
-  "title": "Teesri Begum",
-  "released": "2026-05-22",
-  "language": "Hindi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1769098,
   "title": "Parched",
   "released": "2026-09-07",
@@ -3212,9 +3242,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1748479,
-  "title": "Harrd Disk",
-  "released": "2026-08-21",
+  "tmdbId": 1721639,
+  "title": "Tera Mera Nata",
+  "released": "2026-06-26",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -3232,9 +3262,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1721639,
-  "title": "Tera Mera Nata",
-  "released": "2026-06-26",
+  "tmdbId": 1748479,
+  "title": "Harrd Disk",
+  "released": "2026-08-21",
   "language": "Hindi",
   "genre": null,
   "census": true
@@ -3302,9 +3332,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1234139,
-  "title": "Jailer 2",
-  "released": "2026-10-15",
+  "tmdbId": 1327835,
+  "title": "Mookuthi Amman 2",
+  "released": "2026-11-06",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3312,9 +3342,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1327835,
-  "title": "Mookuthi Amman 2",
-  "released": "2026-11-06",
+  "tmdbId": 1234139,
+  "title": "Jailer 2",
+  "released": "2026-10-15",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3372,9 +3402,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1329084,
-  "title": "The Grand Master",
-  "released": "2026-09-25",
+  "tmdbId": 1728763,
+  "title": "Drones",
+  "released": "2026-10-16",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3382,9 +3412,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1715800,
-  "title": "Dark Giant",
-  "released": "2026-06-19",
+  "tmdbId": 1329084,
+  "title": "The Grand Master",
+  "released": "2026-09-25",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3402,26 +3432,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1576223,
-  "title": "Rage",
-  "released": "2026-09-18",
-  "language": "Tamil",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1728763,
-  "title": "Drones",
-  "released": "2026-10-16",
-  "language": "Tamil",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1800255,
   "title": "Enemy Of The Smuggler",
   "released": "2026-10-30",
@@ -3432,9 +3442,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1620357,
-  "title": "Lakshmikanthan Kolai Vazhakku",
-  "released": "2026-07-10",
+  "tmdbId": 1715800,
+  "title": "Dark Giant",
+  "released": "2026-06-19",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3442,19 +3452,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1764201,
-  "title": "Yen Ennai Edho Seidhai",
-  "released": "2026-09-04",
-  "language": "Tamil",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1732327,
-  "title": "Maaruvesham",
-  "released": "2026-10-01",
+  "tmdbId": 1576223,
+  "title": "Rage",
+  "released": "2026-09-18",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3472,9 +3472,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1737178,
-  "title": "Ego Raman",
-  "released": "2026-05-29",
+  "tmdbId": 1764201,
+  "title": "Yen Ennai Edho Seidhai",
+  "released": "2026-09-04",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3482,19 +3482,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1590380,
-  "title": "Ram and Leela",
-  "released": "2026-08-21",
-  "language": "Tamil",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1758603,
-  "title": "BeeP",
-  "released": "2026-09-18",
+  "tmdbId": 1620357,
+  "title": "Lakshmikanthan Kolai Vazhakku",
+  "released": "2026-07-10",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3512,29 +3502,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1607621,
-  "title": "Arjunan Per Paththu",
-  "released": "2026-07-17",
-  "language": "Tamil",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 954445,
-  "title": "Yezhu Kadal Yezhu Malai",
+  "tmdbId": 1732327,
+  "title": "Maaruvesham",
   "released": "2026-10-01",
-  "language": "Tamil",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1766087,
-  "title": "Nalla Padam",
-  "released": "2026-09-18",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3552,9 +3522,39 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1812810,
-  "title": "Pani Vizhum Iravu",
-  "released": "2026-10-30",
+  "tmdbId": 1590380,
+  "title": "Ram and Leela",
+  "released": "2026-08-21",
+  "language": "Tamil",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 954445,
+  "title": "Yezhu Kadal Yezhu Malai",
+  "released": "2026-10-01",
+  "language": "Tamil",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1758603,
+  "title": "BeeP",
+  "released": "2026-09-18",
+  "language": "Tamil",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1737178,
+  "title": "Ego Raman",
+  "released": "2026-05-29",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3572,6 +3572,36 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1812810,
+  "title": "Pani Vizhum Iravu",
+  "released": "2026-10-30",
+  "language": "Tamil",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1607621,
+  "title": "Arjunan Per Paththu",
+  "released": "2026-07-17",
+  "language": "Tamil",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1766087,
+  "title": "Nalla Padam",
+  "released": "2026-09-18",
+  "language": "Tamil",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1738076,
   "title": "Andharan",
   "released": "2026-06-26",
@@ -3582,9 +3612,29 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1773328,
+  "title": "Cold Call",
+  "released": "2026-09-18",
+  "language": "Tamil",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1010608,
   "title": "Thaainilam",
   "released": "2026-10-09",
+  "language": "Tamil",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1819399,
+  "title": "7 Star Boys",
+  "released": "2026-09-04",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3612,9 +3662,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1773328,
-  "title": "Cold Call",
-  "released": "2026-09-18",
+  "tmdbId": 1806060,
+  "title": "Chola Kollai Bommai",
+  "released": "2026-08-21",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3632,19 +3682,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1806060,
-  "title": "Chola Kollai Bommai",
-  "released": "2026-08-21",
-  "language": "Tamil",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1819399,
-  "title": "7 Star Boys",
-  "released": "2026-09-04",
+  "tmdbId": 1789037,
+  "title": "Singgaramm",
+  "released": "2026-10-30",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3655,16 +3695,6 @@
   "tmdbId": 1595789,
   "title": "Valluvan",
   "released": "2026-06-12",
-  "language": "Tamil",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1789037,
-  "title": "Singgaramm",
-  "released": "2026-10-30",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3692,9 +3722,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1709970,
-  "title": "Alagana Mamiya",
-  "released": "2026-06-05",
+  "tmdbId": 1815835,
+  "title": "Rashomon",
+  "released": "2026-09-17",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3712,9 +3742,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1696756,
-  "title": "Karaa",
-  "released": "2026-05-15",
+  "tmdbId": 1709970,
+  "title": "Alagana Mamiya",
+  "released": "2026-06-05",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3722,9 +3752,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1815835,
-  "title": "Rashomon",
-  "released": "2026-09-17",
+  "tmdbId": 1696756,
+  "title": "Karaa",
+  "released": "2026-05-15",
   "language": "Tamil",
   "genre": null,
   "census": true
@@ -3752,16 +3782,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1456196,
-  "title": "Thella Kaagitham",
-  "released": "2026-10-02",
-  "language": "Telugu",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1389379,
   "title": "Ranabaali",
   "released": "2026-10-16",
@@ -3772,8 +3792,8 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1690876,
-  "title": "Anakapalli",
+  "tmdbId": 1456196,
+  "title": "Thella Kaagitham",
   "released": "2026-10-02",
   "language": "Telugu",
   "genre": null,
@@ -3782,9 +3802,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1637705,
-  "title": "#Cult",
-  "released": "2026-10-30",
+  "tmdbId": 1690876,
+  "title": "Anakapalli",
+  "released": "2026-10-02",
   "language": "Telugu",
   "genre": null,
   "census": true
@@ -3822,8 +3842,18 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1688459,
-  "title": "KillR",
+  "tmdbId": 1555847,
+  "title": "Garividi Lakshmi",
+  "released": "2026-10-17",
+  "language": "Telugu",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1637705,
+  "title": "#Cult",
   "released": "2026-10-30",
   "language": "Telugu",
   "genre": null,
@@ -3832,9 +3862,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1555847,
-  "title": "Garividi Lakshmi",
-  "released": "2026-10-17",
+  "tmdbId": 1688459,
+  "title": "KillR",
+  "released": "2026-10-30",
   "language": "Telugu",
   "genre": null,
   "census": true
@@ -3852,9 +3882,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1772904,
-  "title": "Happy Journey",
-  "released": "2026-09-18",
+  "tmdbId": 1814023,
+  "title": "Adhey Neevu Adhey Nenu",
+  "released": "2026-07-31",
   "language": "Telugu",
   "genre": null,
   "census": true
@@ -3872,29 +3902,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1814023,
-  "title": "Adhey Neevu Adhey Nenu",
-  "released": "2026-07-31",
-  "language": "Telugu",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1542674,
-  "title": "Anumana Pakshi",
-  "released": "2026-09-25",
-  "language": "Telugu",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1403738,
-  "title": "VISA - Vintara Saradaga",
-  "released": "2026-10-17",
+  "tmdbId": 1772904,
+  "title": "Happy Journey",
+  "released": "2026-09-18",
   "language": "Telugu",
   "genre": null,
   "census": true
@@ -3922,26 +3932,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1719646,
-  "title": "Gossip",
-  "released": "2026-06-26",
-  "language": "Telugu",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1628882,
-  "title": "Shabara",
-  "released": "2026-10-02",
-  "language": "Telugu",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1757305,
   "title": "Harudu",
   "released": "2026-05-15",
@@ -3952,9 +3942,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 80827,
-  "title": "Samarasimha Reddy",
-  "released": "1999-01-13",
+  "tmdbId": 1542674,
+  "title": "Anumana Pakshi",
+  "released": "2026-09-25",
   "language": "Telugu",
   "genre": null,
   "census": true
@@ -3962,9 +3952,19 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1741006,
-  "title": "Police Complaint",
-  "released": "2026-06-12",
+  "tmdbId": 1403738,
+  "title": "VISA - Vintara Saradaga",
+  "released": "2026-10-17",
+  "language": "Telugu",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1719646,
+  "title": "Gossip",
+  "released": "2026-06-26",
   "language": "Telugu",
   "genre": null,
   "census": true
@@ -3982,9 +3982,39 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1805372,
-  "title": "I'm Handsome (Since 2009)",
+  "tmdbId": 1628882,
+  "title": "Shabara",
+  "released": "2026-10-02",
+  "language": "Telugu",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1741006,
+  "title": "Police Complaint",
   "released": "2026-06-12",
+  "language": "Telugu",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 80827,
+  "title": "Samarasimha Reddy",
+  "released": "1999-01-13",
+  "language": "Telugu",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1799104,
+  "title": "Vasudheva Sutham",
+  "released": "2026-07-10",
   "language": "Telugu",
   "genre": null,
   "census": true
@@ -4002,9 +4032,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1799104,
-  "title": "Vasudheva Sutham",
-  "released": "2026-07-10",
+  "tmdbId": 1805372,
+  "title": "I'm Handsome (Since 2009)",
+  "released": "2026-06-12",
   "language": "Telugu",
   "genre": null,
   "census": true
@@ -4042,16 +4072,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1722502,
-  "title": "Dishti Bomma",
-  "released": "2026-06-26",
-  "language": "Telugu",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1705450,
   "title": "Bheemseri",
   "released": "2026-05-23",
@@ -4062,9 +4082,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1640189,
-  "title": "Itlu Kanmani",
-  "released": "2026-07-26",
+  "tmdbId": 1722502,
+  "title": "Dishti Bomma",
+  "released": "2026-06-26",
   "language": "Telugu",
   "genre": null,
   "census": true
@@ -4075,6 +4095,16 @@
   "tmdbId": 1705585,
   "title": "Sandigdham",
   "released": "2026-05-29",
+  "language": "Telugu",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1640189,
+  "title": "Itlu Kanmani",
+  "released": "2026-07-26",
   "language": "Telugu",
   "genre": null,
   "census": true
@@ -4132,26 +4162,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1811490,
-  "title": "Spring",
-  "released": "2026-10-30",
-  "language": "Malayalam",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1624274,
-  "title": "Aaram",
-  "released": "2026-09-25",
-  "language": "Malayalam",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1616268,
   "title": "Aroopi",
   "released": "2026-07-03",
@@ -4162,9 +4172,29 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1811490,
+  "title": "Spring",
+  "released": "2026-10-30",
+  "language": "Malayalam",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1588472,
   "title": "L&O - Law and Order",
   "released": "2026-09-18",
+  "language": "Malayalam",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1624274,
+  "title": "Aaram",
+  "released": "2026-09-25",
   "language": "Malayalam",
   "genre": null,
   "census": true
@@ -4212,9 +4242,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1731502,
-  "title": "Vivaah",
-  "released": "2026-08-07",
+  "tmdbId": 1814423,
+  "title": "Kushpu",
+  "released": "2026-11-06",
   "language": "Malayalam",
   "genre": null,
   "census": true
@@ -4232,16 +4262,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1244547,
-  "title": "Udumbanchola Vision",
-  "released": "2026-10-23",
-  "language": "Malayalam",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1790417,
   "title": "Dhanushkodiyilekku",
   "released": "2026-10-09",
@@ -4252,9 +4272,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1814423,
-  "title": "Kushpu",
-  "released": "2026-11-06",
+  "tmdbId": 1731502,
+  "title": "Vivaah",
+  "released": "2026-08-07",
   "language": "Malayalam",
   "genre": null,
   "census": true
@@ -4262,29 +4282,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1585736,
-  "title": "Kalari Kid – She Hits Back",
-  "released": "2026-09-01",
-  "language": "Malayalam",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1776596,
-  "title": "Izhakalkkappuram",
-  "released": "2026-10-02",
-  "language": "Malayalam",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1766084,
-  "title": "Gandharva",
-  "released": "2026-09-12",
+  "tmdbId": 1244547,
+  "title": "Udumbanchola Vision",
+  "released": "2026-10-23",
   "language": "Malayalam",
   "genre": null,
   "census": true
@@ -4302,29 +4302,39 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1776596,
+  "title": "Izhakalkkappuram",
+  "released": "2026-10-02",
+  "language": "Malayalam",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1585736,
+  "title": "Kalari Kid – She Hits Back",
+  "released": "2026-09-01",
+  "language": "Malayalam",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1766084,
+  "title": "Gandharva",
+  "released": "2026-09-12",
+  "language": "Malayalam",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1722975,
   "title": "Kla Kla Klee Klee Nazriya Thirinjunookki",
   "released": "2026-07-03",
-  "language": "Malayalam",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1805385,
-  "title": "Aaru Aanugal",
-  "released": "2026-09-25",
-  "language": "Malayalam",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1748380,
-  "title": "Aali",
-  "released": "2026-08-14",
   "language": "Malayalam",
   "genre": null,
   "census": true
@@ -4352,9 +4362,29 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1748380,
+  "title": "Aali",
+  "released": "2026-08-14",
+  "language": "Malayalam",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1815722,
   "title": "Samarasa",
   "released": "2026-10-30",
+  "language": "Malayalam",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1805385,
+  "title": "Aaru Aanugal",
+  "released": "2026-09-25",
   "language": "Malayalam",
   "genre": null,
   "census": true
@@ -4372,9 +4402,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1566124,
-  "title": "Madhuramee Jeevitham",
-  "released": "2026-08-14",
+  "tmdbId": 864687,
+  "title": "Aanaparambile WorldCup",
+  "released": "2022-11-25",
   "language": "Malayalam",
   "genre": null,
   "census": true
@@ -4382,9 +4412,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 864687,
-  "title": "Aanaparambile WorldCup",
-  "released": "2022-11-25",
+  "tmdbId": 1566124,
+  "title": "Madhuramee Jeevitham",
+  "released": "2026-08-14",
   "language": "Malayalam",
   "genre": null,
   "census": true
@@ -4432,9 +4462,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 691267,
-  "title": "Graamaayana",
-  "released": "2026-07-03",
+  "tmdbId": 1703067,
+  "title": "Bail",
+  "released": "2026-10-02",
   "language": "Kannada",
   "genre": null,
   "census": true
@@ -4442,9 +4472,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1703067,
-  "title": "Bail",
-  "released": "2026-10-02",
+  "tmdbId": 691267,
+  "title": "Graamaayana",
+  "released": "2026-07-03",
   "language": "Kannada",
   "genre": null,
   "census": true
@@ -4472,9 +4502,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1747494,
-  "title": "September 21",
-  "released": "2026-05-22",
+  "tmdbId": 1770836,
+  "title": "Border Diaries",
+  "released": "2026-10-23",
   "language": "Kannada",
   "genre": null,
   "census": true
@@ -4492,29 +4522,19 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1747494,
+  "title": "September 21",
+  "released": "2026-05-22",
+  "language": "Kannada",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1610874,
   "title": "Heggana Muddu",
   "released": "2026-09-25",
-  "language": "Kannada",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1770836,
-  "title": "Border Diaries",
-  "released": "2026-10-23",
-  "language": "Kannada",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1215812,
-  "title": "Karavali",
-  "released": "2026-07-24",
   "language": "Kannada",
   "genre": null,
   "census": true
@@ -4532,29 +4552,19 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1215812,
+  "title": "Karavali",
+  "released": "2026-07-24",
+  "language": "Kannada",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1757697,
   "title": "Love Seasons",
   "released": "2026-07-03",
-  "language": "Kannada",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1702692,
-  "title": "Balaramana Dinagalu",
-  "released": "2026-06-26",
-  "language": "Kannada",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1730231,
-  "title": "Rakky",
-  "released": "2026-07-10",
   "language": "Kannada",
   "genre": null,
   "census": true
@@ -4572,9 +4582,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1662770,
-  "title": "Mother Promise",
-  "released": "2026-07-10",
+  "tmdbId": 1702692,
+  "title": "Balaramana Dinagalu",
+  "released": "2026-06-26",
   "language": "Kannada",
   "genre": null,
   "census": true
@@ -4592,19 +4602,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1740534,
-  "title": "Tadviruddha",
-  "released": "2026-07-31",
-  "language": "Kannada",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1744541,
-  "title": "Picture",
-  "released": "2026-08-07",
+  "tmdbId": 1662770,
+  "title": "Mother Promise",
+  "released": "2026-07-10",
   "language": "Kannada",
   "genre": null,
   "census": true
@@ -4622,8 +4622,18 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1747816,
-  "title": "Jolly",
+  "tmdbId": 1730231,
+  "title": "Rakky",
+  "released": "2026-07-10",
+  "language": "Kannada",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1740534,
+  "title": "Tadviruddha",
   "released": "2026-07-31",
   "language": "Kannada",
   "genre": null,
@@ -4642,9 +4652,29 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1744541,
+  "title": "Picture",
+  "released": "2026-08-07",
+  "language": "Kannada",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1806780,
   "title": "Mr. Lucky",
   "released": "2026-10-30",
+  "language": "Kannada",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1747816,
+  "title": "Jolly",
+  "released": "2026-07-31",
   "language": "Kannada",
   "genre": null,
   "census": true
@@ -4742,9 +4772,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1650810,
-  "title": "Baggo",
-  "released": "2026-08-28",
+  "tmdbId": 1803812,
+  "title": "Patakka Guddiyan",
+  "released": "2026-10-30",
   "language": "Punjabi",
   "genre": null,
   "census": true
@@ -4762,9 +4792,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1803812,
-  "title": "Patakka Guddiyan",
-  "released": "2026-10-30",
+  "tmdbId": 1650810,
+  "title": "Baggo",
+  "released": "2026-08-28",
   "language": "Punjabi",
   "genre": null,
   "census": true
@@ -4782,9 +4812,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1692948,
-  "title": "Chardikala",
-  "released": "2026-05-29",
+  "tmdbId": 1651316,
+  "title": "Eh Din Roz Ni Aune",
+  "released": "2026-10-09",
   "language": "Punjabi",
   "genre": null,
   "census": true
@@ -4792,9 +4822,19 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1651316,
-  "title": "Eh Din Roz Ni Aune",
-  "released": "2026-10-09",
+  "tmdbId": 1744543,
+  "title": "Dama Dum Mast Kalandar",
+  "released": "2026-05-22",
+  "language": "Punjabi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1692948,
+  "title": "Chardikala",
+  "released": "2026-05-29",
   "language": "Punjabi",
   "genre": null,
   "census": true
@@ -4822,9 +4862,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1780846,
-  "title": "Bandkhor",
-  "released": "2026-09-24",
+  "tmdbId": 1774540,
+  "title": "MANJAR",
+  "released": "2026-09-18",
   "language": "Marathi",
   "genre": null,
   "census": true
@@ -4832,9 +4872,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1774540,
-  "title": "MANJAR",
-  "released": "2026-09-18",
+  "tmdbId": 1780846,
+  "title": "Bandkhor",
+  "released": "2026-09-24",
   "language": "Marathi",
   "genre": null,
   "census": true
@@ -4852,16 +4892,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1576389,
-  "title": "Gondhal",
-  "released": "2025-11-14",
-  "language": "Marathi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1728425,
   "title": "Magazine",
   "released": "2026-10-23",
@@ -4872,29 +4902,29 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1729323,
-  "title": "Bhootam Bhayyam",
-  "released": "2026-07-24",
-  "language": "Marathi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1727155,
-  "title": "Drushya Adrushya",
-  "released": "2026-06-19",
-  "language": "Marathi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1783048,
   "title": "Aali Mothi Shahani",
   "released": "2026-10-02",
+  "language": "Marathi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1576389,
+  "title": "Gondhal",
+  "released": "2025-11-14",
+  "language": "Marathi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1729323,
+  "title": "Bhootam Bhayyam",
+  "released": "2026-07-24",
   "language": "Marathi",
   "genre": null,
   "census": true
@@ -4922,6 +4952,16 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1727155,
+  "title": "Drushya Adrushya",
+  "released": "2026-06-19",
+  "language": "Marathi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1608247,
   "title": "Baapya",
   "released": "2026-05-15",
@@ -4942,16 +4982,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1747939,
-  "title": "Sammarth",
-  "released": "2026-08-14",
-  "language": "Marathi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1738125,
   "title": "Swapnasundari",
   "released": "2026-07-24",
@@ -4964,6 +4994,26 @@
   "kind": "movie",
   "tmdbId": 1719518,
   "title": "Cup Bashi",
+  "released": "2026-06-19",
+  "language": "Marathi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1747939,
+  "title": "Sammarth",
+  "released": "2026-08-14",
+  "language": "Marathi",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1718397,
+  "title": "Ghabadkund",
   "released": "2026-06-19",
   "language": "Marathi",
   "genre": null,
@@ -4992,16 +5042,6 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1718397,
-  "title": "Ghabadkund",
-  "released": "2026-06-19",
-  "language": "Marathi",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1607833,
   "title": "Bohurupi: The Golden Daku",
   "released": "2026-10-15",
@@ -5012,8 +5052,8 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1538861,
-  "title": "Emperor vs Sarat Chandra",
+  "tmdbId": 1591522,
+  "title": "The Eken: Kerala-e Kurukshetra",
   "released": "2026-10-15",
   "language": "Bengali",
   "genre": null,
@@ -5022,8 +5062,8 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1591522,
-  "title": "The Eken: Kerala-e Kurukshetra",
+  "tmdbId": 1538861,
+  "title": "Emperor vs Sarat Chandra",
   "released": "2026-10-15",
   "language": "Bengali",
   "genre": null,
@@ -5052,9 +5092,29 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1736395,
+  "title": "Ei Shohorer Gaan",
+  "released": "2026-10-10",
+  "language": "Bengali",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1711502,
   "title": "Nevermind",
   "released": "2026-07-03",
+  "language": "Bengali",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1493932,
+  "title": "Phera",
+  "released": "2026-05-29",
   "language": "Bengali",
   "genre": null,
   "census": true
@@ -5072,58 +5132,8 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1530591,
-  "title": "Pinjar",
-  "released": "2026-07-10",
-  "language": "Bengali",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1736395,
-  "title": "Ei Shohorer Gaan",
-  "released": "2026-10-10",
-  "language": "Bengali",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
   "tmdbId": 1607836,
   "title": "Phool Pishi O Edward",
-  "released": "2026-05-29",
-  "language": "Bengali",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1242197,
-  "title": "Beporoya",
-  "released": "2026-09-17",
-  "language": "Bengali",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1728829,
-  "title": "Bhootu Aaya Bhago",
-  "released": "2026-10-02",
-  "language": "Bengali",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1493932,
-  "title": "Phera",
   "released": "2026-05-29",
   "language": "Bengali",
   "genre": null,
@@ -5142,9 +5152,29 @@
  {
   "code": "in",
   "kind": "movie",
+  "tmdbId": 1728829,
+  "title": "Bhootu Aaya Bhago",
+  "released": "2026-10-02",
+  "language": "Bengali",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
   "tmdbId": 1736398,
   "title": "Autobi",
   "released": "2026-09-25",
+  "language": "Bengali",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1530591,
+  "title": "Pinjar",
+  "released": "2026-07-10",
   "language": "Bengali",
   "genre": null,
   "census": true
@@ -5162,9 +5192,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1666714,
-  "title": "Chobiwala",
-  "released": "2026-07-24",
+  "tmdbId": 1242197,
+  "title": "Beporoya",
+  "released": "2026-09-17",
   "language": "Bengali",
   "genre": null,
   "census": true
@@ -5175,6 +5205,26 @@
   "tmdbId": 1373504,
   "title": "Maya Satya Bhram",
   "released": "2026-08-28",
+  "language": "Bengali",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1666714,
+  "title": "Chobiwala",
+  "released": "2026-07-24",
+  "language": "Bengali",
+  "genre": null,
+  "census": true
+ },
+ {
+  "code": "in",
+  "kind": "movie",
+  "tmdbId": 1154844,
+  "title": "Abar Hawa Bodol",
+  "released": "2026-06-12",
   "language": "Bengali",
   "genre": null,
   "census": true
@@ -5202,9 +5252,9 @@
  {
   "code": "in",
   "kind": "movie",
-  "tmdbId": 1154844,
-  "title": "Abar Hawa Bodol",
-  "released": "2026-06-12",
+  "tmdbId": 1741127,
+  "title": "Amader 7 Kahon",
+  "released": "2026-08-07",
   "language": "Bengali",
   "genre": null,
   "census": true
@@ -5214,16 +5264,6 @@
   "kind": "movie",
   "tmdbId": 874550,
   "title": "Deep6",
-  "released": "2026-08-07",
-  "language": "Bengali",
-  "genre": null,
-  "census": true
- },
- {
-  "code": "in",
-  "kind": "movie",
-  "tmdbId": 1741127,
-  "title": "Amader 7 Kahon",
   "released": "2026-08-07",
   "language": "Bengali",
   "genre": null,
