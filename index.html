@@ -134,12 +134,16 @@
   .hero-verdict { margin-top: 10px; }
   .hero-verdict:empty { display: none; }
   .vpill.vp-hero { background: #3FD08A; color: #0F2A1D; font-size: 13px; }
-  /* Audience-rating dial, top right of the hero (Oct 2026 redesign). */
-  .hero-dial { position: absolute; top: 18px; right: 18px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  /* Audience-rating dial (8 Nov 2026): bottom right, over the dark end of the gradient and away
+     from faces, its label above it, level with the verdict's on the left. */
+  .hero-dial { position: absolute; bottom: 24px; right: 24px; display: flex; flex-direction: column-reverse; align-items: center; gap: 6px; }
   .hero-dial:empty { display: none; }
-  .dial.dial-hero { width: 68px; height: 68px; background: conic-gradient(#FFF7EC var(--p, 0%), rgba(255,255,255,0.18) 0); }
-  .dial.dial-hero span { width: 54px; height: 54px; background: var(--indigo); color: #fff; font-size: 21px; }
-  .hero-dial-label { font-size: 9.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #E4E1FF; }
+  .dial.dial-hero { width: 56px; height: 56px; background: conic-gradient(#FFF7EC var(--p, 0%), rgba(255,255,255,0.18) 0); box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+  .dial.dial-hero span { width: 44px; height: 44px; background: var(--indigo); color: #fff; font-size: 18px; }
+  /* The two halves' labels, in the same small capitals: "FilmyChill Verdict" and "TMDB audience". */
+  .hero-dial-label, .hv-ey { font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,247,236,.85); }
+  .hv-ey { display: block; margin: 12px 0 6px; }
+  .hero-meta { padding-right: 150px; }
 
   /* ---- Toolbar ---- */
   .toolbar { max-width: 1100px; margin: 26px auto 0; padding: 0 24px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
@@ -246,17 +250,18 @@
 
   /* ---- Cards ---- */
   /* Cleaner cards (Oct 2026): poster-led, the rank sits on the poster, no borders. */
-  .card { background: var(--card); border: 1px solid transparent; border-radius: 16px; padding: 12px 14px;
+  .card { background: var(--card); border: 1px solid rgba(36,29,82,.07); border-radius: 16px; padding: 12px 14px;
     display: grid; grid-template-columns: 72px 1fr 52px; gap: 14px; cursor: pointer;
-    box-shadow: 0 1px 2px rgba(36,29,82,.04), 0 6px 18px rgba(36,29,82,.06);
+    box-shadow: 0 1px 2px rgba(28,24,56,.04), 0 8px 24px rgba(28,24,56,.07);
     transition: transform .18s, box-shadow .18s; position: relative; color: inherit; text-decoration: none; }
   .card:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(64,56,199,0.13); }
   @media (prefers-reduced-motion: reduce) { .card:hover { transform: none; } }
   .pw { position: relative; width: 72px; height: 106px; }
-  .poster { display: block; width: 72px; height: 106px; object-fit: cover; border-radius: 10px; background: var(--bg); }
+  .poster { display: block; width: 72px; height: 106px; object-fit: cover; border-radius: 10px; background: var(--bg); box-shadow: 0 4px 12px rgba(28,24,56,.18); }
   .poster.ph { display: flex; align-items: center; justify-content: center; font-family: 'Anton', sans-serif; font-size: 34px; color: #C9C2E6; background: linear-gradient(160deg, #EDEAFB, #DCD8F4); }
-  .rank { position: absolute; left: -5px; bottom: -7px; font-family: 'Anton', sans-serif; font-size: 32px; line-height: 1; color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; }
-  .grid > :first-child .rank { color: var(--marigold); }
+  /* The rank as a badge in the poster corner (8 Nov 2026), marigold for #1. */
+  .rank { position: absolute; left: 6px; top: 6px; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 7px; display: grid; place-items: center; background: rgba(28,24,56,.86); box-shadow: 0 2px 6px rgba(0,0,0,.25); font-family: 'Anton', sans-serif; font-size: 14px; line-height: 1; color: #FFF7EC; }
+  .grid > :first-child .rank { background: var(--marigold); color: #1C1838; }
   .cb { min-width: 0; padding-top: 2px; }
   .cchips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
   .cchip { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #F1EFFC; color: var(--indigo); white-space: nowrap; }
@@ -264,12 +269,12 @@
   .cchip.new { background: #FFF3DC; color: #8A5800; }
   .cchip.foryou { background: transparent; box-shadow: inset 0 0 0 1px var(--indigo); }
   /* Verdict pill + its one-line reason (Oct 2026 redesign). Colours: VPILL_CSS in lib/meter.js. */
-  .vpill { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 12px; font-weight: 800; line-height: 1.35; white-space: nowrap; }
+  .vpill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px 3px 7px; border-radius: 7px; font-size: 12px; font-weight: 800; line-height: 1.35; white-space: nowrap; } .vmark { width: 1.05em; height: 1.05em; flex: none; }
   .vp-must { background: #1E7A4C; color: #FFFFFF; } .vp-worth { background: #FFAD1F; color: #241D52; }
   .vp-skip { background: #FBE3DF; color: #A52617; } .vp-early { background: #EFE6D6; color: #5E5878; }
-  .cb .vpill { margin-top: 9px; }
+  .cb .vpill { margin-top: 10px; }
   .sreason { font-size: 12.5px; line-height: 1.4; color: #4A4366; margin-top: 4px; }
-  .sreason.srv { color: #4038C7; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+  .sreason.srv { color: #4038C7; font-weight: 600; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; margin-top: 6px; white-space: nowrap; }
   .fcs-rv a { color: #4038C7; font-weight: 600; }
   /* Audience-rating dial (CSS only): a conic ring filled to the rating, coloured by verdict. */
   .dial { --dc: #D18A00; width: 48px; height: 48px; border-radius: 50%; align-self: center; justify-self: end;
@@ -492,7 +497,7 @@
     .foot-cols { grid-template-columns: 1fr 1fr; gap: 18px 16px; }
     .foot-country, .foot-country-list { text-align: left; justify-content: flex-start; }
   }
-  @media (max-width: 480px) { .card { grid-template-columns: 72px 1fr 52px; gap: 12px; padding: 10px 12px; } .rank { font-size: 28px; } }
+  @media (max-width: 480px) { .card { grid-template-columns: 72px 1fr 52px; gap: 12px; padding: 10px 12px; } }
   /* ---- Phones: films within the first screen (Sept 2026 review) ----
      Section heads: the subtitle drops to its own line instead of crushing "In Theatres / Top 7".
      Toolbar: language chips scroll sideways in ONE row (was up to three), and Sort / Share /
@@ -519,9 +524,8 @@
     .platform, .fresh-badge { font-size: 9.5px; padding: 2px 6px; letter-spacing: .8px; }
     .fresh-badge.foryou { padding: 1px 5px; }
     .ednote { margin-top: 14px; }
-    .hero-dial { top: 14px; right: 14px; }
-    .dial.dial-hero { width: 56px; height: 56px; } .dial.dial-hero span { width: 44px; height: 44px; font-size: 18px; }
-    .hero-title { padding-right: 70px; }
+    .hero-dial { bottom: 20px; right: 16px; }
+    .hero-meta { padding-right: 118px; }
   }
   /* Small phones (360–400px, most Android): keep each toolbar row intact rather than letting
      one button fall onto a row of its own; header selector and "Updated" share a line. */

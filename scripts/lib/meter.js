@@ -68,12 +68,15 @@ function meterSymbols() {
 // ---- Verdict pills and audience-rating dials (Oct 2026 redesign) ----
 // The verdict as a coloured pill, one colour set on every surface (homepage cards, the language
 // hubs, /new-on-ott/). The homepage's client twin is verdictPill() in js/app.js.
-const VPILL_CSS = ".vpill { display:inline-block; padding:3px 9px; border-radius:6px; font-size:12px; font-weight:800; line-height:1.35; white-space:nowrap; }"
+// The brand mark in every verdict pill (8 Nov 2026, owner): whose verdict it is, without a word. One
+// colour (currentColor), so it takes each pill's own text colour. Twin: VERDICT_MARK in js/app.js.
+const VERDICT_MARK = "<svg class=\"vmark\" viewBox=\"0 0 100 100\" aria-hidden=\"true\"><circle cx=\"50\" cy=\"50\" r=\"37\" fill=\"none\" stroke=\"currentColor\" stroke-opacity=\".3\" stroke-width=\"13\"/><circle cx=\"50\" cy=\"50\" r=\"37\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"13\" stroke-linecap=\"round\" stroke-dasharray=\"176 300\" transform=\"rotate(38 50 50)\"/><path d=\"M42 33 Q40 32 40 35 L40 65 Q40 68 42 67 L66 52.5 Q68 50 66 47.5 Z\" fill=\"currentColor\"/></svg>";
+const VPILL_CSS = ".vpill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px 3px 7px; border-radius:7px; font-size:12px; font-weight:800; line-height:1.35; white-space:nowrap; } .vmark { width:1.05em; height:1.05em; flex:none; }"
   + " .vp-must { background:#1E7A4C; color:#FFFFFF; } .vp-worth { background:#FFAD1F; color:#241D52; }"
   + " .vp-skip { background:#FBE3DF; color:#A52617; } .vp-early { background:#EFE6D6; color:#5E5878; }"
   + " .rev { color:var(--mute); font-size:12.5px; font-weight:600; margin-left:4px; }";
 function verdictPill(label, level = meterLevel(label)) {
-  return `<span class="vpill vp-${level}">${escHtml(label)}</span>`;
+  return `<span class="vpill vp-${level}">${VERDICT_MARK}${escHtml(label)}</span>`;
 }
 // THE RING AND ITS EVIDENCE (Oct 2026). Two jobs, never mixed:
 //   - the pill says the verdict, or why there isn't one ("Critics split", "Too early" for a new
@@ -146,4 +149,4 @@ function rowScoreLine(item, extra = "") {
   return `<div class="rm">${pill}${note ? ` <span class="rev">${escHtml(note)}</span>` : ""}${extra}</div>`;
 }
 
-module.exports = { METER_ZONES, ROW_RING_CSS, VPILL_CSS, dialRating, rowRing, evidenceLabel, heroDialInner, meterInner, meterLevel, meterSvg, meterSymbols, ratingDial, rowScoreLine, verdictPill };
+module.exports = { VERDICT_MARK, METER_ZONES, ROW_RING_CSS, VPILL_CSS, dialRating, rowRing, evidenceLabel, heroDialInner, meterInner, meterLevel, meterSvg, meterSymbols, ratingDial, rowScoreLine, verdictPill };

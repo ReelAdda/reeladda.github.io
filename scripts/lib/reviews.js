@@ -285,9 +285,8 @@ function outlets(items) {
 function reviewsCardText(rv) {
   const names = outlets(rv).map((x) => x.o);
   if (!names.length) return "";
-  const shown = names.slice(0, 2).join(", ");
-  const more = names.length - 2;
-  return `Read the reviews: ${shown}${more > 0 ? ` and ${more} more` : ""} →`;
+  // One line on the card (8 Nov 2026): the first outlet and how many more; the full list is one tap away.
+  return `Reviews: ${names[0]}${names.length > 1 ? ` +${names.length - 1}` : ""} →`;
 }
 
 module.exports = { FALLBACK_OUTLETS, FEEDS, REVIEWS_FILE, REVIEW_WINDOW_DAYS, fetchFeed, headlineMatches, isReview, loadReviews, matchReviews, outlets, parseFeed, parseStars, refreshReviews, reviewsCardText, reviewsFor, starAverage, useReviews, wantsReviews };

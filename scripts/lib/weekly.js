@@ -67,7 +67,8 @@ function ssrCardScoreBase(item, code) {
   const e = escHtml, s = item.fcScore;
   const reason = (text) => (text ? `<div class="sreason">${text}</div>` : "");
   if (s) {
-    const bits = [e(String(s.reason || "").replace(/\.$/, ""))];
+    // One clause on the card (8 Nov 2026): "Critics are positive", not "…; audience ratings are still coming in".
+    const bits = [e(String(s.reason || "").split(";")[0].trim().replace(/\.$/, ""))];
     if (s.early) bits.push(e(earlyReadLabel(s)));
     return verdictPill(s.verdict) + reason(bits.filter(Boolean).join(" · "));
   }

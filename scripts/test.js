@@ -1788,7 +1788,7 @@ test("SSR card and film page carry the verdict colours and the rating ring; the 
   const W = require("./lib/weekly.js"), C = require("./lib/cards.js");
   const it = { ...FCS_ITEM };
   const card = W.ssrCard(it, 0, "in");
-  assert.ok(/<span class="vpill vp-worth">Worth a watch<\/span>/.test(card) && /class="dial dial-aud"/.test(card) && !/dial-worth/.test(card), card);
+  assert.ok(/<span class="vpill vp-worth"><svg class="vmark"[\s\S]*?<\/svg>Worth a watch<\/span>/.test(card) && /class="dial dial-aud"/.test(card) && !/dial-worth/.test(card), card);
   const none = W.ssrCard({ ...it, fcScore: undefined }, 0, "in");
   assert.ok(/class="vpill vp-early"/.test(none) && /<div class="dial-note">(?:Few ratings|Not rated yet)<\/div>/.test(none) && !/class="dial /.test(none), "no score: a grey pill and the evidence as text, never a ring");
   const page = U.buildFilmPage(it, "2026-09-28", new Set(["the-love-hypothesis"]), { code: "in", name: "India" });
@@ -2793,7 +2793,8 @@ test("Pick of the Week is server-rendered and its backdrop preloaded", () => {
     verdict: "Must watch", backdrop: "https://image.tmdb.org/t/p/w780/v.jpg" }] };
   const hero = U.ssrHero(data);
   assert.ok(!/display:none/.test(hero), "visible in the HTML — no reveal, no layout shift");
-  assert.ok(/id="heroTitle">MobLand</.test(hero) && /id="heroVerdict"><span class="vpill vp-hero">Must watch<\/span></.test(hero));
+  // 8 Nov 2026: the verdict is labelled once, here, and its pill carries the brand mark.
+  assert.ok(/id="heroTitle">MobLand</.test(hero) && /id="heroVerdict"><span class="hv-ey">FilmyChill Verdict<\/span><span class="vpill vp-hero"><svg class="vmark"[\s\S]*?<\/svg>Must watch<\/span></.test(hero));
   // Oct 2026: both sizes on the element, the phone one first; the CSS picks by screen width.
   assert.ok(hero.includes('style="--hero-sm:url(&quot;https://image.tmdb.org/t/p/w300/v.jpg&quot;);--hero-lg:url(&quot;https://image.tmdb.org/t/p/w780/v.jpg&quot;)"'), hero);
   assert.strictEqual(U.heroPreload(data),
@@ -3576,7 +3577,7 @@ test("ssrCard: trending badge + trailer views render from data fields", () => {
     badge: "New season", freshDate: recent }, 0, "in");
   assert.ok(/<span class="cchip trend">Trending<\/span>/.test(html) && !html.includes("🔥"));
   // No score yet: one quiet line, carrying the one real signal there is — trailer buzz.
-  assert.ok(/<span class="vpill vp-early">Too early<\/span><div class="sreason">52M trailer views<\/div>/.test(html), html);
+  assert.ok(/<span class="vpill vp-early"><svg class="vmark"[\s\S]*?<\/svg>Too early<\/span><div class="sreason">52M trailer views<\/div>/.test(html), html);
   const scored = U.ssrCard({ title: "HotD", platform: "JioHotstar", rating: 8.2, votes: 900, verdict: "Must watch", kind: "tv",
     slug: "hotd", trailerViews: 52123456, fcScore: { verdict: "Must watch", reason: "Audiences love it.", audience: "Loved", critics: null, basis: "audience" } }, 0, "in");
   assert.ok(!scored.includes("trailer views"), "a scored card keeps to the score");
@@ -5533,10 +5534,10 @@ test("TV runtime (per-episode) stays off the card meta", () => {
 test("unscored card: 'Too early' only when it's just out; otherwise says what's missing", () => {
   const recent = new Date(Date.now() - 5 * 864e5).toISOString().slice(0, 10);
   const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: null, votes: 3, released: recent, verdict: "Just released — verdict soon", slug: "t" }, 0, "in");
-  assert.ok(/<span class="vpill vp-early">Too early<\/span>/.test(html), html);
+  assert.ok(/<span class="vpill vp-early"><svg class="vmark"[\s\S]*?<\/svg>Too early<\/span>/.test(html), html);
   const old = U.ssrCard({ title: "Old", language: "Hindi", genre: "Drama", kind: "movie", rating: 5.7, votes: 9, released: "2026-03-10", slug: "old" }, 0, "in");
   assert.ok(!old.includes("Too early"), "a March release is not 'too early'");
-  assert.ok(old.includes('<span class="vpill vp-early">Not enough ratings</span><div class="sreason">Only 9 ratings</div>'), "older film: counted, never 'early': " + old);
+  assert.ok(old.includes('<span class="vpill vp-early">' + require("./lib/meter.js").VERDICT_MARK + 'Not enough ratings</span><div class="sreason">Only 9 ratings</div>'), "older film: counted, never 'early': " + old);
   assert.ok(old.includes('<div class="dial-note">Few ratings</div>') && !old.includes('class="dial '), "no score, no ring: its 5.7 from 9 ratings isn't shown");
 });
 
@@ -5587,7 +5588,7 @@ test("noScoreText: early only within 4 weeks; exact counts; split critics named"
 test("scored card: FilmyChill verdict pill, its reason, and the audience rating in the dial", () => {
   const html = U.ssrCard({ title: "T", language: "Hindi", genre: "Action", kind: "movie", rating: 7.9, votes: 900, verdict: "Must watch", slug: "t", runtime: 128,
     fcScore: { verdict: "Must watch", reason: "Audiences and critics agree.", audience: "Loved", critics: "positive", basis: "both" } }, 0, "in");
-  assert.ok(/<span class="vpill vp-must">Must watch<\/span><div class="sreason">Audiences and critics agree<\/div>/.test(html), html);
+  assert.ok(/<span class="vpill vp-must"><svg class="vmark"[\s\S]*?<\/svg>Must watch<\/span><div class="sreason">Audiences and critics agree<\/div>/.test(html), html);
   assert.ok(html.includes('<div class="dial dial-aud" style="--p:79%" role="img" aria-label="TMDB audience rating 7.9 out of 10"><span>7.9</span></div>'), "the rating sits in the dial, one neutral colour: it is TMDB's, not the verdict");
   assert.ok(!/★/.test(html), "and not twice");
   assert.ok(/<div class="meta">Hindi · Action · 2h 8m<\/div>/.test(html), "short details line");
@@ -8965,7 +8966,7 @@ test("most searched: pages from Search Console, honest heading, nothing the page
   assert.deepStrictEqual(S.popularItems(top, "in", manifest, { keep: (m) => m.lang === "Hindi" }).map((x) => x.slug), ["a", "c", "d"], "a hub's own filter");
   const html = S.popularBlockHtml(items, "in", top);
   assert.ok(html.includes("<h2 id=\"pop-h\">Most searched this week</h2>") && html.includes("found most on Google in the latest week"), "a week of data: 'this week'");
-  assert.ok(html.includes('<a href="/movie/a.html"><span class="pop-b"><span class="pop-t">A</span><span class="pop-m">Hindi · 2026</span> <span class="vpill vp-must">Must watch</span></span></a>'), html);
+  assert.ok(html.includes('<a href="/movie/a.html"><span class="pop-b"><span class="pop-t">A</span><span class="pop-m">Hindi · 2026</span> <span class="vpill vp-must">' + require("./lib/meter.js").VERDICT_MARK + 'Must watch</span></span></a>'), html);
   assert.ok(html.includes('<span class="pop-t">C &amp; Co</span>') && !/Too early/.test(html), "escaped; only real verdicts get a pill");
   assert.ok(/Tamil · 2025 · Series/.test(html));
   assert.ok(S.popularBlockHtml(items, "in", { from: "2026-09-20", to: "2026-10-17" }).includes("Most searched in the last 28 days"), "28 days of data never says 'this week'");
@@ -9262,7 +9263,7 @@ test("evidence rules: the pill and the slot never contradict each other, at any 
   const read = (it) => {
     const s = F.fcScore(it); if (s) it.fcScore = s;
     const card = W.ssrCard({ ...it, slug: "x" }, 0, "in");
-    return { pill: (card.match(/<span class="vpill[^>]*>([^<]*)/) || [])[1], ring: /class="dial dial-/.test(card),
+    return { pill: (card.match(/<span class="vpill[^>]*>(?:<svg class="vmark"[\s\S]*?<\/svg>)?([^<]*)/) || [])[1], ring: /class="dial dial-/.test(card),
       note: strip((card.match(/<div class="dial-note">([^<]*)<\/div>/) || ["", ""])[1]), reason: strip((card.match(/<div class="sreason">([^<]*)/) || ["", ""])[1]) };
   };
   // Critics decided it: the slot names the reviews, never "Few ratings".
@@ -11355,18 +11356,25 @@ test("cards: 'Read the reviews: A, B →' under the pill where the card has no c
   assert.strictEqual(RV.wantsReviews({ language: "English", votes: 12, fcScore: { critics: "positive", early: true } }, true), false, "English keeps the narrow rule");
   const rv = [{ o: "Indian Express", u: "https://indianexpress.com/x", h: "x", d: "2026-10-23" }, { o: "The Hindu", u: "https://www.thehindu.com/y", h: "y", d: "2026-10-23" }, { o: "The Hindu", u: "https://www.thehindu.com/y2", h: "y2", d: "2026-10-24" }];
   assert.deepStrictEqual(RV.outlets(rv), [{ o: "Indian Express", u: "https://indianexpress.com/x" }, { o: "The Hindu", u: "https://www.thehindu.com/y" }], "one entry per outlet, first link");
-  assert.strictEqual(RV.reviewsCardText(rv), "Read the reviews: Indian Express, The Hindu →");
-  assert.strictEqual(RV.reviewsCardText([...rv, { o: "Scroll", u: "https://scroll.in/z" }, { o: "NDTV", u: "https://ndtv.com/n" }]), "Read the reviews: Indian Express, The Hindu and 2 more →");
+  // 8 Nov 2026: one line on the card, the first outlet and how many more.
+  assert.strictEqual(RV.reviewsCardText(rv), "Reviews: Indian Express +1 →");
+  assert.strictEqual(RV.reviewsCardText([...rv, { o: "Scroll", u: "https://scroll.in/z" }, { o: "NDTV", u: "https://ndtv.com/n" }]), "Reviews: Indian Express +3 →");
+  assert.strictEqual(RV.reviewsCardText([rv[0]]), "Reviews: Indian Express →", "one outlet: no count");
   assert.strictEqual(RV.reviewsCardText([]), "");
   // The server card: the line after the pill and its reason, names only, no link inside the card's link.
   const it = { title: "Udta Teer", slug: "udta-teer", language: "Hindi", genre: "Comedy", runtime: 137, kind: "movie", votes: 4, criticsCount: 9, released: "2026-10-23", rv: RV.outlets(rv) };
   const card = W.ssrCard(it, 3, "in");
-  assert.ok(/<\/span>(?:<div class="sreason">[^<]*<\/div>)?<div class="sreason srv">Read the reviews: Indian Express, The Hindu →<\/div>/.test(card), card.match(/vpill[\s\S]{0,200}/)[0]);
+  assert.ok(/<\/span>(?:<div class="sreason">[^<]*<\/div>)?<div class="sreason srv">Reviews: Indian Express \+1 →<\/div>/.test(card), card.match(/vpill[\s\S]{0,200}/)[0]);
   assert.strictEqual((card.match(/<a /g) || []).length, 1, "the card is still one link");
   assert.ok(!/srv/.test(W.ssrCard({ ...it, rv: undefined }, 3, "in")), "no outlets, no line");
   // The homepage twin (js/app.js) and the detail sheet's links; the data step sets item.rv.
   const app = homeSource(), upd = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
-  assert.ok(app.includes("return 'Read the reviews: ' + names.slice(0, 2).join(', ') + (more > 0 ? ' and ' + more + ' more' : '') + ' →';"), "twin wording");
+  assert.ok(app.includes("return 'Reviews: ' + names[0] + (names.length > 1 ? ' +' + (names.length - 1) : '') + ' →';"), "twin wording");
+  // The reason on a card is one clause; the full sentence stays on the sheet and the film page (8 Nov 2026).
+  const two = W.ssrCard({ title: "R", slug: "r", language: "Hindi", genre: "Drama", kind: "movie", rating: 7, votes: 900,
+    fcScore: { verdict: "Worth a watch", reason: "Critics are positive; audience ratings are still coming in.", audience: null, critics: "positive", basis: "critics" } }, 0, "in");
+  assert.ok(/<div class="sreason">Critics are positive<\/div>/.test(two) && !/still coming in/.test(two), "one clause on the card");
+  assert.ok(app.includes("String(s.reason || '').split(';')[0].trim()"), "the homepage twin does the same");
   assert.ok(app.includes('<div class="sreason srv">${esc(text)}</div>') && app.includes('<div class="fcs-sig fcs-rv"><b>Reviews:</b>') && /if \(s\) return links;/.test(app), "card line and sheet links");
   assert.ok(/RV\.wantsReviews\(it, cited\) \? RV\.outlets\(RV\.reviewsFor\(it\.kind, it\.tmdbId\)\) : \[\]/.test(upd) && /it\.rv = list/.test(upd), "update.js sets item.rv by the same rule");
   assert.ok(require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8").includes(".sreason.srv { color: #4038C7;"), "homepage CSS (the hubs' template too): the line in the link colour");

@@ -831,7 +831,7 @@ function ssrHero(data, code = "in") {
       <span class="hero-eyebrow"><svg class="ic" aria-hidden="true"><use href="#icTrophy"/></svg> Pick of the Week</span>
       <div class="hero-title" id="heroTitle">${e(pick.title)}</div>
       <div class="hero-meta" id="heroMeta">${e(meta)}</div>
-      <div class="hero-verdict" id="heroVerdict">${verdict ? `<span class="vpill vp-hero">${e(verdict)}</span>` : ""}</div>
+      <div class="hero-verdict" id="heroVerdict">${verdict ? `<span class="hv-ey">FilmyChill Verdict</span><span class="vpill vp-hero">${require("./meter.js").VERDICT_MARK}${e(verdict)}</span>` : ""}</div>
     </div>
   </div>
 </div>`;

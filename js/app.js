@@ -247,7 +247,9 @@ function cardChips(item) {
 // rating (out of 10), shown where the card used to print "★ 7.5" — not the FilmyChill Score,
 // which is a verdict.
 function verdictLevel(v) { return /^must/i.test(v || '') ? 'must' : /^skip/i.test(v || '') ? 'skip' : /^worth/i.test(v || '') ? 'worth' : 'early'; }
-function verdictPill(label, level) { return `<span class="vpill vp-${level || verdictLevel(label)}">${esc(label)}</span>`; }
+// The brand mark in every verdict pill (8 Nov 2026): twin of VERDICT_MARK in scripts/lib/meter.js.
+const VERDICT_MARK = '<svg class="vmark" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="37" fill="none" stroke="currentColor" stroke-opacity=".3" stroke-width="13"/><circle cx="50" cy="50" r="37" fill="none" stroke="currentColor" stroke-width="13" stroke-linecap="round" stroke-dasharray="176 300" transform="rotate(38 50 50)"/><path d="M42 33 Q40 32 40 35 L40 65 Q40 68 42 67 L66 52.5 Q68 50 66 47.5 Z" fill="currentColor"/></svg>';
+function verdictPill(label, level) { return `<span class="vpill vp-${level || verdictLevel(label)}">${VERDICT_MARK}${esc(label)}</span>`; }
 function dialRating(item) {
   const s = item && item.fcScore;
   if (!s || !s.audience || item.rating == null || !item.votes) return null;
@@ -285,8 +287,7 @@ function reviewsCardText(rv) {
   const names = []; const seen = {};
   (rv || []).forEach((r) => { if (r && r.o && r.u && !seen[r.o]) { seen[r.o] = 1; names.push(r.o); } });
   if (!names.length) return '';
-  const more = names.length - 2;
-  return 'Read the reviews: ' + names.slice(0, 2).join(', ') + (more > 0 ? ' and ' + more + ' more' : '') + ' →';
+  return 'Reviews: ' + names[0] + (names.length > 1 ? ' +' + (names.length - 1) : '') + ' →';
 }
 function cardScore(item) {
   const text = reviewsCardText(item.rv);
@@ -296,7 +297,8 @@ function cardScoreBase(item) {
   const s = item.fcScore;
   const reason = (text) => (text ? `<div class="sreason">${text}</div>` : '');
   if (s) {
-    const bits = [esc(String(s.reason || '').replace(/\.$/, ''))];
+    // One clause on the card (8 Nov 2026); the sheet keeps the full sentence. Twin of lib/weekly.js.
+    const bits = [esc(String(s.reason || '').split(';')[0].trim().replace(/\.$/, ''))];
     if (s.early) bits.push('Based on ' + Number(s.votes || 0).toLocaleString('en-IN') + ' ratings');
     return verdictPill(s.verdict) + reason(bits.filter(Boolean).join(' · '));
   }
@@ -988,7 +990,7 @@ fetch('/data-' + code + '.json?v=' + Date.now())
       document.getElementById('heroTitle').textContent = pick.title;
       document.getElementById('heroMeta').textContent = [pick.platform, pick.genre, pick.language].filter(Boolean).join(' · ');
       const verdict = (pick.fcScore && pick.fcScore.verdict) || pick.verdict || '';
-      document.getElementById('heroVerdict').innerHTML = verdict ? `<span class="vpill vp-hero">${esc(verdict)}</span>` : '';
+      document.getElementById('heroVerdict').innerHTML = verdict ? `<span class="hv-ey">FilmyChill Verdict</span><span class="vpill vp-hero">${VERDICT_MARK}${esc(verdict)}</span>` : '';
       const heroDial = document.getElementById('heroDial');
       if (heroDial) heroDial.innerHTML = heroDialInner(pick);
       openPick = () => {
