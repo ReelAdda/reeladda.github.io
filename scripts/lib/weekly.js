@@ -559,8 +559,7 @@ ${ogImageTag(hubOgImage(freshItems, cfg))}
 <style>
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
-  .top { background:var(--indigo); padding:14px 16px; } .top a { color:var(--cream); text-decoration:none; font-weight:800; letter-spacing:1px; font-size:18px; }
-  .top a span { color:#FFC04D; } /* 4.95:1 on indigo; marigold is 4.3:1 */
+${require("./brand.js").TOP_BAR_CSS}
   .wrap { max-width:680px; margin:0 auto; padding:20px 16px 40px; }
   h1 { font-size:24px; margin:0 0 4px; line-height:1.3; }
   .upd { color:var(--mute); font-size:13px; margin-bottom:6px; }

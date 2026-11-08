@@ -68,6 +68,12 @@
    "since": "2026-11-06",
    "what": "one meaning for the score on film pages (lib/filmpage.js SCORE_HALVES): the score card in two labelled halves, 'FilmyChill Score' over the verdict stamp and 'TMDB audience' over the ring, the ring in one neutral colour; the vote box says a vote counts toward a future audience score. Every film page by slug, hidden ones included, in stages that start after the near-copy stages end (7 Nov): 10% at the 8 Nov morning build, then 25% / 50% / 100% on 9 / 10 / 11 Nov, so no build carries two staged changes. Homepages, hubs and the detail sheet changed at once (under 500 pages). Mock-up approved 6 Nov 2026."
   },
+  "dark-bar": {
+   "percent": 0,
+   "schedule": [{ "from": "2026-11-12T00:00", "percent": 10 }, { "from": "2026-11-13T00:00", "percent": 25 }, { "from": "2026-11-14T00:00", "percent": 50 }, { "from": "2026-11-15T00:00", "percent": 100 }],
+   "since": "2026-11-08",
+   "what": "the film page's top bar in the brand's dark band, as on the homepage and the share images (lib/filmpage.js DARK_BAR): cream FILMY, marigold CHILL, a marigold edge, country and Search as quiet chips. Presentation only: not in the facts fingerprint, no sitemap date moves. Every film page by slug, in stages that start after score-halves ends (11 Nov), so no build carries two staged changes. The homepage's brand bar, natural-colour Pick of the Week and fixed share image went out at once (under 20 pages). Mock-ups approved 8 Nov 2026."
+  },
   "near-copy-085": {
    "percent": 0,
    "schedule": [{ "from": "2026-11-06T12:00", "percent": 50 }, { "from": "2026-11-07T12:00", "percent": 100 }],

@@ -430,6 +430,74 @@ test("wording: counts of one in the singular, one 'the', one full stop (6 Nov 20
   assert.ok(/Go to Drishyam: The Conclusion: where to watch, and our verdict →/.test(stub) && !/ — /.test(stub));
 });
 
+test("brand bar: the homepage's slim dark bar, natural-colour Pick of the Week, fixed share image (8 Nov 2026)", () => {
+  const fsx = require("fs"), p = require("path");
+  const tpl = fsx.readFileSync(p.join(__dirname, "..", "index.html"), "utf8");
+  // The wordmark sits in the dark bar above the header; the tagline and pills stay on the cream.
+  assert.ok(/<div class="fcbar"><div class="logo"[^>]*><svg class="brand-mark"[\s\S]*?FILMY<span>CHILL<\/span><\/div><\/div>\n<header>\n  <h1 class="tagline">/.test(tpl), "bar, then header with the tagline");
+  assert.ok(/\.fcbar \{[^}]*background: #1C1838;/.test(tpl) && /\.fcbar \.logo \{[^}]*color: #FFF7EC;/.test(tpl) && /\.fcbar \.logo span \{ color: var\(--marigold\); -webkit-text-stroke: 0; \}/.test(tpl), "cream FILMY, marigold CHILL, no outline");
+  assert.ok(/\.hero-bg \{[^}]*opacity: 1;/.test(tpl) && !/rgba\(36,29,82,0\.92\)/.test(tpl), "the photo in its own colours, not under an indigo wash");
+  // The share image: the fixed brand image on every edition's homepage; it exists in the repo.
+  const S = require("./lib/surfaces.js");
+  assert.strictEqual(S.HOME_OG_IMAGE, "https://filmychill.com/og-image.png");
+  assert.ok(fsx.existsSync(p.join(__dirname, "..", "og-image.png")));
+  const src = fsx.readFileSync(p.join(__dirname, "lib", "surfaces.js"), "utf8");
+  assert.ok(src.includes('replaceBetween(html, "OGIMAGE", ogImageTag(HOME_OG_IMAGE))') && !/OGIMAGE", ogImageTag\(hubOgImage/.test(src), "never the week's pick card");
+  assert.ok(/og:image:width" content="1200"/.test(require("./lib/pagekit.js").ogImageTag(S.HOME_OG_IMAGE)), "sized for large previews");
+});
+
+test("one brand bar on every page type: lists, hubs, weekly and site pages at once; person pages staged (8 Nov 2026)", () => {
+  const fsx = require("fs"), p = require("path"), B = require("./lib/brand.js"), R = require("./lib/rollout.js"), prevCfg = R.peekRolloutConfig();
+  const K = require("./lib/pagekit.js");
+  const page = (canonical) => K.listingPageHtml({ title: "T", desc: "d", canonical, h1: "H", updLine: "u", sections: [], faqs: [], homeUrl: "https://filmychill.com/", code: "in" });
+  try {
+    R.useRolloutConfig({ features: { "dark-bar": { percent: 0 } } });
+    for (const url of ["https://filmychill.com/new-on-netflix/", "https://filmychill.com/hindi/", "https://filmychill.com/people/", "https://filmychill.com/ae/people/"]) {
+      const h = page(url);
+      assert.ok(h.includes(B.TOP_BAR_CSS) && !h.includes("background:var(--indigo); padding:14px 16px;"), url + ": the brand bar at once");
+    }
+    assert.ok(page("https://filmychill.com/people/shah-rukh-khan/").includes(B.TOP_BAR_OLD_CSS), "a person page keeps the old bar until its stage (1,875 pages, rewritten every build)");
+    R.useRolloutConfig({ features: { "dark-bar": { percent: 100 } } });
+    assert.ok(page("https://filmychill.com/people/shah-rukh-khan/").includes(B.TOP_BAR_CSS), "and gets the brand bar at its stage");
+  } finally { R.useRolloutConfig(prevCfg); }
+  assert.ok(fsx.readFileSync(p.join(__dirname, "lib", "weekly.js"), "utf8").includes('${require("./brand.js").TOP_BAR_CSS}'), "weekly pages");
+  for (const f of ["about/index.html", "privacy/index.html", "dmca/index.html"]) {
+    const h = fsx.readFileSync(p.join(__dirname, "..", f), "utf8");
+    assert.ok(h.includes(B.TOP_BAR_CSS) && !/\.top \{ background:var\(--indigo\)/.test(h), f + ": the brand bar");
+  }
+  // The same dark band and wordmark colours as the homepage bar and film pages.
+  const home = fsx.readFileSync(p.join(__dirname, "..", "index.html"), "utf8");
+  for (const css of [B.TOP_BAR_CSS, require("./lib/filmpage.js").DARK_BAR_CSS]) assert.ok(css.includes("#1C1838") && css.includes("#FFF7EC") && css.includes("#FFAD1F"));
+  assert.ok(home.includes("background: #1C1838"));
+});
+
+test("dark bar on film pages: builder and the build pass write the same bytes, staged after score-halves (8 Nov 2026)", () => {
+  const R = require("./lib/rollout.js"), F = require("./lib/filmpage.js"), prevCfg = R.peekRolloutConfig();
+  const IN = require("./lib/core.js").COUNTRIES[0];
+  const it = { title: "T", slug: "the-love-hypothesis", kind: "movie", released: "2026-09-01", language: "English", genre: "Romance", providers: ["Prime Video"], rentBuy: [], tmdbId: 5,
+    rating: 8.1, votes: 353, fcScore: { verdict: "Worth a watch", reason: "Audiences like it.", audience: "Liked", critics: "mixed", basis: "both" } };
+  try {
+    for (const halves of [0, 100]) {
+      const base = { "page-v3": { percent: 100 }, "redesign-v2": { percent: 100 }, "lean-page": { percent: 100 }, "score-halves": { percent: halves } };
+      R.useRolloutConfig({ features: { ...base, "dark-bar": { percent: 0 } } });
+      const off = F.buildFilmPage(it, "2026-11-08", new Set([it.slug]), IN);
+      R.useRolloutConfig({ features: { ...base, "dark-bar": { percent: 100 } } });
+      const on = F.buildFilmPage(it, "2026-11-08", new Set([it.slug]), IN);
+      assert.ok(/<div class="top v3">/.test(on) && on.includes("Dark brand bar (lib/filmpage.js DARK_BAR)") && !off.includes("Dark brand bar"), `halves ${halves}: only pages in the rollout`);
+      assert.ok(/body \.top\.v3 \{ background:#1C1838;/.test(on) && /body \.top\.v3 \.mark span \{ color:#FFAD1F; -webkit-text-stroke:0; \}/.test(on));
+      const conv = F.darkBar(off);
+      assert.strictEqual(conv, on, `halves ${halves}: the pass gives an older page exactly the builder's page`);
+      assert.strictEqual(F.darkBar(conv), conv, "idempotent");
+    }
+    assert.strictEqual(F.darkBar("<html><style>x</style><div class=\"top\"></div></html>"), "<html><style>x</style><div class=\"top\"></div></html>", "not a v3 page: left alone");
+  } finally { R.useRolloutConfig(prevCfg); }
+  const repo = JSON.parse(require("fs").readFileSync(require("path").join(__dirname, "..", "rollout.json"), "utf8"));
+  assert.strictEqual(R.percentOf(repo, "dark-bar", Date.parse("2026-11-11T20:00:00Z")), 0, "nothing while score-halves is still staging");
+  assert.strictEqual(R.percentOf(repo, "score-halves", Date.parse("2026-11-12T08:00:00Z")), 100, "score-halves is done before dark-bar starts");
+  assert.deepStrictEqual(["2026-11-12T08:00:00Z", "2026-11-13T08:00:00Z", "2026-11-14T08:00:00Z", "2026-11-15T08:00:00Z"].map((d) => R.percentOf(repo, "dark-bar", Date.parse(d))), [10, 25, 50, 100]);
+  assert.ok(/applyDarkBar\(filmPageFiles\(\)\)/.test(require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8")), "the build runs the pass");
+});
+
 test("the vote note says what a vote does on every film page, old ones included (6 Nov 2026)", () => {
   const fsx = require("fs"), p = require("path");
   const NOTE = "Your vote is counted toward a future audience score. No sign-up.";
@@ -6620,7 +6688,8 @@ test("a usable regional date always wins over the global one", () => {
 });
 test("soon card is tense-correct for a same-day release", () => {
   assert.ok(/>Today</.test(U.ssrSoonCard({ title: "Now", slug: "now", released: todayISO() }, "in")));
-  assert.ok(!/>Today</.test(U.ssrSoonCard({ title: "Later", slug: "later", released: "2026-11-08" }, "in")));
+  // Relative to the clock (a fixed "2026-11-08" became today on 8 Nov 2026 and the test failed).
+  assert.ok(!/>Today</.test(U.ssrSoonCard({ title: "Later", slug: "later", released: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10) }, "in")));
 });
 test("a released film never survives into a coming-soon render", () => {
   // The property that matters, asserted through the function that enforces it.
@@ -10377,9 +10446,14 @@ test("text colours meet WCAG AA (4.5:1) on the backgrounds they sit on", () => {
   const home = fsx.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
   const v = (name) => (new RegExp(`--${name}:\\s*(#[0-9A-Fa-f]{6})`).exec(home) || [])[1];
   for (const [fg, bg, what] of [[v("mute"), "#FFF7EC", "muted text on cream"], [v("mute"), "#FFFFFF", "muted text on white"], [v("marigold-dk"), "#FFF7EC", "gold counts on cream"], ["#FFFFFF", v("coral"), "white on coral"], [v("coral"), "#FFFFFF", "coral text on white"]]) assert.ok(cr(fg, bg) >= 4.5, `${what}: ${fg} on ${bg} is ${cr(fg, bg).toFixed(2)}`);
+  // The brand bar (8 Nov 2026): cream FILMY and marigold CHILL on the dark band; the old indigo bar's
+  // colours stay legible too, for person pages until their stage of "dark-bar".
+  const B = require("./lib/brand.js");
+  assert.ok(/\.top a \{ color:#FFF7EC;/.test(B.TOP_BAR_CSS) && /\.top a span \{ color:#FFAD1F; \}/.test(B.TOP_BAR_CSS)
+    && cr("#FFF7EC", "#1C1838") >= 4.5 && cr("#FFAD1F", "#1C1838") >= 4.5, "logo on the brand bar");
+  assert.ok(/\.top a span \{ color:#FFC04D; \}/.test(B.TOP_BAR_OLD_CSS) && cr("#FFC04D", "#4038C7") >= 4.5, "logo on the old indigo bar");
   for (const f of ["lib/pagekit.js", "lib/weekly.js", "lib/filmpage.js"]) {
     const src = fsx.readFileSync(path.join(__dirname, f), "utf8");
-    assert.ok(/\.top a span \{ color:#FFC04D; \}/.test(src) && cr("#FFC04D", "#4038C7") >= 4.5, `${f}: logo on the indigo bar`);
     assert.ok(!/#FF4E3A/.test(src), `${f}: trend badge`);
   }
   assert.ok(!/#837C9B/i.test(fsx.readFileSync(path.join(__dirname, "lib/embed.js"), "utf8")), "embed widget muted text");

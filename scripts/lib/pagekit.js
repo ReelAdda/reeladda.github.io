@@ -5,6 +5,7 @@
 // wording, and the theatre/streaming status pills written into frozen pages.
 // ============================================================================
 "use strict";
+const { TOP_BAR_CSS, TOP_BAR_OLD_CSS } = require("./brand.js");
 
 const fs = require("fs");
 const {
@@ -365,6 +366,13 @@ function whereLabel(f, cfg, { now = Date.now() } = {}) {
   if (f.where === "theatrical" || f.where === "announced" || /not streaming yet|arrival pending|^Not on /i.test(st)) return ott ? "Not on OTT yet" : "Not streaming yet";
   return "";
 }
+// The brand bar (lib/brand.js TOP_BAR_CSS): every list and hub page at once; the 1,875 person pages
+// (Google- and Bing-hidden, rewritten every build) follow the film pages' stages (rollout "dark-bar"),
+// so no build rewrites thousands of pages.
+function brandBarOn(canonical) {
+  const m = /\/people\/([^/]+)\/?$/.exec(String(canonical || ""));
+  return !m || require("./rollout.js").inRollout("dark-bar", String(canonical));
+}
 function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null, popular = "" }) {
   // ~80 hubs, month archives and week pages ran 61–72 characters; see fitSiteTitle.
   title = fitSiteTitle(title);
@@ -448,8 +456,7 @@ ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</s
 <style>
   :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream:#FFF7EC; --ink:#1A1633; --mute:#6B6890; --line:#E4E1F5; }
   * { box-sizing:border-box; } body { font-family:-apple-system,'Segoe UI',Roboto,sans-serif; background:#F7F5FF; color:var(--ink); margin:0; }
-  .top { background:var(--indigo); padding:14px 16px; } .top a { color:var(--cream); text-decoration:none; font-weight:800; letter-spacing:1px; font-size:18px; }
-  .top a span { color:#FFC04D; } /* 4.95:1 on indigo; marigold is 4.3:1 */
+${brandBarOn(canonical) ? TOP_BAR_CSS : TOP_BAR_OLD_CSS}
   .wrap { max-width:680px; margin:0 auto; padding:20px 16px 40px; }
   h1 { font-size:24px; margin:0 0 4px; line-height:1.3; }
   .upd { color:var(--mute); font-size:13px; margin-bottom:6px; }

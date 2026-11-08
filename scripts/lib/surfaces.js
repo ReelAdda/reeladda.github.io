@@ -42,7 +42,6 @@ const {
   analyticsTag,
   cspWith,
   footerAttribution,
-  hubOgImage,
   ogImageTag,
   ottMonthPath,
   STREAM_BASE,
@@ -835,6 +834,7 @@ function heroPreload(data) {
     + `<link rel="preload" as="image" href="${escHtml(heroBgUrl(pick.backdrop))}" media="(min-width: ${HERO_PHONE_MAX + 1}px)" fetchpriority="high">`;
 }
 
+const HOME_OG_IMAGE = "https://filmychill.com/og-image.png";
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
   const V = streamVocab(cfg);
@@ -872,8 +872,10 @@ function renderCountryPage(templateHtml, cfg, data) {
   html = replaceBetween(html, "ANALYTICS", analyticsTag());
   html = replaceBetween(html, "LASTSCAN", escHtml(ssrLastScan(data, cfg)));
   html = replaceBetween(html, "EDNOTE", ssrEditorNote(data, cfg));
-  // Homepage share/Discover image: the Pick of the Week, then the lists (see hubOgImage).
-  html = replaceBetween(html, "OGIMAGE", ogImageTag(hubOgImage([heroPickOf(data), ...(data.theatres || []), ...(data.ott || [])].filter(Boolean), cfg)));
+  // Homepage share/Discover image: the fixed brand image (8 Nov 2026, owner). The Pick of the Week
+  // card changed weekly, and WhatsApp and Facebook cache a preview for days, so a homepage link
+  // could show last week's film. Film pages keep their own film card; hubs keep theirs (hubOgImage).
+  html = replaceBetween(html, "OGIMAGE", ogImageTag(HOME_OG_IMAGE));
   html = replaceBetween(html, "HERO", ssrHero(data, cfg.code));
   // Most searched (lib/searchtop.js): this edition's film pages people find most on Google, other
   // than the ones the homepage already lists — the site's own links where search demand is.
@@ -931,6 +933,7 @@ function prerenderIndex(data) {
 }
 
 module.exports = {
+  HOME_OG_IMAGE,
   choosePick,
   PICK_FRESH_DAYS,
   ABOUT_LASTMOD,

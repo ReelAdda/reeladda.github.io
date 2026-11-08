@@ -71,4 +71,18 @@ const VERDICT_CSS = [
   `  ${VERDICT_DARK.replace(/(^|\} )\.fcv/g, "$1:root[data-theme=\"dark\"] .fcv")}`,
 ].join("\n");
 
-module.exports = { MARK_HOME, MARK_TOP, VERDICT_CSS, VERDICT_LOCKUP, brandShape: shape, addBrandToPages, ensureBrandMark };
+// The brand bar on list, hub and site pages (8 Nov 2026, owner: one brand look everywhere): the
+// dark band of the homepage and film pages, the Anton wordmark in cream and marigold, a marigold
+// edge, and the mark recoloured to the homepage's (cream track, indigo play) over MARK_TOP's
+// white one. Replaces the indigo bar; the search button (js/search.js) sits in it as before.
+const TOP_BAR_OLD_CSS = "  .top { background:var(--indigo); padding:14px 16px; } .top a { color:var(--cream); text-decoration:none; font-weight:800; letter-spacing:1px; font-size:18px; }\n"
+  + "  .top a span { color:#FFC04D; } /* 4.95:1 on indigo; marigold is 4.3:1 */";
+const TOP_BAR_CSS = [
+  "  /* Brand bar (lib/brand.js TOP_BAR_CSS) */",
+  "  @font-face { font-family:'Anton'; src:url('/fonts/anton-latin.woff2') format('woff2'); font-display:swap; }",
+  "  .top { background:#1C1838; padding:12px 16px; position:relative; } .top::before { content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:#FFAD1F; }",
+  "  .top a { color:#FFF7EC; text-decoration:none; font-family:'Anton',Impact,sans-serif; font-weight:400; letter-spacing:1.2px; font-size:24px; line-height:1.2; }",
+  "  .top a span { color:#FFAD1F; } .top .brand-mark circle:first-child { stroke:#EFE6D6; } .top .brand-mark path { fill:#4038C7; }",
+].join("\n");
+
+module.exports = { MARK_HOME, MARK_TOP, TOP_BAR_CSS, TOP_BAR_OLD_CSS, VERDICT_CSS, VERDICT_LOCKUP, brandShape: shape, addBrandToPages, ensureBrandMark };

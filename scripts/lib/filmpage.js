@@ -1130,6 +1130,8 @@ const SCORE_HALVES_CSS = [
   "  .fcsb-halves .fa .fey { line-height:15px; }",
   VERDICT_CSS,
 ].join("\n");
+// The card block's last line: the passes below anchor on it (see scoreHalves).
+const FCSB_LAST = FCSB_CSS.split("\n").pop();
 const SCORE_HALVES_MARK = "Score halves (lib/filmpage.js SCORE_HALVES)";
 const VOTE_NOTE_OLD = "Your vote helps the FilmyChill Score. No sign-up.";
 const VOTE_NOTE = "Your vote is counted toward a future audience score. No sign-up.";
@@ -1167,7 +1169,9 @@ function scoreHalves(html, { root = "." } = {}) {
   if (s === orig && (!/fcsb-halves|class="fcv"/.test(s) || s.includes(SCORE_HALVES_MARK))) return orig;
   if (/fcsb-halves|class="fcv"/.test(s) && !s.includes(SCORE_HALVES_MARK)) {
     if (/<link rel="stylesheet" href="\/css\/fp-[0-9a-f]{10}\.css">/.test(s)) s = require("./stylesheets.js").inlineStyles(s, root);
-    if (s.includes(FCSB_CSS)) s = s.replace(FCSB_CSS, FCSB_CSS + "\n" + SCORE_HALVES_CSS);
+    // Right after the card's styles, where the builder writes them. Anchored on the block's last
+    // line: a later step adjusts a line inside it, so the whole block isn't on the page verbatim.
+    if (s.includes(FCSB_LAST)) s = s.replace(FCSB_LAST, FCSB_LAST + "\n" + SCORE_HALVES_CSS);
     else if (s.includes("</style>")) s = s.replace("</style>", SCORE_HALVES_CSS + "\n</style>");
     // All or nothing: never a converted card without its styles (a shared stylesheet missing on disk).
     else return orig;
@@ -1184,6 +1188,51 @@ function applyScoreHalves(files, { root = ".", included = (slug) => inRollout(SC
     try { html = require("fs").readFileSync(file, "utf8"); } catch { continue; }
     res.pages++;
     const next = scoreHalves(html, { root });
+    if (next !== html) { require("fs").writeFileSync(file, next); res.changed++; }
+  }
+  return res;
+}
+
+// DARK BAR (8 Nov 2026, rollout "dark-bar"; mock-ups approved by the owner). The film page's top
+// bar in the brand's dark band, as on the homepage and the share images: cream FILMY, marigold
+// CHILL, a marigold edge, the country and Search as quiet chips. The builder writes it for films in
+// the rollout; darkBar() gives pages no builder rewrites exactly the same styles, before the
+// end-of-build pass moves styles to /css/. `body .top.v3` outranks V3_CSS, which comes later.
+const DARK_BAR = "dark-bar";
+const darkBarOn = (item) => !!(item && item.slug) && inRollout(DARK_BAR, item.slug);
+const DARK_BAR_MARK = "Dark brand bar (lib/filmpage.js DARK_BAR)";
+const DARK_BAR_CSS = [
+  `  /* ${DARK_BAR_MARK} */`,
+  "  body .top.v3 { background:#1C1838; border-bottom:0; position:relative; }",
+  "  body .top.v3::before { content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:#FFAD1F; }",
+  "  body .top.v3 .mark { color:#FFF7EC; } body .top.v3 .mark span { color:#FFAD1F; -webkit-text-stroke:0; }",
+  "  body .top.v3 .cpill, body .top.v3 .fcs-btn { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16); color:#FFF7EC; box-shadow:none; }",
+  "  body .top.v3 .fcs-btn svg { color:#FFF7EC; }",
+].join("\n");
+// Pure-ish (reads the page's shared stylesheet when it has one). The bar's rules go right after the
+// card's (and the score halves', when present), where the builder writes them. Idempotent; a page
+// whose stylesheet can't be read is left as it was.
+function darkBar(html, { root = "." } = {}) {
+  const orig = String(html);
+  if (!/<div class="top v3">/.test(orig) || orig.includes(DARK_BAR_MARK)) return orig;
+  let s = orig;
+  if (/<link rel="stylesheet" href="\/css\/fp-[0-9a-f]{10}\.css">/.test(s)) s = require("./stylesheets.js").inlineStyles(s, root);
+  const halvesLast = SCORE_HALVES_CSS.split("\n").pop();
+  const after = s.includes(SCORE_HALVES_MARK) && s.includes(halvesLast) ? halvesLast : s.includes(FCSB_LAST) ? FCSB_LAST : null;
+  if (after) return s.replace(after, after + "\n" + DARK_BAR_CSS);
+  if (s.includes("</style>")) return s.replace("</style>", DARK_BAR_CSS + "\n</style>");
+  return orig;
+}
+function applyDarkBar(files, { root = ".", included = (slug) => inRollout(DARK_BAR, slug) } = {}) {
+  const res = { pages: 0, changed: 0 };
+  for (const rel of files) {
+    const mm = /(?:^|\/)movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
+    if (!mm || !included(mm[1])) continue;
+    const file = require("path").join(root, rel);
+    let html;
+    try { html = require("fs").readFileSync(file, "utf8"); } catch { continue; }
+    res.pages++;
+    const next = darkBar(html, { root });
     if (next !== html) { require("fs").writeFileSync(file, next); res.changed++; }
   }
   return res;
@@ -1516,7 +1565,7 @@ ${(() => { const base = `  :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream
   .rating-early .cdot, .rating-early .cbar i { background:#E39A1C; } .rating-early .ctag { background:rgba(227,154,28,.15); color:#B87910; }
   .rating-few { color:var(--mute); font-weight:600; font-size:15px; } .rating-few .cdot, .rating-few .cbar i { background:#C4BEDA; } .rating-few .ctag { display:none; }
   .verdict { display:inline-block; background:rgba(64,56,199,.08); color:var(--indigo); font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; margin-top:8px; }
-${FCSB_CSS}${scoreHalvesOn(item) ? "\n" + SCORE_HALVES_CSS : ""}
+${FCSB_CSS}${scoreHalvesOn(item) ? "\n" + SCORE_HALVES_CSS : ""}${darkBarOn(item) ? "\n" + DARK_BAR_CSS : ""}
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
   .fit dt { font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--indigo); margin-top:12px; }
@@ -1909,6 +1958,7 @@ function generatePages(data, cfg, allSlugSets) {
 }
 
 module.exports = {
+  DARK_BAR, DARK_BAR_CSS, applyDarkBar, darkBar,
   PAGE_FIXES,
   SCORE_HALVES,
   SCORE_HALVES_CSS,
