@@ -72,8 +72,23 @@ const STREAM_WINDOW_WEEKS = {
   mr: [5, 8], bn: [5, 8], en: [5, 9], de: [5, 9],
 };
 const STREAM_WINDOW_DEFAULT = [5, 9];
+// MEASURED WINDOWS (8 Nov 2026, lib/windows.js): the build loads this month's ranges, derived
+// from what actually happened, and they replace the table above, which was right 30–47% of the
+// time. A language without a usable range (too few films, or wider than MAX_SPAN_WEEKS, which
+// tells a reader nothing) gets no estimate at all: streamWindowEstimate returns null, as it does
+// for a film with no release date. Unset (tests, previews), the table above is used.
+const MAX_SPAN_WEEKS = 10;
+let MEASURED = null;
+function useMeasuredWindows(w) { MEASURED = w && w.languages ? w : null; }
+// The measured range for a language, or null: { lo, hi, n, hit, src }.
+function windowInfo(languageName) {
+  if (!MEASURED) return null;
+  const w = (languageName && MEASURED.languages[languageName]) || null;
+  return w && w.hi - w.lo <= MAX_SPAN_WEEKS ? w : null;
+}
 // LANG maps code->name; we store windows by code, so invert for the name we carry on items.
 function windowForLanguage(languageName) {
+  if (MEASURED) { const w = windowInfo(languageName); return w ? [w.lo, w.hi] : null; }
   if (!languageName) return STREAM_WINDOW_DEFAULT;
   for (const [code, name] of Object.entries(LANG)) {
     if (name === languageName && STREAM_WINDOW_WEEKS[code]) return STREAM_WINDOW_WEEKS[code];
@@ -84,6 +99,7 @@ function windowForLanguage(languageName) {
 // default. Naming the language in a snippet ("the usual Arabic window") implies we have data
 // for it; for anything outside STREAM_WINDOW_WEEKS we do not, and the copy must not pretend.
 function hasLanguageWindow(languageName) {
+  if (MEASURED) return !!windowInfo(languageName);
   if (!languageName) return false;
   for (const [code, name] of Object.entries(LANG)) {
     if (name === languageName && STREAM_WINDOW_WEEKS[code]) return true;
@@ -100,7 +116,9 @@ function streamWindowEstimate(releasedISO, languageName, now = new Date()) {
   if (!releasedISO) return null;
   const rel = new Date(releasedISO + "T00:00:00Z");
   if (Number.isNaN(rel.getTime())) return null;
-  const [lo, hi] = windowForLanguage(languageName);
+  const win = windowForLanguage(languageName);
+  if (!win) return null;   // no settled pattern for this language: say nothing rather than guess
+  const [lo, hi] = win;
   const from = new Date(rel.getTime() + lo * 7 * 86400000);
   const to = new Date(rel.getTime() + hi * 7 * 86400000);
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -314,8 +332,15 @@ const PROVIDER_CANON = [
   [/^France(?:\.| )?TV$/i, "France TV"],
   [/^(?:TF1\+?|MYTF1)$/i, "TF1+"],
   [/^(?:M6\+|6play)$/i, "M6+"],
-  // A service sold as a Prime Video / Apple TV channel is still that service.
+  // The arrival history's last splits (8 Nov 2026): one service under two spellings, so the
+  // monthly arrivals table on /data/ would have counted it twice.
+  [/^AMC(?: Plus|\+)(?: Roku Premium Channel)?$/i, "AMC+"],
+  [/^MGM(?: Plus|\+)$/i, "MGM+"],
+  [/^Manorama ?MAX$/i, "ManoramaMAX"],
+  [/^(?:Animation|Anime) Digital Network$/i, "ADN"],
+  // A service sold as a Prime Video / Apple TV / Roku channel is still that service.
   [/^(.+?) (?:Amazon|Apple TV) Channel$/i, "$1"],
+  [/^(.+?) Roku Premium Channel$/i, "$1"],
 ];
 function canonProvider(name) {
   const n = String(name || "").trim();
@@ -449,6 +474,9 @@ function digitalNoteName(note) {
 const DIGITAL_UNNAMED = "Digital release, platform not named yet";
 
 module.exports = {
+  MAX_SPAN_WEEKS,
+  useMeasuredWindows,
+  windowInfo,
   DIGITAL_UNNAMED,
   digitalNoteName,
   OUTAGE_MIN_CHECKS,

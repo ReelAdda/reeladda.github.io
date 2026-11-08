@@ -121,12 +121,65 @@ function pickAlerts({ subs = [], sent = {}, manifest = {}, today, hasReviews = (
   return out;
 }
 
+// THE FRIDAY DIGEST (step 8, 8 Nov 2026). A reader with alerts on can also ask for one weekly
+// ping with the week's arrivals in their edition. The opt-in rides in the record's films map as
+// films.digest = the day it was turned on (firestore.rules already allows any key there and the
+// film alerts above skip keys that aren't film keys), so no rules change is needed.
+// Sent on the first build that falls on a Friday daytime (09:00–21:59) in the edition's own time,
+// once per week (alertSent.digest = that week's Monday), never on a day the reader already had an
+// alert, never for a week with nothing new. Counts are of the titles FilmyChill tracks.
+const DIGEST_KEY = "digest";
+function editionClock(code, now) {
+  const tz = require("./freshness.js").EDITION_TZ[code];
+  if (!tz) return null;
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "short", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(now));
+  const g = (k) => (parts.find((p) => p.type === k) || {}).value;
+  return { weekday: g("weekday"), hour: Number(g("hour")), day: `${g("year")}-${g("month")}-${g("day")}` };
+}
+const mondayOf = (day) => { const t = Date.parse(`${day}T00:00:00Z`); const wd = (new Date(t).getUTCDay() + 6) % 7; return new Date(t - wd * 864e5).toISOString().slice(0, 10); };
+// Pure: the digest for one edition this week, or null when nothing arrived.
+function digestPayload(records, code, localDay, { V = { word: "OTT" }, country = "" } = {}) {
+  const since = new Date(Date.parse(`${localDay}T00:00:00Z`) - 6 * 864e5).toISOString().slice(0, 10);
+  const mine = (records || []).filter((r) => r && r.c === code && r.first && String(r.first).slice(0, 10) >= since && String(r.first).slice(0, 10) <= localDay && r.p)
+    .sort((a, b) => String(b.seen || b.first).localeCompare(String(a.seen || a.first)));
+  if (!mine.length) return null;
+  const named = mine.slice(0, 2).map((r) => `${r.t} on ${r.p}`);
+  const n = mine.length;
+  const where = country ? ` in ${country}` : "";
+  return {
+    title: `This week on ${V.word}${where}: ${n} new arrival${n === 1 ? "" : "s"}`,
+    body: `Including ${named.join(" and ")}. Tap for the full list.`,
+    url: code === "in" ? "/new-on-ott/today/" : `/${code}/new-on-ott/today/`,
+    tag: "fc-digest",
+  };
+}
+// Pure: who gets this week's digest this run. `skip`: uids already alerted this run.
+function pickDigests({ subs = [], sent = {}, records = [], now = Date.now(), skip = new Set() } = {}) {
+  const { COUNTRIES } = require("./core.js");
+  const { countryNameFor, streamVocab } = require("./rules.js");
+  const out = [], payloads = new Map();
+  for (const s of subs) {
+    if (!s || !s.uid || !s.sub || skip.has(s.uid) || !s.films || !DAY.test(String(s.films[DIGEST_KEY] || ""))) continue;
+    const cfg = COUNTRIES.find((c) => c.code === s.c);
+    const clock = cfg && editionClock(cfg.code, now);
+    if (!clock || clock.weekday !== "Fri" || clock.hour < 9 || clock.hour > 21) continue;
+    const week = mondayOf(clock.day);
+    const was = sent[s.uid] || {};
+    if (was.digest === week || was.last === clock.day) continue;
+    if (!payloads.has(cfg.code)) payloads.set(cfg.code, digestPayload(records, cfg.code, clock.day, { V: streamVocab(cfg), country: countryNameFor(cfg) }));
+    const payload = payloads.get(cfg.code);
+    if (!payload) continue;
+    out.push({ uid: s.uid, sub: s.sub, key: null, digest: week, day: clock.day, payload });
+  }
+  return out;
+}
+
 // Pure: a reader's sent record after one more alert, dropping films older than a year.
 function nextSent(was = {}, key, today) {
   const films = {};
   for (const [k, d] of Object.entries((was && was.films) || {})) if (DAY.test(String(d)) && daysBetween(d, today) <= SENT_KEEP_DAYS) films[k] = d;
   films[key] = today;
-  return { films, last: today };
+  return { ...(was && was.digest ? { digest: was.digest } : {}), films, last: today };
 }
 
 const TEST_PAYLOAD = { title: "FilmyChill alerts are on", body: "This is a test. You'll get a ping like this when a saved film starts streaming.", url: "/", tag: "fc-test" };
@@ -178,6 +231,10 @@ async function sendAlerts({ env = process.env, manifest = null, today = new Date
     if (!m) { try { m = JSON.parse(require("fs").readFileSync("pages-manifest.json", "utf8")); } catch { m = {}; } }
     const RV = require("./reviews.js");
     picks = pickAlerts({ subs, sent, manifest: m, today, hasReviews: (kind, id) => RV.reviewsFor(kind, id).length > 0 });
+    // The Friday digest, for readers who asked for it and had no film alert this run.
+    const digests = pickDigests({ subs, sent, records: require("./history.js").readHistory(), now, skip: new Set(picks.map((p) => p.uid)) });
+    res.digests = digests.length;
+    picks = picks.concat(digests);
     for (const p of picks) p.was = sent[p.uid];
   }
 
@@ -186,6 +243,7 @@ async function sendAlerts({ env = process.env, manifest = null, today = new Date
       await wp.sendNotification(p.sub, JSON.stringify(p.payload), { TTL: 86400, urgency: "normal" });
       res.sent++;
       if (p.key) await db.collection("alertSent").doc(p.uid).set(nextSent(p.was, p.key, today));
+      else if (p.digest) await db.collection("alertSent").doc(p.uid).set({ ...(p.was || {}), digest: p.digest, last: p.day });
     } catch (e) {
       if (e && (e.statusCode === 404 || e.statusCode === 410)) {
         res.gone++;
@@ -199,4 +257,4 @@ async function sendAlerts({ env = process.env, manifest = null, today = new Date
   return res;
 }
 
-module.exports = { ARRIVAL_DAYS, FEATURE, TEST_PAYLOAD, alertPayload, alertsEnabled, arrivalOf, filmIndex, filmPath, nextSent, parseSubscription, pickAlerts, publicKey, sendAlerts };
+module.exports = { DIGEST_KEY, digestPayload, editionClock, mondayOf, pickDigests, ARRIVAL_DAYS, FEATURE, TEST_PAYLOAD, alertPayload, alertsEnabled, arrivalOf, filmIndex, filmPath, nextSent, parseSubscription, pickAlerts, publicKey, sendAlerts };

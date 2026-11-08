@@ -1063,6 +1063,9 @@ let alertOfferedThisSession = false;
 function pushSupported() { return !!(FC_PUSH_KEY && window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window); }
 function alertState() { try { return localStorage.getItem('filmychill-alerts') || ''; } catch { return ''; } }
 function setAlertState(v) { try { localStorage.setItem('filmychill-alerts', v); } catch {} }
+// The Friday digest (8 Nov 2026, scripts/lib/alerts.js pickDigests): rides in the alert record as films.digest.
+function digestState() { try { return localStorage.getItem('filmychill-digest') || ''; } catch { return ''; } }
+function setDigestState(v) { try { localStorage.setItem('filmychill-digest', v); } catch {} }
 function filmKeyOf(it) { return it && /^\d{1,9}$/.test(String(it.tmdbId || '')) ? (it.kind === 'tv' ? 'tv-' : 'movie-') + it.tmdbId : null; }
 function isStreamingItem(it) { return !!(it && ((it.providers && it.providers.length) || (it.platform && it.platform !== 'Theatres'))); }
 
@@ -1098,8 +1101,10 @@ function alertFilms() {
   const films = {};
   for (const it of loadWL()) {
     const k = filmKeyOf(it);
-    if (k && Object.keys(films).length < 200) films[k] = /^\d{4}-\d{2}-\d{2}$/.test(it.savedAt || '') ? it.savedAt : since;
+    if (k && Object.keys(films).length < 199) films[k] = /^\d{4}-\d{2}-\d{2}$/.test(it.savedAt || '') ? it.savedAt : since;
   }
+  // The digest opt-in: one more key, so 199 films at most (the rules allow 200 keys).
+  if (digestState() === 'on') { let on = since; try { on = localStorage.getItem('filmychill-digest-since') || since; } catch {} films.digest = on; }
   return films;
 }
 function writeAlertRecord(sub) {
@@ -1143,6 +1148,7 @@ function turnOnAlerts() {
 }
 function turnOffAlerts() {
   setAlertState('off');
+  setDigestState('off');
   fcTrack('alerts', 'off');
   pushSubscription(false).then(s => s && s.unsubscribe()).catch(() => {});
   return fbIdentity().then(a => fbPost(FB_COMMIT, { writes: [{ delete: alertDoc(a.uid) }] }, { Authorization: 'Bearer ' + a.idToken })).catch(() => {});
@@ -1198,6 +1204,15 @@ function alertsNo() {
   const b = document.getElementById('alertNudge'); if (b) b.remove();
   renderAlertRow();
 }
+function digestToggle() {
+  if (alertState() !== 'on') return;
+  const on = digestState() === 'on';
+  setDigestState(on ? 'off' : 'on');
+  if (!on) { try { localStorage.setItem('filmychill-digest-since', new Date().toISOString().slice(0, 10)); } catch {} }
+  fcTrack('digest', on ? 'off' : 'on');
+  syncAlerts();
+  renderAlertRow();
+}
 function alertsToggle() {
   if (alertState() === 'on') { turnOffAlerts(); renderAlertRow(); return; }
   turnOnAlerts().then(renderAlertRow).catch(() => { setAlertState(''); renderAlertRow(); });
@@ -1209,6 +1224,7 @@ function renderAlertRow() {
   if (!pushSupported() || Notification.permission === 'denied') { el.innerHTML = ''; return; }
   el.innerHTML = alertState() === 'on'
     ? `<div class="alert-row">${BELL}<span><b>Alerts on</b> · one ping when a saved film starts streaming</span><button class="alert-btn" data-click="alertsToggle">Turn off</button></div>`
+      + `<div class="alert-row">${BELL}<span>${digestState() === 'on' ? '<b>Weekly digest on</b> · Fridays, the week\'s arrivals' : 'Weekly digest · one ping on Fridays with the week\'s arrivals'}</span><button class="alert-btn" data-click="digestToggle">${digestState() === 'on' ? 'Turn off' : 'Turn on'}</button></div>`
     : `<div class="alert-row">${BELL}<span>Get one ping when a saved film starts streaming</span><button class="alert-btn" data-click="alertsToggle">Turn on</button></div>`;
 }
 
@@ -1248,6 +1264,7 @@ const ACTIONS = {
   alertsYes: (el) => alertsYes(el),
   alertsNo: () => alertsNo(),
   alertsToggle: () => alertsToggle(),
+  digestToggle: () => digestToggle(),
 };
 function runAction(attr, ev) {
   const el = ev.target && ev.target.closest ? ev.target.closest('[' + attr + ']') : null;

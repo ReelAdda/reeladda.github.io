@@ -77,7 +77,39 @@ function announcedDates(data, manifestForCountry, index = [], now = Date.now()) 
   return [...out.values()].sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
 }
 
-function buildComingPage(items, cfg, { now = Date.now(), hasToday = true } = {}) {
+// STILL WAITING (step 7, 8 Nov 2026): films in this edition's cinemas that are past their
+// language's usual window (lib/windows.js, measured) and have no announced streaming date and no
+// platform yet. No date is predicted: the row states how long it has been, the measured pattern
+// and that no date is in our sources. Only languages with a usable measured range; the probe's
+// watchlist (ott-watch.json) holds the films that opened and aren't streaming. Pure.
+const WAITING_MAX_DAYS = 120;
+const WAITING_MAX_ROWS = 20;   // older than this is a film that never came to streaming, not one on its way
+function stillWaiting(watch, code, { manifest = {}, index = [], announced = new Set(), today = new Date().toISOString().slice(0, 10), V = { word: "OTT" } } = {}) {
+  const { slugify } = require("./core.js");
+  const { windowInfo } = require("./rules.js");
+  const bySlug = new Map((index || []).map((x) => [x.slug, x]));
+  const out = [];
+  for (const w of Array.isArray(watch) ? watch : []) {
+    if (!w || w.code !== code || w.kind === "tv" || !w.title) continue;
+    const opened = String(w.th || w.released || "").slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(opened) || opened > today) continue;
+    const info = windowInfo(w.language);
+    if (!info) continue;
+    const days = Math.round((Date.parse(today) - Date.parse(opened)) / 864e5);
+    if (days <= info.hi * 7 || days > WAITING_MAX_DAYS) continue;   // inside the window, or long past being "waiting"
+    const slug = slugify(w.title);
+    const e = manifest[slug];
+    if (announced.has(slug) || (e && (e.live || (e.digital && e.digital.date)))) continue;
+    const page = bySlug.get(slug);
+    if (page && ((page.providers || []).length || page.digitalDate)) continue;
+    out.push({ slug: page ? slug : null, title: w.title, language: w.language || "", kind: "movie", genre: w.genre || "", poster: page ? page.poster || "" : "",
+      days, hook: `Opened in cinemas ${days} days ago · ${w.language} films usually take ${info.lo}–${info.hi} weeks · no ${V.word === "OTT" ? "OTT" : "streaming"} date in our sources yet` });
+  }
+  // Films with a page first (the ones people search for), then the most recently overdue; 20 at most.
+  return out.sort((a, b) => (!!b.slug - !!a.slug) || a.days - b.days || a.title.localeCompare(b.title)).slice(0, WAITING_MAX_ROWS);
+}
+
+function buildComingPage(items, cfg, { now = Date.now(), hasToday = true, waiting = [] } = {}) {
   const code = (cfg && cfg.code) || "in";
   const country = countryNameFor(cfg);
   const V = streamVocab(cfg);
@@ -100,6 +132,7 @@ function buildComingPage(items, cfg, { now = Date.now(), hasToday = true } = {})
     (w === thisWk ? groups[0] : w === nextWk ? groups[1] : groups[2])[1].push(row);
   }
   const sections = groups.filter(([, xs]) => xs.length).map(([h, xs]) => ({ h2: h, items: xs }));
+  if (waiting.length) sections.push({ h2: "Still waiting: past the usual window, no date yet", items: waiting });
   const n = items.length;
   // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
   const plain = require("./humanprose.js").plainOn(comingUrl(code));
@@ -131,24 +164,60 @@ function buildComingPage(items, cfg, { now = Date.now(), hasToday = true } = {})
   });
 }
 
+// THE ARRIVAL LOG (step 4, 8 Nov 2026): the today page as a dated log of the last two weeks, one
+// section per day, each title with the part of the edition's day FilmyChill spotted it and, for a
+// film we watched leave cinemas, how long that took. "Spotted", never "released": we know when we
+// saw it, at one of the day's checks, not when the platform made it live. No clock times: the
+// checks run a few hours apart, so a minute would claim a precision we don't have.
+const LOG_DAYS = 14;
+// Pure: the edition's local day and the part of it a sighting was made, from the record's write
+// time; null without one (older records, tests).
+function spottedAt(seenISO, code) {
+  const tz = require("./freshness.js").EDITION_TZ[code];
+  const t = seenISO ? new Date(seenISO) : null;
+  if (!tz || !t || Number.isNaN(t.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" }).formatToParts(t);
+  const g = (k) => (parts.find((p) => p.type === k) || {}).value;
+  const h = Number(g("hour"));
+  const part = h >= 22 || h < 5 ? "overnight" : h < 12 ? "in the morning" : h < 17 ? "in the afternoon" : "in the evening";
+  return { day: `${g("year")}-${g("month")}-${g("day")}`, part };
+}
+
 function buildTodayPage(records, cfg, { index = [], now = Date.now(), hasComing = true } = {}) {
   const code = (cfg && cfg.code) || "in";
   const country = countryNameFor(cfg);
   const V = streamVocab(cfg);
   const loc = localeFor(code);
-  const day = (offset) => new Date(now - offset * 864e5).toISOString().slice(0, 10);
-  const today = day(0), yday = day(1), weekAgo = day(7);
+  const { editionToday } = require("./freshness.js");
+  const W = require("./windows.js");
+  const today = editionToday(code, now);
+  const back = (n) => new Date(Date.parse(`${today}T00:00:00Z`) - n * 864e5).toISOString().slice(0, 10);
+  const yday = back(1), since = back(LOG_DAYS - 1);
   const bySlug = new Map((index || []).map((x) => [x.slug, x]));
-  const mine = (records || []).filter((r) => r && r.c === code && r.first && r.first >= weekAgo)
-    .sort((a, b) => String(b.first).localeCompare(String(a.first)) || String(a.t || "").localeCompare(String(b.t || "")));
-  const rowOf = (r) => monthRow(r, { bySlug, code, now });
-  const tod = mine.filter((r) => r.first === today).map(rowOf);
-  const yst = mine.filter((r) => r.first === yday).map(rowOf);
-  const earlier = mine.filter((r) => r.first < yday).map(rowOf);
-  const sections = [];
-  if (tod.length) sections.push({ h2: `Today, ${fmtDateShort(today, now, loc)}`, items: tod });
-  if (yst.length) sections.push({ h2: `Yesterday, ${fmtDateShort(yday, now, loc)}`, items: yst });
-  if (earlier.length) sections.push({ h2: "Earlier this week", items: earlier });
+  // A sighting's day is the edition's local day of the check that saw it; a record without a
+  // usable write time (or one written well after its first day) keeps its recorded date.
+  const dayOf = (r) => {
+    const s = spottedAt(r.seen, code);
+    return s && Math.abs(Date.parse(s.day) - Date.parse(String(r.first).slice(0, 10))) <= 864e5 ? s : { day: String(r.first).slice(0, 10), part: null };
+  };
+  const mine = (records || []).filter((r) => r && r.c === code && r.first).map((r) => ({ r, at: dayOf(r) }))
+    .filter((x) => x.at.day >= since && x.at.day <= today)
+    .sort((a, b) => b.at.day.localeCompare(a.at.day) || String(b.r.seen || "").localeCompare(String(a.r.seen || "")) || String(a.r.t || "").localeCompare(String(b.r.t || "")));
+  const rowOf = ({ r, at }) => {
+    const row = monthRow(r, { bySlug, code, now });
+    const clock = W.clockFor(code, { kind: r.k === "tv" ? "tv" : "movie", tmdbId: r.id });
+    const bits = [`Spotted ${at.part ? `${at.part} ` : ""}on ${r.p}`, clock ? `${clock.days} day${clock.days === 1 ? "" : "s"} after cinemas` : null];
+    return { ...row, hook: bits.filter(Boolean).join(" · ") };
+  };
+  const tod = mine.filter((x) => x.at.day === today).map(rowOf);
+  const days = new Map();
+  for (const x of mine) { if (!days.has(x.at.day)) days.set(x.at.day, []); days.get(x.at.day).push(x); }
+  const WEEKDAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const sections = [...days.entries()].map(([d, xs]) => {
+    const name = d === today ? "Today" : d === yday ? "Yesterday" : WEEKDAY[new Date(`${d}T00:00:00Z`).getUTCDay()];
+    // The list shows each section's count beside its heading, so the heading is the day alone.
+    return { h2: `${name}, ${fmtDateShort(d, now, loc)}`, items: xs.map(rowOf) };
+  });
   const d = fmtDateShort(today, now, loc);
   // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
   const plain = require("./humanprose.js").plainOn(todayUrl(code));
@@ -157,16 +226,14 @@ function buildTodayPage(records, cfg, { index = [], now = Date.now(), hasComing 
       ? [`${tod.length} New on ${V.word} Today in ${country} (${d}) | FilmyChill`, `${tod.length} New on ${V.word} Today in ${country} (${d})`, `New on ${V.word} Today (${d})`]
       : [`New on ${V.word} Today in ${country} (${d}) | FilmyChill`, `New on ${V.word} Today in ${country} (${d})`, `New on ${V.word} Today (${d})`], 60),
     desc: fitFirst([tod.length
-      ? `${tod.length} title${tod.length === 1 ? "" : "s"} started streaming in ${country} today, ${d}, plus everything that arrived this week${plain ? ". Checked twice a day." : " — checked twice a day."}`
-      : plain ? `What started streaming in ${country} over the last week, newest first. ${d}'s arrivals appear as soon as they land. Checked twice a day.`
-      : `What started streaming in ${country} over the last week, newest first — ${d}'s arrivals appear as soon as they land. Checked twice a day.`], 160),
+      ? `${tod.length} title${tod.length === 1 ? "" : "s"} started streaming in ${country} today, ${d}, plus everything that arrived this week${plain ? ". Checked several times a day." : " — checked several times a day."}`
+      : plain ? `What started streaming in ${country} over the last week, newest first. ${d}'s arrivals appear as soon as they land. Checked several times a day.`
+      : `What started streaming in ${country} over the last week, newest first — ${d}'s arrivals appear as soon as they land. Checked several times a day.`], 160),
     canonical: todayUrl(code),
     h1: `New on ${V.word} today — ${country}`,
-    updLine: `Updated ${new Date(now).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" })} · checked twice a day`,
-    lead: tod.length
-      ? `What appeared on a subscription service in ${country} today, then the rest of the week. Every date is the day FilmyChill first saw it streaming.`
-      : plain ? `Nothing new has landed in ${country} yet today. Below is everything that arrived this week, newest first. Today's titles appear here as soon as they land.`
-      : `Nothing new has landed in ${country} yet today. Here's everything that arrived this week, newest first — today's titles appear here the moment they do.`,
+    updLine: `Updated ${new Date(now).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" })} · checked several times a day`,
+    // The log's own terms (8 Nov 2026): "spotted" at one of the day's checks, of the titles we track.
+    lead: `${tod.length ? "" : `Nothing new has landed in ${country} yet today. `}Every title FilmyChill spotted arriving on a subscription service in ${country} over the last two weeks, by day, newest first, with the part of the day we first saw it. That is when we spotted it, not necessarily when it went live, and only for the titles we track.`,
     sections, faqs: [], code, extraLd: [],
     // Only link pages that exist this run — the coming page is gated and can be absent.
     navLinks: [...(hasComing ? [{ href: comingUrl(code), label: `Coming to ${V.word}` }] : []), { href: ottWeekUrl(code), label: `This week's ${V.word} releases` }],
@@ -184,7 +251,10 @@ function writeDatedOttPages(data, cfg, manifest, records = null) {
   const cp = comingPath(code);
   if (hasComing) {
     fs.mkdirSync(cp.slice(0, cp.lastIndexOf("/")), { recursive: true });
-    writeIfChanged(cp, buildComingPage(items, cfg, { hasToday: hasWeek }));
+    let watch = [];
+    try { watch = JSON.parse(fs.readFileSync("ott-watch.json", "utf8")); } catch { /* no watchlist this run */ }
+    const waiting = stillWaiting(watch, code, { manifest: (manifest || {})[code] || {}, index: idx, announced: new Set(items.map((x) => x.slug)), today: require("./freshness.js").editionToday(code), V: streamVocab(cfg) });
+    writeIfChanged(cp, buildComingPage(items, cfg, { hasToday: hasWeek, waiting }));
   } else if (fs.existsSync(cp)) {
     fs.rmSync(cp.slice(0, cp.lastIndexOf("/")), { recursive: true, force: true });
   }
@@ -487,6 +557,8 @@ function writeIndexNowPayload(builtCountries, dataByCode = {}) {
 
 module.exports = {
   announcedDates,
+  spottedAt,
+  stillWaiting,
   buildComingPage,
   buildLanguagePage,
   buildTodayPage,

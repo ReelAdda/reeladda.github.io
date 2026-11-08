@@ -2422,6 +2422,17 @@ async function main() {
   async function stageBuildData() {
     // Staged page changes (lib/rollout.js): what share of films each one is switched on for.
     console.log(`Rollout: ${rolloutSummary()}`);
+    // Streaming windows measured from what happened (lib/windows.js), refreshed monthly; every
+    // "typically reach streaming about N–M weeks" this run uses them (lib/rules.js).
+    try {
+      const WN = require("./lib/windows.js");
+      const { windows, computed } = WN.refreshWindows();
+      require("./lib/rules.js").useMeasuredWindows(windows);
+      // The window clock on film pages: each measured film's own cinema-to-streaming days.
+      console.log(`Window clocks: ${WN.useClocks(require("./lib/history.js").readHistory()).size} measured film(s)`);
+      const langs = Object.entries(windows.languages).map(([l, w]) => `${l} ${w.lo}–${w.hi}wk (${w.hit}/${w.n}, ${w.src})`).join(", ");
+      console.log(`Streaming windows ${windows.month}${computed ? " (recomputed)" : ""}: ${langs || "none yet"}`);
+    } catch (e) { stageFailed("streaming windows", e, { optional: true }); }
     // "Most searched" data (lib/searchtop.js): Search Console's latest week of clicks per page.
     // Dormant without access; the last saved list (or a loaded export) is used meanwhile.
     try {

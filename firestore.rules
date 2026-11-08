@@ -28,7 +28,10 @@ service cloud.firestore {
     // Arrival alerts (5 Nov 2026, scripts/lib/alerts.js). One record per anonymous visitor who
     // turned alerts on: alerts/<uid> = { sub, films, c, t }
     //   sub    the browser's push subscription (JSON text from PushSubscription.toJSON())
-    //   films  saved films' keys ("movie-123" / "tv-456") -> the day each was saved
+    //   films  saved films' keys ("movie-123" / "tv-456") -> the day each was saved; plus
+    //          "digest" -> the day the weekly digest was turned on (8 Nov 2026, optional; the
+    //          rules below already allow it, so this comment is the only change and nothing
+    //          needs publishing)
     //   c      the FilmyChill edition, t the server's time of the write
     // A visitor may write and delete only their own record and read none. The build reads them
     // with its service account and keeps what it sent in alertSent/<uid>, closed below.

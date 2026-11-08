@@ -508,6 +508,28 @@ function tmdbIndiaSection(digital) {
   return out;
 }
 
+// Arrivals per month in India (step 6, 8 Nov 2026): what reached streaming each month, from the
+// arrival record, one name per service. Counts are of the titles FilmyChill tracks, not the whole
+// catalogue, and the page says so. The first and the current month are marked partial.
+function arrivalsSection(records, { code = "in", today = new Date().toISOString().slice(0, 10) } = {}) {
+  const e = escHtml;
+  const months = require("./history.js").arrivalsByMonth(records, code);
+  if (!months.length) return "";
+  const start = observationStarts(records)[code];
+  const MONTH = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const label = (m) => `${MONTH[Number(m.slice(5, 7)) - 1]} ${m.slice(0, 4)}`;
+  const note = (m) => (m === today.slice(0, 7) ? " (so far)" : start && m === start.slice(0, 7) ? ` (from ${Number(start.slice(8, 10))} ${MONTH[Number(start.slice(5, 7)) - 1].slice(0, 3)})` : "");
+  const rows = months.map((m) => {
+    const top = m.platforms.slice(0, 4).map(([p, n]) => `${e(p)} ${n}`).join(" · ");
+    const rest = m.platforms.slice(4).reduce((s, [, n]) => s + n, 0);
+    return `<tr><td>${e(label(m.month))}${e(note(m.month))}</td><td class="n">${m.total}</td><td>${top}${rest ? ` · others ${rest}` : ""}</td></tr>`;
+  }).join("");
+  return `<h2 id="arrivals">Arrivals by month, India</h2>
+  <p>Films and series that reached a streaming service in India each month, of the titles FilmyChill tracks,
+  counted on the day we first saw each one there.</p>
+  <table><thead><tr><th>Month</th><th class="n">Arrivals</th><th>Biggest services</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
 function buildDataPage(records, updatedHuman, { inCinemas = 0, digital = null } = {}) {
   const e = escHtml;
   const s = windowStats(records);
@@ -600,6 +622,8 @@ ${ICON_LINKS}
     <br><br><b>Correction, 4 October 2026.</b> Earlier versions of this page also counted TV series,
     straight-to-streaming films and titles we hadn't seen arrive, which pulled every median down to a few days.
   </div>
+
+  ${arrivalsSection(records)}
 
   <h2>Use the data</h2>
   <p>The full record is available as <a href="/data/streaming-windows.csv">CSV</a>, free to use for any

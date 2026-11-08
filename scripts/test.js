@@ -430,6 +430,154 @@ test("wording: counts of one in the singular, one 'the', one full stop (6 Nov 20
   assert.ok(/Go to Drishyam: The Conclusion: where to watch, and our verdict →/.test(stub) && !/ — /.test(stub));
 });
 
+// ---- 8 Nov 2026: the arrival record, put to work (steps 1–8) ----
+const ARR_REC = (o) => ({ c: "in", k: "movie", id: o.id, t: o.t, p: o.p || "Netflix", first: o.first, seen: o.seen || `${o.first}T08:00:00.000Z`, rel: o.th || null, th: o.th, lang: o.lang || "Hindi", g: "Drama" });
+
+test("streaming windows come from what happened: measured ranges, a minimum sample, no range too wide to help (steps 1–2)", () => {
+  const W = require("./lib/windows.js"), RU = require("./lib/rules.js");
+  // rangeFor: 20th–80th percentile in whole weeks, at least two weeks wide, with the exact count inside.
+  const r = W.rangeFor([28, 30, 31, 35, 42, 45, 49, 56, 63, 120]);
+  assert.deepStrictEqual([r.lo, r.hi, r.n], [4, 8, 10]);
+  assert.strictEqual(r.hit, [28, 30, 31, 35, 42, 45, 49, 56, 63, 120].filter((d) => d >= r.lo * 7 && d <= r.hi * 7).length, "the count is what's inside the range, not a claim");
+  assert.ok(W.rangeFor([28, 28, 28]).hi - W.rangeFor([28, 28, 28]).lo >= 2, "never a one-week range");
+  // computeWindows: ours first; an Indian language with too few of ours uses TMDB's dates; under 10 films, nothing.
+  const recs = [];
+  let id = 1;
+  const start = ARR_REC({ id: id++, t: "Already there", first: "2026-08-27", seen: "2026-08-27T10:00:00.000Z", th: "2026-07-01", lang: "English" });
+  recs.push(start);
+  for (let i = 0; i < 12; i++) recs.push(ARR_REC({ id: id++, t: "E" + i, first: "2026-10-20", th: new Date(Date.parse("2026-10-20") - (60 + i * 3) * 864e5).toISOString().slice(0, 10), lang: "English" }));
+  for (let i = 0; i < 4; i++) recs.push(ARR_REC({ id: id++, t: "T" + i, first: "2026-10-20", th: "2026-09-20", lang: "Tamil" }));
+  const digital = { films: Object.fromEntries(Array.from({ length: 11 }, (_, i) => [String(900 + i), { lang: "Tamil", th: "2026-06-01", dig: new Date(Date.parse("2026-06-01") + (28 + i) * 864e5).toISOString().slice(0, 10) }])) };
+  const w = W.computeWindows(recs, digital, "2026-11");
+  assert.strictEqual(w.languages.English.src, "ours");
+  assert.strictEqual(w.languages.Tamil.src, "tmdb", "4 of ours is too few: TMDB's 11 India digital dates");
+  assert.ok(!("Telugu" in w.languages));
+  // The rules use them once loaded; a language without a usable range gets no estimate at all.
+  try {
+    RU.useMeasuredWindows({ month: "2026-11", languages: { Hindi: { lo: 8, hi: 10, n: 160, hit: 98, src: "tmdb" }, Bengali: { lo: 9, hi: 33, n: 52, hit: 32, src: "tmdb" } }, default: null });
+    const est = RU.streamWindowEstimate("2026-11-01", "Hindi", new Date("2026-11-08"));
+    assert.deepStrictEqual([est.lo, est.hi], [8, 10]);
+    assert.strictEqual(RU.streamWindowEstimate("2026-11-01", "Bengali", new Date("2026-11-08")), null, "9–33 weeks tells a reader nothing: say nothing");
+    assert.strictEqual(RU.streamWindowEstimate("2026-11-01", "Swahili", new Date("2026-11-08")), null, "no data: no estimate");
+    assert.ok(RU.hasLanguageWindow("Hindi") && !RU.hasLanguageWindow("Bengali"));
+  } finally { RU.useMeasuredWindows(null); }
+  assert.deepStrictEqual(RU.streamWindowEstimate("2026-11-01", "Hindi", new Date("2026-11-08")).lo, 6, "unset (tests, previews): the old table");
+  // Refreshed once a month, kept for the rest of it.
+  inTempDirSync(() => {
+    const a = W.refreshWindows({ today: "2026-11-08", records: recs, digitalStore: digital });
+    const b = W.refreshWindows({ today: "2026-11-20", records: [], digitalStore: null });
+    assert.ok(a.computed && !b.computed && b.windows.languages.English, "the same month: the stored ranges, not a recompute");
+    assert.ok(W.refreshWindows({ today: "2026-12-01", records: recs, digitalStore: digital }).computed, "a new month: recomputed");
+  });
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(/refreshWindows\(\)/.test(src) && /useMeasuredWindows\(windows\)/.test(src), "the build loads them");
+  assert.ok(/stream-windows\.json/.test(require("fs").readFileSync(require("path").join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8")), "and commits them");
+});
+
+test("one name per service in the arrival record: the last splits merged (step 3)", () => {
+  const RU = require("./lib/rules.js");
+  for (const [raw, canon] of [["AMC Plus", "AMC+"], ["AMC+ Roku Premium Channel", "AMC+"], ["MGM Plus", "MGM+"], ["ManoramaMax", "ManoramaMAX"], ["Animation Digital Network", "ADN"], ["Anime Digital Network", "ADN"], ["Amazon Prime Video", "Prime Video"], ["Sonyliv", "Sony LIV"]]) {
+    assert.strictEqual(RU.canonProvider(raw), canon, raw);
+  }
+});
+
+test("arrivals by month on /data/: real arrivals only, one name per service, partial months marked (step 6)", () => {
+  const H = require("./lib/history.js"), S = require("./lib/surfaces.js");
+  const recs = [
+    ARR_REC({ id: 1, t: "Already streaming", first: "2026-08-27", seen: "2026-08-27T10:00:00.000Z" }),
+    ARR_REC({ id: 2, t: "A", first: "2026-09-10", p: "Prime Video" }), ARR_REC({ id: 3, t: "B", first: "2026-10-02", p: "Netflix" }),
+    ARR_REC({ id: 4, t: "C", first: "2026-10-03", p: "Netflix" }), ARR_REC({ id: 5, t: "D", first: "2026-10-04", p: "Prime Video" }),
+    { ...ARR_REC({ id: 6, t: "UK", first: "2026-10-04" }), c: "uk" },
+  ];
+  const m = H.arrivalsByMonth(recs, "in");
+  assert.deepStrictEqual(m.map((x) => [x.month, x.total]), [["2026-10", 3], ["2026-09", 1]], "the first day's titles were already there; other editions apart");
+  assert.deepStrictEqual(m[0].platforms, [["Netflix", 2], ["Prime Video", 1]]);
+  const html = S.buildDataPage(recs, "8 November 2026", {});
+  assert.ok(/<h2 id="arrivals">Arrivals by month, India<\/h2>/.test(html) && /of the titles FilmyChill tracks/.test(html));
+  assert.ok(/October 2026<\/td><td class="n">3<\/td>/.test(html));
+});
+
+test("the arrival log: by day, the part of the day we spotted it, never a clock time (step 4)", () => {
+  const D = require("./lib/dated.js"), W = require("./lib/windows.js");
+  assert.deepStrictEqual(D.spottedAt("2026-11-07T01:30:00.000Z", "in"), { day: "2026-11-07", part: "in the morning" }, "07:00 in India");
+  assert.deepStrictEqual(D.spottedAt("2026-11-07T20:30:00.000Z", "in"), { day: "2026-11-08", part: "overnight" }, "02:00 the next day in India");
+  assert.strictEqual(D.spottedAt("2026-11-07T20:30:00.000Z", "uk").part, "in the evening");
+  const now = Date.parse("2026-11-08T12:00:00Z");
+  const recs = [
+    ARR_REC({ id: 10, t: "Started", first: "2026-08-27", seen: "2026-08-27T10:00:00.000Z" }),
+    ARR_REC({ id: 11, t: "Dhurandhar Two", first: "2026-11-07", seen: "2026-11-07T02:20:00.000Z", th: "2026-09-12", p: "Netflix" }),
+    ARR_REC({ id: 12, t: "Late Show", first: "2026-11-07", seen: "2026-11-07T18:00:00.000Z", p: "JioHotstar" }),
+    ARR_REC({ id: 13, t: "Old Arrival", first: "2026-10-01", seen: "2026-10-01T08:00:00.000Z" }),
+  ];
+  W.useClocks(recs);
+  try {
+    const html = D.buildTodayPage(recs, { code: "in", name: "India", region: "IN" }, { now });
+    assert.ok(/Yesterday, 7 Nov/.test(html) && !/· 2 titles/.test(html), "a section per day (the list adds the count beside it)");
+    assert.ok(/Spotted in the morning on Netflix · 56 days after cinemas/.test(html), "the part of the day and, for a measured film, its window");
+    assert.ok(/Spotted overnight on JioHotstar/.test(html), "23:30 IST: overnight");
+    assert.ok(!/Old Arrival/.test(html), "two weeks back, no more");
+    const text = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ");
+    assert.ok(!/\b\d{1,2}:\d{2}\b/.test(text), "no clock time anywhere: the checks run hours apart");
+    assert.ok(/not necessarily when it went live, and only for the titles we track/.test(text));
+  } finally { W.useClocks(null); }
+});
+
+test("the window clock on film pages: only a measured arrival, outside the facts block (step 5)", () => {
+  const W = require("./lib/windows.js"), V2 = require("./lib/pagev2.js");
+  const line = W.clockHtml({ days: 56, platform: "Netflix" }, "Hindi", { lo: 8, hi: 10, n: 160, hit: 98, src: "tmdb" });
+  assert.ok(line.includes("Reached Netflix 56 days after cinemas.") && line.includes("Hindi films usually take 8–10 weeks (98 of 160 in TMDB's records)."));
+  assert.ok(W.clockHtml({ days: 30, platform: "Prime Video" }, "Swahili", null).endsWith("after cinemas.</b></p>"), "no range: the days alone");
+  assert.strictEqual(W.clockHtml(null, "Hindi", null), "");
+  const where = (clock) => V2.v3Where({ title: "T", providers: ["Netflix"], language: "Hindi", windowClock: clock }, { relState: "released", country: "India", V: { word: "OTT" }, asOf: "2026-11-08" });
+  const withClock = where({ days: 56, platform: "Netflix" });
+  assert.ok(withClock.indexOf("<!--/FC:wtw-->") < withClock.indexOf("Reached Netflix"), "after the block lib/facts.js reads");
+  assert.ok(!/Reached/.test(where(null)), "no measured arrival: no line");
+  W.useClocks([ARR_REC({ id: 20, t: "S", first: "2026-08-27", seen: "2026-08-27T10:00:00.000Z" }), ARR_REC({ id: 21, t: "Film", first: "2026-10-20", th: "2026-09-10" }), { ...ARR_REC({ id: 22, t: "Show", first: "2026-10-20", th: "2026-09-10" }), k: "tv" }]);
+  try {
+    assert.strictEqual(W.clockFor("in", { kind: "movie", tmdbId: 21 }).days, 40);
+    assert.strictEqual(W.clockFor("in", { kind: "tv", tmdbId: 22 }), null, "series have no cinema window");
+    assert.strictEqual(W.clockFor("in", { kind: "movie", tmdbId: 20 }), null, "already streaming when we started: no guess");
+  } finally { W.useClocks(null); }
+});
+
+test("still waiting: past the measured window, no date announced, no date predicted (step 7)", () => {
+  const D = require("./lib/dated.js"), RU = require("./lib/rules.js");
+  const w = (title, th, language = "Telugu") => ({ code: "in", kind: "movie", tmdbId: 1, title, released: th, th, language });
+  try {
+    RU.useMeasuredWindows({ month: "2026-11", languages: { Telugu: { lo: 3, hi: 6, n: 18, hit: 14, src: "ours" } }, default: null });
+    const list = D.stillWaiting([w("Overdue", "2026-09-20"), w("Inside", "2026-10-25"), w("Ancient", "1999-01-14"), w("Announced", "2026-09-20"), w("Streaming", "2026-09-20"), w("Bengali One", "2026-08-01", "Bengali")], "in", {
+      today: "2026-11-08", announced: new Set(["announced"]), manifest: { streaming: { live: { since: "2026-11-01" } } },
+      index: [{ slug: "overdue", title: "Overdue" }] });
+    assert.deepStrictEqual(list.map((x) => x.title), ["Overdue"], "inside the window, 30 years old, announced, streaming, or no measured range: left out");
+    assert.strictEqual(list[0].hook, "Opened in cinemas 49 days ago · Telugu films usually take 3–6 weeks · no OTT date in our sources yet");
+    assert.ok(/^Opened in cinemas \d+ days ago · /.test(list[0].hook) && !/^In cinemas/.test(list[0].hook), "never says it is still in cinemas");
+    const many = Array.from({ length: 30 }, (_, i) => w("F" + i, "2026-09-01"));
+    assert.strictEqual(D.stillWaiting(many, "in", { today: "2026-11-08" }).length, 20, "20 at most");
+  } finally { RU.useMeasuredWindows(null); }
+});
+
+test("the Friday digest: opt-in, Friday daytime in the edition, once a week, never beside another alert (step 8)", () => {
+  const A = require("./lib/alerts.js");
+  const recs = [ARR_REC({ id: 30, t: "Arrival One", first: "2026-11-12", seen: "2026-11-12T08:00:00.000Z", p: "Netflix" }), ARR_REC({ id: 31, t: "Arrival Two", first: "2026-11-10", seen: "2026-11-10T08:00:00.000Z", p: "JioHotstar" })];
+  const p = A.digestPayload(recs, "in", "2026-11-13", { V: { word: "OTT" }, country: "India" });
+  assert.deepStrictEqual(p, { title: "This week on OTT in India: 2 new arrivals", body: "Including Arrival One on Netflix and Arrival Two on JioHotstar. Tap for the full list.", url: "/new-on-ott/today/", tag: "fc-digest" });
+  assert.strictEqual(A.digestPayload([], "in", "2026-11-13"), null, "nothing new: nothing sent");
+  const sub = { endpoint: "https://push.example/x", keys: { p256dh: "k", auth: "a" } };
+  const subs = [{ uid: "on", sub, c: "in", films: { digest: "2026-11-01", "movie-1": "2026-11-01" } }, { uid: "off", sub, c: "in", films: { "movie-1": "2026-11-01" } }];
+  const fri = Date.parse("2026-11-13T08:00:00Z");   // 13:30 Friday in India
+  assert.deepStrictEqual(A.pickDigests({ subs, records: recs, now: fri }).map((x) => [x.uid, x.digest]), [["on", "2026-11-09"]], "only who asked, keyed by the week's Monday");
+  assert.strictEqual(A.pickDigests({ subs, records: recs, now: fri, sent: { on: { digest: "2026-11-09" } } }).length, 0, "once a week");
+  assert.strictEqual(A.pickDigests({ subs, records: recs, now: fri, skip: new Set(["on"]) }).length, 0, "never beside a film alert");
+  assert.strictEqual(A.pickDigests({ subs, records: recs, now: Date.parse("2026-11-12T08:00:00Z") }).length, 0, "Thursday: no");
+  assert.strictEqual(A.pickDigests({ subs, records: recs, now: Date.parse("2026-11-13T01:00:00Z") }).length, 0, "06:30 Friday: too early");
+  assert.deepStrictEqual(A.nextSent({ digest: "2026-11-09", films: {} }, "movie-1", "2026-11-14").digest, "2026-11-09", "a film alert keeps the digest note");
+  const fsx = require("fs"), path = require("path");
+  const app = fsx.readFileSync(path.join(__dirname, "..", "js", "app.js"), "utf8");
+  assert.ok(/digestToggle: \(\) => digestToggle\(\)/.test(app) && /films\.digest = on;/.test(app) && /length < 199/.test(app), "the switch, the opt-in key, room for it under the rules' 200 keys");
+  assert.ok(/The weekly digest/.test(fsx.readFileSync(path.join(__dirname, "..", "privacy", "index.html"), "utf8")), "Privacy says what it is");
+  assert.ok(/films is map/.test(fsx.readFileSync(path.join(__dirname, "..", "firestore.rules"), "utf8")), "the published rules already allow the key");
+});
+
 test("brand bar: the homepage's slim dark bar, natural-colour Pick of the Week, fixed share image (8 Nov 2026)", () => {
   const fsx = require("fs"), p = require("path");
   const tpl = fsx.readFileSync(p.join(__dirname, "..", "index.html"), "utf8");
@@ -1050,12 +1198,15 @@ test("Coming to OTT: announced dates only, grouped by week, soonest first", () =
 });
 
 test("New on OTT today: today first, never empty on a quiet day", () => {
-  const d = (o) => new Date(Date.now() - o * 864e5).toISOString().slice(0, 10);
+  // Sightings carry their check's time; the page groups by the edition's own day (8 Nov 2026).
+  const at = (o) => new Date(Date.now() - o * 864e5).toISOString();
+  const day = (o) => require("./lib/freshness.js").editionToday("in", Date.now() - o * 864e5);
   const recs = [
-    { c: "in", k: "movie", t: "Today Film", p: "ZEE5", first: d(0), rel: "2026-08-01", lang: "Tamil" },
-    { c: "in", k: "movie", t: "Yesterday Film", p: "Netflix", first: d(1), rel: "2026-08-01", lang: "Hindi" },
-    { c: "uk", k: "movie", t: "UK Film", p: "Netflix", first: d(0), rel: "2026-08-01", lang: "English" },
+    { c: "in", k: "movie", t: "Today Film", p: "ZEE5", first: day(0), seen: at(0), rel: "2026-08-01", lang: "Tamil" },
+    { c: "in", k: "movie", t: "Yesterday Film", p: "Netflix", first: day(1), seen: at(1), rel: "2026-08-01", lang: "Hindi" },
+    { c: "uk", k: "movie", t: "UK Film", p: "Netflix", first: day(0), seen: at(0), rel: "2026-08-01", lang: "English" },
   ];
+  const d = day;
   const html = U.buildTodayPage(recs, A_IN);
   assert.ok(html.indexOf("Today Film") < html.indexOf("Yesterday Film") && !/UK Film/.test(html));
   assert.ok(/<title>1 New on OTT Today in India/.test(html));
@@ -9140,7 +9291,7 @@ test("a channel is named as its service: Paramount Plus's Apple TV channel is Pa
   const R = require("./lib/rules.js");
   for (const [raw, want] of [["Paramount Plus Apple TV channel", "Paramount+"], ["Paramount+ Amazon Channel", "Paramount+"],
     ["Telecine Amazon Channel", "Telecine"], ["HBO Max Amazon Channel", "HBO Max"], ["RTL+ Max Amazon Channel", "RTL+ Max"],
-    ["AMC Plus Apple TV channel", "AMC Plus"], ["Movistar Plus+ Ficción Total ", "Movistar Plus+"]]) {
+    ["AMC Plus Apple TV channel", "AMC+"], ["Movistar Plus+ Ficción Total ", "Movistar Plus+"]]) {
     assert.strictEqual(R.canonProvider(raw), want, raw);
   }
   assert.strictEqual(require("./lib/pagekit.js").canonProvider, R.canonProvider, "one implementation, re-exported");

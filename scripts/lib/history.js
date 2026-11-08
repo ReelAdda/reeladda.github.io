@@ -123,6 +123,28 @@ function observationStarts(records) {
   return out;
 }
 
+// Pure: arrivals per month for one edition (step 6, 8 Nov 2026), for the table on /data/. An
+// arrival is a title we first saw streaming after we had started watching that edition: titles
+// already there on the first day were streaming before, not arriving. Films and series both;
+// platform names one per service (readHistory). Newest month first; each month's platforms by
+// count, then name.
+function arrivalsByMonth(records, code) {
+  const start = observationStarts(records || [])[code];
+  if (!start) return [];
+  const months = new Map();
+  for (const r of records || []) {
+    if (!r || r.c !== code || !r.first || !r.p || String(r.first).slice(0, 10) <= start) continue;
+    const m = String(r.first).slice(0, 7);
+    if (!months.has(m)) months.set(m, new Map());
+    const pm = months.get(m);
+    pm.set(r.p, (pm.get(r.p) || 0) + 1);
+  }
+  return [...months.entries()].sort((a, b) => b[0].localeCompare(a[0])).map(([month, pm]) => {
+    const platforms = [...pm.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    return { month, total: platforms.reduce((s, [, n]) => s + n, 0), platforms };
+  });
+}
+
 // ---------------------------------------------------------------------------
 // EARLY-ARRIVAL CHECK (Oct 2026). TMDB's provider data (from JustWatch) sometimes lists a film
 // on a platform before it is really there: Prime Video's placeholder for Drishyam: The
@@ -371,7 +393,7 @@ function historyForMonth(records, code, month) {
 }
 
 module.exports = {
-  HISTORY_FILE, appendHistory, readHistory, loadHistoryIndex,
+  HISTORY_FILE, arrivalsByMonth, appendHistory, readHistory, loadHistoryIndex,
   historyRecord, streamingWindowDays, windowStats, median,
   observationStarts, cinemaWindowDays, cinemaClaim,
   EARLY_WINDOW_DAYS, VERIFY_AFTER_DAYS, awaitingCheck, prelisted, verifyEarlyArrivals,
