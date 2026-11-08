@@ -2433,6 +2433,13 @@ async function main() {
       const langs = Object.entries(windows.languages).map(([l, w]) => `${l} ${w.lo}–${w.hi}wk (${w.hit}/${w.n}, ${w.src})`).join(", ");
       console.log(`Streaming windows ${windows.month}${computed ? " (recomputed)" : ""}: ${langs || "none yet"}`);
     } catch (e) { stageFailed("streaming windows", e, { optional: true }); }
+    // "Recent changes" on film pages (lib/facts.js): the changes each page's facts record holds.
+    try {
+      const FX = require("./lib/facts.js");
+      const idx = FX.loadChangeIndex(COUNTRIES.map((c) => c.code));
+      FX.useChangeIndex(idx);
+      console.log(`Recent changes: ${[...idx.values()].reduce((s, m) => s + m.size, 0)} page(s) with a recorded change`);
+    } catch (e) { stageFailed("recent changes", e, { optional: true }); }
     // "Most searched" data (lib/searchtop.js): Search Console's latest week of clicks per page.
     // Dormant without access; the last saved list (or a loaded export) is used meanwhile.
     try {
@@ -2993,6 +3000,14 @@ async function main() {
       const p = applyGoogleHidePaths(peoplePageFiles());
       console.log(`Google-hidden people and embed pages: ${p.hidden} of ${p.pages} hidden from Google, ${p.changed} updated this run`);
     } catch (e) { stageFailed("google hide", e); }
+    // Near-copy dry run (lib/googlehide.js): the rule's 5-word phrases beside plain word overlap,
+    // with a control of different films. Log only: nothing is hidden or shown because of it.
+    try {
+      const d = require("./lib/googlehide.js").nearCopyDryRun(filmPageFiles(), pagesManifest, { skip: (code, slug, entry) => googleHidden(code, slug, entry) });
+      console.log(`Near-copy dry run (log only): ${d.pairs} visible edition pair(s); 5-word phrases >=0.85: ${d.phrases.ge85}, >=0.90: ${d.phrases.ge90}; `
+        + `word overlap >=0.85: ${d.words.ge85}, >=0.90: ${d.words.ge90}; control, ${d.control.n} pairs of different films in one edition: `
+        + `phrases median ${d.control.phrasesMedian}, words median ${d.control.wordsMedian} (90th percentile ${d.control.wordsP90})`);
+    } catch (e) { stageFailed("near-copy dry run", e, { optional: true }); }
 
     // All countries are built by now, so the filesystem finally shows every cluster's true
     // membership — repair them in one pass before the sitemap is written.

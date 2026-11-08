@@ -578,6 +578,102 @@ test("the Friday digest: opt-in, Friday daytime in the edition, once a week, nev
   assert.ok(/films is map/.test(fsx.readFileSync(path.join(__dirname, "..", "firestore.rules"), "utf8")), "the published rules already allow the key");
 });
 
+test("the name everywhere is 'FilmyChill Verdict'; episode stars say they are TMDB's (8 Nov 2026 review)", () => {
+  const S = require("./lib/series.js"), F = require("./lib/filmpage.js"), R = require("./lib/rollout.js"), prevCfg = R.peekRolloutConfig();
+  const ep = { count: 8, seasons: 1, season: 1, next: { s: 1, e: 8, name: "Forever", date: "2099-11-10" },
+    list: [{ e: 1, name: "No Strings", date: "2026-10-13", runtime: 56, rating: 7.4 }, { e: 8, name: "Forever", date: "2099-11-10" }] };
+  const item = { kind: "tv", title: "VisionQuest", episodes: ep, fcScore: { verdict: "Must watch" } };
+  assert.ok(/ FilmyChill Verdict: Must watch\.$/.test(S.seriesDescription(item, (d) => d, "2026-11-08")), "the series snippet");
+  assert.ok(/ · original air dates · episode ratings from TMDB<\/p>/.test(S.episodesHtml(item, (d) => d, "2026-11-08", { v2: true })), "the stars are labelled once for the list");
+  const unrated = { ...item, episodes: { ...ep, list: ep.list.map(({ rating, ...x }) => x) } };
+  assert.ok(!/episode ratings from TMDB/.test(S.episodesHtml(unrated, (d) => d, "2026-11-08", { v2: true })), "no stars, no label");
+  assert.ok(/By the FilmyChill Verdict: /.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "lastweek.js"), "utf8")));
+  // Film pages: the share title and its image text switch with the page's stage of score-halves; the pass renames older pages.
+  const it = { title: "T", slug: "the-love-hypothesis", kind: "movie", released: "2026-09-01", language: "English", genre: "Romance", providers: ["Prime Video"], rentBuy: [], tmdbId: 5,
+    rating: 8.1, votes: 353, fcScore: { verdict: "Worth a watch", reason: "Audiences like it.", audience: "Liked", critics: "mixed", basis: "both" } };
+  const IN = require("./lib/core.js").COUNTRIES[0];
+  try {
+    R.useRolloutConfig({ features: { "score-halves": { percent: 0 } } });
+    const off = F.buildFilmPage(it, "2026-11-08", new Set([it.slug]), IN);
+    assert.ok(/ — FilmyChill verdict">/.test(off), "before its stage: unchanged bytes");
+    R.useRolloutConfig({ features: { "score-halves": { percent: 100 } } });
+    const on = F.buildFilmPage(it, "2026-11-08", new Set([it.slug]), IN);
+    assert.ok(/ — FilmyChill Verdict">/.test(on) && !/FilmyChill verdict/.test(on), "at its stage: the capital V, nowhere lower-case");
+    assert.ok(!/FilmyChill verdict/.test(F.scoreHalves(off)), "and the pass gives older pages the same");
+  } finally { R.useRolloutConfig(prevCfg); }
+});
+
+test("near-copy dry run: both measures and a control, logged only (8 Nov 2026)", () => {
+  const G = require("./lib/googlehide.js");
+  const body = (words) => `<html><body><main><p>${words}</p></main></body></html>`;
+  const shared = Array.from({ length: 80 }, (_, i) => `word${i}`).join(" ");
+  inTempDirSync(() => {
+    const fsx = require("fs");
+    fsx.mkdirSync("movie", { recursive: true }); fsx.mkdirSync("uk/movie", { recursive: true });
+    fsx.writeFileSync("movie/a.html", body(shared + " india netflix"));
+    fsx.writeFileSync("uk/movie/a.html", body(shared + " uk prime"));
+    fsx.writeFileSync("movie/b.html", body(Array.from({ length: 80 }, (_, i) => `other${i}`).join(" ")));
+    const man = { in: { a: { tmdbId: 1, kind: "movie" }, b: { tmdbId: 2, kind: "movie" } }, uk: { a: { tmdbId: 1, kind: "movie" } } };
+    const d = G.nearCopyDryRun(["movie/a.html", "uk/movie/a.html", "movie/b.html"], man);
+    assert.strictEqual(d.pairs, 1, "one film in two editions");
+    assert.strictEqual(d.words.ge90, 1, "word overlap sees the shared template");
+    assert.strictEqual(d.control.n, 1, "a and b: different films in one edition");
+    assert.ok(d.control.wordsMedian < 0.1, "unrelated text reads as unrelated");
+  });
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(/nearCopyDryRun\(filmPageFiles\(\), pagesManifest/.test(src) && /Near-copy dry run \(log only\)/.test(src), "the build logs it");
+  assert.ok(!/nearCopyDryRun[\s\S]{0,400}applyGoogleHide/.test(src.slice(src.indexOf("Near-copy dry run"))), "and nothing it computes feeds the hiding");
+});
+
+test("change record: what changed on a page, kept on its facts record, nothing invented (8 Nov 2026)", () => {
+  const F = require("./lib/facts.js");
+  const base = { released: "2026-10-13", providers: ["Prime Video"], runtime: 56, cert: "16+",
+    episodes: { count: 3, list: [{ date: "2026-10-13" }, { date: "2026-10-20" }, { date: "2026-11-11" }] } };
+  assert.deepStrictEqual(F.factChanges(null, base, "2026-11-08"), [], "a first capture records nothing");
+  assert.deepStrictEqual(F.factChanges(base, { ...base, providers: ["Amazon Prime Video"] }, "2026-11-08"), [], "a new spelling of the same service is no change");
+  assert.deepStrictEqual(F.factChanges(base, { ...base, episodes: { count: 3, list: [{ date: "2026-10-13" }, { date: "2026-10-20" }, { date: "2026-11-10" }] } }, "2026-11-08"),
+    [{ on: "2026-11-08", field: "finale", from: "2026-11-11", to: "2026-11-10" }]);
+  assert.deepStrictEqual(F.factChanges(base, { ...base, providers: [] }, "2026-11-08"), [{ on: "2026-11-08", field: "streaming on", from: "Prime Video", to: "" }], "leaving a platform counts");
+  assert.deepStrictEqual(F.factChanges({ ...base, providers: [] }, base, "2026-11-04"), [{ on: "2026-11-04", field: "streaming on", from: "", to: "Prime Video" }], "a first platform counts most of all");
+  assert.deepStrictEqual(F.factChanges({ ...base, runtime: null }, base, "2026-11-08"), [], "TMDB filling in a blank is not a change");
+  assert.deepStrictEqual(F.factChanges(base, { ...base, rating: 9.9, votes: 99999 }, "2026-11-08"), [], "ratings are not tracked");
+  // The words say exactly what the record shows.
+  const t = (c) => F.changeText(c, (d) => d);
+  assert.strictEqual(t({ field: "streaming on", from: "", to: "JioHotstar" }), "now streaming on JioHotstar");
+  assert.strictEqual(t({ field: "streaming on", from: "Netflix, Prime Video", to: "Netflix, Zee5" }), "now streaming on Zee5, no longer on Prime Video");
+  assert.strictEqual(t({ field: "streaming on", from: "Netflix", to: "" }), "no longer on Netflix");
+  assert.strictEqual(t({ field: "finale", from: "2026-11-11", to: "2026-11-10" }), "finale moved from 2026-11-11 to 2026-11-10");
+  assert.strictEqual(t({ field: "episodes", from: "8", to: "10" }), "now 10 episodes (was 8)");
+  // The line: the last 30 days before the page's own date, newest first; nothing older, nothing invented.
+  const line = F.recentChangesHtml([{ on: "2026-11-04", field: "streaming on", from: "", to: "JioHotstar" }, { on: "2026-11-08", field: "finale", from: "2026-11-11", to: "2026-11-10" },
+    { on: "2026-09-01", field: "runtime", from: "50 min", to: "52 min" }], "2026-11-08", (d) => d);
+  assert.ok(line.includes("<b style=\"color:var(--ink);font-weight:600\">Recent changes:</b> 2026-11-08, finale moved from 2026-11-11 to 2026-11-10 · 2026-11-04, now streaming on JioHotstar</div>"));
+  assert.ok(!/runtime/.test(line), "older than 30 days: not 'recent'");
+  assert.strictEqual(F.recentChangesHtml([], "2026-11-08"), "", "no changes: no line");
+  assert.strictEqual(F.recentChangesHtml([{ on: "2026-08-01", field: "runtime", from: "50 min", to: "52 min" }], "2026-11-08"), "", "only old ones: no line");
+  // On the page, under "Page updated", from the build's index; absent for a page without changes.
+  const P = require("./lib/filmpage.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const film = { title: "T", slug: "chg-film", kind: "movie", released: "2026-09-01", language: "English", genre: "Drama", providers: ["JioHotstar"], rentBuy: [], tmdbId: 9, rating: 7, votes: 300 };
+  try {
+    F.useChangeIndex(new Map([["in", new Map([["chg-film", [{ on: "2026-11-04", field: "streaming on", from: "", to: "JioHotstar" }]]])]]));
+    const page = P.buildFilmPage(film, "2026-11-08", new Set(), IN);
+    assert.ok(/Page updated [^<]*<\/div><div class="chg"[^>]*><b[^>]*>Recent changes:<\/b> 4 Nov, now streaming on JioHotstar<\/div>/.test(page), "right under Page updated, in the edition's date style");
+    assert.ok(!/Recent changes/.test(P.buildFilmPage({ ...film, slug: "other-film" }, "2026-11-08", new Set(), IN)), "another page: nothing");
+  } finally { F.useChangeIndex(null); }
+  assert.ok(/loadChangeIndex\(COUNTRIES\.map/.test(require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8")), "the build loads the index");
+  inTempDirSync(() => {
+    const map = new Map([["x", { slug: "x", updated: "2026-11-01", item: base }]]);
+    F.writeFacts("in", map);
+    assert.ok(!F.readFacts("in").get("x").changes, "first write: nothing to say");
+    F.writeFacts("in", new Map([["x", { slug: "x", updated: "2026-11-08", item: { ...base, runtime: 58 } }]]));
+    assert.deepStrictEqual(F.readFacts("in").get("x").changes, [{ on: "2026-11-08", field: "runtime", from: "56 min", to: "58 min" }]);
+    F.writeFacts("in", new Map([["x", { slug: "x", updated: "2026-11-09", item: { ...base, runtime: 58 } }]]));
+    assert.strictEqual(F.readFacts("in").get("x").changes.length, 1, "a replaced record keeps its changes; an unchanged write adds none");
+    for (const [d, c] of [["2026-11-10", "18+"], ["2026-11-11", "13+"], ["2026-11-12", "7+"]]) F.writeFacts("in", new Map([["x", { slug: "x", updated: d, item: { ...base, runtime: 58, cert: c } }]]));
+    assert.strictEqual(F.readFacts("in").get("x").changes.length, F.CHANGE_KEEP, "the last three");
+  });
+});
+
 test("brand bar: the homepage's slim dark bar, natural-colour Pick of the Week, fixed share image (8 Nov 2026)", () => {
   const fsx = require("fs"), p = require("path");
   const tpl = fsx.readFileSync(p.join(__dirname, "..", "index.html"), "utf8");
@@ -6518,7 +6614,7 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     assert.deepStrictEqual(S.nextDrop(two, "2026-10-27"), { nums: [5, 6], date: "2099-10-27", label: "E5 & E6", name: "", season: 1 });
     assert.ok(/Episodes 5 and 6 come out on 2099-10-27/.test(S.episodeFaqs({ ...item, episodes: two }, (d) => d, "2026-10-27")[1].a));
     assert.strictEqual(S.seriesDescription({ ...item, episodes: two, fcScore: { verdict: "Must watch" } }, (d) => d, "2026-10-27"),
-      "VisionQuest: all 8 episodes with dates. E5 & E6 out 2099-10-27, finale 2099-11-10. FilmyChill verdict: Must watch.", "the schedule, never the platform");
+      "VisionQuest: all 8 episodes with dates. E5 & E6 out 2099-10-27, finale 2099-11-10. FilmyChill Verdict: Must watch.", "the schedule, never the platform");
     const rated = S.episodesFrom(tv, { season_number: 1, episodes: [{ episode_number: 1, name: "A", air_date: "2026-10-14", vote_average: 8.43, vote_count: 25 }, { episode_number: 2, name: "B", air_date: "2026-10-14", vote_average: 9.8, vote_count: 2 }] });
     assert.deepStrictEqual(rated.list.map((x) => x.rating || null), [8.4, null], "no rating from two votes");
     assert.deepStrictEqual(fd.watchFirst.map((x) => x.slug), ["wandavision"], "watch first: only earlier titles");
@@ -6559,7 +6655,7 @@ testAsync("series and franchise: episode guide, franchise row, Good to know, FAQ
     assert.strictEqual(X.keyFacts("<html><body><h1>F</h1></body></html>").episodes, undefined, "pages without a guide: no new key, no fingerprint change");
     // A frozen page's description keeps the verdict (the record's score reaches the rewrite).
     const rec = require("./lib/archive.js").withRecord({ title: "VisionQuest", kind: "tv", providers: ["JioHotstar"] }, { fcScore: { verdict: "Must watch" }, episodes: two });
-    assert.ok(/FilmyChill verdict: Must watch\.$/.test(F.filmMetaDescription({ ...rec, slug: "visionquest" }, IN)), F.filmMetaDescription({ ...rec, slug: "visionquest" }, IN));
+    assert.ok(/FilmyChill Verdict: Must watch\.$/.test(F.filmMetaDescription({ ...rec, slug: "visionquest" }, IN)), F.filmMetaDescription({ ...rec, slug: "visionquest" }, IN));
     const back = X.extractFacts(html, "visionquest");
     assert.deepStrictEqual(back.episodes, ep, "the guide survives a frozen render");
     assert.deepStrictEqual(back.franchise, item.franchise);

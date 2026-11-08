@@ -333,10 +333,97 @@ function readFacts(code, root = ".") {
   }
   return out;
 }
+// CHANGE RECORD (8 Nov 2026): what changed on a page, for a future "Changed 8 Nov: finale
+// 11 Nov → 10 Nov" line (not shown yet: mock-up first). Only facts a reader acts on: the release
+// date, where it streams, the episode total, the finale date, runtime and certificate. Ratings
+// and counts move daily and are left out, and a series' next episode moving on is the schedule,
+// not a change. A first capture records nothing: only a value that existed and then changed.
+// The last three changes ride on the record as `changes`, carried over when a record is replaced.
+const CHANGE_KEEP = 3;
+function trackedFacts(item) {
+  if (!item) return {};
+  const { canonProvider } = require("./rules.js");
+  const ep = item.episodes || null;
+  const dates = ep && Array.isArray(ep.list) ? ep.list.map((x) => x && x.date).filter(Boolean).sort() : [];
+  return {
+    "release date": item.released ? String(item.released).slice(0, 10) : "",
+    "streaming on": Array.isArray(item.providers) ? [...new Set(item.providers.map(canonProvider))].sort().join(", ") : "",
+    episodes: ep && ep.count ? String(ep.count) : "",
+    finale: dates.length && ep && ep.count && dates.length === ep.count ? dates[dates.length - 1] : "",
+    runtime: item.runtime ? `${item.runtime} min` : "",
+    certificate: item.cert ? String(item.cert) : "",
+  };
+}
+// Pure: the changes between two records' items, dated `on`. The record existing before is what
+// makes it a change. Where it streams counts both ways, from nothing included (a first platform
+// is the change readers care about most); any other field counts only when a value was replaced
+// by another, not when TMDB fills in a blank or drops one.
+function factChanges(before, after, on) {
+  if (!before || !after) return [];
+  const a = trackedFacts(before), b = trackedFacts(after), out = [];
+  for (const k of Object.keys(b)) {
+    if (a[k] === b[k]) continue;
+    if (k === "streaming on" ? (a[k] || b[k]) : (a[k] && b[k])) out.push({ on, field: k, from: a[k], to: b[k] });
+  }
+  return out;
+}
+// Pure: one change in words, from exactly what was recorded. `fmt(iso)` formats a date for the
+// edition. Platforms: what arrived and what left, by name; nothing is said that the two lists
+// don't show.
+function changeText(c, fmt = (d) => d) {
+  const list = (s) => String(s || "").split(", ").filter(Boolean);
+  const and = (xs) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
+  if (c.field === "streaming on") {
+    const was = list(c.from), now = list(c.to);
+    const added = now.filter((p) => !was.includes(p)), gone = was.filter((p) => !now.includes(p));
+    return [added.length ? `now streaming on ${and(added)}` : "", gone.length ? `no longer on ${and(gone)}` : ""].filter(Boolean).join(", ");
+  }
+  if (c.field === "release date") return `release date moved from ${fmt(c.from)} to ${fmt(c.to)}`;
+  if (c.field === "finale") return `finale moved from ${fmt(c.from)} to ${fmt(c.to)}`;
+  if (c.field === "episodes") return `now ${c.to} episodes (was ${c.from})`;
+  if (c.field === "runtime") return `runtime now ${c.to} (was ${c.from})`;
+  if (c.field === "certificate") return `certificate now ${c.to} (was ${c.from})`;
+  return "";
+}
+// The visible line (owner, 8 Nov 2026: the "Recent changes" mock-up): the changes of the last
+// RECENT_DAYS before the page's own date, newest first, three at most; empty when there are none,
+// so most pages never show it. Loaded once per build (useChangeIndex) from the facts store.
+const RECENT_DAYS = 30;
+function recentChangesHtml(changes, asOf, fmt = (d) => d) {
+  if (!Array.isArray(changes) || !changes.length || !asOf) return "";
+  const from = new Date(Date.parse(`${String(asOf).slice(0, 10)}T00:00:00Z`) - RECENT_DAYS * 864e5).toISOString().slice(0, 10);
+  const recent = changes.filter((c) => c && c.on && c.on >= from && c.on <= String(asOf).slice(0, 10))
+    .slice().sort((x, y) => y.on.localeCompare(x.on)).slice(0, CHANGE_KEEP)
+    .map((c) => ({ on: c.on, t: changeText(c, fmt) })).filter((x) => x.t);
+  if (!recent.length) return "";
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return `<div class="chg" style="font-size:12.5px;color:var(--mute);margin-top:4px;line-height:1.5"><b style="color:var(--ink);font-weight:600">Recent changes:</b> ${recent.map((x) => `${esc(fmt(x.on))}, ${esc(x.t)}`).join(" · ")}</div>`;
+}
+let CHANGE_INDEX = null;
+function useChangeIndex(map) { CHANGE_INDEX = map || null; }
+function loadChangeIndex(codes, root = ".") {
+  const out = new Map();
+  for (const code of codes) {
+    const m = new Map();
+    for (const [slug, r] of readFacts(code, root)) if (r && Array.isArray(r.changes) && r.changes.length) m.set(slug, r.changes);
+    out.set(code, m);
+  }
+  return out;
+}
+function changesFor(code, slug) { return (CHANGE_INDEX && CHANGE_INDEX.get(code) && CHANGE_INDEX.get(code).get(slug)) || null; }
+function withChanges(prev, next, today) {
+  const kept = (prev && Array.isArray(prev.changes) ? prev.changes : []);
+  const fresh = prev && prev.item && next && next.item ? factChanges(prev.item, next.item, String(next.updated || today).slice(0, 10)) : [];
+  const all = [...(Array.isArray(next.changes) ? next.changes : kept), ...fresh].slice(-CHANGE_KEEP);
+  return all.length ? { ...next, changes: all } : next;
+}
 function writeFacts(code, map, root = ".") {
+  // Record what changed against the file as it stands, before it is replaced.
+  const before = readFacts(code, root), today = new Date().toISOString().slice(0, 10);
+  for (const [slug, rec] of map) if (rec && rec.item) map.set(slug, withChanges(before.get(slug), rec, today));
   fs.mkdirSync(path.join(root, FACTS_DIR), { recursive: true });
   const lines = [...map.values()].sort((a, b) => a.slug.localeCompare(b.slug)).map((r) => JSON.stringify(r));
   fs.writeFileSync(factsPath(code, root), lines.join("\n") + (lines.length ? "\n" : ""));
 }
 
-module.exports = { FACTS_DIR, STATUS_PILL, availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, pageState, readFacts, whereOf, writeFacts, wtwBlock };
+module.exports = { CHANGE_KEEP, RECENT_DAYS, changeText, changesFor, factChanges, loadChangeIndex, recentChangesHtml, trackedFacts, useChangeIndex, FACTS_DIR, STATUS_PILL, availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, pageState, readFacts, whereOf, writeFacts, wtwBlock };

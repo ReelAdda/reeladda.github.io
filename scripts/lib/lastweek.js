@@ -83,7 +83,7 @@ function buildLastWeekPage(items, cfg, { from, to, now = Date.now() }) {
   // Only say the verdicts are in when most of the list has one.
   const verdicts = good.length + items.filter((it) => level(it) === 0).length >= items.length / 2;
   const faqs = [{ q: `Which movies were released last week in ${country}?`, a: `${items.length} films were released in ${country} in the week of ${range}: ${andList(names(items, 8))}${items.length > 8 ? `, and ${items.length - 8} more` : ""}.` }];
-  if (good.length) faqs.push({ q: "Which of last week's movies are worth watching?", a: `By the FilmyChill verdict: ${andList(good.slice(0, 4).map((x) => `${x.title} (${x.fcScore.verdict})`))}.` });
+  if (good.length) faqs.push({ q: "Which of last week's movies are worth watching?", a: `By the FilmyChill Verdict: ${andList(good.slice(0, 4).map((x) => `${x.title} (${x.fcScore.verdict})`))}.` });
   return listingPageHtml({
     title: fitFirst([
       `${items.length} Movies Released Last Week in ${country} (${range})`,

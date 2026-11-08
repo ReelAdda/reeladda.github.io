@@ -312,7 +312,67 @@ function nearCopyEditions(files, manifest, { root = ".", threshold = null, skip 
   return hide;
 }
 
+// NEAR-COPY DRY RUN (8 Nov 2026, log only: hides nothing, changes nothing indexed). A review
+// read the IN/UK VisionQuest pair at 0.739 on the rule's 5-word phrases and 0.895 on plain word
+// overlap, and asked which one the rule should trust. Each build logs both for every pair of
+// visible editions of a film, plus a control: pairs of DIFFERENT films in the same edition, which
+// shows what each measure reports for pages that are clearly not copies (same template, other
+// film). Decide from these numbers and Search Console, not from one example.
+function wordSet(text) { return new Set(String(text).split(" ").filter(Boolean)); }
+function nearCopyDryRun(files, manifest, { root = ".", skip = () => false, controlPairs = 200 } = {}) {
+  const byFilm = new Map(), byEdition = new Map();
+  for (const rel of files) {
+    const m = /^(?:([a-z]{2})\/)?movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
+    if (!m) continue;
+    const code = m[1] || "in", slug = m[2];
+    const entry = ((manifest || {})[code] || {})[slug];
+    if (!entry || !entry.tmdbId || skip(code, slug, entry)) continue;
+    const key = `${entry.kind === "tv" ? "tv" : "movie"}:${entry.tmdbId}`;
+    if (!byFilm.has(key)) byFilm.set(key, []);
+    byFilm.get(key).push({ code, slug, rel, key });
+    if (!byEdition.has(code)) byEdition.set(code, []);
+    byEdition.get(code).push({ code, slug, rel, key });
+  }
+  const texts = new Map();
+  const textOf = (x) => {
+    if (texts.has(x.rel)) return texts.get(x.rel);
+    let t = null;
+    try { const html = fs.readFileSync(path.join(root, x.rel), "utf8"); if (!NOINDEX_META.test(html.slice(0, 4096).replace(GOOGLEBOT_TAG, ""))) t = mainText(html); } catch { /* gone */ }
+    texts.set(x.rel, t);
+    return t;
+  };
+  const measure = (a, b) => ({ phrases: similarity(shingleSet(a), shingleSet(b)), words: similarity(wordSet(a), wordSet(b)) });
+  const out = { pairs: 0, phrases: { ge85: 0, ge90: 0 }, words: { ge85: 0, ge90: 0 } };
+  for (const eds of byFilm.values()) {
+    if (eds.length < 2) continue;
+    for (let i = 0; i < eds.length; i++) for (let j = i + 1; j < eds.length; j++) {
+      const a = textOf(eds[i]), b = textOf(eds[j]);
+      if (!a || !b) continue;
+      const s = measure(a, b);
+      out.pairs++;
+      if (s.phrases >= 0.85) out.phrases.ge85++; if (s.phrases >= 0.9) out.phrases.ge90++;
+      if (s.words >= 0.85) out.words.ge85++; if (s.words >= 0.9) out.words.ge90++;
+    }
+  }
+  // Control: neighbouring films (by slug) in each edition, never the same title.
+  const ctl = { phrases: [], words: [] };
+  for (const list of byEdition.values()) {
+    const sorted = list.slice().sort((a, b) => a.slug.localeCompare(b.slug));
+    for (let i = 0; i + 1 < sorted.length && ctl.words.length < controlPairs; i += 2) {
+      if (sorted[i].key === sorted[i + 1].key) continue;
+      const a = textOf(sorted[i]), b = textOf(sorted[i + 1]);
+      if (!a || !b) continue;
+      const s = measure(a, b);
+      ctl.phrases.push(s.phrases); ctl.words.push(s.words);
+    }
+  }
+  const q = (arr, p) => { const s = arr.slice().sort((x, y) => x - y); return s.length ? Math.round(100 * s[Math.min(s.length - 1, Math.floor(p * (s.length - 1)))]) / 100 : null; };
+  out.control = { n: ctl.words.length, phrasesMedian: q(ctl.phrases, 0.5), wordsMedian: q(ctl.words, 0.5), wordsP90: q(ctl.words, 0.9) };
+  return out;
+}
+
 module.exports = {
+  nearCopyDryRun, wordSet,
   CURRENT_DAYS, EPISODE_GRACE_DAYS, currentEntry, factsOf, releaseCurrent, useFactsLookup,
   NEAR_COPY, NEAR_COPY_LOWER, NEAR_COPY_STAGE, WEEKLY_HIDE_DAYS, nearCopyThreshold, listedHidden, mainText, nearCopyEditions, similarity, shingleSet,
   applyGoogleHidePaths, pathHidden, peoplePageFiles, BINGBOT_TAG, HIDE_TAG, GOOGLEBOT_TAG, HIDE_FEATURE, HIDE_FILE, NOINDEX_META, addGooglebotNoindex, applyGoogleHide, googleEligible, googleHidden, loadHidden, removeGooglebotNoindex, useHiddenList };

@@ -434,8 +434,8 @@ function plainStats({ ratingBit, runtimeBit }) {
 }
 const PLAIN_DESC = {
   streaming: (c) => fitDesc([
-    `${c.item.title} is streaming in ${c.country}. ${plainStats(c)}See the FilmyChill verdict, what critics said and every platform that has it.`,
-    `${c.item.title} is streaming in ${c.country}. ${plainStats(c)}See the FilmyChill verdict and every platform that has it.`,
+    `${c.item.title} is streaming in ${c.country}. ${plainStats(c)}See the ${scoreHalvesOn(c.item) ? "FilmyChill Verdict" : "FilmyChill verdict"}, what critics said and every platform that has it.`,
+    `${c.item.title} is streaming in ${c.country}. ${plainStats(c)}See the ${scoreHalvesOn(c.item) ? "FilmyChill Verdict" : "FilmyChill verdict"} and every platform that has it.`,
     `${c.item.title} is streaming in ${c.country}. See the verdict and where to watch it.`,
     `${c.item.title} is streaming in ${c.country}.`,
   ]),
@@ -1151,6 +1151,9 @@ const VERDICT_RENAMES = [
   ["The FilmyChill Score combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a score.",
     "The FilmyChill Verdict combines audience ratings and critics' reception, and updates twice a day. No studio or platform can pay for a verdict."],
   ["FilmyChill Score: ", "FilmyChill Verdict: "],
+  // The name's capital V in the share title, image text and description (8 Nov 2026).
+  [" — FilmyChill verdict", " — FilmyChill Verdict"],
+  ["See the FilmyChill verdict", "See the FilmyChill Verdict"],
   ["title=\"The FilmyChill Score combines audience ratings and critics' reception\"", "title=\"The FilmyChill Verdict combines audience ratings and critics' reception\""],
   [VOTE_NOTE_OLD, VOTE_NOTE],
 ];
@@ -1527,7 +1530,7 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
 ${ICON_LINKS}${v2 ? `\n<link rel="manifest" href="/manifest.json">\n<meta name="theme-color" content="${V2.DEEP}">` : ""}${posterFirst(item, lean)}
 ${robotsTag}
 <link rel="canonical" href="${e(url)}">${alts.length ? "\n" + alts.map((a) => `<link rel="alternate" hreflang="${a.code === "in" ? "en-IN" : "en-" + a.region}" href="${e(filmPageUrl(a.code, item.slug))}"/>`).join("\n") + `\n<link rel="alternate" hreflang="x-default" href="${e(filmPageUrl(xDefaultCode(alts.map((a) => a.code)), item.slug))}"/>` : ""}
-<meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — FilmyChill verdict">
+<meta property="og:title" content="${e(item.title)}${year ? " (" + year + ")" : ""} — ${scoreHalvesOn(item) ? "FilmyChill Verdict" : "FilmyChill verdict"}">
 <meta property="og:description" content="${e(desc)}">
 <meta property="og:type" content="${item.kind === "tv" ? "video.tv_show" : "video.movie"}">
 <meta property="og:url" content="${e(url)}">
@@ -1538,7 +1541,7 @@ ${(() => {
   const isCard = /\/cards\//.test(src);
   const dims = isCard ? '\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">'
     : item.backdropPath ? '\n<meta property="og:image:width" content="1280">\n<meta property="og:image:height" content="720">' : "";
-  const alt = isCard ? `\n<meta property="og:image:alt" content="${e(`${item.title} — FilmyChill verdict${(item.fcScore && item.fcScore.verdict) || item.verdict ? `: ${(item.fcScore && item.fcScore.verdict) || item.verdict}` : ""}`)}">` : "";
+  const alt = isCard ? `\n<meta property="og:image:alt" content="${e(`${item.title} — ${scoreHalvesOn(item) ? "FilmyChill Verdict" : "FilmyChill verdict"}${(item.fcScore && item.fcScore.verdict) || item.verdict ? `: ${(item.fcScore && item.fcScore.verdict) || item.verdict}` : ""}`)}">` : "";
   return `<meta property="og:image" content="${e(src)}">${dims}${alt}`;
 })()}
 <meta name="twitter:card" content="summary_large_image">
@@ -1647,7 +1650,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
         : [item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert]).filter(Boolean).map(e).join(" · ")}</div>
       ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Where({ ...item, windowClock: require("./windows.js").clockFor(code, item) }, { relState, country, V: V_TITLE, asOf, fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
       ${item.released && !v2 ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
-      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px"${v2 && !tidyLd ? ' hidden' : ""}>Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}
+      ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px"${v2 && !tidyLd ? ' hidden' : ""}>Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}${asOf && !(v2 && !tidyLd) ? require("./facts.js").recentChangesHtml(require("./facts.js").changesFor(code, item.slug), asOf, (d) => fmtDateShort(d, Date.parse(`${String(asOf).slice(0, 10)}T00:00:00Z`), localeFor(code))) : ""}
     </div>
   </div>${lean && !v3 ? "\n  </div>" : ""}
   ${v2 && !v3 ? V2.v2Cta(item, { cfg, country, asOf, relState, V: V_TITLE }) : ""}

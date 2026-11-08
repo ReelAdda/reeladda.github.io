@@ -160,7 +160,7 @@ function seriesDescription(item, fmt, today = new Date().toISOString().slice(0, 
   if (!nd) return null;
   const dates = (ep.list || []).map((x) => x.date).filter(Boolean).sort();
   const last = dates.length ? dates[dates.length - 1] : null;
-  const verdict = item.fcScore && item.fcScore.verdict ? ` FilmyChill verdict: ${item.fcScore.verdict}.` : "";
+  const verdict = item.fcScore && item.fcScore.verdict ? ` FilmyChill Verdict: ${item.fcScore.verdict}.` : "";
   const finale = last && last > nd.date ? `, finale ${fmt(last)}` : "";
   const whose = airLabel ? ` (original air date${finale ? "s" : ""})` : "";
   return `${item.title}: all ${ep.count} episode${ep.count === 1 ? "" : "s"} with dates. ${nd.label} out ${fmt(nd.date)}${finale}${whose}.${verdict}`;
@@ -188,7 +188,9 @@ function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10), 
     return `<li class="${state}"><span class="epn">${x.e}</span><div><b>${e(x.name || `Episode ${x.e}`)}</b><small>${e(meta)}</small></div>${state === "next" ? '<span class="eptag">Next</span>' : ""}</li>`;
   }).join("");
   const cadence = releaseCadence(ep, fmt);
-  const intro = `<p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""} · original air dates</p>`;
+  // The episode stars are TMDB viewers' ratings, said once for the list (8 Nov 2026).
+  const rated = (ep.list || []).some((x) => x.rating);
+  const intro = `<p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""} · original air dates${rated ? " · episode ratings from TMDB" : ""}</p>`;
   // v2 (lib/pagev2.js): "n of count out" with a progress bar while the season runs; a finished
   // series says so with its finale date and has neither.
   let head = `<h2>Episodes</h2>`;
