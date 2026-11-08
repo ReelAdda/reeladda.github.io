@@ -1,21 +1,62 @@
 {
- "date": "2026-11-07",
+ "date": "2026-11-08",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
- "high": 0,
- "correctable": 0,
+ "pagesDisagreeing": 6,
+ "high": 6,
+ "correctable": 6,
  "byField": {
-  "director": 1
+  "streaming": 1,
+  "platform": 5
  },
  "rows": [
   {
-   "field": "director",
-   "severity": "medium",
-   "page": "Mouli",
-   "tmdb": "Moulee",
-   "code": "ae",
-   "slug": "pammal-k-sambandam"
+   "field": "streaming",
+   "severity": "high",
+   "page": "on JioHotstar",
+   "tmdb": "on no subscription service",
+   "code": "in",
+   "slug": "love-action-drama"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "RTL+, ARD Plus, Magenta TV+",
+   "tmdb": "ARD Plus, Magenta TV+",
+   "code": "de",
+   "slug": "7-dwarves-the-forest-is-not-enough"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, WeTV",
+   "tmdb": "Netflix, Tencent Video",
+   "code": "sg",
+   "slug": "put-your-head-on-my-shoulder"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, WeTV",
+   "tmdb": "Netflix, Tencent Video",
+   "code": "ph",
+   "slug": "fight-for-my-way"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, Watcha, WeTV",
+   "tmdb": "Netflix, Watcha, Tencent Video",
+   "code": "kr",
+   "slug": "secret-garden"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Molotov TV, HBO Max",
+   "tmdb": "HBO Max",
+   "code": "fr",
+   "slug": "corpse-bride"
   }
  ]
 }
