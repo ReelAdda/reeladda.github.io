@@ -1,9 +1,9 @@
 {
  "_about": "Published reviews of recent titles, from the outlets' RSS feeds (lib/reviews.js): outlet, link, headline, date, and a star rating only when the feed states one. Keyed by kind:tmdbId; pruned 90 days after release.",
- "fetched": "2026-11-08",
+ "fetched": "2026-11-09",
  "feeds": {
   "https://www.thehindu.com/entertainment/reviews/feeder/default.rss": {
-   "ok": "2026-11-08",
+   "ok": "2026-11-09",
    "items": 60
   },
   "https://indianexpress.com/section/entertainment/movie-review/feed/": {
@@ -23,31 +23,31 @@
    "error": "HTTP 403"
   },
   "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml": {
-   "ok": "2026-11-08",
-   "items": 58
+   "ok": "2026-11-09",
+   "items": 63
   },
   "https://feeds.feedburner.com/ndtvmovies-latest": {
    "ok": "2026-11-05",
    "items": 100
   },
   "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml": {
-   "failed": "2026-11-08",
+   "failed": "2026-11-09",
    "error": "HTTP 403"
   },
   "https://www.news18.com/rss/movies.xml": {
-   "failed": "2026-11-08",
+   "failed": "2026-11-09",
    "error": "HTTP 403"
   },
   "https://feeds.feedburner.com/ScrollinArticles.rss": {
-   "ok": "2026-11-08",
+   "ok": "2026-11-09",
    "items": 100
   },
   "https://www.koimoi.com/feed/": {
-   "failed": "2026-11-08",
+   "failed": "2026-11-09",
    "error": "HTTP 403"
   },
   "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms": {
-   "ok": "2026-11-08",
+   "ok": "2026-11-09",
    "items": 20
   },
   "https://www.indiatoday.in/rss/1206611": {
@@ -55,43 +55,43 @@
    "items": 20
   },
   "https://www.dnaindia.com/feeds/entertainment.xml": {
-   "ok": "2026-11-08",
+   "ok": "2026-11-09",
    "items": 20
   },
   "https://www.freepressjournal.in/stories.rss?section=entertainment": {
-   "ok": "2026-11-08",
-   "items": 33
+   "ok": "2026-11-09",
+   "items": 85
   },
   "https://www.123telugu.com/category/reviews/feed": {
-   "ok": "2026-11-08",
+   "ok": "2026-11-09",
    "items": 30
   },
   "https://www.telugu360.com/feed/": {
-   "ok": "2026-11-08",
+   "ok": "2026-11-09",
    "items": 10
   },
   "https://www.cinemaexpress.com/feed": {
-   "ok": "2026-11-08",
-   "items": 4
+   "ok": "2026-11-09",
+   "items": 11
   },
   "https://www.vikatan.com/feed": {
-   "ok": "2026-11-08",
-   "items": 1
+   "ok": "2026-11-09",
+   "items": 15
   },
   "https://www.prajavani.net/feed": {
-   "ok": "2026-11-08",
-   "items": 36
+   "ok": "2026-11-09",
+   "items": 178
   },
   "https://www.amarujala.com/rss/entertainment.xml": {
-   "ok": "2026-11-08",
+   "ok": "2026-11-09",
    "items": 40
   },
   "https://www.sangbadpratidin.in/feed/": {
-   "ok": "2026-11-08",
+   "ok": "2026-11-09",
    "items": 20
   },
   "https://www.rediff.com/rss/moviesreviewsrss.xml": {
-   "ok": "2026-11-08",
+   "ok": "2026-11-09",
    "items": 215
   }
  },
@@ -113,7 +113,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1496785": {
    "title": "Aadarsha Kutumbam House No: 47 - AK47",
@@ -126,7 +126,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1234139": {
    "title": "Jailer 2",
@@ -158,7 +158,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1153576": {
    "title": "Street Fighter",
@@ -196,7 +196,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1400940": {
    "title": "Clayface",
@@ -215,7 +215,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1288069": {
    "title": "Tenzing",
@@ -241,7 +241,7 @@
      "d": "2026-10-18"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1255833": {
    "title": "Whalefall",
@@ -356,7 +356,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1395215": {
    "title": "Sigma",
@@ -400,7 +400,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "tv:289517": {
    "title": "Dead-End Job",
@@ -426,7 +426,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1374689": {
    "title": "Pyre",
@@ -451,7 +451,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1606527": {
    "title": "418",
@@ -464,7 +464,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:869152": {
    "title": "Titans",
@@ -529,7 +529,19 @@
     },
     {
      "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/ott-review-the-traitors-telugu-review.html",
+     "h": "OTT Review: The Traitors Telugu (3 Episodes) - Chinmayi’s Murder, Vidyullekha’s Exit and Ashika’s Strategy",
+     "d": "2026-10-15"
+    },
+    {
+     "o": "123telugu",
      "u": "https://www.123telugu.com/reviews/the-traitors-telugu-ott-review-and-rating.html",
+     "h": "OTT Review: The Traitors Telugu (Episodes 4–6) - Shravya Shines, Rahat’s Mind Games & a Big Win for Innocents",
+     "d": "2026-10-24"
+    },
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/the-traitors-telugu-ott-review.html",
      "h": "OTT Review: The Traitors Telugu (Episodes 4–6) - Shravya Shines, Rahat’s Mind Games & a Big Win for Innocents",
      "d": "2026-10-24"
     },
@@ -544,9 +556,21 @@
      "u": "https://www.123telugu.com/reviews/the-traitors-telugu-ott-review-and-rating-3.html",
      "h": "The Traitors Telugu Finale Review: Who Won the Rs. 42.77 Lakh Prize Pot?",
      "d": "2026-11-07"
+    },
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/the-traitors-telugu-show-ott-review-and-rating.html",
+     "h": "The Traitors Telugu Finale Review: Who Won the Rs. 42.77 Lakh Prize Pot?",
+     "d": "2026-11-07"
+    },
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/ott-review-the-traitors-telugu-review-and-rating.html",
+     "h": "The Traitors Telugu Review (All Episodes): Mind Games, Betrayals, and High-Stakes Drama",
+     "d": "2026-11-09"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "tv:337806": {
    "title": "Least Eligible Bachelor",
@@ -604,7 +628,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "tv:338918": {
    "title": "Chaar Yaar",
@@ -617,7 +641,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1081010": {
    "title": "Prahaar: The Untold Story of Ujjwal Nikam",
@@ -643,7 +667,7 @@
      "d": "2026-10-14"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "tv:302882": {
    "title": "#Love",
@@ -675,7 +699,7 @@
      "d": "2026-11-02"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1453407": {
    "title": "Gajab Raat",
@@ -694,7 +718,7 @@
      "d": "2026-10-24"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:656908": {
    "title": "Ramayana: Rise of a Legend",
@@ -738,7 +762,7 @@
      "d": "2026-11-05"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1810711": {
    "title": "Dilwali Diwali",
@@ -769,7 +793,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1423191": {
    "title": "Resident Evil",
@@ -782,7 +806,7 @@
      "d": "2026-09-17"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1555847": {
    "title": "Garividi Lakshmi",
@@ -826,7 +850,7 @@
      "d": "2026-11-07"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1402181": {
    "title": "Scene",
@@ -863,7 +887,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:926867": {
    "title": "Nooru Kodi Vaanavil",
@@ -889,7 +913,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1803837": {
    "title": "Summer Holidays",
@@ -908,7 +932,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
   },
   "movie:1555215": {
    "title": "Baa Baa Black Sheep",
@@ -938,9 +962,28 @@
      "u": "https://scroll.in/reel/1096941/possible-love-review-an-elegant-evisceration-of-the-limits-of-caring?utm_source=rss&utm_medium=public",
      "h": "‘Possible Love’ review: An elegant evisceration of the limits of caring",
      "d": "2026-11-07"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/possible-love-movie-review-lee-chang-dongs-exquisitely-layered-study-of-covetousness/article71681055.ece",
+     "h": "‘Possible Love’ movie review: Lee Chang-dong’s exquisitely layered study of covetousness",
+     "d": "2026-11-09"
     }
    ],
-   "updated": "2026-11-08"
+   "updated": "2026-11-09"
+  },
+  "tv:314271": {
+   "title": "Bass X Machina",
+   "released": "2026-11-03",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/bass-x-machina-series-review-exhilarating-genre-mash-up-rides-out-boldly/article71680848.ece",
+     "h": "‘Bass X Machina’ series review: Exhilarating genre mash-up rides out boldly",
+     "d": "2026-11-09"
+    }
+   ],
+   "updated": "2026-11-09"
   }
  }
 }

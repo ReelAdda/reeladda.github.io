@@ -1,10 +1,64 @@
 {
- "date": "2026-11-08",
+ "date": "2026-11-09",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 0,
- "high": 0,
- "correctable": 0,
- "byField": {},
- "rows": []
+ "pagesDisagreeing": 6,
+ "high": 3,
+ "correctable": 3,
+ "byField": {
+  "director": 1,
+  "streaming": 2,
+  "lead actor": 2,
+  "platform": 1
+ },
+ "rows": [
+  {
+   "field": "director",
+   "severity": "medium",
+   "page": "Sreenu Vaitla",
+   "tmdb": "Srinu Vaitla",
+   "code": "in",
+   "slug": "aagadu"
+  },
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "on JioHotstar",
+   "tmdb": "on no subscription service",
+   "code": "in",
+   "slug": "hridayam"
+  },
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "on ITVX Premium",
+   "tmdb": "rent/buy only",
+   "code": "uk",
+   "slug": "madagascar-3-europe-s-most-wanted"
+  },
+  {
+   "field": "lead actor",
+   "severity": "medium",
+   "page": "Austin Abrams",
+   "tmdb": "Austin AbraDIH, Paul Walter Hauser, Kali Reis",
+   "code": "my",
+   "slug": "resident-evil"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Prime Video, U-NEXT",
+   "tmdb": "Prime Video",
+   "code": "jp",
+   "slug": "puss-in-boots-the-last-wish"
+  },
+  {
+   "field": "lead actor",
+   "severity": "medium",
+   "page": "Austin Abrams",
+   "tmdb": "Austin AbraDIH, Josh Brolin, Elisabeth Shue",
+   "code": "es",
+   "slug": "whalefall"
+  }
+ ]
 }
