@@ -75,9 +75,12 @@ function verifiedAvailability(data, manifestForCountry, index, now = Date.now())
   };
   for (const it of [...((data && data.ott) || []), ...((data && data.ottExtra) || [])]) {
     if (!it || !it.slug) continue;
+    // The score travels with the row (9 Nov 2026): the card's pill reads fcScore, and without it
+    // every list row said "Not enough ratings" or "Too early" while the page gave a verdict.
     add(it.slug, { title: it.title, language: it.language || "", kind: it.kind || "movie", genre: it.genre || "",
       rating: it.rating ?? null, votes: it.votes || 0, verdict: it.verdict || null, poster: it.poster || "",
-      released: it.released || null, platform: null }, it.providers);
+      released: it.released || null, platform: null,
+      fcScore: it.fcScore || null, criticsCount: it.criticsCount || 0, reception: it.reception || null }, it.providers);
   }
   // Today's lists also say what ISN'T streaming: a film in the cinema or coming-soon list keeps
   // no older claim (Drishyam: The Conclusion, in Indian cinemas, sat on India's Prime Video
@@ -96,8 +99,11 @@ function verifiedAvailability(data, manifestForCountry, index, now = Date.now())
     // 2 Oct — not streaming yet" (26 such cards, 11 titles). A page the index can't read keeps the claim.
     const onPage = Array.isArray(ix.providers) ? new Set(ix.providers.map(canonProvider)) : null;
     const provs = onPage ? live.providers.filter((p) => onPage.has(canonProvider(p))) : live.providers;
+    // A claim has no data item, so its score is the one its page shows (lib/graph.js pageScore).
+    const shown = ix.shown || {};
     add(slug, { title: e.title || ix.title || slug, language: e.lang || ix.language || "", kind: e.kind || ix.kind || "movie",
-      genre: ix.genre || "", rating: null, votes: 0, verdict: null, poster: ix.poster || "", released: e.released || ix.released || null,
+      genre: ix.genre || "", rating: shown.rating ?? null, votes: shown.votes || 0, verdict: shown.fcScore ? shown.fcScore.verdict : null,
+      fcScore: shown.fcScore || null, poster: ix.poster || "", released: e.released || ix.released || null,
       platform: null }, provs);
   }
   for (const list of byPlatform.values()) for (const x of list) x.platform = x.platform || null;

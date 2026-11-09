@@ -380,6 +380,69 @@ test("a list's verdict and the film's own page always agree, whatever wrote the 
   assert.ok(/findings\.push\(\.\.\.auditListVsPage\(cfg\.code, dataByCode\[cfg\.code\]\)\)/.test(require("fs").readFileSync(require("path").join(__dirname, "lib", "audit.js"), "utf8")), "the build's audit runs it for every edition");
 });
 
+test("a list row without a score shows its film page's verdict, never 'Not enough ratings' beside one (PK, 9 Nov 2026)", () => {
+  const G = require("./lib/graph.js");
+  const P = require("./lib/pagekit.js");
+  const pk = '<!--FC:audience=7.7|1228--><!--FC:fcs=Loved|positive--><span class="fcsb-stamp fcsb-must">Must watch</span>';
+  const critics = '<!--FC:audience=7.6|11--><!--FC:fcs=|positive--><span class="fcsb-stamp fcsb-worth">Worth a watch</span>';
+  const early = '<!--FC:audience=6.1|9--><!--FC:fcs=|--><span class="fcsb-mini-v">Too early</span>';
+  // The page's own markers, read back in the shape the lists draw from.
+  assert.deepStrictEqual(G.pageScore(pk), { rating: 7.7, votes: 1228, fcScore: { verdict: "Must watch", audience: "Loved", critics: "positive", basis: "both" } });
+  assert.deepStrictEqual(G.pageScore(critics).fcScore, { verdict: "Worth a watch", audience: null, critics: "positive", basis: "critics" }, "critics only: no audience half, so no ring");
+  assert.strictEqual(G.pageScore(early).fcScore, undefined, "no verdict on the page: none invented");
+  const pages = { "movie/pk.html": pk, "movie/drishyam.html": critics, "movie/new.html": early };
+  const read = (p) => { if (!(p in pages)) throw new Error("no page"); return pages[p]; };
+  const row = (slug) => P.withShownScore("in", { slug, title: slug, rating: null, votes: 0 }, read);
+  assert.strictEqual(row("pk").fcScore.verdict, "Must watch");
+  assert.strictEqual(row("pk").rating, 7.7);
+  assert.strictEqual(row("drishyam").fcScore.basis, "critics");
+  assert.strictEqual(row("new").fcScore, undefined, "the row's own wording stands when the page has no verdict");
+  const own = { slug: "pk", fcScore: { verdict: "Skip" } };
+  assert.strictEqual(P.withShownScore("in", own, read), own, "a row with its own score keeps it (auditListVsPage checks it)");
+  // The rendered card says it.
+  const M = require("./lib/meter.js");
+  assert.ok(M.rowScoreLine(row("pk")).includes("Must watch") && !M.rowScoreLine(row("pk")).includes("Not enough ratings"));
+  // The Streaming pages: today's data rows keep their score, and claim rows carry the page's, so
+  // "best-rated first" ranks them by it.
+  const E = require("./lib/evergreen.js");
+  const now = Date.parse("2026-11-09T00:00:00Z");
+  const data = { ott: [{ slug: "dead-end-job", title: "Dead-End Job", providers: ["Netflix"], rating: 7.5, votes: 71, fcScore: { verdict: "Must watch", audience: "Loved", critics: null, basis: "audience" } }] };
+  const manifest = { pk: { title: "PK", live: { providers: ["Netflix"], lastCheck: "2026-11-05" } } };
+  const index = [{ slug: "pk", title: "PK", providers: ["Netflix"], shown: G.pageScore(pk) }];
+  const list = E.verifiedAvailability(data, manifest, index, now).get("Netflix");
+  assert.strictEqual(list.find((x) => x.slug === "dead-end-job").fcScore.verdict, "Must watch", "a data row's score travels with it");
+  const claim = list.find((x) => x.slug === "pk");
+  assert.strictEqual(claim.fcScore.verdict, "Must watch");
+  assert.strictEqual(claim.votes, 1228, "and its ratings, for the ranking");
+});
+
+test("the build checks every rendered list row against the film page it links to (9 Nov 2026)", () => {
+  const A = require("./lib/audit.js");
+  const pill = (t) => `<span class="vpill vp-early"><svg class="vmark"><circle/></svg>${t}</span>`;
+  const rowHtml = (slug, t) => `<a class="row" href="/movie/${slug}.html"><div class="rt"><h3>${slug}</h3></div><div class="rm">${pill(t)}</div></a>`;
+  const pages = { "movie/pk.html": '<span class="fcsb-stamp fcsb-must">Must watch</span>', "movie/new.html": '<span class="fcsb-mini-v">Too early</span>', "movie/jawan.html": '<span class="fcsb-stamp fcsb-worth">Worth a watch</span>' };
+  const read = (p) => { if (!(p in pages)) throw new Error("no page"); return pages[p]; };
+  const html = rowHtml("pk", "Not enough ratings") + rowHtml("new", "Too early") + rowHtml("jawan", "Worth a watch") + rowHtml("gone", "Skip");
+  assert.deepStrictEqual(A.auditRenderedRows(html, "/streaming/netflix/", read).map((f) => f.detail), ["pk: list Not enough ratings, page Must watch"],
+    "only the contradiction: agreeing rows, two no-verdict wordings and a missing page pass");
+  assert.deepStrictEqual(A.auditRenderedRows(rowHtml("jawan", "Skip"), "/x/", read).map((f) => f.detail), ["jawan: list Skip, page Worth a watch"], "two different verdicts");
+  // It runs after the last list writer and turns the run red.
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  const at = src.indexOf("auditListingRows(builtCountries, { issue: healthIssue");
+  assert.ok(at > 0 && at > src.indexOf("writePeoplePages(dataByCode[cfg.code], cfg, pagesManifest)") && at > src.indexOf("writeDatedOttPages(dataByCode[cfg.code], cfg, pagesManifest)"), "after the Streaming, people and dated pages are written");
+  // listingPages finds the Streaming and people trees and skips film pages.
+  const os = require("os"), path = require("path"), fsx = require("fs");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-rows-"));
+  const cwd = process.cwd();
+  try {
+    for (const d of ["streaming/netflix/hindi", "people/suriya", "movie", "us/streaming/hulu", "hindi"]) fsx.mkdirSync(path.join(root, d), { recursive: true });
+    for (const f of ["streaming/netflix/index.html", "streaming/netflix/hindi/index.html", "people/suriya/index.html", "us/streaming/hulu/index.html", "hindi/index.html"]) fsx.writeFileSync(path.join(root, f), "x");
+    process.chdir(root);
+    assert.deepStrictEqual(A.listingPages("in").sort(), ["hindi/index.html", "people/suriya/index.html", "streaming/netflix/hindi/index.html", "streaming/netflix/index.html"], "India: its own trees, not another edition's");
+    assert.deepStrictEqual(A.listingPages("us"), ["us/streaming/hulu/index.html"]);
+  } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
+});
+
 test("episode guide: one source decides 'Next' and 'out' (The Assassin, 6 Nov 2026)", () => {
   const S = require("./lib/series.js");
   // TMDB's show-level next episode says 6 Nov; the season's own list dates E1–E6 to 5 Nov.
@@ -419,7 +482,12 @@ test("wording: counts of one in the singular, one 'the', one full stop (6 Nov 20
   assert.ok(!/\b1 ratings\b/.test(page) && !/Jr\.\./.test(page), (/.{40}(?:1 ratings|Jr\.\.).{20}/.exec(page) || [""])[0]);
   assert.strictEqual(A.wordingSlip(page), null, "the build's page check finds nothing");
   // The build's check on every page catches each slip, wherever a new one comes from.
-  for (const bad of ["Audience: 1 ratings on TMDB", "All 1 episodes out", "More in the The Dark Knight series", "created by James Manos Jr.. When", "directed by Girish A. D.. When"]) {
+  // The window FAQ counts from the opening, as the OTT section does (Scene, 9 Nov 2026).
+  const waiting = F.buildFilmPage({ ...it, title: "Scene", slug: "scene-x", kind: "movie", released: "2026-11-06", language: "Tamil", platform: "Theatres", providers: [], fcScore: null, votes: 9, rating: 6.1 }, "2026-11-09", new Set(), IN);
+  assert.ok(!/after their theatrical run/.test(waiting), "no 'after their theatrical run'");
+  assert.strictEqual(A.wordingSlip(waiting), null, (/.{60}weeks after.{30}/.exec(waiting) || [""])[0]);
+  for (const bad of ["Audience: 1 ratings on TMDB", "All 1 episodes out", "More in the The Dark Knight series", "created by James Manos Jr.. When", "directed by Girish A. D.. When",
+    "Tamil releases typically reach streaming about 4–6 weeks after their theatrical run, which"]) {
     assert.ok(A.wordingSlip(`<p>${bad}</p>`), bad);
   }
   for (const fine of ["Oh..! Sukumari", "a tale of second chances.. happy", "21 ratings on TMDB", "11 episodes", "More in the Dhoom series"]) {

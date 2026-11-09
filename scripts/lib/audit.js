@@ -77,6 +77,71 @@ function auditListVsPage(code, data, read = (p) => fs.readFileSync(p, "utf8")) {
   return out;
 }
 
+// The same rule read from what the build wrote (9 Nov 2026): every list row's verdict pill against
+// the verdict on the film page it links to. auditListVsPage reads the data files, so a list built
+// from somewhere else (the Streaming on <platform> pages, from availability claims) went unchecked
+// and showed PK, The Godfather and 187 other Netflix India titles as "Not enough ratings" for three
+// weeks while their pages gave a verdict. Pure apart from `read`; `listHtml` is one built page.
+const VERDICTS = /^(Must watch|Worth a watch|Skip)$/;
+function auditRenderedRows(listHtml, listUrl, read = (p) => fs.readFileSync(p, "utf8"), cache = new Map()) {
+  const out = [];
+  for (const m of String(listHtml).matchAll(/<a class="row" href="(\/(?:[a-z]{2}\/)?movie\/[^"]+\.html)">([\s\S]*?)<\/a>/g)) {
+    const pill = /<span class="vpill[^"]*">(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/span>/.exec(m[2]);
+    if (!pill) continue;
+    const shown = pill[1].trim();
+    if (!cache.has(m[1])) {
+      let html = null;
+      try { html = read(m[1].replace(/^\//, "")); } catch { /* page missing: another check's job */ }
+      cache.set(m[1], html == null ? undefined : ((/class="fcsb-stamp fcsb-(?:must|worth|skip)">([^<]+)</.exec(html) || [])[1] || null));
+    }
+    const page = cache.get(m[1]);
+    if (page === undefined) continue;
+    const listVerdict = VERDICTS.test(shown) ? shown : null;
+    if (listVerdict !== page) {
+      const title = ((/<h3>([^<]*)<\/h3>/.exec(m[2]) || [])[1] || m[1]);
+      out.push({ check: "list-row-vs-page", url: listUrl, detail: `${title}: list ${shown}, page ${page || "no verdict"}` });
+    }
+  }
+  return out;
+}
+
+// Every built listing page of an edition: the Streaming on <platform> tree and each top-level
+// directory page that carries list rows (hubs, language pages, the weekly lists).
+function listingPages(code) {
+  const base = code === "in" ? "." : code;
+  const out = [];
+  const walk = (dir, depth) => {
+    let names;
+    try { names = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const d of names) {
+      if (!d.isDirectory() || d.name === "movie" || d.name.startsWith(".") || (code === "in" && /^[a-z]{2}$/.test(d.name))) continue;
+      const p = `${dir}/${d.name}`;
+      if (fs.existsSync(`${p}/index.html`)) out.push(`${p}/index.html`.replace(/^\.\//, ""));
+      if (depth < 2) walk(p, depth + 1);
+    }
+  };
+  walk(base, 0);
+  return out;
+}
+
+// Every edition's built listing pages, row by row (auditRenderedRows). Run after the last list
+// writer (scripts/update.js, after the Streaming and people pages), so it reads this run's pages.
+// A mismatch turns the run red: a list contradicting the page it links to is a false claim.
+function auditListingRows(countries, { issue = () => {}, note = () => {} } = {}) {
+  const findings = [];
+  for (const cfg of countries) {
+    const cache = new Map();
+    for (const p of listingPages(cfg.code)) {
+      let html;
+      try { html = fs.readFileSync(p, "utf8"); } catch { continue; }
+      if (html.includes('<a class="row"')) findings.push(...auditRenderedRows(html, `/${p.replace(/index\.html$/, "")}`, undefined, cache));
+    }
+  }
+  if (findings.length) issue(`audit: ${findings.length} list row(s) whose verdict differs from the film's own page — e.g. ${findings.slice(0, 3).map((f) => `${f.url} (${f.detail})`).join("; ")}`);
+  else note("audit: every list row agrees with its film page");
+  return findings;
+}
+
 // Oct 2026 data-integrity audit: every finding there is checked here on every build, so a
 // regression shows in the run summary instead of waiting for the next audit. Pure.
 // One date parser and one not-yet title pattern for the whole build (lib/facts.js, lib/archive.js).
@@ -247,7 +312,9 @@ function auditPage(html, { released = null, now = Date.now() } = {}) {
 function wordingSlip(html) {
   const text = String(html).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, " ").replace(/<[^>]+>/g, " ")
     .replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/\s+/g, " ");
-  const m = /\b1 (?:ratings|reviews|critics|episodes|seasons)\b|\bAll 1 episodes\b|\bMore in the The\b|\b(?:Jr|Sr|[A-Z])\.\.(?![.!?])/.exec(text);
+  // Also a streaming window said to run from the end of the cinema run: the weeks are measured from
+  // the opening (lib/windows.js), as the page's own OTT section says (9 Nov 2026).
+  const m = /\b1 (?:ratings|reviews|critics|episodes|seasons)\b|\bAll 1 episodes\b|\bMore in the The\b|\b(?:Jr|Sr|[A-Z])\.\.(?![.!?])|reach streaming about \d+–\d+ weeks after their theatrical run/.exec(text);
   return m ? text.slice(Math.max(0, m.index - 30), m.index + m[0].length + 15).trim() : null;
 }
 
@@ -342,4 +409,4 @@ function runAudit({ dataByCode = {}, pagesManifest = {}, countries = [], now = D
   return { findings, byCheck };
 }
 
-module.exports = { FALSE_CLAIMS, auditData, auditIntegrity, auditListVsPage, wordingSlip, auditManifest, auditPage, runAudit, shownDate, textSimilarity };
+module.exports = { FALSE_CLAIMS, auditData, auditIntegrity, auditListVsPage, auditRenderedRows, auditListingRows, listingPages, wordingSlip, auditManifest, auditPage, runAudit, shownDate, textSimilarity };

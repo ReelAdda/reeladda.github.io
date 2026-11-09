@@ -310,7 +310,9 @@ function buildFaqs(item, countryName = "India", cfg = null) {
     } else {
       const est = item.platform === "Theatres" ? streamWindowEstimate(item.released, item.language) : null;
       const hint = est && !est.passed
-        ? ` ${item.language || "These"} releases typically reach streaming about ${est.lo}–${est.hi} weeks after their theatrical run, which would put it around ${est.span}${plain ? ". That's an estimate based on past releases." : " — that's a pattern, not a confirmed date."}`
+        // "After they open", as the page's own OTT section says: the weeks are measured from the
+        // cinema opening, not from the end of the run ("after their theatrical run", until 9 Nov 2026).
+        ? ` ${item.language || "These"} releases typically reach streaming about ${est.lo}–${est.hi} weeks after they open in cinemas, which would put it around ${est.span}${plain ? ". That's an estimate based on past releases." : " — that's a pattern, not a confirmed date."}`
         : "";
       ottA = `${V.article} ${V.releaseDate} for ${item.title} hasn't been officially announced yet.${hint} This page updates automatically the day it starts streaming.`;
     }

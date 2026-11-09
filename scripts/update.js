@@ -2916,6 +2916,12 @@ async function main() {
       try { writeDatedOttPages(dataByCode[cfg.code], cfg, pagesManifest); }
       catch (e) { stageFailed(`dated OTT pages [${cfg.code}]`, e); }
     }
+    // Every list row against the film page it links to, now that the last list writer has run
+    // (lib/audit.js auditListingRows). Read-only.
+    try {
+      const rows = require("./lib/audit.js").auditListingRows(builtCountries, { issue: healthIssue, note: healthNote });
+      console.log(`List rows vs film pages: ${rows.length} disagreement(s)`);
+    } catch (e) { stageFailed("list-row audit", e, { optional: true }); }
 
     // Links on frozen pages to hubs and people pages this run (or an earlier one) removed
     // (lib/stylesheets.js). After the last page writer, so every target is in its final state.

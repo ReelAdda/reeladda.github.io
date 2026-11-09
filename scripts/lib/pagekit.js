@@ -373,6 +373,32 @@ function brandBarOn(canonical) {
   const m = /\/people\/([^/]+)\/?$/.exec(String(canonical || ""));
   return !m || require("./rollout.js").inRollout("dark-bar", String(canonical));
 }
+// A list row says what the film's page says (9 Nov 2026). Rows drawn from anywhere but today's
+// data file (availability claims, the people index, older weekly stores) carried no score, so the
+// card read "Not enough ratings" or "Too early" beside a page giving a verdict: 22,344 rows on the
+// Streaming, people, language and coming-to-OTT pages. A row without a score takes the page's
+// (lib/graph.js pageScore); a row with one keeps it (lib/audit.js checks the two agree). The
+// page is read once per build unless it changes (keyed by its modified time).
+const SHOWN_CACHE = new Map();
+function withShownScore(code, it, read = null) {
+  if (!it || !it.slug || it.fcScore) return it;
+  const file = filmPagePath(code, it.slug).replace(/^\//, "");
+  let shown;
+  if (read) { try { shown = require("./graph.js").pageScore(read(file)); } catch { return it; } }
+  else {
+    let mtime;
+    try { mtime = fs.statSync(file).mtimeMs; } catch { return it; }
+    const hit = SHOWN_CACHE.get(file);
+    if (hit && hit.mtime === mtime) shown = hit.shown;
+    else {
+      try { shown = require("./graph.js").pageScore(fs.readFileSync(file, "utf8")); } catch { return it; }
+      SHOWN_CACHE.set(file, { mtime, shown });
+    }
+  }
+  if (!shown.fcScore) return it;   // no verdict on the page either: the row's own wording stands
+  return { ...it, fcScore: shown.fcScore, rating: shown.rating ?? null, votes: shown.votes || 0 };
+}
+
 function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null, popular = "" }) {
   // ~80 hubs, month archives and week pages ran 61–72 characters; see fitSiteTitle.
   title = fitSiteTitle(title);
@@ -394,7 +420,8 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
     return RV.outlets(RV.reviewsFor(it.kind, it.tmdbId));
   };
   const rvLinks = (list) => (list.length ? `<div class="row-rv"><b>Reviews:</b> ${list.map((r) => `<a href="${e(r.u)}" rel="noopener" target="_blank">${e(r.o)}</a>`).join(" · ")}</div>` : "");
-  const rowFor = (it) => {
+  const rowFor = (given) => {
+    const it = withShownScore(code, given);
     const badge = it.badge || (it.isRecent ? "New release" : null);
     // Where to watch leads every card (29 Oct 2026): the platform, one name per service ("Sonyliv"
     // and "Sony Liv" were the same service on two pages), or — for a title that isn't streaming —
@@ -601,6 +628,7 @@ function ogImageTag(src) {
 }
 
 module.exports = {
+  withShownScore,
   FOOTER_LINKS,
   NO_HOSTING_NOTICE,
   NO_HOSTING_PLAIN,

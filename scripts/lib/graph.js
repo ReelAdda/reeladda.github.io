@@ -48,6 +48,9 @@ function filmIndexFor(cfg) {
       director: personNames(ld.director || ld.creator).slice(0, 3),
       // Its franchise, from the page's own marker (lib/series.js), for "More in this series".
       franchise: require("./series.js").readSeriesMark(html).franchise || null,
+      // The score the page shows, for lists built from claims rather than today's data. Under its
+      // own key so nothing else reading the index changes.
+      shown: pageScore(html),
       // Where the page says it can be watched (lib/facts.js whereOf), for the lists that name a
       // title's platform. Read through the shared where-to-watch block reader: this looked only
       // for the old "Where to watch" heading, which page v3 doesn't have, and from 28 Oct 2026 read
@@ -62,6 +65,28 @@ function filmIndexFor(cfg) {
         };
       })(),
     });
+  }
+  return out;
+}
+
+// Pure: the score a film page shows, from its own markers, in the shape the lists draw from
+// ({ fcScore, rating, votes }). A list built from availability claims (lib/evergreen.js) has no
+// data item to take a score from, and listed every title it drew that way as "Not enough
+// ratings" while the title's page said "Must watch" (PK on Netflix India, 7.7, 9 Nov 2026).
+// fcScore exists only when the page shows a verdict; its halves come from <!--FC:fcs=a|c-->
+// (lib/filmpage.js), so a list draws TMDB's ring only where the page counts the audience.
+function pageScore(html) {
+  const out = {};
+  const aud = /<!--FC:audience=([\d.]*)\|(\d+)-->/.exec(html);
+  if (aud) {
+    out.rating = aud[1] === "" ? null : Number(aud[1]);
+    out.votes = Number(aud[2]) || 0;
+  }
+  const verdict = (/class="fcsb-stamp fcsb-(?:must|worth|skip)">([^<]+)</.exec(html) || [])[1];
+  if (verdict) {
+    const halves = /<!--FC:fcs=([^|>]*)\|([^>]*?)-->/.exec(html) || [];
+    const audience = halves[1] || null, critics = halves[2] || null;
+    out.fcScore = { verdict: verdict.trim(), audience, critics, basis: audience && critics ? "both" : audience ? "audience" : critics ? "critics" : null };
   }
   return out;
 }
@@ -510,6 +535,7 @@ module.exports = {
   browsePath,
   buildBrowsePage,
   filmIndexFor,
+  pageScore,
   filmPageDir,
   filmIdentity,
   filmPageExists,
