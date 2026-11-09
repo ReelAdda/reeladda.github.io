@@ -444,7 +444,8 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
   };
   const sectionHtml = sections.filter((sec) => sec.items.length).map((sec) => `
   <section>
-    <h2>${e(sec.h2)} <span class="cnt">${sec.items.length}</span></h2>
+    <h2>${e(sec.h2)} <span class="cnt">${sec.items.length}</span></h2>${sec.facts ? `
+    <p class="secf" style="font-size:13px;color:var(--mute);margin:-4px 0 12px;line-height:1.5">${e(sec.facts)}</p>` : ""}
     ${sec.items.map(rowFor).join("\n")}
   </section>`).join("\n");
   const faqHtml = faqs && faqs.length ? `

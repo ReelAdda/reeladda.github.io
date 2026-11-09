@@ -183,6 +183,44 @@ function spottedAt(seenISO, code) {
   return { day: `${g("year")}-${g("month")}-${g("day")}`, part };
 }
 
+// THE ARRIVAL RECORD ON A FILM PAGE (rollout "arrival-record", 9 Nov 2026): the same sighting the
+// log shows, on the title's own page, for good. Only a live sighting counts: one whose write time
+// falls within a day of its first date (dayOf above). A record written later is a backfill or a
+// catalogue listing, and saying "spotted on 16 Oct" for it would be false. The first live sighting
+// per edition and title is kept; it never changes afterwards, so the line can't churn a page.
+// Two more guards, because a page keeps the line for good: the records written on the archive's
+// first day (27 Aug 2026, 137 of them) are the titles already streaming when it started, not
+// arrivals (The Simpsons, "first" 26 Aug on Disney+); and a title out more than two years before
+// its first sighting is a catalogue listing, the line lib/history.js draws for windows too.
+const SIGHTINGS_FROM = "2026-08-28";
+const SIGHTING_MAX_GAP_DAYS = 730;
+let SIGHTINGS = null;
+function sightingOf(r, code) {
+  const s = r && r.first ? spottedAt(r.seen, code) : null;
+  if (!s || Math.abs(Date.parse(s.day) - Date.parse(String(r.first).slice(0, 10))) > 864e5) return null;
+  if (String(r.seen).slice(0, 10) < SIGHTINGS_FROM) return null;
+  const gap = r.rel ? (Date.parse(String(r.first).slice(0, 10)) - Date.parse(String(r.rel).slice(0, 10))) / 864e5 : null;
+  if (gap != null && gap > SIGHTING_MAX_GAP_DAYS) return null;
+  return { day: s.day, part: s.part, platform: require("./rules.js").canonProvider(r.p) || r.p };
+}
+function useSightings(records) {
+  const map = new Map();
+  for (const r of records || []) {
+    if (!r || !r.c || !r.id) continue;
+    const s = sightingOf(r, r.c);
+    if (!s) continue;
+    const key = `${r.c}:${r.k === "tv" ? "tv" : "movie"}:${r.id}`;
+    const have = map.get(key);
+    if (!have || s.day < have.day) map.set(key, s);
+  }
+  SIGHTINGS = map;
+  return map;
+}
+function sightingFor(code, item) {
+  if (!SIGHTINGS || !item || !item.tmdbId) return null;
+  return SIGHTINGS.get(`${code}:${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}`) || null;
+}
+
 function buildTodayPage(records, cfg, { index = [], now = Date.now(), hasComing = true } = {}) {
   const code = (cfg && cfg.code) || "in";
   const country = countryNameFor(cfg);
@@ -206,7 +244,10 @@ function buildTodayPage(records, cfg, { index = [], now = Date.now(), hasComing 
   const rowOf = ({ r, at }) => {
     const row = monthRow(r, { bySlug, code, now });
     const clock = W.clockFor(code, { kind: r.k === "tv" ? "tv" : "movie", tmdbId: r.id });
-    const bits = [`Spotted ${at.part ? `${at.part} ` : ""}on ${r.p}`, clock ? `${clock.days} day${clock.days === 1 ? "" : "s"} after cinemas` : null];
+    // Counted to the day the row is filed under (lib/windows.js daysToSighting): "28 days" under
+    // "Friday 7 Nov" for a film out 9 Oct read wrong by a day (All Pass, 9 Nov 2026).
+    const days = clock ? (at.part ? W.daysToSighting(clock, { day: at.day }) : clock.days) : null;
+    const bits = [`Spotted ${at.part ? `${at.part} ` : ""}on ${r.p}`, clock ? `${days} day${days === 1 ? "" : "s"} after cinemas` : null];
     return { ...row, hook: bits.filter(Boolean).join(" · ") };
   };
   const tod = mine.filter((x) => x.at.day === today).map(rowOf);
@@ -558,6 +599,9 @@ function writeIndexNowPayload(builtCountries, dataByCode = {}) {
 module.exports = {
   announcedDates,
   spottedAt,
+  sightingFor,
+  sightingOf,
+  useSightings,
   stillWaiting,
   buildComingPage,
   buildLanguagePage,

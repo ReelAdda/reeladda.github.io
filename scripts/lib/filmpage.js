@@ -939,13 +939,32 @@ function reviewLinks(item) {
   return { n: rv.length, parts, mark: rv.length ? `<!--FC:reviews=${rv.length}-->` : "" };
 }
 const andList = (xs) => xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
+// With the review block (item._reviewBlock, rollout "review-block") the card gives the count and
+// the block below it the outlets, so nothing is said twice (the owner's rule of 31 Oct holds).
 function reviewsTail(item) {
   const { n, parts, mark } = reviewLinks(item);
+  if (n && item._reviewBlock) return `; ${n} review${n === 1 ? "" : "s"} out.${mark}`;
   return n ? `; ${n} review${n === 1 ? "" : "s"} out, in ${andList(parts)}.${mark}` : "";
 }
 function reviewsClause(item) {
   const { n, parts, mark } = reviewLinks(item);
+  if (n && item._reviewBlock) return ` · <b>Reviews:</b> ${n}${mark}`;
   return n ? ` · <b>Reviews:</b> ${parts.join(", ")}${mark}` : "";
+}
+// THE REVIEW BLOCK (rollout "review-block", 9 Nov 2026 review): each published review as a row,
+// the outlet, the day it ran, its own headline, a star rating only where the feed stated one,
+// newest first, one row per link. The headline is the outlet's, quoted as the link text it is, and
+// never trimmed into a different claim. Pure.
+const REVIEW_BLOCK_CSS = ".rvb{margin:18px 0 0}.rvl{list-style:none;padding:0;margin:8px 0 0;border-top:1px solid var(--line)}.rvl li{border-bottom:1px solid var(--line)}.rvl a{display:block;padding:10px 2px;color:inherit;text-decoration:none}.rvl a:hover .rvh{text-decoration:underline}.rvo{font-weight:700;font-size:14px}.rvd{color:var(--mute);font-size:12.5px;margin-left:8px}.rvs{font-size:12.5px;margin-left:8px}.rvh{display:block;font-size:14px;line-height:1.45;margin-top:2px;color:var(--link)}";
+function reviewBlockHtml(item, fmt = (d) => d) {
+  const e = escHtml;
+  const seen = new Set();
+  const rows = (Array.isArray(item && item.reviews) ? item.reviews : [])
+    .filter((r) => r && r.o && r.u && !seen.has(r.u) && seen.add(r.u))
+    .sort((a, b) => String(b.d || "").localeCompare(String(a.d || "")));
+  if (!rows.length) return "";
+  return `<section class="rvb" id="reviews"><h2>Reviews</h2><ul class="rvl">${rows.map((r) =>
+    `<li><a href="${e(r.u)}" rel="noopener" target="_blank"><span class="rvo">${e(r.o)}</span>${r.d ? `<span class="rvd">${e(fmt(r.d))}</span>` : ""}${typeof r.s === "number" ? `<span class="rvs">★ ${e(String(r.s))}/5</span>` : ""}${r.h ? `<span class="rvh">${e(r.h)}</span>` : `<span class="rvh">Read the review</span>`}</a></li>`).join("")}</ul></section>`;
 }
 function audiencePhrase(votes, recent) {
   const n = Number(votes || 0);
@@ -1203,6 +1222,28 @@ function applyScoreHalves(files, { root = ".", included = (slug) => inRollout(SC
 // end-of-build pass moves styles to /css/. `body .top.v3` outranks V3_CSS, which comes later.
 const DARK_BAR = "dark-bar";
 const darkBarOn = (item) => !!(item && item.slug) && inRollout(DARK_BAR, item.slug);
+// The arrival record (lib/dated.js useSightings, lib/windows.js arrivalHtml), and the three page
+// changes after the 9 Nov review: the published reviews as their own block (REVIEW_BLOCK) and the
+// FAQ cut to what the page doesn't already say (FAQ_TRIM). All start at 0%.
+const ARRIVAL_RECORD = "arrival-record";
+const arrivalRecordOn = (item) => !!(item && item.slug) && inRollout(ARRIVAL_RECORD, item.slug);
+const REVIEW_BLOCK = "review-block";
+const reviewBlockOn = (item) => !!(item && item.slug) && inRollout(REVIEW_BLOCK, item.slug);
+const FAQ_TRIM = "faq-trim";
+const faqTrimOn = (item) => !!(item && item.slug) && inRollout(FAQ_TRIM, item.slug);
+// Pure: the FAQ once trimmed. Every answer restated something higher on the page (9 Nov 2026,
+// Scene: the verdict, the reviews, where to watch, the OTT estimate almost word for word, the
+// certificate, the language), and Google has shown FAQ rich results only for government and health
+// sites since August 2023. One question earns its place: the OTT date, on a film page that has no
+// "When is X coming to OTT?" section to say it (no platform, not in cinemas, not due, not gone).
+function faqTrimmed(item, cfg, faqs) {
+  if (!faqTrimOn(item)) return faqs;
+  const hasSection = item.kind === "tv" || (item.providers || []).length || item.platform === "Theatres" || item.state === "gone"
+    || (item.released && item.released > new Date().toISOString().slice(0, 10));
+  if (hasSection) return [];
+  const q = streamVocab(cfg).faqQuestion(item.title);
+  return faqs.filter((f) => f.q === q);
+}
 const DARK_BAR_MARK = "Dark brand bar (lib/filmpage.js DARK_BAR)";
 const DARK_BAR_CSS = [
   `  /* ${DARK_BAR_MARK} */`,
@@ -1236,6 +1277,39 @@ function applyDarkBar(files, { root = ".", included = (slug) => inRollout(DARK_B
     try { html = require("fs").readFileSync(file, "utf8"); } catch { continue; }
     res.pages++;
     const next = darkBar(html, { root });
+    if (next !== html) { require("fs").writeFileSync(file, next); res.changed++; }
+  }
+  return res;
+}
+
+// FAQ TRIM ON PAGES NO BUILDER REWROTE (rollout "faq-trim", owner 9 Nov 2026: "if FAQ causes
+// duplication and does not add much value, let's remove them"). The same rule as faqTrimmed, read
+// from the page itself: a page with an OTT section (<!--SW:pending-->), a where-to-watch block
+// (<!--SW:stream-->) or a series loses the whole block; any other keeps the OTT-date question only.
+// Any FAQPage markup goes with it. Not in the facts fingerprint, so no sitemap date moves. Pure and
+// idempotent.
+const FAQ_BLOCK_RE = /\s*<h2>Frequently asked<\/h2><div class="faq">((?:<details>[\s\S]*?<\/details>)*)<\/div>/;
+const OTT_FAQ_Q = /^When is .+ (?:releasing on OTT\? \(OTT release date\)|coming to streaming\?)$/;
+function faqTrimPage(html) {
+  let s = String(html);
+  s = s.replace(/\n?<script type="application\/ld\+json">\{"@context":"https:\/\/schema\.org","@type":"FAQPage"[\s\S]*?<\/script>/, "");
+  const m = FAQ_BLOCK_RE.exec(s);
+  if (!m) return s;
+  const answered = /<!--SW:(?:pending|stream)-->/.test(s) || /"@type":"TVSeries"/.test(s);
+  const keep = answered ? [] : (m[1].match(/<details>[\s\S]*?<\/details>/g) || [])
+    .filter((d) => OTT_FAQ_Q.test(((/<summary>([\s\S]*?)<\/summary>/.exec(d) || [])[1] || "").replace(/&#39;/g, "'").replace(/&amp;/g, "&").trim()));
+  return s.slice(0, m.index) + (keep.length ? `\n  <h2>Frequently asked</h2><div class="faq">${keep.join("")}</div>` : "") + s.slice(m.index + m[0].length);
+}
+function applyFaqTrim(files, { root = ".", included = (slug) => inRollout(FAQ_TRIM, slug) } = {}) {
+  const res = { pages: 0, changed: 0 };
+  for (const rel of files) {
+    const mm = /(?:^|\/)movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
+    if (!mm || !included(mm[1])) continue;
+    const file = require("path").join(root, rel);
+    let html;
+    try { html = require("fs").readFileSync(file, "utf8"); } catch { continue; }
+    res.pages++;
+    const next = faqTrimPage(html);
     if (next !== html) { require("fs").writeFileSync(file, next); res.changed++; }
   }
   return res;
@@ -1489,8 +1563,8 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // Episodes and franchise (lib/series.js) lead "Good to know"; series FAQs follow "where to watch".
   const fmtFull = (dt) => fmtDateFull(dt, localeFor(code));
   const goodToKnow = [...SER.seriesKnowRows(item, { partialRuntimes: !!item._fix30 }), ...buildGoodToKnow(item, cfg)];
-  const faqs = buildFaqs(item, country, cfg);
-  faqs.splice(Math.min(2, faqs.length), 0, ...SER.episodeFaqs(item, fmtFull));
+  const faqs = faqTrimmed(item, cfg, [...buildFaqs(item, country, cfg)]);
+  if (!faqTrimOn(item)) faqs.splice(Math.min(2, faqs.length), 0, ...SER.episodeFaqs(item, fmtFull));
   // "More in this series": other titles of the franchise with a page Google can see here.
   const franchise = SER.franchiseSiblings(item, franchiseIndexFor(code), { visible: (s) => !require("./googlehide.js").listedHidden(code, s) });
   // On-site titles outrank off-site ones in the strip: a recommendation the reader can
@@ -1568,7 +1642,7 @@ ${(() => { const base = `  :root { --indigo:#4038C7; --marigold:#FFAD1F; --cream
   .rating-early .cdot, .rating-early .cbar i { background:#E39A1C; } .rating-early .ctag { background:rgba(227,154,28,.15); color:#B87910; }
   .rating-few { color:var(--mute); font-weight:600; font-size:15px; } .rating-few .cdot, .rating-few .cbar i { background:#C4BEDA; } .rating-few .ctag { display:none; }
   .verdict { display:inline-block; background:rgba(64,56,199,.08); color:var(--indigo); font-weight:700; font-size:13px; padding:6px 14px; border-radius:999px; margin-top:8px; }
-${FCSB_CSS}${scoreHalvesOn(item) ? "\n" + SCORE_HALVES_CSS : ""}${darkBarOn(item) ? "\n" + DARK_BAR_CSS : ""}
+${FCSB_CSS}${scoreHalvesOn(item) ? "\n" + SCORE_HALVES_CSS : ""}${darkBarOn(item) ? "\n" + DARK_BAR_CSS : ""}${reviewBlockOn(item) && Array.isArray(item.reviews) && item.reviews.length ? "\n" + REVIEW_BLOCK_CSS : ""}
   .fit { margin:18px 0 4px; border-left:3px solid var(--indigo); padding:2px 0 2px 16px; }
   .fit dl { margin:0; }
   .fit dt { font-weight:700; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--indigo); margin-top:12px; }
@@ -1648,13 +1722,17 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       <div class="meta">${v3 ? V2.v3Meta(item, { fmt: (d) => fmtDateFull(d, localeFor(code)), airLabel: !!item._fix30 }) : v2 ? V2.v2Meta(item, year) : (lean
         ? [item.language, item.genre, item.runtime ? (item.kind === "tv" ? `${item.runtime} min episodes` : item.runtime + " min") : null]
         : [item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert]).filter(Boolean).map(e).join(" · ")}</div>
-      ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Where({ ...item, windowClock: require("./windows.js").clockFor(code, item) }, { relState, country, V: V_TITLE, asOf, fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
+      ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Where({ ...item, windowClock: require("./windows.js").clockFor(code, item), sighting: arrivalRecordOn(item) ? require("./dated.js").sightingFor(code, item) : null }, { relState, country, V: V_TITLE, asOf, fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
       ${item.released && !v2 ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px"${v2 && !tidyLd ? ' hidden' : ""}>Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}${asOf && !(v2 && !tidyLd) ? require("./facts.js").recentChangesHtml(require("./facts.js").changesFor(code, item.slug), asOf, (d) => fmtDateShort(d, Date.parse(`${String(asOf).slice(0, 10)}T00:00:00Z`), localeFor(code))) : ""}
     </div>
   </div>${lean && !v3 ? "\n  </div>" : ""}
   ${v2 && !v3 ? V2.v2Cta(item, { cfg, country, asOf, relState, V: V_TITLE }) : ""}
-  ${v3 ? `${fcScoreSection(item)}\n  ${voteWidgetHtml(item, code)}` : (() => { const answerBlock = (() => {
+  ${v3 ? (() => {
+    // The review block (rollout "review-block"): the card counts the reviews, the block lists them.
+    const rv = reviewBlockOn(item) && Array.isArray(item.reviews) && item.reviews.length ? { ...item, _reviewBlock: true } : item;
+    return `${fcScoreSection(rv)}\n  ${voteWidgetHtml(item, code)}${rv._reviewBlock ? `\n  ${reviewBlockHtml(rv, (d) => fmtDateShort(d, Date.now(), localeFor(code)))}` : ""}`;
+  })() : (() => { const answerBlock = (() => {
     // Lead answer line. The GSC data showed pages ranking on page 1 for "where to watch [film]"
     // and "[film] ott release date" but pulling <1% CTR, and answer engines had nothing at the
     // top to lift. This puts the direct answer FIRST, in one snippet-shaped sentence, before the
@@ -1838,7 +1916,10 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       // streaming here — the one fact no competitor can publish, as a row where facts are read.
       const rec = FILM_HISTORY.get(`${code}:${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}`);
       const days = rec ? cinemaWindowDays(rec, FILM_HISTORY.starts()) : null;
-      if (days != null) rows.unshift(`<tr><td>OTT arrival</td><td>${e(fcdataWindowPhrase(days))}${rec.p ? `, on ${e(rec.p)}` : ""} (FilmyChill data)</td></tr>`);
+      // With the arrival record, the line under the platform says this once (the row repeated the
+      // clock: "Reached Prime Video 28 days after cinemas" and "OTT arrival: 28 days…", All Pass).
+      const clockShown = arrivalRecordOn(item) && providers.length && require("./windows.js").clockFor(code, item);
+      if (days != null && !clockShown) rows.unshift(`<tr><td>OTT arrival</td><td>${e(fcdataWindowPhrase(days))}${rec.p ? `, on ${e(rec.p)}` : ""} (FilmyChill data)</td></tr>`);
       // The platform's own pages (crawl paths from every film back to the lists), as a row.
       const links = filmHubLinks(item, cfg).replace(/^<p[^>]*>More: /, "").replace(/<\/p>$/, "");
       if (links && providers.length) rows.push(`<tr><td>More on ${e(canonProvider(providers[0]))}</td><td>${links}</td></tr>`);
@@ -1961,6 +2042,7 @@ function generatePages(data, cfg, allSlugSets) {
 }
 
 module.exports = {
+  ARRIVAL_RECORD, FAQ_TRIM, REVIEW_BLOCK, REVIEW_BLOCK_CSS, applyFaqTrim, faqTrimPage, faqTrimmed, reviewBlockHtml, reviewsClause, reviewsTail,
   DARK_BAR, DARK_BAR_CSS, applyDarkBar, darkBar,
   PAGE_FIXES,
   SCORE_HALVES,

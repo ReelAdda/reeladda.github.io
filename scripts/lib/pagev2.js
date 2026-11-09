@@ -316,8 +316,11 @@ function v3Where(item, { relState, country, V, asOf = "", fmt = (d) => d }) {
     const arrived = item.arrived ? `<!--SW:arrived=${e(item.arrived)}|${e(item.arrivedOn || provs[0])}-->` : "";
     // class="pill" exactly: lib/facts.js reads providers by that attribute, character for character.
     // The window clock (lib/windows.js), after the block the facts store reads, never inside it.
+    // With the arrival record (rollout "arrival-record"), the clock and the sighting share one line.
+    const W = require("./windows.js"), info = require("./rules.js").windowInfo(item.language);
     return wrap(provs.map((p) => `<span class="pill">${e(p)}</span>`).join("") + rentPills, `${arrived}${note}`, { live: true })
-      + (item.windowClock ? require("./windows.js").clockHtml(item.windowClock, item.language, require("./rules.js").windowInfo(item.language)) : "");
+      + (item.sighting ? W.arrivalHtml(item.windowClock, item.sighting, item.language, info, fmt)
+        : item.windowClock ? W.clockHtml(item.windowClock, item.language, info) : "");
   }
   // Status pills (not providers; lib/facts.js STATUS_PILL skips them) sit in a .st wrapper, so
   // they draw as the quiet dashed pill while keeping the class the readers expect.

@@ -113,4 +113,34 @@ function clockHtml(clock, language, info) {
   return `<p class="wclock" style="font-size:13.5px;color:var(--mute);margin:8px 0 0;line-height:1.5"><b style="color:var(--ink)">Reached ${e(clock.platform)} ${clock.days} day${clock.days === 1 ? "" : "s"} after cinemas.</b>${usual}</p>`;
 }
 
-module.exports = { INDIAN, MIN_FILMS, WINDOWS_FILE, clockFor, clockHtml, computeWindows, rangeFor, refreshWindows, useClocks };
+// Pure: the arrival line (rollout "arrival-record", 9 Nov 2026): the clock and the sighting in
+// one sentence, so the fact is said once. `sighting` is lib/dated.js sightingFor ({ day, part,
+// platform }); `fmt(day)` the edition's date. "Spotted", never "released": we know when one of
+// the day's checks saw it, not when the platform made it live; the part of day, never a time.
+// Either half alone still draws; neither draws nothing.
+// Days from the cinema date to a sighting's LOCAL day. The clock counts to the record's UTC run
+// date, so a check at 01:37 IST on 7 Nov (20:07 UTC on the 6th) read "28 days" beside "spotted
+// Friday 7 Nov": 29 by the reader's own sum (All Pass, 9 Nov 2026). Shown beside a day, the count
+// runs to that day.
+function daysToSighting(clock, sighting) {
+  if (!clock || !sighting || !/^\d{4}-\d{2}-\d{2}/.test(clock.cinema || "")) return clock ? clock.days : null;
+  const d = Math.round((Date.parse(`${sighting.day}T00:00:00Z`) - Date.parse(`${String(clock.cinema).slice(0, 10)}T00:00:00Z`)) / 864e5);
+  return d >= 0 ? d : clock.days;
+}
+function arrivalHtml(clock, sighting, language, info, fmt = (d) => d) {
+  if (!sighting) return clockHtml(clock, language, info);
+  if (clock && String(clock.platform).toLowerCase() === String(sighting.platform).toLowerCase()) clock = { ...clock, days: daysToSighting(clock, sighting) };
+  const e = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const WEEKDAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const when = `${WEEKDAY[new Date(`${sighting.day}T00:00:00Z`).getUTCDay()]} ${e(fmt(sighting.day))}, ${e(sighting.part)}`;
+  const same = clock && clock.platform && sighting.platform && String(clock.platform).toLowerCase() === String(sighting.platform).toLowerCase();
+  const usual = clock && info && language
+    ? ` ${e(language)} films usually take ${info.lo}–${info.hi} weeks (${info.hit} of ${info.n} ${info.src === "ours" ? "we measured" : "in TMDB's records"}).`
+    : "";
+  const lead = clock
+    ? `<b style="color:var(--ink)">Reached ${e(clock.platform)} ${clock.days} day${clock.days === 1 ? "" : "s"} after cinemas.</b> ${same ? "We spotted it there" : `We spotted it on ${e(sighting.platform)}`} on ${when}.`
+    : `<b style="color:var(--ink)">Spotted on ${e(sighting.platform)} on ${when}.</b>`;
+  return `<p class="wclock" style="font-size:13.5px;color:var(--mute);margin:8px 0 0;line-height:1.5">${lead}${usual}</p>`;
+}
+
+module.exports = { INDIAN, MIN_FILMS, WINDOWS_FILE, arrivalHtml, clockFor, clockHtml, daysToSighting, computeWindows, rangeFor, refreshWindows, useClocks };

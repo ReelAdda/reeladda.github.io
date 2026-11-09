@@ -416,6 +416,100 @@ test("a list row without a score shows its film page's verdict, never 'Not enoug
   assert.strictEqual(claim.votes, 1228, "and its ratings, for the ranking");
 });
 
+test("arrival record: live sightings only, and the day count runs to the day shown (9 Nov 2026)", () => {
+  const D = require("./lib/dated.js"), W = require("./lib/windows.js");
+  const rec = (o) => ({ c: "in", k: "movie", id: 1, p: "Amazon Prime Video", first: "2026-11-06", rel: "2026-10-09", th: "2026-10-09", seen: "2026-11-06T20:07:04Z", ...o });
+  // 20:07 UTC on the 6th is 01:37 IST on the 7th.
+  assert.deepStrictEqual(D.sightingOf(rec({}), "in"), { day: "2026-11-07", part: "overnight", platform: "Prime Video" }, "the edition's day, the part of it, one name per service");
+  assert.strictEqual(D.sightingOf(rec({ seen: "2026-11-20T10:00:00Z" }), "in"), null, "written two weeks later: a backfill, not a sighting");
+  assert.strictEqual(D.sightingOf(rec({ first: "2026-08-26", seen: "2026-08-27T15:43:42Z", rel: "1989-12-17" }), "in"), null, "the archive's first day (The Simpsons)");
+  assert.strictEqual(D.sightingOf(rec({ first: "2026-10-01", seen: "2026-10-01T09:00:00Z", rel: "2024-05-07" }), "in"), null, "out over two years before: a catalogue listing");
+  D.useSightings([rec({}), rec({ first: "2026-11-08", seen: "2026-11-08T06:00:00Z", p: "Netflix" })]);
+  assert.strictEqual(D.sightingFor("in", { kind: "movie", tmdbId: 1 }).day, "2026-11-07", "the first live sighting is kept");
+  assert.strictEqual(D.sightingFor("in", { kind: "tv", tmdbId: 1 }), null);
+  const clock = { days: 28, platform: "Prime Video", first: "2026-11-06", cinema: "2026-10-09" };
+  assert.strictEqual(W.daysToSighting(clock, { day: "2026-11-07" }), 29, "9 Oct to 7 Nov");
+  const line = W.arrivalHtml(clock, D.sightingFor("in", { kind: "movie", tmdbId: 1 }), "Tamil", { lo: 4, hi: 6, hit: 15, n: 24, src: "ours" }, (d) => d.slice(8) + " Nov");
+  assert.ok(line.includes("Reached Prime Video 29 days after cinemas.") && line.includes("We spotted it there on Saturday 07 Nov, overnight.") && line.includes("Tamil films usually take 4–6 weeks"), line);
+  assert.ok(!/\d{1,2}:\d{2}/.test(line), "never a clock time");
+  const alone = W.arrivalHtml(null, { day: "2026-11-05", part: "in the evening", platform: "Netflix" }, "Hindi", null);
+  assert.ok(alone.includes("Spotted on Netflix on Thursday 2026-11-05, in the evening.") && !alone.includes("Reached"), alone);
+  assert.strictEqual(W.arrivalHtml(clock, null, "Tamil", null), W.clockHtml(clock, "Tamil", null), "no sighting: the clock line as before");
+  // The today log files the row under the same day it counts to.
+  D.useSightings(null);
+});
+
+test("review block, FAQ trim and platform figures: what each draws, and nothing at 0% (9 Nov 2026)", () => {
+  const F = require("./lib/filmpage.js"), E = require("./lib/evergreen.js"), R = require("./lib/rollout.js");
+  const reviews = [{ o: "The Hindu", u: "https://h/1", h: "Scene review: a chaotic, fun ride", d: "2026-11-06" },
+    { o: "Cinema Express", u: "https://c/1", h: "Scene review", d: "2026-11-07", s: 3.5 }, { o: "The Hindu", u: "https://h/1", h: "dup", d: "2026-11-06" }];
+  const block = F.reviewBlockHtml({ reviews }, (d) => d);
+  assert.ok(block.indexOf("Cinema Express") < block.indexOf("The Hindu"), "newest first");
+  assert.strictEqual((block.match(/<li>/g) || []).length, 2, "one row per link");
+  assert.ok(block.includes("★ 3.5/5") && block.includes("Scene review: a chaotic, fun ride") && block.includes('rel="noopener"'));
+  assert.strictEqual(F.reviewBlockHtml({ reviews: [] }), "");
+  // With the block the card counts; without it, the card names the outlets as before.
+  assert.strictEqual(F.reviewsTail({ reviews, _reviewBlock: true }), "; 3 reviews out.<!--FC:reviews=3-->");
+  assert.ok(F.reviewsTail({ reviews }).includes(">The Hindu</a>"));
+  assert.strictEqual(F.reviewsClause({ reviews, _reviewBlock: true }), " · <b>Reviews:</b> 3<!--FC:reviews=3-->");
+  const prev = R.peekRolloutConfig();
+  try {
+    const IN = require("./lib/core.js").COUNTRIES[0];
+    const faqs = [{ q: "Is X worth watching?", a: "…" }, { q: require("./lib/rules.js").streamVocab(IN).faqQuestion("X"), a: "…" }];
+    R.useRolloutConfig({ features: { "faq-trim": { percent: 0 } } });
+    assert.strictEqual(F.faqTrimmed({ slug: "x", title: "X" }, IN, faqs).length, 2, "at 0% the FAQ is untouched");
+    R.useRolloutConfig({ features: { "faq-trim": { percent: 100 } } });
+    assert.deepStrictEqual(F.faqTrimmed({ slug: "x", title: "X", kind: "movie", platform: "Theatres", providers: [] }, IN, faqs), [], "in cinemas: the OTT section says it");
+    assert.deepStrictEqual(F.faqTrimmed({ slug: "x", title: "X", kind: "movie", providers: ["Netflix"] }, IN, faqs), [], "streaming: the platform says it");
+    assert.deepStrictEqual(F.faqTrimmed({ slug: "x", title: "X", kind: "movie", providers: [], released: "2024-01-01" }, IN, faqs).map((f) => f.q), [faqs[1].q], "no section to answer it: the OTT question stays");
+  } finally { R.useRolloutConfig(prev); }
+  // Platform figures: counts from the rows' verdicts, a median only from five counted ratings.
+  const P = require("./lib/pagekit.js");
+  const row = (v, r) => ({ slug: `s${Math.random()}`, kind: "movie", rating: r, votes: 500, fcScore: v ? { verdict: v, audience: "Liked", critics: null, basis: "audience" } : null });
+  const items = [row("Must watch", 8.2), row("Must watch", 7.9), row("Worth a watch", 7.0), row("Worth a watch", 6.8), row("Skip", 4.1), row(null, null)];
+  assert.strictEqual(E.sectionFacts(items, "in"), "2 Must watch · 2 Worth a watch · 1 Skip · 1 no verdict yet · median TMDB audience rating 7.0");
+  assert.ok(!E.sectionFacts(items.slice(0, 3), "in").includes("median"), "under five counted ratings: no median");
+  void P;
+  // A row's "Spotted" note needs a live sighting on this platform within 30 days.
+  const D = require("./lib/dated.js");
+  D.useSightings([{ c: "in", k: "movie", id: 7, p: "Netflix", first: "2026-11-05", rel: "2026-10-01", seen: "2026-11-05T06:00:00Z" }]);
+  const now = Date.parse("2026-11-09T00:00:00Z");
+  assert.ok(/^Spotted here on /.test(E.spottedRow({ kind: "movie", _tmdb: 7 }, "in", "Netflix", now).hook));
+  assert.strictEqual(E.spottedRow({ kind: "movie", _tmdb: 7 }, "in", "Prime Video", now).hook, undefined, "another platform: no note");
+  assert.strictEqual(E.spottedRow({ kind: "movie", _tmdb: 7 }, "in", "Netflix", now + 40 * 864e5).hook, undefined, "over 30 days: no note");
+  assert.strictEqual(E.spottedRow({ kind: "movie", _tmdb: 8 }, "in", "Netflix", now).hook, undefined, "no sighting (a catalogue title): no date");
+  D.useSightings(null);
+});
+
+test("faq-trim on frozen pages: the block goes where the page answers it, the OTT question stays where nothing else does", () => {
+  const F = require("./lib/filmpage.js");
+  const d = (q, a = "…") => `<details><summary>${q}</summary><div class="fa">${a}</div></details>`;
+  const faq = (...qs) => `\n  <h2>Frequently asked</h2><div class="faq">${qs.join("")}</div>`;
+  const ott = "When is Scene releasing on OTT? (OTT release date)";
+  const page = (marker, block) => `<body><h1>Scene</h1>${marker}<p>x</p>${block}\n  <p class="more">more</p></body>`;
+  // In cinemas (OTT section) and streaming (where-to-watch block): the whole block goes.
+  for (const marker of ["<!--SW:pending--><h2>When is Scene coming to OTT?</h2><!--/SW:pending-->", "<!--FC:wtw--><!--SW:stream--><span class=\"pill\">Netflix</span><!--/SW:stream--><!--/FC:wtw-->"]) {
+    const out = F.faqTrimPage(page(marker, faq(d("Is Scene worth watching?"), d(ott), d("What language is Scene in?"))));
+    assert.ok(!out.includes("Frequently asked") && !out.includes("<details>") && out.includes('<p class="more">more</p>'), out);
+  }
+  // Nothing else answers the OTT question: it alone stays.
+  const kept = F.faqTrimPage(page("", faq(d("Is Scene worth watching?"), d(ott), d("Is Scene family friendly?"))));
+  assert.strictEqual((kept.match(/<details>/g) || []).length, 1);
+  assert.ok(kept.includes(ott));
+  assert.ok(F.faqTrimPage(page("", faq(d("When is Scene coming to streaming?")))).includes("coming to streaming"), "the streaming markets' wording too");
+  // A series answers it with its episode guide and platform: no FAQ.
+  assert.ok(!F.faqTrimPage(`<script type="application/ld+json">{"@type":"TVSeries"}</script>${page("", faq(d(ott)))}`).includes("<details>"));
+  // FAQ markup goes with it; a page without a block is untouched; running twice changes nothing.
+  const ld = `<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[]}</script>`;
+  assert.ok(!F.faqTrimPage(`${ld}${page("<!--SW:stream-->", faq(d("Q?")))}`).includes("FAQPage"));
+  assert.strictEqual(F.faqTrimPage("<p>no faq</p>"), "<p>no faq</p>");
+  const once = F.faqTrimPage(page("", faq(d("Is Scene worth watching?"), d(ott))));
+  assert.strictEqual(F.faqTrimPage(once), once, "idempotent");
+  // The build runs it after the other film-page passes.
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(src.indexOf("applyFaqTrim(filmPageFiles())") > src.indexOf("applyDarkBar(filmPageFiles())") && src.indexOf("applyFaqTrim(filmPageFiles())") < src.indexOf("finishFilmPages(filmPageFiles()"));
+});
+
 test("the build checks every rendered list row against the film page it links to (9 Nov 2026)", () => {
   const A = require("./lib/audit.js");
   const pill = (t) => `<span class="vpill vp-early"><svg class="vmark"><circle/></svg>${t}</span>`;

@@ -43,7 +43,12 @@
   },
   "tidy-names": {
    "percent": 0,
-   "schedule": [{ "from": "2026-10-30T12:00", "percent": 100 }],
+   "schedule": [
+    {
+     "from": "2026-10-30T12:00",
+     "percent": 100
+    }
+   ],
    "since": "2026-10-29",
    "what": "one name per service in a film page's where-to-watch pills, FAQ and links ('Prime Video', not 'Amazon Prime Video' + 'Amazon Prime Video with Ads'), on pages Google sees (~236; lib/filmpage.js, rules.js dedupeProviders). Fingerprint v3 reads names the same way, so no date moves — once the stored fingerprints are upgraded to v3, which the builds before 30 Oct 12:00 UTC do; it switches itself on at the 30 Oct 13:52 UTC build."
   },
@@ -64,19 +69,62 @@
   },
   "score-halves": {
    "percent": 0,
-   "schedule": [{ "from": "2026-11-08T00:00", "percent": 10 }, { "from": "2026-11-09T00:00", "percent": 25 }, { "from": "2026-11-10T00:00", "percent": 50 }, { "from": "2026-11-11T00:00", "percent": 100 }],
+   "schedule": [
+    {
+     "from": "2026-11-08T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-09T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-10T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-11T00:00",
+     "percent": 100
+    }
+   ],
    "since": "2026-11-06",
    "what": "one meaning for the score on film pages (lib/filmpage.js SCORE_HALVES): the score card in two labelled halves, 'FilmyChill Score' over the verdict stamp and 'TMDB audience' over the ring, the ring in one neutral colour; the vote box says a vote counts toward a future audience score. Every film page by slug, hidden ones included, in stages that start after the near-copy stages end (7 Nov): 10% at the 8 Nov morning build, then 25% / 50% / 100% on 9 / 10 / 11 Nov, so no build carries two staged changes. Homepages, hubs and the detail sheet changed at once (under 500 pages). Mock-up approved 6 Nov 2026."
   },
   "dark-bar": {
    "percent": 0,
-   "schedule": [{ "from": "2026-11-12T00:00", "percent": 10 }, { "from": "2026-11-13T00:00", "percent": 25 }, { "from": "2026-11-14T00:00", "percent": 50 }, { "from": "2026-11-15T00:00", "percent": 100 }],
+   "schedule": [
+    {
+     "from": "2026-11-12T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-13T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-14T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-15T00:00",
+     "percent": 100
+    }
+   ],
    "since": "2026-11-08",
    "what": "the film page's top bar in the brand's dark band, as on the homepage and the share images (lib/filmpage.js DARK_BAR): cream FILMY, marigold CHILL, a marigold edge, country and Search as quiet chips. Presentation only: not in the facts fingerprint, no sitemap date moves. Every film page by slug, in stages that start after score-halves ends (11 Nov), so no build carries two staged changes. The homepage's brand bar, natural-colour Pick of the Week and fixed share image went out at once (under 20 pages). Mock-ups approved 8 Nov 2026."
   },
   "near-copy-085": {
    "percent": 0,
-   "schedule": [{ "from": "2026-11-06T12:00", "percent": 50 }, { "from": "2026-11-07T12:00", "percent": 100 }],
+   "schedule": [
+    {
+     "from": "2026-11-06T12:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-07T12:00",
+     "percent": 100
+    }
+   ],
    "since": "2026-11-05",
    "what": "near-copy editions hidden from Google at 0.85 similarity instead of 0.90, by film (lib/googlehide.js nearCopyThreshold). At 0.90 the rule hides 129 editions today, and 2,001 visible pairs sit at 0.80 to 0.90. At 0.85 it hides 552 editions of 180 films (India never; the edition with the most clicks stays), 423 more than today, and their sister pages lose them from hreflang. Two stages so no build changes more than about 700 pages: 50% at the 6 Nov afternoon build (390 hidden, after the score-link build), 100% on 7 Nov (552). Owner's call, 5 Nov 2026."
   },
@@ -94,6 +142,44 @@
    "percent": 100,
    "since": "2026-10-28",
    "what": "film page v3 (owner's sequence, 28 Oct 2026): backdrop, title with status tag, meta line, audience + platform pills, score card with one Audience/Critics line, full Story, director, cast, Good to know (with the where-to-watch row), episodes, trailer, franchise, similar, FAQ. No answer card, CTA, prose fillers, fit rows or separate Where to watch block. Mock-up first. Switched to 100% at once on 28 Oct 2026 at the owner's request after the mock-up."
+  },
+  "arrival-record": {
+   "percent": 0,
+   "since": "2026-11-09",
+   "what": "the arrival record on film pages (lib/dated.js useSightings, lib/windows.js arrivalHtml): 'Reached Prime Video 28 days after cinemas. We spotted it there on Thursday 16 Oct, in the morning.' Live sightings only (written within a day of the first date), the part of the day and never a time; the Good to know 'OTT arrival' row goes where the line says the same. Mock-up first; frozen pages need a pass before this goes past 0."
+  },
+  "review-block": {
+   "percent": 0,
+   "since": "2026-11-09",
+   "what": "published reviews as their own block under the score card (lib/filmpage.js reviewBlockHtml): outlet, date, the outlet's headline, newest first; the card keeps the count only, so nothing is said twice. Mock-up first; the score sweep must keep the count-only sentence on pages with the block before this goes past 0."
+  },
+  "faq-trim": {
+   "percent": 0,
+   "schedule": [
+    {
+     "from": "2026-11-16T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-17T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-18T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-19T00:00",
+     "percent": 100
+    }
+   ],
+   "since": "2026-11-09",
+   "what": "film-page FAQ removed where it repeats the page (lib/filmpage.js faqTrimmed on rebuilt pages, faqTrimPage on frozen ones): every answer restated the score card, the reviews, the where-to-watch pill, the OTT section, Good to know or the header. The OTT-date question stays only on a page with no OTT section or platform to answer it. Owner, 9 Nov 2026: 'what matters is the product getting better; if FAQ causes duplication and does not add much value, remove them'. Staged after dark-bar finishes (15 Nov). Not in the facts fingerprint: no sitemap date moves."
+  },
+  "platform-lines": {
+   "percent": 0,
+   "since": "2026-11-09",
+   "what": "Streaming on <platform> pages (lib/evergreen.js sectionFacts, spottedRow): one line of counts per section, and 'Spotted here on <date>' on titles with a live sighting in the last 30 days. By canonical URL; these pages are rebuilt every run."
   }
  }
 }

@@ -2429,7 +2429,10 @@ async function main() {
       const { windows, computed } = WN.refreshWindows();
       require("./lib/rules.js").useMeasuredWindows(windows);
       // The window clock on film pages: each measured film's own cinema-to-streaming days.
-      console.log(`Window clocks: ${WN.useClocks(require("./lib/history.js").readHistory()).size} measured film(s)`);
+      const historyRecords = require("./lib/history.js").readHistory();
+      console.log(`Window clocks: ${WN.useClocks(historyRecords).size} measured film(s)`);
+      // The arrival record on film pages (lib/dated.js useSightings): live sightings only.
+      console.log(`Arrival records: ${require("./lib/dated.js").useSightings(historyRecords).size} live sighting(s)`);
       const langs = Object.entries(windows.languages).map(([l, w]) => `${l} ${w.lo}–${w.hi}wk (${w.hit}/${w.n}, ${w.src})`).join(", ");
       console.log(`Streaming windows ${windows.month}${computed ? " (recomputed)" : ""}: ${langs || "none yet"}`);
     } catch (e) { stageFailed("streaming windows", e, { optional: true }); }
@@ -2851,6 +2854,11 @@ async function main() {
           const db = require("./lib/filmpage.js").applyDarkBar(filmPageFiles());
           if (db.changed) console.log(`Dark bar: ${db.changed} of ${db.pages} switched page(s) updated`);
         } catch (e) { stageFailed("dark bar", e, { optional: true }); }
+        // The FAQ block (rollout "faq-trim", lib/filmpage.js faqTrimPage), the same way.
+        try {
+          const ft = require("./lib/filmpage.js").applyFaqTrim(filmPageFiles());
+          if (ft.changed) console.log(`FAQ trim: ${ft.changed} of ${ft.pages} switched page(s) updated`);
+        } catch (e) { stageFailed("faq trim", e, { optional: true }); }
         const f = finishFilmPages(filmPageFiles(), { fcdataClaim, fromFacts });
         console.log(`Film pages finished: ${f.pages} checked (${f.fromFacts} rendered from facts, ${f.pages - f.fromFacts} still frozen), ${f.externalized} moved to shared styles,${f.footerLinked} footers given the notice and Privacy · Copyright links, ${f.iconed} icon tags added, `
           + `${f.retitled.length - f.notYetFixed} titles given their country, ${f.notYetFixed} 'not streaming yet' titles corrected on pages that stream, ${f.timeWordsFixed} outdated release wordings settled, ${f.fcdataDropped} window lines removed and ${f.fcdataFixed} corrected, `

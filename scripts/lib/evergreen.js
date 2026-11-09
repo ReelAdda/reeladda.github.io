@@ -80,7 +80,7 @@ function verifiedAvailability(data, manifestForCountry, index, now = Date.now())
     add(it.slug, { title: it.title, language: it.language || "", kind: it.kind || "movie", genre: it.genre || "",
       rating: it.rating ?? null, votes: it.votes || 0, verdict: it.verdict || null, poster: it.poster || "",
       released: it.released || null, platform: null,
-      fcScore: it.fcScore || null, criticsCount: it.criticsCount || 0, reception: it.reception || null }, it.providers);
+      fcScore: it.fcScore || null, criticsCount: it.criticsCount || 0, reception: it.reception || null, _tmdb: it.tmdbId || null }, it.providers);
   }
   // Today's lists also say what ISN'T streaming: a film in the cinema or coming-soon list keeps
   // no older claim (Drishyam: The Conclusion, in Indian cinemas, sat on India's Prime Video
@@ -103,11 +103,46 @@ function verifiedAvailability(data, manifestForCountry, index, now = Date.now())
     const shown = ix.shown || {};
     add(slug, { title: e.title || ix.title || slug, language: e.lang || ix.language || "", kind: e.kind || ix.kind || "movie",
       genre: ix.genre || "", rating: shown.rating ?? null, votes: shown.votes || 0, verdict: shown.fcScore ? shown.fcScore.verdict : null,
-      fcScore: shown.fcScore || null, poster: ix.poster || "", released: e.released || ix.released || null,
+      fcScore: shown.fcScore || null, poster: ix.poster || "", released: e.released || ix.released || null, _tmdb: e.tmdbId || null,
       platform: null }, provs);
   }
   for (const list of byPlatform.values()) for (const x of list) x.platform = x.platform || null;
   return byPlatform;
+}
+
+// THE PLATFORM PAGES' FIGURES (rollout "platform-lines", 9 Nov 2026). Pure apart from reading the
+// film pages' verdicts (lib/pagekit.js withShownScore), the same source the rows draw from, so the
+// line and the rows below it can't disagree. Counts only, no adjectives: "38 Must watch · 41 Worth a
+// watch · 9 Skip · 27 no verdict yet · 4 spotted here in the last 7 days". The median is TMDB's
+// audience rating over the titles whose rating counts toward their verdict, and only from 5 such.
+const PLATFORM_LINES = "platform-lines";
+const SPOTTED_DAYS = 30;
+const { inRollout } = require("./rollout.js");
+function sightingAge(s, now) { return s ? (now - Date.parse(`${s.day}T00:00:00Z`)) / 864e5 : null; }
+function sectionFacts(items, code, now = Date.now()) {
+  const { withShownScore } = require("./pagekit.js");
+  const { dialRating } = require("./meter.js");
+  const D = require("./dated.js");
+  const rows = items.map((x) => withShownScore(code, x));
+  const n = (v) => rows.filter((x) => x.fcScore && x.fcScore.verdict === v).length;
+  const unscored = rows.filter((x) => !x.fcScore).length;
+  const recent = rows.filter((x) => { const a = sightingAge(D.sightingFor(code, { kind: x.kind, tmdbId: x._tmdb }), now); return a != null && a >= 0 && a < 7; }).length;
+  const rated = rows.map(dialRating).filter((r) => r != null).sort((a, b) => a - b);
+  const median = rated.length >= 5 ? (rated.length % 2 ? rated[(rated.length - 1) / 2] : (rated[rated.length / 2 - 1] + rated[rated.length / 2]) / 2) : null;
+  return [n("Must watch") ? `${n("Must watch")} Must watch` : null, n("Worth a watch") ? `${n("Worth a watch")} Worth a watch` : null,
+    n("Skip") ? `${n("Skip")} Skip` : null, unscored ? `${unscored} no verdict yet` : null,
+    recent ? `${recent} spotted here in the last 7 days` : null,
+    median != null ? `median TMDB audience rating ${median.toFixed(1)}` : null].filter(Boolean).join(" · ");
+}
+// A row's "Spotted" note: only a live sighting (lib/dated.js) on this platform, in the last
+// SPOTTED_DAYS days. A catalogue title has none, so it never gets a date that is only the day
+// FilmyChill built its page.
+function spottedRow(x, code, platform, now = Date.now()) {
+  // `_tmdb`, not tmdbId: a row with a tmdbId would also draw review links (lib/pagekit.js reviewsOf).
+  const s = require("./dated.js").sightingFor(code, { kind: x.kind, tmdbId: x._tmdb });
+  const age = sightingAge(s, now);
+  if (!s || age == null || age < 0 || age > SPOTTED_DAYS || String(s.platform).toLowerCase() !== String(platform).toLowerCase() || x.hook) return x;
+  return { ...x, hook: `Spotted here on ${fmtDateFull(s.day, localeFor(code))}` };
 }
 
 function buildStreamingPage(items, cfg, { platform, pslug, language = null, lslug = null, langLinks = [], weeklyHub = null, now = Date.now() }) {
@@ -121,8 +156,12 @@ function buildStreamingPage(items, cfg, { platform, pslug, language = null, lslu
   const subject = language ? `${language} Movies & Series` : "Movies & Series";
   const checked = new Date(now).toLocaleDateString(localeFor(code), { day: "numeric", month: "short", year: "numeric" });
   const sections = [];
-  if (films.length) sections.push({ h2: `${language ? language + " films" : "Films"} on ${platform}`, items: films.map((x) => ({ ...x, platform })) });
-  if (series.length) sections.push({ h2: `${language ? language + " series" : "Series"} on ${platform}`, items: series.map((x) => ({ ...x, platform })) });
+  // One line of figures per section and a "Spotted" note on recent arrivals (rollout
+  // "platform-lines", by the page's canonical URL; 9 Nov 2026 review).
+  const lines = inRollout(PLATFORM_LINES, url);
+  const dress = (xs) => (lines ? xs.map((x) => spottedRow({ ...x, platform }, code, platform, now)) : xs.map((x) => ({ ...x, platform })));
+  if (films.length) sections.push({ h2: `${language ? language + " films" : "Films"} on ${platform}`, items: dress(films), facts: lines ? sectionFacts(films, code, now) : null });
+  if (series.length) sections.push({ h2: `${language ? language + " series" : "Series"} on ${platform}`, items: dress(series), facts: lines ? sectionFacts(series, code, now) : null });
   const rated = sorted.filter((x) => x.rating != null && (x.votes || 0) >= 50);
   // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
   const plain = require("./humanprose.js").plainOn(url);
@@ -418,6 +457,9 @@ function writePeoplePages(data, cfg, manifest) {
 }
 
 module.exports = {
+  PLATFORM_LINES,
+  sectionFacts,
+  spottedRow,
   buildPersonPage,
   buildStreamingPage,
   PEOPLE_MIN,
