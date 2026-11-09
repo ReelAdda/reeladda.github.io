@@ -146,6 +146,8 @@ jobs:
           git add -A -- reviews.json 2>/dev/null || true
           # This month's streaming windows, measured (scripts/lib/windows.js).
           git add -A -- stream-windows.json 2>/dev/null || true
+          # Depth facts (scripts/lib/depth.js): the box-office lookup.
+          git add -A -- gross.json 2>/dev/null || true
           if git diff --staged --quiet; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             echo "No changes to commit."

@@ -543,6 +543,9 @@ function entryReception(e) {
   return out;
 }
 function cachedReception(imdbId) { return imdbId ? entryReception(loadTakes()[imdbId]) : null; }
+// The box office the article states (lib/depth.js grossFromLead), for pages drawn without a take.
+function cachedGross(imdbId) { const e = imdbId ? loadTakes()[imdbId] : null; return (e && e.gross) || null; }
+const GROSS_BACKFILL = 150;
 
 // Pure: enough published reviews to show the critics' side in a film's first week, when the
 // release-week gate (takeConfident) otherwise holds every critics' line back. Indian films are
@@ -1134,6 +1137,8 @@ async function attachTakes(dataByCode) {
     }
   }
   let found = 0;
+  let grossBackfill = GROSS_BACKFILL;
+  const grossSeen = {};   // kind:tmdbId -> figure, for pages drawn from facts (lib/depth.js gross.json)
   for (const [key, items] of byKey) {
     try {
       let entry = takes[key];
@@ -1154,10 +1159,14 @@ async function attachTakes(dataByCode) {
       // ratings while its article listed 12. Only for films out under CRITICS_RECHECK_DAYS (60: regional reviews land late).
       const recheck = !!entry && !stale && entry.src === "wiki" && !criticsSettled(entry.a)
         && entry.checked !== today && itemsAgeDays(items) != null && itemsAgeDays(items) < CRITICS_RECHECK_DAYS;
-      const needsFetch = !entry || stale || recheck || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
+      // Box office (rollout "box-office", lib/depth.js): entries read before the gross was kept are
+      // read again, GROSS_BACKFILL a run, so the lead is fetched once more and nothing else changes.
+      const grossDue = !!entry && entry.gross === undefined && !!entry.article && grossBackfill > 0 && entry.checked !== today;
+      if (grossDue) grossBackfill--;
+      const needsFetch = !entry || stale || recheck || grossDue || ((!entry.take || entry.hook === undefined) && entry.checked !== today);
       if (needsFetch) {
         const fresh = stale || recheck; // read the reception again rather than keep the old analysis
-        let take = fresh ? null : entry?.take || null, src = fresh ? null : entry?.src || null, hook = null;
+        let take = fresh ? null : entry?.take || null, src = fresh ? null : entry?.src || null, hook = null, gross = null;
         let a = fresh ? null : entry?.a || null, ta = fresh ? null : entry?.ta || null;
         let article = entry?.article || null; // the article LOCATION is a stable fact — survives purges
         if (key.startsWith("tt")) { // real IMDb id -> precise Wikipedia route
@@ -1165,6 +1174,8 @@ async function attachTakes(dataByCode) {
           if (article) {
             const { lead, reception } = await wikiExtract(article);
             hook = extractHook(lead, items[0]);
+            const g = require("./depth.js").grossFromLead(lead);
+            gross = g ? { t: g, at: today, article } : null;
             if (!take) {
               a = readCritics({ lead, reception });
               const composed = composeTake(a, Number(items[0].tmdbId) || 0);
@@ -1181,7 +1192,7 @@ async function attachTakes(dataByCode) {
           // The re-read found nothing (Wikipedia down, article moved): keep the reading we had.
           entry.checked = today;
         } else {
-          entry = { take, src, hook, article: article || undefined, a: a || undefined, ta: ta || undefined, checked: today, v: TAKE_VERSION };
+          entry = { take, src, hook, article: article || undefined, a: a || undefined, ta: ta || undefined, gross: article ? gross : undefined, checked: today, v: TAKE_VERSION };
           takes[key] = entry;
         }
         await sleep(150); // polite pace against Wikimedia
@@ -1243,6 +1254,7 @@ async function attachTakes(dataByCode) {
             if (counter) it.takeCounter = counter;
           }
           if (entry.hook) it.hook = entry.hook;
+          if (entry.gross) { it.gross = entry.gross; grossSeen[`${it.kind === "tv" ? "tv" : "movie"}:${it.tmdbId}`] = entry.gross; }
         }
       }
     } catch (e) {
@@ -1250,6 +1262,7 @@ async function attachTakes(dataByCode) {
     }
   }
   fs.writeFileSync(TAKES_FILE, JSON.stringify(takes, null, 1));
+  try { const n = require("./depth.js").recordGross(grossSeen); if (n) console.log(`Box office: ${n} figure(s) recorded from Wikipedia`); } catch (e) { console.warn(`  box office: not recorded (${e.message})`); }
   console.log(`Takes: ${found}/${byKey.size} titles have a critics' line`);
 }
 
@@ -1368,6 +1381,7 @@ async function attachTrailerStats(dataByCode) {
 }
 
 module.exports = {
+  cachedGross,
   cachedCriticsCount,
   cachedReception,
   entryReception,

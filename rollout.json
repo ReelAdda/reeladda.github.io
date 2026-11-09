@@ -234,6 +234,121 @@
    ],
    "since": "2026-11-09",
    "what": "Streaming on <platform> pages (lib/evergreen.js sectionFacts, spottedRow): one line of counts per section, and 'Spotted here on <date>' on titles with a live sighting on that platform in the last 30 days. By canonical URL; these pages are rebuilt every run. Approved by the owner after the 9 Nov mock-ups; 10/25/50/100% on 10–13 Nov. Every edition draws its film pages from facts through the builder (facts-mode.json), so frozen pages get it on their next render; a page still frozen keeps its present, consistent text. Not in the facts fingerprint: no sitemap date moves."
+  },
+  "elsewhere": {
+   "percent": 0,
+   "since": "2026-11-09",
+   "what": "the 'Elsewhere' line under the platform pill: where other editions' own pages say the title streams (two platforms at most, three countries named, 'and N more'), and, for a film out in the last 60 days or not out yet, the other countries' dates that differ from this one's. lib/depth.js. Built 9 Nov 2026 for the owner's depth plan; Approved by the owner after the full-page mock-up (9 Nov 2026); 10/25/50/100% on 20–23 Nov, after the FAQ removal. One line or row inside a block the page already has, only where the data exists.",
+   "schedule": [
+    {
+     "from": "2026-11-20T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-21T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-22T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-23T00:00",
+     "percent": 100
+    }
+   ]
+  },
+  "platform-history": {
+   "percent": 0,
+   "since": "2026-11-09",
+   "what": "later platforms' first live sightings, added to the arrival line ('Later also spotted on Netflix on Tuesday 2 Dec'); only platforms the page still lists. lib/depth.js. Built 9 Nov 2026 for the owner's depth plan; Approved by the owner after the full-page mock-up (9 Nov 2026); 10/25/50/100% on 20–23 Nov, after the FAQ removal. One line or row inside a block the page already has, only where the data exists.",
+   "schedule": [
+    {
+     "from": "2026-11-20T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-21T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-22T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-23T00:00",
+     "percent": 100
+    }
+   ]
+  },
+  "readers-verdict": {
+   "percent": 0,
+   "since": "2026-11-09",
+   "what": "'Readers: 78% say worth it (142 votes)' in the score card, once a film has 50 votes (votes-agg.json); none qualify yet. lib/depth.js. Built 9 Nov 2026 for the owner's depth plan; Approved by the owner after the full-page mock-up (9 Nov 2026); 10/25/50/100% on 20–23 Nov, after the FAQ removal. One line or row inside a block the page already has, only where the data exists.",
+   "schedule": [
+    {
+     "from": "2026-11-20T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-21T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-22T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-23T00:00",
+     "percent": 100
+    }
+   ]
+  },
+  "review-stars": {
+   "percent": 0,
+   "since": "2026-11-09",
+   "what": "'3 of 4 reviews gave stars: median 3.5 out of 5' at the top of the review block, from stars the feeds stated, two or more. lib/depth.js. Built 9 Nov 2026 for the owner's depth plan; Approved by the owner after the full-page mock-up (9 Nov 2026); 10/25/50/100% on 20–23 Nov, after the FAQ removal. One line or row inside a block the page already has, only where the data exists.",
+   "schedule": [
+    {
+     "from": "2026-11-20T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-21T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-22T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-23T00:00",
+     "percent": 100
+    }
+   ]
+  },
+  "box-office": {
+   "percent": 0,
+   "since": "2026-11-09",
+   "what": "'Box office: over ₹142 crore worldwide (Wikipedia, 8 Nov)' in Good to know: the gross the article's lead states, governed by a verb of earning, linked to the article (gross.json by TMDB id). lib/depth.js. Built 9 Nov 2026 for the owner's depth plan; Approved by the owner after the full-page mock-up (9 Nov 2026); 10/25/50/100% on 20–23 Nov, after the FAQ removal. One line or row inside a block the page already has, only where the data exists.",
+   "schedule": [
+    {
+     "from": "2026-11-20T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-21T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-22T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-23T00:00",
+     "percent": 100
+    }
+   ]
   }
  }
 }

@@ -58,6 +58,7 @@ const {
   streamPagePath,
   ytIdOf,
 } = require("./pagekit.js");
+const DEPTH = require("./depth.js");
 const { countryNameFor, dedupeProviders, digitalNoteName, hasLanguageWindow, streamVocab, streamWindowEstimate, streamWindowShort, titleWithCountry } = require("./rules.js");
 
 // ============================================================
@@ -963,7 +964,9 @@ function reviewBlockHtml(item, fmt = (d) => d) {
     .filter((r) => r && r.o && r.u && !seen.has(r.u) && seen.add(r.u))
     .sort((a, b) => String(b.d || "").localeCompare(String(a.d || "")));
   if (!rows.length) return "";
-  return `<section class="rvb" id="reviews"><h2>Reviews</h2><ul class="rvl">${rows.map((r) =>
+  // The stars the feeds stated, summed up (rollout "review-stars", lib/depth.js starsLine).
+  const stars = DEPTH.on(DEPTH.STARS, item) ? DEPTH.starsLine(rows) : "";
+  return `<section class="rvb" id="reviews"><h2>Reviews</h2>${stars}<ul class="rvl">${rows.map((r) =>
     `<li><a href="${e(r.u)}" rel="noopener" target="_blank"><span class="rvo">${e(r.o)}</span>${r.d ? `<span class="rvd">${e(fmt(r.d))}</span>` : ""}${typeof r.s === "number" ? `<span class="rvs">★ ${e(String(r.s))}/5</span>` : ""}${r.h ? `<span class="rvh">${e(r.h)}</span>` : `<span class="rvh">Read the review</span>`}</a></li>`).join("")}</ul></section>`;
 }
 function audiencePhrase(votes, recent) {
@@ -1116,7 +1119,10 @@ function fcScoreSection(item) {
     // The method link inside the card, after the figures it explains (rollout "score-link",
     // 5 Nov 2026): the sentence under the card is gone, the link stays (scoreLink below).
     const linkIn = v3 && !!item.slug && inRollout(SCORE_LINK, item.slug);
-    const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}${reviewsClause(item)}${linkIn ? ` · ${scoreHalvesOn(item) ? VERDICT_HOW : SCORE_HOW}` : ""}</p>` : "";
+    // Readers after the critics (rollout "readers-verdict", lib/depth.js); nothing where it is off
+    // or the film has too few votes.
+    const readersPart = item._edition && DEPTH.on(DEPTH.READERS, item) ? DEPTH.readersClause(item) : "";
+    const line = v3 ? `<p class="fcsb-line">${audPart}${criPart}${readersPart}${reviewsClause(item)}${linkIn ? ` · ${scoreHalvesOn(item) ? VERDICT_HOW : SCORE_HOW}` : ""}</p>` : "";
     // The two halves as a marker too (<!--FC:fcs=audience|critics-->): lib/facts.js read them from
     // the rows' tags, which the v3 line replaces; without them a frozen render lost the ring.
     const fcsMark = `<!--FC:fcs=${e(s && s.audience ? s.audience : "")}|${e(s && s.critics ? s.critics : "")}-->`;
@@ -1399,6 +1405,8 @@ function buildFilmPage(item, asOf, knownSlugs, cfg, filmIndex = null) {
   // Only where the card has no critics' reading of its own: no FilmyChill score yet, or a score
   // from audience ratings alone with nothing cited from Wikipedia (owner, 31 Oct 2026: a page that
   // carries a verdict with the critics' figures already answers the question).
+  // Box office from the lookup kept by TMDB id (lib/depth.js), for pages drawn from their facts.
+  if (item && !item.gross && DEPTH.on(DEPTH.GROSS, item)) { const g = DEPTH.grossFor(item); if (g) item = { ...item, gross: g }; }
   if (item && inRollout("reviews", item.slug)) {
     const RVW = require("./reviews.js");
     const citedCritics = !!item.reception && inRollout(require("./reception.js").RECEPTION_FEATURE, item.slug);
@@ -1722,7 +1730,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       <div class="meta">${v3 ? V2.v3Meta(item, { fmt: (d) => fmtDateFull(d, localeFor(code)), airLabel: !!item._fix30 }) : v2 ? V2.v2Meta(item, year) : (lean
         ? [item.language, item.genre, item.runtime ? (item.kind === "tv" ? `${item.runtime} min episodes` : item.runtime + " min") : null]
         : [item.language, item.genre, item.runtime ? item.runtime + " min" : null, item.cert]).filter(Boolean).map(e).join(" · ")}</div>
-      ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Where({ ...item, windowClock: require("./windows.js").clockFor(code, item), sighting: arrivalRecordOn(item) ? require("./dated.js").sightingFor(code, item) : null }, { relState, country, V: V_TITLE, asOf, fmt: (d) => fmtDateFull(d, localeFor(code)) }) : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
+      ${lean ? "" : headRatingHtml(item)}${v3 ? "\n      " + V2.v3Where({ ...item, windowClock: require("./windows.js").clockFor(code, item), sighting: arrivalRecordOn(item) ? require("./dated.js").sightingFor(code, item) : null, laterSightings: arrivalRecordOn(item) && DEPTH.on(DEPTH.LATER, item) ? require("./dated.js").laterSightingsFor(code, item, providers) : [] }, { relState, country, V: V_TITLE, asOf, fmt: (d) => fmtDateFull(d, localeFor(code)) }) + (DEPTH.on(DEPTH.ELSEWHERE, item) ? DEPTH.elsewhereHtml(code, item, { fmt: (d) => fmtDateShort(d, Date.now(), localeFor(code)) }) : "") : v2 ? "\n      " + V2.v2ScorePill(item) : ""}
       ${item.released && !v2 ? `<div class="meta" style="margin-top:8px">${relState === "today" ? relLabel : `${relLabel} ${e(fmtDateFull(item.released, localeFor(code)))}`}</div>` : ""}
       ${asOf ? `<div class="meta" style="margin-top:2px;font-size:12.5px"${v2 && !tidyLd ? ' hidden' : ""}>Page updated ${e(fmtDateFull(asOf, localeFor(code)))}</div>` : ""}${asOf && !(v2 && !tidyLd) ? require("./facts.js").recentChangesHtml(require("./facts.js").changesFor(code, item.slug), asOf, (d) => fmtDateShort(d, Date.parse(`${String(asOf).slice(0, 10)}T00:00:00Z`), localeFor(code))) : ""}
     </div>
@@ -1730,7 +1738,9 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
   ${v2 && !v3 ? V2.v2Cta(item, { cfg, country, asOf, relState, V: V_TITLE }) : ""}
   ${v3 ? (() => {
     // The review block (rollout "review-block"): the card counts the reviews, the block lists them.
-    const rv = reviewBlockOn(item) && Array.isArray(item.reviews) && item.reviews.length ? { ...item, _reviewBlock: true } : item;
+    const rv0 = reviewBlockOn(item) && Array.isArray(item.reviews) && item.reviews.length ? { ...item, _reviewBlock: true } : item;
+    // The edition, for the readers row (lib/depth.js); only where it is switched on.
+    const rv = DEPTH.on(DEPTH.READERS, item) ? { ...rv0, _edition: code } : rv0;
     return `${fcScoreSection(rv)}\n  ${voteWidgetHtml(item, code)}${rv._reviewBlock ? `\n  ${reviewBlockHtml(rv, (d) => fmtDateShort(d, Date.now(), localeFor(code)))}` : ""}`;
   })() : (() => { const answerBlock = (() => {
     // Lead answer line. The GSC data showed pages ranking on page 1 for "where to watch [film]"
@@ -1922,6 +1932,8 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       if (days != null && !clockShown) rows.unshift(`<tr><td>OTT arrival</td><td>${e(fcdataWindowPhrase(days))}${rec.p ? `, on ${e(rec.p)}` : ""} (FilmyChill data)</td></tr>`);
       // The platform's own pages (crawl paths from every film back to the lists), as a row.
       const links = filmHubLinks(item, cfg).replace(/^<p[^>]*>More: /, "").replace(/<\/p>$/, "");
+      // Box office, as the Wikipedia article states it (rollout "box-office", lib/depth.js).
+      if (DEPTH.on(DEPTH.GROSS, item)) { const g = DEPTH.grossRow(item, (d) => fmtDateShort(d, Date.now(), localeFor(code))); if (g) rows.push(g); }
       if (links && providers.length) rows.push(`<tr><td>More on ${e(canonProvider(providers[0]))}</td><td>${links}</td></tr>`);
       return rows.length ? `<h2>Good to know</h2><table class="gtk">${rows.join("")}</table>` : "";
     }

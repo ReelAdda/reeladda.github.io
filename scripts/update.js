@@ -2436,6 +2436,20 @@ async function main() {
       const langs = Object.entries(windows.languages).map(([l, w]) => `${l} ${w.lo}–${w.hi}wk (${w.hit}/${w.n}, ${w.src})`).join(", ");
       console.log(`Streaming windows ${windows.month}${computed ? " (recomputed)" : ""}: ${langs || "none yet"}`);
     } catch (e) { stageFailed("streaming windows", e, { optional: true }); }
+    // Depth facts (lib/depth.js), read once before any page is written: where each edition's
+    // page says the title streams and its date there (Elsewhere), readers' votes and the box-office lookup. From the pages on disk, so another edition's
+    // change this run shows on the next.
+    try {
+      const DEPTH = require("./lib/depth.js");
+      const { filmIndexFor } = require("./lib/graph.js");
+      const indexByCode = {};
+      for (const c of COUNTRIES) indexByCode[c.code] = filmIndexFor(c);
+      const entries = DEPTH.elsewhereEntries(loadPagesManifest(), indexByCode);
+      DEPTH.useElsewhere(entries);
+      DEPTH.loadVotes();
+      DEPTH.loadGross();
+      console.log(`Depth facts: ${entries.length} edition page(s) for Elsewhere`);
+    } catch (e) { stageFailed("depth facts", e, { optional: true }); }
     // "Recent changes" on film pages (lib/facts.js): the changes each page's facts record holds.
     try {
       const FX = require("./lib/facts.js");

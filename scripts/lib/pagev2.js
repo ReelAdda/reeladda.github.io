@@ -319,7 +319,7 @@ function v3Where(item, { relState, country, V, asOf = "", fmt = (d) => d }) {
     // With the arrival record (rollout "arrival-record"), the clock and the sighting share one line.
     const W = require("./windows.js"), info = require("./rules.js").windowInfo(item.language);
     return wrap(provs.map((p) => `<span class="pill">${e(p)}</span>`).join("") + rentPills, `${arrived}${note}`, { live: true })
-      + (item.sighting ? W.arrivalHtml(item.windowClock, item.sighting, item.language, info, fmt)
+      + (item.sighting ? W.arrivalHtml(item.windowClock, item.sighting, item.language, info, fmt, item.laterSightings || [])
         : item.windowClock ? W.clockHtml(item.windowClock, item.language, info) : "");
   }
   // Status pills (not providers; lib/facts.js STATUS_PILL skips them) sit in a .st wrapper, so

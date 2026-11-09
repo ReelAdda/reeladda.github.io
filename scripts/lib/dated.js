@@ -203,8 +203,11 @@ function sightingOf(r, code) {
   if (gap != null && gap > SIGHTING_MAX_GAP_DAYS) return null;
   return { day: s.day, part: s.part, platform: require("./rules.js").canonProvider(r.p) || r.p };
 }
+// Each platform's first live sighting is kept too (rollout "platform-history", lib/depth.js): a
+// title that later reaches a second platform says when that was seen as well.
+let SIGHTINGS_BY_PLATFORM = null;
 function useSightings(records) {
-  const map = new Map();
+  const map = new Map(), all = new Map();
   for (const r of records || []) {
     if (!r || !r.c || !r.id) continue;
     const s = sightingOf(r, r.c);
@@ -212,13 +215,27 @@ function useSightings(records) {
     const key = `${r.c}:${r.k === "tv" ? "tv" : "movie"}:${r.id}`;
     const have = map.get(key);
     if (!have || s.day < have.day) map.set(key, s);
+    if (!all.has(key)) all.set(key, new Map());
+    const per = all.get(key), was = per.get(s.platform);
+    if (!was || s.day < was.day) per.set(s.platform, s);
   }
   SIGHTINGS = map;
+  SIGHTINGS_BY_PLATFORM = all;
   return map;
 }
 function sightingFor(code, item) {
   if (!SIGHTINGS || !item || !item.tmdbId) return null;
   return SIGHTINGS.get(`${code}:${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}`) || null;
+}
+// The other platforms' first live sightings, after the first one, oldest first; only platforms
+// the page still lists, so the line never reads as a platform it has left.
+function laterSightingsFor(code, item, providers = []) {
+  const first = sightingFor(code, item);
+  if (!first || !SIGHTINGS_BY_PLATFORM) return [];
+  const now = new Set((providers || []).map((p) => String(require("./rules.js").canonProvider(p) || p).toLowerCase()));
+  return [...(SIGHTINGS_BY_PLATFORM.get(`${code}:${item.kind === "tv" ? "tv" : "movie"}:${item.tmdbId}`) || new Map()).values()]
+    .filter((s) => s.platform !== first.platform && now.has(String(s.platform).toLowerCase()))
+    .sort((a, b) => a.day.localeCompare(b.day));
 }
 
 function buildTodayPage(records, cfg, { index = [], now = Date.now(), hasComing = true } = {}) {
@@ -600,6 +617,7 @@ module.exports = {
   announcedDates,
   spottedAt,
   sightingFor,
+  laterSightingsFor,
   sightingOf,
   useSightings,
   stillWaiting,

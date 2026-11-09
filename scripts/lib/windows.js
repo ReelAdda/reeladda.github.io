@@ -104,11 +104,12 @@ function clockFor(code, item) {
   return CLOCKS.get(`${code}:${item.tmdbId}`) || null;
 }
 // Pure: the line. `info` is lib/rules.js windowInfo(language) or null.
+// The usual range alone (owner, 9 Nov 2026): "(15 of 24 we measured)" read as noise beside it.
 function clockHtml(clock, language, info) {
   if (!clock) return "";
   const e = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const usual = info && language
-    ? ` ${e(language)} films usually take ${info.lo}–${info.hi} weeks (${info.hit} of ${info.n} ${info.src === "ours" ? "we measured" : "in TMDB's records"}).`
+    ? ` ${e(language)} films usually take ${info.lo}–${info.hi} weeks.`
     : "";
   return `<p class="wclock" style="font-size:13.5px;color:var(--mute);margin:8px 0 0;line-height:1.5"><b style="color:var(--ink)">Reached ${e(clock.platform)} ${clock.days} day${clock.days === 1 ? "" : "s"} after cinemas.</b>${usual}</p>`;
 }
@@ -127,7 +128,7 @@ function daysToSighting(clock, sighting) {
   const d = Math.round((Date.parse(`${sighting.day}T00:00:00Z`) - Date.parse(`${String(clock.cinema).slice(0, 10)}T00:00:00Z`)) / 864e5);
   return d >= 0 ? d : clock.days;
 }
-function arrivalHtml(clock, sighting, language, info, fmt = (d) => d) {
+function arrivalHtml(clock, sighting, language, info, fmt = (d) => d, later = []) {
   if (!sighting) return clockHtml(clock, language, info);
   if (clock && String(clock.platform).toLowerCase() === String(sighting.platform).toLowerCase()) clock = { ...clock, days: daysToSighting(clock, sighting) };
   const e = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -135,12 +136,15 @@ function arrivalHtml(clock, sighting, language, info, fmt = (d) => d) {
   const when = `${WEEKDAY[new Date(`${sighting.day}T00:00:00Z`).getUTCDay()]} ${e(fmt(sighting.day))}, ${e(sighting.part)}`;
   const same = clock && clock.platform && sighting.platform && String(clock.platform).toLowerCase() === String(sighting.platform).toLowerCase();
   const usual = clock && info && language
-    ? ` ${e(language)} films usually take ${info.lo}–${info.hi} weeks (${info.hit} of ${info.n} ${info.src === "ours" ? "we measured" : "in TMDB's records"}).`
+    ? ` ${e(language)} films usually take ${info.lo}–${info.hi} weeks.`
     : "";
   const lead = clock
     ? `<b style="color:var(--ink)">Reached ${e(clock.platform)} ${clock.days} day${clock.days === 1 ? "" : "s"} after cinemas.</b> ${same ? "We spotted it there" : `We spotted it on ${e(sighting.platform)}`} on ${when}.`
     : `<b style="color:var(--ink)">Spotted on ${e(sighting.platform)} on ${when}.</b>`;
-  return `<p class="wclock" style="font-size:13.5px;color:var(--mute);margin:8px 0 0;line-height:1.5">${lead}${usual}</p>`;
+  // Later platforms (rollout "platform-history", lib/dated.js laterSightingsFor), oldest first.
+  const more = (later || []).map((s) => `${e(s.platform)} on ${WEEKDAY[new Date(`${s.day}T00:00:00Z`).getUTCDay()]} ${e(fmt(s.day))}`);
+  const also = more.length ? ` Later also spotted on ${more.length > 1 ? `${more.slice(0, -1).join(", ")} and ${more[more.length - 1]}` : more[0]}.` : "";
+  return `<p class="wclock" style="font-size:13.5px;color:var(--mute);margin:8px 0 0;line-height:1.5">${lead}${also}${usual}</p>`;
 }
 
 module.exports = { INDIAN, MIN_FILMS, WINDOWS_FILE, arrivalHtml, clockFor, clockHtml, daysToSighting, computeWindows, rangeFor, refreshWindows, useClocks };

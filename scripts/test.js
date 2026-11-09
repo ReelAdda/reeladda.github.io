@@ -510,6 +510,47 @@ test("faq-trim on frozen pages: the block goes where the page answers it, the OT
   assert.ok(src.indexOf("applyFaqTrim(filmPageFiles())") > src.indexOf("applyDarkBar(filmPageFiles())") && src.indexOf("applyFaqTrim(filmPageFiles())") < src.indexOf("finishFilmPages(filmPageFiles()"));
 });
 
+test("depth facts: Elsewhere, readers, stars and box office say only what the data holds (9 Nov 2026)", () => {
+  const D = require("./lib/depth.js");
+  // Elsewhere: other editions' platforms, most countries first, and dates that differ, for a recent film.
+  const e = (code, providers, released = "2026-10-23") => ({ code, slug: "clayface", kind: "movie", tmdbId: 9, providers, released });
+  D.useElsewhere([e("in", ["Netflix"], "2026-10-23"), e("us", ["Netflix"]), e("uk", ["Netflix"], "2026-10-19"), e("au", ["Netflix"], "2026-10-22"),
+    e("ca", ["Netflix"]), e("de", ["Prime Video"], "2026-10-22"), e("jp", [], "2026-10-30")]);
+  const item = { slug: "clayface", kind: "movie", tmdbId: 9, released: "2026-10-23" };
+  const line = D.elsewhereHtml("in", item, { today: "2026-11-09" });
+  assert.ok(line.includes("Netflix in the US, the UK, Australia and 1 more") && line.includes("Prime Video in Germany"), line);
+  assert.ok(line.includes("out in the UK on 2026-10-19, Australia on 2026-10-22, Germany on 2026-10-22 and 1 more country"), line);
+  assert.ok(!D.elsewhereHtml("in", item, { today: "2027-03-01" }).includes("out in"), "an older film: platforms only");
+  assert.strictEqual(D.elsewhereHtml("in", { ...item, tmdbId: 10 }), "", "no other edition: nothing");
+  D.useElsewhere(null);
+  // Readers: nothing under 50 votes.
+  D.useVotes({ "movie-1": { up: 39, down: 11 }, "movie-2": { up: 9, down: 1 } });
+  assert.strictEqual(D.readersClause({ kind: "movie", tmdbId: 1 }), " · <b>Readers:</b> 78% say worth it (50 votes)");
+  assert.strictEqual(D.readersClause({ kind: "movie", tmdbId: 2 }), "");
+  D.useVotes(null);
+  // Stars: two or more stated, median.
+  assert.strictEqual(D.starsLine([{ u: "a", s: 3 }, { u: "b", s: 4 }, { u: "c" }, { u: "d", s: 3.5 }]).replace(/<[^>]+>/g, ""), "3 of 4 reviews gave stars: median 3.5 out of 5");
+  assert.strictEqual(D.starsLine([{ u: "a", s: 3 }, { u: "b" }]), "", "one star is already on its row");
+  // Box office: the figure a verb of earning governs, as stated; never a budget.
+  assert.strictEqual(D.grossFromLead("The film grossed over ₹142 crore worldwide, becoming a hit."), "over ₹142 crore worldwide");
+  assert.strictEqual(D.grossFromLead("Made on a budget of ₹50 crore, it earned $12.4 million in North America."), "$12.4 million in North America");
+  assert.strictEqual(D.grossFromLead("Made on a budget of ₹50 crore, it was a flop."), null);
+  assert.strictEqual(D.grossFromLead("It has grossed $109 million worldwide."), "$109 million worldwide", "a currency sign straight after the verb (Clayface)");
+  assert.strictEqual(D.grossFromLead("Focus Features acquired the rights for $14–15 million."), null, "a rights deal is not a gross");
+  assert.strictEqual(D.grossFromLead("It became the highest-grossing Tamil film of the year."), null, "no figure: nothing");
+  assert.ok(D.grossRow({ gross: { t: "over ₹142 crore worldwide", at: "2026-11-08", article: "Jawan (film)" } }).includes("https://en.wikipedia.org/wiki/Jawan_(film)"));
+  // The arrival line names later platforms the page still lists.
+  const Dd = require("./lib/dated.js");
+  Dd.useSightings([{ c: "in", k: "movie", id: 5, p: "Prime Video", first: "2026-10-01", rel: "2026-09-01", seen: "2026-10-01T06:00:00Z" },
+    { c: "in", k: "movie", id: 5, p: "Netflix", first: "2026-12-02", rel: "2026-09-01", seen: "2026-12-02T06:00:00Z" },
+    { c: "in", k: "movie", id: 5, p: "Zee5", first: "2026-12-05", rel: "2026-09-01", seen: "2026-12-05T06:00:00Z" }]);
+  const later = Dd.laterSightingsFor("in", { kind: "movie", tmdbId: 5 }, ["Prime Video", "Netflix"]);
+  assert.deepStrictEqual(later.map((s) => s.platform), ["Netflix"], "Zee5 isn't listed any more: not named");
+  const W = require("./lib/windows.js");
+  assert.ok(W.arrivalHtml(null, Dd.sightingFor("in", { kind: "movie", tmdbId: 5 }), "Hindi", null, (d) => d, later).includes("Later also spotted on Netflix on Wednesday 2026-12-02."));
+  Dd.useSightings(null);
+});
+
 test("the build checks every rendered list row against the film page it links to (9 Nov 2026)", () => {
   const A = require("./lib/audit.js");
   const pill = (t) => `<span class="vpill vp-early"><svg class="vmark"><circle/></svg>${t}</span>`;
@@ -687,7 +728,7 @@ test("the arrival log: by day, the part of the day we spotted it, never a clock 
 test("the window clock on film pages: only a measured arrival, outside the facts block (step 5)", () => {
   const W = require("./lib/windows.js"), V2 = require("./lib/pagev2.js");
   const line = W.clockHtml({ days: 56, platform: "Netflix" }, "Hindi", { lo: 8, hi: 10, n: 160, hit: 98, src: "tmdb" });
-  assert.ok(line.includes("Reached Netflix 56 days after cinemas.") && line.includes("Hindi films usually take 8–10 weeks (98 of 160 in TMDB's records)."));
+  assert.ok(line.includes("Reached Netflix 56 days after cinemas.") && line.includes("Hindi films usually take 8–10 weeks.") && !/ of 160|we measured|TMDB's records/.test(line), line);
   assert.ok(W.clockHtml({ days: 30, platform: "Prime Video" }, "Swahili", null).endsWith("after cinemas.</b></p>"), "no range: the days alone");
   assert.strictEqual(W.clockHtml(null, "Hindi", null), "");
   const where = (clock) => V2.v3Where({ title: "T", providers: ["Netflix"], language: "Hindi", windowClock: clock }, { relState: "released", country: "India", V: { word: "OTT" }, asOf: "2026-11-08" });
