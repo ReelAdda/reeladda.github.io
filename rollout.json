@@ -145,13 +145,49 @@
   },
   "arrival-record": {
    "percent": 0,
+   "schedule": [
+    {
+     "from": "2026-11-10T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-11T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-12T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-13T00:00",
+     "percent": 100
+    }
+   ],
    "since": "2026-11-09",
-   "what": "the arrival record on film pages (lib/dated.js useSightings, lib/windows.js arrivalHtml): 'Reached Prime Video 28 days after cinemas. We spotted it there on Thursday 16 Oct, in the morning.' Live sightings only (written within a day of the first date), the part of the day and never a time; the Good to know 'OTT arrival' row goes where the line says the same. Mock-up first; frozen pages need a pass before this goes past 0."
+   "what": "the arrival record on film pages (lib/dated.js useSightings, lib/windows.js arrivalHtml): 'Reached Prime Video 29 days after cinemas. We spotted it there on Saturday 7 Nov, overnight.' Live sightings only (written within a day of the first date; not the archive's first day; not a title out two years before), the part of the day and never a time, the days counted to the day shown; the Good to know 'OTT arrival' row goes where the line says the same. Approved by the owner after the 9 Nov mock-ups; 10/25/50/100% on 10–13 Nov. Every edition draws its film pages from facts through the builder (facts-mode.json), so frozen pages get it on their next render; a page still frozen keeps its present, consistent text. Not in the facts fingerprint: no sitemap date moves."
   },
   "review-block": {
    "percent": 0,
+   "schedule": [
+    {
+     "from": "2026-11-10T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-11T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-12T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-13T00:00",
+     "percent": 100
+    }
+   ],
    "since": "2026-11-09",
-   "what": "published reviews as their own block under the score card (lib/filmpage.js reviewBlockHtml): outlet, date, the outlet's headline, newest first; the card keeps the count only, so nothing is said twice. Mock-up first; the score sweep must keep the count-only sentence on pages with the block before this goes past 0."
+   "what": "published reviews as their own block under the score card (lib/filmpage.js reviewBlockHtml): outlet, date, the outlet's headline, a star rating only where the feed gave one, newest first; the card keeps the count, so nothing is said twice. Approved by the owner after the 9 Nov mock-ups; 10/25/50/100% on 10–13 Nov. Every edition draws its film pages from facts through the builder (facts-mode.json), so frozen pages get it on their next render; a page still frozen keeps its present, consistent text. Not in the facts fingerprint: no sitemap date moves."
   },
   "faq-trim": {
    "percent": 0,
@@ -178,8 +214,26 @@
   },
   "platform-lines": {
    "percent": 0,
+   "schedule": [
+    {
+     "from": "2026-11-10T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-11T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-12T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-13T00:00",
+     "percent": 100
+    }
+   ],
    "since": "2026-11-09",
-   "what": "Streaming on <platform> pages (lib/evergreen.js sectionFacts, spottedRow): one line of counts per section, and 'Spotted here on <date>' on titles with a live sighting in the last 30 days. By canonical URL; these pages are rebuilt every run."
+   "what": "Streaming on <platform> pages (lib/evergreen.js sectionFacts, spottedRow): one line of counts per section, and 'Spotted here on <date>' on titles with a live sighting on that platform in the last 30 days. By canonical URL; these pages are rebuilt every run. Approved by the owner after the 9 Nov mock-ups; 10/25/50/100% on 10–13 Nov. Every edition draws its film pages from facts through the builder (facts-mode.json), so frozen pages get it on their next render; a page still frozen keeps its present, consistent text. Not in the facts fingerprint: no sitemap date moves."
   }
  }
 }
