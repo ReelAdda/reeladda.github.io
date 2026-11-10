@@ -166,6 +166,39 @@ function seriesDescription(item, fmt, today = new Date().toISOString().slice(0, 
   return `${item.title}: all ${ep.count} episode${ep.count === 1 ? "" : "s"} with dates. ${nd.label} out ${fmt(nd.date)}${finale}${whose}.${verdict}`;
 }
 
+// A list longer than this is a daily or long-running show: the page lists its latest episodes.
+const LONG_LIST = 100;
+const LATEST_SHOWN = 30;
+// Pure: the latest LATEST_SHOWN episodes of a list, in list order.
+function latestEpisodes(list) {
+  const l = list || [];
+  if (l.length <= LATEST_SHOWN) return l;
+  const keep = new Set(l.map((x, i) => [x.date || "", i]).sort((a, b) => a[0].localeCompare(b[0]) || a[1] - b[1])
+    .slice(-LATEST_SHOWN).map(([, i]) => i));
+  return l.filter((_, i) => keep.has(i));
+}
+
+// Pure: the Episodes header's "n of count out" (repair sprint, 10 Nov 2026), or null when the page
+// can't say it truthfully. The count is the listed season's when one season is listed, never the
+// whole show's ("0 of 42 out" on Stranger Things: 42 episodes across five seasons, none listed).
+// No list, a long-running show's list, or a show with an episode still to come: no "finale".
+function episodeProgress(ep, today) {
+  const list = (ep && ep.list) || [];
+  if (!list.length || list.length > LONG_LIST) return null;
+  const of = ep.seasons > 1 && ep.season ? list.length : ep.count;
+  if (!of) return null;
+  const dated = list.filter((x) => x.date);
+  const out = dated.filter((x) => x.date <= today).length;
+  const last = dated.map((x) => x.date).sort().pop();
+  // An episode still to come that the list doesn't hold (TMDB's next episode often names one the
+  // list already shows as out: The Assassin, 6 Nov 2026; that one doesn't count).
+  const n = ep.next;
+  const more = !!(n && n.date && !list.some((x) => x.e === n.e && (n.s || 1) === (ep.season || 1)));
+  const done = dated.length === of && out === of && !more;
+  if (out === of && !done) return null; // all listed episodes out but more to come: no count to give
+  return { of, out, done, last: done ? last : null };
+}
+
 // Pure: the "Episodes" section (series only). `fmt(date)` formats a date for the edition.
 function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10), { v2 = false } = {}) {
   const ep = item && item.kind === "tv" && item.episodes;
@@ -177,8 +210,12 @@ function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10), 
   // With no episode list, the next episode is said in words (the answer card says it too).
   const next = !(ep.list || []).length && ep.next && ep.next.date >= today
     ? `<p class="epnext"><b>Next episode:</b> ${ep.next.s > 1 || ep.seasons > 1 ? `S${ep.next.s} ` : ""}E${ep.next.e}${ep.next.name ? ` — ${e(ep.next.name)}` : ""}, ${e(fmt(ep.next.date))}</p>` : "";
-  // A timeline: aired episodes filled, the next one marked, the rest outlined.
-  const items = (ep.list || []).map((x) => {
+  // A timeline: aired episodes filled, the next one marked, the rest outlined. A daily soap's list
+  // runs to thousands of rows (Anupamaa, Nov 2026: 1,986 rows, 719 KB), so a long list shows its
+  // latest episodes only.
+  const long = (ep.list || []).length > LONG_LIST;
+  const shown = long ? latestEpisodes(ep.list) : (ep.list || []);
+  const items = shown.map((x) => {
     const state = nextNos.has(x.e) ? "next" : x.date && x.date <= today ? "out" : "soon";
     // Episodes released the same day: said once, on the first of them ("double drop with E6").
     const sameDay = x.date ? (ep.list || []).filter((y) => y.date === x.date).map((y) => y.e).sort((a, b) => a - b) : [];
@@ -190,17 +227,15 @@ function episodesHtml(item, fmt, today = new Date().toISOString().slice(0, 10), 
   const cadence = releaseCadence(ep, fmt);
   // The episode stars are TMDB viewers' ratings, said once for the list (8 Nov 2026).
   const rated = (ep.list || []).some((x) => x.rating);
-  const intro = `<p>${e(summary)}${ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : ""} · original air dates${rated ? " · episode ratings from TMDB" : ""}</p>`;
-  // v2 (lib/pagev2.js): "n of count out" with a progress bar while the season runs; a finished
-  // series says so with its finale date and has neither.
+  const below = long ? ` · latest ${shown.length} below` : ep.season && ep.seasons > 1 ? ` · season ${ep.season} below` : "";
+  const intro = `<p>${e(summary)}${below} · original air dates${rated ? " · episode ratings from TMDB" : ""}</p>`;
   let head = `<h2>Episodes</h2>`;
-  if (v2) {
-    const dated = (ep.list || []).filter((x) => x.date);
-    const out = dated.filter((x) => x.date <= today).length;
-    const last = dated.map((x) => x.date).sort().pop();
-    const done = dated.length === ep.count && out === ep.count;
-    head = `<div class="ephead"><h2>Episodes</h2><span class="lbl">${done ? `All ${ep.count} episode${ep.count === 1 ? "" : "s"} out${last ? ` · finale ${e(fmt(last))}` : ""}` : `${out} of ${ep.count} out`}</span></div>`
-      + (done ? "" : `<div class="epbar"><i data-pct="${Math.round(100 * out / ep.count)}"></i></div>`);
+  const label = v2 ? episodeProgress(ep, today) : null;
+  if (label) {
+    head = `<div class="ephead"><h2>Episodes</h2><span class="lbl">${label.done
+      ? `All ${label.of} episode${label.of === 1 ? "" : "s"} out${label.last ? ` · finale ${e(fmt(label.last))}` : ""}`
+      : `${label.out} of ${label.of} out`}</span></div>`
+      + (label.done ? "" : `<div class="epbar"><i data-pct="${Math.round(100 * label.out / label.of)}"></i></div>`);
   }
   return head + intro + next
     + (items ? `<ol class="eplist">${items}</ol>` : "") + (cadence ? `<p class="epcadence">${e(cadence)}</p>` : "");
@@ -246,7 +281,7 @@ function episodeSchema(ep) {
     "@type": "TVSeason",
     seasonNumber: ep.season || 1,
     numberOfEpisodes: ep.seasons > 1 && ep.season ? list.length : ep.count || list.length,
-    episode: list.map((x) => ({ "@type": "TVEpisode", episodeNumber: x.e, name: x.name || `Episode ${x.e}`, datePublished: x.date || undefined,
+    episode: (list.length > LONG_LIST ? latestEpisodes(list) : list).map((x) => ({ "@type": "TVEpisode", episodeNumber: x.e, name: x.name || `Episode ${x.e}`, datePublished: x.date || undefined,
       ...(x.runtime ? { timeRequired: `PT${Math.round(x.runtime)}M` } : {}) })),
   }];
 }
@@ -368,5 +403,5 @@ async function sweepSeries(manifest, { budget = 300, tmdb, queueFacts, hidden = 
   return res;
 }
 
-module.exports = { EP_MIN_VOTES, FRANCHISE_KEYWORD, fitFromData, nextDrop, seriesDescription, sweepSeries, SERIES_SWEEP_VERSION, episodeFaqs, episodesFrom, episodesHtml, episodeSchema, releaseCadence, franchiseFrom, franchiseSiblings,
+module.exports = { EP_MIN_VOTES, episodeProgress, latestEpisodes, LONG_LIST, FRANCHISE_KEYWORD, fitFromData, nextDrop, seriesDescription, sweepSeries, SERIES_SWEEP_VERSION, episodeFaqs, episodesFrom, episodesHtml, episodeSchema, releaseCadence, franchiseFrom, franchiseSiblings,
   readSeriesMark, seasonToFetch, seriesFactsFor, seriesKnowRows, seriesMark, seriesName, seriesSweepDue, universeName };

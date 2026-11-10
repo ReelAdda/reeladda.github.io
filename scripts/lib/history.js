@@ -289,7 +289,11 @@ function windowStats(records, { code = null } = {}) {
   };
   return {
     total: rows.length,                       // films that opened in cinemas, tracked
-    measured: withWindow.length,              // ...whose arrival we actually observed
+    measured: withWindow.length,              // ...whose arrival we actually observed (a film once per country)
+    // Distinct films and countries behind `measured` (repair sprint, 10 Nov 2026: the Data page
+    // called 139 film-and-country windows "139 films in 18 countries"; they were 76 films in 17).
+    films: new Set(withWindow.map((x) => `${x.r.k}:${x.r.id}`)).size,
+    countries: new Set(withWindow.map((x) => x.r.c)).size,
     overall: median(withWindow.map((x) => x.d)),
     byLanguage: by((r) => r.lang),
     byPlatform: by((r) => r.p),

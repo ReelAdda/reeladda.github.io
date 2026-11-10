@@ -595,6 +595,33 @@ test("episode guide: one source decides 'Next' and 'out' (The Assassin, 6 Nov 20
   assert.strictEqual(S.nextDrop({ ...ep, list: [] }, "2026-11-06").date, "2026-11-06");
 });
 
+test("episodes header: no '0 of N out', no finale on a running soap (repair sprint, 10 Nov 2026)", () => {
+  const S = require("./lib/series.js");
+  const f = (d) => d;
+  // Stranger Things: 42 episodes across five seasons, no list → no count at all.
+  const st = S.episodesHtml({ kind: "tv", episodes: { count: 42, seasons: 5, season: null, next: null, list: [] } }, f, "2026-11-10", { v2: true });
+  assert.ok(!/ of 42 out/.test(st) && !/epbar/.test(st) && /<h2>Episodes<\/h2>/.test(st), st);
+  // One season of several listed: the season's count, not the show's.
+  const s2 = { count: 20, seasons: 2, season: 2, next: null, list: [1, 2, 3, 4].map((e) => ({ e, date: e <= 2 ? "2026-11-01" : "2026-11-20" })) };
+  assert.ok(/<span class="lbl">2 of 4 out<\/span>/.test(S.episodesHtml({ kind: "tv", episodes: s2 }, f, "2026-11-10", { v2: true })));
+  // Anupamaa: a daily soap with 1,986 listed episodes and more to come → latest 30, no finale.
+  const list = Array.from({ length: 1986 }, (_, i) => ({ e: i + 1, date: new Date(Date.parse("2021-01-01") + i * 864e5).toISOString().slice(0, 10) }));
+  const soap = { count: 1986, seasons: 1, season: 1, next: { s: 1, e: 2184, date: "2026-10-27" }, list };
+  const html = S.episodesHtml({ kind: "tv", episodes: soap }, f, "2026-11-10", { v2: true });
+  assert.ok(!/finale/.test(html) && !/All 1986/.test(html), "no finale for a running soap");
+  assert.strictEqual((html.match(/<li /g) || []).length, 30, "latest 30 listed");
+  assert.ok(/<span class="epn">1986<\/span>/.test(html) && !/<span class="epn">1<\/span>/.test(html), "the latest ones");
+  assert.ok(/latest 30 below/.test(html));
+  assert.strictEqual(S.episodeSchema(soap)[0].episode.length, 30, "structured data capped too");
+  // A finished short season still says so.
+  const done = { count: 3, seasons: 1, season: 1, next: null, list: [1, 2, 3].map((e) => ({ e, date: "2026-10-01" })) };
+  assert.ok(/All 3 episodes out · finale 2026-10-01/.test(S.episodesHtml({ kind: "tv", episodes: done }, f, "2026-11-10", { v2: true })));
+  // All listed out but TMDB names a later episode the list lacks: no count, no finale.
+  const more = { ...done, next: { s: 1, e: 4, date: "2026-11-20" } };
+  const mh = S.episodesHtml({ kind: "tv", episodes: more }, f, "2026-11-10", { v2: true });
+  assert.ok(!/finale/.test(mh) && !/ of 3 out/.test(mh), mh);
+});
+
 test("wording: counts of one in the singular, one 'the', one full stop (6 Nov 2026 scan)", () => {
   const S = require("./lib/series.js"), RC = require("./lib/reception.js"), A = require("./lib/audit.js");
   // "All 1 episodes out" and "all 1 episodes with dates"
@@ -1491,7 +1518,7 @@ test("Coming to OTT: announced dates only, grouped by week, soonest first", () =
   assert.deepStrictEqual(items.map((x) => x.slug), ["a", "b", "e"], "past dates, streaming titles and live claims are excluded");
   const html = U.buildComingPage(items, A_IN);
   assert.ok(/Streaming from [^<]* on Netflix/.test(html));
-  assert.ok(/never estimates|Estimates are never listed/.test(html));
+  assert.ok(/never our estimates|never list our own estimates/.test(html) && !/Nothing here is a guess|announced by the platform or studio/.test(html), "says the dates are TMDB's, not platform-confirmed (10 Nov 2026)");
   const title = (/<title>([^<]*)/.exec(html) || [])[1];
   assert.ok(/^Upcoming OTT Releases in India/.test(title) && title.replace(/&amp;/g, "&").length <= 60, title);
 });
@@ -2467,6 +2494,57 @@ test("1 · the due pass reaches run-ended pages and old fallback descriptions ev
   const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "lifecycle.js"), "utf8");
   assert.ok(/OPEN_PILL_RE\.test\(html\) \|\| RUN_ENDED_PILL_RE\.test\(html\) \|\| OLD_FALLBACK_DESC_RE\.test\(html\)/.test(src));
 });
+test("repair sprint (10 Nov 2026): FAQ answers that deny the page's date go; UAE title rule; no cut-off sentence", () => {
+  const F = require("./lib/filmpage.js"), H = require("./lib/honest.js");
+  const det = (q, a) => `<details><summary>${q}</summary><p>${a}</p></details>`;
+  const faq = (body) => `\n  <h2>Frequently asked</h2><div class="faq">${body}</div>`;
+  const page = (marker, body) => `<h1>Haiwaan</h1>${marker}<p>body</p>${faq(body)}<footer></footer>`;
+  const worth = det("Is Haiwaan worth watching?", "Not enough ratings yet.");
+  const where = det("Where can I watch Haiwaan?", "It opened in theatres. We haven&#39;t seen an announced OTT release date yet. Check back soon.");
+  const when = det("When is Haiwaan releasing on OTT? (OTT release date)", "We haven&#39;t found an announced OTT release date for Haiwaan yet. … around November 2026.");
+  const agrees = det("When is Jailer 2 releasing on OTT? (OTT release date)", "Jailer 2 is scheduled to start streaming on Prime Video in India on 12 Nov 2026.");
+  const dated = page("<!--SW:pending--><!--SW:digital=2026-11-06|Sony LIV-->", worth + where + when + agrees);
+  const out = F.faqDateConflictPage(dated);
+  assert.ok(/worth watching/.test(out) && /scheduled to start streaming on Prime Video/.test(out), "answers that agree stay");
+  assert.ok(!/haven&#39;t (?:seen|found) an announced/.test(out) && !/around November 2026/.test(out), "answers that deny the date go");
+  assert.strictEqual(F.faqDateConflictPage(out), out, "idempotent");
+  assert.strictEqual(F.faqDateConflictPage(page("<!--SW:pending-->", where)), page("<!--SW:pending-->", where), "no date on the page: left alone");
+  assert.ok(!/Frequently asked/.test(F.faqDateConflictPage(page("<!--SW:digital=2026-11-06|-->", where + when))), "an emptied block goes with its heading");
+  // UAE titles carry the country, which the old title rules missed (31 pages).
+  assert.strictEqual(H.honestWording("<title>Aasha (2026) OTT Release Date in the UAE: Not Announced Yet</title>"), "<title>Aasha (2026) OTT Release Date in the UAE: Awaiting Date</title>");
+  assert.strictEqual(H.plainWording("<title>Aasha (2026) OTT Release Date in the UAE: Awaiting Date</title>"), "<title>Aasha (2026) OTT Release Date in the UAE: Not Announced Yet</title>");
+  // The plain-wording OTT paragraph ends its sentence and closes its paragraph (7 Dogs, 464 pages).
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "filmpage.js"), "utf8");
+  assert.ok(!/No platform has announced`/.test(src), "no paragraph that stops at 'No platform has announced'");
+});
+
+test("ad-supported tiers: the services offering a title free or with ads only (I'm Game, 10 Nov 2026)", () => {
+  const R = require("./lib/rules.js");
+  const P = (...n) => n.map((provider_name) => ({ provider_name }));
+  assert.deepStrictEqual(R.adTierProviders({ ads: P("JioHotstar") }), ["JioHotstar"], "I'm Game in India: ads only");
+  assert.deepStrictEqual(R.adTierProviders({ flatrate: P("JioHotstar"), ads: P("JioHotstar") }), [], "on subscription too: not an ad-tier-only title");
+  assert.deepStrictEqual(R.adTierProviders({ free: P("MX Player"), ads: P("Zee5", "Zee5") }), ["MX Player", "Zee5"]);
+  assert.deepStrictEqual(R.adTierProviders(undefined), []);
+});
+
+test("alert button: in the OTT section of a waiting page only, stripped without a key (10 Nov 2026)", () => {
+  const F = require("./lib/filmpage.js");
+  const KEY = "B" + "a".repeat(86);
+  const page = (code, block) => `<head><meta property="og:image" content="https://image.tmdb.org/t/p/w342/x.jpg"></head><h1>Haiwaan (2026)</h1>${block}`
+    + `<div class="fcvote" data-film="movie-1475799" data-c="${code}" hidden></div>`;
+  const waiting = page("in", "<!--SW:pending--><h2>When is Haiwaan coming to OTT?</h2><p>Not yet.</p><!--/SW:pending-->");
+  const on = F.alertButtonPage(waiting, "haiwaan", KEY);
+  assert.ok(/<p>Not yet\.<\/p><div class="fcalert" [^>]*data-film="movie-1475799" data-c="in" data-title="Haiwaan" data-slug="haiwaan"[^>]*hidden/.test(on), on);
+  assert.ok(/Tell me when it&#39;s on OTT|Tell me when it's on OTT/.test(on) && /<script src="\/js\/alert\.js" defer><\/script><!--\/SW:pending-->/.test(on), "inside the section, so the arrival sweep removes it");
+  assert.strictEqual(F.alertButtonPage(on, "haiwaan", KEY), on, "idempotent");
+  assert.strictEqual(F.alertButtonPage(on, "haiwaan", ""), waiting, "no key: stripped");
+  assert.ok(/Tell me when it(?:&#39;|')s streaming/.test(F.alertButtonPage(page("uk", "<!--SW:pending--><p>x</p><!--/SW:pending-->"), "haiwaan", KEY)), "streaming wording outside India and the UAE");
+  const streaming = page("in", "<!--SW:stream--><p>On Netflix</p><!--/SW:stream-->");
+  assert.strictEqual(F.alertButtonPage(streaming, "haiwaan", KEY), streaming, "a streaming page gets no button");
+  const js = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "alert.js"), "utf8");
+  assert.ok(/filmychill-wl/.test(js) && /mapValue: \{ fields: films\(\) \}/.test(js), "writes every saved film, as the homepage does");
+});
+
 test("2 · an announced streaming date that passed: honest block, FAQ, title and description", () => {
   const L = require("./lib/lifecycle.js");
   const P = require("./lib/pagekit.js");
@@ -2483,7 +2561,7 @@ test("2 · an announced streaming date that passed: honest block, FAQ, title and
   assert.strictEqual(L.patchDigitalIfPassed(html.replace(date, trustDaysAgo(-3)), { title: "Unit", countryName: "India", cfg: TRUST_IN }).changed, false, "a date still ahead is left alone");
   const item = { title: "Unit", kind: "movie", language: "Malayalam", released: trustDaysAgo(60), platform: "Theatres", digitalDate: date, digitalNote: "Jio Hotstar", providers: [] };
   assert.ok(P.digitalPassed(item) && !P.digitalUpcoming(item));
-  assert.ok(/^Unit \(\d{4}\) OTT Release Date: .+ on JioHotstar$/.test(U.filmTitleTag(item, TRUST_IN)), "the announced date stays in the title, not 'Not Announced Yet'");
+  assert.ok(/^Unit \(\d{4}\) OTT Release Date: Was Due .+, Not on OTT Yet$/.test(U.filmTitleTag(item, TRUST_IN)), "a passed date says so in the title, as the body does (10 Nov 2026): " + U.filmTitleTag(item, TRUST_IN));
   const dd = U.filmMetaDescription(item, TRUST_IN);
   assert.ok(/^Unit \(\d{4}\) was due to stream on JioHotstar in India from .+ but isn't showing yet\. We check twice a day/.test(dd) && dd.length <= 155, dd);
   const page = U.buildFilmPage({ ...item, slug: "unit" }, trustDaysAgo(0), new Set(), TRUST_IN);
@@ -5921,9 +5999,9 @@ test("data page states sample size and refuses to invent a median", () => {
     _film({ p: "Netflix", lang: "Tamil", first: "2026-02-05" }),
     _film({ p: "Netflix", lang: "Tamil", first: "2026-02-09" }),
   ], "26 August 2026", { inCinemas: 7 });
-  assert.ok(/Films<\/th>/.test(withData), "sample size is published next to every median");
+  assert.ok(/Arrivals<\/th>/.test(withData), "sample size is published next to every median");
   assert.ok(/attribution/i.test(withData), "reuse terms are stated");
-  assert.ok(/across 3 films we saw arrive/.test(withData) && /7 more films are in cinemas now/.test(withData), "measured count and films still in cinemas, each labelled");
+  assert.ok(/across 3 arrivals we saw ourselves/.test(withData) && /7 more films are in cinemas now/.test(withData), "measured count and films still in cinemas, each labelled");
   assert.ok(/Which number to quote/.test(withData) && /This is the headline figure/.test(withData), "the page says which figure to quote");
   assert.ok(/Cite as:/.test(withData), "a citation line");
   assert.ok(/Correction, 4 October 2026/.test(withData), "the old figure's flaw is stated, not buried");
@@ -7758,9 +7836,14 @@ test("data page: every table's rows plus its small-group line add up to the tota
   for (let i = 0; i < 4; i++) recs.push(mk(i, "English", "Netflix"));
   for (let i = 4; i < 6; i++) recs.push(mk(i, "Korean", "Viu"));
   const html = U.buildDataPage(recs, "5 November 2026", { inCinemas: 2 });
-  assert.ok(/across 6 films we saw arrive/.test(html), "6 measured");
-  assert.ok(/<td>English<\/td><td class="n">\d+<\/td><td class="n">4<\/td>/.test(html) && /plus 2 films in languages with fewer than 3 films/.test(html), "4 in a row + 2 in the line = 6");
-  assert.ok(/plus 2 films in platforms with fewer than 3 films/.test(html), "the platform table too");
+  assert.ok(/across 6 arrivals we saw ourselves: 6 films in 1 country,/.test(html), "6 measured");
+  // One film seen in three countries is three arrivals but one film (10 Nov 2026: "139 films in 18
+  // countries" were 76 films in 17).
+  const multi = ["us", "uk", "in"].flatMap((c) => [{ c, k: "tv", id: 1, first: "2026-08-01", lang: "English", p: "Netflix", seen: "2026-08-01T00:00:00Z" },
+    { c, k: "movie", id: 9, th: "2026-09-01", first: "2026-10-01", lang: "English", p: "Netflix", seen: "2026-10-01T00:00:00Z" }]);
+  assert.ok(/the median of 3 moves from cinema to streaming that FilmyChill saw itself[^:]*: 1 film in 3 countries/.test(U.buildDataPage(multi, "10 November 2026")), "distinct films and countries");
+  assert.ok(/<td>English<\/td><td class="n">\d+<\/td><td class="n">4<\/td>/.test(html) && /plus 2 arrivals in languages with fewer than 3 arrivals/.test(html), "4 in a row + 2 in the line = 6");
+  assert.ok(/plus 2 arrivals in platforms with fewer than 3 arrivals/.test(html), "the platform table too");
   assert.ok(!/plus 0 film/.test(html), "no empty line");
   const IND2 = require("./lib/indiadata.js");
   assert.deepStrictEqual(["ZEE5", "Zee5", "Hotstar", "Disney+ Hotstar", "Amazon Prime Video", "Prime Video", "", "Sony Liv"].map(IND2.platformOf), ["ZEE5", "ZEE5", "JioHotstar", "JioHotstar", "Prime Video", "Prime Video", null, "Sony LIV"], "one name per service");

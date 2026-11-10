@@ -2571,7 +2571,9 @@ async function main() {
         check: async (rec) => {
           const d = await tmdb(`/movie/${rec.id}/watch/providers`);
           const wp = (d && d.results && d.results[regionOf(rec.c)]) || {};
-          return (wp.flatrate || []).map((p) => p.provider_name);
+          // The same lists the probe logs a sighting from (scripts/probe.js: subscription and free),
+          // so a free-tier sighting isn't overturned for lacking a subscription (10 Nov 2026).
+          return [...(wp.flatrate || []), ...(wp.free || [])].map((p) => p.provider_name);
         },
         pause: () => sleep(120),
       });
@@ -2993,6 +2995,20 @@ async function main() {
       const t = applyLeanTrim(filmPageFiles());
       if (t.changed) console.log(`Lean pages: ${t.changed} "not streaming yet" lead(s) trimmed`);
     } catch (e) { stageFailed("lean trim", e); }
+    // FAQ answers that say no date is known, on pages whose OTT section gives one (repair sprint,
+    // 10 Nov 2026; lib/filmpage.js faqDateConflictPage). After honest wording, the last FAQ writer.
+    try {
+      const fc = require("./lib/filmpage.js").applyFaqDateConflicts(filmPageFiles());
+      console.log(`FAQ date conflicts: ${fc.changed} page(s) cleared of a "no date" answer`);
+    } catch (e) { stageFailed("faq date conflicts", e, { optional: true }); }
+    // "Tell me when it's streaming" in the OTT section of waiting film pages (rollout
+    // "alert-button", lib/filmpage.js alertButtonPage). Needs the arrival alerts switched on and
+    // the push key; without them every button is stripped.
+    try {
+      const AL = require("./lib/alerts.js");
+      const ab = require("./lib/filmpage.js").applyAlertButton(filmPageFiles(), { key: AL.alertsEnabled() ? AL.publicKey() : "" });
+      console.log(`Alert button: on ${ab.shown} waiting film page(s), ${ab.changed} updated this run`);
+    } catch (e) { stageFailed("alert button", e, { optional: true }); }
     // The score card's method link moves into the card and the sentence under it goes (rollout
     // "score-link", lib/filmpage.js scoreLink): every film page, hidden ones included.
     try {

@@ -44,6 +44,17 @@ function toggleSave(listKey, i) {
 }
 function updateWLCount() { document.getElementById('wlCount').textContent = loadWL().length; }
 function toggleMyList() {
+  // Nothing saved: say so, and leave the lists alone. It used to blank both lists and scroll to a
+  // section that stays hidden while the list is empty (repair sprint, 10 Nov 2026).
+  if (!myListOnly && !loadWL().length) {
+    const bar = document.getElementById('personalBar');
+    if (bar && !document.getElementById('wlEmptyNote')) {
+      bar.insertAdjacentHTML('beforeend', '<div class="error-box" id="wlEmptyNote" role="status">Your list is empty. Tap the bookmark on any film to save it here.</div>');
+      setTimeout(() => { const n = document.getElementById('wlEmptyNote'); if (n) n.remove(); }, 5000);
+    }
+    return;
+  }
+  const note = document.getElementById('wlEmptyNote'); if (note) note.remove();
   myListOnly = !myListOnly;
   document.getElementById('mylistBtn').classList.toggle('active', myListOnly);
   render();
@@ -1038,9 +1049,12 @@ fetch('/data-' + code + '.json?v=' + Date.now())
   })
   .catch(() => {
     answerHeroTap(false);
-    document.getElementById('lastScan').textContent = 'Fresh picks arriving soon';
-    document.getElementById('moviesGrid').innerHTML = '<div class="error-box">No data yet — run the workflow in the Actions tab.</div>';
-    document.getElementById('ottGrid').innerHTML = '<div class="error-box">No data yet.</div>';
+    // The server-rendered cards stay: they are this build's lists, and a failed fetch or script
+    // error used to swap all of them for "No data yet — run the workflow in the Actions tab"
+    // (repair sprint, 10 Nov 2026). Only an empty grid gets a message, written for visitors.
+    const empty = (id) => { const g = document.getElementById(id); return g && !g.querySelector('.card, a'); };
+    if (empty('moviesGrid')) document.getElementById('moviesGrid').innerHTML = '<div class="error-box">This list didn&#39;t load. Refresh the page to try again.</div>';
+    if (empty('ottGrid')) document.getElementById('ottGrid').innerHTML = '<div class="error-box">This list didn&#39;t load. Refresh the page to try again.</div>';
   });
 } // end loadCountryData
 

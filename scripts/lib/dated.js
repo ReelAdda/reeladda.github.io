@@ -141,19 +141,22 @@ function buildComingPage(items, cfg, { now = Date.now(), hasToday = true, waitin
     a: items.slice(0, 5).map((x) => { const p = digitalNoteName(x.platform); return `${x.title} (${fmtDateShort(x.date, now, loc)}${p ? `, ${p}` : ", platform not named yet"})`; }).join(", ") + (n > 5 ? `, and ${n - 5} more.` : "."),
   }, {
     q: `Are these dates confirmed?`,
-    a: `Yes${plain ? ". Every" : " — every"} date here was announced by the platform or studio and published on TMDB. Estimates are never listed. Each page switches to "streaming now" the day the title lands.`,
+    // Repair sprint, 10 Nov 2026: the dates are TMDB's digital release dates, which its contributors
+    // enter; FilmyChill doesn't check each against an announcement, so the page no longer says
+    // "announced by the platform" or "Nothing here is a guess".
+    a: `Not by FilmyChill. Each date comes from TMDB, where contributors add it, usually from the platform's or studio's announcement. We never list our own estimates, and each page switches to "streaming now" the day the title turns up.`,
   }];
   const url = comingUrl(code);
   const linkable = items.filter((x) => x.slug);
   return listingPageHtml({
-    title: fitFirst([`Upcoming ${V.Releases} in ${country}: ${n} Dates Announced | FilmyChill`, `Upcoming ${V.Releases} in ${country}: ${n} Dates Announced`,
+    title: fitFirst([`Upcoming ${V.Releases} in ${country}: ${n} Dates | FilmyChill`, `Upcoming ${V.Releases} in ${country}: ${n} Dates`,
       `Upcoming ${V.Releases} in ${country} (${n})`, `Coming to ${V.word} in ${country}`], 60),
-    desc: fitFirst([`${n} films with an announced ${V.word === "OTT" ? "OTT" : "streaming"} release date in ${country}, soonest first${plain ? ", with the platform where it's been named" : " — with the platform, where it's been named"}. Announced dates only, never estimates.`,
-      `${n} announced ${V.word === "OTT" ? "OTT" : "streaming"} release dates in ${country}, soonest first.`], 160),
+    desc: fitFirst([`${n} films with an ${V.word === "OTT" ? "OTT" : "streaming"} release date in ${country}, soonest first, with the platform where it's been named. Dates from TMDB, never our estimates.`,
+      `${n} ${V.word === "OTT" ? "OTT" : "streaming"} release dates in ${country}, soonest first. Dates from TMDB.`], 160),
     canonical: url,
     h1: `Coming to ${V.word} in ${country}`,
-    updLine: `${n} announced date${n === 1 ? "" : "s"} · updated ${new Date(now).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" })}`,
-    lead: `Films with a streaming date the platform has announced, soonest first. Nothing here is a guess: when a date moves, the list moves with it.`,
+    updLine: `${n} date${n === 1 ? "" : "s"} · updated ${new Date(now).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" })}`,
+    lead: `Films with a streaming date on TMDB, soonest first. TMDB's contributors add these dates, usually from the platform's or studio's announcement, and we don't check each one ourselves. When a date changes there, it changes here.`,
     sections, faqs, code,
     extraLd: [{ "@context": "https://schema.org", "@type": "CollectionPage", name: `Coming to ${V.word} in ${country}`, url,
       isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },

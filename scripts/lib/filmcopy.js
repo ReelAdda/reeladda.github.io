@@ -15,7 +15,7 @@ const { isRecent } = require("./fcscore.js");
 const { plainFit, whyWatch } = require("./whywatch.js");
 const { plainOn } = require("./humanprose.js");
 const { certAudience } = require("./enrich.js");
-const { digitalAnnounceText, digitalUpcoming } = require("./pagekit.js");
+const { digitalAnnounceText, digitalPassed, digitalUpcoming } = require("./pagekit.js");
 const { streamVocab, streamWindowEstimate } = require("./rules.js");
 
 // ---- Enriched film-page content (all DETERMINISTIC: derived from fields we already have,
@@ -284,7 +284,8 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   // The release-day settle pass (lib/pagekit.js) matches both forms of this answer.
   if (upcoming) whereA = `${item.title} hasn't released yet${item.released ? `${plain ? ". It's due" : " — it's due"} ${fmtDateFull(item.released, localeFor(cfg && cfg.code))}` : ""}. We'll list where to watch once it's out.`;
   else if (provs.length) whereA = `You can stream ${item.title} in ${countryName} on ${provs.join(", ")}.`;
-  else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across ${countryName}. ${V.article} ${V.release} hasn't been announced yet.`;
+  // With a streaming date on the page, no "hasn't been announced" (repair sprint, 10 Nov 2026).
+  else if (item.platform === "Theatres") whereA = `${item.title} is currently playing in theatres across ${countryName}.${item.digitalDate ? "" : ` ${V.article} ${V.release} hasn't been announced yet.`}`;
   else whereA = plain ? `Streaming availability for ${item.title} in ${countryName} isn't confirmed yet. This page updates when a platform lists it.`
     : `Streaming availability for ${item.title} in ${countryName} isn't confirmed yet — check back as platforms update.`;
   faqs.push({ q: `Where can I watch ${item.title}?`, a: whereA });
@@ -295,7 +296,9 @@ function buildFaqs(item, countryName = "India", cfg = null) {
   // arrival date when first-seen tracking has one); theatrical -> honestly "not
   // announced", plus the typical window as a labelled pattern, plus the true promise
   // that this page updates the day it lands.
-  if (item.kind !== "tv") {
+  // A date that has passed without the film arriving: the OTT section says so, and an answer here
+  // could only repeat it or deny it (repair sprint, 10 Nov 2026).
+  if (item.kind !== "tv" && !(digitalPassed(item) && !provs.length)) {
     let ottA;
     // Only a verified arrival date (lib/lifecycle.js arrivalDate). This used ottFreshDate, which
     // is a first sighting or the release date: neither is when the film reached the platform.
