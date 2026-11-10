@@ -132,10 +132,46 @@ function wikiViewsLabel(n) {
 // OTT?" job, answered on every visit. Saved snapshots go stale; live DATA doesn't —
 // so we look the film up fresh by slug and fall back to the snapshot only if it has
 // left the lists entirely.
-function trackStatus(saved) {
+// A saved film as this build knows it now (its entry in the current lists), else as it was saved.
+function liveItem(saved) {
   const slug = saved.slug || slugify(saved.title);
   const bySlug = (list) => (list || []).find(x => (x.slug || slugify(x.title)) === slug);
-  const live = bySlug(DATA.ott) || bySlug(DATA.theatres) || bySlug(DATA.comingSoon) || saved;
+  return bySlug(DATA.ott) || bySlug(DATA.theatres) || bySlug(DATA.comingSoon) || saved;
+}
+// WHAT YOUR LIST NEEDS (10 Nov 2026). Pure: the fewest services that between them carry every
+// streaming title given, each with the titles it accounts for. `films` is a list of provider-name
+// lists, one per title. Greedy: the service on the most titles still uncovered, ties by name.
+function wlCover(films) {
+  let left = films.filter(p => p && p.length);
+  const out = [];
+  while (left.length) {
+    const n = {};
+    left.forEach(p => [...new Set(p)].forEach(x => { n[x] = (n[x] || 0) + 1; }));
+    const best = Object.keys(n).sort((a, b) => n[b] - n[a] || a.localeCompare(b))[0];
+    out.push({ name: best, n: n[best] });
+    left = left.filter(p => !p.includes(best));
+  }
+  return out;
+}
+// One line under My List's heading, from two streaming titles up (with one, its card says it).
+function renderWlNeeds(wl) {
+  let el = document.getElementById('wlNeeds');
+  const row = document.getElementById('alertRow');
+  if (!el && row) { row.insertAdjacentHTML('afterend', '<div class="alert-row" id="wlNeeds"></div>'); el = document.getElementById('wlNeeds'); }
+  if (!el) return;
+  const items = wl.map(liveItem);
+  const provs = items.filter(isStreamingItem).map(it => (it.providers && it.providers.length ? it.providers : [it.platform]));
+  if (provs.length < 2) { el.hidden = true; el.innerHTML = ''; return; }
+  const cover = wlCover(provs);
+  const names = cover.map((c, i) => '<b>' + esc(c.name) + '</b> (' + c.n + (i === 0 ? ' title' + (c.n === 1 ? '' : 's') : '') + ')');
+  const list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+  const waiting = items.length - provs.length;
+  el.hidden = false;
+  el.innerHTML = '<span>' + (cover.length === 1 ? 'Everything streaming on your list is on ' + list + '.' : 'To watch everything streaming on your list you need ' + list + '.')
+    + (waiting ? ' ' + waiting + ' more ' + (waiting === 1 ? 'isn’t' : 'aren’t') + (FC_STREAM.word === 'OTT' ? ' on OTT' : ' streaming') + ' yet.' : '') + '</span>';
+}
+function trackStatus(saved) {
+  const live = liveItem(saved);
   const today = new Date().toISOString().slice(0, 10);
   if (live.platform && live.platform !== 'Theatres') {
     const since = live.kind === 'tv' ? live.freshDate : (live.ottFreshDate || live.freshDate);
@@ -434,6 +470,7 @@ function render() {
   const mySec = document.getElementById('mylistSection');
   mySec.style.display = wl.length ? 'block' : 'none';
   renderAlertRow();
+  renderWlNeeds(wl);
   document.getElementById('mylistGrid').innerHTML = wl.map((it, i) => card(it, i, 'wl')).join('');
   const t = myListOnly ? [] : applyFilters(DATA.theatres);
   const o = myListOnly ? [] : applyFilters(DATA.ott);

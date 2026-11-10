@@ -2527,6 +2527,38 @@ test("ad-supported tiers: the services offering a title free or with ads only (I
   assert.deepStrictEqual(R.adTierProviders(undefined), []);
 });
 
+test("eight-week tracker on /data/: India films of the last 90 days, counted and marked (10 Nov 2026)", () => {
+  const S = require("./lib/surfaces.js");
+  const mk = (id, t, lang, th, first, p, c = "in") => ({ c, k: "movie", id, t, lang, th, first, p, seen: `${first}T05:00:00Z` });
+  const recs = [{ c: "in", k: "tv", id: 1, t: "Start", first: "2026-08-01", p: "Netflix", seen: "2026-08-01T00:00:00Z" },
+    mk(2, "Fast One", "Tamil", "2026-10-01", "2026-10-29", "Netflix"),        // 28 days
+    mk(3, "Just Under", "Tamil", "2026-09-01", "2026-10-26", "Prime Video"),  // 55
+    mk(4, "On The Line", "Hindi", "2026-09-01", "2026-10-27", "Zee5"),        // 56
+    mk(5, "Slow One", "Telugu", "2026-06-01", "2026-11-01", "aha"),           // 153
+    mk(6, "A & B", "Telugu", "2026-10-01", "2026-11-05", "Netflix"),          // 35
+    mk(7, "Too Old", "Tamil", "2026-05-01", "2026-08-05", "Netflix"),         // outside 90 days
+    mk(8, "Elsewhere", "English", "2026-10-01", "2026-10-29", "Netflix", "us")];
+  const html = S.eightWeekSection(recs, { today: "2026-11-10" });
+  assert.ok(/Of these 5 films, 3 were streaming before eight weeks had passed\./.test(html), html.slice(0, 600));
+  assert.ok(/<td>Tamil<\/td><td class="n">2<\/td><td class="n">2<\/td>/.test(html) && /<td>Hindi<\/td><td class="n">1<\/td><td class="n">0<\/td>/.test(html), "by language");
+  assert.ok(/<td>On The Line<\/td>.*?<td class="n">56<\/td><td>Yes<\/td>/.test(html) && /<td>Just Under<\/td>.*?<td class="n">55<\/td><td>No<\/td>/.test(html), "56 days is eight weeks; 55 is not");
+  assert.ok(!/Too Old|Elsewhere/.test(html) && /A &amp; B/.test(html), "90 days, India only, escaped");
+  assert.ok(html.indexOf("A &amp; B") < html.indexOf("Slow One") && html.indexOf("Slow One") < html.indexOf("Fast One"), "newest sighting first");
+  assert.strictEqual(S.eightWeekSection(recs.slice(0, 4), { today: "2026-11-10" }), "", "too few films: no section");
+  assert.ok(/id="eight-weeks"/.test(S.buildDataPage(recs, "10 November 2026")) === /id="eight-weeks"/.test(S.eightWeekSection(recs)), "on the Data page when there is one");
+});
+
+test("My List: the fewest services that cover the streaming titles (10 Nov 2026)", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "app.js"), "utf8");
+  const fn = /function wlCover\(films\) \{[\s\S]*?\n\}/.exec(src);
+  assert.ok(fn, "wlCover is in js/app.js");
+  const wlCover = new Function(`${fn[0]}; return wlCover;`)();
+  assert.deepStrictEqual(wlCover([["Netflix"], ["Netflix", "Prime Video"], ["JioHotstar"], ["Prime Video", "JioHotstar"]]), [{ name: "JioHotstar", n: 2 }, { name: "Netflix", n: 2 }]);
+  assert.deepStrictEqual(wlCover([["Netflix", "Prime Video"], ["Prime Video"], ["Prime Video", "Zee5"]]), [{ name: "Prime Video", n: 3 }], "one service can cover all");
+  assert.deepStrictEqual(wlCover([[], null]), []);
+  assert.ok(/renderWlNeeds\(wl\);/.test(src) && /provs\.length < 2/.test(src), "drawn with My List, from two streaming titles up");
+});
+
 test("alert button: in the OTT section of a waiting page only, stripped without a key (10 Nov 2026)", () => {
   const F = require("./lib/filmpage.js");
   const KEY = "B" + "a".repeat(86);

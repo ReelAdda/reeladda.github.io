@@ -532,6 +532,44 @@ function arrivalsSection(records, { code = "in", today = new Date().toISOString(
   <table><thead><tr><th>Month</th><th class="n">Arrivals</th><th>Biggest services</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
+// THE EIGHT-WEEK WINDOW, INDIA (10 Nov 2026). Cinema owners in India want eight weeks between a
+// film's cinema release and its streaming release, producers want less, and the argument is made
+// with opinions. The arrival record has the dates: every film we saw reach a streaming service in
+// India in the last TRACKER_DAYS days, the days it took (cinemaWindowDays, the same rows as the
+// CSV), and whether that was under EIGHT_WEEKS days. A table on /data/, where the owner allows
+// counts; no film page says any of it. At most TRACKER_ROWS rows, newest first: the rest are in
+// the CSV. Nothing is shown until there are a few films to show.
+const EIGHT_WEEKS = 56, TRACKER_DAYS = 90, TRACKER_ROWS = 60, TRACKER_MIN = 5;
+function eightWeekSection(records, { code = "in", today = new Date().toISOString().slice(0, 10) } = {}) {
+  const e = escHtml;
+  const starts = observationStarts(records);
+  const from = new Date(Date.parse(`${today}T00:00:00Z`) - TRACKER_DAYS * 864e5).toISOString().slice(0, 10);
+  const day = (r) => String(r.first).slice(0, 10);
+  const rows = (records || []).filter((r) => r && r.c === code && r.first && day(r) >= from && day(r) <= today)
+    .map((r) => ({ r, d: cinemaWindowDays(r, starts) })).filter((x) => x.d != null)
+    .sort((a, b) => day(b.r).localeCompare(day(a.r)) || String(a.r.t || "").localeCompare(String(b.r.t || "")));
+  if (rows.length < TRACKER_MIN) return "";
+  const early = (x) => x.d < EIGHT_WEEKS;
+  const short = (x) => new Date(`${x}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  const langs = new Map();
+  for (const x of rows) { const k = x.r.lang || "Other"; const g = langs.get(k) || { n: 0, early: 0 }; g.n++; if (early(x)) g.early++; langs.set(k, g); }
+  const langRows = [...langs.entries()].sort((a, b) => b[1].n - a[1].n || a[0].localeCompare(b[0]))
+    .map(([k, g]) => `<tr><td>${e(k)}</td><td class="n">${g.n}</td><td class="n">${g.early}</td></tr>`).join("");
+  const shown = rows.slice(0, TRACKER_ROWS);
+  const filmRows = shown.map((x) => `<tr><td>${e(x.r.t || "")}</td><td>${e(x.r.lang || "")}</td><td>${e(short(String(x.r.th).slice(0, 10)))}</td><td>${e(short(day(x.r)))}</td>`
+    + `<td>${e(x.r.p || "")}</td><td class="n">${x.d}</td><td>${early(x) ? "No" : "Yes"}</td></tr>`).join("");
+  const nEarly = rows.filter(early).length;
+  return `<h2 id="eight-weeks">The eight-week window, India</h2>
+  <p>Cinema owners in India have asked for eight weeks (${EIGHT_WEEKS} days) between a film's cinema release and its streaming release.
+  These are the films we saw reach a streaming service in India in the last ${TRACKER_DAYS} days, with the days each one took.
+  Of these ${rows.length} films, ${nEarly} ${nEarly === 1 ? "was" : "were"} streaming before eight weeks had passed.</p>
+  <table><thead><tr><th>Language</th><th class="n">Films</th><th class="n">Streaming before 8 weeks</th></tr></thead><tbody>${langRows}</tbody></table>
+  <h3>Film by film</h3>
+  <table><thead><tr><th>Film</th><th>Language</th><th>In cinemas</th><th>Seen streaming</th><th>Service</th><th class="n">Days</th><th>Waited 8 weeks?</th></tr></thead><tbody>${filmRows}</tbody></table>
+  ${rows.length > shown.length ? `<p class="plus">plus ${rows.length - shown.length} earlier film${rows.length - shown.length === 1 ? "" : "s"}, in the CSV below.</p>` : ""}
+  <p class="plus">Days run from the Indian cinema release to the day we first saw the film on a service. That can be a day or two after it went live, so a film shown at ${EIGHT_WEEKS} or ${EIGHT_WEEKS + 1} days may have arrived just inside eight weeks.</p>`;
+}
+
 function buildDataPage(records, updatedHuman, { inCinemas = 0, digital = null } = {}) {
   const e = escHtml;
   const s = windowStats(records);
@@ -603,6 +641,8 @@ ${ICON_LINKS}
   ${indiaDataSection(records, digital)}
 
   ${tmdbIndiaSection(digital)}
+
+  ${eightWeekSection(records)}
 
   <div class="method">
     <b>Method.</b> FilmyChill checks streaming availability every day in ${COUNTRIES.length} countries and records the
@@ -959,6 +999,7 @@ function prerenderIndex(data) {
 }
 
 module.exports = {
+  eightWeekSection,
   HOME_OG_IMAGE,
   choosePick,
   PICK_FRESH_DAYS,
