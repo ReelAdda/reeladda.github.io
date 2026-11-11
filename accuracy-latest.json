@@ -1,10 +1,39 @@
 {
- "date": "2026-11-10",
+ "date": "2026-11-11",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 0,
- "high": 0,
- "correctable": 0,
- "byField": {},
- "rows": []
+ "pagesDisagreeing": 3,
+ "high": 1,
+ "correctable": 1,
+ "byField": {
+  "director": 1,
+  "streaming": 1,
+  "runtime": 1
+ },
+ "rows": [
+  {
+   "field": "director",
+   "severity": "medium",
+   "page": "Earl Hamner, Jr.",
+   "tmdb": "Earl Hamner, Jr.",
+   "code": "us",
+   "slug": "falcon-crest"
+  },
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "not streaming",
+   "tmdb": "on Netflix",
+   "code": "au",
+   "slug": "possible-love"
+  },
+  {
+   "field": "runtime",
+   "severity": "medium",
+   "page": "140 min",
+   "tmdb": "150 min",
+   "code": "br",
+   "slug": "dune-part-three"
+  }
+ ]
 }
