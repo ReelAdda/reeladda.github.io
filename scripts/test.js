@@ -2630,11 +2630,13 @@ test("Bing report, 12 Nov 2026: language hubs say how many, which week and which
   assert.ok(desc.includes("starts streaming in India on") && desc.includes("See which platform has it") && !desc.includes("Prime Video"), desc);
 });
 
-test("one logo, 12 Nov 2026: the ring with a white play on the dark band; a navy tile off it; film and person pages by stage", () => {
-  const B = require("./lib/brand.js");
-  const white = 'fill="#FFFFFF" style="fill:#FFFFFF"', tile = '<rect width="100" height="100" rx="22" fill="#1C1838"/>';
+test("one logo, 12 Nov 2026: the ring with a white play on the dark band; an indigo tile off it; film and person pages by stage", () => {
+  const B = require("./lib/brand.js"), fs0 = require("fs"), path0 = require("path");
+  const white = 'fill="#FFFFFF" style="fill:#FFFFFF"', tile = '<rect width="100" height="100" rx="22" fill="#4038C7"/>';
   assert.ok(B.MARK_HOME.includes(white) && B.MARK_TOP.includes(white) && !B.MARK_HOME.includes("#4038C7") && !B.MARK_HOME.includes("<rect"), "white play, no indigo, no tile on the bar; immune to the bar's recolouring");
-  assert.ok(B.LOGO_TILE.startsWith(tile) && B.LOGO_TILE.includes(white), "off the bar, the same on a tile of the bar's colour");
+  // The app icons are the same drawing on indigo: unchanged files, so installed apps see no new icon.
+  assert.ok(fs0.existsSync(path0.join(__dirname, "..", "icon-192.png")) && fs0.existsSync(path0.join(__dirname, "..", "favicon.ico")));
+  assert.ok(B.LOGO_TILE.startsWith(tile) && B.LOGO_TILE.includes(white), "off the bar, the same on a tile of the brand's indigo");
   const ring = '<svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true" style="width:.92em"><circle cx="50" cy="50" r="37" fill="none" stroke="#EFE6D6" stroke-width="13"/><path d="M42 33" fill="#4038C7"/></svg>';
   const page = `<div class="top v3"><a class="mark" href="/">${ring}FILMY<span>CHILL</span></a></div>`;
   const on = B.ensureBrandMark(page);

@@ -21,14 +21,13 @@ const shape = (track, play) =>
   + `<circle cx="50" cy="50" r="37" fill="none" stroke="#FFAD1F" stroke-width="13" stroke-linecap="round" stroke-dasharray="176 300" transform="rotate(38 50 50)"/>`
   + `<path d="M42 33 Q40 32 40 35 L40 65 Q40 68 42 67 L66 52.5 Q68 50 66 47.5 Z" fill="${play}"/>`;
 // ONE LOGO (12 Nov 2026, owner: "we cannot have different colours for the brand"). The logo is
-// the marigold ring with a white play on the brand's dark band (#1C1838): the wordmark's own two
-// colours on the bar's own colour. Until now the headers drew an indigo play (made for the old
-// cream header) and the app icon sat on an indigo tile, so the site, the icon and Instagram showed
-// three versions. The owner saw the indigo tile on the dark bar in a mock-up, found the two blues
-// clashed, and chose to move the logo to the bar's colour.
-//   LOGO       on the dark bar: the ring and the play, nothing behind them.
-//   LOGO_TILE  on anything else (the 404 page's cream, the app icon, the share of the logo alone):
-//              the same on a rounded tile of the bar's colour.
+// the marigold ring with a white play. Until now the headers drew an indigo play (made for the
+// old cream header), so the site showed a different mark from the app icon and Instagram.
+//   LOGO       on the dark bar: the ring and the play, nothing behind them. The owner saw the
+//              indigo tile on the dark bar in a mock-up and found the two blues clashed.
+//   LOGO_TILE  where the logo stands alone (the 404 page's cream; the app icon, the favicon and
+//              Instagram are the same drawing): on a tile of the brand's indigo. A tile of the
+//              bar's dark colour was tried and read as nearly black on its own (mock-up 5).
 // The track and the play carry their colours as inline styles too: the brand bar's stylesheet
 // (TOP_BAR_CSS) recolours a mark's first circle and its path, and that stylesheet stays as it is
 // so the pages that still show the old ring are not rewritten.
@@ -36,7 +35,8 @@ const BAND = "#1C1838";
 const LOGO = shape("rgba(255,255,255,.22)", "#FFFFFF")
   .replace('stroke="rgba(255,255,255,.22)"', 'stroke="rgba(255,255,255,.22)" style="stroke:rgba(255,255,255,.22)"')
   .replace('fill="#FFFFFF"/>', 'fill="#FFFFFF" style="fill:#FFFFFF"/>');
-const LOGO_TILE = `<rect width="100" height="100" rx="22" fill="${BAND}"/><g transform="translate(16 16) scale(.68)">${LOGO}</g>`;
+const TILE = "#4038C7";
+const LOGO_TILE = `<rect width="100" height="100" rx="22" fill="${TILE}"/><g transform="translate(16 16) scale(.68)">${LOGO}</g>`;
 const TOP_ATTRS = `class="brand-mark" viewBox="0 0 100 100" width="24" height="24" aria-hidden="true" style="flex:none;margin-right:8px"`;
 const HOME_ATTRS = `class="brand-mark" viewBox="0 0 100 100" aria-hidden="true" style="width:.92em;height:.92em;flex:none;margin-right:.16em"`;
 const MARK_TOP = `<svg ${TOP_ATTRS}>${LOGO}</svg>`;
