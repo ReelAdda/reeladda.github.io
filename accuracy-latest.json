@@ -1,39 +1,55 @@
 {
- "date": "2026-11-11",
+ "date": "2026-11-12",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 3,
- "high": 1,
- "correctable": 1,
+ "pagesDisagreeing": 4,
+ "high": 3,
+ "correctable": 4,
  "byField": {
-  "director": 1,
-  "streaming": 1,
-  "runtime": 1
+  "streaming": 2,
+  "release date": 2,
+  "platform": 1
  },
  "rows": [
-  {
-   "field": "director",
-   "severity": "medium",
-   "page": "Earl Hamner, Jr.",
-   "tmdb": "Earl Hamner, Jr.",
-   "code": "us",
-   "slug": "falcon-crest"
-  },
   {
    "field": "streaming",
    "severity": "high",
    "page": "not streaming",
-   "tmdb": "on Netflix",
-   "code": "au",
-   "slug": "possible-love"
+   "tmdb": "on Zee5",
+   "code": "in",
+   "slug": "mrigaya-1-5-the-hunt-continues"
   },
   {
-   "field": "runtime",
+   "field": "release date",
    "severity": "medium",
-   "page": "140 min",
-   "tmdb": "150 min",
-   "code": "br",
-   "slug": "dune-part-three"
+   "page": "2026-11-20",
+   "tmdb": "2026-11-13",
+   "code": "in",
+   "slug": "mrigaya-1-5-the-hunt-continues"
+  },
+  {
+   "field": "release date",
+   "severity": "medium",
+   "page": "2026-11-11",
+   "tmdb": "2026-11-18",
+   "code": "us",
+   "slug": "madden"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "alleskino, Adrenalin",
+   "tmdb": "alleskino",
+   "code": "de",
+   "slug": "offline-are-you-ready-for-the-next-level"
+  },
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "on fuboTV",
+   "tmdb": "rent/buy only",
+   "code": "es",
+   "slug": "resident-evil-welcome-to-raccoon-city"
   }
  ]
 }
