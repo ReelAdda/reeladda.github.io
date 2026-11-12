@@ -1,55 +1,30 @@
 {
  "date": "2026-11-12",
- "checked": 108,
- "errors": 0,
- "pagesDisagreeing": 4,
- "high": 3,
- "correctable": 4,
+ "checked": 107,
+ "errors": 1,
+ "pagesDisagreeing": 2,
+ "high": 2,
+ "correctable": 2,
  "byField": {
-  "streaming": 2,
-  "release date": 2,
-  "platform": 1
+  "streaming": 1,
+  "release date": 1
  },
  "rows": [
   {
    "field": "streaming",
    "severity": "high",
    "page": "not streaming",
-   "tmdb": "on Zee5",
-   "code": "in",
-   "slug": "mrigaya-1-5-the-hunt-continues"
+   "tmdb": "on Stan",
+   "code": "au",
+   "slug": "backrooms"
   },
   {
    "field": "release date",
-   "severity": "medium",
-   "page": "2026-11-20",
-   "tmdb": "2026-11-13",
-   "code": "in",
-   "slug": "mrigaya-1-5-the-hunt-continues"
-  },
-  {
-   "field": "release date",
-   "severity": "medium",
-   "page": "2026-11-11",
-   "tmdb": "2026-11-18",
-   "code": "us",
-   "slug": "madden"
-  },
-  {
-   "field": "platform",
    "severity": "high",
-   "page": "alleskino, Adrenalin",
-   "tmdb": "alleskino",
-   "code": "de",
-   "slug": "offline-are-you-ready-for-the-next-level"
-  },
-  {
-   "field": "streaming",
-   "severity": "high",
-   "page": "on fuboTV",
-   "tmdb": "rent/buy only",
-   "code": "es",
-   "slug": "resident-evil-welcome-to-raccoon-city"
+   "page": "2026-12-01",
+   "tmdb": "2027-06-01",
+   "code": "sg",
+   "slug": "film-1599189"
   }
  ]
 }
