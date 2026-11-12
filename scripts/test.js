@@ -1377,14 +1377,15 @@ test("an announced date answers the OTT-date query in the title, FAQ, block and 
   const item = { title: "Hi!", slug: "hi", kind: "movie", language: "Tamil", platform: "Theatres", released: inDays(-30),
     digitalDate: date, digitalNote: "ZEE5", tmdbId: 1 };
   const t = U.filmTitleTag(item, A_IN);
-  assert.ok(/^Hi! \(\d{4}\) OTT Release Date: \d{1,2} [A-Z][a-z]{2,3} on ZEE5/.test(t) && t.length <= 60, t);
+  // The date, never the platform (12 Nov 2026): a result that names the service needs no click.
+  assert.ok(/^Hi! \(\d{4}\) OTT Release Date: \d{1,2} [A-Z][a-z]{2,3}( \| FilmyChill)?$/.test(t) && !/ZEE5/i.test(t) && t.length <= 60, t);
   assert.ok(/Streaming Date/.test(U.filmTitleTag(item, A_UK)), "streaming markets say 'Streaming Date'");
   const page = U.buildFilmPage(item, new Date().toISOString().slice(0, 10), new Set(["hi"]), A_IN);
   assert.ok(/<!--SW:digital=\d{4}-\d{2}-\d{2}\|ZEE5-->/.test(page), "stamped, so the frozen page can be rebuilt from it");
   assert.ok(/scheduled to start streaming on ZEE5 in India on/.test(page));
   assert.ok(!/hasn(?:'|&#39;)t been officially announced/.test(page), "no 'not announced' beside a date");
   const desc = (/name="description" content="([^"]*)"/.exec(page) || [])[1];
-  assert.ok(/starts streaming on ZEE5 in India on|streams on ZEE5 in India from/.test(desc), desc);
+  assert.ok(/starts streaming in India on|streams in India from/.test(desc) && !/ZEE5/i.test(desc), desc);
   assert.ok(!U.digitalUpcoming({ ...item, providers: ["ZEE5"] }), "once it streams, the date is history");
 });
 
@@ -1396,7 +1397,7 @@ test("frozen page: announcement patch, then the arrival replaces it — no contr
   const r = U.applyDigitalDatePatch(frozen, { title: "Toxic", date, note: "ZEE5", countryName: "India", cfg: A_IN });
   assert.ok(r.changed);
   let h = U.retitleFrozen(U.rewriteMetaDescription(r.html, A_IN).html, A_IN).html;
-  assert.ok(/<title>Toxic \(\d{4}\) OTT Release Date: [^<]*ZEE5/.test(h), (/<title>[^<]*/.exec(h) || [])[0]);
+  assert.ok(/<title>Toxic \(\d{4}\) OTT Release Date: \d{1,2} [A-Z][a-z]{2,3}[^<]*<\/title>/.test(h) && !/<title>[^<]*ZEE5/i.test(h), (/<title>[^<]*/.exec(h) || [])[0]);
   assert.ok(!/hasn(?:'|&#39;)t been officially announced/.test(h), "the FAQ now carries the date");
   for (const m of h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(m[1]);
   const a = U.applyArrivalPatch(h, { title: "Toxic", providers: ["ZEE5"], countryName: "India", cfg: A_IN, asOf: date });
@@ -2606,6 +2607,29 @@ test("visitor review, 12 Nov 2026: one pick, plain hub rows, verdict order, no e
   assert.ok(src.includes("tier(b.x) - tier(a.x) || a.i - b.i") && src.includes("Must watch titles first.") && !src.includes("best-rated first"), "verdict first, and the page says so");
 });
 
+test("Bing report, 12 Nov 2026: language hubs say how many, which week and which films; dated results never name the platform", () => {
+  const D = require("./lib/dated.js"), F = require("./lib/filmpage.js");
+  const gen = "2026-11-11T08:00:00.000Z";
+  const mk = (title, language, platform, extra = {}) => ({ title, slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-"), kind: "movie", language, platform, released: "2026-11-06", freshDate: "2026-11-06", ...extra });
+  const data = { generatedAt: gen,
+    theatres: [mk("Ramayana", "Hindi", "Theatres"), mk("Udta Teer", "Hindi", "Theatres"), mk("Scene", "Tamil", "Theatres")],
+    ott: [mk("Dilwali Diwali", "Hindi", "Netflix"), mk("Gajab Raat", "Hindi", "Netflix")], comingSoon: [] };
+  const head = (h) => [(h.match(/<title>([^<]*)/) || [])[1], (h.match(/<meta name="description" content="([^"]*)/) || [])[1]];
+  const [t, d] = head(D.buildLanguagePage(data, "Hindi", "hindi", null));
+  assert.strictEqual(t.replace(/&amp;/g, "&"), "4 New Hindi Movies & OTT Releases This Week (9–15 Nov)");
+  assert.ok(d.startsWith("4 new Hindi releases this week: Ramayana, Dilwali Diwali, Udta Teer + 1 more."), d);
+  assert.ok(t.length <= 64 && d.length <= 160);
+  // A thin week makes no count: the old title and description stand.
+  const [tt, td] = head(D.buildLanguagePage(data, "Tamil", "tamil", null));
+  assert.ok(tt.startsWith("New Tamil Movies") && tt.includes("November 2026") && td.startsWith("New Tamil movies in theatres and on OTT this week"), tt + " / " + td);
+  // A dated streaming release: the date in the title and description, the platform in neither.
+  const ahead = new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10);
+  const it = { title: "Jailer 2", slug: "jailer-2", kind: "movie", language: "Tamil", released: new Date(Date.now() - 28 * 864e5).toISOString().slice(0, 10), platform: "Theatres", providers: [], digitalDate: ahead, digitalNote: "Prime Video" };
+  const title = F.filmTitleTag(it, TRUST_IN), desc = F.filmMetaDescription(it, TRUST_IN);
+  assert.ok(title.includes("OTT Release Date: ") && !title.includes("Prime Video"), title);
+  assert.ok(desc.includes("starts streaming in India on") && desc.includes("See which platform has it") && !desc.includes("Prime Video"), desc);
+});
+
 test("alert button: in the OTT section of a waiting page only, stripped without a key (10 Nov 2026)", () => {
   const F = require("./lib/filmpage.js");
   const KEY = "B" + "a".repeat(86);
@@ -2642,7 +2666,7 @@ test("2 · an announced streaming date that passed: honest block, FAQ, title and
   assert.ok(P.digitalPassed(item) && !P.digitalUpcoming(item));
   assert.ok(/^Unit \(\d{4}\) OTT Release Date: Was Due .+, Not on OTT Yet$/.test(U.filmTitleTag(item, TRUST_IN)), "a passed date says so in the title, as the body does (10 Nov 2026): " + U.filmTitleTag(item, TRUST_IN));
   const dd = U.filmMetaDescription(item, TRUST_IN);
-  assert.ok(/^Unit \(\d{4}\) was due to stream on JioHotstar in India from .+ but isn't showing yet\. We check twice a day/.test(dd) && dd.length <= 155, dd);
+  assert.ok(/^Unit \(\d{4}\) was due to stream in India from .+ but isn't showing yet\. We check twice a day/.test(dd) && !/Hotstar/i.test(dd) && dd.length <= 155, dd);
   const page = U.buildFilmPage({ ...item, slug: "unit" }, trustDaysAgo(0), new Set(), TRUST_IN);
   assert.ok(/was scheduled to start streaming on JioHotstar in India/.test(page) && !/switches to “streaming now”/.test(page), "the live builder says the same");
   assert.ok(!P.digitalPassed({ ...item, providers: ["JioHotstar"] }), "arrived: not this state");

@@ -472,13 +472,32 @@ function buildLanguagePage(data, langName, slug, archive = null) {
   }];
   // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
   const plain = require("./humanprose.js").plainOn(url);
+  // THE WEEKLY HUBS' PATTERN (12 Nov 2026, Bing's 30-day report): the two New on OTT hubs, whose
+  // titles carry a count and the week's dates and whose descriptions name three films, were clicked
+  // on 3.9% and 4.7% of their showings; these five hubs, titled by the month with no film named,
+  // on 0.85% (42 clicks from 4,949). From three listed titles up, a language hub says the same
+  // things: how many, which week, and which films. A thin week keeps the old wording, which
+  // makes no count it can't back. The count is the In theatres and Streaming now rows, as listed.
+  const nNew = theatres.length + ott.length;
+  const weekRange = require("./pagekit.js").weekRangeFor(gen, "in");
+  const lead3 = [theatres[0], ott[0], theatres[1] || ott[1], ott[1]].filter((x, i, a) => x && a.indexOf(x) === i).slice(0, 3).map((x) => x.title);
+  const oldDesc = plain
+    ? `${thin ? "New" : "Every new"} ${langName} movie${thin ? "s" : ""} in theatres and on OTT this week, with ratings, critics' verdicts and where to watch. Updated twice daily.`
+    : thin
+      ? `New ${langName} movies in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`
+      : `Every new ${langName} movie in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`;
+  const more = (k) => (nNew > k ? ` + ${nNew - k} more` : "");
   return listingPageHtml({
-    title: `New ${langName} Movies & OTT Releases This Week (${monthYear}) | FilmyChill`,
-    desc: plain
-      ? `${thin ? "New" : "Every new"} ${langName} movie${thin ? "s" : ""} in theatres and on OTT this week, with ratings, critics' verdicts and where to watch. Updated twice daily.`
-      : thin
-        ? `New ${langName} movies in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`
-        : `Every new ${langName} movie in theatres and on OTT this week — ratings, critics' verdicts and where to watch. Updated twice daily.`,
+    title: thin
+      ? `New ${langName} Movies & OTT Releases This Week (${monthYear}) | FilmyChill`
+      : fitFirst([`${nNew} New ${langName} Movies & OTT Releases This Week (${weekRange})`,
+        `${nNew} New ${langName} Movies & OTT This Week (${weekRange})`,
+        `New ${langName} Movies & OTT Releases This Week (${weekRange})`], 60),
+    desc: thin || lead3.length < 2 ? oldDesc
+      : fitFirst([`${nNew} new ${langName} releases this week: ${lead3.join(", ")}${more(lead3.length)}. In theatres and on OTT, with verdicts and where to watch.`,
+        `${nNew} new ${langName} releases this week: ${lead3.join(", ")}${more(lead3.length)}. Verdicts and where to watch.`,
+        `${nNew} new ${langName} releases this week: ${lead3.slice(0, 2).join(", ")}${more(2)}. Verdicts and where to watch.`,
+        oldDesc], 160),
     canonical: url,
     h1: `New ${langName} Movies & OTT This Week`,
     updLine: `Updated ${updatedHuman} · refreshed twice daily`,
