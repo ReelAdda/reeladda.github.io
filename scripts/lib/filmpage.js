@@ -615,6 +615,7 @@ function partOfMonth(d) {
 // Google shows ~60 chars; the ladder drops decoration (brand, year) before it drops the
 // query-bearing words, so truncation never eats the part that earns the click. Outside India
 // the country is never dropped (titleWithCountry): a long title beats one shared by 14 editions.
+const ANSWER_TITLES = "answer-titles";
 function filmTitleTag(item, cfg = null) {
   const country = countryNameFor(cfg);
   const V = streamVocab(cfg);
@@ -762,6 +763,25 @@ function filmTitleTag(item, cfg = null) {
   const longOut = item.released && (Date.now() - Date.parse(`${String(item.released).slice(0, 10)}T00:00:00Z`)) / 864e5 > STREAMING_DATE_TITLE_DAYS
     && inRollout(INTENT_TITLES, item.slug);
   const canAnswerDate = V.word === "OTT" && item.kind !== "tv" && providers.length > 0 && !longOut;
+  // THE ANSWER IN THE TITLE (rollout "answer-titles", 12 Nov 2026 visitor review). A film that is
+  // streaming was titled "X (2026) OTT Release Date & Review": the searcher asking for the date
+  // couldn't tell it was already out, and "Review" promised what many of these pages don't have.
+  // The query words stay (dropping them halved the click rate once, see above) and the answer
+  // follows them, as it does on a page with an announced date: "Streaming Since 5 Nov" when we
+  // saw the film arrive (item.arrived, a verified arrival), else "Now Streaming". Never the
+  // platform: naming it in a result sends the searcher straight there.
+  if (canAnswerDate && inRollout(ANSWER_TITLES, item.slug)) {
+    const code = (cfg && cfg.code) || "in";
+    const since = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(item.arrived || ""))
+      ? `Streaming Since ${fmtDateShort(item.arrived, Date.now(), localeFor(code))}` : "Now Streaming";
+    return fitTitle([
+      `${item.title}${yr} ${V.titleFragment}: ${since} | FilmyChill`,
+      `${item.title}${yr} ${V.titleFragment}: ${since}`,
+      `${item.title} ${V.titleFragment}: ${since}`,
+      `${item.title}${yr} ${V.titleFragment}: Now Streaming`,
+      `${item.title} ${V.titleFragment}: Now Streaming`,
+    ]);
+  }
   return canAnswerDate
     ? fitTitle([
         `${item.title}${yr} ${V.titleFragment}, Review & Where to Watch | FilmyChill`,
@@ -910,14 +930,27 @@ const REDESIGN_CSS = [
   "  .faq { background:#fff; border-radius:16px; padding:2px 16px; } .faq details:first-child { border-top:0; }",
 ].join("\n");
 
+// A card with no image: the title's initial on the brand's ink, where a poster would be. It was
+// an empty box in the franchise row and nothing at all in "If you liked this", and both read as a
+// broken page. Styled inline: the film pages' shared stylesheets don't change, so no page is
+// rewritten for it.
+function initialTile(title, cls = "") {
+  const ch = (String(title || "").trim().match(/[\p{L}\p{N}]/u) || ["?"])[0].toUpperCase();
+  return `<span${cls ? ` class="${cls}"` : ""} aria-hidden="true" style="display:grid;place-items:center;width:100%;aspect-ratio:2/3;background:#241D52;color:#FFAD1F;font:800 32px/1 system-ui,sans-serif">${escHtml(ch)}</span>`;
+}
+
 // The franchise row: the siblings and this title in release order, this one marked.
 function franchiseRowHtml(fr, item, code) {
   const e = escHtml;
   const yr = (x) => String(x.released || "").slice(0, 4);
-  const self = { slug: item.slug, title: item.title, released: item.released, poster: item.poster, here: true };
+  // This title's own card (12 Nov 2026 visitor review): a page drawn from facts often has no
+  // poster on file, and Jailer 2's card in its own series row was an empty box. It takes the
+  // backdrop the page already shows; a card with no image at all gets the title's initial.
+  const selfImg = item.poster || (item.backdrop ? String(item.backdrop).replace(/(image\.tmdb\.org\/t\/p\/)w\d+\//, "$1w300/") : "");
+  const self = { slug: item.slug, title: item.title, released: item.released, poster: selfImg, here: true };
   const all = [...fr.items, self].sort((a, b) => String(a.released || "").localeCompare(String(b.released || "")));
   const card = (x) => {
-    const img = x.poster ? `<img src="${e(cardPoster(x.poster))}" alt="${e(x.title)} poster" loading="lazy">` : `<span class="nop"></span>`;
+    const img = x.poster ? `<img src="${e(x.here && !item.poster ? x.poster : cardPoster(x.poster))}" alt="${e(x.title)} poster" loading="lazy">` : initialTile(x.title, "nop");
     return x.here
       ? `<div class="frcard here">${img}<span class="frhere">You're here</span><b>${e(x.title)}</b><small>${e(yr(x))}</small></div>`
       : `<a class="frcard" href="${e(filmPagePath(code, x.slug))}">${img}<b>${e(x.title)}</b><small>${e(yr(x))}</small></a>`;
@@ -1027,7 +1060,7 @@ function simGridHtml(similar, code, linkable = () => true) {
   return similar.length ? `<h2>If you liked this</h2><div class="simgrid">${similar.map((s) => {
     const exists = linkable(s);
     const poster = cardPoster(s.poster);
-    const inner = `${poster ? `<img src="${e(poster)}" alt="${e(s.title)} poster" loading="lazy">` : ""}<div class="st">${e(s.title)}</div><div class="sm">${[s.language, s.kind === "tv" ? "Series" : "Film"].filter(Boolean).map(e).join(" · ")}</div>`;
+    const inner = `${poster ? `<img src="${e(poster)}" alt="${e(s.title)} poster" loading="lazy">` : initialTile(s.title)}<div class="st">${e(s.title)}</div><div class="sm">${[s.language, s.kind === "tv" ? "Series" : "Film"].filter(Boolean).map(e).join(" · ")}</div>`;
     return exists
       ? `<a class="simcard" href="${e(filmPagePath(code, s.slug))}">${inner}</a>`
       : `<div class="simcard" style="cursor:default">${inner}</div>`;
@@ -2138,7 +2171,7 @@ function generatePages(data, cfg, allSlugSets) {
 }
 
 module.exports = {
-  ALERT_BUTTON, ARRIVAL_RECORD, FAQ_TRIM, REVIEW_BLOCK, REVIEW_BLOCK_CSS, alertButtonPage, applyAlertButton, applyFaqDateConflicts, faqDateConflictPage, applyFaqTrim, faqTrimPage, faqTrimmed, reviewBlockHtml, reviewsClause, reviewsTail,
+  ALERT_BUTTON, ANSWER_TITLES, franchiseRowHtml, initialTile, ARRIVAL_RECORD, FAQ_TRIM, REVIEW_BLOCK, REVIEW_BLOCK_CSS, alertButtonPage, applyAlertButton, applyFaqDateConflicts, faqDateConflictPage, applyFaqTrim, faqTrimPage, faqTrimmed, reviewBlockHtml, reviewsClause, reviewsTail,
   DARK_BAR, DARK_BAR_CSS, applyDarkBar, darkBar,
   PAGE_FIXES,
   SCORE_HALVES,

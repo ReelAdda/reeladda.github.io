@@ -2567,6 +2567,45 @@ test("editions: the installed app and the calendar files open the visitor's edit
   assert.ok(!app.includes("'URL:https://filmychill.com'") && !app.includes("`https://filmychill.com/#${slug}`"), "no link fixed to India's homepage");
 });
 
+test("visitor review, 12 Nov 2026: one pick, plain hub rows, verdict order, no empty poster boxes, the answer in the title", () => {
+  const W = require("./lib/weekly.js"), M = require("./lib/meter.js"), F = require("./lib/filmpage.js"), R = require("./lib/rollout.js");
+  const day = (n) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10);
+  const sc = (verdict) => ({ verdict, reason: "Audiences love it." });
+  // 1. The note's "Top pick" is the hero's Pick of the Week, even a "still worth watching" one.
+  const data = { pick: "Dead-End Job",
+    theatres: [{ title: "Wild Horse Nine", kind: "movie", genre: "Comedy", language: "English", released: day(6), freshDate: day(6), platform: "Theatres", fcScore: sc("Must watch"), rating: 8, votes: 900 }],
+    ott: [{ title: "Dead-End Job", kind: "tv", genre: "Mystery", language: "Korean", released: day(13), freshDate: day(13), platform: "Netflix", stillGood: true, fcScore: sc("Must watch"), rating: 8, votes: 900 }] };
+  const note = W.buildEditorNote(data, { code: "in", name: "India" });
+  assert.ok(note.startsWith("Top pick: Dead-End Job,") && note.includes("In cinemas: Wild Horse Nine"), note);
+  // 2. A pill that says the ratings are missing isn't followed by a label saying it again.
+  const early = M.rowScoreLine({ title: "New", kind: "movie", released: day(3), freshDate: day(3), votes: 4 });
+  assert.ok(early.includes("Too early") && !early.includes("Few ratings") && !early.includes("Not rated yet"), early);
+  const old = M.rowScoreLine({ title: "Old", kind: "movie", released: day(200), freshDate: day(200), votes: 0 });
+  assert.ok(old.includes("Not enough ratings") && !old.includes("Not rated yet"), old);
+  assert.ok(M.rowScoreLine({ title: "C", fcScore: { verdict: "Worth a watch", basis: "critics" }, criticsCount: 12 }).includes("12 critic reviews"), "evidence for a verdict stays");
+  // 4. No empty poster box: the title's initial, and the page's backdrop on its own series card.
+  const grid = F.simGridHtml([{ title: "Saheb's stolen Redmi", slug: "s", language: "Hindi" }], "in");
+  assert.ok(grid.includes(">S</span><div class=\"st\">") && !grid.includes("<img"), grid);
+  const row = F.franchiseRowHtml({ heading: "More in the Jailer series", items: [{ slug: "jailer", title: "Jailer", released: "2023-08-10" }] },
+    { slug: "jailer-2", title: "Jailer 2", released: "2026-10-15", backdrop: "https://image.tmdb.org/t/p/w780/m0ks.jpg" }, "in");
+  assert.ok(row.includes('<div class="frcard here"><img src="https://image.tmdb.org/t/p/w300/m0ks.jpg"') && row.includes(">J</span><b>Jailer</b>") && !row.includes('<span class="nop"></span>'), row);
+  // 5. The answer after the query words, by rollout; never the platform.
+  const prev = R.peekRolloutConfig();
+  const it = { title: "Dilwali Diwali", slug: "dilwali-diwali", kind: "movie", released: day(7), platform: "Netflix", providers: ["Netflix"], language: "Hindi" };
+  try {
+    R.useRolloutConfig({ features: { "answer-titles": { percent: 0 } } });
+    assert.ok(F.filmTitleTag(it, TRUST_IN).includes("OTT Release Date") && !F.filmTitleTag(it, TRUST_IN).includes("Now Streaming"), "off: the old title");
+    R.useRolloutConfig({ features: { "answer-titles": { percent: 100 } } });
+    assert.strictEqual(F.filmTitleTag(it, TRUST_IN), "Dilwali Diwali (" + it.released.slice(0, 4) + ") OTT Release Date: Now Streaming");
+    const seen = F.filmTitleTag({ ...it, title: "Akka", slug: "akka", arrived: day(2) }, TRUST_IN);
+    assert.ok(seen.includes("OTT Release Date: Streaming Since ") && !seen.includes("Netflix") && !seen.includes("Review"), seen);
+    assert.ok(!F.filmTitleTag({ ...it, providers: [], platform: "Theatres" }, TRUST_IN).includes("Streaming Since"), "a waiting film keeps its own title");
+  } finally { R.useRolloutConfig(prev); }
+  // 3. The platform catalogue orders by the verdict its rows show.
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "evergreen.js"), "utf8");
+  assert.ok(src.includes("tier(b.x) - tier(a.x) || a.i - b.i") && src.includes("Must watch titles first.") && !src.includes("best-rated first"), "verdict first, and the page says so");
+});
+
 test("alert button: in the OTT section of a waiting page only, stripped without a key (10 Nov 2026)", () => {
   const F = require("./lib/filmpage.js");
   const KEY = "B" + "a".repeat(86);
