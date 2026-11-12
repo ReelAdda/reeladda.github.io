@@ -382,7 +382,14 @@ function frozenFilmFacts(html) {
   try { ld = JSON.parse(m[1]); } catch { return null; }
   if (!ld.name) return null; // unrecognised shape — leave the page alone rather than mangle it
   const dur = /^PT(?:(\d+)H)?(?:(\d+)M)?$/.exec(ld.duration || "");
-  const star = /\u2605\s*([0-9]+(?:\.[0-9])?)/.exec(html);
+  // The header's star and no other (12 Nov 2026 accuracy scan). The search ran over the whole
+  // page, and on a page with no star in its header the first "\u2605" is an EPISODE's rating (or a
+  // critic's "\u2605 3/5"): 121 series told searchers "It rates 6.3/10" over a page showing 7.7
+  // (Lupin). A page without a header star states no rating in its description, as before.
+  const headAt = html.indexOf('<div class="head');
+  const headEnd = headAt < 0 ? -1 : html.slice(headAt).search(/id="filmychill-score"|<h2[ >]/);
+  const headHtml = headAt < 0 ? "" : html.slice(headAt, headEnd > 0 ? headAt + headEnd : headAt + 4000);
+  const star = /\u2605\s*([0-9]+(?:\.[0-9])?)/.exec(headHtml);
   // The pill block under "Where to watch" holds subscription providers first, then a
   // "Rent or buy" sub-heading and its own pills. Split on that label rather than guessing.
   // Up to the next heading, however long the section is: it was capped at 900 characters,
@@ -678,6 +685,10 @@ function archivePatchHtml(html, countryName, cfg = null, item = null, now = Date
   const released = String((item && item.released) || (/"datePublished":"(d{4}-d{2}-d{2})/.exec(html) || [])[1] || "").slice(0, 10);
   const open = theatreRunState(released || null, now) === "open";
   const openedOn = open ? fmtDateShort(released, now, localeFor((cfg && cfg.code) || "in")) : "";
+  // A date still ahead is neither "open" nor "ended" (12 Nov 2026 accuracy scan): a release moved
+  // later read "Theatrical run ended" on a film not yet out. It says when the film opens.
+  const ahead = !!released && released > new Date(now).toISOString().slice(0, 10);
+  const opensOn = ahead ? fmtDateShort(released, now, localeFor((cfg && cfg.code) || "in")) : "";
   // Pages frozen BEFORE the per-country vocabulary split carry India's "OTT" wording
   // in every market, so we match both the country's current word and the legacy one.
   // Replacements always use the country's current vocabulary.
@@ -687,16 +698,19 @@ function archivePatchHtml(html, countryName, cfg = null, item = null, now = Date
   ];
   const swaps = [
     [`It&#39;s in theatres in ${countryName} now — best caught on the big screen.`,
-     open ? `It opened in theatres in ${countryName} on ${escHtml(openedOn)} — check back here for its ${V.arrival}.`
+     ahead ? `It opens in theatres in ${countryName} on ${escHtml(opensOn)}.`
+       : open ? `It opened in theatres in ${countryName} on ${escHtml(openedOn)} — check back here for its ${V.arrival}.`
        : `It had its theatrical run in ${countryName} — check back here for its ${V.arrival}.`],
     [`<span class="pill">In theatres</span>`,
-     open ? `<span class="pill">Opened in cinemas ${escHtml(openedOn)} — not streaming yet</span>`
+     ahead ? `<span class="pill">In cinemas from ${escHtml(opensOn)}</span>`
+       : open ? `<span class="pill">Opened in cinemas ${escHtml(openedOn)} — not streaming yet</span>`
        : `<span class="pill">Theatrical run ended — ${V.arrival} pending</span>`],
   ];
   for (const v of variants) {
     swaps.push([
       `is currently playing in theatres across ${countryName}. ${v.article} ${v.release} hasn&#39;t been announced yet.`,
-      open ? `opened in theatres in ${countryName} on ${escHtml(openedOn)} and may still be showing — check local cinema listings. Its ${V.release} hasn&#39;t been announced yet — check back soon.`
+      ahead ? `opens in theatres in ${countryName} on ${escHtml(opensOn)}. Its ${V.release} hasn&#39;t been announced yet.`
+        : open ? `opened in theatres in ${countryName} on ${escHtml(openedOn)} and may still be showing — check local cinema listings. Its ${V.release} hasn&#39;t been announced yet — check back soon.`
         : `has finished its theatrical run in ${countryName}. Its ${V.release} hasn&#39;t been announced yet — check back soon.`,
     ]);
   }

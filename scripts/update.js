@@ -936,6 +936,14 @@ async function buildOtt(cfg, { isRegional, todayStr, isSuspicious, looksReReleas
     const extra = await enrich(c.kind, c.id, cfg.watchRegion);
     if (!extra.providers || extra.providers.length === 0) return null; // not streaming in this region
     Object.assign(item, extra, { platform: extra.providers[0] });
+    // A service's page for a film that hasn't been released is a listing, not an arrival (12 Nov
+    // 2026 accuracy scan): Mrigaya 1.5 was logged on Zee5 on 7 Nov and shown as streaming with
+    // "Released 13 Nov", six days before its premiere. Nothing is recorded or shown until the
+    // film's own date; the sighting is logged the first day it is listed on or after it.
+    if (item.kind === "movie" && item.released && String(item.released).slice(0, 10) > editionToday(cfg.code)) {
+      console.log(`  ott [${cfg.code}]: skipped ${item.title} — listed on ${item.platform} before its ${item.released} release`);
+      return null;
+    }
     withImdb(item);
     item._w = weighted402535(c); // quality score kept for the recency re-rank below (stripped before write)
 
@@ -1852,6 +1860,14 @@ function assembleCountry(cfg, { theatres, langTheatres }, { ott, ottOverflow, su
     const extra = await enrich(c.kind, c.id, cfg.watchRegion);
     if (!extra.providers || extra.providers.length === 0) return null; // not streaming in this region
     Object.assign(item, extra, { platform: extra.providers[0] });
+    // A service's page for a film that hasn't been released is a listing, not an arrival (12 Nov
+    // 2026 accuracy scan): Mrigaya 1.5 was logged on Zee5 on 7 Nov and shown as streaming with
+    // "Released 13 Nov", six days before its premiere. Nothing is recorded or shown until the
+    // film's own date; the sighting is logged the first day it is listed on or after it.
+    if (item.kind === "movie" && item.released && String(item.released).slice(0, 10) > editionToday(cfg.code)) {
+      console.log(`  ott [${cfg.code}]: skipped ${item.title} — listed on ${item.platform} before its ${item.released} release`);
+      return null;
+    }
     withImdb(item);
     item._w = weighted402535(c); // quality score kept for the recency re-rank below (stripped before write)
 

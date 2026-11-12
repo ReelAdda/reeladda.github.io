@@ -2669,6 +2669,41 @@ test("one logo, 12 Nov 2026: the ring with a white play on the dark band; an ind
   }
 });
 
+test("accuracy scan, 12 Nov 2026: tense, the header's rating, films not yet out, titles that left, one verdict per film", () => {
+  const V = require("./lib/pagev2.js"), A = require("./lib/archive.js"), F = require("./lib/filmpage.js"), M = require("./lib/migrate.js"), D = require("./lib/dated.js");
+  const day = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+  // 1. "Released" only for a date that has passed.
+  assert.ok(V.v3Meta({ kind: "movie", genre: "Drama", language: "Telugu", released: day(8) }).includes("Releases " + day(8)), "a date ahead: Releases");
+  assert.ok(V.v3Meta({ kind: "movie", genre: "Drama", language: "Telugu", released: day(-8) }).includes("Released " + day(-8)), "a date behind: Released");
+  // 5. A film whose date is ahead is never "in theatres", whatever its record says.
+  const where = V.v3Where({ kind: "movie", platform: "Theatres", released: day(40), providers: [] }, { relState: "upcoming", country: "India", V: { word: "OTT" } });
+  assert.ok(where.includes("In cinemas from") && !where.includes("In theatres"), where);
+  const patched = A.archivePatchHtml('<p><span class="pill">In theatres</span></p>', "India", { code: "in" }, { released: day(40) }).html;
+  assert.ok(patched.includes("In cinemas from") && !patched.includes("Theatrical run ended"), patched);
+  assert.ok(A.archivePatchHtml('<p><span class="pill">In theatres</span></p>', "India", { code: "in" }, { released: day(-200) }).html.includes("Theatrical run ended"), "a run long over still says so");
+  // 7. A title that left streaming says so in its title.
+  const gone = { title: "Asur", slug: "asur", kind: "tv", released: "2020-03-02", state: "gone", providers: [], platform: "" };
+  assert.ok(F.filmTitleTag(gone, TRUST_IN).includes("Not on OTT in India") && !F.filmTitleTag(gone, TRUST_IN).includes("Where to Watch"), F.filmTitleTag(gone, TRUST_IN));
+  assert.ok(F.filmTitleTag(gone, { code: "uk", name: "UK", region: "GB" }).includes("Not Streaming in the UK"));
+  // 3 and 4. One verdict per film: the freshest record lends the whole verdict.
+  const rich = M.verdictBundle({ rating: 7.5, votes: 1000, fcScore: { verdict: "Worth a watch", critics: "mixed" }, reception: { rt: { pct: 33 } } }, "2026-11-01");
+  const poor = { title: "Moana", rating: 7.5, votes: 1000, fcScore: { verdict: "Must watch", critics: null }, take: "Critics are split." };
+  const out = M.shareScore(poor, rich);
+  assert.ok(out.fcScore.verdict === "Worth a watch" && out.reception && out.take === undefined, "same count: the record with the critics' figures wins, whole");
+  assert.strictEqual(M.shareScore({ rating: 7.5, votes: 1000, fcScore: { verdict: "Worth a watch" }, reception: { rt: { pct: 33 } } }, rich).fcScore.verdict, "Worth a watch");
+  const noScore = { title: "Coco", rating: 8.2, votes: 21643 };
+  assert.strictEqual(M.shareScore(noScore, M.verdictBundle({ rating: 8.2, votes: 21643, fcScore: { verdict: "Must watch" } }, "2026-10-31")).fcScore.verdict, "Must watch", "a record that lost its score takes it back");
+  const fresh = { rating: 7.5, votes: 665, fcScore: { verdict: "Must watch" }, reception: { rt: { pct: 84 } } };
+  assert.strictEqual(M.shareScore(fresh, M.verdictBundle({ rating: 7.4, votes: 601, fcScore: { verdict: "Worth a watch" } }, "2026-11-12")), fresh, "an older count never replaces a newer one");
+  // 9. The Coming list takes a date a film page states.
+  const list = D.announcedDates({ theatres: [], comingSoon: [] }, {}, [{ slug: "daayra", title: "Daayra", language: "Hindi", digital: { date: day(3), note: "Netflix" }, platforms: [] },
+    { slug: "live", title: "Live", digital: { date: day(3), note: "Netflix" }, platforms: ["Netflix"] }, { slug: "past", title: "Past", digital: { date: day(-3), note: "" }, platforms: [] }]);
+  assert.deepStrictEqual(list.map((x) => x.slug), ["daayra"], "a date ahead on a page that isn't streaming, and only that");
+  // 2. The description's rating comes from the header, never an episode's star.
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "archive.js"), "utf8");
+  assert.ok(src.includes(".exec(headHtml)") && !src.includes("([0-9]+(?:\.[0-9])?)/.exec(html)"), "the star is looked for in the header only");
+});
+
 test("alert button: in the OTT section of a waiting page only, stripped without a key (10 Nov 2026)", () => {
   const F = require("./lib/filmpage.js");
   const KEY = "B" + "a".repeat(86);
@@ -4246,9 +4281,9 @@ const OTT_WEEK_DATA = {
   generatedAt: "2026-07-01T07:54:26.326Z",
   ott: [
     { title: "Alliance", slug: "alliance", platform: "Amazon Prime Video", language: "English", genre: "Reality", rating: 7.2, verdict: "Worth a watch", kind: "tv", freshDate: "2026-06-26", badge: "New show", poster: "https://image.tmdb.org/t/p/w342/x.jpg" },
-    { title: "Maa <Behen>", slug: "maa-behen", platform: "Netflix", language: "Hindi", genre: "Drama", rating: 6.9, verdict: "Worth a watch", kind: "movie", freshDate: "2026-06-04" },
+    { title: "Maa <Behen>", slug: "maa-behen", platform: "Netflix", language: "Hindi", genre: "Drama", rating: 6.9, verdict: "Worth a watch", kind: "movie", freshDate: "2026-06-27" },
     { title: "The Bear", slug: "the-bear", platform: "JioHotstar", language: "English", genre: "Comedy", rating: 8.2, verdict: "Must watch", kind: "tv", freshDate: "2026-06-25", badge: "New season", trending: true, trailerViews: 12300000 },
-    { title: "Raakh", slug: "raakh", platform: "Amazon Prime Video", language: "Hindi", genre: "Thriller", rating: 7.5, verdict: "Worth a watch", kind: "movie", freshDate: "2026-06-12" },
+    { title: "Raakh", slug: "raakh", platform: "Amazon Prime Video", language: "Hindi", genre: "Thriller", rating: 7.5, verdict: "Worth a watch", kind: "movie", freshDate: "2026-06-28" },
   ],
 };
 const OTT_WEEK_COUNTRIES = [{ code: "in", region: "IN" }, { code: "us", region: "US" }];
@@ -4300,6 +4335,22 @@ test("released last week: the previous Monday–Sunday, films only, best verdict
     assert.deepStrictEqual(HP.scanProse(HP.siteProse(live)), [], "plain wording");
   } finally { R.useRolloutConfig(ROLLOUT_OFF); }
   assert.ok(require("./lib/pagetypes.js").pageTypeOf("released-last-week/index.html").id === "released last week" && require("./site.js").isGenerated("released-last-week"));
+});
+test("weekly hubs: 'new this week' is the last seven days; older arrivals sit under 'Arrived earlier' (12 Nov 2026)", () => {
+  const data = { generatedAt: "2026-11-12T08:00:00.000Z", ott: [
+    { title: "Fresh One", slug: "fresh-one", platform: "Netflix", kind: "movie", freshDate: "2026-11-09", ottFreshDate: "2026-11-09" },
+    { title: "Edge Case", slug: "edge-case", platform: "Netflix", kind: "movie", freshDate: "2026-11-05", ottFreshDate: "2026-11-05" },
+    { title: "Late Arrival", slug: "late-arrival", platform: "Zee5", kind: "movie", freshDate: "2026-09-23", ottFreshDate: "2026-11-10" },
+    { title: "Old News", slug: "old-news", platform: "Netflix", kind: "tv", freshDate: "2026-10-09", ottFreshDate: "2026-10-09" },
+    { title: "Carried", slug: "carried", platform: "Netflix", kind: "tv", freshDate: "2026-10-01", stillGood: true },
+  ] };
+  const html = U.buildOttWeekPage(data, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);
+  const sec = (h) => { const i = html.indexOf(h); const j = html.indexOf("<h2", i + 4); return i < 0 ? "" : html.slice(i, j > 0 ? j : html.length); };
+  assert.ok(sec("<h2>New on Netflix").includes("Fresh One") && sec("<h2>New on Netflix").includes("Edge Case") && !sec("<h2>New on Netflix").includes("Old News"), "seven days back counts; five weeks back doesn't");
+  assert.ok(sec("<h2>New on Zee5").includes("Late Arrival"), "an older film that arrived this week is new");
+  assert.ok(sec("<h2>Arrived earlier").includes("Old News") && sec("<h2>Arrived earlier").includes("last five weeks"), "older arrivals get their own section");
+  assert.ok(sec("<h2>Still worth it").includes("Carried") && !sec("<h2>Arrived earlier").includes("Carried"));
+  assert.ok(!html.includes("<title>4 New") && !html.includes("<title>5 New"), "the title never counts the older rows");
 });
 test("buildOttWeekPage: groups by platform, biggest platform first", () => {
   const html = U.buildOttWeekPage(OTT_WEEK_DATA, { code: "in", name: "India" }, OTT_WEEK_COUNTRIES);

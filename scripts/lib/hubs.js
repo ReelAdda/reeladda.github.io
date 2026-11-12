@@ -536,7 +536,14 @@ function buildPlatformHubPage(data, cfg, hub) {
   // new arrivals. Every currency claim on this page is now computed from `fresh` only;
   // carried-over titles still appear, under their own labelled section, because they are
   // genuinely worth watching and dropping them would thin the page for no gain.
-  const fresh = hub.items.filter((x) => !x.stillGood);
+  // "This week" is the seven days up to this build (12 Nov 2026 accuracy scan, as on
+  // /new-on-ott/, lib/weekly.js): a title that arrived three weeks ago and isn't a carried-over
+  // standout is neither, and goes under "Arrived earlier".
+  const weekAgo = new Date((Date.parse(gen) || Date.now()) - 7 * 864e5).toISOString().slice(0, 10);
+  const arrivedOn = (x) => String(x.ottFreshDate || x.freshDate || "").slice(0, 10);
+  const thisWeek = (x) => !arrivedOn(x) || arrivedOn(x) >= weekAgo;
+  const fresh = hub.items.filter((x) => !x.stillGood && thisWeek(x));
+  const earlier = hub.items.filter((x) => !x.stillGood && !thisWeek(x));
   const carried = hub.items.filter((x) => x.stillGood);
   const claimSet = fresh.length ? fresh : hub.items;   // never leave the page claim-less
   const films = fresh.filter((x) => x.kind !== "tv"), series = fresh.filter((x) => x.kind === "tv");
@@ -606,6 +613,7 @@ function buildPlatformHubPage(data, cfg, hub) {
       ...((films.length && series.length)
         ? [{ h2: "Movies", items: films }, { h2: "Series", items: series }]
         : (fresh.length ? [{ h2: `Added this week`, items: fresh }] : [])),
+      ...(earlier.length ? [{ h2: "Arrived earlier", items: earlier }] : []),
       ...(carried.length ? [{ h2: plain ? "Still worth watching from earlier weeks" : "Still worth it — from earlier weeks", items: carried }] : []),
     ],
     faqs, extraLd, homeUrl: `https://filmychill.com${m.path}`, code, altPaths,

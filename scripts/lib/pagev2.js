@@ -283,7 +283,9 @@ function v3Meta(item, { fmt = (d) => d, airLabel = false } = {}) {
   const guideFirst = ep && ep.list && ep.list.length ? ep.list.map((x) => x.date).filter(Boolean).sort()[0] : null;
   const when = item.kind === "tv"
     ? (start ? `Latest season ${fmt(start)}${airLabel && guideFirst && start === guideFirst ? " (original air date)" : ""}` : null)
-    : (item.released ? `Released ${fmt(item.released)}` : null);
+    // The tense follows the date (12 Nov 2026 accuracy scan): 567 pages read "Released 20 Nov
+    // 2026" for a date still ahead, beside a pill saying "In cinemas from 20 Nov".
+    : (item.released ? `${String(item.released).slice(0, 10) >= new Date().toISOString().slice(0, 10) ? "Releases" : "Released"} ${fmt(item.released)}` : null);
   const tv = item.trailerViews ? trailerViewsLabel(item.trailerViews) : null;
   return [item.genre, item.language, when, item.runtime ? `${item.runtime} min` : null, tv].filter(Boolean).map(escHtml).join(" · ");
 }
@@ -324,12 +326,17 @@ function v3Where(item, { relState, country, V, asOf = "", fmt = (d) => d }) {
   }
   // Status pills (not providers; lib/facts.js STATUS_PILL skips them) sit in a .st wrapper, so
   // they draw as the quiet dashed pill while keeping the class the readers expect.
-  if (item.platform === "Theatres") return wrap(`<span class="st"><span class="pill">In theatres</span></span>${rentPills}`, rb.length ? note : checked);
-  if (rb.length) return wrap(rentPills, note);
-  if ((relState === "upcoming" || relState === "today") && item.released) {
+  // A film whose date is still ahead is not "in theatres", whatever its record says (12 Nov 2026
+  // accuracy scan): a release moved later kept platform "Theatres", drew the "In theatres" pill,
+  // and the frozen-page patch turned that into "Theatrical run ended" on a film not yet out
+  // (Chiranjeevi Hanuman: The Eternal, due 25 Dec; 10 pages).
+  const ahead = (relState === "upcoming" || relState === "today") && item.released;
+  if (ahead && !rb.length) {
     const pill = relState === "today" ? "In cinemas today" : `In cinemas from ${e(fmt(item.released))}`;
     return wrap(`<span class="st"><span class="pill">${pill}</span></span>`, "");
   }
+  if (item.platform === "Theatres") return wrap(`<span class="st"><span class="pill">In theatres</span></span>${rentPills}`, rb.length ? note : checked);
+  if (rb.length) return wrap(rentPills, note);
   // Nowhere: no block for the readers (as before), just the honest pill.
   return `<div class="pills">${aud}<span class="ppill none">Not on ${ott} in ${e(country)} ${item.state === "gone" ? "right now" : "yet"}</span></div>`;
 }

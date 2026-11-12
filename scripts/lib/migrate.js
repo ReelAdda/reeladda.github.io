@@ -153,6 +153,7 @@ function migrateBatch(manifest, cfg, { limit = 0, today }) {
 // FilmyChill Score is worked out again from that count with the critics' reading it already
 // had. Pages in this week's lists were just rebuilt from TMDB and already hold the newest.
 const ONE_SCORE = "one-score";
+const ONE_VERDICT = "one-verdict";
 const TIER_TONE = { positive: "positive", mixed: "mixed", negative: "negative" };
 let bestAudience = null;
 function bestAudienceFor(key) {
@@ -166,20 +167,52 @@ function bestAudienceFor(key) {
       for (const [slug, rec] of facts) {
         const e = (man[c.code] || {})[slug];
         const it = rec && rec.item;
-        if (!e || !e.tmdbId || !it || it.rating == null || !(Number(it.votes) > 0)) continue;
+        if (!e || !e.tmdbId || !it) continue;
+        const rated = it.rating != null && Number(it.votes) > 0;
+        if (!rated && !it.fcScore) continue;
         const k = `${e.kind || it.kind || "movie"}:${e.tmdbId}`;
+        const cand = verdictBundle(it, rec.updated);
         const cur = bestAudience.get(k);
-        if (!cur || Number(it.votes) > cur.votes) bestAudience.set(k, { rating: Number(it.rating), votes: Number(it.votes) });
+        if (!cur || fresher(cand, cur)) bestAudience.set(k, cand);
       }
     }
   }
   return bestAudience.get(key) || null;
 }
 function resetBestAudience() { bestAudience = null; }
-// Pure: the item with the fresher rating and count, its score worked out again; the same item
-// when there's nothing fresher or no score comes out of it.
+// ONE VERDICT PER FILM (12 Nov 2026 accuracy scan). Sharing the count alone left the critics'
+// reading per edition, so one film still drew two verdicts (Moana: "Must watch" in the UAE, with
+// no critics' figures on file, "Worth a watch" in twelve editions that had them, all at 1,000
+// ratings), and an edition whose record had lost its score said "Not enough ratings" beside
+// fifteen that gave one (Coco in Spain and Mexico): 47 films in all. The freshest record now
+// lends everything the verdict rests on: the rating and count, the score, the critics' figures
+// and the take. Freshest: the most ratings; then the one with critics' figures; then a score;
+// then the later date. A film not yet out in an edition still says so there (lib/fcscore.js).
+const BUNDLE_KEYS = ["rating", "votes", "fcScore", "reception", "take", "takeSrc", "takeArticle", "takeCounter"];
+function verdictBundle(it, updated = "") {
+  const b = { updated: String(updated || ""), rating: it.rating == null ? null : Number(it.rating), votes: Number(it.votes) || 0 };
+  for (const k of BUNDLE_KEYS.slice(2)) if (it[k] !== undefined) b[k] = it[k];
+  return b;
+}
+const rank = (b) => [b.votes || 0, b.reception ? 1 : 0, b.fcScore ? 1 : 0];
+function fresher(a, b) {
+  const x = rank(a), y = rank(b);
+  for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] > y[i];
+  return String(a.updated || "") > String(b.updated || "");
+}
+// Pure: the item with the freshest record's rating, count and verdict; the same item when there
+// is nothing fresher. A best record without a score (older callers, tests) lends its count only,
+// and the score is worked out again with the critics' reading the item already had.
 function shareScore(item, best) {
-  if (!item || !best || !(best.votes > (Number(item.votes) || 0))) return item;
+  if (!item || !best) return item;
+  const mine = verdictBundle(item, "");
+  if (best.fcScore) {
+    if (!fresher({ ...best, updated: "" }, mine)) return item;        // this record is as fresh: keep it
+    const next = { ...item };
+    for (const k of BUNDLE_KEYS) { if (best[k] === undefined) delete next[k]; else next[k] = best[k]; }
+    return next;
+  }
+  if (!(best.votes > (Number(item.votes) || 0))) return item;
   const tone = TIER_TONE[item.fcScore && item.fcScore.critics] || null;
   const next = { ...item, rating: best.rating, votes: best.votes };
   const s = fcScore({ ...next, criticsTone: tone });
@@ -265,7 +298,10 @@ function renderMigrated(manifest, cfg, { today, mode = null, modes = null, liste
     }
     // One score per film (rollout ONE_SCORE): the freshest TMDB count any edition holds for it.
     if (e.tmdbId && inRollout(ONE_SCORE, slug)) {
-      const shared = shareScore(now, bestAudienceFor(`${e.kind || now.kind || "movie"}:${e.tmdbId}`));
+      // The whole verdict by stages (rollout ONE_VERDICT); until a film's stage, the count alone.
+      const best = bestAudienceFor(`${e.kind || now.kind || "movie"}:${e.tmdbId}`);
+      const lend = !best ? null : inRollout(ONE_VERDICT, slug) ? best : (best.rating != null ? { rating: best.rating, votes: best.votes } : null);
+      const shared = shareScore(now, lend);
       if (shared !== now) { now = shared; res.fields.sharedScore = (res.fields.sharedScore || 0) + 1; }
     }
     let r = rec;
@@ -317,4 +353,4 @@ function migrateLimit() {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
 }
 
-module.exports = { migrateBatch, migrateLimit, renderFrozen, renderMigrated, resetBestAudience, shareScore, tryMigrate };
+module.exports = { fresher, migrateBatch, migrateLimit, renderFrozen, renderMigrated, resetBestAudience, shareScore, tryMigrate, verdictBundle };

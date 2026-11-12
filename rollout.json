@@ -189,6 +189,21 @@
    "since": "2026-11-09",
    "what": "published reviews as their own block under the score card (lib/filmpage.js reviewBlockHtml): outlet, date, the outlet's headline, a star rating only where the feed gave one, newest first; the card keeps the count, so nothing is said twice. Approved by the owner after the 9 Nov mock-ups; 10/25/50/100% on 10–13 Nov. Every edition draws its film pages from facts through the builder (facts-mode.json), so frozen pages get it on their next render; a page still frozen keeps its present, consistent text. Not in the facts fingerprint: no sitemap date moves."
   },
+  "one-verdict": {
+   "percent": 0,
+   "schedule": [
+    {
+     "from": "2026-11-20T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-21T00:00",
+     "percent": 100
+    }
+   ],
+   "since": "2026-11-12",
+   "what": "one verdict per film across editions (lib/migrate.js shareScore, verdictBundle): a film page takes the rating, count, FilmyChill verdict, critics' figures and take from the freshest record any edition holds (most ratings, then critics' figures, then a score, then the later date). 12 Nov 2026 accuracy scan: 4 films carried different verdicts in different editions and 43 a verdict in some and 'Not enough ratings' in others (Moana, Coco). About 570 records change, 108 of them their verdict label, so two stages (50% on 20 Nov, 100% on 21 Nov). Until a film's stage it shares the count only, as since October (one-score)."
+  },
   "one-logo": {
    "percent": 0,
    "schedule": [

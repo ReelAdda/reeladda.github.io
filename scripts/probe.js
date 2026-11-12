@@ -59,8 +59,11 @@ async function main() {
   const order = [...pending.slice(start), ...pending.slice(0, start)];
 
   let calls = 0, found = 0;
+  const today = new Date().toISOString().slice(0, 10);
   for (const w of order) {
     if (calls >= MAX_CALLS) break;
+    // A film not yet released can only be a placeholder listing (12 Nov 2026): not checked, not logged.
+    if (w.released && String(w.released).slice(0, 10) > today) continue;
     calls++;
     let providers;
     try {

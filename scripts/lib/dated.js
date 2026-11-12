@@ -74,6 +74,17 @@ function announcedDates(data, manifestForCountry, index = [], now = Date.now()) 
     out.set(slug, { slug, title: e.title || ix.title || slug, language: e.lang || ix.language || "", kind: e.kind || "movie",
       genre: ix.genre || "", poster: ix.poster || "", rating: null, votes: 0, verdict: null, date: dg.date, platform: dg.note || null });
   }
+  // A date a film page states (its own marker, read into the index by lib/graph.js) that neither
+  // source above carried: the page said "Streaming from 13 Nov on Netflix" and this list left the
+  // film out (Daayra, 12 Nov 2026 accuracy scan). A page that names a service is streaming already.
+  for (const ix of index || []) {
+    const dg = ix && ix.digital;
+    if (!dg || !dg.date || dg.date < today || out.has(ix.slug) || (ix.platforms && ix.platforms.length)) continue;
+    const e = (manifestForCountry || {})[ix.slug];
+    if (e && e.live) continue;
+    out.set(ix.slug, { slug: ix.slug, title: ix.title || ix.slug, language: ix.language || "", kind: ix.kind || "movie",
+      genre: ix.genre || "", poster: ix.poster || "", rating: null, votes: 0, verdict: null, date: dg.date, platform: dg.note || null });
+  }
   return [...out.values()].sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
 }
 
