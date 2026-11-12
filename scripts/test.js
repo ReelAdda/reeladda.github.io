@@ -2630,6 +2630,43 @@ test("Bing report, 12 Nov 2026: language hubs say how many, which week and which
   assert.ok(desc.includes("starts streaming in India on") && desc.includes("See which platform has it") && !desc.includes("Prime Video"), desc);
 });
 
+test("one logo, 12 Nov 2026: the ring with a white play on the dark band; a navy tile off it; film and person pages by stage", () => {
+  const B = require("./lib/brand.js");
+  const white = 'fill="#FFFFFF" style="fill:#FFFFFF"', tile = '<rect width="100" height="100" rx="22" fill="#1C1838"/>';
+  assert.ok(B.MARK_HOME.includes(white) && B.MARK_TOP.includes(white) && !B.MARK_HOME.includes("#4038C7") && !B.MARK_HOME.includes("<rect"), "white play, no indigo, no tile on the bar; immune to the bar's recolouring");
+  assert.ok(B.LOGO_TILE.startsWith(tile) && B.LOGO_TILE.includes(white), "off the bar, the same on a tile of the bar's colour");
+  const ring = '<svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true" style="width:.92em"><circle cx="50" cy="50" r="37" fill="none" stroke="#EFE6D6" stroke-width="13"/><path d="M42 33" fill="#4038C7"/></svg>';
+  const page = `<div class="top v3"><a class="mark" href="/">${ring}FILMY<span>CHILL</span></a></div>`;
+  const on = B.ensureBrandMark(page);
+  assert.ok(on.includes('style="width:.92em"><circle') && on.includes(white) && !on.includes('fill="#4038C7"'), "the drawing changes, the size stays");
+  assert.strictEqual(B.ensureBrandMark(on), on, "idempotent");
+  assert.strictEqual(B.ensureBrandMark(page, { upgrade: false }), page, "a page whose stage hasn't come keeps the old ring");
+  const onTile = `<div class="logo"><svg class="brand-mark" viewBox="0 0 100 100">${B.LOGO_TILE}</svg>FILMY</div>`;
+  assert.strictEqual(B.ensureBrandMark(onTile), onTile, "a mark on its tile is left alone");
+  const bare = '<div class="top"><a href="/">FILMY<span>CHILL</span></a></div>';
+  assert.ok(B.ensureBrandMark(bare).includes(white) && !B.ensureBrandMark(bare, { upgrade: false }).includes('style="fill:#FFFFFF"'), "a new mark follows the stage too");
+  assert.deepStrictEqual(["movie/a.html", "uk/movie/a.html", "people/x/index.html", "hindi/index.html", "index.html", "404.html"].map(B.stagedKey), ["a", "a", "people/x", null, null, null]);
+  // The pass: hubs and site pages at once, film pages only when their stage has come.
+  const fs = require("fs"), path = require("path"), dir = fs.mkdtempSync(path.join(require("os").tmpdir(), "fclogo-"));
+  for (const f of ["movie/in.html", "movie/out.html", "hindi/index.html"]) { fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true }); fs.writeFileSync(path.join(dir, f), page); }
+  const r = B.addBrandToPages(["movie/in.html", "movie/out.html", "hindi/index.html"], { root: dir, included: (key) => key === "in" });
+  assert.strictEqual(r.changed, 2);
+  assert.ok(fs.readFileSync(path.join(dir, "movie/in.html"), "utf8").includes(white) && !fs.readFileSync(path.join(dir, "movie/out.html"), "utf8").includes(white) && fs.readFileSync(path.join(dir, "hindi/index.html"), "utf8").includes(white));
+  // The toolbar colour follows the logo: the bar's colour, by the same stages.
+  const meta = '<meta name="theme-color" content="#4038C7">';
+  assert.strictEqual(B.barColour(meta), '<meta name="theme-color" content="#1C1838">');
+  assert.strictEqual(B.barColour(meta, false), meta);
+  fs.writeFileSync(path.join(dir, "movie/in.html"), meta + page); fs.writeFileSync(path.join(dir, "movie/out.html"), meta + page);
+  B.addBrandToPages(["movie/in.html", "movie/out.html"], { root: dir, included: (key) => key === "in" });
+  assert.ok(fs.readFileSync(path.join(dir, "movie/in.html"), "utf8").includes("#1C1838") && fs.readFileSync(path.join(dir, "movie/out.html"), "utf8").startsWith(meta));
+  assert.ok(fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8").includes('<meta name="theme-color" content="#1C1838">') && fs.readFileSync(path.join(__dirname, "..", "manifest.json"), "utf8").includes('"theme_color": "#1C1838"'), "homepage and web-app manifest");
+  // The hand-kept pages and the homepage template already carry it; the 404 page, on cream, on its tile.
+  for (const f of ["index.html", "404.html", "about/index.html", "privacy/index.html", "dmca/index.html"]) {
+    const h = fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+    assert.ok(h.includes(white) && B.ensureBrandMark(h) === h && h.includes(tile) === (f === "404.html"), f);
+  }
+});
+
 test("alert button: in the OTT section of a waiting page only, stripped without a key (10 Nov 2026)", () => {
   const F = require("./lib/filmpage.js");
   const KEY = "B" + "a".repeat(86);
@@ -9605,9 +9642,9 @@ test("brand mark: the ring + play beside the header wordmark on every page shape
   const t = B.ensureBrandMark(top);
   assert.ok(t.startsWith('<div class="top"><a href="https://filmychill.com/us/" style="display:inline-flex;align-items:center"><svg class="brand-mark"') && t.includes("</svg>FILMY<span>CHILL</span></a>"), "top bar: the edition's link kept, mark first, wordmark unchanged");
   const home = B.ensureBrandMark('<div class="logo">FILMY<span>CHILL</span></div>');
-  assert.ok(home.includes('<div class="logo" style="display:inline-flex;align-items:center"><svg class="brand-mark"') && home.includes('fill="#4038C7"'), "homepage: indigo play on cream");
+  assert.ok(home.includes('<div class="logo" style="display:inline-flex;align-items:center"><svg class="brand-mark"') && home.includes('fill="#FFFFFF"') && !home.includes('#4038C7'), "homepage: the logo, the ring with a white play (12 Nov 2026)");
   assert.ok(B.MARK_TOP.includes('stroke="#FFAD1F"') && B.MARK_TOP.includes('aria-hidden="true"'), "amber ring, hidden from screen readers (the link text says FilmyChill)");
-  assert.ok(B.MARK_HOME.includes('stroke="#EFE6D6"'), "the same track colour as the card rings");
+  assert.ok(B.MARK_HOME.includes('stroke="rgba(255,255,255,.22)"') && !B.MARK_HOME.includes('stroke="#EFE6D6"'), "the logo's own faint track, as on the app icon");
   assert.strictEqual(B.ensureBrandMark(t), t, "idempotent");
   assert.strictEqual(B.ensureBrandMark("<p>no header</p>"), "<p>no header</p>");
   assert.strictEqual(W.comparable(t), W.comparable(top), "a fresh render without the mark is the same page");
@@ -10202,7 +10239,7 @@ test("PWA (28 Oct 2026): manifest, service worker, offline page, registration on
   const root = path.join(__dirname, "..");
   const read = (p) => fsx.readFileSync(path.join(root, p), "utf8");
   const m = JSON.parse(read("manifest.json"));
-  assert.strictEqual(m.theme_color, "#4038C7"); assert.strictEqual(m.display, "standalone"); assert.strictEqual(m.start_url, "/?source=pwa"); assert.strictEqual(m.scope, "/"); assert.strictEqual(m.id, "/");
+  assert.strictEqual(m.theme_color, "#1C1838"); assert.strictEqual(m.display, "standalone"); assert.strictEqual(m.start_url, "/?source=pwa"); assert.strictEqual(m.scope, "/"); assert.strictEqual(m.id, "/");
   assert.ok(m.icons.some((i) => i.sizes === "512x512" && /maskable/.test(i.purpose)) && m.icons.some((i) => i.sizes === "192x192" && /any/.test(i.purpose)), "any + maskable icons");
   assert.ok(m.shortcuts.length >= 2 && m.shortcuts.every((s) => /^\/[a-z-]+\/\?source=pwa$/.test(s.url)));
   const sw = read("sw.js");
@@ -10221,7 +10258,7 @@ test("PWA (28 Oct 2026): manifest, service worker, offline page, registration on
   assert.ok(/navigator\.serviceWorker\.register\('\/sw\.js'\)/.test(read("js/app.js")) && /navigator\.serviceWorker\.register\("\/sw\.js"\)/.test(read("js/film.js")), "registered by both page scripts, after load");
   assert.ok(/addEventListener\('load', \(\) => \{ navigator\.serviceWorker\.register/.test(read("js/app.js")));
   const home = read("index.html");
-  assert.ok(/<meta name="theme-color" content="#4038C7">/.test(home) && /<link rel="manifest" href="\/manifest\.json">/.test(home));
+  assert.ok(/<meta name="theme-color" content="#1C1838">/.test(home) && /<link rel="manifest" href="\/manifest\.json">/.test(home));
   // v2 film pages link the manifest and carry the header colour; lean pages are left as they were.
   const R = require("./lib/rollout.js"), F = require("./lib/filmpage.js"), IN = require("./lib/core.js").COUNTRIES[0];
   const it = { title: "T", slug: "t", kind: "movie", released: "2026-10-01", language: "Hindi", genre: "Drama", providers: ["Netflix"], rentBuy: [], tmdbId: 1 };

@@ -189,6 +189,29 @@
    "since": "2026-11-09",
    "what": "published reviews as their own block under the score card (lib/filmpage.js reviewBlockHtml): outlet, date, the outlet's headline, a star rating only where the feed gave one, newest first; the card keeps the count, so nothing is said twice. Approved by the owner after the 9 Nov mock-ups; 10/25/50/100% on 10–13 Nov. Every edition draws its film pages from facts through the builder (facts-mode.json), so frozen pages get it on their next render; a page still frozen keeps its present, consistent text. Not in the facts fingerprint: no sitemap date moves."
   },
+  "one-logo": {
+   "percent": 0,
+   "schedule": [
+    {
+     "from": "2026-11-25T00:00",
+     "percent": 10
+    },
+    {
+     "from": "2026-11-26T00:00",
+     "percent": 25
+    },
+    {
+     "from": "2026-11-27T00:00",
+     "percent": 50
+    },
+    {
+     "from": "2026-11-28T00:00",
+     "percent": 100
+    }
+   ],
+   "since": "2026-11-12",
+   "what": "the header mark on film and person pages becomes the logo (lib/brand.js LOGO, addBrandToPages): the marigold ring with a white play on the dark band, in place of the ring with an indigo play; the browser's toolbar colour (theme-color) becomes the band's #1C1838 with it. Owner, 12 Nov 2026: 'we cannot have different colours for the brand'; the logo moved from the indigo tile to the bar's colour after the owner saw the two blues together (mock-up 4, https://claude.ai/artifact/AjyMn6zuLK1giAKDcUKP8h). The homepage, hubs, lists, trust pages, the 404 page, the app icons, the favicon and the share image change at once; film and person pages in stages on 25-28 Nov, after answer-titles (24 Nov). Presentation only: not in the facts fingerprint, no sitemap date moves."
+  },
   "answer-titles": {
    "percent": 0,
    "schedule": [
