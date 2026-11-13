@@ -24,7 +24,7 @@
   },
   "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml": {
    "ok": "2026-11-13",
-   "items": 83
+   "items": 88
   },
   "https://feeds.feedburner.com/ndtvmovies-latest": {
    "ok": "2026-11-05",
@@ -60,7 +60,7 @@
   },
   "https://www.freepressjournal.in/stories.rss?section=entertainment": {
    "ok": "2026-11-13",
-   "items": 95
+   "items": 42
   },
   "https://www.123telugu.com/category/reviews/feed": {
    "ok": "2026-11-13",
@@ -72,15 +72,15 @@
   },
   "https://www.cinemaexpress.com/feed": {
    "ok": "2026-11-13",
-   "items": 11
+   "items": 0
   },
   "https://www.vikatan.com/feed": {
    "ok": "2026-11-13",
-   "items": 27
+   "items": 1
   },
   "https://www.prajavani.net/feed": {
    "ok": "2026-11-13",
-   "items": 136
+   "items": 37
   },
   "https://www.amarujala.com/rss/entertainment.xml": {
    "ok": "2026-11-13",
@@ -88,11 +88,13 @@
   },
   "https://www.sangbadpratidin.in/feed/": {
    "ok": "2026-11-13",
-   "items": 20
+   "items": 20,
+   "failed": "2026-11-13",
+   "error": "This operation was aborted"
   },
   "https://www.rediff.com/rss/moviesreviewsrss.xml": {
    "ok": "2026-11-13",
-   "items": 218
+   "items": 219
   }
  },
  "films": {
@@ -1012,6 +1014,18 @@
      "u": "https://www.freepressjournal.in/entertainment/blind-game-review-generously-use-the-fast-forward-button-for-this-arjun-rampal-priyamani-thriller",
      "h": "Blind Game Review: Generously Use The Fast Forward Button For This Arjun Rampal, Priyamani 'Thriller'",
      "d": "2026-11-12"
+    },
+    {
+     "o": "DNA",
+     "u": "https://www.dnaindia.com/bollywood/report-blind-game-movie-review-arjun-rampal-moves-on-from-dhurandhar-s-major-iqbal-effortlessly-delivers-engaging-whodunnit-with-priyamani-3223996",
+     "h": "Blind Game movie review: Arjun Rampal moves on from Dhurandhar's Major Iqbal effortlessly, delivers engaging whodunnit with Priyamani",
+     "d": "2026-11-13"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/blind-game-movie-review-arjun-rampals-swag-cant-save-this-twisted-thriller/article71697273.ece",
+     "h": "‘Blind Game’ movie review: Arjun Rampal’s swag can’t save this twisted thriller",
+     "d": "2026-11-13"
     }
    ],
    "updated": "2026-11-13"
@@ -1098,6 +1112,18 @@
    "released": "2026-11-12",
    "items": [
     {
+     "o": "Amar Ujala",
+     "u": "https://www.amarujala.com/entertainment/celebs-interviews/parivarik-manuranjan-movie-review-in-hindi-starring-pankaj-tripathi-and-aditi-rao-hydari-2026-11-13",
+     "h": "Parivarik ManuRanjan Review: परिवार संग देखने के लिए परफेक्ट मनुरंजन; पंकज त्रिपाठी ने बचाया, कहां हुई गड़बड़?",
+     "d": "2026-11-13"
+    },
+    {
+     "o": "Hindustan Times",
+     "u": "https://www.hindustantimes.com/entertainment/bollywood/parivarik-manuranjan-review-pankaj-tripathi-aditi-rao-hydaris-slice-of-life-film-is-too-run-of-the-mill-to-leave-an-impact-101794569789567.html",
+     "h": "Parivarik ManuRanjan review: Pankaj Tripathi, Aditi Rao Hydari's slice of life film is too run-of-the-mill to leave an impact",
+     "d": "2026-11-13"
+    },
+    {
      "o": "Rediff",
      "u": "https://www.rediff.com/movies/review/review-parivarik-manuranjan-could-have-been-funnier/20261113.htm",
      "h": "Review: Parivarik ManuRanjan Could Have Been Funnier",
@@ -1146,12 +1172,18 @@
   },
   "movie:791523": {
    "title": "Wildwood",
-   "released": "2026-11-05",
+   "released": "2026-11-13",
    "items": [
     {
      "o": "Free Press Journal",
      "u": "https://www.freepressjournal.in/entertainment/wildwood-review-laikas-stop-motion-fantasy-is-visually-spellbinding-and-engaging",
      "h": "Wildwood Review: Laika’s Stop-Motion Fantasy Is Visually Spellbinding And Engaging",
+     "d": "2026-11-13"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/wildwood-movie-review-alluring-forest-tale-withers-away-into-meandering-shadows/article71697588.ece",
+     "h": "‘Wildwood’ movie review: Alluring forest tale withers away into meandering shadows",
      "d": "2026-11-13"
     }
    ],
@@ -1165,6 +1197,38 @@
      "o": "Cinema Express",
      "u": "https://www.cinemaexpress.com/tamil/review/2026/Nov/13/john-doe-movie-review-this-otherwise-competent-no-frills-thriller-stumbles-at-the-finish-line",
      "h": "John Doe Movie Review: This otherwise competent no-frills thriller stumbles at the finish line",
+     "d": "2026-11-13"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/john-doe-movie-review-madhumita-arjun-das-sanchana-natarajan/article71698688.ece",
+     "h": "‘John Doe’ movie review: Madhumita finds her footing with a neat, effective thriller",
+     "d": "2026-11-13"
+    }
+   ],
+   "updated": "2026-11-13"
+  },
+  "tv:291507": {
+   "title": "The Body",
+   "released": "2026-11-11",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/the-body-series-review-is-deliciously-twisted-teen-drama-netflix-catholic-dread-erotic-thriller-supernatural-horror/article71698027.ece",
+     "h": "‘The Body’ series review: A deliciously twisted teen drama to be enjoyed with a side of Catholic dread",
+     "d": "2026-11-13"
+    }
+   ],
+   "updated": "2026-11-13"
+  },
+  "movie:1445172": {
+   "title": "Dark Chocolate",
+   "released": "2026-11-13",
+   "items": [
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/dark-chocolate-telugu-movie-review-and-rating.html",
+     "h": "Review: Dark Chocolate – A Different Attempt That Fails to Impress",
      "d": "2026-11-13"
     }
    ],
