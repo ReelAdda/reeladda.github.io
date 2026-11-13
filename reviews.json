@@ -1,9 +1,9 @@
 {
  "_about": "Published reviews of recent titles, from the outlets' RSS feeds (lib/reviews.js): outlet, link, headline, date, and a star rating only when the feed states one. Keyed by kind:tmdbId; pruned 90 days after release.",
- "fetched": "2026-11-12",
+ "fetched": "2026-11-13",
  "feeds": {
   "https://www.thehindu.com/entertainment/reviews/feeder/default.rss": {
-   "ok": "2026-11-12",
+   "ok": "2026-11-13",
    "items": 60
   },
   "https://indianexpress.com/section/entertainment/movie-review/feed/": {
@@ -23,7 +23,7 @@
    "error": "HTTP 403"
   },
   "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml": {
-   "ok": "2026-11-12",
+   "ok": "2026-11-13",
    "items": 83
   },
   "https://feeds.feedburner.com/ndtvmovies-latest": {
@@ -31,23 +31,23 @@
    "items": 100
   },
   "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml": {
-   "failed": "2026-11-12",
+   "failed": "2026-11-13",
    "error": "HTTP 403"
   },
   "https://www.news18.com/rss/movies.xml": {
-   "failed": "2026-11-12",
+   "failed": "2026-11-13",
    "error": "HTTP 403"
   },
   "https://feeds.feedburner.com/ScrollinArticles.rss": {
-   "ok": "2026-11-12",
+   "ok": "2026-11-13",
    "items": 100
   },
   "https://www.koimoi.com/feed/": {
-   "failed": "2026-11-12",
+   "failed": "2026-11-13",
    "error": "HTTP 403"
   },
   "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms": {
-   "ok": "2026-11-12",
+   "ok": "2026-11-13",
    "items": 20
   },
   "https://www.indiatoday.in/rss/1206611": {
@@ -55,44 +55,44 @@
    "items": 20
   },
   "https://www.dnaindia.com/feeds/entertainment.xml": {
-   "ok": "2026-11-12",
+   "ok": "2026-11-13",
    "items": 20
   },
   "https://www.freepressjournal.in/stories.rss?section=entertainment": {
-   "ok": "2026-11-12",
-   "items": 34
+   "ok": "2026-11-13",
+   "items": 95
   },
   "https://www.123telugu.com/category/reviews/feed": {
-   "ok": "2026-11-12",
+   "ok": "2026-11-13",
    "items": 30
   },
   "https://www.telugu360.com/feed/": {
-   "ok": "2026-11-12",
+   "ok": "2026-11-13",
    "items": 10
   },
   "https://www.cinemaexpress.com/feed": {
-   "ok": "2026-11-12",
-   "items": 2
+   "ok": "2026-11-13",
+   "items": 11
   },
   "https://www.vikatan.com/feed": {
-   "ok": "2026-11-12",
-   "items": 1
+   "ok": "2026-11-13",
+   "items": 27
   },
   "https://www.prajavani.net/feed": {
-   "ok": "2026-11-12",
-   "items": 28
+   "ok": "2026-11-13",
+   "items": 136
   },
   "https://www.amarujala.com/rss/entertainment.xml": {
-   "ok": "2026-11-12",
+   "ok": "2026-11-13",
    "items": 40
   },
   "https://www.sangbadpratidin.in/feed/": {
-   "ok": "2026-11-12",
+   "ok": "2026-11-13",
    "items": 20
   },
   "https://www.rediff.com/rss/moviesreviewsrss.xml": {
-   "ok": "2026-11-12",
-   "items": 216
+   "ok": "2026-11-13",
+   "items": 218
   }
  },
  "films": {
@@ -113,7 +113,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1496785": {
    "title": "Aadarsha Kutumbam House No: 47 - AK47",
@@ -126,7 +126,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1234139": {
    "title": "Jailer 2",
@@ -145,7 +145,7 @@
      "d": "2026-10-26"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1740967": {
    "title": "Orijinal",
@@ -158,7 +158,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1153576": {
    "title": "Street Fighter",
@@ -200,7 +200,7 @@
   },
   "movie:1400940": {
    "title": "Clayface",
-   "released": "2026-10-23",
+   "released": "2026-10-30",
    "items": [
     {
      "o": "The Hindu",
@@ -215,7 +215,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1288069": {
    "title": "Tenzing",
@@ -232,7 +232,7 @@
   },
   "movie:1058424": {
    "title": "Hope",
-   "released": "2026-10-23",
+   "released": "2026-10-29",
    "items": [
     {
      "o": "The Hindu",
@@ -241,7 +241,7 @@
      "d": "2026-10-18"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1255833": {
    "title": "Whalefall",
@@ -356,7 +356,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1395215": {
    "title": "Sigma",
@@ -400,7 +400,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "tv:289517": {
    "title": "Dead-End Job",
@@ -426,7 +426,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1374689": {
    "title": "Pyre",
@@ -451,7 +451,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1606527": {
    "title": "418",
@@ -570,7 +570,7 @@
      "d": "2026-11-09"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "tv:337806": {
    "title": "Least Eligible Bachelor",
@@ -615,7 +615,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1772549": {
    "title": "Pehla Pyaar Doosri Baar",
@@ -641,7 +641,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1081010": {
    "title": "Prahaar: The Untold Story of Ujjwal Nikam",
@@ -673,7 +673,7 @@
      "d": "2026-11-12"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "tv:302882": {
    "title": "#Love",
@@ -724,7 +724,7 @@
      "d": "2026-10-24"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:656908": {
    "title": "Ramayana: Rise of a Legend",
@@ -768,7 +768,7 @@
      "d": "2026-11-05"
     }
    ],
-   "updated": "2026-11-11"
+   "updated": "2026-11-13"
   },
   "movie:1810711": {
    "title": "Dilwali Diwali",
@@ -799,7 +799,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1423191": {
    "title": "Resident Evil",
@@ -812,7 +812,7 @@
      "d": "2026-09-17"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1555847": {
    "title": "Garividi Lakshmi",
@@ -856,7 +856,7 @@
      "d": "2026-11-07"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1402181": {
    "title": "Scene",
@@ -893,7 +893,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:926867": {
    "title": "Nooru Kodi Vaanavil",
@@ -919,7 +919,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1803837": {
    "title": "Summer Holidays",
@@ -976,7 +976,7 @@
      "d": "2026-11-09"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "tv:314271": {
    "title": "Bass X Machina",
@@ -1014,7 +1014,7 @@
      "d": "2026-11-12"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1263337": {
    "title": "Heart of the Beast",
@@ -1027,7 +1027,7 @@
      "d": "2026-09-23"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
   },
   "movie:1733518": {
    "title": "Bouma",
@@ -1038,9 +1038,137 @@
      "u": "https://www.thehindu.com/entertainment/movies/bouma-movie-review-despite-familiar-settings-an-engaging-gothic-horror-until-the-final-fumble/article71694345.ece",
      "h": "‘Bouma’ movie review: Despite familiar settings, an engaging gothic horror until the final fumble",
      "d": "2026-11-12"
+    },
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/bouma-movie-review-bizarre-thriller/20261113.htm",
+     "h": "Bouma Review: BIZARRE Thriller",
+     "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-12"
+   "updated": "2026-11-13"
+  },
+  "movie:1641520": {
+   "title": "DNK",
+   "released": "2026-11-13",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/dnk-movie-review-moulis-crime-comedy-is-funny-but-chaotic/article71696814.ece",
+     "h": "‘DNK’ movie review: Mouli’s crime comedy is funny but chaotic",
+     "d": "2026-11-13"
+    }
+   ],
+   "updated": "2026-11-13"
+  },
+  "movie:1440539": {
+   "title": "Itllu Arjuna",
+   "released": "2026-11-13",
+   "items": [
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/itllu-arjuna-telugu-movie-review-and-rating.html",
+     "h": "Review: Itllu Arjuna - An Enjoyable Outing",
+     "d": "2026-11-13"
+    },
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/itllu-arjuna-movie-review-aniesh-anaswara-rajans-film-is-a-contrived-action-romance/article71697004.ece",
+     "h": "‘Itllu Arjuna’ movie review: Aniesh, Anaswara Rajan’s film is a contrived action-romance",
+     "d": "2026-11-13"
+    }
+   ],
+   "updated": "2026-11-13"
+  },
+  "movie:1117898": {
+   "title": "The Cat in the Hat",
+   "released": "2026-11-06",
+   "items": [
+    {
+     "o": "The Hindu",
+     "u": "https://www.thehindu.com/entertainment/movies/the-cat-in-the-hat-movie-review-dr-seuss-erica-rivinoja-alessandro-carloni-bill-hader-matt-berry-quinta-brunson/article71674694.ece",
+     "h": "‘The Cat in the Hat’ movie review: A fun way to step into the holiday season",
+     "d": "2026-11-07"
+    }
+   ],
+   "updated": "2026-11-13"
+  },
+  "movie:1493572": {
+   "title": "Parivarik ManuRanjan",
+   "released": "2026-11-12",
+   "items": [
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/review-parivarik-manuranjan-could-have-been-funnier/20261113.htm",
+     "h": "Review: Parivarik ManuRanjan Could Have Been Funnier",
+     "d": "2026-11-13"
+    },
+    {
+     "o": "Scroll",
+     "u": "https://scroll.in/reel/1096978/parivarik-manuranjan-review-charming-leads-can-get-you-only-so-far?utm_source=rss&utm_medium=public",
+     "h": "‘Parivarik ManuRanjan’ review: Charming leads can get you only so far",
+     "d": "2026-11-13"
+    }
+   ],
+   "updated": "2026-11-13"
+  },
+  "movie:1286656": {
+   "title": "I Play Rocky",
+   "released": "2026-11-13",
+   "items": [
+    {
+     "o": "Free Press Journal",
+     "u": "https://www.freepressjournal.in/entertainment/i-play-rocky-review-anthony-ippolito-scores-a-knockout-as-young-sylvester-stallone",
+     "h": "I Play Rocky Review: Anthony Ippolito Scores A Knockout As Young Sylvester Stallone",
+     "d": "2026-11-13"
+    },
+    {
+     "o": "Scroll",
+     "u": "https://scroll.in/reel/1097047/i-play-rocky-review-a-salute-to-sylvester-stallone-and-a-love-letter-to-hollywood?utm_source=rss&utm_medium=public",
+     "h": "‘I Play Rocky’ review: A salute to Sylvester Stallone and a love letter to Hollywood",
+     "d": "2026-11-13"
+    }
+   ],
+   "updated": "2026-11-13"
+  },
+  "movie:1562642": {
+   "title": "Ghost Soldier",
+   "released": "2026-11-11",
+   "items": [
+    {
+     "o": "Free Press Journal",
+     "u": "https://www.freepressjournal.in/entertainment/ghost-soldier-review-jim-caviezels-action-thriller-fires-blanks-despite-a-contemporary-premise",
+     "h": "Ghost Soldier Review: Jim Caviezel’s Action Thriller Fires Blanks Despite A Contemporary Premise",
+     "d": "2026-11-13"
+    }
+   ],
+   "updated": "2026-11-13"
+  },
+  "movie:791523": {
+   "title": "Wildwood",
+   "released": "2026-11-05",
+   "items": [
+    {
+     "o": "Free Press Journal",
+     "u": "https://www.freepressjournal.in/entertainment/wildwood-review-laikas-stop-motion-fantasy-is-visually-spellbinding-and-engaging",
+     "h": "Wildwood Review: Laika’s Stop-Motion Fantasy Is Visually Spellbinding And Engaging",
+     "d": "2026-11-13"
+    }
+   ],
+   "updated": "2026-11-13"
+  },
+  "movie:1655020": {
+   "title": "John Doe",
+   "released": "2026-11-13",
+   "items": [
+    {
+     "o": "Cinema Express",
+     "u": "https://www.cinemaexpress.com/tamil/review/2026/Nov/13/john-doe-movie-review-this-otherwise-competent-no-frills-thriller-stumbles-at-the-finish-line",
+     "h": "John Doe Movie Review: This otherwise competent no-frills thriller stumbles at the finish line",
+     "d": "2026-11-13"
+    }
+   ],
+   "updated": "2026-11-13"
   }
  }
 }
