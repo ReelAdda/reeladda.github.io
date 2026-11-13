@@ -207,12 +207,17 @@ function peoplePageFiles(root = ".") {
   try { tops = fs.readdirSync(root); } catch { /* none */ }
   for (const t of tops) if (/^[a-z]{2}$/.test(t)) add(`${t}/people`);
   if (fs.existsSync(path.join(root, "embed", "index.html"))) out.push("embed/index.html");   // see ALWAYS_HIDDEN
+  // The streaming finder (lib/evergreen.js writeStreamingFinder), one per edition: see ALWAYS_HIDDEN.
+  for (const base of ["streaming", ...tops.filter((t) => /^[a-z]{2}$/.test(t)).map((t) => `${t}/streaming`)]) {
+    if (fs.existsSync(path.join(root, base, "index.html"))) out.push(`${base}/index.html`);
+  }
   return out;
 }
 // Hidden whatever the list says (25 Oct 2026, the owner): every people page (none are created any
 // more, and the 190 that had impressions were thin: median 236 words) and the embed instructions,
-// a tool page for site owners (91 words).
-const ALWAYS_HIDDEN = [/^(?:[a-z]{2}\/)?people\//, /^embed\/$/];
+// a tool page for site owners (91 words). And the streaming finder (13 Nov 2026, the owner: "keep
+// it hidden"): a filter over titles the platform lists already show.
+const ALWAYS_HIDDEN = [/^(?:[a-z]{2}\/)?people\//, /^embed\/$/, /^(?:[a-z]{2}\/)?streaming\/$/];
 function pathHidden(rel, { list = hiddenConfig() } = {}) {
   const key = String(rel).replace(/\\/g, "/").replace(/index\.html$/, "");
   const xs = (list && list.paths) || [];

@@ -189,6 +189,8 @@ function buildStreamingPage(items, cfg, { platform, pslug, language = null, lslu
   if (language) navLinks.push({ href: streamPageUrl(code, pslug), label: `Everything on ${platform} in ${country}` });
   for (const l of langLinks) navLinks.push({ href: streamPageUrl(code, pslug, l.slug), label: `${l.name} (${l.n})` });
   if (weeklyHub) navLinks.push({ href: weeklyHub, label: `New on ${platform} this week` });
+  // The finder over every service (below), once this edition has one.
+  if (fs.existsSync(finderPath(code))) navLinks.push({ href: finderUrl(code), label: "All services, by genre and language" });
   const linkable = sorted.filter((x) => x.slug);
   const extraLd = [{
     "@context": "https://schema.org", "@type": "CollectionPage",
@@ -277,6 +279,11 @@ function writeStreamingPages(data, cfg, manifest, index = null) {
     }
   }
   if (summary.length) console.log(`  streaming pages [${code}]: ${summary.join("; ")}`);
+  // The finder over all of them (below): one page and one data file per edition.
+  try {
+    const f = writeStreamingFinder(avail, cfg);
+    if (f) console.log(`  streaming finder [${code}]: ${f.titles} titles, ${f.services} services in the menu, ${Math.round(f.bytes / 1024)} KB of data`);
+  } catch (err) { console.warn(`  streaming finder [${code}]: ${err.message}`); }
   return written;
 }
 
@@ -463,7 +470,126 @@ function writePeoplePages(data, cfg, manifest) {
   return written;
 }
 
+// ============================================================================
+// THE STREAMING FINDER — /streaming/ (13 Nov 2026).
+//
+// A reader could filter the homepage by language, but a service and a genre together meant
+// opening /streaming/netflix/ and reading down it. This is one page per edition with three
+// menus (service, genre, language) over every title FilmyChill has confirmed streaming there:
+// the same titles as the platform lists, by the same rule (verifiedAvailability), hidden titles
+// included, since a reader can open those pages.
+//
+// Lean on purpose: the page is a shell, the rows live in one data file (streaming/titles.json,
+// about 100 bytes a title) that /js/browse.js fetches on this page only, and filtering happens in
+// the browser, so no page exists per combination. Hidden from Google (lib/googlehide.js
+// ALWAYS_HIDDEN, the owner's call): it is a tool, and its rows repeat the platform lists.
+// Each row shows the verdict its film page shows (withShownScore), in the platform lists' order:
+// verdict first, then audience rank.
+// ============================================================================
+const FINDER_MIN = 30;
+// The data file's ceiling: the best-ranked FINDER_MAX titles. At about 100 bytes a title that
+// keeps the file near 200 KB (under 100 KB compressed) however large an edition's list grows.
+const FINDER_MAX = 2000;
+const FINDER_MENU_MIN = 10;   // a service needs this many titles to be offered in the menu
+const finderPath = (code) => `${STREAM_BASE(code)}/index.html`;
+const finderDataPath = (code) => `${STREAM_BASE(code)}/titles.json`;
+const finderUrl = (code) => `https://filmychill.com/${STREAM_BASE(code)}/`;
+const VERDICT_CODE = { "Must watch": 3, "Worth a watch": 2, Skip: 1 };
+// Without a verdict the row says why, in the words the list pages use (lib/fcscore.js noScoreText).
+// The numbers are /js/browse.js's LABEL list.
+const NO_VERDICT_CODE = { "Too early": 4, "Not enough ratings": 5, "Critics split": 6, "Not out yet": 7 };
+
+// Pure (but for withShownScore's cached page reads): the data file for one edition.
+//   { at, services: [name], rows: [[slug, title, year, tv, language, genre, verdict, rating, poster, [service index]]] }
+function finderData(avail, code, now = Date.now()) {
+  const { withShownScore } = require("./pagekit.js");
+  const { dialRating } = require("./meter.js");
+  const { noScoreText } = require("./fcscore.js");
+  const bySlug = new Map();
+  for (const list of avail.values()) for (const x of list) if (x && x.slug && !bySlug.has(x.slug)) bySlug.set(x.slug, withShownScore(code, x));
+  const tier = (x) => (x.fcScore && VERDICT_CODE[x.fcScore.verdict] !== undefined ? [0, 0, 2, 3][VERDICT_CODE[x.fcScore.verdict]] : 1);
+  const sorted = rankFilms([...bySlug.values()]).map((x, i) => ({ x, i })).sort((a, b) => tier(b.x) - tier(a.x) || a.i - b.i).map((o) => o.x);
+  const count = new Map();
+  for (const x of sorted) for (const p of x.providers || []) count.set(p, (count.get(p) || 0) + 1);
+  const services = [...count.entries()].filter(([, n]) => n >= FINDER_MENU_MIN).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([p]) => p);
+  const sIdx = new Map(services.map((p, i) => [p, i]));
+  const rows = sorted.map((x) => {
+    const r = dialRating(x);
+    const poster = (/\/t\/p\/w\d+\/([A-Za-z0-9]+\.(?:jpg|png))/.exec(String(x.poster || "")) || [])[1] || "";
+    return [x.slug, x.title, Number(String(x.released || "").slice(0, 4)) || 0, x.kind === "tv" ? 1 : 0, x.language || "", String(x.genre || "").split(" / ")[0],
+      (x.fcScore && VERDICT_CODE[x.fcScore.verdict]) || NO_VERDICT_CODE[noScoreText(x).label] || 0, r == null ? 0 : Math.round(r * 10) / 10, poster,
+      (x.providers || []).map((p) => sIdx.get(p)).filter((i) => i !== undefined)];
+  }).filter((r) => r[9].length).slice(0, FINDER_MAX);
+  return { at: new Date(now).toISOString().slice(0, 10), services, rows };
+}
+
+// Pure: the page. The menus' options and the first rows are in the HTML, so the page reads
+// without its script; the script takes over the list once the data file is in.
+function buildFinderPage(data, cfg, { now = Date.now() } = {}) {
+  const e = escHtml;
+  const code = (cfg && cfg.code) || "in";
+  const country = countryNameFor(cfg);
+  const V = streamVocab(cfg);
+  const url = finderUrl(code);
+  const checked = new Date(now).toLocaleDateString(localeFor(code), { day: "numeric", month: "short", year: "numeric" });
+  const uniq = (i) => { const m = new Map(); for (const r of data.rows) if (r[i]) m.set(r[i], (m.get(r[i]) || 0) + 1); return [...m.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([k]) => k); };
+  const opts = (first, list) => `<option value="">${e(first)}</option>` + list.map((x) => `<option value="${e(x)}">${e(x)}</option>`).join("");
+  const select = (id, label, first, list) => `<label class="ff"><span>${e(label)}</span><select id="${id}">${opts(first, list)}</select></label>`;
+  const n = data.rows.length;
+  const finder = `
+  <section class="finder" id="finder" data-src="/${e(finderDataPath(code))}" data-base="${code === "in" ? "" : "/" + code}" data-word="${e(V.word)}">
+    <div class="ffs">
+      ${select("fSvc", "Service", "All services", data.services)}
+      ${select("fGen", "Genre", "All genres", uniq(5))}
+      ${select("fLang", "Language", "All languages", uniq(4))}
+    </div>
+    <div class="fsum"><b id="fCount">${n.toLocaleString("en-IN")} titles</b> <span id="fWhat">on all services</span> <button type="button" id="fClear" hidden>Clear</button></div>
+    <div id="fRows"><p class="rm">Loading the list…</p></div>
+    <button type="button" class="btn fmore" id="fMore" hidden>Show more</button>
+    <noscript><p class="rm">This list needs JavaScript. The same titles are on the service pages linked above.</p></noscript>
+  </section>`;
+  const svcLinks = data.services.map((p) => ({ p, s: platformSlug(p) })).filter((x) => x.s && fs.existsSync(streamPagePath(code, x.s)))
+    .map((x) => ({ href: `/${STREAM_BASE(code)}/${x.s}/`, label: x.p }));
+  let html = listingPageHtml({
+    title: `Streaming in ${country}: Filter by Service, Genre and Language`,
+    desc: `Every title FilmyChill has confirmed streaming in ${country}, filtered by service, genre and language, with our verdict on each.`,
+    canonical: url,
+    h1: `Streaming in ${country}`,
+    updLine: `${n.toLocaleString("en-IN")} titles · availability confirmed within ${STREAM_PAGE_MAX_AGE} days · updated ${checked}`,
+    lead: `Pick a service, a genre and a language. The list holds the films and series FilmyChill covers and has checked on each service, with the Must watch titles first.`,
+    sections: [], faqs: [], popular: finder, code,
+    navLinks: svcLinks.slice(0, 8),
+    homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
+  });
+  html = html.replace("</style>", FINDER_CSS + "\n</style>").replace("</body>", '<script src="/js/browse.js" defer></script>\n</body>');
+  return require("./googlehide.js").addGooglebotNoindex(html);
+}
+const FINDER_CSS = [
+  "  /* Streaming finder (lib/evergreen.js) */",
+  "  .ffs { display:grid; grid-template-columns:1fr; gap:10px; margin:6px 0 14px; } @media (min-width:560px) { .ffs { grid-template-columns:repeat(3,1fr); } }",
+  "  .ff span { display:block; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--mute); margin-bottom:4px; }",
+  "  .ff select { width:100%; min-height:44px; padding:0 12px; font:inherit; font-size:15px; font-weight:600; color:var(--ink); background:#fff; border:1.5px solid var(--line); border-radius:10px; }",
+  "  .fsum { display:flex; align-items:baseline; gap:8px; margin:0 0 12px; font-size:14px; color:var(--mute); } .fsum b { color:var(--ink); font-size:16px; }",
+  "  #fClear { margin-left:auto; background:none; border:0; color:var(--indigo); font:inherit; font-weight:700; min-height:44px; cursor:pointer; }",
+  "  .fmore { border:0; cursor:pointer; width:100%; justify-content:center; margin-top:8px; } .finder [hidden] { display:none; }",
+].join("\n");
+
+function writeStreamingFinder(avail, cfg, now = Date.now()) {
+  const code = cfg.code;
+  const data = finderData(avail, code, now);
+  const page = finderPath(code), file = finderDataPath(code);
+  if (data.rows.length < FINDER_MIN) {
+    for (const p of [page, file]) if (fs.existsSync(p)) fs.rmSync(p);
+    return null;
+  }
+  fs.mkdirSync(STREAM_BASE(code), { recursive: true });
+  writeIfChanged(file, JSON.stringify(data));
+  writeIfChanged(page, buildFinderPage(data, cfg, { now }));
+  return { titles: data.rows.length, services: data.services.length, bytes: JSON.stringify(data).length };
+}
+
 module.exports = {
+  FINDER_MAX, FINDER_MIN, buildFinderPage, finderData, finderDataPath, finderPath, writeStreamingFinder,
   PLATFORM_LINES,
   sectionFacts,
   spottedRow,

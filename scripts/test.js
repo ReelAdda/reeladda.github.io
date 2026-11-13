@@ -2704,6 +2704,47 @@ test("accuracy scan, 12 Nov 2026: tense, the header's rating, films not yet out,
   assert.ok(src.includes(".exec(headHtml)") && !src.includes("([0-9]+(?:\.[0-9])?)/.exec(html)"), "the star is looked for in the header only");
 });
 
+test("streaming finder (13 Nov 2026): one hidden page per edition, its rows in a data file, verdict first", () => {
+  const E = require("./lib/evergreen.js"), P = require("./lib/pagetypes.js"), G = require("./lib/googlehide.js");
+  const mk = (slug, title, providers, o = {}) => ({ slug, title, providers, language: "Hindi", genre: "Comedy / Drama", kind: "movie", released: "2014-12-19", rating: 7.7, votes: 1200, poster: "https://image.tmdb.org/t/p/w342/abc123.jpg", ...o });
+  const must = mk("pk", "PK", ["Netflix"], { fcScore: { verdict: "Must watch", audience: "Loved" } });
+  const worth = mk("omo", "Om Shanti Om", ["Netflix", "Tiny TV"], { fcScore: { verdict: "Worth a watch", audience: "Liked" }, rating: 7.1 });
+  const skip = mk("flop", "Flop", ["Netflix"], { fcScore: { verdict: "Skip", audience: "Lukewarm" }, rating: 4.1 });
+  const none = mk("new-one", "New One", ["Netflix"], { rating: null, votes: 0, kind: "tv", genre: "", poster: "" });
+  const filler = Array.from({ length: 10 }, (_, i) => mk("f" + i, "Filler " + i, ["Netflix"], { fcScore: { verdict: "Worth a watch", audience: "Liked" }, rating: 6.5 }));
+  const avail = new Map([["Netflix", [skip, none, worth, must, ...filler]], ["Tiny TV", [worth]]]);
+  const d = E.finderData(avail, "zz", Date.parse("2026-11-13T08:00:00Z"));
+  assert.deepStrictEqual(d.services, ["Netflix"], "a service with under ten titles isn't offered in the menu");
+  assert.strictEqual(d.rows.length, 14, "one row a title, however many services carry it");
+  assert.deepStrictEqual(d.rows[0].slice(0, 9), ["pk", "PK", 2014, 0, "Hindi", "Comedy", 3, 7.7, "abc123.jpg"], "Must watch first; the genre is the first one; the poster is its file name");
+  assert.strictEqual(d.rows[d.rows.length - 1][0], "flop", "Skip last");
+  const nv = d.rows.find((r) => r[0] === "new-one");
+  assert.ok(nv[6] >= 4 && nv[7] === 0 && nv[3] === 1 && nv[8] === "", "no verdict: the reason's code, no ring, no poster");
+  const html = E.buildFinderPage(d, { code: "in", name: "India", region: "IN" }, { now: Date.parse("2026-11-13T08:00:00Z") });
+  assert.ok(html.includes('<meta name="googlebot" content="noindex">') && html.includes('<meta name="bingbot" content="noindex">'), "hidden from Google and Bing");
+  assert.ok(html.includes('id="fSvc"') && html.includes('<option value="Netflix">Netflix</option>') && html.includes('<option value="Comedy">Comedy</option>') && html.includes('<option value="Hindi">Hindi</option>'), "three menus with the data's own values");
+  assert.ok(html.includes('data-src="/streaming/titles.json"') && html.includes('<script src="/js/browse.js" defer></script>') && !html.includes('class="row"'), "a shell: the rows come from the data file");
+  assert.ok(E.buildFinderPage(d, { code: "uk", name: "UK", region: "GB" }).includes('data-src="/uk/streaming/titles.json"'));
+  assert.strictEqual(P.pageTypeOf("streaming/index.html").id, "streaming finder");
+  assert.strictEqual(P.pageTypeOf("uk/streaming/index.html").id, "streaming finder");
+  assert.strictEqual(P.pageTypeOf("streaming/netflix/index.html").id, "platform list");
+  assert.ok(G.pathHidden("streaming/index.html", { list: { paths: [] } }) === G.pathHidden("people/x/index.html", { list: { paths: [] } }), "hidden by the same rule as people pages");
+  const js = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "browse.js"), "utf8");
+  assert.ok(js.includes('"Skip", "Worth a watch", "Must watch", "Too early", "Not enough ratings", "Critics split", "Not out yet"'), "the script's labels are the build's codes, in order");
+  // Lean: a ceiling on the data file, and no other page loads the script or the data.
+  const many = new Map([["Netflix", Array.from({ length: E.FINDER_MAX + 50 }, (_, i) => mk("m" + i, "M " + i, ["Netflix"], { fcScore: { verdict: "Worth a watch", audience: "Liked" } }))]]);
+  assert.strictEqual(E.finderData(many, "zz").rows.length, E.FINDER_MAX, "never more than the ceiling");
+  assert.ok(js.length < 8000, "the script stays small: " + js.length + " bytes");
+  for (const f of ["index.html", "404.html", "about/index.html"]) assert.ok(!require("fs").readFileSync(require("path").join(__dirname, "..", f), "utf8").includes("browse.js"), f + " doesn't load the finder's script");
+  const fsx2 = require("fs"), dir = fsx2.mkdtempSync(require("path").join(require("os").tmpdir(), "fcfind-"));
+  fsx2.mkdirSync(require("path").join(dir, "streaming", "netflix"), { recursive: true });
+  fsx2.writeFileSync(require("path").join(dir, "streaming", "netflix", "index.html"), "<h1>Movies &amp; Series on Netflix in India</h1> 207 titles · x");
+  const H = require("./lib/hubs.js");
+  assert.ok(!H.platformListLinks("in", dir).some((l) => l.href === "/streaming/"), "no finder: no link to it");
+  fsx2.writeFileSync(require("path").join(dir, "streaming", "index.html"), "<html></html>");
+  assert.deepStrictEqual(H.platformListLinks("in", dir)[0], { href: "/streaming/", name: "All services, by genre and language", n: 0 }, "the finder leads Browse by platform");
+});
+
 test("alert button: in the OTT section of a waiting page only, stripped without a key (10 Nov 2026)", () => {
   const F = require("./lib/filmpage.js");
   const KEY = "B" + "a".repeat(86);
