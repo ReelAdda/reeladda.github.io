@@ -22,7 +22,7 @@ const {
 } = require("./archive.js");
 const { digitalReleaseFor } = require("./enrich.js");
 const { digitalAnnounceText, digitalPassedBlock, OPEN_PILL_RE, settleReleasedCopy } = require("./pagekit.js");
-const { canonProvider, countryNameFor, dedupeProviders, streamVocab, looksLikeOutage } = require("./rules.js");
+const { adTierProviders, canonProvider, countryNameFor, dedupeProviders, streamVocab, looksLikeOutage } = require("./rules.js");
 const { healthNote, loadStateFile } = require("./runhealth.js");
 const { readHistory, EARLY_WINDOW_DAYS, VERIFY_AFTER_DAYS } = require("./history.js");
 const { tmdbTruth } = require("./truth.js");
@@ -744,7 +744,7 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
   const old = oldSweepCandidates(entries, new Date(), SWEEP_MAX_CHECKS - recent.length, pendingPage);
   const candidates = [...recent, ...old];
   if (!candidates.length) return;
-  let found = 0, announced = 0, dated = 0;
+  let found = 0, announced = 0, dated = 0, adSeen = 0;
   // Earliest sighting per film in this country (probe and build), to narrow an arrival window.
   const sightings = new Map();
   for (const r of readHistory()) if (r && r.c === cfg.code && r.k !== "tv" && r.first) { const k = String(r.id); if (!sightings.has(k) || r.first < sightings.get(k)) sightings.set(k, r.first); }
@@ -757,6 +757,12 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
       delete m[c.slug].tmdbGone;   // found again
       m[c.slug].truth = tmdbTruth(d, "movie", cfg, asOf);   // date, title, rent/buy for the page (lib/truth.js)
       const provs = dedupeProviders((d?.["watch/providers"]?.results?.[cfg.watchRegion]?.flatrate || []).map((x) => x.provider_name)).slice(0, 4);
+      // Free and ad-supported tiers, recorded and not yet shown (10 Nov 2026, lib/rules.js
+      // adTierProviders): when we first saw the film there, so that switching the tiers on later
+      // can tell a real arrival from a film that was already there before we looked.
+      const adTier = provs.length ? [] : adTierProviders(d?.["watch/providers"]?.results?.[cfg.watchRegion]);
+      if (adTier.length) { m[c.slug].adTier = { since: (m[c.slug].adTier && m[c.slug].adTier.since) || asOf, at: asOf, p: adTier.slice(0, 4) }; adSeen++; }
+      else delete m[c.slug].adTier;
       if (!provs.length) {
         const dig = digitalReleaseFor(d, cfg.watchRegion);
         const prev = m[c.slug].digital || {};
@@ -808,7 +814,8 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
       console.warn(`  sweep ${c.slug}: ${e.message}`);
     }
   }
-  console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming (${dated} with an arrival date within a day), ${announced} streaming date(s) announced`);
+  console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming (${dated} with an arrival date within a day), ${announced} streaming date(s) announced, `
+    + `${adSeen} found only on a free or ad-supported tier (${Object.values(m).filter((x) => x && x.adTier).length} recorded in all, not shown on pages yet)`);
 }
 
 // pages-manifest.json: { <edition>: { <slug>: entry } }. Who writes each field — a field
@@ -828,6 +835,8 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
 //                             scoresweep (merges language/released)
 //   fcs                       scoresweep; sweepCatalogCritics and flagYearOutliers set w = 0
 //   swept, digital, tmdbGone  arrival sweep
+//   adTier                    arrival sweep: { since, at, p } while a waiting film is on a free or
+//                             ad-supported tier only (observation, 10 Nov 2026; nothing reads it yet)
 //   rendered                  migrateBatch (sets), renderMigrated / legacy repair (clear it
 //                             so a page is captured again)
 //   rel                       refreshRelated;  imdb  sweepCatalogCritics

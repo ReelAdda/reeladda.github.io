@@ -473,7 +473,20 @@ function digitalNoteName(note) {
 }
 const DIGITAL_UNNAMED = "Digital release, platform not named yet";
 
+// FREE AND AD-SUPPORTED TIERS (10 Nov 2026). TMDB's watch-provider data keeps subscription
+// ("flatrate"), "free", "ads", "rent" and "buy" apart, and the build reads only flatrate to decide
+// whether a title is streaming. TMDB files JioHotstar's free tier (and ZEE5's, MX Player's) under
+// "ads": I'm Game, live on JioHotstar from 6 Nov 2026, showed "not streaming yet" for days because
+// India's only listing for it was {"ads":["JioHotstar"]} (owner checked 10 Nov). Pure: the
+// services that offer a title free or with ads and NOT on subscription, one name each.
+function adTierProviders(region) {
+  const r = region || {};
+  const flat = new Set(dedupeProviders((r.flatrate || []).map((p) => p.provider_name)));
+  return dedupeProviders([...(r.free || []), ...(r.ads || [])].map((p) => p.provider_name)).filter((n) => !flat.has(n));
+}
+
 module.exports = {
+  adTierProviders,
   MAX_SPAN_WEEKS,
   useMeasuredWindows,
   windowInfo,

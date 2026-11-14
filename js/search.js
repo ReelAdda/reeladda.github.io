@@ -216,7 +216,7 @@
     if (!items) { msg.textContent = "Loading…"; msg.hidden = false; return; }
     shown = find(q);
     if (!shown.length) {
-      msg.innerHTML = "Nothing matches “" + esc(q.trim()) + "” in " + esc(COUNTRY[code]) + ". Try fewer letters, or <a href=\"" + base + "/films/\">browse every film we've covered</a>.";
+      msg.innerHTML = "Nothing matches “" + esc(q.trim()) + "” in " + esc(COUNTRY[code]) + ". Try fewer letters, or <a href=\"" + base + "/new-on-ott/\">see what's new this week</a>.";
       msg.hidden = false;
       return;
     }

@@ -650,8 +650,20 @@ function filmTitleTag(item, cfg = null) {
   if (item.kind !== "tv" && (digitalUpcoming(item) || digitalPassed(item))) {
     const code = (cfg && cfg.code) || "in";
     const d = fmtDateShort(item.digitalDate, Date.now(), localeFor(code));
-    const on = digitalNoteName(item.digitalNote) ? ` on ${digitalNoteName(item.digitalNote)}` : "";
     const label = V.word === "OTT" ? "OTT Release Date" : "Streaming Date";
+    // DATE PASSED (repair sprint, 10 Nov 2026): the date has gone by and the film isn't showing.
+    // The title said "OTT Release Date: 6 Nov on Sony LIV" for days while the body said it wasn't
+    // there yet (Haiwaan, The Vvaan, I'm Game, The Grand Master). The title now says the same.
+    if (!digitalUpcoming(item)) {
+      const notYet = V.word === "OTT" ? "Not on OTT Yet" : "Not Streaming Yet";
+      return fitTitle([
+        `${item.title}${yr} ${label}: Was Due ${d}, ${notYet} | FilmyChill`,
+        `${item.title}${yr} ${label}: Was Due ${d}, ${notYet}`,
+        `${item.title} ${label}: Was Due ${d}, ${notYet}`,
+        `${item.title} ${label}: Was Due ${d}`,
+      ]);
+    }
+    const on = digitalNoteName(item.digitalNote) ? ` on ${digitalNoteName(item.digitalNote)}` : "";
     return fitTitle([
       `${item.title}${yr} ${label}: ${d}${on} | FilmyChill`,
       `${item.title}${yr} ${label}: ${d}${on}`,
@@ -1306,6 +1318,78 @@ function faqTrimPage(html) {
     .filter((d) => OTT_FAQ_Q.test(((/<summary>([\s\S]*?)<\/summary>/.exec(d) || [])[1] || "").replace(/&#39;/g, "'").replace(/&amp;/g, "&").trim()));
   return s.slice(0, m.index) + (keep.length ? `\n  <h2>Frequently asked</h2><div class="faq">${keep.join("")}</div>` : "") + s.slice(m.index + m[0].length);
 }
+// FAQ ANSWERS THAT DENY THE PAGE'S OWN DATE (repair sprint, 10 Nov 2026). A page whose OTT section
+// holds a streaming date (<!--SW:digital=…-->) still answered "We haven't seen an announced OTT
+// release date yet" in its FAQ, and on Haiwaan went on to estimate "around November 2026": three
+// answers on one page (Jailer 2, Haiwaan, The Vvaan, I'm Game, The Grand Master). Several writers
+// produce those answers (filmcopy.js, the archive and honest-wording patches), so this runs on the
+// finished page, after the last of them: any FAQ entry saying no date is known goes, and an emptied
+// block goes with its heading. Not in the facts fingerprint. Pure and idempotent.
+const NO_DATE_ANSWER = /hasn(?:'|&#39;|’)t been (?:officially )?announced|haven(?:'|&#39;|’)t (?:seen|found) (?:an announced|a date announced|one announced)|no (?:OTT |streaming )?(?:release )?date in our sources|isn(?:'|&#39;|’)t confirmed yet/i;
+function faqDateConflictPage(html) {
+  const s = String(html);
+  if (!s.includes("<!--SW:digital=")) return s;
+  const m = FAQ_BLOCK_RE.exec(s);
+  if (!m) return s;
+  const all = m[1].match(/<details>[\s\S]*?<\/details>/g) || [];
+  const keep = all.filter((d) => !NO_DATE_ANSWER.test(d.replace(/<summary>[\s\S]*?<\/summary>/, "")));
+  if (keep.length === all.length) return s;
+  return s.slice(0, m.index) + (keep.length ? `\n  <h2>Frequently asked</h2><div class="faq">${keep.join("")}</div>` : "") + s.slice(m.index + m[0].length);
+}
+function applyFaqDateConflicts(files, { root = "." } = {}) {
+  const res = { pages: 0, changed: 0 };
+  for (const rel of files) {
+    if (!/(?:^|\/)movie\/[^/]+\.html$/.test(String(rel).replace(/\\/g, "/"))) continue;
+    const file = require("path").join(root, rel);
+    let html;
+    try { html = require("fs").readFileSync(file, "utf8"); } catch { continue; }
+    res.pages++;
+    const next = faqDateConflictPage(html);
+    if (next !== html) { require("fs").writeFileSync(file, next); res.changed++; }
+  }
+  return res;
+}
+// "TELL ME WHEN IT'S STREAMING" (rollout "alert-button", 10 Nov 2026 audit, recommendation 3).
+// Alerts could only be switched on from the homepage's cards; search visitors land on film pages.
+// The button goes at the end of the OTT section of a waiting page (<!--SW:pending-->), so the
+// arrival sweep removes it with the section the day the film lands. js/alert.js does the rest
+// with the homepage's alert record. Every run strips the old button first, so a key change or
+// switching the feature off (no key) is undone on the next build. Pure and idempotent.
+const ALERT_BUTTON = "alert-button";
+const ALERT_RE = /<div class="fcalert"[^>]*>[\s\S]*?<\/div><script src="\/js\/alert\.js" defer><\/script>/g;
+function alertButtonPage(html, slug, key) {
+  const s = String(html).replace(ALERT_RE, "");
+  if (!key || !/^[A-Za-z0-9_-]{86,88}$/.test(key) || !s.includes("<!--/SW:pending-->")) return s;
+  const film = (/data-film="((?:movie|tv)-\d{1,9})"/.exec(s) || [])[1];
+  if (!film) return s;
+  const code = (/class="fcvote" data-film="[^"]*" data-c="([a-z]{2})"/.exec(s) || [])[1] || "in";
+  const title = ((/<h1[^>]*>([^<]+)/.exec(s) || [])[1] || "").replace(/\s*\(\d{4}\)\s*$/, "").trim();
+  const poster = (/<meta property="og:image" content="(https:\/\/image\.tmdb\.org\/[^"]+)"/.exec(s) || [])[1] || "";
+  if (!title) return s;
+  const ott = streamVocab({ code }).word === "OTT";
+  const label = ott ? "Tell me when it's on OTT" : "Tell me when it's streaming";
+  const a = (v) => String(v).replace(/&(?!(?:[a-z]+|#\d+);)/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  const box = `<div class="fcalert" data-key="${a(key)}" data-film="${film}" data-c="${code}" data-title="${a(title)}" data-slug="${a(slug)}" data-poster="${a(poster)}"`
+    + ` data-on="Alert on" data-done="Done. We'll send one alert when it arrives, and it's saved in My List." hidden style="margin:14px 0 0">`
+    + `<button type="button" class="btn">${a(label)}</button> <span role="status" style="display:block;font-size:13px;margin-top:6px"></span></div><script src="/js/alert.js" defer></script>`;
+  const at = s.indexOf("<!--/SW:pending-->");
+  return s.slice(0, at) + box + s.slice(at);
+}
+function applyAlertButton(files, { root = ".", key = "", included = (slug) => inRollout(ALERT_BUTTON, slug) } = {}) {
+  const res = { pages: 0, changed: 0, shown: 0 };
+  for (const rel of files) {
+    const mm = /(?:^|\/)movie\/([^/]+)\.html$/.exec(String(rel).replace(/\\/g, "/"));
+    if (!mm) continue;
+    const file = require("path").join(root, rel);
+    let html;
+    try { html = require("fs").readFileSync(file, "utf8"); } catch { continue; }
+    res.pages++;
+    const next = alertButtonPage(html, mm[1], included(mm[1]) ? key : "");
+    if (next.includes('class="fcalert"')) res.shown++;
+    if (next !== html) { require("fs").writeFileSync(file, next); res.changed++; }
+  }
+  return res;
+}
 function applyFaqTrim(files, { root = ".", included = (slug) => inRollout(FAQ_TRIM, slug) } = {}) {
   const res = { pages: 0, changed: 0 };
   for (const rel of files) {
@@ -1911,7 +1995,7 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       ? `<p>Not streaming yet — ${e(item.title)} is in its theatrical run in ${e(country)}${item.released ? `, released ${e(item.released)}` : ""}. ${e(item.language || "Films like this")} releases typically reach streaming about ${est.lo}–${est.hi} weeks after opening, which would put it somewhere around <strong>${e(est.span)}</strong>.</p><p style="color:var(--mute);font-size:13px">That's the usual pattern, not a confirmed date — no platform has announced one. We re-check every day and this page updates the moment it lands.</p>`
       : item._plain
         // Plain wording (lib/humanprose.js): two sentences, and the date as the edition writes dates.
-        ? `<p>Not streaming yet in ${e(country)}.${item.released ? ` ${e(item.title)} opened in theatres on ${e(fmtDateFull(item.released, localeFor(code)))}.` : ""} No platform has announced`
+        ? `<p>Not streaming yet in ${e(country)}.${item.released ? ` ${e(item.title)} opened in theatres on ${e(fmtDateFull(item.released, localeFor(code)))}.` : ""} No platform has announced ${e(V.article.toLowerCase())} ${e(V.releaseDate)}. We re-check every day.</p>`
         : `<p>Not streaming yet in ${e(country)}${item.released ? ` — ${e(item.title)} released in theatres ${e(item.released)}` : ""}. No platform has announced ${e(V.article.toLowerCase())} ${e(V.releaseDate)}. We re-check every day and this page updates the moment it lands.</p>`;
     return `<!--SW:pending--><h2>${e(V.heading(item.title))}</h2>${body}<!--/SW:pending-->`;
   })()}
@@ -2054,7 +2138,7 @@ function generatePages(data, cfg, allSlugSets) {
 }
 
 module.exports = {
-  ARRIVAL_RECORD, FAQ_TRIM, REVIEW_BLOCK, REVIEW_BLOCK_CSS, applyFaqTrim, faqTrimPage, faqTrimmed, reviewBlockHtml, reviewsClause, reviewsTail,
+  ALERT_BUTTON, ARRIVAL_RECORD, FAQ_TRIM, REVIEW_BLOCK, REVIEW_BLOCK_CSS, alertButtonPage, applyAlertButton, applyFaqDateConflicts, faqDateConflictPage, applyFaqTrim, faqTrimPage, faqTrimmed, reviewBlockHtml, reviewsClause, reviewsTail,
   DARK_BAR, DARK_BAR_CSS, applyDarkBar, darkBar,
   PAGE_FIXES,
   SCORE_HALVES,

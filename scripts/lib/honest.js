@@ -64,6 +64,10 @@ const RULES = [
     rev: [/(OTT Release Date|Streaming Date): Awaiting Date\b(?! in)/g, (m, k) => `${k}: Not Announced Yet`] },
   { fwd: [/(Streaming Date in [^<"]+?): Not Announced\b(?! Yet)/g, (m, k) => `${k}: Awaiting Date`],
     rev: [/(Streaming Date in [^<"]+?): Awaiting Date\b/g, (m, k) => `${k}: Not Announced`] },
+  // Titles with a country (repair sprint, 10 Nov 2026): "OTT Release Date in the UAE: Not Announced
+  // Yet" was missed by both rules above (31 UAE pages).
+  { fwd: [/(OTT Release Date in [^<":]+?|Streaming Date in [^<":]+?): Not Announced Yet\b/g, (m, k) => `${k}: Awaiting Date`],
+    rev: [/(OTT Release Date in [^<":]+?): Awaiting Date\b/g, (m, k) => `${k}: Not Announced Yet`] },
 ];
 
 // Pure: the honest wording. Idempotent.

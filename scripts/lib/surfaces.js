@@ -443,8 +443,10 @@ function streamingPagesFor(code) {
 // small groups hold, so its rows reach the total stated above it; every count comes from the
 // same stats object as the median beside it.
 const DP_SMALL = "plus {n} film{s} in {what} with fewer than {min} films, counted in the total but not given a row";
-const plusLine = (n, what, min) => (n > 0
-  ? `<p class="plus">${DP_SMALL.replace("{n}", String(n)).replace("{s}", n === 1 ? "" : "s").replace("{what}", what).replace("{min}", String(min))}.</p>` : "");
+// `noun`: "film" for tables that count films, "arrival" for the own-measurement tables, which count
+// a film once per country it reached.
+const plusLine = (n, what, min, noun = "film") => (n > 0
+  ? `<p class="plus">${DP_SMALL.replace(/film\{s\}/, `${noun}{s}`).replace(" films,", ` ${noun}s,`).replace("{n}", String(n)).replace("{s}", n === 1 ? "" : "s").replace("{what}", what).replace("{min}", String(min))}.</p>` : "");
 const sumN = (rows) => rows.reduce((a, r) => a + r.n, 0);
 const dayHuman = (x) => new Date(`${x}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const monthHuman = (x) => new Date(`${x}T00:00:00Z`).toLocaleDateString("en-GB", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -540,12 +542,12 @@ function buildDataPage(records, updatedHuman, { inCinemas = 0, digital = null } 
   const row = (r) => `<tr><td>${e(r.key)}</td><td class="n">${r.median}</td><td class="n">${r.n}</td></tr>`;
   const table = (title, head, rows, what) => !rows.length ? "" :
     `<h3>${e(title)}</h3><table><thead><tr><th>${head}</th>`
-    + `<th class="n">Median days</th><th class="n">Films</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>${plusLine(s.measured - sumN(rows), what, 3)}`;
+    + `<th class="n">Median days</th><th class="n">Arrivals</th></tr></thead><tbody>${rows.map(row).join("")}</tbody></table>${plusLine(s.measured - sumN(rows), what, 3, "arrival")}`;
   const d = digital && digital.measured >= PUBLISH_MIN ? digital : null;
   const topLangs = india.byLanguage.slice().sort((a, b) => b.n - a.n).slice(0, 2).map((r) => r.key);
   const chartRows = d ? d.byLanguage.filter((r) => !r.small).slice().sort((a, b) => a.median - b.median) : [];
   const quote = [
-    s.overall != null ? `<li><b>${s.overall} days</b>: the median for ${e(String(s.measured))} films in ${COUNTRIES.length} countries whose move from cinema to streaming FilmyChill saw itself${since ? `, since ${e(since)}` : ""}. This is the headline figure on this page.</li>` : "",
+    s.overall != null ? `<li><b>${s.overall} days</b>: the median of ${e(String(s.measured))} moves from cinema to streaming that FilmyChill saw itself${since ? ` since ${e(since)}` : ""}: ${e(String(s.films))} film${s.films === 1 ? "" : "s"} in ${e(String(s.countries))} countr${s.countries === 1 ? "y" : "ies"}, each film counted once for every country it reached. This is the headline figure on this page.</li>` : "",
     d ? `<li><b>${d.overall} days</b>: the median for ${e(String(d.measured))} Indian-language films, from TMDB's digital release dates, ${e(monthHuman(d.from))} to ${e(monthHuman(d.to))}. The longer record for India.</li>` : "",
     india.overall != null ? `<li><b>${india.overall} days</b>: India from FilmyChill's own checks, ${e(String(india.measured))} films since October 2026. An early reading${topLangs.length ? `, mostly ${e(topLangs.join(" and "))} films so far` : ""}.</li>` : "",
   ].filter(Boolean).join("\n    ");
@@ -553,7 +555,7 @@ function buildDataPage(records, updatedHuman, { inCinemas = 0, digital = null } 
 ${analyticsTag()}
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>How long films take to reach streaming — FilmyChill data</title>
-<meta name="description" content="Days from cinema release to streaming: ${e(String(s.measured))} films FilmyChill saw arrive in ${COUNTRIES.length} countries${d ? `, and ${e(String(d.measured))} Indian films from TMDB's release dates` : ""}. Free to use with attribution.">
+<meta name="description" content="Days from cinema release to streaming: ${e(String(s.films))} films FilmyChill saw arrive in ${e(String(s.countries))} countries${d ? `, and ${e(String(d.measured))} Indian films from TMDB's release dates` : ""}. Free to use with attribution.">
 ${ICON_LINKS}
 <link rel="canonical" href="https://filmychill.com/data/">
 <meta name="robots" content="max-image-preview:large">
@@ -592,7 +594,7 @@ ${ICON_LINKS}
 
   <h2 id="measured">FilmyChill's own measurements${since ? `, since ${e(since)}` : ""}</h2>
   ${s.overall != null ? `<div class="big">${s.overall} days</div>
-  <div class="sub">median from cinema release to first streaming sighting, across ${e(String(s.measured))} films we saw arrive in ${COUNTRIES.length} countries.${unmeasured > 0 ? ` Our archive holds ${e(String(s.total))} cinema releases that reached streaming; the other ${e(String(unmeasured))} have no usable window: they were already streaming when we started watching their country, a later check disproved the sighting, the gap ran over two years, or a very short window is still waiting for a confirming check.` : ""}${inCinemas ? ` ${e(String(inCinemas))} more films are in cinemas now and join the figures when they reach streaming.` : ""}</div>` :
+  <div class="sub">median from cinema release to first streaming sighting, across ${e(String(s.measured))} arrivals we saw ourselves: ${e(String(s.films))} film${s.films === 1 ? "" : "s"} in ${e(String(s.countries))} countr${s.countries === 1 ? "y" : "ies"}, each film counted once for every country it reached.${unmeasured > 0 ? ` Our archive holds ${e(String(s.total))} cinema releases that reached streaming; the other ${e(String(unmeasured))} have no usable window: they were already streaming when we started watching their country, a later check disproved the sighting, the gap ran over two years, or a very short window is still waiting for a confirming check.` : ""}${inCinemas ? ` ${e(String(inCinemas))} more films are in cinemas now and join the figures when they reach streaming.` : ""}</div>` :
   `<p>Not enough measured films yet to publish a median. The archive is still filling.</p>`}
 
   ${table("By language", "Language", s.byLanguage, "languages")}
