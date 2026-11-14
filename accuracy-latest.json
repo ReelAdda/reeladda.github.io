@@ -2,46 +2,20 @@
  "date": "2026-11-14",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 4,
- "high": 3,
- "correctable": 3,
+ "pagesDisagreeing": 1,
+ "high": 1,
+ "correctable": 1,
  "byField": {
-  "runtime": 1,
-  "streaming": 1,
-  "platform": 2
+  "platform": 1
  },
  "rows": [
   {
-   "field": "runtime",
-   "severity": "medium",
-   "page": "150 min",
-   "tmdb": "105 min",
-   "code": "in",
-   "slug": "bhai-tera-star-hai"
-  },
-  {
-   "field": "streaming",
-   "severity": "high",
-   "page": "not streaming",
-   "tmdb": "on Paramount+",
-   "code": "us",
-   "slug": "gone-girl"
-  },
-  {
    "field": "platform",
    "severity": "high",
-   "page": "Prime Video, Philo, AMC+",
-   "tmdb": "Prime Video, AMC+, AMC, MGM+",
+   "page": "Paramount+, Peacock, Paramount+ Roku Premium Channel",
+   "tmdb": "Paramount+",
    "code": "us",
-   "slug": "child-s-play"
-  },
-  {
-   "field": "platform",
-   "severity": "high",
-   "page": "Netflix, Prime Video",
-   "tmdb": "Prime Video",
-   "code": "nz",
-   "slug": "scarface"
+   "slug": "monsters-vs-aliens"
   }
  ]
 }
