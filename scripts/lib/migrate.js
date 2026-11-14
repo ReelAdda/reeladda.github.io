@@ -216,7 +216,12 @@ function renderMigrated(manifest, cfg, { today, mode = null, modes = null, liste
     }
     // Catalogue pages are frozen too (1 Nov 2026: Dune in the Philippines kept a 2026 re-release
     // date, with "Not out yet" under a Must watch, because its truth record never applied).
-    if ((e.archivedOn || e.catalog) && e.truth) {
+    // A record taken before the page was archived is older than the page's own facts, which came
+    // from the live data file until that day: on 13 Nov 2026 a 17-day-old record moved Summer
+    // Holidays from 6 Nov back to a date TMDB had since dropped, and the next build moved it
+    // back again. Such a record waits for the accuracy pass to take a new one.
+    const truthStale = !!(e.truth && e.truth.at && e.archivedOn && e.truth.at < e.archivedOn);
+    if ((e.archivedOn || e.catalog) && e.truth && !truthStale) {
       const t = applyTruth(out, e.truth);
       if (t.changed.length) {
         out = t.item;

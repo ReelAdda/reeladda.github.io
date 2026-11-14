@@ -389,10 +389,23 @@ function changeText(c, fmt = (d) => d) {
 // RECENT_DAYS before the page's own date, newest first, three at most; empty when there are none,
 // so most pages never show it. Loaded once per build (useChangeIndex) from the facts store.
 const RECENT_DAYS = 30;
+// Pure: the changes with every there-and-back pair removed. A date that moved and then moved
+// back is where it started, so the page has nothing to report (14 Nov 2026: a page showing
+// 6 Nov said its date had "moved from 6 Nov to 16 Oct"). Platforms are left alone: leaving a
+// service and returning to it are two real events.
+function settledChanges(changes) {
+  const out = [];
+  for (const c of Array.isArray(changes) ? changes : []) {
+    if (!c) continue;
+    const i = c.field === "streaming on" ? -1 : out.findIndex((p) => p.field === c.field && p.from === c.to && p.to === c.from);
+    if (i >= 0) out.splice(i, 1); else out.push(c);
+  }
+  return out;
+}
 function recentChangesHtml(changes, asOf, fmt = (d) => d) {
   if (!Array.isArray(changes) || !changes.length || !asOf) return "";
   const from = new Date(Date.parse(`${String(asOf).slice(0, 10)}T00:00:00Z`) - RECENT_DAYS * 864e5).toISOString().slice(0, 10);
-  const recent = changes.filter((c) => c && c.on && c.on >= from && c.on <= String(asOf).slice(0, 10))
+  const recent = settledChanges(changes).filter((c) => c && c.on && c.on >= from && c.on <= String(asOf).slice(0, 10))
     .slice().sort((x, y) => y.on.localeCompare(x.on)).slice(0, CHANGE_KEEP)
     .map((c) => ({ on: c.on, t: changeText(c, fmt) })).filter((x) => x.t);
   if (!recent.length) return "";
@@ -426,4 +439,4 @@ function writeFacts(code, map, root = ".") {
   fs.writeFileSync(factsPath(code, root), lines.join("\n") + (lines.length ? "\n" : ""));
 }
 
-module.exports = { CHANGE_KEEP, RECENT_DAYS, changeText, changesFor, factChanges, loadChangeIndex, recentChangesHtml, trackedFacts, useChangeIndex, FACTS_DIR, STATUS_PILL, availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, pageState, readFacts, whereOf, writeFacts, wtwBlock };
+module.exports = { settledChanges, CHANGE_KEEP, RECENT_DAYS, changeText, changesFor, factChanges, loadChangeIndex, recentChangesHtml, trackedFacts, useChangeIndex, FACTS_DIR, STATUS_PILL, availabilityText, extractFacts, factsDiff, isoFromShown, keyFacts, pageState, readFacts, whereOf, writeFacts, wtwBlock };
