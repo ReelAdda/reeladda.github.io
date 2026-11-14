@@ -1,21 +1,47 @@
 {
- "date": "2026-11-13",
+ "date": "2026-11-14",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 1,
- "high": 1,
- "correctable": 1,
+ "pagesDisagreeing": 4,
+ "high": 3,
+ "correctable": 3,
  "byField": {
-  "streaming": 1
+  "runtime": 1,
+  "streaming": 1,
+  "platform": 2
  },
  "rows": [
   {
+   "field": "runtime",
+   "severity": "medium",
+   "page": "150 min",
+   "tmdb": "105 min",
+   "code": "in",
+   "slug": "bhai-tera-star-hai"
+  },
+  {
    "field": "streaming",
    "severity": "high",
-   "page": "on JioHotstar",
-   "tmdb": "on no subscription service",
-   "code": "in",
-   "slug": "mukundan-unni-associates"
+   "page": "not streaming",
+   "tmdb": "on Paramount+",
+   "code": "us",
+   "slug": "gone-girl"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Prime Video, Philo, AMC+",
+   "tmdb": "Prime Video, AMC+, AMC, MGM+",
+   "code": "us",
+   "slug": "child-s-play"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, Prime Video",
+   "tmdb": "Prime Video",
+   "code": "nz",
+   "slug": "scarface"
   }
  ]
 }
