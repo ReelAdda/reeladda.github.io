@@ -10325,6 +10325,30 @@ test("a frozen page is rendered with TMDB's recorded facts; a page in this week'
     assert.ok(/>U-NEXT</.test(fsx.readFileSync("jp/movie/current-film.html", "utf8")), "not archived: untouched");
   } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
 });
+test("date flips (14 Nov 2026): a TMDB record older than the archive day is not applied; a there-and-back change is not reported", () => {
+  const Mg = require("./lib/migrate.js"), Fa = require("./lib/facts.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-flip-")), cwd = process.cwd();
+  try {
+    process.chdir(root); fsx.mkdirSync("jp/movie", { recursive: true });
+    const JP = require("./lib/core.js").COUNTRIES.find((c) => c.code === "jp");
+    const item = { title: "Summer Holidays", kind: "movie", released: "2026-11-06", language: "Telugu", providers: [], platform: "Theatres", rentBuy: [] };
+    for (const s of ["stale", "fresh"]) fsx.writeFileSync(`jp/movie/${s}.html`, Mg.renderFrozen({ ...item, slug: s }, JP, { checkedAt: "2026-11-12" }));
+    Fa.writeFacts("jp", new Map(["stale", "fresh"].map((s) => [s, { slug: s, updated: "2026-11-12", item: Fa.extractFacts(fsx.readFileSync(`jp/movie/${s}.html`, "utf8"), s) }])));
+    const truth = (at) => ({ at, providers: [], rentBuy: [], released: "2026-10-16" });
+    const man = { jp: { stale: { rendered: "2026-10-28", archivedOn: "2026-11-13", truth: truth("2026-10-27") }, fresh: { rendered: "2026-10-28", archivedOn: "2026-11-13", truth: truth("2026-11-13") } } };
+    const r = Mg.renderMigrated(man, JP, { today: "2026-11-13" });
+    assert.strictEqual(r.corrected, 1, "only the record taken on or after the archive day applies");
+    assert.strictEqual(Fa.readFacts("jp").get("stale").item.released, "2026-11-06", "the older record leaves the page's own date");
+    assert.strictEqual(Fa.readFacts("jp").get("fresh").item.released, "2026-10-16", "the newer record moves it");
+  } finally { process.chdir(cwd); fsx.rmSync(root, { recursive: true, force: true }); }
+  const there = { on: "2026-11-13", field: "release date", from: "2026-11-06", to: "2026-10-16" }, back = { on: "2026-11-13", field: "release date", from: "2026-10-16", to: "2026-11-06" };
+  assert.deepStrictEqual(Fa.settledChanges([there, back]), [], "moved and moved back: nothing changed");
+  assert.strictEqual(Fa.recentChangesHtml([there, back], "2026-11-14"), "", "and the page says nothing");
+  assert.ok(Fa.recentChangesHtml([there], "2026-11-14").includes("release date moved"), "a move that stands is still reported");
+  const left = { on: "2026-11-01", field: "streaming on", from: "Netflix", to: "" }, came = { on: "2026-11-09", field: "streaming on", from: "", to: "Netflix" };
+  assert.strictEqual(Fa.settledChanges([left, came]).length, 2, "leaving a service and returning are two events");
+});
 group("17 Oct 2026: facts-only film pages, switched on edition by edition, automatically");
 test("fact updates merge into a record; undefined removes a field", () => {
   const Q = require("./lib/factsq.js");
