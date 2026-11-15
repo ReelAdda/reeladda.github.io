@@ -3203,6 +3203,60 @@ test("the workflow publishes css/ with the site — every film page links a styl
   assert.ok(/have < want \* MIN_SHARE/.test(src) && /refusing to build a site missing its archive/.test(src), "an incomplete restore stops the run");
 });
 
+test("state branch (15 Nov 2026): facts and the manifest round-trip through `state`, in the shadow stage and the live one", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path"), { execFileSync } = require("child_process");
+  const wf = fsx.readFileSync(path.join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8");
+  const stateStep = wf.indexOf("node scripts/site.js publish-state"), siteStep = wf.indexOf("run: node scripts/site.js publish\n");
+  assert.ok(stateStep > wf.indexOf("id: commit") && stateStep < siteStep, "state is published after the data commit and before the pages");
+  assert.ok(wf.includes("steps.state.outcome == 'success'"), "the pages are not published ahead of their facts");
+  const S = require("./site.js");
+  assert.deepStrictEqual(S.STATE_PATHS, ["pages-manifest.json", "facts"]);
+  assert.strictEqual(S.manifestPages(JSON.stringify({ in: { a: {}, b: {} }, us: { a: {} } })), 3);
+  assert.strictEqual(S.manifestPages("not json"), 0);
+  // A real round trip, in a throwaway repository with its own bare "origin".
+  const root = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-state-"));
+  const script = path.join(__dirname, "site.js");
+  const work = path.join(root, "work"), origin = path.join(root, "origin.git");
+  const env = { ...process.env, GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@example.com", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@example.com", GITHUB_OUTPUT: "" };
+  const git = (args, cwd = work) => execFileSync("git", args, { cwd, env, encoding: "utf8" }).trim();
+  const run = (cmd) => { try { return { ok: true, out: execFileSync(process.execPath, [script, cmd], { cwd: work, env, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }) }; } catch (e) { return { ok: false, out: String(e.stdout || "") + String(e.stderr || "") }; } };
+  const manifest = (n) => JSON.stringify({ in: Object.fromEntries(Array.from({ length: n }, (_, i) => ["f" + i, { last: "2026-11-15" }])) });
+  try {
+    fsx.mkdirSync(work); git(["init", "--bare", "--quiet", origin], root);
+    git(["init", "--quiet"]); git(["config", "core.autocrlf", "false"]); git(["remote", "add", "origin", origin]);
+    fsx.mkdirSync(path.join(work, "facts"));
+    fsx.writeFileSync(path.join(work, "pages-manifest.json"), manifest(20));
+    fsx.writeFileSync(path.join(work, "facts", "in.jsonl"), '{"slug":"f0"}\n');
+    fsx.writeFileSync(path.join(work, "code.js"), "1\n");
+    git(["add", "-A"]); git(["commit", "--quiet", "-m", "main"]);
+    // Shadow stage: main tracks the files. Publishing creates the branch; restoring only compares.
+    assert.ok(/no branch yet/.test(run("restore-state").out));
+    assert.ok(/state published/.test(run("publish-state").out));
+    assert.strictEqual(git(["rev-list", "--count", "state"], origin), "1", "one commit, no parent");
+    assert.deepStrictEqual(git(["ls-tree", "-r", "--name-only", "state"], origin).split("\n"), ["facts/in.jsonl", "pages-manifest.json"], "only the state files, no code");
+    assert.ok(/matches main \(shadow stage\)/.test(run("restore-state").out));
+    assert.ok(/state unchanged/.test(run("publish-state").out), "nothing changed: nothing pushed");
+    // Live stage: main stops tracking them; the working copies now come from the branch.
+    fsx.writeFileSync(path.join(work, ".gitignore"), "/pages-manifest.json\n/facts/\n");
+    git(["rm", "-r", "--cached", "--quiet", "pages-manifest.json", "facts"]); git(["add", ".gitignore"]); git(["commit", "--quiet", "-m", "state leaves main"]);
+    fsx.writeFileSync(path.join(work, "pages-manifest.json"), manifest(21));
+    fsx.writeFileSync(path.join(work, "facts", "us.jsonl"), '{"slug":"f1"}\n');
+    assert.ok(/state published/.test(run("publish-state").out));
+    assert.strictEqual(git(["rev-list", "--count", "state"], origin), "1", "replaced, not added to");
+    assert.strictEqual(git(["rev-list", "--count", "state-prev"], origin), "1", "the outgoing state is kept");
+    fsx.rmSync(path.join(work, "pages-manifest.json")); fsx.writeFileSync(path.join(work, "facts", "stale.jsonl"), "x\n");
+    assert.ok(/state restored/.test(run("restore-state").out));
+    assert.strictEqual(fsx.readFileSync(path.join(work, "pages-manifest.json"), "utf8"), manifest(21), "the manifest comes back byte for byte");
+    assert.deepStrictEqual(fsx.readdirSync(path.join(work, "facts")).sort(), ["in.jsonl", "us.jsonl"], "facts are exactly the branch's: a stray file is gone");
+    assert.strictEqual(git(["status", "--porcelain"]), "", "main's working tree stays clean");
+    // A manifest that lost most of its pages never replaces the state; here that stops the run.
+    fsx.writeFileSync(path.join(work, "pages-manifest.json"), manifest(3));
+    const bad = run("publish-state");
+    assert.ok(!bad.ok && /refusing to replace it/.test(bad.out), bad.out);
+    assert.strictEqual(S.manifestPages(git(["show", "state:pages-manifest.json"], origin)), 21, "the published state is untouched");
+  } finally { fsx.rmSync(root, { recursive: true, force: true }); }
+});
+
 // ---- Failure paths: a broken upstream or a broken stage must be loud, never destructive ----
 group("failure paths: outages, stalls, corrupt state, silent stages");
 
