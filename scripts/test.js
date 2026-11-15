@@ -8877,7 +8877,18 @@ test("homepage: no inline script and no inline handler, so its CSP can refuse in
 test("homepage: the build inlines js/app.js and the policy allows exactly that script by its hash (Oct 2026)", () => {
   const fsx = require("fs"), path = require("path"), crypto = require("crypto");
   const S = require("./lib/surfaces.js");
-  const app = fsx.readFileSync(path.join(__dirname, "..", "js", "app.js"), "utf8");
+  const source = fsx.readFileSync(path.join(__dirname, "..", "js", "app.js"), "utf8");
+  // The page carries the script without its comments and indentation (15 Nov 2026, leanScript).
+  const app = S.leanScript(source);
+  assert.ok(app.length < source.length * 0.8, `comments and indentation are dropped: ${source.length} to ${app.length} bytes`);
+  assert.ok(!app.includes("It lived inline in index.html until Oct 2026"), "the header comment is not sent to visitors");
+  // Every multi-line template string survives byte for byte: its whitespace is page text.
+  const opens = "document.getElementById('modal').innerHTML = `\n";
+  assert.ok(source.includes(opens) && app.includes(opens), "a template string keeps its line breaks");
+  new (require("vm").Script)(app);
+  // What it leaves alone, and when it gives up and returns the script as it is.
+  assert.strictEqual(S.leanScript("// a\n  var a = 1; // kept\n\n  /* b\n   c */\n  var b = `\n    // text\n  x`;\n"), "var a = 1; // kept\nvar b = `\n    // text\n  x`;\n");
+  for (const odd of ["var a = `open;\n", "/* never closed\nvar a = 1;\n", "var a = 'x\\\n  y';\n", "/* c */ var a = 1;\n  var b = ;\n"]) assert.strictEqual(S.leanScript(odd), odd, "unsure: unchanged");
   const s = S.homeScript();
   assert.ok(s, "js/app.js can be inlined (no </script or <!-- in it)");
   assert.strictEqual(s.tag, `<script>${app}</script>`);
