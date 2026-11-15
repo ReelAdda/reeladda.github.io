@@ -3077,6 +3077,12 @@ async function main() {
       console.log(`Film lastmod: ${l.changed} of ${l.pages} pages changed content${l.seeded ? `, ${l.seeded} fingerprinted for the first time` : ""}${l.restamped ? `; ${l.restamped} page(s) now show the same updated date as the sitemap` : ""}`);
     } catch (e) { stageFailed("film lastmod", e); }
     fs.writeFileSync(PAGES_MANIFEST_FILE, JSON.stringify(pagesManifest, null, 1));
+    // My List's status files (lib/alerts.js listStatus): each edition's film pages as streaming or
+    // not, from the manifest just written, so a saved film's card says what its page says.
+    try {
+      const ls = require("./lib/alerts.js").writeListStatus(pagesManifest, COUNTRIES.map((c) => c.code), todayStr());
+      console.log(`My List status: ${ls.films} film(s) across ${ls.editions} edition file(s), ${Math.round(ls.bytes / 1024)} KB in all`);
+    } catch (e) { stageFailed("my list status", e, { optional: true }); }
 
     // Rewrite the sitemap to include every country page (with hreflang) now that all are built.
     // Frozen archived pages are never rewritten, so pages generated before the x-default

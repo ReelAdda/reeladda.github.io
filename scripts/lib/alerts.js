@@ -54,6 +54,33 @@ function filmIndex(manifestForCountry = {}) {
   return out;
 }
 
+// MY LIST STATUS (10 Nov 2026). The homepage knew a saved film's status only while the film was
+// in that week's lists; after that the card kept what was true on the day it was saved, so a
+// film saved in cinemas could say "Awaiting OTT" weeks after it started streaming. Pure: for one
+// edition, every film page's streaming state as the page states it (the manifest's live claim):
+// film key -> { p: [services], a: arrival day when we saw it arrive } or 0 for not streaming.
+// Written to data/status-<code>.json, which the homepage fetches only for a visitor with a list.
+function listStatus(manifestForCountry, today) {
+  const f = {};
+  for (const [key, { e }] of filmIndex(manifestForCountry)) {
+    const live = e.live;
+    const p = live && Array.isArray(live.providers) ? live.providers.filter((x) => typeof x === "string" && x).slice(0, 4) : [];
+    f[key] = p.length ? (DAY.test(String(live.arrived || "")) ? { p, a: live.arrived } : { p }) : 0;
+  }
+  return { at: today, f };
+}
+function writeListStatus(manifest, codes, today, { dir = "data" } = {}) {
+  const fs = require("fs"), path = require("path");
+  fs.mkdirSync(dir, { recursive: true });
+  let films = 0, bytes = 0;
+  for (const code of codes) {
+    const json = JSON.stringify(listStatus((manifest && manifest[code]) || {}, today));
+    fs.writeFileSync(path.join(dir, `status-${code}.json`), json);
+    films += (json.match(/"(?:movie|tv)-/g) || []).length; bytes += json.length;
+  }
+  return { editions: codes.length, films, bytes };
+}
+
 // Pure: has this film arrived on a platform, as the page now says? Returns the arrival or null.
 function arrivalOf(e, today) {
   const live = e && e.live;
@@ -257,4 +284,4 @@ async function sendAlerts({ env = process.env, manifest = null, today = new Date
   return res;
 }
 
-module.exports = { DIGEST_KEY, digestPayload, editionClock, mondayOf, pickDigests, ARRIVAL_DAYS, FEATURE, TEST_PAYLOAD, alertPayload, alertsEnabled, arrivalOf, filmIndex, filmPath, nextSent, parseSubscription, pickAlerts, publicKey, sendAlerts };
+module.exports = { listStatus, writeListStatus, DIGEST_KEY, digestPayload, editionClock, mondayOf, pickDigests, ARRIVAL_DAYS, FEATURE, TEST_PAYLOAD, alertPayload, alertsEnabled, arrivalOf, filmIndex, filmPath, nextSent, parseSubscription, pickAlerts, publicKey, sendAlerts };

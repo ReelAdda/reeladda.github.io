@@ -2527,6 +2527,46 @@ test("ad-supported tiers: the services offering a title free or with ads only (I
   assert.deepStrictEqual(R.adTierProviders(undefined), []);
 });
 
+test("My List: the fewest services that cover the streaming titles (10 Nov 2026)", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "app.js"), "utf8");
+  const fn = /function wlCover\(films\) \{[\s\S]*?\n\}/.exec(src);
+  assert.ok(fn, "wlCover is in js/app.js");
+  const wlCover = new Function(`${fn[0]}; return wlCover;`)();
+  assert.deepStrictEqual(wlCover([["Netflix"], ["Netflix", "Prime Video"], ["JioHotstar"], ["Prime Video", "JioHotstar"]]), [{ name: "JioHotstar", n: 2 }, { name: "Netflix", n: 2 }]);
+  assert.deepStrictEqual(wlCover([["Netflix", "Prime Video"], ["Prime Video"], ["Prime Video", "Zee5"]]), [{ name: "Prime Video", n: 3 }], "one service can cover all");
+  assert.deepStrictEqual(wlCover([[], null]), []);
+  assert.ok(/renderWlNeeds\(wl\);/.test(src) && /provs\.length < 2/.test(src), "drawn with My List, from two streaming titles up");
+});
+
+test("My List status file: each film page as streaming or not, as its page says (10 Nov 2026)", () => {
+  const A = require("./lib/alerts.js");
+  const man = {
+    a: { tmdbId: 1, kind: "movie", live: { since: "2026-11-06", arrived: "2026-11-06", providers: ["JioHotstar", "", "Zee5"], misses: 1 } },
+    b: { tmdbId: 2, kind: "tv", live: { since: "2026-09-01", providers: ["Netflix"] } },
+    c: { tmdbId: 3, kind: "movie" },
+    d: { kind: "movie", live: { since: "2026-09-01", providers: ["Netflix"] } },
+  };
+  assert.deepStrictEqual(A.listStatus(man, "2026-11-10"), { at: "2026-11-10", f: {
+    "movie-1": { p: ["JioHotstar", "Zee5"], a: "2026-11-06" },   // the page still says streaming after one missed check
+    "tv-2": { p: ["Netflix"] },                                   // no arrival day unless we saw it arrive
+    "movie-3": 0 } }, "a page without a TMDB id has no key");
+  const dir = require("fs").mkdtempSync(require("path").join(require("os").tmpdir(), "fcst-"));
+  const r = A.writeListStatus({ in: man, uk: {} }, ["in", "uk"], "2026-11-10", { dir });
+  assert.deepStrictEqual([r.editions, r.films], [2, 3]);
+  assert.deepStrictEqual(JSON.parse(require("fs").readFileSync(require("path").join(dir, "status-uk.json"), "utf8")), { at: "2026-11-10", f: {} });
+  const app = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "app.js"), "utf8");
+  assert.ok(app.includes("fetch('/data/status-' + code + '.json')") && app.includes("if (loadWL().length) {"), "fetched only for a visitor with a list");
+  assert.ok(require("fs").readFileSync(require("path").join(__dirname, "site.js"), "utf8").includes("|data|"), "data/ is published with the site");
+});
+
+test("editions: the installed app and the calendar files open the visitor's edition (10 Nov 2026)", () => {
+  const app = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "app.js"), "utf8");
+  assert.ok(app.includes("location.replace(COUNTRY_PATH[last] + '?source=pwa')"), "a home-screen launch goes to the last edition");
+  assert.ok(app.includes("FC_PAGE === 'in' && location.pathname === '/' &&") && app.includes("SUPPORTED_COUNTRIES[last]"), "only from the root, only to a real edition");
+  assert.ok(app.includes("const link = `${FC_HOME}#${slug}`") && app.includes("'URL:' + FC_HOME"), "calendar links use the edition's homepage");
+  assert.ok(!app.includes("'URL:https://filmychill.com'") && !app.includes("`https://filmychill.com/#${slug}`"), "no link fixed to India's homepage");
+});
+
 test("alert button: in the OTT section of a waiting page only, stripped without a key (10 Nov 2026)", () => {
   const F = require("./lib/filmpage.js");
   const KEY = "B" + "a".repeat(86);

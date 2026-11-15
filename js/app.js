@@ -20,6 +20,9 @@ const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2ox
 let DATA = { theatres: [], ott: [], comingSoon: [] };
 let dataReady = false; // set once this country's data file has loaded
 let activeLang = 'All';
+// My List's status file for this edition (data/status-<code>.json, scripts/lib/alerts.js
+// listStatus): film key -> { p: services, a: arrival day } or 0. null until it has loaded.
+let WL_STATUS = null;
 let sortMode = 'default';
 let myListOnly = false;
 
@@ -132,10 +135,54 @@ function wikiViewsLabel(n) {
 // OTT?" job, answered on every visit. Saved snapshots go stale; live DATA doesn't —
 // so we look the film up fresh by slug and fall back to the snapshot only if it has
 // left the lists entirely.
-function trackStatus(saved) {
+// A saved film as this build knows it now (its entry in the current lists), else as it was saved.
+// A film that has left this week's lists is read from the status file (10 Nov 2026): its card used
+// to keep the status of the day it was saved, "Awaiting OTT" weeks after it started streaming.
+function liveItem(saved) {
+  if (saved._live) return saved;
   const slug = saved.slug || slugify(saved.title);
   const bySlug = (list) => (list || []).find(x => (x.slug || slugify(x.title)) === slug);
-  const live = bySlug(DATA.ott) || bySlug(DATA.theatres) || bySlug(DATA.comingSoon) || saved;
+  const hit = bySlug(DATA.ott) || bySlug(DATA.theatres) || bySlug(DATA.comingSoon);
+  if (hit) return hit;
+  const key = filmKeyOf(saved), st = WL_STATUS && key ? WL_STATUS[key] : undefined;
+  if (st === undefined) return saved;
+  if (st && st.p && st.p.length) return Object.assign({}, saved, { _live: true, platform: st.p[0], providers: st.p, ottFreshDate: st.a || '', freshDate: st.a || '' });
+  return Object.assign({}, saved, { _live: true, platform: 'Theatres', providers: [], _wasOn: isStreamingItem(saved) });
+}
+// WHAT YOUR LIST NEEDS (10 Nov 2026). Pure: the fewest services that between them carry every
+// streaming title given, each with the titles it accounts for. `films` is a list of provider-name
+// lists, one per title. Greedy: the service on the most titles still uncovered, ties by name.
+function wlCover(films) {
+  let left = films.filter(p => p && p.length);
+  const out = [];
+  while (left.length) {
+    const n = {};
+    left.forEach(p => [...new Set(p)].forEach(x => { n[x] = (n[x] || 0) + 1; }));
+    const best = Object.keys(n).sort((a, b) => n[b] - n[a] || a.localeCompare(b))[0];
+    out.push({ name: best, n: n[best] });
+    left = left.filter(p => !p.includes(best));
+  }
+  return out;
+}
+// One line under My List's heading, from two streaming titles up (with one, its card says it).
+function renderWlNeeds(wl) {
+  let el = document.getElementById('wlNeeds');
+  const row = document.getElementById('alertRow');
+  if (!el && row) { row.insertAdjacentHTML('afterend', '<div class="alert-row" id="wlNeeds"></div>'); el = document.getElementById('wlNeeds'); }
+  if (!el) return;
+  const items = wl.map(liveItem);
+  const provs = items.filter(isStreamingItem).map(it => (it.providers && it.providers.length ? it.providers : [it.platform]));
+  if (provs.length < 2) { el.hidden = true; el.innerHTML = ''; return; }
+  const cover = wlCover(provs);
+  const names = cover.map((c, i) => '<b>' + esc(c.name) + '</b> (' + c.n + (i === 0 ? ' title' + (c.n === 1 ? '' : 's') : '') + ')');
+  const list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+  const waiting = items.length - provs.length;
+  el.hidden = false;
+  el.innerHTML = '<span>' + (cover.length === 1 ? 'Everything streaming on your list is on ' + list + '.' : 'To watch everything streaming on your list you need ' + list + '.')
+    + (waiting ? ' ' + waiting + ' more ' + (waiting === 1 ? 'isn’t' : 'aren’t') + (FC_STREAM.word === 'OTT' ? ' on OTT' : ' streaming') + ' yet.' : '') + '</span>';
+}
+function trackStatus(saved) {
+  const live = liveItem(saved);
   const today = new Date().toISOString().slice(0, 10);
   if (live.platform && live.platform !== 'Theatres') {
     const since = live.kind === 'tv' ? live.freshDate : (live.ottFreshDate || live.freshDate);
@@ -144,6 +191,8 @@ function trackStatus(saved) {
   if (live.released && live.released > today) {
     return { cls: 'ts-soon', label: '<svg class="ic" aria-hidden="true"><use href="#icCal"/></svg> Releases ' + esc(fmtDate(live.released)) + ' — tracking for you' };
   }
+  // Saved while it was streaming, and its page no longer lists a service.
+  if (live._wasOn) return { cls: 'ts-wait', label: FC_STREAM.word === 'OTT' ? 'Not on OTT right now' : 'Not streaming right now' };
   return { cls: 'ts-wait', label: '⏳ Awaiting ' + FC_STREAM.Word + ' — you\u2019ll see it here the day it lands' };
 }
 
@@ -434,7 +483,8 @@ function render() {
   const mySec = document.getElementById('mylistSection');
   mySec.style.display = wl.length ? 'block' : 'none';
   renderAlertRow();
-  document.getElementById('mylistGrid').innerHTML = wl.map((it, i) => card(it, i, 'wl')).join('');
+  renderWlNeeds(wl);
+  document.getElementById('mylistGrid').innerHTML = wl.map((it, i) => card(liveItem(it), i, 'wl')).join('');
   const t = myListOnly ? [] : applyFilters(DATA.theatres);
   const o = myListOnly ? [] : applyFilters(DATA.ott);
   const hideMsg = myListOnly ? '<div class="error-box">Showing only My List above — tap My List again to see everything.</div>' : '<div class="error-box">No releases match this filter.</div>';
@@ -587,7 +637,7 @@ function remindMe(listKey, i) {
   const next = new Date(item.released); next.setDate(next.getDate() + 1);
   const dEnd = next.toISOString().slice(0, 10).replace(/-/g, '');
   const slug = item.slug || slugify(item.title);
-  const link = `https://filmychill.com/#${slug}`;
+  const link = `${FC_HOME}#${slug}`;   // this edition's homepage opens the film (10 Nov 2026: was India's)
   const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//FilmyChill//EN', 'BEGIN:VEVENT',
     `UID:${slug}-${d}@filmychill.com`,
     `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
@@ -732,8 +782,8 @@ function addFridayRitual(btn) {
     `DTSTART:${d}T190000`, `DTEND:${d}T220000`,
     'RRULE:FREQ=WEEKLY;BYDAY=FR',
     'SUMMARY:🍿 FilmyChill Friday — movie night',
-    "DESCRIPTION:This week's verdicts\\, trailers & where to watch: https://filmychill.com",
-    'URL:https://filmychill.com', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    "DESCRIPTION:This week's verdicts\\, trailers & where to watch: " + FC_HOME,
+    'URL:' + FC_HOME, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
   a.download = 'filmychill-friday.ics'; a.click();
@@ -884,6 +934,23 @@ const FC_PAGE = (() => {
   return (code && SUPPORTED_COUNTRIES[code]) ? code : 'in';
 })();
 
+// THE INSTALLED APP OPENS YOUR EDITION (10 Nov 2026). One web-app manifest serves every edition and
+// starts at "/", so the app opened India's page for a visitor who installed it from /uk/. A launch
+// from the home screen (the manifest's ?source=pwa on "/") now goes to the edition this browser
+// last had open; every other visit stays where it is, so search visitors and crawlers see no
+// redirect. The switcher still wins: choosing India there is remembered like any other edition.
+// On iPhones the home-screen app keeps its own storage, so its first launch still opens India.
+const FC_HOME = 'https://filmychill.com' + COUNTRY_PATH[FC_PAGE];
+(() => {
+  let last = '';
+  try { last = localStorage.getItem('fc_country') || ''; } catch (e) {}
+  if (FC_PAGE === 'in' && location.pathname === '/' && /[?&]source=pwa/.test(location.search) && last !== 'in' && SUPPORTED_COUNTRIES[last]) {
+    location.replace(COUNTRY_PATH[last] + '?source=pwa');
+    return;
+  }
+  try { localStorage.setItem('fc_country', FC_PAGE); } catch (e) {}
+})();
+
 // The word this market uses for streaming, injected by the build alongside fc-page
 // (single source of truth: streamVocab() in scripts/update.js). "OTT" is everyday
 // language in India and the UAE and is what people there search; everywhere else it
@@ -1031,6 +1098,11 @@ fetch('/data-' + code + '.json?v=' + Date.now())
     if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !deferredInstall && installEligible()) installPill(true, 'Add to Home');
     dataReady = true;
     render();
+    // Only for a visitor with saved films: today's status of each, then My List is drawn again.
+    if (loadWL().length) {
+      fetch('/data/status-' + code + '.json').then(r => (r.ok ? r.json() : null))
+        .then(j => { if (j && j.f) { WL_STATUS = j.f; render(); } }).catch(() => {});
+    }
 
     const d = new Date(data.generatedAt);
     const days = Math.floor((new Date() - d) / 86400000);
