@@ -268,18 +268,20 @@ function descContext(item, cfg, opts) {
 // A digital date announced and still ahead.
 function descDigitalUpcoming({ item, yr, country, fullDate }) {
   const when = fullDate(item.digitalDate);
-  const on = digitalNoteName(item.digitalNote) ? ` on ${digitalNoteName(item.digitalNote)}` : "";
+  // Never the platform in a search result (12 Nov 2026, Bing's 30-day report): the dated pages
+  // named it in the title and the description, and The Vvaan, I'm Game and Haiwaan were clicked
+  // once in 371 showings. The date answers "when"; the page answers "where".
   return fitDesc([
-    `${item.title}${yr} starts streaming${on} in ${country} on ${when}. The verdict, runtime and cast — and whether it's worth the wait.`,
-    `${item.title} streams${on} in ${country} from ${when} — verdict, runtime and cast.`,
-    `${item.title} streams${on} in ${country} from ${when}.`,
+    `${item.title}${yr} starts streaming in ${country} on ${when}. See which platform has it, with the verdict, runtime and cast.`,
+    `${item.title} streams in ${country} from ${when}. See which platform has it.`,
+    `${item.title} streams in ${country} from ${when}.`,
   ]);
 }
 
 // The announced digital date has passed and it isn't showing yet.
 function descDigitalPassed({ item, yr, country, fullDate }) {
   const when = fullDate(item.digitalDate);
-  const on = digitalNoteName(item.digitalNote) ? ` on ${digitalNoteName(item.digitalNote)}` : "";
+  const on = "";   // no platform in a search result (see descDigitalUpcoming)
   return fitDesc([
     `${item.title}${yr} was due to stream${on} in ${country} from ${when} but isn't showing yet. We check twice a day and update this page the moment it lands.`,
     `${item.title} was due to stream${on} in ${country} from ${when} — not showing yet. We update this page the moment it lands.`,
@@ -664,7 +666,7 @@ function filmTitleTag(item, cfg = null) {
         `${item.title} ${label}: Was Due ${d}`,
       ]);
     }
-    const on = digitalNoteName(item.digitalNote) ? ` on ${digitalNoteName(item.digitalNote)}` : "";
+    const on = "";   // no platform in the title (12 Nov 2026, see descDigitalUpcoming): the date is the answer, the page says where
     return fitTitle([
       `${item.title}${yr} ${label}: ${d}${on} | FilmyChill`,
       `${item.title}${yr} ${label}: ${d}${on}`,
