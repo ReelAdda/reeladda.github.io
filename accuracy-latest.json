@@ -1,10 +1,30 @@
 {
- "date": "2026-11-16",
+ "date": "2026-11-17",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 0,
- "high": 0,
- "correctable": 0,
- "byField": {},
- "rows": []
+ "pagesDisagreeing": 2,
+ "high": 1,
+ "correctable": 2,
+ "byField": {
+  "rent/buy": 1,
+  "streaming": 1
+ },
+ "rows": [
+  {
+   "field": "rent/buy",
+   "severity": "medium",
+   "page": "none",
+   "tmdb": "Amazon Video",
+   "code": "uk",
+   "slug": "de-gaulle-r-sistance"
+  },
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "on Hayu",
+   "tmdb": "rent/buy only",
+   "code": "nz",
+   "slug": "beverly-hills-90210"
+  }
+ ]
 }

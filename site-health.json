@@ -194,6 +194,96 @@
     "indexed share fell two weeks running (12% → 8%)",
     "a new sentence pattern is on 28% of film pages: \"«T» is an «L» film («G» / «G»).\""
    ]
+  },
+  {
+   "date": "2026-11-17",
+   "offered": 7312,
+   "visiblePages": 7313,
+   "hiddenPages": 14818,
+   "toHiddenShare": 0.031,
+   "orphans": 13,
+   "freshWeak": 42,
+   "indexedShare": 0.067,
+   "sampled": 60,
+   "prevIndexedFell": true,
+   "repetition": {
+    "sampled": 513,
+    "patterns": [
+     {
+      "pattern": "Watch the trailer on YouTube →",
+      "share": 0.799
+     },
+     {
+      "pattern": "What language is «T» in?",
+      "share": 0.706
+     },
+     {
+      "pattern": "Where can I watch «T»?",
+      "share": 0.669
+     },
+     {
+      "pattern": "Is «T» worth watching?",
+      "share": 0.663
+     },
+     {
+      "pattern": "It rates «N»/«N» from «N» audience ratings on TMDB.",
+      "share": 0.497
+     },
+     {
+      "pattern": "Who is in the cast of «T»?",
+      "share": 0.359
+     },
+     {
+      "pattern": "When is «T» coming to streaming?",
+      "share": 0.324
+     },
+     {
+      "pattern": "Is «T» family friendly?",
+      "share": 0.314
+     },
+     {
+      "pattern": "This page updates automatically the day it starts streaming.",
+      "share": 0.271
+     },
+     {
+      "pattern": "How many episodes does «T» have?",
+      "share": 0.271
+     },
+     {
+      "pattern": "FilmyChill Verdict: Worth a watch.",
+      "share": 0.248
+     },
+     {
+      "pattern": "Audience: «N» ratings on TMDB · How the verdict works",
+      "share": 0.246
+     },
+     {
+      "pattern": "«T» is a «L» film («G» / «G»).",
+      "share": 0.22
+     },
+     {
+      "pattern": "Audience: «N» ratings on TMDB · Critics: positive · How the verdict works",
+      "share": 0.22
+     },
+     {
+      "pattern": "When did «T» first air?",
+      "share": 0.201
+     }
+    ],
+    "repeatedCount": 63,
+    "thinShare": 0.764,
+    "thinSample": [
+     "movie/100-days-of-deception.html",
+     "movie/aligned-apart.html",
+     "movie/ananthan-kaadu.html",
+     "movie/avengers-endgame.html",
+     "movie/babita-singh-reporting.html"
+    ]
+   },
+   "alarms": [
+    "42 new title(s) with fewer than 3 links in",
+    "indexed share fell two weeks running (8% → 7%)"
+   ]
   }
  ]
 }
