@@ -332,7 +332,9 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
     }
     e.fcs = { v: s ? s.verdict : "early", at: today, w: SWEEP_WORDING };
     // The same rating and score as facts (lib/factsq.js), for pages drawn from their record.
-    queueFacts(code, slug, { rating: item.rating, votes: item.votes, fcScore: s || undefined });
+    // A held critics' side leaves the record too, or the page drawn from it would still cite the
+    // four reviews beside "Too early". Nothing else removes the figures: an old film keeps them.
+    queueFacts(code, slug, { rating: item.rating, votes: item.votes, fcScore: s || undefined, ...(held ? { reception: undefined } : {}) });
     if (next !== html) {
       fs.writeFileSync(file, next);
       // No `last` bump here: injecting the vote widget or re-wording markup isn't news to a

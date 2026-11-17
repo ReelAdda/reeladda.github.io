@@ -11986,6 +11986,8 @@ testAsync("sweepScores: four reviews in a film's first week give its page no ver
     assert.strictEqual(week.v, "early", "four reviews, day four: no verdict yet");
     assert.ok(!/fcsb-stamp fcsb-(?:must|worth|skip)"/.test(week.html), "no verdict stamp on the page");
     assert.ok(!/published ratings|per Wikipedia/.test(week.html), "and no critics' figures beside 'Too early'");
+    const queued = require("./lib/factsq.js").queuedFacts("in").get("titanic");
+    assert.ok(queued && "reception" in queued && queued.reception === undefined && queued.fcScore === undefined, "the facts record drops the verdict and the figures with it");
     const settled = await run(5, "2026-11-17");
     assert.strictEqual(settled.v, "Skip", "five reviews are a settled reception in any week");
     const later = await run(4, "2026-11-20");
