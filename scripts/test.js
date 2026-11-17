@@ -12072,6 +12072,46 @@ test("archive patch: every step uses the caller's date, and the page's own relea
   assert.ok(/Theatrical run ended/.test(ended), "past the window by the caller's date");
 });
 
+group("17 Nov 2026: the weekly index check keeps Google's reason for each page, hubs included");
+testAsync("index check: asks about every hub and a film sample, keeps each answer, survives failures and a time limit", async () => {
+  const K = require("./lib/keeplean.js");
+  assert.ok(K.isFilmPath("/movie/jailer-2.html") && K.isFilmPath("/ae/movie/jailer-2.html"));
+  assert.ok(!K.isFilmPath("/") && !K.isFilmPath("/ae/") && !K.isFilmPath("/tamil/") && !K.isFilmPath("/us/streaming/netflix/"));
+  assert.ok(K.isIndexedState("Submitted and indexed") && K.isIndexedState("Indexed, not submitted in sitemap"));
+  assert.ok(!K.isIndexedState("Crawled - currently not indexed") && !K.isIndexedState("Discovered - currently not indexed")
+    && !K.isIndexedState("Duplicate, Google chose different canonical than user") && !K.isIndexedState("URL is unknown to Google") && !K.isIndexedState(""));
+  const answers = { "/": "Submitted and indexed", "/tamil/": "Crawled - currently not indexed", "/movie/a.html": "Discovered - currently not indexed", "/movie/b.html": "Submitted and indexed" };
+  const asked = [];
+  const fetchImpl = async (url, opt) => {
+    const b = JSON.parse(opt.body); asked.push(b.inspectionUrl);
+    assert.strictEqual(b.siteUrl, "sc-domain:filmychill.com"); assert.strictEqual(opt.headers.authorization, "Bearer t");
+    const p = "/" + b.inspectionUrl.slice("https://filmychill.com/".length);
+    if (p === "/movie/broken.html") throw new Error("503");
+    if (p === "/movie/empty.html") return { json: async () => ({ error: { message: "quota" } }) };
+    return { json: async () => ({ inspectionResult: { indexStatusResult: { coverageState: answers[p] } } }) };
+  };
+  const paths = ["/", "/tamil/", "/movie/a.html", "/movie/b.html", "/movie/broken.html", "/movie/empty.html"];
+  const states = await K.inspectPages(paths, { token: "t", site: "sc-domain:filmychill.com", fetchImpl, parallel: 3 });
+  assert.strictEqual(asked.length, 6, "every page asked about once");
+  assert.deepStrictEqual([...states.keys()].sort(), ["/", "/movie/a.html", "/movie/b.html", "/tamil/"], "a failed request and an empty answer each skip one page");
+  assert.deepStrictEqual(K.coverageCounts(["/", "/tamil/"], states), { checked: 2, indexed: 1, states: { "Crawled - currently not indexed": 1, "Submitted and indexed": 1 } });
+  assert.deepStrictEqual(K.coverageCounts(["/movie/a.html", "/movie/b.html", "/movie/broken.html"], states).checked, 2, "a page with no answer is not counted either way");
+  // Out of time: it stops asking and returns what it has; without access it asks nothing.
+  let t = 0; const slow = await K.inspectPages(paths, { token: "t", site: "s", parallel: 1, maxMs: 25, now: () => (t += 10),
+    fetchImpl: async () => ({ json: async () => ({ inspectionResult: { indexStatusResult: { coverageState: "Submitted and indexed" } } }) }) });
+  assert.ok(slow.size >= 1 && slow.size < paths.length, `stopped at the time limit (${slow.size} of ${paths.length})`);
+  assert.strictEqual((await K.inspectPages(paths, { token: null, site: "s", fetchImpl: async () => { throw new Error("must not be called"); } })).size, 0);
+  // The build's line names the hubs and the reasons; an old record without them reads as before.
+  const line = K.healthLine({ date: "2026-11-24", offered: 7400, indexedShare: 0.07, sampled: 298, toHiddenShare: 0.03, orphans: 13, freshWeak: 40,
+    hubs: { offered: 454, checked: 450, indexed: 120, states: { "Crawled - currently not indexed": 330, "Submitted and indexed": 120 } },
+    filmStates: { "Crawled - currently not indexed": 277, "Submitted and indexed": 21 } });
+  assert.ok(/7% of film pages indexed \(sample of 298\)/.test(line) && /Homepages and hubs: 120 of 450 indexed, 4 not answered \(330 Crawled - currently not indexed; 120 Submitted and indexed\)/.test(line)
+    && /Film pages sampled: 277 Crawled - currently not indexed; 21 Submitted and indexed\./.test(line), line);
+  assert.ok(!/Homepages|sampled:/.test(K.healthLine({ date: "2026-11-17", offered: 7312, indexedShare: 0.067, sampled: 60, toHiddenShare: 0.031, orphans: 13, freshWeak: 42 })));
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "keeplean.js"), "utf8");
+  assert.ok(/const SAMPLE = 300;/.test(src) && /INSPECT_MAX_MS = 4 \* 60 \* 1000/.test(src), "300 film pages, at most four minutes");
+});
+
 
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");

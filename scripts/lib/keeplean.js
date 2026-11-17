@@ -29,7 +29,13 @@ const ROLL_DAYS = 28;
 const WINDOW_DAYS = 90;
 const HEALTH_FILE = "site-health.json";
 const HEALTH_EVERY_DAYS = 7;
-const SAMPLE = 60;
+// Film pages asked about each week (60 until 17 Nov 2026: too few to say why pages are left out).
+const SAMPLE = 300;
+// URL Inspection requests in flight at once, and the longest the whole check may take. The report
+// runs inside the build, before it publishes, so it must never hold one up: when the time is
+// spent, the pages not yet asked about are left out of this week's numbers.
+const INSPECT_PARALLEL = 6;
+const INSPECT_MAX_MS = 4 * 60 * 1000;
 const B = "https://filmychill.com/";
 const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
 
@@ -221,6 +227,42 @@ function healthAlarms(cur, prev) {
   return a;
 }
 
+// Google's own answer for each page (URL Inspection "coverageState": "Submitted and indexed",
+// "Crawled - currently not indexed", "Discovered - currently not indexed", "Duplicate, Google chose
+// different canonical than user", ...). Returns a Map of path -> state for the pages that got an
+// answer. One failed request skips one page; nothing here throws.
+async function inspectPages(paths, { token, site, fetchImpl = fetch, parallel = INSPECT_PARALLEL, maxMs = INSPECT_MAX_MS, now = Date.now } = {}) {
+  const out = new Map();
+  if (!token || !site || !paths || !paths.length) return out;
+  const queue = paths.slice(), started = now();
+  const worker = async () => {
+    while (queue.length && now() - started < maxMs) {
+      const u = queue.shift();
+      try {
+        const r = await fetchImpl("https://searchconsole.googleapis.com/v1/urlInspection/index:inspect", {
+          method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+          body: JSON.stringify({ inspectionUrl: B + u.slice(1), siteUrl: site }),
+        });
+        const j = await r.json();
+        const st = j && j.inspectionResult && j.inspectionResult.indexStatusResult && j.inspectionResult.indexStatusResult.coverageState;
+        if (st) out.set(u, String(st));
+      } catch { /* skip one */ }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, Math.min(parallel, queue.length)) }, worker));
+  return out;
+}
+// Pure: is this coverage state an indexed one? ("Submitted and indexed", "Indexed, not submitted in sitemap".)
+const isIndexedState = (st) => /indexed/i.test(st || "") && !/not indexed/i.test(st || "");
+// Pure: is this path a film page? Everything else offered is a homepage, a hub or a list.
+const isFilmPath = (u) => /^\/(?:[a-z]{2}\/)?movie\/[^/]+\.html$/.test(u);
+// Pure: the answers for a set of pages as counts by state, most common first, and the indexed count.
+function coverageCounts(paths, states) {
+  const by = {}; let checked = 0, indexed = 0;
+  for (const u of paths) { const st = states.get(u); if (!st) continue; checked++; if (isIndexedState(st)) indexed++; by[st] = (by[st] || 0) + 1; }
+  return { checked, indexed, states: Object.fromEntries(Object.entries(by).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))) };
+}
+
 async function weeklyHealth({ manifest, env = process.env, nowMs = Date.now(), root = ".", file = HEALTH_FILE, force = false, fetchImpl = fetch } = {}) {
   let hist = { runs: [] };
   try { hist = JSON.parse(fs.readFileSync(path.join(root, file), "utf8")); } catch { /* first run */ }
@@ -229,22 +271,22 @@ async function weeklyHealth({ manifest, env = process.env, nowMs = Date.now(), r
   const lh = linkHealth({ root, manifest, nowMs });
   const rec = { date: iso(nowMs), offered: lh.offered, visiblePages: lh.visiblePages, hiddenPages: lh.hiddenPages,
     toHiddenShare: Math.round(lh.toHiddenShare * 1000) / 1000, orphans: lh.orphans, freshWeak: lh.freshWeak, indexedShare: null, sampled: 0 };
-  // Indexed share: a random sample of the pages offered, through URL Inspection.
+  // Indexed share, through URL Inspection (17 Nov 2026): every homepage, hub and list offered, and
+  // a random sample of the film pages, each with the reason Google gives. Until then it was 60
+  // random pages and one number, which could not say whether the hubs were in, or why film pages
+  // were out. The hubs go first, so a slow week still answers for them. Measurement only: nothing
+  // here changes a page. indexedShare stays the film sample's share (the old sample was 94% film pages).
   const token = await gscToken(env);
   if (token && lh.offeredList.length) {
-    const pick = lh.offeredList.map((u) => [Math.random(), u]).sort((x, y) => x[0] - y[0]).slice(0, SAMPLE).map((x) => x[1]);
-    let indexed = 0, n = 0;
-    for (const u of pick) {
-      try {
-        const r = await fetchImpl("https://searchconsole.googleapis.com/v1/urlInspection/index:inspect", {
-          method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-          body: JSON.stringify({ inspectionUrl: B + u.slice(1), siteUrl: sitesOf(env)[0] }),
-        });
-        const j = await r.json(); const st = j.inspectionResult && j.inspectionResult.indexStatusResult.coverageState;
-        if (!st) continue; n++; if (/indexed/i.test(st) && !/not indexed/i.test(st)) indexed++;
-      } catch { /* skip one */ }
+    const hubs = lh.offeredList.filter((u) => !isFilmPath(u)).sort();
+    const films = lh.offeredList.filter(isFilmPath).map((u) => [Math.random(), u]).sort((x, y) => x[0] - y[0]).slice(0, SAMPLE).map((x) => x[1]);
+    const states = await inspectPages([...hubs, ...films], { token, site: sitesOf(env)[0], fetchImpl });
+    const f = coverageCounts(films, states), h = coverageCounts(hubs, states);
+    if (f.checked) { rec.indexedShare = Math.round((f.indexed / f.checked) * 1000) / 1000; rec.sampled = f.checked; rec.filmStates = f.states; }
+    if (h.checked) {
+      rec.hubs = { offered: hubs.length, checked: h.checked, indexed: h.indexed, states: h.states,
+        notIndexed: hubs.filter((u) => states.has(u) && !isIndexedState(states.get(u))).map((u) => [u, states.get(u)]) };
     }
-    if (n) { rec.indexedShare = Math.round((indexed / n) * 1000) / 1000; rec.sampled = n; }
   }
   rec.prevIndexedFell = !!(prev && prev.indexedShare != null && rec.indexedShare != null && rec.indexedShare < prev.indexedShare);
   try {
@@ -259,7 +301,10 @@ async function weeklyHealth({ manifest, env = process.env, nowMs = Date.now(), r
 }
 
 function healthLine(rec) {
-  return `Site health (${rec.date}): ${rec.offered} pages offered to Google, ${rec.indexedShare == null ? "indexed share not sampled" : `${Math.round(rec.indexedShare * 100)}% indexed (sample of ${rec.sampled})`}, ${Math.round(rec.toHiddenShare * 100)}% of links to hidden pages, ${rec.orphans} unlinked, ${rec.freshWeak} new title(s) under 3 links`;
+  const reasons = (st) => Object.entries(st || {}).map(([k, n]) => `${n} ${k}`).join("; ");
+  const hubs = rec.hubs ? ` Homepages and hubs: ${rec.hubs.indexed} of ${rec.hubs.checked} indexed${rec.hubs.checked < rec.hubs.offered ? `, ${rec.hubs.offered - rec.hubs.checked} not answered` : ""} (${reasons(rec.hubs.states)}).` : "";
+  const films = rec.filmStates ? ` Film pages sampled: ${reasons(rec.filmStates)}.` : "";
+  return `Site health (${rec.date}): ${rec.offered} pages offered to Google, ${rec.indexedShare == null ? "indexed share not sampled" : `${Math.round(rec.indexedShare * 100)}% of film pages indexed (sample of ${rec.sampled})`}, ${Math.round(rec.toHiddenShare * 100)}% of links to hidden pages, ${rec.orphans} unlinked, ${rec.freshWeak} new title(s) under 3 links.${hubs}${films}`;
 }
 
-module.exports = { HEALTH_FILE, REPEAT_SHARE, ROLL_DAYS, THIN_WORDS, WINDOW_DAYS, contentRepetition, healthAlarms, healthLine, linkHealth, mainSentences, rollHiddenList, rollList, weeklyHealth };
+module.exports = { coverageCounts, inspectPages, isFilmPath, isIndexedState, SAMPLE, HEALTH_FILE, REPEAT_SHARE, ROLL_DAYS, THIN_WORDS, WINDOW_DAYS, contentRepetition, healthAlarms, healthLine, linkHealth, mainSentences, rollHiddenList, rollList, weeklyHealth };
