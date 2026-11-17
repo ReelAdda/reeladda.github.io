@@ -145,7 +145,10 @@ function heroDialInner(item) {
 function rowScoreLine(item, extra = "") {
   const r = dialRating(item);
   const pill = item.fcScore ? verdictPill(item.fcScore.verdict) : verdictPill(noScoreText(item).label, "early");
-  const note = r == null ? evidenceLabel(item) : "";
+  // A pill that already says the ratings are missing gets no second label saying so ("Too early ·
+  // Few ratings", "Not enough ratings · Not rated yet": 12 Nov 2026 visitor review).
+  const said = !item.fcScore && ["Too early", "Not enough ratings"].includes(noScoreText(item).label);
+  const note = r == null && !said ? evidenceLabel(item) : "";
   return `<div class="rm">${pill}${note ? ` <span class="rev">${escHtml(note)}</span>` : ""}${extra}</div>`;
 }
 

@@ -248,7 +248,11 @@ function buildEditorNote(data, cfg, seed = null, { short = false } = {}) {
   const skipWhy = (x) => plainReason(x.fcScore && x.fcScore.reason).trim().replace(/\.+$/, "").replace(/[:;,]?\s*skip it$/i, "").replace(/^[A-Z]/, (c) => c.toLowerCase());
 
   const all = [...th, ...ott];
-  const flagship = data && data.pick ? all.find((x) => x.title === data.pick) || null : null;
+  // The Pick of the Week can be a "still worth watching" title, which `ott` leaves out. The note
+  // then named another film "Top pick" under a hero card that crowned Dead-End Job (12 Nov 2026):
+  // two picks on one page. The flagship is looked up among every listed title.
+  const ottOlder = ((data && data.ott) || []).filter((x) => x.stillGood).map((x) => ({ ...x, _cinema: false }));
+  const flagship = data && data.pick ? [...all, ...ottOlder].find((x) => x.title === data.pick) || null : null;
   const used = new Set();
   const otherSide = flagship ? (flagship._cinema ? ott : th) : th;
   if (flagship) used.add(flagship.title);
@@ -471,13 +475,24 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
     // The platform leads every card, as on every other listing page (29 Oct 2026): the 120 cards
     // under "Still worth it" named none anywhere, and a card scrolled away from its "New on
     // Netflix" heading didn't either.
-    const meta = [it.platform || null, it.language, it.genre ? it.genre.split(" / ")[0] : null, freshLabel(it) || null].filter(Boolean).map(e).join(" · ");
+    // A film that reached the service well after its release shows when we first saw it there,
+    // not its release date: Possible Love, "New on Netflix", read "Released 23 Sept" on a page of
+    // this week's arrivals (12 Nov 2026 visitor review). "First seen", as the arrival log says it:
+    // the day of our sighting. Only a recent sighting later than the release date.
+    const seen = it.kind !== "tv" && it.ottFreshDate && it.released && String(it.ottFreshDate).slice(0, 10) > String(it.released).slice(0, 10)
+      && (Date.now() - Date.parse(`${String(it.ottFreshDate).slice(0, 10)}T00:00:00Z`)) / 864e5 <= 21
+      ? `First seen ${fmtDateShort(String(it.ottFreshDate).slice(0, 10), Date.now(), localeFor(code))}` : "";
+    const meta = [it.platform || null, it.language, it.genre ? it.genre.split(" / ")[0] : null, seen || freshLabel(it) || null].filter(Boolean).map(e).join(" · ");
+    // Published reviews, named as the homepage card names them (item.rv): something to go on
+    // where there is no verdict yet.
+    const rvText = require("./reviews.js").reviewsCardText(it.rv);
     const inner = `
       ${it.poster ? `<img src="${e(it.poster)}" alt="${e(it.title)} poster" width="92" height="138" loading="lazy">` : "<div class=\"nop\"></div>"}
       <div>
         <div class="rt"><h3>${e(it.title)}</h3>${badge ? `<span class="badge">${e(badge)}</span>` : ""}${it.trending ? '<span class="badge trend">Trending</span>' : ""}</div>
         <div class="rm">${meta}</div>
         ${rowScoreLine(it, trailerViewsLabel(it.trailerViews) ? " · " + e(trailerViewsLabel(it.trailerViews)) : "")}
+        ${rvText ? `<div class="rm">${e(rvText.replace(/ →$/, ""))}</div>` : ""}
       </div>
       ${rowRing(it)}`;
     return it.slug

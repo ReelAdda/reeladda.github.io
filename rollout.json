@@ -189,6 +189,17 @@
    "since": "2026-11-09",
    "what": "published reviews as their own block under the score card (lib/filmpage.js reviewBlockHtml): outlet, date, the outlet's headline, a star rating only where the feed gave one, newest first; the card keeps the count, so nothing is said twice. Approved by the owner after the 9 Nov mock-ups; 10/25/50/100% on 10–13 Nov. Every edition draws its film pages from facts through the builder (facts-mode.json), so frozen pages get it on their next render; a page still frozen keeps its present, consistent text. Not in the facts fingerprint: no sitemap date moves."
   },
+  "answer-titles": {
+   "percent": 0,
+   "schedule": [
+    {
+     "from": "2026-11-24T00:00",
+     "percent": 100
+    }
+   ],
+   "since": "2026-11-12",
+   "what": "titles of films that are streaming, in the India and UAE editions (lib/filmpage.js filmTitleTag): 'X (2026) OTT Release Date: Streaming Since 5 Nov' when we saw the film arrive, else 'OTT Release Date: Now Streaming', in place of 'OTT Release Date & Review'. The query words stay, the answer follows, the platform is never named. About 330 pages, so one build, on the first day with no other staged change (24 Nov). From the 12 Nov visitor review; owner said to fix it the same day."
+  },
   "alert-button": {
    "percent": 0,
    "schedule": [

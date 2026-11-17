@@ -75,7 +75,7 @@ function extractFacts(html, slug, { tmdbId = null } = {}) {
   // "If you liked this" only: the franchise row (lib/series.js) uses the same cards and isn't it.
   const simAt = html.indexOf("<h2>If you liked this</h2>");
   const simHtml = simAt < 0 ? "" : html.slice(simAt, (html.indexOf("<h2", simAt + 4) + 1 || html.length + 1) - 1);
-  const similar = [...simHtml.matchAll(/<(?:a class="simcard" href="([^"]+)"|div class="simcard" style="cursor:default")>(?:<img src="([^"]*)"[^>]*>)?<div class="st">([\s\S]*?)<\/div><div class="sm">([\s\S]*?)<\/div><\/(?:a|div)>/g)]
+  const similar = [...simHtml.matchAll(/<(?:a class="simcard" href="([^"]+)"|div class="simcard" style="cursor:default")>(?:<img src="([^"]*)"[^>]*>|<span aria-hidden="true" style="[^"]*">[^<]*<\/span>)?<div class="st">([\s\S]*?)<\/div><div class="sm">([\s\S]*?)<\/div><\/(?:a|div)>/g)]
     .map((m) => {
       const sm = text(m[4]);
       return { title: text(m[3]), slug: m[1] ? (/\/([^/]+)\.html$/.exec(m[1]) || [])[1] : slugGuess(text(m[3])),

@@ -150,7 +150,14 @@ function buildStreamingPage(items, cfg, { platform, pslug, language = null, lslu
   const country = countryNameFor(cfg);
   const url = streamPageUrl(code, pslug, lslug);
   const n = items.length;
-  const sorted = rankFilms(items);
+  // Verdict first, then the audience rank (12 Nov 2026 visitor review): the page said "best-rated
+  // first" and opened with a Worth a watch above The Godfather, because rows were ordered by TMDB's
+  // weighted rating while each row shows the film page's verdict. Rows take that verdict here
+  // (withShownScore, cached per page), so the order and the pills agree.
+  const TIER = { "Must watch": 3, "Worth a watch": 2, Skip: 0 };
+  const tier = (x) => (x.fcScore && x.fcScore.verdict in TIER ? TIER[x.fcScore.verdict] : 1);
+  const sorted = rankFilms(items.map((x) => require("./pagekit.js").withShownScore(code, x)))
+    .map((x, i) => ({ x, i })).sort((a, b) => tier(b.x) - tier(a.x) || a.i - b.i).map((o) => o.x);
   const films = sorted.filter((x) => x.kind !== "tv");
   const series = sorted.filter((x) => x.kind === "tv");
   const subject = language ? `${language} Movies & Series` : "Movies & Series";
@@ -213,8 +220,8 @@ function buildStreamingPage(items, cfg, { platform, pslug, language = null, lslu
     h1: `${subject} on ${platform} in ${country}`,
     updLine: `${n} title${n === 1 ? "" : "s"} · availability confirmed within ${STREAM_PAGE_MAX_AGE} days · updated ${checked}`,
     lead: plain
-      ? `The ${language ? language + " " : ""}films and series FilmyChill covers that are streaming on ${platform} in ${country} right now, best-rated first. It's a selection of the ${platform} library, and every title here has been checked against ${platform}'s current listing.`
-      : `The ${language ? language + " " : ""}films and series FilmyChill covers that are streaming on ${platform} in ${country} right now, best-rated first. Not the whole ${platform} library — every title here has been checked against ${platform}'s current listing.`,
+      ? `The ${language ? language + " " : ""}films and series FilmyChill covers that are streaming on ${platform} in ${country} right now, Must watch titles first. It's a selection of the ${platform} library, and every title here has been checked against ${platform}'s current listing.`
+      : `The ${language ? language + " " : ""}films and series FilmyChill covers that are streaming on ${platform} in ${country} right now, Must watch titles first. Not the whole ${platform} library — every title here has been checked against ${platform}'s current listing.`,
     sections, faqs, extraLd, navLinks, code,
     homeUrl: code === "in" ? "https://filmychill.com/" : `https://filmychill.com/${code}/`,
   });
