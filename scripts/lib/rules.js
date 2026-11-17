@@ -236,6 +236,17 @@ function langName(code) {
 function takeConfident(item) {
   return !!item && !item.isFresh;
 }
+// Pure: the same release-week test for a film that is not a list item (the score sweep and the
+// catalogue builder read it straight from TMDB): out for under a week with fewer than 20 ratings,
+// which is what the list builder's isFresh means (update.js baseItem). `today` and `released`
+// are dates (YYYY-MM-DD); the week is the release day and the six days after it, the days on
+// which a build's own clock still says "seven days or less".
+function releaseWeekFresh(released, votes, today) {
+  const a = Date.parse(`${String(released || "").slice(0, 10)}T00:00:00Z`), b = Date.parse(`${String(today || "").slice(0, 10)}T00:00:00Z`);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return false;
+  const days = Math.round((b - a) / 864e5);
+  return days >= 0 && days <= 6 && (Number(votes) || 0) < 20;
+}
 
 function verdict(rating, votes) {
   if (!votes || votes < 10) return "Not enough ratings"; // age-neutral: also used for old films
@@ -516,6 +527,7 @@ module.exports = {
   streamWindowShort,
   hasLanguageWindow,
   takeConfident,
+  releaseWeekFresh,
   titleWithCountry,
   verdict,
 };

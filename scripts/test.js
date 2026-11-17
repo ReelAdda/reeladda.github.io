@@ -1560,7 +1560,9 @@ const futureDate = (d) => new Date(Date.now() + d * 864e5).toISOString().slice(0
 test("a film not out yet is titled by its release date in that country — and only until it opens", () => {
   const rel = futureDate(18);
   const t = U.filmTitleTag({ title: "Forgotten Island", released: rel, kind: "movie" }, G_AE);
-  assert.ok(/^Forgotten Island \(\d{4}\) — Release Date in the UAE: \d{1,2} [A-Z][a-z]{2,3}/.test(t), t);
+  // The year sits in brackets after the title, or in the date itself when the film opens in a
+  // later year and both would not fit in 60 characters (found by the future-date run, 16 Nov 2026).
+  assert.ok(/^Forgotten Island(?: \(\d{4}\) — Release Date in the UAE: \d{1,2} [A-Z][a-z]{2,3}| — Release Date in the UAE: \d{1,2} [A-Z][a-z]{2,3} \d{4})/.test(t), t);
   assert.ok(t.length <= 60, t);
   const out = U.filmTitleTag({ title: "Forgotten Island", released: futureDate(-3), kind: "movie" }, G_AE);
   // Out in cinemas, not streaming: the title answers the streaming question honestly.
@@ -12001,6 +12003,74 @@ group("score card: the method link inside the card, the sentence gone (rollout s
     assert.ok(W.injectVote(withNote, item, "in").indexOf("fcvote") > W.injectVote(withNote, item, "in").indexOf("fcsb-note"), "after the note where there still is one");
   });
 }
+
+group("17 Nov 2026: a film page keeps the lists' release-week rule; the archive patch keeps the caller's date");
+test("release week: the release day and the six days after it, under 20 ratings", () => {
+  const { releaseWeekFresh } = require("./lib/rules.js");
+  assert.strictEqual(releaseWeekFresh("2026-11-13", 0, "2026-11-13"), true, "release day");
+  assert.strictEqual(releaseWeekFresh("2026-11-13", 19, "2026-11-19"), true, "day six");
+  assert.strictEqual(releaseWeekFresh("2026-11-13", 0, "2026-11-20"), false, "day seven: the lists' own clock is past seven days");
+  assert.strictEqual(releaseWeekFresh("2026-11-13", 20, "2026-11-14"), false, "20 ratings: the audience can be read");
+  assert.strictEqual(releaseWeekFresh("2026-11-13", 0, "2026-11-12"), false, "not out yet");
+  assert.strictEqual(releaseWeekFresh(null, 0, "2026-11-12"), false);
+  assert.strictEqual(releaseWeekFresh("2026-11-13", 0, ""), false);
+});
+test("sweepCandidates: a page in its film's release week is rescored every run, and once more on day seven", () => {
+  const W = require("./lib/scoresweep.js");
+  const man = { in: {
+    titanic: { tmdbId: 1, catalog: true, released: "2026-11-13", fcs: { v: "Skip", at: "2026-11-17", w: 99 } },
+    older: { tmdbId: 2, catalog: true, released: "2026-10-30", fcs: { v: "Skip", at: "2026-11-17", w: 99 } },
+  } };
+  const on = (day) => W.sweepCandidates(man, day, 10).map((x) => x.slug);
+  assert.deepStrictEqual(on("2026-11-17"), ["titanic"], "scored this morning, rescored this evening");
+  assert.deepStrictEqual(on("2026-11-19"), ["titanic"], "day six");
+  assert.deepStrictEqual(on("2026-11-20"), ["titanic"], "day seven: the hold has ended since it was last scored");
+  man.in.titanic.fcs.at = "2026-11-20";
+  assert.deepStrictEqual(on("2026-11-21"), [], "then it waits like any other page");
+});
+testAsync("sweepScores: four reviews in a film's first week give its page no verdict, as on the lists (Titanic, Tamil)", async () => {
+  const W = require("./lib/scoresweep.js"), E = require("./lib/editorial.js");
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const tmp = fsx.mkdtempSync(path.join(os.tmpdir(), "fc-sweep-week-")); const cwd = process.cwd();
+  const takes = E.loadTakes(), key = "tt99000017", checked = new Date().toISOString().slice(0, 10);
+  const reading = (n) => ({ take: "x", src: "wiki", hook: null, article: "Titanic (2026 film)", a: { tone: "negative", toneSrc: "ratings", ratings: { n, median: 2.25 } }, checked, v: 6 });
+  const blank = '<html><style>a{}</style><div class="head">H</div>\n  <p class="answer">A</p></html>';
+  const api = { pause: async () => {}, tmdb: async () => ({ vote_average: 0, vote_count: 0, release_date: "2026-11-13", external_ids: { imdb_id: key } }) };
+  const run = async (n, today) => {
+    takes[key] = reading(n);
+    fsx.writeFileSync("movie/titanic.html", blank);
+    const man = { in: { titanic: { tmdbId: 499371, kind: "movie", catalog: true, released: "2026-11-13" } } };
+    await W.sweepScores(man, { today, batch: 1, api });
+    return { v: man.in.titanic.fcs.v, html: fsx.readFileSync("movie/titanic.html", "utf8") };
+  };
+  try {
+    process.chdir(tmp); fsx.mkdirSync("movie");
+    const week = await run(4, "2026-11-17");
+    assert.strictEqual(week.v, "early", "four reviews, day four: no verdict yet");
+    assert.ok(!/fcsb-stamp fcsb-(?:must|worth|skip)"/.test(week.html), "no verdict stamp on the page");
+    assert.ok(!/published ratings|per Wikipedia/.test(week.html), "and no critics' figures beside 'Too early'");
+    const queued = require("./lib/factsq.js").queuedFacts("in").get("titanic");
+    assert.ok(queued && "reception" in queued && queued.reception === undefined && queued.fcScore === undefined, "the facts record drops the verdict and the figures with it");
+    const settled = await run(5, "2026-11-17");
+    assert.strictEqual(settled.v, "Skip", "five reviews are a settled reception in any week");
+    const later = await run(4, "2026-11-20");
+    assert.strictEqual(later.v, "Skip", "from day seven the critics count, as on the lists");
+    assert.ok(/fcsb-stamp fcsb-skip">Skip</.test(later.html));
+  } finally { delete takes[key]; process.chdir(cwd); fsx.rmSync(tmp, { recursive: true, force: true }); }
+});
+test("archive patch: every step uses the caller's date, and the page's own release date when there is no record", () => {
+  const A = require("./lib/archive.js");
+  const cfg = { code: "in", name: "India" };
+  const page = (released) => `<script type="application/ld+json">{"@type":"Movie","datePublished":"${released}"}</script><div class="sub"><span class="pill">In theatres</span></div><p>It&#39;s in theatres in India now — best caught on the big screen.</p>`;
+  // A date far from any clock this test can run under: the answer may only come from \`now\`.
+  const now = Date.parse("2024-03-02T10:00:00Z");
+  for (const item of [{ released: "2024-03-01" }, null]) {
+    const html = A.archivePatchHtml(page("2024-03-01"), "India", cfg, item, now).html;
+    assert.ok(/Opened in cinemas 1 Mar/.test(html) && !/Theatrical run ended|had its theatrical run/.test(html), `${item ? "with" : "without"} a record: ${html.slice(-220)}`);
+  }
+  const ended = A.archivePatchHtml(page("2024-03-01"), "India", cfg, null, Date.parse("2024-06-01T10:00:00Z")).html;
+  assert.ok(/Theatrical run ended/.test(ended), "past the window by the caller's date");
+});
 
 
 (async () => {

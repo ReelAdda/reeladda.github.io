@@ -19,6 +19,7 @@ const { filmPagePath, fmtDateFull, localeFor } = require("./core.js");
 const { fcScore } = require("./fcscore.js");
 const { FCSB_CSS, fcScoreSection, headRatingHtml, orderAnswer } = require("./filmpage.js");
 const { cachedCriticsCount, cachedCriticsTone } = require("./editorial.js");
+const { releaseWeekFresh } = require("./rules.js");
 const { escHtml } = require("./core.js");
 const { buildVerdictProse } = require("./filmcopy.js");
 const { isRecent } = require("./fcscore.js");
@@ -34,9 +35,10 @@ const { queueFacts } = require("./factsq.js");
 // the 30-day re-checks (~300 a day), so the cap rarely binds.
 const SCORE_SWEEP_BATCH = Math.max(0, Number(process.env.SCORE_SWEEP_BATCH || 1500));
 const RESCORE_DAYS = 30;
-// Ages (days after release) at which a page's wording changes: "Too early" ends at 28
-// (EARLY_DAYS in lib/fcscore.js); few-ratings scores start at 60 (EARLY_READ_AGE_DAYS).
-const AGE_LINES = [28, 60];
+// Ages (days after release) at which a page's wording changes: the release-week hold on the
+// critics' side ends at 7 (lib/rules.js releaseWeekFresh); "Too early" ends at 28 (EARLY_DAYS in
+// lib/fcscore.js); few-ratings scores start at 60 (EARLY_READ_AGE_DAYS).
+const AGE_LINES = [7, 28, 60];
 // Bumped when the no-score wording changes: pages swept under an older wording with no score
 // are redone at once rather than waiting 30 days. 2 = "Too early" only for recent releases.
 // 3 = early reads; 4 = header rating shown with one decimal like the score box, and every
@@ -235,8 +237,11 @@ function sweepCandidates(pagesManifest, today, limit) {
         const line = new Date(Date.parse(`${e.released}T00:00:00Z`) + d * 864e5).toISOString().slice(0, 10);
         return at < line && line <= today;
       }));
-      if (at && at > stale && !outdated && !crossed) continue;
-      all.push({ code, slug, e, at: outdated || crossed ? "" : at || "" });
+      // A page in its film's release week is rescored every run (17 Nov 2026): the lists read the
+      // critics' side again each build that week, so a page scored once would fall behind them.
+      const inWeek = releaseWeekFresh(e.released, 0, today);
+      if (at && at > stale && !outdated && !crossed && !inWeek) continue;
+      all.push({ code, slug, e, at: outdated || crossed || inWeek ? "" : at || "" });
     }
   }
   all.sort((a, b) => (a.at === b.at ? 0 : a.at < b.at ? -1 : 1)); // never-scored ("") first
@@ -296,15 +301,24 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
       e.released = String(d.release_date).slice(0, 10);
     }
     const votes = d.vote_count || 0;
+    const imdbId = (d.external_ids && d.external_ids.imdb_id) || d.imdb_id || null;
+    const released = e.released || d.release_date || d.first_air_date || null;
+    // The lists' release-week rule (lib/editorial.js attachTakes): a film out for under a week
+    // with under 20 ratings shows no critics' side until five reviews are in. Without it this
+    // sweep gave Titanic (Tamil, 13 Nov 2026) "Skip" from four reviews on its page while the
+    // Tamil list said "Too early" (17 Nov 2026). The count and figures are held with the tone.
+    const fresh = releaseWeekFresh(released, votes, today);
+    const criticsTone = cachedCriticsTone(imdbId, { isFresh: fresh });
+    const held = fresh && !criticsTone;
     const item = {
       rating: d.vote_average > 0 ? Number(Number(d.vote_average).toFixed(1)) : null,
       votes,
       // For the no-score wording: "Too early" only if it's actually just out.
-      released: e.released || d.release_date || d.first_air_date || null,
-      criticsTone: cachedCriticsTone((d.external_ids && d.external_ids.imdb_id) || d.imdb_id || null),
-      criticsCount: cachedCriticsCount((d.external_ids && d.external_ids.imdb_id) || d.imdb_id || null),
+      released,
+      criticsTone,
+      criticsCount: held ? null : cachedCriticsCount(imdbId),
       // The figures the Critics row cites (lib/reception.js), from the same cache.
-      reception: require("./editorial.js").cachedReception((d.external_ids && d.external_ids.imdb_id) || d.imdb_id || null) || undefined,
+      reception: (held ? null : require("./editorial.js").cachedReception(imdbId)) || undefined,
     };
     const s = fcScore(item);
     if (s) item.fcScore = s;
@@ -318,7 +332,9 @@ async function sweepScores(pagesManifest, { today, batch = SCORE_SWEEP_BATCH, ap
     }
     e.fcs = { v: s ? s.verdict : "early", at: today, w: SWEEP_WORDING };
     // The same rating and score as facts (lib/factsq.js), for pages drawn from their record.
-    queueFacts(code, slug, { rating: item.rating, votes: item.votes, fcScore: s || undefined });
+    // A held critics' side leaves the record too, or the page drawn from it would still cite the
+    // four reviews beside "Too early". Nothing else removes the figures: an old film keeps them.
+    queueFacts(code, slug, { rating: item.rating, votes: item.votes, fcScore: s || undefined, ...(held ? { reception: undefined } : {}) });
     if (next !== html) {
       fs.writeFileSync(file, next);
       // No `last` bump here: injecting the vote widget or re-wording markup isn't news to a

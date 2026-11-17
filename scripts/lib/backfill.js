@@ -27,7 +27,7 @@ const { enrich } = require("./enrich.js");
 const { cachedCriticsTone } = require("./editorial.js");
 const { fcScore } = require("./fcscore.js");
 const { buildFilmPage } = require("./filmpage.js");
-const { countryNameFor, EXCLUDE_IDS, verdict } = require("./rules.js");
+const { countryNameFor, EXCLUDE_IDS, releaseWeekFresh, verdict } = require("./rules.js");
 const { loadStateFile } = require("./runhealth.js");
 const { sleep, tmdb } = require("./tmdb.js");
 
@@ -184,7 +184,8 @@ async function backfillCatalog(cfg, pagesManifest, { state, baseItem, withImdb, 
       // FilmyChill Score first, on the real rating: catalogue items never pass through the
       // weekly scoring step (without this every catalogue page read "Too early", even with
       // thousands of ratings), and an older title with 15–49 ratings earns an early read.
-      item.criticsTone = cachedCriticsTone(item.imdbId);
+      // With the lists' release-week rule (lib/rules.js releaseWeekFresh), as the score sweep has.
+      item.criticsTone = cachedCriticsTone(item.imdbId, { isFresh: releaseWeekFresh(item.released, item.votes, new Date().toISOString().slice(0, 10)) });
       const score = fcScore(item);
       if (score) item.fcScore = score;
       // Thin data: the page's audience wording must not outrun the early read (an 8.9 from

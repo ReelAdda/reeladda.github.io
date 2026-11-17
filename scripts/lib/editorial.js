@@ -1387,6 +1387,7 @@ module.exports = {
   entryReception,
   parseAggregates,
   cachedCriticsTone,
+  loadTakes,
   itemsAgeDays,
   wikiEntityMatches,
   wikiTitleCandidates,

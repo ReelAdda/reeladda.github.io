@@ -714,9 +714,11 @@ function archivePatchHtml(html, countryName, cfg = null, item = null, now = Date
   if (rt.changed) { out = rt.html; changed = true; }
   const an = ensureAnalytics(out);
   if (an.changed) { out = an.html; changed = true; }
-  const st = settleReleasedCopy(out, { countryName, cfg });
+  // The same `now` as the swaps above: these two read the real clock until 17 Nov 2026, so a
+  // caller's date was honoured for the first half of the patch and ignored for the second.
+  const st = settleReleasedCopy(out, { countryName, cfg, now });
   if (st.changed) { out = st.html; changed = true; }
-  const fz = freshenFrozenCopy(out, { countryName, cfg });
+  const fz = freshenFrozenCopy(out, { countryName, cfg, now });
   if (fz.changed) { out = fz.html; changed = true; }
   const t = shortenTitleTag(out, countryName, cfg);
   if (t.changed) { out = t.html; changed = true; }
