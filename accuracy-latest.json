@@ -1,10 +1,38 @@
 {
- "date": "2026-11-17",
+ "date": "2026-11-18",
  "checked": 108,
  "errors": 0,
- "pagesDisagreeing": 0,
- "high": 0,
- "correctable": 0,
- "byField": {},
- "rows": []
+ "pagesDisagreeing": 3,
+ "high": 2,
+ "correctable": 3,
+ "byField": {
+  "title": 1,
+  "platform": 2
+ },
+ "rows": [
+  {
+   "field": "title",
+   "severity": "low",
+   "page": "Hadota",
+   "tmdb": "Hadoota",
+   "code": "ae",
+   "slug": "hadota"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, HBO Max, WeTV",
+   "tmdb": "Netflix, HBO Max, Tencent Video",
+   "code": "id",
+   "slug": "my-mister"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, Prime Video, Disney+, Molotov TV",
+   "tmdb": "Netflix, Prime Video, Disney+, TF1+",
+   "code": "fr",
+   "slug": "law-order-special-victims-unit"
+  }
+ ]
 }
