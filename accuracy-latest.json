@@ -1,30 +1,30 @@
 {
- "date": "2026-11-18",
+ "date": "2026-11-19",
  "checked": 108,
  "errors": 0,
  "pagesDisagreeing": 2,
  "high": 2,
  "correctable": 2,
  "byField": {
-  "streaming": 1,
-  "platform": 1
+  "platform": 1,
+  "streaming": 1
  },
  "rows": [
   {
-   "field": "streaming",
-   "severity": "high",
-   "page": "not streaming",
-   "tmdb": "on wavve",
-   "code": "kr",
-   "slug": "mr-robot"
-  },
-  {
    "field": "platform",
    "severity": "high",
-   "page": "Canal+, Molotov TV, Cine+ OCS, Paramount+",
-   "tmdb": "Canal+, Molotov TV, Paramount+, SFR Play",
+   "page": "Netflix, Paramount+",
+   "tmdb": "Prime Video, Paramount+",
+   "code": "uk",
+   "slug": "mean-girls"
+  },
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "on Molotov TV, Cine+ OCS, SFR Play",
+   "tmdb": "rent/buy only",
    "code": "fr",
-   "slug": "haute-cuisine"
+   "slug": "moliere"
   }
  ]
 }
