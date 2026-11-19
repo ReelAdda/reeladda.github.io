@@ -363,7 +363,16 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
   // given their own labelled section at the end. The section headings on this page are
   // literally "New on Netflix this week" — putting a title that arrived five weeks ago
   // under one is a false claim in a heading, which is the worst place to put one.
-  const freshItems = items.filter((x) => !x.stillGood);
+  // "This week" means the seven days up to this build (12 Nov 2026 accuracy scan). Every title
+  // not carried over counted as new, and those reach back five weeks: 79 of the 171 rows under
+  // "New on X" headings, on pages titled "N New OTT Releases This Week (9–15 Nov)", had arrived
+  // more than a week earlier (Doctor X, 9 Oct). Those rows now sit under "Arrived earlier", and
+  // the title's count, the description and the "New on X" headings are this week's only.
+  const weekAgo = new Date((Date.parse(gen) || Date.now()) - 7 * 864e5).toISOString().slice(0, 10);
+  const arrivedOn = (x) => String(x.ottFreshDate || x.freshDate || "").slice(0, 10);
+  const thisWeek = (x) => !arrivedOn(x) || arrivedOn(x) >= weekAgo;
+  const freshItems = items.filter((x) => !x.stillGood && thisWeek(x));
+  const earlierItems = items.filter((x) => !x.stillGood && !thisWeek(x));
   const carriedItems = items.filter((x) => x.stillGood && !hidden(x.slug));
   // Group by platform, preserving the ranked order inside each group; biggest platforms first.
   const groups = new Map();
@@ -504,6 +513,13 @@ function buildOttWeekPage(data, cfg, allCountries, calendarIndex = null, platfor
     <h2>New on ${e(p)} <span class="cnt">${groups.get(p).length}</span></h2>
     ${groups.get(p).map(rowFor).join("\n")}
   </section>`).join("\n")
+  // Arrivals from the weeks before this one, newest first, each row naming its service.
+  + (earlierItems.length ? `
+  <section>
+    <h2>Arrived earlier <span class="cnt">${earlierItems.length}</span></h2>
+    <p class="rm" style="margin:0 0 10px">Reached streaming in the last five weeks, before this week.</p>
+    ${earlierItems.slice().sort((a, b) => arrivedOn(b).localeCompare(arrivedOn(a))).map(rowFor).join("\n")}
+  </section>` : "")
   // Carried-over titles get one honest section at the end, mirroring the homepage's
   // "Still worth it" divider, rather than being folded into a "New on X this week" heading.
   + (carriedItems.length ? `

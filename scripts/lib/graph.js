@@ -43,6 +43,9 @@ function filmIndexFor(cfg) {
       // 265 KB w780 poster (28,687 cards, 16 Oct 2026 audit). Cards want the poster at w342.
       poster: String([].concat(ld.image || "")[0] || "").replace(/\/t\/p\/w\d+\//, "/t/p/w342/"),
       kind: ld["@type"] === "TVSeries" ? "tv" : "movie",
+      // The streaming date the page itself gives (its <!--SW:digital=date|service--> marker), so
+      // the Coming list can't leave out a date a film page states (Daayra, 12 Nov 2026).
+      digital: ((d) => (d ? { date: d[1], note: d[2].replace(/&amp;/g, "&") } : null))(/<!--SW:digital=(\d{4}-\d{2}-\d{2})\|([^>]*?)-->/.exec(html)),
       // People, for "same actor / same director" neighbours (already in the page's JSON-LD).
       cast: personNames(ld.actor).slice(0, 8),
       director: personNames(ld.director || ld.creator).slice(0, 3),

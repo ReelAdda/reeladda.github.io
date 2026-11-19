@@ -762,6 +762,19 @@ function filmTitleTag(item, cfg = null) {
       `${item.title}: Episode Schedule`,
     ]);
   }
+  // LEFT STREAMING (12 Nov 2026 accuracy scan). A title that was on a service and no longer is
+  // (state "gone", lib/factsq.js) kept "Where to Watch in India" over a page saying "Not on OTT in
+  // India right now": 125 pages promised what they can't give. The title says what the page says.
+  if (item.state === "gone" && !providers.length) {
+    const off = V.word === "OTT" ? "Not on OTT" : "Not Streaming";
+    return fitTitle([
+      `${item.title}${yr} — ${off} in ${country} Right Now | FilmyChill`,
+      `${item.title}${yr} — ${off} in ${country} Right Now`,
+      `${item.title} — ${off} in ${country} Right Now`,
+      `${item.title}${yr} — ${off} in ${country}`,
+      `${item.title} — ${off} in ${country}`,
+    ]);
+  }
   const longOut = item.released && (Date.now() - Date.parse(`${String(item.released).slice(0, 10)}T00:00:00Z`)) / 864e5 > STREAMING_DATE_TITLE_DAYS
     && inRollout(INTENT_TITLES, item.slug);
   const canAnswerDate = V.word === "OTT" && item.kind !== "tv" && providers.length > 0 && !longOut;
@@ -2017,6 +2030,13 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
       const usual = est && !est.passed
         ? ` ${e(hasLanguageWindow(item.language) ? `${item.language} releases` : "Releases like this")} usually reach ${V.word === "OTT" ? "OTT" : "streaming"} ${est.lo}–${est.hi} weeks after opening, which would put it around <strong>${e(est.span)}</strong>${item._plain ? ". That's an estimate based on past releases." : " — an estimate, not a confirmed date."}`
         : "";
+      // A streaming date already listed for a film not yet in cinemas (12 Nov 2026 accuracy scan):
+      // the Coming list gave "23 Dec on Netflix" for Cliff Booth while this section said a date
+      // "won't be set until after it opens". The page says the date, and whose it is.
+      if (digitalUpcoming(item)) {
+        const on = digitalNoteName(item.digitalNote) ? ` on ${e(digitalNoteName(item.digitalNote))}` : "";
+        return `<!--SW:pending--><!--SW:due=${e(due)}--><h2>${e(V.heading(item.title))}</h2><p>${opens} TMDB lists a streaming date for it: <strong>${e(fmtDateFull(item.digitalDate, localeFor(code)))}${on}</strong>. This page updates automatically the day it starts streaming.</p><!--/SW:pending-->`;
+      }
       return `<!--SW:pending--><!--SW:due=${e(due)}--><h2>${e(V.heading(item.title))}</h2><p>${opens} ${e(V.article)} ${e(V.releaseDate)} won't be set until after it opens${item._plain ? ". This page" : " — this page"} updates automatically the day it starts streaming.${usual}</p><!--/SW:pending-->`;
     }
     if (digitalUpcoming(item)) {
