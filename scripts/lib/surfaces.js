@@ -621,6 +621,7 @@ ${ICON_LINKS}
     reaches back further, but it is volunteer-entered, so we publish its coverage beside it and never mix it
     with our own measurements. Films whose digital date comes before their cinema date, or more than a year
     after it, are left out. The rows behind it are in <a href="/data/india-digital-windows.csv">this CSV</a>.
+    The platform column is normalised from TMDB's free-text note; platform_note keeps the original text.
     <br><br><b>Correction, 4 October 2026.</b> Earlier versions of this page also counted TV series,
     straight-to-streaming films and titles we hadn't seen arrive, which pulled every median down to a few days.
   </div>
@@ -628,12 +629,16 @@ ${ICON_LINKS}
   ${arrivalsSection(records)}
 
   <h2>Use the data</h2>
-  <p>The full record is available as <a href="/data/streaming-windows.csv">CSV</a>, free to use for any
-  purpose including commercially, with attribution to FilmyChill and a link to this page. No API key,
-  no signup. If you're writing something and want a cut we don't publish here, ask.</p>
+  <p>The full record is available as <a href="/data/streaming-windows.csv">CSV</a>, free to cite and quote
+  with credit to FilmyChill and a link to this page. Release dates come from TMDB and streaming
+  availability from JustWatch; reuse of that underlying data is governed by
+  <a href="https://www.themoviedb.org/api-terms-of-use" rel="noopener">TMDB's API terms</a>. If you're
+  writing something and want a cut we don't publish here, ask.</p>
   <p class="cite"><b>Cite as:</b> FilmyChill, "How long does a film take to reach streaming?", updated ${e(updatedHuman)}, https://filmychill.com/data/</p>
 
-  <footer><a href="/">← FilmyChill</a> · <a href="/about/">About</a></footer>
+  <footer><a href="/">← FilmyChill</a> · <a href="/about/">About</a>
+  <br>Release dates from <a href="https://www.themoviedb.org" rel="noopener">TMDB</a> · Streaming availability data by <a href="https://www.justwatch.com" rel="noopener">JustWatch</a>
+  <br>${require("./pagekit.js").TMDB_NOTICE}</footer>
 </body></html>`;
 }
 
@@ -665,11 +670,13 @@ function filmsInCinemas(today = new Date().toISOString().slice(0, 10)) {
 // The rows behind the India digital-release table.
 function buildDigitalCsv(store) {
   const q = (x) => `"${String(x || "").replace(/"/g, '""')}"`;
-  const rows = [["tmdb_id", "title", "language", "cinema_release_in", "digital_release_in", "platform_note", "window_days"]];
+  // "platform" is the name the page's table groups by (lib/indiadata.js platformOf); "platform_note"
+  // stays TMDB's text as typed. Grouping the file by platform gives the page's figures.
+  const rows = [["tmdb_id", "title", "language", "cinema_release_in", "digital_release_in", "platform_note", "platform", "window_days"]];
   for (const [id, f] of Object.entries((store && store.films) || {})) {
     const w = digitalWindow(f);
     if (w.days == null) continue;
-    rows.push([id, q(f.t), q(f.lang), f.th, f.dig, q(f.note), w.days]);
+    rows.push([id, q(f.t), q(f.lang), f.th, f.dig, q(f.note), q(require("./indiadata.js").platformOf(f.note)), w.days]);
   }
   return rows.map((r) => r.join(",")).join("\n") + "\n";
 }

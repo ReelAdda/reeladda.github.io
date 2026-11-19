@@ -8023,7 +8023,7 @@ test("data page: India section keeps measured and TMDB figures apart, with count
   const thin = S2.tmdbIndiaSection(IND.digitalStats({ films: { 1: films[1] } }, { today: "2026-10-17" }));
   assert.ok(!/digital release dates,/.test(thin), "too few dated films: the TMDB table isn't shown");
   const csv = S2.buildDigitalCsv({ films: { 7: { t: 'A "B"', lang: "Hindi", th: "2025-02-01", dig: "2025-04-01", note: "Netflix" }, 8: { t: "No", th: "2025-01-01" } } });
-  assert.strictEqual(csv, 'tmdb_id,title,language,cinema_release_in,digital_release_in,platform_note,window_days\n7,"A ""B""","Hindi",2025-02-01,2025-04-01,"Netflix",59\n');
+  assert.strictEqual(csv, 'tmdb_id,title,language,cinema_release_in,digital_release_in,platform_note,platform,window_days\n7,"A ""B""","Hindi",2025-02-01,2025-04-01,"Netflix","Netflix",59\n');
 });
 test("data page: every table's rows plus its small-group line add up to the total stated above it (5 Nov 2026)", () => {
   const mk = (i, lang, p) => ({ c: "us", k: "movie", id: 100 + i, th: "2026-09-01", first: `2026-10-${String(1 + i).padStart(2, "0")}`, lang, p, seen: "2026-10-01T00:00:00Z" });
@@ -8085,6 +8085,8 @@ test("trust copy: About and Privacy never repeat a statement the code contradict
   const banned = [
     [about, "verdict soon", "no card says it any more"],
     [about, "never sent anywhere", "arrival alerts send My List films to Firestore"],
+    [read("index.html"), "zero-tracking", "the site runs Google Analytics and Grow (press review, 19 Nov 2026)"],
+    [read("scripts/lib/surfaces.js"), "including commercially", "the data is TMDB's and JustWatch's to license, not ours (press review, 19 Nov 2026)"],
     [about, "editorial rankings", "the rankings are automated"],
     [about, "in our own words", "the critics' summary is machine-written"],
     [about, "YouTube trailer statistics", "trending uses Wikipedia readership and TMDB popularity"],
@@ -12200,6 +12202,54 @@ testAsync("index check: asks about every hub and a film sample, keeps each answe
   assert.ok(!/Homepages|sampled:/.test(K.healthLine({ date: "2026-11-17", offered: 7312, indexedShare: 0.067, sampled: 60, toHiddenShare: 0.031, orphans: 13, freshWeak: 42 })));
   const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "keeplean.js"), "utf8");
   assert.ok(/const SAMPLE = 300;/.test(src) && /INSPECT_MAX_MS = 4 \* 60 \* 1000/.test(src), "300 film pages, at most four minutes");
+});
+
+group("19 Nov 2026: the data page before the press emails: one platform name in the CSV, credits, no licence we can't give");
+test("platform names: every spelling of a service is one name, and a note that is not one service is none", () => {
+  const { platformOf } = require("./lib/indiadata.js");
+  const all = (names, want) => { for (const n of names) assert.strictEqual(platformOf(n), want, `${JSON.stringify(n)} -> ${want}`); };
+  all(["Prime Video", "Amazon Prime Video", "Amazon Prime", "Prime video", "prime video", "PrimeVideo", "Primevideo", "AmazonPrimeVideo", "Streaming in Prime Video", "Streaming In Prime Video", "In Prime Video"], "Prime Video");
+  all(["Zee5", "ZEE5", "Zee 5"], "ZEE5");
+  all(["JioHotstar", "Hotstar", "Disney+ Hotstar", "Jio Hotstar", "JioHotStar"], "JioHotstar");
+  all(["Sony Liv", "SonyLIV", "Sonyliv", "Sony LIV"], "Sony LIV");
+  all(["SunNXT", "Sun NXT", "SunNxt", "Sunnxt", "SUN NXT"], "Sun NXT");
+  all(["ETV Win", "Etv-Win", "Etvwin", "ETV win"], "ETV Win");
+  all(["ManoramaMAX", "Manorama Max", "Manorama max", "Availabe on ManoramaMAX OTT"], "ManoramaMAX");
+  all(["Hoichoi", "Hoichoi Release"], "Hoichoi");
+  all(["aha", "Aha", "AHA"], "aha");
+  // Not one streaming service: no platform, so the film is in the totals and in no platform's row.
+  all(["", "  ", "Netflix & JioHotstar", "Tamil Dubbed", "Worldwide not just India", "Amazon Prime Rental", "BookmyShow Steem"], null);
+  // A service outside the table keeps the contributor's spelling.
+  assert.strictEqual(platformOf("Lionsgate Play"), "Lionsgate Play");
+  assert.strictEqual(platformOf("Waves"), "Waves");
+});
+test("the India CSV: grouping by its platform column gives the page's platform table", () => {
+  const S2 = require("./lib/surfaces.js"), IND = require("./lib/indiadata.js");
+  const films = {};
+  const notes = [...Array(6).fill("Zee5"), ...Array(5).fill("ZEE5"), "Zee 5", ...Array(7).fill("Prime Video"), "PrimeVideo", "Streaming in Prime Video", "Amazon Prime Rental", "Tamil Dubbed", ""];
+  notes.forEach((note, i) => { films[100 + i] = { t: "F" + i, lang: "Hindi", votes: 30, th: "2025-01-01", dig: `2025-0${2 + (i % 3)}-1${i % 9}`, note }; });
+  const lines = S2.buildDigitalCsv({ films }).trim().split("\n");
+  const head = lines[0].split(",");
+  assert.deepStrictEqual(head.slice(5), ["platform_note", "platform", "window_days"], "the raw note stays, the name sits beside it");
+  const cells = (l) => l.match(/("(?:[^"]|"")*"|[^,]*)(?:,|$)/g).slice(0, head.length).map((x) => x.replace(/,$/, "").replace(/^"|"$/g, ""));
+  const by = new Map();
+  for (const l of lines.slice(1)) { const c = cells(l); assert.strictEqual(c[6], IND.platformOf(c[5]) || "", "the column is the page's own name for the note"); if (c[6]) { if (!by.has(c[6])) by.set(c[6], []); by.get(c[6]).push(Number(c[7])); } }
+  assert.deepStrictEqual([...by.keys()].sort(), ["Prime Video", "ZEE5"]);
+  const median = (a) => { a = a.slice().sort((x, y) => x - y); return a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2; };
+  const page = IND.digitalStats({ films }, { today: "2026-01-01" });
+  for (const row of page.byPlatform) { assert.strictEqual(by.get(row.key).length, row.n, `${row.key}: ${row.n} films on the page`); assert.strictEqual(Math.round(median(by.get(row.key))), Math.round(row.median), `${row.key}: the page's median`); }
+  assert.strictEqual(page.byPlatform.length, 2);
+  assert.strictEqual(page.platformNamed, 21, "the rental and the dubbing note name no platform");
+});
+test("the data page: free to cite, credits to TMDB and JustWatch, TMDB's notice, and the platform column explained", () => {
+  const fsx = require("fs"), os = require("os"), path = require("path");
+  const src = fsx.readFileSync(path.join(__dirname, "lib", "surfaces.js"), "utf8");
+  assert.ok(/free to cite and quote\s+with credit to FilmyChill/.test(src) && !/for any\s+purpose|including commercially/.test(src), "no licence over data that is TMDB's and JustWatch's");
+  assert.ok(/reuse of that underlying data is governed by\s+<a href="https:\/\/www\.themoviedb\.org\/api-terms-of-use"/.test(src));
+  assert.ok(/Streaming availability data by <a href="https:\/\/www\.justwatch\.com"/.test(src) && /require\("\.\/pagekit\.js"\)\.TMDB_NOTICE\}<\/footer>/.test(src), "the footer credits both and carries TMDB's notice");
+  assert.ok(/uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB\./.test(require("./lib/pagekit.js").TMDB_NOTICE), "the notice in TMDB's own words, with its logo");
+  assert.ok(/The platform column is normalised from TMDB's free-text note; platform_note keeps the original text\./.test(src));
+  assert.ok(!/zero-tracking/.test(fsx.readFileSync(path.join(__dirname, "..", "index.html"), "utf8")), "the homepage template promises no zero tracking");
 });
 
 
