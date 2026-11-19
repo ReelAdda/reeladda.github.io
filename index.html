@@ -54,7 +54,7 @@
 <link rel="preload" href="/fonts/inter-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 <!--SSR:HEROPRELOAD--><link rel="preload" as="image" href="https://image.tmdb.org/t/p/w300/yHVZncPRZr63mezRX20IyKLrSkv.jpg" media="(max-width: 520px)" fetchpriority="high"><link rel="preload" as="image" href="https://image.tmdb.org/t/p/w780/yHVZncPRZr63mezRX20IyKLrSkv.jpg" media="(min-width: 521px)" fetchpriority="high"><!--/SSR:HEROPRELOAD-->
 <style>
-  /* Self-hosted (subsetted latin) — no Google Fonts CDN, keeping the zero-tracking promise. */
+  /* Self-hosted (subsetted latin): no Google Fonts CDN request. */
   @font-face { font-family: 'Anton'; font-style: normal; font-weight: 400; font-display: swap;
     src: url('/fonts/anton-latin.woff2') format('woff2'); }
   @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 800; font-display: swap;

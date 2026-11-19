@@ -632,6 +632,7 @@ module.exports = {
   withShownScore,
   FOOTER_LINKS,
   NO_HOSTING_NOTICE,
+  TMDB_NOTICE,
   NO_HOSTING_PLAIN,
   analyticsTag,
   canonProvider,

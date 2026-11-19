@@ -141,16 +141,28 @@ function digitalWindow(f) {
 // Pure: the published figures. Groups under PUBLISH_MIN films are kept but flagged.
 // TMDB's free-text platform note, one name per service (contributors write "ZEE5" and "Zee5",
 // "Hotstar" and "JioHotstar"). Null when the note is empty.
-const PLATFORM_NAMES = [
-  [/^(amazon )?prime( video)?$/i, "Prime Video"], [/^amazon prime video$/i, "Prime Video"], [/^netflix$/i, "Netflix"],
-  [/^zee ?5$/i, "ZEE5"], [/^(jio ?hotstar|hotstar|disney\+ ?hotstar)$/i, "JioHotstar"], [/^sony ?liv$/i, "Sony LIV"],
-  [/^sun ?nxt$/i, "Sun NXT"], [/^aha$/i, "aha"], [/^hoichoi$/i, "Hoichoi"], [/^jio ?cinema$/i, "JioCinema"],
-  [/^etv ?win$/i, "ETV Win"], [/^manorama ?max$/i, "ManoramaMAX"], [/^chaupal$/i, "Chaupal"], [/^youtube$/i, "YouTube"],
-];
+// The same function names the platform on the data page and in the CSV's "platform" column
+// (19 Nov 2026), so a reader who groups the CSV gets the page's numbers. Until then the CSV carried
+// only the raw note: "Zee5" alone gave 67 days and "ZEE5" alone 58.5 against the page's 63.
+// Spellings are compared without case, spaces or hyphens ("PrimeVideo", "Etv-Win"), after the
+// words contributors wrap a name in ("Streaming in Prime Video", "Availabe on ManoramaMAX OTT",
+// "Hoichoi Release"). A note that is not one streaming service ("Netflix & JioHotstar", "Tamil
+// Dubbed", "Amazon Prime Rental", "Worldwide not just India") names no platform. A service not in
+// the table keeps the contributor's spelling.
+const PLATFORM_KEYS = {
+  netflix: "Netflix", prime: "Prime Video", primevideo: "Prime Video", amazonprime: "Prime Video", amazonprimevideo: "Prime Video",
+  zee5: "ZEE5", jiohotstar: "JioHotstar", hotstar: "JioHotstar", "disney+hotstar": "JioHotstar", sonyliv: "Sony LIV",
+  sunnxt: "Sun NXT", aha: "aha", hoichoi: "Hoichoi", jiocinema: "JioCinema", etvwin: "ETV Win", manoramamax: "ManoramaMAX",
+  chaupal: "Chaupal", youtube: "YouTube",
+};
+const NOT_ONE_PLATFORM = /[&,\/]|\band\b|dubbed|worldwide|rental|bookmyshow/i;
 function platformOf(note) {
-  const n = String(note || "").trim();
+  let n = String(note || "").trim();
   if (!n) return null;
-  for (const [re, name] of PLATFORM_NAMES) if (re.test(n)) return name;
+  n = n.replace(/^(?:streaming |availabl?e )?(?:in|on) /i, "").replace(/(?: (?:ott|release))+$/i, "").trim();
+  const known = PLATFORM_KEYS[n.toLowerCase().replace(/[\s-]+/g, "")];
+  if (known) return known;
+  if (!n || NOT_ONE_PLATFORM.test(n)) return null;
   return n;
 }
 
