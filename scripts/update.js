@@ -357,8 +357,10 @@ const SOON_EXTRA_DAYS = 120;
 // catch-up runs from the "India streaming data" workflow with a larger budget.
 const DIGITAL_BUDGET = Number(process.env.DIGITAL_BUDGET || 300);
 // The same for the studio record outside India (lib/studiowindows.js): about 2,500 films to read
-// once, so the first pass takes about nine runs; after that only the weekly refresh.
-const STUDIO_BUDGET = Number(process.env.STUDIO_BUDGET || 300);
+// once. 1,200 a run (about six minutes) so the first pass takes two or three runs and the
+// sections can appear from the first; once the record is read the cap no longer binds, and a
+// run spends only the weekly refresh and the rechecks.
+const STUDIO_BUDGET = Number(process.env.STUDIO_BUDGET || 1200);
 // Pick of the Week needs at least this many ratings before its rating can earn the crown.
 const PICK_MIN_VOTES = 20;
 // Archive lines that failed to write this run (the archive is additive, so a failure never
