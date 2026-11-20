@@ -1,39 +1,10 @@
 {
- "date": "2026-11-19",
- "checked": 108,
- "errors": 0,
- "pagesDisagreeing": 3,
- "high": 2,
- "correctable": 2,
- "byField": {
-  "director": 1,
-  "release date": 1,
-  "streaming": 1
- },
- "rows": [
-  {
-   "field": "director",
-   "severity": "medium",
-   "page": "Marvick Núñez",
-   "tmdb": "Marvick Eduardo Núñez Aguilera",
-   "code": "us",
-   "slug": "la-leyenda-de-los-chaneques"
-  },
-  {
-   "field": "release date",
-   "severity": "high",
-   "page": "2026-12-04",
-   "tmdb": "2026-11-04",
-   "code": "au",
-   "slug": "maatrubhumi"
-  },
-  {
-   "field": "streaming",
-   "severity": "high",
-   "page": "not streaming",
-   "tmdb": "on Netflix",
-   "code": "nz",
-   "slug": "the-hangover"
-  }
- ]
+ "date": "2026-11-20",
+ "checked": 107,
+ "errors": 1,
+ "pagesDisagreeing": 0,
+ "high": 0,
+ "correctable": 0,
+ "byField": {},
+ "rows": []
 }

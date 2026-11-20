@@ -1,9 +1,9 @@
 {
  "_about": "Published reviews of recent titles, from the outlets' RSS feeds (lib/reviews.js): outlet, link, headline, date, and a star rating only when the feed states one. Keyed by kind:tmdbId; pruned 90 days after release.",
- "fetched": "2026-11-19",
+ "fetched": "2026-11-20",
  "feeds": {
   "https://www.thehindu.com/entertainment/reviews/feeder/default.rss": {
-   "ok": "2026-11-19",
+   "ok": "2026-11-20",
    "items": 60
   },
   "https://indianexpress.com/section/entertainment/movie-review/feed/": {
@@ -23,31 +23,31 @@
    "error": "HTTP 403"
   },
   "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml": {
-   "ok": "2026-11-19",
-   "items": 79
+   "ok": "2026-11-20",
+   "items": 80
   },
   "https://feeds.feedburner.com/ndtvmovies-latest": {
    "ok": "2026-11-05",
    "items": 100
   },
   "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml": {
-   "failed": "2026-11-19",
+   "failed": "2026-11-20",
    "error": "HTTP 403"
   },
   "https://www.news18.com/rss/movies.xml": {
-   "failed": "2026-11-19",
+   "failed": "2026-11-20",
    "error": "HTTP 403"
   },
   "https://feeds.feedburner.com/ScrollinArticles.rss": {
-   "ok": "2026-11-19",
+   "ok": "2026-11-20",
    "items": 100
   },
   "https://www.koimoi.com/feed/": {
-   "failed": "2026-11-19",
+   "failed": "2026-11-20",
    "error": "HTTP 403"
   },
   "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms": {
-   "ok": "2026-11-19",
+   "ok": "2026-11-20",
    "items": 20
   },
   "https://www.indiatoday.in/rss/1206611": {
@@ -55,44 +55,44 @@
    "items": 20
   },
   "https://www.dnaindia.com/feeds/entertainment.xml": {
-   "ok": "2026-11-19",
+   "ok": "2026-11-20",
    "items": 20
   },
   "https://www.freepressjournal.in/stories.rss?section=entertainment": {
-   "ok": "2026-11-19",
-   "items": 14
+   "ok": "2026-11-20",
+   "items": 100
   },
   "https://www.123telugu.com/category/reviews/feed": {
-   "ok": "2026-11-19",
+   "ok": "2026-11-20",
    "items": 30
   },
   "https://www.telugu360.com/feed/": {
-   "ok": "2026-11-19",
+   "ok": "2026-11-20",
    "items": 10
   },
   "https://www.cinemaexpress.com/feed": {
-   "ok": "2026-11-19",
-   "items": 1
+   "ok": "2026-11-20",
+   "items": 8
   },
   "https://www.vikatan.com/feed": {
-   "ok": "2026-11-19",
-   "items": 1
+   "ok": "2026-11-20",
+   "items": 17
   },
   "https://www.prajavani.net/feed": {
-   "ok": "2026-11-19",
-   "items": 2
+   "ok": "2026-11-20",
+   "items": 130
   },
   "https://www.amarujala.com/rss/entertainment.xml": {
-   "ok": "2026-11-19",
+   "ok": "2026-11-20",
    "items": 40
   },
   "https://www.sangbadpratidin.in/feed/": {
-   "ok": "2026-11-19",
+   "ok": "2026-11-20",
    "items": 20
   },
   "https://www.rediff.com/rss/moviesreviewsrss.xml": {
-   "ok": "2026-11-19",
-   "items": 223
+   "ok": "2026-11-20",
+   "items": 225
   }
  },
  "films": {
@@ -356,7 +356,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1395215": {
    "title": "Sigma",
@@ -400,7 +400,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "tv:289517": {
    "title": "Dead-End Job",
@@ -426,7 +426,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1374689": {
    "title": "Pyre",
@@ -641,7 +641,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1081010": {
    "title": "Prahaar: The Untold Story of Ujjwal Nikam",
@@ -673,7 +673,7 @@
      "d": "2026-11-12"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "tv:302882": {
    "title": "#Love",
@@ -724,7 +724,7 @@
      "d": "2026-10-24"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:656908": {
    "title": "Ramayana: Rise of a Legend",
@@ -768,7 +768,7 @@
      "d": "2026-11-05"
     }
    ],
-   "updated": "2026-11-18"
+   "updated": "2026-11-20"
   },
   "movie:1810711": {
    "title": "Dilwali Diwali",
@@ -799,7 +799,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1555847": {
    "title": "Garividi Lakshmi",
@@ -843,7 +843,7 @@
      "d": "2026-11-07"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1402181": {
    "title": "Scene",
@@ -880,7 +880,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:926867": {
    "title": "Nooru Kodi Vaanavil",
@@ -906,7 +906,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1803837": {
    "title": "Summer Holidays",
@@ -1013,7 +1013,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1733518": {
    "title": "Bouma",
@@ -1032,7 +1032,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1641520": {
    "title": "DNK",
@@ -1045,7 +1045,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1440539": {
    "title": "Itllu Arjuna",
@@ -1064,7 +1064,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1493572": {
    "title": "Parivarik ManuRanjan",
@@ -1101,7 +1101,7 @@
      "d": "2026-11-16"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1286656": {
    "title": "I Play Rocky",
@@ -1132,7 +1132,7 @@
      "d": "2026-11-16"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1562642": {
    "title": "Ghost Soldier",
@@ -1164,7 +1164,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1655020": {
    "title": "John Doe",
@@ -1189,7 +1189,7 @@
      "d": "2026-11-14"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "tv:291507": {
    "title": "The Body",
@@ -1202,7 +1202,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1445172": {
    "title": "Dark Chocolate",
@@ -1215,7 +1215,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "tv:334412": {
    "title": "Student of the Year: After Dark",
@@ -1246,7 +1246,7 @@
      "d": "2026-11-17"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1543469": {
    "title": "Heartland",
@@ -1259,7 +1259,7 @@
      "d": "2026-11-14"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1434462": {
    "title": "Melcow Pondicherry",
@@ -1272,7 +1272,7 @@
      "d": "2026-11-16"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1263337": {
    "title": "Heart of the Beast",
@@ -1285,7 +1285,7 @@
      "d": "2026-09-23"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1505644": {
    "title": "ENE Repeat",
@@ -1310,7 +1310,7 @@
      "d": "2026-11-19"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1533928": {
    "title": "Bachelor Party D'eux",
@@ -1321,9 +1321,15 @@
      "u": "https://www.thehindu.com/entertainment/movies/bachelor-party-deux-movie-review-amal-neerad-makes-a-sequel-almost-as-forgettable-as-the-original/article71720038.ece",
      "h": "‘Bachelor Party D’eux’ movie review: Amal Neerad makes a sequel almost as forgettable as the original",
      "d": "2026-11-19"
+    },
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/bachelor-party-deux-movie-review-all-swag-but-nothing-to-brag/20261120.htm",
+     "h": "Bachelor Party D'eux Review: Listless!",
+     "d": "2026-11-20"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
   },
   "movie:1698932": {
    "title": "Kaali Kheti",
@@ -1336,7 +1342,109 @@
      "d": "2026-11-19"
     }
    ],
-   "updated": "2026-11-19"
+   "updated": "2026-11-20"
+  },
+  "movie:1567605": {
+   "title": "Ebenezer",
+   "released": "2026-11-13",
+   "items": [
+    {
+     "o": "Free Press Journal",
+     "u": "https://www.freepressjournal.in/entertainment/ebenezer-review-ti-wests-gothic-christmas-impresses-but-johnny-depps-scrooge-disappoints",
+     "h": "Ebenezer Review: Ti West’s Gothic Christmas Impresses, but Johnny Depp’s Scrooge Disappoints",
+     "d": "2026-11-20"
+    },
+    {
+     "o": "Hindustan Times",
+     "u": "https://www.hindustantimes.com/entertainment/hollywood/ebenezer-movie-review-johnny-depp-is-still-the-master-of-misfits-in-heartwarming-a-christmas-carol-adaptation-thats-certainly-not-humbug-101795155177314.html",
+     "h": "Ebenezer movie review: Johnny Depp is still the master of misfits in heartwarming Christmas Carol adaptation that's certainly not humbug",
+     "d": "2026-11-20"
+    },
+    {
+     "o": "Rediff",
+     "u": "https://www.rediff.com/movies/review/ebenezer-review-depp-sucks-but-movie-is-scary/20261120.htm",
+     "h": "Ebenezer Review: Depp Sucks, But Movie is Scary",
+     "d": "2026-11-20"
+    }
+   ],
+   "updated": "2026-11-20"
+  },
+  "movie:1300968": {
+   "title": "The Hunger Games: Sunrise on the Reaping",
+   "released": "2026-11-20",
+   "items": [
+    {
+     "o": "Free Press Journal",
+     "u": "https://www.freepressjournal.in/entertainment/the-hunger-games-sunrise-on-the-reaping-review-joseph-zada-shines-in-francis-lawrences-spectacular-but-overlong-hunger-games-prequel",
+     "h": "The Hunger Games: Sunrise On The Reaping Review - Joseph Zada Shines In Francis Lawrence’s Spectacular But Overlong Hunger Games Prequel",
+     "d": "2026-11-20"
+    },
+    {
+     "o": "Hindustan Times",
+     "u": "https://www.hindustantimes.com/entertainment/hollywood/the-hunger-games-sunrise-on-the-reaping-review-hollywood-finest-prop-up-joseph-zada-prequel-reminds-you-of-franchise-best-mckenna-grace-maya-hawke-101795159608282.html",
+     "h": "The Hunger Games Sunrise on the Reaping review: Hollywood's finest prop up Joseph Zada in a prequel that reminds you of the best of the franchise",
+     "d": "2026-11-20"
+    }
+   ],
+   "updated": "2026-11-20"
+  },
+  "movie:1381071": {
+   "title": "Godzilla Minus Zero",
+   "released": "2026-11-20",
+   "items": [
+    {
+     "o": "Scroll",
+     "u": "https://scroll.in/reel/1097191/godzilla-minus-zero-review-gigantic-warring-monsters-do-the-trick?utm_source=rss&utm_medium=public",
+     "h": "‘Godzilla Minus Zero’ review: Gigantic warring monsters do the trick",
+     "d": "2026-11-20"
+    }
+   ],
+   "updated": "2026-11-20"
+  },
+  "movie:1322273": {
+   "title": "Aakasamlo Oka Tara",
+   "released": "2026-11-20",
+   "items": [
+    {
+     "o": "123telugu",
+     "u": "https://www.123telugu.com/reviews/dulquer-salmaan-aakasamlo-oka-tara-telugu-movie-review-and-rating.html",
+     "h": "Review: Aakasamlo Oka Tara - An Endearing Tale of Aspirations & Love",
+     "d": "2026-11-20"
+    },
+    {
+     "o": "Cinema Express",
+     "u": "https://www.cinemaexpress.com/telugu/review/2026/Nov/20/aakasamlo-oka-tara-movie-review-a-beautiful-tale-of-a-young-girls-dream-and-determination",
+     "h": "Aakasamlo Oka Tara Movie Review: A beautiful tale of a young girl's dream and determination",
+     "d": "2026-11-20"
+    }
+   ],
+   "updated": "2026-11-20"
+  },
+  "movie:1680033": {
+   "title": "Appa Kutty",
+   "released": "2026-11-20",
+   "items": [
+    {
+     "o": "Vikatan",
+     "u": "https://cinema.vikatan.com/kollywood/vijay-antony-preethi-asrani-starrer-appa-kutty-movie-review",
+     "h": "Appa Kutty Review: அப்பா - மகள் பாசக்கதையில் மருத்துவ மற்றும் உறவுச் சிக்கல்கள்! நெகிழ வைக்கிறதா?",
+     "d": "2026-11-20"
+    }
+   ],
+   "updated": "2026-11-20"
+  },
+  "movie:1783280": {
+   "title": "Party Animals",
+   "released": "2026-11-20",
+   "items": [
+    {
+     "o": "Amar Ujala",
+     "u": "https://www.amarujala.com/entertainment/movie-review/party-animals-movie-review-in-hindi-and-rating-viraj-ghelani-arjun-tanwar-saqib-ayub-brijendra-kala-2026-11-19",
+     "h": "Party Animals Movie Review: कलाकारों की भीड़, पुराने गानों के रीमिक्स; कॉमेडी के नाम पर हंगामा परोसती फिल्म",
+     "d": "2026-11-18"
+    }
+   ],
+   "updated": "2026-11-20"
   }
  }
 }

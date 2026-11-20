@@ -999,19 +999,42 @@
   "checked": "2026-07-15"
  },
  "tt33764258": {
-  "take": "Viewer word on TMDB runs mixed — reviews keep coming back to the performances.",
-  "src": "tmdb",
+  "take": "Critics loved this one, and the performances and direction drew the loudest praise.",
+  "src": "wiki",
   "hook": null,
   "article": "The Odyssey (2026 film)",
-  "ta": {
-   "lean": "mixed",
+  "a": {
+   "tone": "acclaim",
    "praised": [
-    "performances"
+    "performances",
+    "direction"
    ],
-   "panned": []
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 94
+   },
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 94,
+     "n": 516,
+     "avg": 8.7
+    },
+    "mc": {
+     "score": 88,
+     "n": 63
+    }
+   }
   },
-  "checked": "2026-10-01",
-  "v": 5
+  "gross": {
+   "t": "$1.804 billion worldwide",
+   "at": "2026-11-20",
+   "article": "The Odyssey (2026 film)"
+  },
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt32991344": {
   "take": null,
@@ -2375,11 +2398,28 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 98
+    "value": 94
+   },
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 1,
+    "median": 5
+   },
+   "agg": {
+    "rt": {
+     "pct": 94,
+     "n": 278,
+     "avg": 8.2
+    },
+    "mc": {
+     "score": 89,
+     "n": 48
+    }
    }
   },
-  "checked": "2026-08-27",
-  "v": 5
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt32268156": {
   "take": "Early word from viewers on TMDB runs positive.",
@@ -2980,7 +3020,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt8667404": {
@@ -3982,10 +4022,10 @@
   },
   "gross": {
    "t": "$26.7 million",
-   "at": "2026-11-19",
+   "at": "2026-11-20",
    "article": "Fall 2: Deadpoint"
   },
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39567879": {
@@ -5065,7 +5105,7 @@
    "agg": {
     "rt": {
      "pct": 84,
-     "n": 186,
+     "n": 187,
      "avg": 7
     },
     "mc": {
@@ -5075,11 +5115,11 @@
    }
   },
   "gross": {
-   "t": "$193 million worldwide",
-   "at": "2026-11-19",
+   "t": "$193.1 million worldwide",
+   "at": "2026-11-20",
    "article": "Heart of the Beast"
   },
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt36583977": {
@@ -5836,7 +5876,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt45381850": {
@@ -5998,10 +6038,10 @@
   },
   "gross": {
    "t": "$181 million",
-   "at": "2026-11-19",
+   "at": "2026-11-20",
    "article": "Verity (film)"
   },
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1777082": {
@@ -7102,7 +7142,7 @@
    "agg": {
     "rt": {
      "pct": 19,
-     "n": 104,
+     "n": 106,
      "avg": 4.4
     },
     "mc": {
@@ -7112,11 +7152,11 @@
    }
   },
   "gross": {
-   "t": "$119.6 million worldwide",
-   "at": "2026-11-19",
+   "t": "$119.8 million worldwide",
+   "at": "2026-11-20",
    "article": "Other Mommy"
   },
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt47657999": {
@@ -10881,7 +10921,7 @@
    "toneSrc": "summary"
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt15239678": {
@@ -12731,7 +12771,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt1979376": {
@@ -14995,17 +15035,17 @@
      "avg": 9.2
     },
     "mc": {
-     "score": 96,
-     "n": 45
+     "score": 97,
+     "n": 49
     }
    }
   },
   "gross": {
    "t": "$94 million",
-   "at": "2026-11-19",
+   "at": "2026-11-20",
    "article": "You Can See Everything"
   },
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt0078748": {
@@ -18024,14 +18064,14 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 40
+    "value": 38
    },
    "toneSrc": "summary",
    "agg": {
     "rt": {
-     "pct": 40,
-     "n": 20,
-     "avg": 4.4
+     "pct": 38,
+     "n": 21,
+     "avg": 4.2
     },
     "mc": {
      "score": 41
@@ -18039,7 +18079,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt31378509": {
@@ -23633,23 +23673,23 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 72
+    "value": 67
    },
    "toneSrc": "summary",
    "agg": {
     "rt": {
-     "pct": 72,
-     "n": 105,
-     "avg": 6.7
+     "pct": 67,
+     "n": 134,
+     "avg": 6.6
     },
     "mc": {
      "score": 55,
-     "n": 32
+     "n": 37
     }
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt0068069": {
@@ -48383,7 +48423,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt34384661": {
@@ -48419,11 +48459,11 @@
    }
   },
   "gross": {
-   "t": "$105.9 million worldwide",
-   "at": "2026-11-19",
+   "t": "$106.5 million worldwide",
+   "at": "2026-11-20",
    "article": "Godzilla Minus Zero"
   },
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt30768979": {
@@ -49539,7 +49579,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt0318224": {
@@ -63627,12 +63667,12 @@
   "cat": true
  },
  "tt32909364": {
-  "take": "Reviewers' main gripe: the writing.",
+  "take": "Critics were rough on it, mostly over the writing.",
   "src": "wiki",
   "hook": null,
   "article": "Mookuthi Amman 2",
   "a": {
-   "tone": null,
+   "tone": "negative",
    "praised": [],
    "panned": [
     "writing"
@@ -63640,10 +63680,11 @@
    "divided": [
     "visuals"
    ],
-   "score": null
+   "score": null,
+   "toneSrc": "lead"
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt0054906": {
@@ -67584,7 +67625,7 @@
    "score": null
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1792363": {
@@ -67626,7 +67667,7 @@
    "agg": {
     "rt": {
      "pct": 93,
-     "n": 261,
+     "n": 266,
      "avg": 8.2
     },
     "mc": {
@@ -67636,7 +67677,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt5259966": {
@@ -76520,7 +76561,7 @@
    "agg": {
     "rt": {
      "pct": 97,
-     "n": 187,
+     "n": 188,
      "avg": 8.7
     },
     "mc": {
@@ -76530,11 +76571,11 @@
    }
   },
   "gross": {
-   "t": "$72 million worldwide",
-   "at": "2026-11-19",
+   "t": "$73 million worldwide",
+   "at": "2026-11-20",
    "article": "Wildwood (film)"
   },
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1798325": {
@@ -77682,14 +77723,14 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt42004484": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tv:337038": {
@@ -77703,7 +77744,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt46658626": {
@@ -85495,7 +85536,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39087958": {
@@ -91039,14 +91080,14 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt35324004": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt12574330": {
@@ -93470,7 +93511,7 @@
    "toneSrc": "summary"
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt18069420": {
@@ -93800,7 +93841,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt36553729": {
@@ -93814,7 +93855,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt37959568": {
@@ -95433,6 +95474,7 @@
  "tt28088049": {
   "take": "A positive reception on balance, with the emotional weight taking the knocks.",
   "src": "wiki",
+  "hook": null,
   "article": "Bitter Christmas",
   "a": {
    "tone": "positive",
@@ -95451,9 +95493,9 @@
     "median": 4
    }
   },
-  "checked": "2026-10-26",
-  "v": 6,
-  "cat": true
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt38792109": {
   "take": null,
@@ -96385,7 +96427,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39337450": {
@@ -96564,7 +96606,7 @@
   "hook": null,
   "article": "Final Table",
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt44175143": {
@@ -96816,7 +96858,7 @@
    "score": null
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt34877127": {
@@ -96868,7 +96910,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt45629121": {
@@ -96945,7 +96987,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39382808": {
@@ -96954,15 +96996,15 @@
   "hook": null,
   "article": "The Loneliest Man in Town",
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt43632661": {
   "take": null,
   "src": null,
-  "checked": "2026-10-26",
-  "v": 6,
-  "cat": true
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt41966739": {
   "take": null,
@@ -96995,9 +97037,9 @@
  "tt31970593": {
   "take": null,
   "src": null,
-  "checked": "2026-10-26",
-  "v": 6,
-  "cat": true
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt43662678": {
   "take": null,
@@ -97238,7 +97280,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt46594641": {
@@ -97335,7 +97377,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt44879224": {
@@ -97475,7 +97517,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1798828": {
@@ -97626,7 +97668,7 @@
    "agg": {
     "rt": {
      "pct": 93,
-     "n": 136,
+     "n": 138,
      "avg": 8.1
     },
     "mc": {
@@ -97636,7 +97678,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-18",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt43655467": {
@@ -97794,7 +97836,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39050356": {
@@ -97815,7 +97857,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt35494574": {
@@ -97824,7 +97866,7 @@
   "hook": null,
   "article": "Women on Trial (2026 film)",
   "gross": null,
-  "checked": "2026-11-18",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt6628920": {
@@ -97906,7 +97948,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt33402927": {
@@ -98016,7 +98058,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt33037660": {
@@ -98134,7 +98176,7 @@
   "hook": "Premiered at the Busan International Film Festival.",
   "article": "Dead-End Job",
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt38589433": {
@@ -98195,7 +98237,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt27480831": {
@@ -98254,7 +98296,7 @@
    "agg": {
     "rt": {
      "pct": 83,
-     "n": 71
+     "n": 72
     },
     "mc": {
      "score": 63,
@@ -98263,7 +98305,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt4406178": {
@@ -98349,6 +98391,7 @@
  "tt35856037": {
   "take": "Wall-to-wall praise from the critics on this one.",
   "src": "wiki",
+  "hook": "Premiered at the Toronto International Film Festival.",
   "article": "Your Mother Your Mother Your Mother",
   "a": {
    "tone": "acclaim",
@@ -98372,9 +98415,9 @@
     }
    }
   },
-  "checked": "2026-11-03",
-  "v": 6,
-  "cat": true
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt50389959": {
   "take": null,
@@ -98427,11 +98470,11 @@
    }
   },
   "gross": {
-   "t": "over ₹256.50 crore",
-   "at": "2026-11-19",
+   "t": "over ₹256 crore",
+   "at": "2026-11-20",
    "article": "Scene (2026 film)"
   },
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39346312": {
@@ -98449,7 +98492,7 @@
    "score": null
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt26242352": {
@@ -98477,7 +98520,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt43440269": {
@@ -98659,7 +98702,7 @@
   "hook": null,
   "article": "The Remarried Empress",
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt44878818": {
@@ -98686,7 +98729,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39973370": {
@@ -98756,7 +98799,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-11",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1749714": {
@@ -98952,7 +98995,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt49200202": {
@@ -99053,7 +99096,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt10098420": {
@@ -99129,7 +99172,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt33246591": {
@@ -99158,7 +99201,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1710024": {
@@ -99172,7 +99215,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt36471253": {
@@ -99241,7 +99284,7 @@
    "toneSrc": "lead"
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39386285": {
@@ -99306,7 +99349,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt50483201": {
@@ -99327,7 +99370,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-18",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt32728338": {
@@ -99495,7 +99538,7 @@
    "agg": {
     "rt": {
      "pct": 54,
-     "n": 147,
+     "n": 148,
      "avg": 5.6
     },
     "mc": {
@@ -99505,11 +99548,11 @@
    }
   },
   "gross": {
-   "t": "$45.7 million worldwide",
-   "at": "2026-11-19",
+   "t": "$47 million worldwide",
+   "at": "2026-11-20",
    "article": "Ebenezer (2026 film)"
   },
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt48118405": {
@@ -99547,23 +99590,23 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 87
+    "value": 88
    },
    "toneSrc": "summary",
    "agg": {
     "rt": {
-     "pct": 87,
-     "n": 143,
+     "pct": 88,
+     "n": 158,
      "avg": 7.4
     },
     "mc": {
      "score": 68,
-     "n": 40
+     "n": 41
     }
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt36482679": {
@@ -99609,21 +99652,21 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt11732018": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tv:339692": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt40919730": {
@@ -99665,7 +99708,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39562962": {
@@ -99756,12 +99799,26 @@
   "cat": true
  },
  "tt38123579": {
-  "take": null,
-  "src": null,
+  "take": "The performances is what reviewers walked away talking about.",
+  "src": "wiki",
+  "hook": "Praveen S Vijaay's directorial debut.",
   "article": "Sathyavan Savithiri",
-  "checked": "2026-11-12",
-  "v": 6,
-  "cat": true
+  "a": {
+   "tone": null,
+   "praised": [
+    "performances"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": null,
+   "ratings": {
+    "n": 2,
+    "median": 2.75
+   }
+  },
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt14113574": {
   "take": null,
@@ -99865,7 +99922,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt37200939": {
@@ -99892,7 +99949,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt50252733": {
@@ -99906,7 +99963,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt4357198": {
@@ -100036,9 +100093,9 @@
  "tt41687980": {
   "take": null,
   "src": null,
-  "checked": "2026-11-13",
-  "v": 6,
-  "cat": true
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt39292036": {
   "take": null,
@@ -100145,14 +100202,14 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39494650": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39119853": {
@@ -100196,7 +100253,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt28450216": {
@@ -100205,14 +100262,14 @@
   "hook": "A spin-off of Student of the Year franchise.",
   "article": "Student of the Year (TV series)",
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt50089775": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1825658": {
@@ -100328,7 +100385,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1791261": {
@@ -100496,7 +100553,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt37675123": {
@@ -100516,21 +100573,21 @@
    "score": null
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt47021035": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt50816261": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt37454145": {
@@ -100586,7 +100643,7 @@
    "score": null
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39369076": {
@@ -100600,7 +100657,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1828678": {
@@ -100614,7 +100671,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1764859": {
@@ -100628,14 +100685,14 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1756431": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1809304": {
@@ -100673,7 +100730,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt37424290": {
@@ -100718,21 +100775,37 @@
   "hook": null,
   "article": "ENE Repeat",
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt41075537": {
-  "take": null,
-  "src": null,
+  "take": "Critics can't agree, though the performances bothered nearly everyone.",
+  "src": "wiki",
   "hook": null,
-  "checked": "2026-11-19",
+  "article": "Bachelor Party D'eux",
+  "a": {
+   "tone": "mixed",
+   "praised": [],
+   "panned": [
+    "performances"
+   ],
+   "divided": [],
+   "score": null,
+   "toneSrc": "summary",
+   "ratings": {
+    "n": 3,
+    "median": 2
+   }
+  },
+  "gross": null,
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt43598591": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt34515768": {
@@ -100741,14 +100814,14 @@
   "hook": null,
   "article": "O.M: Operation Mole",
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt27246088": {
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt44840674": {
@@ -100777,7 +100850,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39393155": {
@@ -100823,6 +100896,91 @@
   "src": null,
   "article": "Doraemon: Nobita's Steam-Powered Time Machine",
   "checked": "2026-11-19",
+  "v": 6,
+  "cat": true
+ },
+ "tt33044571": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Aakasamlo Oka Tara",
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
+ },
+ "tt50900930": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
+ },
+ "tt31844371": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Vienna Game (TV series)",
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
+ },
+ "tt50135636": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
+ },
+ "movie:1650675": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
+ },
+ "tt42152429": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Sword & Silence",
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
+ },
+ "tt39161219": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
+ },
+ "movie:1747585": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
+ },
+ "tt40304652": {
+  "take": null,
+  "src": null,
+  "checked": "2026-11-20",
+  "v": 6,
+  "cat": true
+ },
+ "tt9219630": {
+  "take": null,
+  "src": null,
+  "article": "November 1963 (film)",
+  "checked": "2026-11-20",
+  "v": 6,
+  "cat": true
+ },
+ "tt33214716": {
+  "take": null,
+  "src": null,
+  "article": "The Florist",
+  "checked": "2026-11-20",
   "v": 6,
   "cat": true
  }
