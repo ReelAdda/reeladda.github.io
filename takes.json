@@ -9702,7 +9702,7 @@
    "toneSrc": "summary"
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt38672588": {
@@ -48503,9 +48503,9 @@
  "tt18351090": {
   "take": null,
   "src": null,
-  "checked": "2026-10-19",
-  "v": 6,
-  "cat": true
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt38077943": {
   "take": null,
@@ -99448,7 +99448,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt10946316": {
@@ -99784,9 +99784,9 @@
  "tt28023987": {
   "take": null,
   "src": null,
-  "checked": "2026-11-12",
-  "v": 6,
-  "cat": true
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt36290176": {
   "take": null,
@@ -101027,5 +101027,56 @@
   "gross": null,
   "checked": "2026-11-20",
   "v": 6
+ },
+ "tt36786185": {
+  "take": "Most reviews land firmly on the positive side.",
+  "src": "wiki",
+  "hook": null,
+  "article": "The Altruists",
+  "a": {
+   "tone": "positive",
+   "praised": [],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 78
+   },
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 78
+    },
+    "mc": {
+     "score": 64,
+     "n": 22
+    }
+   }
+  },
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
+ },
+ "tt35063806": {
+  "take": null,
+  "src": null,
+  "article": "Mr. Bhaarath",
+  "checked": "2026-11-20",
+  "v": 6,
+  "cat": true
+ },
+ "tt12299946": {
+  "take": null,
+  "src": null,
+  "checked": "2026-11-20",
+  "v": 6,
+  "cat": true
+ },
+ "tt33055902": {
+  "take": null,
+  "src": null,
+  "checked": "2026-11-20",
+  "v": 6,
+  "cat": true
  }
 }
