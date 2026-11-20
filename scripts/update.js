@@ -356,6 +356,9 @@ const SOON_EXTRA_DAYS = 120;
 // TMDB calls per run for the Indian digital-release backfill (lib/indiadata.js). The one-off
 // catch-up runs from the "India streaming data" workflow with a larger budget.
 const DIGITAL_BUDGET = Number(process.env.DIGITAL_BUDGET || 300);
+// The same for the studio record outside India (lib/studiowindows.js): about 2,500 films to read
+// once, so the first pass takes about nine runs; after that only the weekly refresh.
+const STUDIO_BUDGET = Number(process.env.STUDIO_BUDGET || 300);
 // Pick of the Week needs at least this many ratings before its rating can earn the crown.
 const PICK_MIN_VOTES = 20;
 // Archive lines that failed to write this run (the archive is additive, so a failure never
@@ -2556,6 +2559,24 @@ async function main() {
       const r = await runDigitalBackfill({ api: { tmdb, pause: sleep }, today: todayStr(), budget: DIGITAL_BUDGET });
       if (r.calls) console.log(`  digital release dates: ${r.discovered} film(s) discovered, ${r.read} read (${r.dated} with a date), ${r.left} left to read, ${r.calls} TMDB call(s)${r.errors ? `, ${r.errors} errors` : ""}`);
     } catch (e) { stageFailed("digital release dates", e); }
+
+    // Outside India (lib/studiowindows.js, 20 Nov 2026): the same release dates for the US, the UK,
+    // Australia and Canada, with each film's studio, and in awards season the Best Picture
+    // nominees and where they stream. Budgeted and resumable like the read above; both feed
+    // sections of /data/ that are drawn only once they have enough behind them. Optional: a
+    // failure here costs those sections, nothing else.
+    try {
+      const SW = require("./lib/studiowindows.js");
+      const r = await SW.runStudioBackfill({ api: { tmdb, pause: sleep }, today: todayStr(), budget: STUDIO_BUDGET });
+      if (r.calls) console.log(`  studio windows: ${r.discovered} film(s) discovered, ${r.read} read (${r.dated} with a digital date), ${r.left} left to read, ${r.calls} TMDB call(s)${r.errors ? `, ${r.errors} errors` : ""}`);
+      const store = JSON.parse(fs.readFileSync(require("./lib/indiadata.js").DIGITAL_FILE, "utf8"));
+      for (const m of SW.MARKETS) {
+        const s = SW.studioStats(store, m.region, { today: todayStr() });
+        console.log(`  studio windows [${m.code}]: ${s.measured} of ${s.films} films read have a digital date (median ${s.overall == null ? "n/a" : s.overall + "d"}); ${s.byStudio.length} studio row(s), ${s.expected.length} estimate(s)`);
+      }
+      const a = await SW.runAwards({ api: { tmdb, pause: sleep }, today: todayStr() });
+      if (a.asked || a.films) console.log(`  Best Picture nominees: ${a.films ? `${a.films} films, ${a.calls} TMDB call(s)` : a.why}`);
+    } catch (e) { stageFailed("studio windows", e, { optional: true }); }
 
     // Cinema dates for archived films recorded before the archive stored them (fillCinemaDates
     // in lib/history.js): one TMDB call per film covers every country. /data/ and the film
