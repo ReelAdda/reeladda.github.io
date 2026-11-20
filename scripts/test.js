@@ -12293,6 +12293,43 @@ test("the data page: free to cite, credits to TMDB and JustWatch, TMDB's notice,
   assert.ok(!/zero-tracking/.test(fsx.readFileSync(path.join(__dirname, "..", "index.html"), "utf8")), "the homepage template promises no zero tracking");
 });
 
+group("20 Nov 2026: list rows are brought in line with their film pages at the end of the build");
+test("row sync: a row whose page changed after the list was written takes the page's verdict (Titanic, Tamil page)", () => {
+  const R = require("./lib/rowsync.js"), A = require("./lib/audit.js"), M = require("./lib/meter.js");
+  const row = (slug, title, score, extra = "") => `<a class="row" href="/movie/${slug}.html"><div><div class="rt"><h3>${title}</h3></div><div class="rm">Chaupal · Comedy</div>${score.replace(/<\/div>$/, `${extra}</div>`)}</div></a>`;
+  const early = M.rowScoreLine({ released: "2026-11-13", votes: 0, rating: null });
+  const worth = M.rowScoreLine({ released: "2026-06-01", votes: 900, rating: 7.1, fcScore: { verdict: "Worth a watch", audience: "positive", critics: null, basis: "audience" } });
+  assert.ok(/Too early/.test(early) && /Worth a watch/.test(worth));
+  const list = `<main>${row("titanic", "Titanic", early)}${row("steady", "Steady", worth)}${row("fallen", "Fallen", worth, ' <span class="tv">2M trailer views</span>')}${row("gone", "Gone", early)}<a class="row" href="/tamil/">not a film</a></main>`;
+  const pages = {
+    "movie/titanic.html": '<!--FC:audience=|0--><section class="fcsb" id="filmychill-score"><!--FC:fcs=|negative--><div class="fcsb-stamp fcsb-skip">Skip</div></section>',
+    "movie/steady.html": '<!--FC:audience=7.1|900--><!--FC:fcs=positive|--><div class="fcsb-stamp fcsb-worth">Worth a watch</div>',
+    "movie/fallen.html": '<!--FC:audience=|3--><section class="fcsb fcsb-compact" id="filmychill-score"><span class="fcsb-mini-v">Not enough ratings</span></section>',
+  };
+  const read = (p) => { if (!(p in pages)) throw new Error("no page"); return pages[p]; };
+  const man = { titanic: { released: "2026-11-13", kind: "movie" }, fallen: { released: "2025-01-10", kind: "movie" } };
+  assert.strictEqual(A.auditRenderedRows(list, "/tamil/", read).length, 2, "two rows disagree with their pages before");
+  const out = R.syncRows(list, { read, entryOf: (s) => man[s] });
+  assert.strictEqual(out.changed, 2);
+  assert.deepStrictEqual(A.auditRenderedRows(out.html, "/tamil/", read), [], "none after");
+  const rowOf = (slug) => new RegExp(`href="/movie/${slug}\\.html">([\\s\\S]*?)</a>`).exec(out.html)[1];
+  assert.ok(/vp-skip[^>]*>(?:<svg[\s\S]*?<\/svg>)?Skip</.test(rowOf("titanic")) && !/Too early/.test(rowOf("titanic")), "Titanic's row says Skip, as its page does");
+  assert.ok(/Not enough ratings/.test(rowOf("fallen")) && !/Worth a watch/.test(rowOf("fallen")), "a page that lost its verdict takes the row's with it, in the wording for an older film");
+  assert.ok(/2M trailer views/.test(rowOf("fallen")) && /Chaupal · Comedy/.test(rowOf("titanic")), "only the pill and its label change");
+  assert.strictEqual(rowOf("steady"), new RegExp('href="/movie/steady\\.html">([\\s\\S]*?)</a>').exec(list)[1], "a row that agrees is left byte for byte");
+  assert.ok(/href="\/movie\/gone\.html">/.test(out.html) && /not a film/.test(out.html), "a row whose page is missing, or that is not a film, is left alone");
+  const again = R.syncRows(out.html, { read, entryOf: (s) => man[s] });
+  assert.strictEqual(again.changed, 0, "running it twice changes nothing more");
+  assert.strictEqual(again.html, out.html);
+});
+test("row sync: runs after the last list writer and before the list-row audit", () => {
+  const up = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  const sync = up.indexOf('require("./lib/rowsync.js").syncListingRows(builtCountries, pagesManifest)');
+  const audit = up.indexOf('require("./lib/audit.js").auditListingRows(');
+  const lastWriter = up.indexOf("writeDatedOttPages(dataByCode[cfg.code], cfg, pagesManifest)");
+  assert.ok(lastWriter > 0 && sync > lastWriter && audit > sync, "writers, then the sync, then the audit");
+});
+
 
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");
