@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-20T09:18:59.343Z",
+ "generatedAt": "2026-11-20T10:55:19.079Z",
  "country": "kr",
  "pick": "The Body",
  "theatres": [
@@ -168,7 +168,7 @@
    "slug": "other-mommy",
    "wikiWeeklyViews": 196074,
    "trending": true,
-   "trailerViews": 16445275,
+   "trailerViews": 16447316,
    "take": "Critics didn't like it.",
    "takeSrc": "wiki",
    "takeArticle": "Other Mommy",
@@ -363,7 +363,7 @@
    "theatricalHere": true,
    "slug": "mutiny",
    "wikiWeeklyViews": 17326,
-   "trailerViews": 337327,
+   "trailerViews": 337330,
    "take": "Critics were split.",
    "takeSrc": "wiki",
    "takeArticle": "Mutiny (2026 film)",
@@ -561,7 +561,7 @@
    "theatricalHere": true,
    "slug": "fall-2-deadpoint",
    "wikiWeeklyViews": 23202,
-   "trailerViews": 10810212,
+   "trailerViews": 10810953,
    "take": "Critics were split. They praised the originality and music and criticised the writing.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -984,6 +984,13 @@
      "kind": "movie"
     },
     {
+     "title": "Endless",
+     "slug": "endless",
+     "poster": "https://image.tmdb.org/t/p/w342/1ZViaX2oRnI0uM3Gf87Z7eCZ3hE.jpg",
+     "language": "English",
+     "kind": "movie"
+    },
+    {
      "title": "Purple Hearts",
      "slug": "purple-hearts",
      "poster": "https://image.tmdb.org/t/p/w342/4JyNWkryifWbWXJyxcWh3pVya6N.jpg",
@@ -1015,13 +1022,6 @@
      "title": "The Sleeping Dictionary",
      "slug": "the-sleeping-dictionary",
      "poster": "https://image.tmdb.org/t/p/w342/bszp3HdnaBE6ptfio37vB3JckuL.jpg",
-     "language": "English",
-     "kind": "movie"
-    },
-    {
-     "title": "The Spirit of Christmas",
-     "slug": "the-spirit-of-christmas",
-     "poster": "https://image.tmdb.org/t/p/w342/ynWcaW8ZrtBeuzgUyEXR30A2TAT.jpg",
      "language": "English",
      "kind": "movie"
     }
@@ -1220,7 +1220,7 @@
      "score": "7.2/10"
     }
    ],
-   "votes": 4113,
+   "votes": 4114,
    "verdict": "Worth a watch",
    "poster": "https://image.tmdb.org/t/p/w342/bMXWXKM9ydUmMTNvDnYo9QtCBRt.jpg",
    "isRecent": true,
@@ -1444,7 +1444,7 @@
    "ottFreshDate": "2026-11-11",
    "slug": "the-lord-of-the-rings-the-rings-of-power",
    "wikiWeeklyViews": 292505,
-   "trailerViews": 19218258,
+   "trailerViews": 19218881,
    "take": "Critics liked the visuals and music but criticised the pacing.",
    "takeSrc": "wiki",
    "takeAspects": [
@@ -1656,7 +1656,7 @@
    "ottSince": "2026-11-16",
    "ottFreshDate": "2026-11-15",
    "slug": "the-chosen",
-   "trailerViews": 5081134,
+   "trailerViews": 5081136,
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences love it.",
@@ -1904,8 +1904,23 @@
    "slug": "the-body",
    "wikiWeeklyViews": 790056,
    "trending": true,
-   "trailerViews": 1618448,
+   "trailerViews": 1624421,
+   "take": "Critics were mostly positive.",
+   "takeSrc": "wiki",
+   "takeArticle": "The Body (TV series)",
    "criticsTone": "positive",
+   "reception": {
+    "rt": {
+     "pct": 87,
+     "avg": 7.3
+    },
+    "mc": {
+     "score": 73,
+     "n": 13
+    },
+    "asOf": "2026-11-20",
+    "article": "The Body (TV series)"
+   },
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences and critics agree.",
@@ -2128,8 +2143,22 @@
    "ottFreshDate": "2026-11-20",
    "slug": "percy-jackson-and-the-olympians",
    "wikiWeeklyViews": 34283,
-   "trailerViews": 16525391,
+   "trailerViews": 16525503,
+   "take": "Critics liked it, especially the writing.",
+   "takeSrc": "wiki",
+   "takeAspects": [
+    "writing"
+   ],
+   "takeArticle": "Percy Jackson and the Olympians (TV series)",
    "criticsTone": "positive",
+   "reception": {
+    "rt": {
+     "pct": 100
+    },
+    "asOf": "2026-11-20",
+    "article": "Percy Jackson and the Olympians (TV series)"
+   },
+   "hook": "Based on the book by Riordan.",
    "fcScore": {
     "verdict": "Worth a watch",
     "reason": "Critics are warmer than audiences.",
@@ -2152,7 +2181,7 @@
     }
    ],
    "votes": 25,
-   "verdict": "Just released — verdict soon",
+   "verdict": "Skip",
    "poster": "https://image.tmdb.org/t/p/w342/bRa83oPFFPqaAF3wrpVWPqqfFel.jpg",
    "isRecent": true,
    "isFresh": false,
@@ -2306,7 +2335,34 @@
    "ottFreshDate": "2026-11-18",
    "slug": "madden",
    "wikiWeeklyViews": 117313,
-   "trailerViews": 8815709
+   "trailerViews": 8818158,
+   "take": "Critics didn't like it.",
+   "takeSrc": "wiki",
+   "takeAspects": [
+    "writing",
+    "humour"
+   ],
+   "takeArticle": "Madden (film)",
+   "criticsTone": "negative",
+   "reception": {
+    "rt": {
+     "pct": 15,
+     "avg": 3.9
+    },
+    "mc": {
+     "score": 29,
+     "n": 19
+    },
+    "asOf": "2026-11-20",
+    "article": "Madden (film)"
+   },
+   "fcScore": {
+    "verdict": "Skip",
+    "reason": "Critics are negative; audience ratings are still coming in.",
+    "audience": null,
+    "critics": "negative",
+    "basis": "critics"
+   }
   },
   {
    "title": "Never Surrender",
@@ -2475,7 +2531,7 @@
    "ottSince": "2026-11-13",
    "ottFreshDate": "2026-11-11",
    "slug": "never-surrender",
-   "trailerViews": 323727,
+   "trailerViews": 325038,
    "fcScore": {
     "verdict": "Worth a watch",
     "reason": "Audiences like it.",
@@ -2737,7 +2793,7 @@
    "ottFreshDate": "2026-11-19",
    "slug": "final-table",
    "wikiWeeklyViews": 13885,
-   "trailerViews": 569523
+   "trailerViews": 569644
   },
   {
    "title": "The Remarried Empress",
@@ -2979,7 +3035,7 @@
    "stillGood": true,
    "slug": "the-remarried-empress",
    "wikiWeeklyViews": 138590,
-   "trailerViews": 422517,
+   "trailerViews": 423871,
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences love it.",
@@ -3203,7 +3259,7 @@
    "stillGood": true,
    "slug": "dead-end-job",
    "wikiWeeklyViews": 48368,
-   "trailerViews": 2874094,
+   "trailerViews": 2875061,
    "hook": "Premiered at the Busan International Film Festival.",
    "fcScore": {
     "verdict": "Must watch",
@@ -3219,14 +3275,14 @@
    "language": "English",
    "released": "2026-10-13",
    "review": "With a bounty on his head, Vision must confront his nature and resist Ultron's influence to survive.",
-   "rating": 8.3,
+   "rating": 8.2,
    "scores": [
     {
      "source": "TMDB",
-     "score": "8.3/10"
+     "score": "8.2/10"
     }
    ],
-   "votes": 549,
+   "votes": 550,
    "verdict": "Must watch",
    "poster": "https://image.tmdb.org/t/p/w342/WGyAyBPncfuu8MZhLY9RtfZPM0.jpg",
    "isRecent": false,
@@ -3461,8 +3517,23 @@
    "slug": "visionquest",
    "wikiWeeklyViews": 300531,
    "trending": true,
-   "trailerViews": 24415030,
+   "trailerViews": 24416226,
+   "take": "Critics were mostly positive.",
+   "takeSrc": "wiki",
+   "takeArticle": "VisionQuest",
    "criticsTone": "positive",
+   "reception": {
+    "rt": {
+     "pct": 86,
+     "n": 97
+    },
+    "mc": {
+     "score": 64,
+     "n": 25
+    },
+    "asOf": "2026-11-20",
+    "article": "VisionQuest"
+   },
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences and critics agree.",
@@ -3780,7 +3851,7 @@
    ],
    "theatricalHere": true,
    "slug": "hexed",
-   "trailerViews": 154699,
+   "trailerViews": 154814,
    "verdict": ""
   },
   {
@@ -3943,7 +4014,7 @@
    ],
    "theatricalHere": true,
    "slug": "focker-in-law",
-   "trailerViews": 1208660,
+   "trailerViews": 1208679,
    "verdict": ""
   },
   {
@@ -4225,7 +4296,7 @@
    ],
    "theatricalHere": true,
    "slug": "you-can-see-everything",
-   "trailerViews": 102819,
+   "trailerViews": 102884,
    "criticsTone": "acclaim",
    "verdict": ""
   },
@@ -4391,7 +4462,7 @@
    ],
    "theatricalHere": true,
    "slug": "avengers-doomsday",
-   "trailerViews": 55036362,
+   "trailerViews": 55049074,
    "verdict": ""
   },
   {
@@ -4871,7 +4942,23 @@
    "ottSince": "2026-11-15",
    "ottFreshDate": "2026-11-13",
    "slug": "heartland-2026",
+   "take": "Critics were split.",
+   "takeSrc": "wiki",
+   "takeArticle": "Heartland (2026 film)",
    "criticsTone": "mixed",
+   "reception": {
+    "rt": {
+     "pct": 53,
+     "n": 32,
+     "avg": 5.1
+    },
+    "mc": {
+     "score": 54,
+     "n": 11
+    },
+    "asOf": "2026-11-20",
+    "article": "Heartland (2026 film)"
+   },
    "fcScore": {
     "verdict": "Skip",
     "reason": "Neither audiences nor critics are sold.",
@@ -5298,7 +5385,22 @@
    "ottSince": "2026-10-31",
    "ottFreshDate": "2026-10-29",
    "slug": "nocturne",
+   "take": "Critics were mostly positive.",
+   "takeSrc": "wiki",
+   "takeArticle": "Nocturne (TV series)",
    "criticsTone": "positive",
+   "reception": {
+    "rt": {
+     "pct": 85,
+     "n": 40
+    },
+    "mc": {
+     "score": 70,
+     "n": 21
+    },
+    "asOf": "2026-11-20",
+    "article": "Nocturne (TV series)"
+   },
    "fcScore": {
     "verdict": "Must watch",
     "reason": "Audiences and critics agree.",

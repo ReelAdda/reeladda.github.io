@@ -2,9 +2,20 @@
  "date": "2026-11-20",
  "checked": 107,
  "errors": 1,
- "pagesDisagreeing": 0,
- "high": 0,
- "correctable": 0,
- "byField": {},
- "rows": []
+ "pagesDisagreeing": 1,
+ "high": 1,
+ "correctable": 1,
+ "byField": {
+  "streaming": 1
+ },
+ "rows": [
+  {
+   "field": "streaming",
+   "severity": "high",
+   "page": "not streaming",
+   "tmdb": "on Netflix",
+   "code": "sg",
+   "slug": "meethe-mein-kya-hai"
+  }
+ ]
 }

@@ -7356,7 +7356,7 @@
   "hook": null,
   "article": "Doctor X: Mafia in White",
   "gross": null,
-  "checked": "2026-11-18",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt43691434": {
@@ -8013,7 +8013,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-18",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt39140225": {
@@ -22192,6 +22192,7 @@
  "tt12324366": {
   "take": "Critics liked it, especially the writing.",
   "src": "wiki",
+  "hook": "Based on the book by Riordan.",
   "article": "Percy Jackson and the Olympians (TV series)",
   "a": {
    "tone": "positive",
@@ -22206,9 +22207,9 @@
    },
    "toneSrc": "summary"
   },
-  "checked": "2026-10-18",
-  "v": 6,
-  "cat": true
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt2226417": {
   "take": "A divided reception: the visuals won praise, the performances took the heat.",
@@ -76619,7 +76620,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-18",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt37421560": {
@@ -76777,7 +76778,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt0080979": {
@@ -77665,7 +77666,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt2531336": {
@@ -91011,7 +91012,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-18",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt48242205": {
@@ -96928,12 +96929,37 @@
   "v": 6
  },
  "tt24818230": {
-  "take": null,
-  "src": null,
+  "take": "The critics' patience ran thin here.",
+  "src": "wiki",
+  "hook": null,
   "article": "Madden (film)",
-  "checked": "2026-10-26",
-  "v": 6,
-  "cat": true
+  "a": {
+   "tone": "negative",
+   "praised": [
+    "writing",
+    "humour"
+   ],
+   "panned": [],
+   "divided": [],
+   "score": {
+    "kind": "rt",
+    "value": 15
+   },
+   "toneSrc": "summary",
+   "agg": {
+    "rt": {
+     "pct": 15,
+     "avg": 3.9
+    },
+    "mc": {
+     "score": 29,
+     "n": 19
+    }
+   }
+  },
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt35682658": {
   "take": "The writing drew the bulk of the complaints.",
@@ -97030,9 +97056,9 @@
  "tt42854785": {
   "take": null,
   "src": null,
-  "checked": "2026-10-26",
-  "v": 6,
-  "cat": true
+  "hook": null,
+  "checked": "2026-11-20",
+  "v": 6
  },
  "tt31970593": {
   "take": null,
@@ -97436,7 +97462,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt42666999": {
@@ -97801,7 +97827,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1811490": {
@@ -98073,7 +98099,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt26598805": {
@@ -98103,7 +98129,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-18",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt37522541": {
@@ -98771,7 +98797,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-18",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1813865": {
@@ -99132,7 +99158,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt40789778": {
@@ -99342,7 +99368,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1819380": {
@@ -99867,22 +99893,22 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 90
+    "value": 87
    },
    "toneSrc": "summary",
    "agg": {
     "rt": {
-     "pct": 90,
-     "avg": 7.4
+     "pct": 87,
+     "avg": 7.3
     },
     "mc": {
-     "score": 72,
-     "n": 12
+     "score": 73,
+     "n": 13
     }
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "movie:1813677": {
@@ -99942,7 +99968,7 @@
    "score": null
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt41296534": {
@@ -100341,7 +100367,7 @@
   "take": null,
   "src": null,
   "hook": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt21906238": {
@@ -100507,13 +100533,13 @@
    "divided": [],
    "score": {
     "kind": "rt",
-    "value": 57
+    "value": 53
    },
    "toneSrc": "summary",
    "agg": {
     "rt": {
-     "pct": 57,
-     "n": 30,
+     "pct": 53,
+     "n": 32,
      "avg": 5.1
     },
     "mc": {
@@ -100523,7 +100549,7 @@
    }
   },
   "gross": null,
-  "checked": "2026-11-19",
+  "checked": "2026-11-20",
   "v": 6
  },
  "tt41742035": {
@@ -100983,5 +101009,23 @@
   "checked": "2026-11-20",
   "v": 6,
   "cat": true
+ },
+ "tt6611324": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Guarding Stars",
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
+ },
+ "tt43636043": {
+  "take": null,
+  "src": null,
+  "hook": null,
+  "article": "Party Animals (film)",
+  "gross": null,
+  "checked": "2026-11-20",
+  "v": 6
  }
 }
