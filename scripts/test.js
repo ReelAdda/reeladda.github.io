@@ -12330,6 +12330,138 @@ test("row sync: runs after the last list writer and before the list-row audit", 
   assert.ok(lastWriter > 0 && sync > lastWriter && audit > sync, "writers, then the sync, then the audit");
 });
 
+group("20 Nov 2026: outside India on the data page: windows by studio, expected digital dates, Best Picture nominees");
+const SW_STORE = (today = "2026-11-20") => {
+  // US: Disney 10 films at 60 days, Universal 9 at 30, Sony 8 at 45, A24 3 at 20, 12 with no studio at 50,
+  // 5 with no digital date; plus two in cinemas now. India's own keys sit beside it.
+  const films = {}; let id = 1000;
+  const add = (co, th, days, region = "US", extra = {}) => { const dig = days == null ? null : new Date(Date.parse(`${th}T00:00:00Z`) + days * 864e5).toISOString().slice(0, 10); films[id++] = { t: `Film ${id}`, votes: id, c: co ? [co] : ["Some Indie Co"], r: { [region]: dig ? { th, dig } : { th } }, at: today, ...extra }; };
+  for (let i = 0; i < 10; i++) add("Pixar", `2025-0${1 + (i % 9)}-05`, 60);
+  for (let i = 0; i < 9; i++) add("Universal Pictures", `2025-0${1 + (i % 9)}-12`, 30);
+  for (let i = 0; i < 8; i++) add("Columbia Pictures", `2025-0${1 + (i % 8)}-19`, 45);
+  for (let i = 0; i < 3; i++) add("A24", `2025-0${1 + i}-21`, 20);
+  for (let i = 0; i < 12; i++) add(null, `2025-0${1 + (i % 9)}-25`, 50);
+  for (let i = 0; i < 5; i++) add(null, `2024-0${1 + i}-02`, null);
+  add("Marvel Studios", "2026-11-06", null, "US", { t: "In Cinemas Now" });          // expected 5 Jan 2027
+  add("A24", "2026-11-13", null, "US", { t: "No Row For Its Studio" });
+  add("Universal Pictures", "2026-09-01", null, "US", { t: "Estimate Already Past" });
+  return { windows: { "hi:2023-01-01": "2026-11-01" }, films: { 7: { t: "India film", lang: "Hindi", th: "2025-02-01", dig: "2025-04-01", note: "Netflix" } }, world: { windows: {}, films } };
+};
+test("studios: a film goes to the first major group among its production companies", () => {
+  const { studioOf } = require("./lib/studiowindows.js");
+  assert.strictEqual(studioOf(["Legendary Pictures", "Warner Bros. Pictures"]), "Warner Bros.");
+  assert.strictEqual(studioOf(["Pixar", "Walt Disney Pictures"]), "Disney");
+  assert.strictEqual(studioOf(["Marvel Studios"]), "Disney");
+  assert.strictEqual(studioOf(["Focus Features", "Working Title Films"]), "Universal");
+  assert.strictEqual(studioOf(["Columbia Pictures", "Marvel Entertainment"]), "Sony");
+  assert.strictEqual(studioOf(["Metro-Goldwyn-Mayer"]), "Amazon MGM");
+  assert.strictEqual(studioOf(["a24"]), "A24");
+  assert.strictEqual(studioOf(["Blumhouse Productions"]), null, "a company outside the groups names no studio");
+  assert.strictEqual(studioOf(["Paramount Pictures Studios Tour"]), null, "whole names only");
+  assert.strictEqual(studioOf(null), null);
+});
+test("studio windows: medians by studio, small studios counted but not given a row, estimates only where they are backed", () => {
+  const SW = require("./lib/studiowindows.js");
+  const s = SW.studioStats(SW_STORE(), "US", { today: "2026-11-20" });
+  assert.strictEqual(s.measured, 42, "10 + 9 + 8 + 3 + 12 with both dates");
+  assert.strictEqual(s.films, 50, "plus 5 with no digital date and 3 in cinemas");
+  assert.deepStrictEqual(s.byStudio, [{ key: "Universal", n: 9, median: 30 }, { key: "Sony", n: 8, median: 45 }, { key: "Disney", n: 10, median: 60 }], "fastest first; A24's three films get no row");
+  assert.strictEqual(s.inRows, 27);
+  assert.deepStrictEqual(s.expected.map((x) => [x.title, x.studio, x.date]), [["In Cinemas Now", "Disney", "2027-01-05"]],
+    "cinema date + the studio's median; no estimate for a studio without a row, none whose date has passed");
+  assert.deepStrictEqual(SW.windowIn({ r: { US: { th: "2025-03-01", dig: "2025-02-20" } } }, "US"), { why: "digitalFirst" });
+  assert.deepStrictEqual(SW.windowIn({ r: { US: { th: "2024-01-01", dig: "2025-06-01" } } }, "US"), { why: "tooLong" });
+  assert.deepStrictEqual(SW.windowIn({ r: { GB: { th: "2025-03-01" } } }, "US"), { why: "noCinemaDate" });
+  assert.strictEqual(SW.studioStats(SW_STORE(), "GB", { today: "2026-11-20" }).films, 0, "another country has its own films");
+});
+test("data page: the sections outside India appear only with enough behind them, and India's page is byte for byte the same without them", () => {
+  const SW = require("./lib/studiowindows.js");
+  const store = SW_STORE();
+  const html = SW.worldSectionsHtml(store, { today: "2026-11-20" });
+  assert.ok(/<h2 id="studios">Outside India: cinema to digital release, by studio<\/h2>/.test(html));
+  assert.ok(/<h3 id="studios-us">United States<\/h3>/.test(html) && !/United Kingdom<\/h3>|Australia<\/h3>|Canada<\/h3>/.test(html), "only the country with 40 measured films");
+  assert.ok(/Median 50 days across 42 films/.test(html) && /TMDB has a digital date for 42 of the 50 films read/.test(html), "the coverage is stated");
+  assert.ok(/<td>Universal<\/td><td class="n">30<\/td><td class="n">9<\/td>/.test(html) && !/<td>A24<\/td>/.test(html));
+  assert.ok(/plus 15 films from other studios, or from studios with fewer than 8 films/.test(html), "27 in rows + 15 = 42");
+  assert.ok(/<td>In Cinemas Now<\/td><td>Disney<\/td><td>6 November 2026<\/td><td>5 January 2027<\/td>/.test(html) && /An estimate:.*No studio has announced these dates\./.test(html));
+  assert.ok(/usually the first day a film can be bought or rented at home/.test(html) && /a film's distributor can differ/.test(html), "says what a digital date is and what the studio is");
+  assert.ok(!/nominees/i.test(html), "no nominees table without a stored ceremony");
+  // Too little: nothing is drawn.
+  const thin = SW_STORE(); for (const k of Object.keys(thin.world.films).slice(0, 20)) delete thin.world.films[k];
+  assert.strictEqual(SW.worldSectionsHtml(thin, { today: "2026-11-20" }), "", "under 40 measured films: no section at all");
+  assert.strictEqual(SW.worldSectionsHtml({ films: {} }, { today: "2026-11-20" }), "");
+  assert.strictEqual(SW.worldSectionsHtml(null, { today: "2026-11-20" }), "");
+  const recs = [{ c: "in", k: "movie", id: 1, t: "A", lang: "Tamil", th: "2026-09-01", rel: "2026-09-01", first: "2026-10-01", seen: "2026-10-01T00:00:00Z", p: ["Netflix"] }];
+  const base = U.buildDataPage(recs, "20 November 2026", { inCinemas: 2 });
+  assert.strictEqual(U.buildDataPage(recs, "20 November 2026", { inCinemas: 2, world: "" }), base, "no sections: the page is unchanged");
+  const withWorld = U.buildDataPage(recs, "20 November 2026", { inCinemas: 2, world: html });
+  assert.ok(withWorld.indexOf('id="studios"') > withWorld.indexOf('class="method"') && withWorld.indexOf('id="studios"') < withWorld.indexOf("<h2>Use the data</h2>"), "after the existing sections, before Use the data");
+  assert.strictEqual(withWorld.replace(`${html}\n\n  `, ""), base, "and everything else on the page is untouched");
+  for (const m of withWorld.matchAll(/<table>[\s\S]*?<\/table>/g)) assert.ok((m[0].match(/<tr>/g) || []).length >= 2, "no empty table");
+});
+testAsync("studio backfill: within its budget, resumable, one call per film, and India's record is never touched", async () => {
+  const SW = require("./lib/studiowindows.js");
+  const calls = [];
+  const detail = (id) => ({ id, production_companies: [{ name: id % 2 ? "Pixar" : "Universal Pictures" }],
+    release_dates: { results: [
+      { iso_3166_1: "US", release_dates: [{ type: 3, release_date: "2026-08-01T00:00:00.000Z" }, ...(id % 3 ? [{ type: 4, release_date: "2026-09-15T00:00:00.000Z", note: "" }] : [])] },
+      { iso_3166_1: "GB", release_dates: [{ type: 1, release_date: "2026-07-01T00:00:00.000Z" }] },
+      { iso_3166_1: "AU", release_dates: [{ type: 2, release_date: "2026-08-06T00:00:00.000Z" }, { type: 4, release_date: "2026-10-01T00:00:00.000Z" }] }] } });
+  const api = { pause: async () => {}, tmdb: async (p, q) => {
+    calls.push(p);
+    if (p === "/discover/movie") return { total_pages: 1, results: q.region === "US" && q["release_date.gte"] === "2026-10-01" ? [{ id: 1, title: "One", vote_count: 50 }, { id: 2, title: "Two", vote_count: 900 }, { id: 3, title: "Three", vote_count: 10 }] : [] };
+    return detail(Number(p.split("/").pop()));
+  } };
+  const india = { windows: { "hi:2023-01-01": "2026-11-01" }, films: { 7: { t: "India film", lang: "Hindi", th: "2025-02-01", dig: "2025-04-01" } } };
+  let saved = null; const store = JSON.parse(JSON.stringify(india));
+  const first = await SW.runStudioBackfill({ api, today: "2026-11-20", budget: 6, store, save: (s) => { saved = JSON.parse(JSON.stringify(s)); } });
+  assert.strictEqual(first.calls, 6, "stops at the budget");
+  assert.deepStrictEqual({ films: saved.films, windows: saved.windows }, india, "India's keys are exactly as they were");
+  assert.strictEqual(first.discovered, 3, "the newest quarter is discovered first");
+  const second = await SW.runStudioBackfill({ api, today: "2026-11-20", budget: 500, store: saved, save: (s) => { saved = JSON.parse(JSON.stringify(s)); } });
+  assert.strictEqual(second.left, 0, "the next run finishes the reading");
+  const f = saved.world.films;
+  assert.deepStrictEqual(f[2].r, { US: { th: "2026-08-01", dig: "2026-09-15" }, AU: { th: "2026-08-06", dig: "2026-10-01" } }, "each country's own dates; a premiere (type 1) is not a cinema release");
+  assert.deepStrictEqual(f[3].r.US, { th: "2026-08-01" }, "no digital date yet");
+  assert.deepStrictEqual(f[1].c, ["Pixar"]);
+  assert.strictEqual(calls.filter((p) => p === "/movie/2").length, 1, "one call per film");
+  const before = calls.length;
+  const third = await SW.runStudioBackfill({ api, today: "2026-11-21", budget: 500, store: saved, save: () => {} });
+  assert.strictEqual(third.read, 0, "read films wait 14 days before being asked again");
+  assert.strictEqual(calls.length - before, third.calls);
+  const later = await SW.runStudioBackfill({ api, today: "2026-12-06", budget: 500, store: saved, save: () => {} });
+  assert.strictEqual(later.read, 1, "only the film still waiting for a digital date is read again");
+});
+testAsync("Best Picture nominees: only in season, only with exactly ten films, each with where it streams", async () => {
+  const SW = require("./lib/studiowindows.js");
+  const bind = (cer, date, id, label) => ({ cerLabel: { value: cer }, date: { value: `${date}T00:00:00Z` }, tmdb: { value: String(id) }, workLabel: { value: label } });
+  const ten = Array.from({ length: 10 }, (_, i) => bind("99th Academy Awards", "2027-03-14", 500 + i, i === 0 ? "Q123" : `Nominee ${i}`));
+  const old = Array.from({ length: 10 }, (_, i) => bind("98th Academy Awards", "2026-03-15", 400 + i, `Old ${i}`));
+  assert.strictEqual(SW.pickCeremony({ results: { bindings: old } }, "2026-11-20"), null, "a ceremony eight months ago is out of season");
+  assert.strictEqual(SW.pickCeremony({ results: { bindings: ten.slice(0, 9) } }, "2027-01-25"), null, "nine listed films: not shown as the nominees");
+  const cer = SW.pickCeremony({ results: { bindings: [...old, ...ten, ten[3]] } }, "2027-01-25");
+  assert.strictEqual(cer.name, "99th Academy Awards"); assert.strictEqual(cer.films.length, 10, "a film listed twice counts once");
+  assert.ok(SW.inSeason("2027-01-25") && SW.inSeason("2026-12-01") && !SW.inSeason("2026-11-20") && !SW.inSeason("2027-05-01"));
+  const api = { pause: async () => {}, tmdb: async (p) => ({ title: `Title ${p.split("/").pop()}`, "watch/providers": { results: {
+    US: { flatrate: [{ provider_name: "Netflix" }, { provider_name: "Netflix Standard with Ads" }] }, GB: { rent: [{ provider_name: "Apple TV" }] }, AU: {} } } }) };
+  let asked = 0; const fetchImpl = async () => { asked++; return { json: async () => ({ results: { bindings: ten } }) }; };
+  const store = { films: { 7: {} }, windows: {} }; let saved = null; const save = (s) => { saved = JSON.parse(JSON.stringify(s)); };
+  const off = await SW.runAwards({ api, today: "2026-11-20", fetchImpl, store, save });
+  assert.strictEqual(asked, 0, "nothing is asked outside the season"); assert.strictEqual(off.why, "out of season");
+  const r = await SW.runAwards({ api, today: "2027-01-25", fetchImpl, store, save });
+  assert.strictEqual(r.films, 10); assert.strictEqual(asked, 1);
+  assert.deepStrictEqual(saved.world.awards.films[0].where, { US: ["Netflix"], GB: "rent", AU: "", CA: "" });
+  assert.deepStrictEqual(saved.films, { 7: {} }, "India's record untouched");
+  await SW.runAwards({ api, today: "2027-01-25", fetchImpl, store: saved, save });
+  assert.strictEqual(asked, 1, "once a day");
+  const html = SW.worldSectionsHtml(saved, { today: "2027-01-26" });
+  assert.ok(/<h2 id="nominees">Where to stream the Best Picture nominees<\/h2>/.test(html) && /99th Academy Awards, 14 March 2027\. Nominees as listed on Wikidata/.test(html));
+  assert.ok(/<td>Title 500<\/td><td>Netflix<\/td><td>Rent or buy<\/td><td>Not streaming<\/td><td>Not streaming<\/td>/.test(html), "the film's TMDB title where Wikidata has no English label");
+  assert.strictEqual(SW.worldSectionsHtml(saved, { today: "2027-05-10" }), "", "gone 45 days after the ceremony");
+  const down = await SW.runAwards({ api, today: "2027-01-26", fetchImpl: async () => { throw new Error("503"); }, store: saved, save });
+  assert.ok(/Wikidata not read/.test(down.why) && saved.world.awards.films.length === 10, "an outage keeps yesterday's table");
+});
+
 
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");

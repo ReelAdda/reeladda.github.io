@@ -532,7 +532,10 @@ function arrivalsSection(records, { code = "in", today = new Date().toISOString(
   <table><thead><tr><th>Month</th><th class="n">Arrivals</th><th>Biggest services</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-function buildDataPage(records, updatedHuman, { inCinemas = 0, digital = null } = {}) {
+// `world`: sections for countries outside India (lib/studiowindows.js worldSectionsHtml), drawn
+// after everything else and before "Use the data". Empty until that record has filled, and then
+// the page is byte for byte what it was.
+function buildDataPage(records, updatedHuman, { inCinemas = 0, digital = null, world = "" } = {}) {
   const e = escHtml;
   const s = windowStats(records);
   const india = windowStats(records, { code: "in" });
@@ -628,7 +631,9 @@ ${ICON_LINKS}
 
   ${arrivalsSection(records)}
 
-  <h2>Use the data</h2>
+  ${world ? `${world}
+
+  ` : ""}<h2>Use the data</h2>
   <p>The full record is available as <a href="/data/streaming-windows.csv">CSV</a>, free to cite and quote
   with credit to FilmyChill and a link to this page. Release dates come from TMDB and streaming
   availability from JustWatch; reuse of that underlying data is governed by
@@ -687,7 +692,9 @@ function writeDataPage(updatedHuman) {
   try { store = JSON.parse(fs.readFileSync(DIGITAL_FILE, "utf8")); } catch { /* not built yet */ }
   const digital = store ? digitalStats(store) : null;
   fs.mkdirSync("data", { recursive: true });
-  writeIfChanged("data/index.html", buildDataPage(records, updatedHuman, { inCinemas: filmsInCinemas(), digital }));
+  let world = "";
+  try { world = require("./studiowindows.js").worldSectionsHtml(store); } catch (e) { console.warn(`  /data/ sections outside India not drawn: ${e.message}`); }
+  writeIfChanged("data/index.html", buildDataPage(records, updatedHuman, { inCinemas: filmsInCinemas(), digital, world }));
   fs.writeFileSync("data/streaming-windows.csv", buildWindowsCsv(records));
   if (store) fs.writeFileSync("data/india-digital-windows.csv", buildDigitalCsv(store));
   if (digital) console.log(`  /data/ India digital dates: ${digital.measured} usable window(s) of ${digital.films} films (median ${digital.overall == null ? "n/a" : digital.overall + "d"}; 20+ ratings: ${digital.notable.measured}/${digital.notable.films})`);
