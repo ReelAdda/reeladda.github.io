@@ -443,12 +443,15 @@ function platformListLinks(code, root = ".") {
   const base = STREAM_BASE(code);
   let dirs = [];
   try { dirs = fs.readdirSync(path.join(root, base)); } catch { return []; }
-  return dirs.filter((d) => fs.existsSync(path.join(root, base, d, "index.html"))).map((d) => {
+  // The streaming finder (lib/evergreen.js) leads the list when this edition has one: every
+  // service on one page, filtered by genre and language.
+  const finder = fs.existsSync(path.join(root, base, "index.html")) ? [{ href: `/${base}/`, name: "All services, by genre and language", n: 0 }] : [];
+  return finder.concat(dirs.filter((d) => fs.existsSync(path.join(root, base, d, "index.html"))).map((d) => {
     const html = fs.readFileSync(path.join(root, base, d, "index.html"), "utf8");
     const n = Number((/(\d+) titles? ·/.exec(html) || [])[1] || 0);
     const name = ((/<h1>[^<]*? on ([^<]+?) in [^<]*<\/h1>/.exec(html) || [])[1] || d).replace(/&amp;/g, "&");
     return { href: `/${base}/${d}/`, name, n };
-  }).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
+  }).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name)));
 }
 
 function writeOttWeekPage(data, cfg, allCountries) {
