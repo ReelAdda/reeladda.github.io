@@ -2956,6 +2956,13 @@ async function main() {
       try { writeDatedOttPages(dataByCode[cfg.code], cfg, pagesManifest); }
       catch (e) { stageFailed(`dated OTT pages [${cfg.code}]`, e); }
     }
+    // First bring every row in line with its page as the page stands now (lib/rowsync.js): the
+    // score sweep runs after the language pages and weekly lists are written, and a verdict it
+    // changed left those rows one build behind (20 Nov 2026).
+    try {
+      const rs = require("./lib/rowsync.js").syncListingRows(builtCountries, pagesManifest);
+      console.log(`List rows brought in line with their film pages: ${rs.rows} row(s) on ${rs.pages} page(s)${rs.examples.length ? `, e.g. ${rs.examples.join(", ")}` : ""}`);
+    } catch (e) { stageFailed("list-row sync", e, { optional: true }); }
     // Every list row against the film page it links to, now that the last list writer has run
     // (lib/audit.js auditListingRows). Read-only.
     try {
