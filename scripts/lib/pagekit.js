@@ -399,7 +399,11 @@ function withShownScore(code, it, read = null) {
   return { ...it, fcScore: shown.fcScore, rating: shown.rating ?? null, votes: shown.votes || 0 };
 }
 
-function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null, popular = "" }) {
+// `rowAfter(item)` puts a block under a row (the waiting board's alert button, lib/dated.js);
+// `connect`, `extraStyle` and `tailScripts` add what that block needs. A page that passes none of
+// them is byte for byte what it was.
+function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, faqs, extraLd, homeUrl, frozenNote, prevWeekHref = null, code = "in", altPaths = null, navLinks = null, ogImage = null, popular = "",
+  rowAfter = null, connect = null, extraStyle = "", tailScripts = null }) {
   // ~80 hubs, month archives and week pages ran 61–72 characters; see fitSiteTitle.
   title = fitSiteTitle(title);
   const e = escHtml;
@@ -440,6 +444,8 @@ function listingPageHtml({ title, desc, canonical, h1, updLine, lead, sections, 
       ${rowRing(it)}`;
     const row = it.slug ? `<a class="row" href="${e(filmPagePath(code, it.slug))}">${inner}</a>` : `<div class="row">${inner}</div>`;
     const links = rvLinks(reviewsOf(it));
+    const after = rowAfter ? rowAfter(it) || "" : "";
+    if (after) return `<div class="rowact">${row}${links}${after}</div>`;
     return links ? `<div class="rowwrap">${row}${links}</div>` : row;
   };
   const sectionHtml = sections.filter((sec) => sec.items.length).map((sec) => `
@@ -478,7 +484,7 @@ ${ICON_LINKS}
 <meta property="og:url" content="${e(canonical)}">
 ${ogImageTag(ogImage || hubOgImage((sections || []).flatMap((x) => x.items || []), { code }))}
 <meta name="twitter:card" content="summary">
-<meta http-equiv="Content-Security-Policy" content="${cspWith("default-src 'self'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'")}">${analyticsTag()}
+<meta http-equiv="Content-Security-Policy" content="${cspWith(`default-src 'self';${connect && connect.length ? ` connect-src 'self' ${connect.join(" ")};` : ""} script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://image.tmdb.org data:; object-src 'none'; base-uri 'self'`)}">${analyticsTag()}
 ${(extraLd || []).map((o) => `<script type="application/ld+json">${ldJson(o)}</script>`).join("\n")}${faqLd ? `
 <script type="application/ld+json">${ldJson(faqLd)}</script>` : ""}
 <style>
@@ -516,7 +522,7 @@ ${ROW_RING_CSS}
   .faq details[open] summary::after { content:"–"; }
   .faq .fa { font-size:14px; line-height:1.6; color:var(--mute); margin-top:8px; }
   .btn { display:inline-flex; align-items:center; min-height:44px; box-sizing:border-box; background:var(--indigo); color:#fff; font-weight:700; font-size:14px; padding:11px 20px; border-radius:10px; text-decoration:none; margin-top:20px; }
-  footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }
+  footer { color:var(--mute); font-size:12px; text-align:center; padding:24px 16px; line-height:1.7; }${extraStyle ? `\n${extraStyle}` : ""}
 </style>
 </head>
 <body>${LISTING_VERSION}
@@ -536,7 +542,7 @@ ${faqHtml}
 <footer>
   ${footerAttribution(undefined, { plain: require("./humanprose.js").plainOn(canonical) })}© 2026 FilmyChill · Vikram Sharma
 </footer>
-</body>
+${(tailScripts || []).map((src) => `<script src="${e(src)}" defer></script>\n`).join("")}</body>
 </html>`;
 }
 

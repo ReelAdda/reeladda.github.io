@@ -238,7 +238,7 @@ async function enrich(kind, id, region = "IN") {
 
   // Streaming platforms in this country's region
   const inProv = d["watch/providers"]?.results?.[region];
-  const providers = dedupeProviders((inProv?.flatrate || []).map((p) => p.provider_name)).slice(0, 4);
+  const providers = require("./rules.js").streamingProviders(inProv).slice(0, 4);
 
   // Rent/buy platforms from the SAME response — zero extra API calls. "Streaming on X"
   // never said whether it costs extra; and for theatrical releases, "can I rent it at

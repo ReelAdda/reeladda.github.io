@@ -496,8 +496,23 @@ function adTierProviders(region) {
   return dedupeProviders([...(r.free || []), ...(r.ads || [])].map((p) => p.provider_name)).filter((n) => !flat.has(n));
 }
 
+// THE AD TIERS, SWITCHED ON (first stage, 21 Nov 2026). A week of recording (14-20 Nov) found
+// 22 waiting pages whose only listing was a free or ad-supported tier; ten were India's, all on
+// JioHotstar, I'm Game among them, each still reading "not on OTT yet". From now a title with no
+// subscription listing counts as streaming when one of the services below carries it free or
+// with ads. India's three first, the ones the owner checked; the other names the record holds
+// (Hoopla, Kanopy, Tubi and so on) stay recorded and unshown until they are checked the same way.
+// A title that has a subscription listing is read exactly as before, so no streaming page changes.
+const AD_TIER_ON = new Set(["JioHotstar", "ZEE5", "Zee5", "MX Player", "Amazon MX Player"]);
+function streamingProviders(region) {
+  const r = region || {};
+  const flat = dedupeProviders((r.flatrate || []).map((p) => p.provider_name));
+  if (flat.length) return flat;
+  return adTierProviders(r).filter((n) => AD_TIER_ON.has(n));
+}
+
 module.exports = {
-  adTierProviders,
+  adTierProviders, streamingProviders, AD_TIER_ON,
   MAX_SPAN_WEEKS,
   useMeasuredWindows,
   windowInfo,

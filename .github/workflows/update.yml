@@ -129,6 +129,7 @@ jobs:
           # Optional state files: absent until their feature is set up (git add exits 128 on a
           # pathspec that matches nothing, which would fail the step).
           git add -A -- votes-agg.json votes-state.json 2>/dev/null || true
+          git add -A -- alerts-agg.json 2>/dev/null || true
           # Honest sitemap dates for every non-film URL (lib/sitemap.js).
           git add -A -- page-lastmods.json 2>/dev/null || true
           # Facts of every page rendered from facts (scripts/lib/facts.js, lib/migrate.js).

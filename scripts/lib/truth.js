@@ -13,7 +13,7 @@
 "use strict";
 
 const { isReRelease, regionalTheatricalDate } = require("./enrich.js");
-const { dedupeProviders, langCode, langName } = require("./rules.js");
+const { dedupeProviders, streamingProviders, langCode, langName } = require("./rules.js");
 
 // Pure: the facts TMDB gives for one edition, from /movie|tv/{id} with watch/providers (and
 // release_dates for films) appended. Same rules as the build (lib/enrich.js): subscription
@@ -28,7 +28,7 @@ function tmdbTruth(d, kind, cfg, asOf) {
     : ((regional && !isReRelease(regional, d.release_date)) ? regional : String(d.release_date || "").slice(0, 10));
   return {
     at: asOf,
-    providers: dedupeProviders((wp.flatrate || []).map((p) => p.provider_name)).slice(0, 4),
+    providers: streamingProviders(wp).slice(0, 4),
     rentBuy: dedupeProviders([...(wp.rent || []), ...(wp.buy || [])].map((p) => p.provider_name)).slice(0, 3),
     ...(released ? { released } : {}),
     ...((tv ? d.name : d.title) ? { title: tv ? d.name : d.title } : {}),

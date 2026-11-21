@@ -22,7 +22,7 @@ const {
 } = require("./archive.js");
 const { digitalReleaseFor } = require("./enrich.js");
 const { digitalAnnounceText, digitalPassedBlock, OPEN_PILL_RE, settleReleasedCopy } = require("./pagekit.js");
-const { adTierProviders, canonProvider, countryNameFor, dedupeProviders, streamVocab, looksLikeOutage } = require("./rules.js");
+const { adTierProviders, streamingProviders, canonProvider, countryNameFor, dedupeProviders, streamVocab, looksLikeOutage } = require("./rules.js");
 const { healthNote, loadStateFile } = require("./runhealth.js");
 const { readHistory, EARLY_WINDOW_DAYS, VERIFY_AFTER_DAYS } = require("./history.js");
 const { tmdbTruth } = require("./truth.js");
@@ -423,7 +423,7 @@ async function sweepStreamingDepartures(manifest, cfg, asOf) {
       const d = await tmdb(`/${kind}/${c.tmdbId}`, { append_to_response: kind === "tv" ? "watch/providers,aggregate_credits" : "watch/providers,release_dates,credits" });
       const region = d?.["watch/providers"]?.results?.[cfg.watchRegion] || {};
       checks.push({ c, truth: tmdbTruth(d, kind, cfg, asOf),
-        provs: dedupeProviders((region.flatrate || []).map((x) => x.provider_name)).slice(0, 4),
+        provs: streamingProviders(region).slice(0, 4),   // the ad tiers that are switched on count (lib/rules.js)
         rentBuy: dedupeProviders([...(region.rent || []), ...(region.buy || [])].map((x) => x.provider_name)).slice(0, 3) });
     } catch (e) { console.warn(`  departure ${c.slug}: ${e.message}`); }
   }
@@ -756,7 +756,10 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
       m[c.slug].swept = asOf;
       delete m[c.slug].tmdbGone;   // found again
       m[c.slug].truth = tmdbTruth(d, "movie", cfg, asOf);   // date, title, rent/buy for the page (lib/truth.js)
-      const provs = dedupeProviders((d?.["watch/providers"]?.results?.[cfg.watchRegion]?.flatrate || []).map((x) => x.provider_name)).slice(0, 4);
+      const provs = streamingProviders(d?.["watch/providers"]?.results?.[cfg.watchRegion]).slice(0, 4);
+      // Recorded on an ad tier before today: it was there when we looked, on a day we can't name
+      // to within a day, so its arrival goes undated (no window is measured from it).
+      const wasAdTier = !!m[c.slug].adTier;
       // Free and ad-supported tiers, recorded and not yet shown (10 Nov 2026, lib/rules.js
       // adTierProviders): when we first saw the film there, so that switching the tiers on later
       // can tell a real arrival from a film that was already there before we looked.
@@ -789,7 +792,7 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
         continue;
       }
       const p = `${dir}/${c.slug}.html`;
-      const arrived = arrivalDate({ prev: prevCheck, detected: asOf, sighting: sightings.get(String(c.tmdbId)) || null });
+      const arrived = wasAdTier ? null : arrivalDate({ prev: prevCheck, detected: asOf, sighting: sightings.get(String(c.tmdbId)) || null });
       const { html, changed } = applyArrivalPatch(fs.readFileSync(p, "utf8"), {
         title: c.title || c.slug, providers: provs, countryName: countryNameFor(cfg), cfg, asOf, arrived,
       });
@@ -815,7 +818,7 @@ async function sweepStreamingArrivals(manifest, cfg, asOf) {
     }
   }
   console.log(`  streaming sweep [${cfg.code}]: ${candidates.length} checked, ${found} newly streaming (${dated} with an arrival date within a day), ${announced} streaming date(s) announced, `
-    + `${adSeen} found only on a free or ad-supported tier (${Object.values(m).filter((x) => x && x.adTier).length} recorded in all, not shown on pages yet)`);
+    + `${adSeen} found only on a free or ad-supported tier (${Object.values(m).filter((x) => x && x.adTier).length} recorded in all on tiers not switched on yet)`);
 }
 
 // pages-manifest.json: { <edition>: { <slug>: entry } }. Who writes each field — a field

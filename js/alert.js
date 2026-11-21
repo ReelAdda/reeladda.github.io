@@ -7,8 +7,8 @@
 // Shown only where web push works; the page reads fully without it.
 (function () {
   "use strict";
-  var box = document.querySelector(".fcalert");
-  if (!box) return;
+  // One box on a film page; one under each waiting film on the Coming to OTT page (21 Nov 2026).
+  Array.prototype.forEach.call(document.querySelectorAll(".fcalert"), function (box) {
   var KEY = box.getAttribute("data-key") || "";
   var btn = box.querySelector("button"), status = box.querySelector("[role=status]");
   if (!/^[A-Za-z0-9_-]{86,88}$/.test(KEY) || !btn || !window.isSecureContext || !("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return;
@@ -96,5 +96,6 @@
         say(box.getAttribute("data-done") || "Done. One alert when it arrives, and it's in My List.");
       });
     }).catch(function () { btn.disabled = false; say("That didn't work just now. Try again in a minute."); });
+  });
   });
 })();

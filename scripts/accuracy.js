@@ -18,7 +18,7 @@ const fs = require("fs");
 const path = require("path");
 const { COUNTRIES } = require("./lib/core.js");
 const { extractFacts, STATUS_PILL } = require("./lib/facts.js");
-const { canonProvider, dedupeProviders, langName, looksLikeOutage } = require("./lib/rules.js");
+const { canonProvider, dedupeProviders, streamingProviders, langName, looksLikeOutage } = require("./lib/rules.js");
 
 const SITE = "https://filmychill.com";
 const norm = (s) => String(s || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/&amp;/g, "&").replace(/[^a-z0-9]+/g, " ").trim();
@@ -56,7 +56,7 @@ function samplePages(manifest, { per = 14, exists = () => true, isPending = () =
 function expectedFromTmdb(d, kind, cfg) {
   const region = cfg.watchRegion || cfg.region;
   const wp = (d && d["watch/providers"] && d["watch/providers"].results && d["watch/providers"].results[region]) || {};
-  const flat = dedupeProviders((wp.flatrate || []).map((p) => p.provider_name)).slice(0, 4);
+  const flat = streamingProviders(wp).slice(0, 4);   // as the build reads it (lib/rules.js)
   const rentBuy = dedupeProviders([...(wp.rent || []), ...(wp.buy || [])].map((p) => p.provider_name));
   const dates = new Set();
   const primary = String((kind === "tv" ? d.first_air_date : d.release_date) || "").slice(0, 10);

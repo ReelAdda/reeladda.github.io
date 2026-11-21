@@ -448,6 +448,9 @@ function unlinkMissingPages(html, missing, rel = "") {
   };
   // Mark each dead link, then drop marked links with a separator; the rest keep their text.
   let out = html.replace(/<a href="([^"]+)">([^<\u0000\u0001]*)<\/a>/g, (whole, href, text) => (dead(href) ? `\u0000${text}\u0001` : whole));
+  // A footer column's item that was only the link goes whole: "Coming to OTT" sat in India's
+  // footer as dead text for a week after its page was removed (21 Nov 2026).
+  out = out.replace(/<li>\u0000[^\u0001]*\u0001<\/li>/g, "");
   out = out.replace(/ · \u0000[^\u0001]*\u0001/g, "").replace(/\u0000[^\u0001]*\u0001 · /g, "")
     .replace(/(More: )\u0000[^\u0001]*\u0001(<\/p>)/g, "$1$2").replace(/\u0000([^\u0001]*)\u0001/g, "$1");
   out = out.replace(/<p style="color:var\(--mute\);font-size:12\.5px;margin-top:10px">More: <\/p>/g, "");
