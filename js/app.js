@@ -466,6 +466,33 @@ function soonCard(item, i) {
   </${item.slug ? 'a' : 'div'}>`;
 }
 
+// A LARGER POOL FOR A CHOSEN LANGUAGE (21 Nov 2026). The homepage holds this week's lists, so
+// choosing Tamil can leave two cards while the Tamil page holds dozens. With a language chosen,
+// one line under the menus links to the larger list that already exists: on India's page the
+// language's own page (/tamil/), everywhere else this edition's streaming finder with the
+// language already chosen. The build says where each language leads (<meta name="fc-more-lang">,
+// lib/surfaces.js moreByLanguage): {"Tamil": ["/tamil/", 0], "Korean": ["/streaming/#l=Korean", 16]}.
+// A finder link shows only when the finder holds more titles than this page is showing; a
+// language page always holds more. No line for "All languages" or with My List only.
+const FC_MORE_LANG = (() => {
+  const m = document.querySelector('meta[name="fc-more-lang"]');
+  try { return JSON.parse((m && m.getAttribute('content')) || '{}') || {}; } catch (e) { return {}; }
+})();
+function langMoreHtml(lang, shown, more) {
+  const to = lang && lang !== 'All' ? (more || {})[lang] : null;
+  if (!Array.isArray(to) || !/^\/[a-z0-9\/-]*(#l=[A-Za-z0-9%]+)?$/.test(String(to[0]))) return '';
+  const finder = to[0].indexOf('#l=') > 0;
+  if (finder && !(Number(to[1]) > shown)) return '';
+  return '<a href="' + esc(to[0]) + '">' + (finder ? 'See all ' + esc(lang) + ' titles streaming now' : 'See every new ' + esc(lang) + ' release') + ' →</a>';
+}
+function renderLangMore(shown) {
+  const el = document.getElementById('langMore');
+  if (!el) return;
+  const html = myListOnly ? '' : langMoreHtml(activeLang, shown, FC_MORE_LANG);
+  el.innerHTML = html;
+  el.hidden = !html;
+}
+
 function applyFilters(list) {
   let out = list;
   if (activeLang !== 'All') out = out.filter(x => x.language === activeLang);
@@ -487,6 +514,7 @@ function render() {
   document.getElementById('mylistGrid').innerHTML = wl.map((it, i) => card(liveItem(it), i, 'wl')).join('');
   const t = myListOnly ? [] : applyFilters(DATA.theatres);
   const o = myListOnly ? [] : applyFilters(DATA.ott);
+  renderLangMore(t.length + o.length);
   const hideMsg = myListOnly ? '<div class="error-box">Showing only My List above — tap My List again to see everything.</div>' : '<div class="error-box">No releases match this filter.</div>';
   document.getElementById('moviesGrid').innerHTML = t.map((it) => card(it, DATA.theatres.indexOf(it), 'theatres')).join('') || hideMsg;
   let ottHtml = '', ottDivided = false;

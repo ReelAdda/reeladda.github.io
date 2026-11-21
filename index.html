@@ -152,6 +152,8 @@
      even a flex gap between the language and sort dropdowns). */
   #personalBar { flex-basis: 100%; order: 10; } #personalBar:empty { display: none; }
   #langSel { font-weight: 600; }
+  .lang-more { flex-basis: 100%; font-size: 14px; } .lang-more[hidden] { display: none; }
+  .lang-more a { color: var(--indigo); font-weight: 700; text-decoration: none; } .lang-more a:hover { text-decoration: underline; }
   .chip { background: var(--card); border: 1px solid var(--line); color: var(--mute); border-radius: 999px;
     padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; transition: all .15s; }
   .chip:hover { border-color: var(--indigo); color: var(--indigo); }
@@ -600,6 +602,7 @@
       <button class="mylist-btn" id="mylistBtn" data-click="toggleMyList"><svg class="ic" aria-hidden="true"><use href="#icBookmark"/></svg> My List <span class="wl-n" id="wlCount">0</span></button>
       <button class="tonight-btn" data-click="openMood" aria-label="What to watch tonight? Pick a mood"><svg class="ic" aria-hidden="true"><use href="#icDice"/></svg> Tonight</button>
     </div>
+  <div class="lang-more" id="langMore" hidden></div>
   <div id="personalBar"></div>
 </div>
 
