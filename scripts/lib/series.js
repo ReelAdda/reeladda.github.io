@@ -196,6 +196,9 @@ function episodeProgress(ep, today) {
   const more = !!(n && n.date && !list.some((x) => x.e === n.e && (n.s || 1) === (ep.season || 1)));
   const done = dated.length === of && out === of && !more;
   if (out === of && !done) return null; // all listed episodes out but more to come: no count to give
+  // Nothing out yet: "0 of 1 out" under "48 episodes across 2 seasons" read as a contradiction
+  // (27 pages, 21 Nov 2026). The list below already shows the first date.
+  if (out === 0) return null;
   return { of, out, done, last: done ? last : null };
 }
 

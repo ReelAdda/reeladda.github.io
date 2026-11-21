@@ -94,7 +94,14 @@ function announcedDates(data, manifestForCountry, index = [], now = Date.now()) 
 // and that no date is in our sources. Only languages with a usable measured range; the probe's
 // watchlist (ott-watch.json) holds the films that opened and aren't streaming. Pure.
 const WAITING_MAX_DAYS = 120;
-const WAITING_MAX_ROWS = 20;   // older than this is a film that never came to streaming, not one on its way
+const WAITING_MAX_ROWS = 40;
+// THE WAITING BOARD (21 Nov 2026). The waiting rows hung off the announced-dates gate, so when
+// India fell to under three announced dates its page went, the installed app's "Coming to OTT"
+// shortcut opened nothing, and the waiting list (the part readers act on) went with it. The page
+// now stands on either leg: COMING_MIN announced dates, or WAITING_PAGE_MIN waiting films. Each
+// waiting row with a film page carries the film page's alert button (js/alert.js), so a reader
+// can ask to be told about several films from one place.
+const WAITING_PAGE_MIN = 5;
 function stillWaiting(watch, code, { manifest = {}, index = [], announced = new Set(), today = new Date().toISOString().slice(0, 10), V = { word: "OTT" } } = {}) {
   const { slugify } = require("./core.js");
   const { windowInfo } = require("./rules.js");
@@ -113,14 +120,29 @@ function stillWaiting(watch, code, { manifest = {}, index = [], announced = new 
     if (announced.has(slug) || (e && (e.live || (e.digital && e.digital.date)))) continue;
     const page = bySlug.get(slug);
     if (page && ((page.providers || []).length || page.digitalDate)) continue;
-    out.push({ slug: page ? slug : null, title: w.title, language: w.language || "", kind: "movie", genre: w.genre || "", poster: page ? page.poster || "" : "",
+    out.push({ slug: page ? slug : null, tmdbId: w.tmdbId || null, title: w.title, language: w.language || "", kind: "movie", genre: w.genre || "", poster: page ? page.poster || "" : "",
       days, hook: `Opened in cinemas ${days} days ago · ${w.language} films usually take ${info.lo}–${info.hi} weeks · no ${V.word === "OTT" ? "OTT" : "streaming"} date in our sources yet` });
   }
   // Films with a page first (the ones people search for), then the most recently overdue; 20 at most.
   return out.sort((a, b) => (!!b.slug - !!a.slug) || a.days - b.days || a.title.localeCompare(b.title)).slice(0, WAITING_MAX_ROWS);
 }
 
-function buildComingPage(items, cfg, { now = Date.now(), hasToday = true, waiting = [] } = {}) {
+// The alert button under a waiting row: the film page's box (lib/filmpage.js alertButtonPage), one
+// per row, and one copy of the script for the page. "" without a key, a film page or an id.
+function waitingAlertBox(row, code, key) {
+  if (!key || !/^[A-Za-z0-9_-]{86,88}$/.test(key) || !row || !row.slug || !/^\d{1,9}$/.test(String(row.tmdbId || ""))) return "";
+  const a = (v) => String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  const label = streamVocab({ code }).word === "OTT" ? "Tell me when it's on OTT" : "Tell me when it's streaming";
+  return `<div class="fcalert" data-key="${a(key)}" data-film="movie-${row.tmdbId}" data-c="${a(code)}" data-title="${a(row.title)}" data-slug="${a(row.slug)}" data-poster="${a(row.poster)}" data-lang="${a(row.language)}"`
+    + ` data-on="Alert on" data-done="Done. We'll send one alert when it arrives, and it's saved in My List." hidden>`
+    + `<button type="button" class="btn alertb">${a(label)}</button> <span role="status"></span></div>`;
+}
+const WAITING_STYLE = `  .rowact { margin-bottom:14px; } .rowact .row { margin-bottom:0; }
+  .rowact .fcalert { margin:6px 0 0; font-size:13px; color:var(--mute); }
+  .alertb { min-height:40px; padding:8px 14px; font-size:13px; background:transparent; color:var(--indigo); border:1.5px solid var(--indigo); cursor:pointer; }
+  .alertb:disabled { color:var(--mute); border-color:var(--line); cursor:default; }`;
+
+function buildComingPage(items, cfg, { now = Date.now(), hasToday = true, waiting = [], alertKey = "" } = {}) {
   const code = (cfg && cfg.code) || "in";
   const country = countryNameFor(cfg);
   const V = streamVocab(cfg);
@@ -145,30 +167,40 @@ function buildComingPage(items, cfg, { now = Date.now(), hasToday = true, waitin
   const sections = groups.filter(([, xs]) => xs.length).map(([h, xs]) => ({ h2: h, items: xs }));
   if (waiting.length) sections.push({ h2: "Still waiting: past the usual window, no date yet", items: waiting });
   const n = items.length;
+  const hasAlerts = waiting.some((w) => waitingAlertBox(w, code, alertKey));
+  const wn = waiting.length;
   // Plain wording (rollout "human-prose", lib/humanprose.js), by the page's canonical URL.
   const plain = require("./humanprose.js").plainOn(comingUrl(code));
-  const faqs = [{
+  const faqs = [...(n ? [{
     q: `What's coming to ${V.word} in ${country} next?`,
     a: items.slice(0, 5).map((x) => { const p = digitalNoteName(x.platform); return `${x.title} (${fmtDateShort(x.date, now, loc)}${p ? `, ${p}` : ", platform not named yet"})`; }).join(", ") + (n > 5 ? `, and ${n - 5} more.` : "."),
-  }, {
+  }] : []), ...(n ? [{
     q: `Are these dates confirmed?`,
     // Repair sprint, 10 Nov 2026: the dates are TMDB's digital release dates, which its contributors
     // enter; FilmyChill doesn't check each against an announcement, so the page no longer says
     // "announced by the platform" or "Nothing here is a guess".
     a: `Not by FilmyChill. Each date comes from TMDB, where contributors add it, usually from the platform's or studio's announcement. We never list our own estimates, and each page switches to "streaming now" the day the title turns up.`,
-  }];
+  }] : [])];
+  // With no dated film the page is the waiting list, and says so in its title and first lines.
+  const word = V.word === "OTT" ? "OTT" : "streaming";
+  const updated = new Date(now).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" });
   const url = comingUrl(code);
   const linkable = items.filter((x) => x.slug);
   return listingPageHtml({
-    title: fitFirst([`Upcoming ${V.Releases} in ${country}: ${n} Dates | FilmyChill`, `Upcoming ${V.Releases} in ${country}: ${n} Dates`,
-      `Upcoming ${V.Releases} in ${country} (${n})`, `Coming to ${V.word} in ${country}`], 60),
-    desc: fitFirst([`${n} films with an ${V.word === "OTT" ? "OTT" : "streaming"} release date in ${country}, soonest first, with the platform where it's been named. Dates from TMDB, never our estimates.`,
-      `${n} ${V.word === "OTT" ? "OTT" : "streaming"} release dates in ${country}, soonest first. Dates from TMDB.`], 160),
+    title: n ? fitFirst([`Upcoming ${V.Releases} in ${country}: ${n} Date${n === 1 ? "" : "s"} | FilmyChill`, `Upcoming ${V.Releases} in ${country}: ${n} Date${n === 1 ? "" : "s"}`,
+      `Upcoming ${V.Releases} in ${country} (${n})`, `Coming to ${V.word} in ${country}`], 60)
+      : fitFirst([`Waiting for ${V.word} in ${country}: Films With No Date Yet | FilmyChill`, `Waiting for ${V.word} in ${country}: Films With No Date Yet`, `Waiting for ${V.word} in ${country}`], 60),
+    desc: n ? fitFirst([`${n} film${n === 1 ? "" : "s"} with an ${V.word === "OTT" ? "OTT" : "streaming"} release date in ${country}, soonest first, with the platform where it's been named. Dates from TMDB, never our estimates.`,
+      `${n} ${V.word === "OTT" ? "OTT" : "streaming"} release date${n === 1 ? "" : "s"} in ${country}, soonest first. Dates from TMDB.`], 160)
+      : fitFirst([`Films that have opened in cinemas in ${country} and have no ${word} date yet, with the days since each opened. No estimated dates.`,
+        `Films in ${country} with no ${word} date yet, and the days since each opened in cinemas.`], 160),
     canonical: url,
     h1: `Coming to ${V.word} in ${country}`,
-    updLine: `${n} date${n === 1 ? "" : "s"} · updated ${new Date(now).toLocaleDateString(loc, { day: "numeric", month: "short", year: "numeric" })}`,
-    lead: `Films with a streaming date on TMDB, soonest first. TMDB's contributors add these dates, usually from the platform's or studio's announcement, and we don't check each one ourselves. When a date changes there, it changes here.`,
+    updLine: n ? `${n} date${n === 1 ? "" : "s"} · updated ${updated}` : `${wn} film${wn === 1 ? "" : "s"} waiting · updated ${updated}`,
+    lead: n ? `Films with a streaming date on TMDB, soonest first. TMDB's contributors add these dates, usually from the platform's or studio's announcement, and we don't check each one ourselves. When a date changes there, it changes here.${hasAlerts ? " Below them are films with no date yet: tap the button under one and we'll send one alert the day it arrives." : ""}`
+      : `No film in ${country} has ${word === "OTT" ? "an OTT" : "a streaming"} date on TMDB right now. These have opened in cinemas, are past the time films in their language usually take, and have no date and no platform yet.${hasAlerts ? " Tap the button under a film and we'll send one alert the day it arrives." : ""}`,
     sections, faqs, code,
+    ...(hasAlerts ? { rowAfter: (it) => waitingAlertBox(it, code, alertKey), connect: require("./vote.js").VOTE_CONNECT, extraStyle: WAITING_STYLE, tailScripts: ["/js/alert.js"] } : {}),
     extraLd: [{ "@context": "https://schema.org", "@type": "CollectionPage", name: `Coming to ${V.word} in ${country}`, url,
       isPartOf: { "@type": "WebSite", "@id": "https://filmychill.com/#website" },
       mainEntity: { "@type": "ItemList", numberOfItems: linkable.length,
@@ -319,14 +351,19 @@ function writeDatedOttPages(data, cfg, manifest, records = null) {
   const items = announcedDates(data, (manifest || {})[code] || {}, idx);
   const recs = records || readHistory();
   const hasWeek = recs.some((r) => r && r.c === code && r.first && r.first >= new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10));
-  const hasComing = items.length >= COMING_MIN;
+  let watch = [];
+  try { watch = JSON.parse(fs.readFileSync("ott-watch.json", "utf8")); } catch { /* no watchlist this run */ }
+  const waiting = stillWaiting(watch, code, { manifest: (manifest || {})[code] || {}, index: idx, announced: new Set(items.map((x) => x.slug)), today: require("./freshness.js").editionToday(code), V: streamVocab(cfg) });
+  // The page stands on announced dates or on the waiting list (see WAITING_PAGE_MIN). A page
+  // standing on the waiting list still lists the one or two dated films first, so it never says
+  // no film has a date while one does.
+  const hasComing = items.length >= COMING_MIN || waiting.length >= WAITING_PAGE_MIN;
+  const dated = items;
   const cp = comingPath(code);
   if (hasComing) {
     fs.mkdirSync(cp.slice(0, cp.lastIndexOf("/")), { recursive: true });
-    let watch = [];
-    try { watch = JSON.parse(fs.readFileSync("ott-watch.json", "utf8")); } catch { /* no watchlist this run */ }
-    const waiting = stillWaiting(watch, code, { manifest: (manifest || {})[code] || {}, index: idx, announced: new Set(items.map((x) => x.slug)), today: require("./freshness.js").editionToday(code), V: streamVocab(cfg) });
-    writeIfChanged(cp, buildComingPage(items, cfg, { hasToday: hasWeek, waiting }));
+    const A = require("./alerts.js");
+    writeIfChanged(cp, buildComingPage(dated, cfg, { hasToday: hasWeek, waiting, alertKey: A.alertsEnabled() ? A.publicKey() : "" }));
   } else if (fs.existsSync(cp)) {
     fs.rmSync(cp.slice(0, cp.lastIndexOf("/")), { recursive: true, force: true });
   }
@@ -340,7 +377,7 @@ function writeDatedOttPages(data, cfg, manifest, records = null) {
   } else if (fs.existsSync(tp)) {
     fs.rmSync(tp.slice(0, tp.lastIndexOf("/")), { recursive: true, force: true });
   }
-  console.log(`  dated OTT pages [${code}]: ${items.length} announced date(s)${items.length >= COMING_MIN ? "" : " (below gate — no coming page)"}${hasWeek ? ", today page written" : ""}`);
+  console.log(`  dated OTT pages [${code}]: ${items.length} announced date(s)${items.length >= COMING_MIN ? "" : hasComing ? ` (below the dates gate; the page is the waiting list, ${waiting.length} film(s))` : " (below gate — no coming page)"}${hasWeek ? ", today page written" : ""}`);
 }
 
 function writePlatformHubPages(data, cfg) {

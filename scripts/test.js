@@ -781,8 +781,8 @@ test("still waiting: past the measured window, no date announced, no date predic
     assert.deepStrictEqual(list.map((x) => x.title), ["Overdue"], "inside the window, 30 years old, announced, streaming, or no measured range: left out");
     assert.strictEqual(list[0].hook, "Opened in cinemas 49 days ago · Telugu films usually take 3–6 weeks · no OTT date in our sources yet");
     assert.ok(/^Opened in cinemas \d+ days ago · /.test(list[0].hook) && !/^In cinemas/.test(list[0].hook), "never says it is still in cinemas");
-    const many = Array.from({ length: 30 }, (_, i) => w("F" + i, "2026-09-01"));
-    assert.strictEqual(D.stillWaiting(many, "in", { today: "2026-11-08" }).length, 20, "20 at most");
+    const many = Array.from({ length: 50 }, (_, i) => w("F" + i, "2026-09-01"));
+    assert.strictEqual(D.stillWaiting(many, "in", { today: "2026-11-08" }).length, 40, "40 at most");
   } finally { RU.useMeasuredWindows(null); }
 });
 
@@ -9990,8 +9990,8 @@ test("provider lists carry one canonical name per service, in TMDB's order", () 
   // the departure and arrival sweeps, and the 30-minute probe that writes history records.
   const fsx = require("fs"), path = require("path");
   const src = (f) => fsx.readFileSync(path.join(__dirname, f), "utf8");
-  assert.ok(/const providers = dedupeProviders\(/.test(src("lib/enrich.js")) && /const rentBuy = dedupeProviders\(/.test(src("lib/enrich.js")));
-  assert.strictEqual((src("lib/lifecycle.js").match(/dedupeProviders\(/g) || []).length, 3, "departure check (2) and arrival sweep (1)");
+  assert.ok(/const providers = require\("\.\/rules\.js"\)\.streamingProviders\(/.test(src("lib/enrich.js")) && /const rentBuy = dedupeProviders\(/.test(src("lib/enrich.js")));
+  assert.strictEqual((src("lib/lifecycle.js").match(/(?:dedupeProviders|streamingProviders)\(/g) || []).length, 3, "departure check (2) and arrival sweep (1); streamingProviders dedupes (lib/rules.js)");
   assert.ok(/providers = dedupeProviders\(\[/.test(src("probe.js")), "the probe's history records too");
   for (const f of ["probe.js", "lib/enrich.js", "lib/lifecycle.js"]) {
     for (const line of src(f).split("\n").filter((l) => l.includes("provider_name"))) {
@@ -12611,6 +12611,89 @@ test("language link: Tonight's pick keeps to the chosen language and carries the
   assert.ok(/kept \? langMoreHtml\(activeLang, pool\.length, FC_MORE_LANG\) : ''/.test(src), "the pop-up carries the toolbar's link");
   const tpl = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
   assert.ok(/<p id="moodSub">I'll pick something from this week's releases<\/p>/.test(tpl) && /<div class="lang-more mood-more" id="moodMore" hidden><\/div>/.test(tpl));
+});
+
+group("21 Nov 2026: ad tiers switched on, the waiting board, the alert counts, small repairs");
+test("ad tiers: a title with no subscription listing is streaming on a switched-on free tier, and only there", () => {
+  const R = require("./lib/rules.js"), T = require("./lib/truth.js");
+  const P = (...names) => names.map((provider_name) => ({ provider_name }));
+  assert.deepStrictEqual(R.streamingProviders({ ads: P("JioHotstar") }), ["JioHotstar"], "I'm Game: India's only listing was the ad tier");
+  assert.deepStrictEqual(R.streamingProviders({ free: P("MX Player"), ads: P("Zee5") }), ["MX Player", "Zee5"]);
+  assert.deepStrictEqual(R.streamingProviders({ flatrate: P("Netflix"), ads: P("JioHotstar") }), ["Netflix"], "a subscription listing is read exactly as before");
+  assert.deepStrictEqual(R.streamingProviders({ ads: P("Hoopla", "Tubi TV"), free: P("YouTube") }), [], "tiers not switched on stay recorded only");
+  assert.deepStrictEqual(R.streamingProviders({ rent: P("Apple TV") }), []); assert.deepStrictEqual(R.streamingProviders(undefined), []);
+  assert.deepStrictEqual(R.adTierProviders({ ads: P("Hoopla") }), ["Hoopla"], "the record still sees every tier");
+  const d = { title: "I'm Game", release_date: "2026-09-03", "watch/providers": { results: { IN: { ads: P("JioHotstar") } } } };
+  assert.deepStrictEqual(T.tmdbTruth(d, "movie", { code: "in", region: "IN", watchRegion: "IN" }, "2026-11-21").providers, ["JioHotstar"], "the page's facts agree with the sweep");
+  const life = require("fs").readFileSync(require("path").join(__dirname, "lib", "lifecycle.js"), "utf8");
+  assert.strictEqual((life.match(/streamingProviders\(/g) || []).length, 2, "the arrival sweep and the departure sweep read it the same way");
+  assert.ok(!/\.flatrate \|\| \[\]\)\.map/.test(life), "neither reads the subscription list alone any more");
+  assert.ok(/const arrived = wasAdTier \? null : arrivalDate\(/.test(life), "a film already recorded on the tier gets no arrival date");
+});
+test("waiting board: the page stands on the waiting list, lists a lone dated film first, and each film page row has the alert button", () => {
+  const D = require("./lib/dated.js");
+  const KEY = "B" + "a".repeat(86), IN = { code: "in", name: "India" };
+  const waiting = [
+    { slug: "one", tmdbId: 11, title: "One", language: "Tamil", kind: "movie", genre: "Drama", poster: "https://image.tmdb.org/t/p/w342/a.jpg", days: 50, hook: "Opened in cinemas 50 days ago · Tamil films usually take 4–6 weeks · no OTT date in our sources yet" },
+    { slug: null, tmdbId: 12, title: "No Page", language: "Tamil", kind: "movie", genre: "", poster: "", days: 51, hook: "Opened in cinemas 51 days ago · Tamil films usually take 4–6 weeks · no OTT date in our sources yet" },
+  ];
+  const now = Date.parse("2026-11-21T06:00:00Z");
+  const board = D.buildComingPage([], IN, { now, waiting, alertKey: KEY });
+  assert.ok(/<title>Waiting for OTT in India: Films With No Date Yet/.test(board) && !/0 Dates|0 dates/.test(board), "no '0 dates' title");
+  assert.ok(/<div class="upd">2 films waiting · updated/.test(board) && /No film in India has an OTT date on TMDB right now\./.test(board));
+  assert.strictEqual((board.match(/class="fcalert"/g) || []).length, 1, "a button only where there is a film page to open");
+  assert.ok(/<div class="rowact"><a class="row" href="\/movie\/one\.html">[\s\S]*?<\/a><div class="fcalert" data-key="B[a]+" data-film="movie-11" data-c="in" data-title="One" data-slug="one"[^>]*hidden><button type="button" class="btn alertb">Tell me when it's on OTT<\/button>/.test(board));
+  assert.strictEqual((board.match(/<script src="\/js\/alert\.js" defer><\/script>/g) || []).length, 1, "one copy of the script");
+  assert.ok(/connect-src 'self' https:\/\/identitytoolkit\.googleapis\.com https:\/\/securetoken\.googleapis\.com https:\/\/firestore\.googleapis\.com/.test(board), "the policy lets the alert be saved");
+  assert.ok(!/Are these dates confirmed|What's coming to OTT/.test(board), "no questions about dates on a page with none");
+  const noKey = D.buildComingPage([], IN, { now, waiting });
+  assert.ok(!/fcalert|alert\.js|connect-src 'self' https:\/\/identitytoolkit|Tap the button/.test(noKey), "alerts off: the list alone");
+  const one = D.buildComingPage([{ slug: "dated", title: "Dated", language: "Hindi", kind: "movie", genre: "", poster: "", rating: null, votes: 0, verdict: null, date: "2026-11-28", platform: "Netflix" }], IN, { now, waiting, alertKey: KEY });
+  assert.ok(/Upcoming OTT Releases in India: 1 Date(?!s)/.test(one) && /1 film with an OTT release date/.test(one), "one date reads as one");
+  assert.ok(one.indexOf("Streaming from") < one.indexOf("Still waiting: past the usual window") && !/No film in India has/.test(one), "the dated film first, and no claim that none has a date");
+  const dates = Array.from({ length: 3 }, (_, i) => ({ slug: "d" + i, title: "D" + i, language: "Hindi", kind: "movie", genre: "", poster: "", rating: null, votes: 0, verdict: null, date: "2026-11-2" + (5 + i), platform: null }));
+  const plain = D.buildComingPage(dates, IN, { now });
+  assert.ok(/3 Dates/.test(plain) && !/fcalert|alert\.js|rowact|alertb|connect-src 'self' https:\/\/identitytoolkit/.test(plain), "a page with no waiting rows is what it was");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "lib", "dated.js"), "utf8");
+  assert.ok(/const hasComing = items\.length >= COMING_MIN \|\| waiting\.length >= WAITING_PAGE_MIN;/.test(src), "three dates or five waiting films");
+  const js = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "alert.js"), "utf8");
+  assert.ok(/forEach\.call\(document\.querySelectorAll\("\.fcalert"\), function \(box\) \{/.test(js) && !/querySelector\("\.fcalert"\)/.test(js), "the script serves every button on the page");
+});
+testAsync("alert counts: totals only, one row a week, written beside the votes", () => inTempDir(async () => {
+  const A = require("./lib/alerts.js"), fsx = require("fs");
+  const subs = [{ films: { "movie-1": "2026-11-10", "movie-2": "2026-11-12", digest: "2026-11-10" } }, { films: { "tv-3": "2026-11-15" } }, { films: {} }];
+  const sent = { u1: { films: { "movie-1": "2026-11-20", "movie-9": "2026-10-01" }, last: "2026-11-20" }, u2: { digest: "2026-11-13", last: "2026-11-13" } };
+  const c = A.alertCounts(subs, sent, "2026-11-21");
+  assert.deepStrictEqual(c, { at: "2026-11-21", records: 3, digestOn: 1, filmsSaved: 3, medianFilms: 1, readersAlerted: 1, alertsSent: 2, alertsSentLast7: 1 });
+  assert.deepStrictEqual(A.alertCounts([], {}, "2026-11-21"), { at: "2026-11-21", records: 0, digestOn: 0, filmsSaved: 0, medianFilms: 0, readersAlerted: 0, alertsSent: 0, alertsSentLast7: 0 });
+  const f1 = A.withAlertCounts(null, c), f2 = A.withAlertCounts(f1, { ...c, at: "2026-11-22", records: 4 }), f3 = A.withAlertCounts(f2, { ...c, at: "2026-11-23", records: 5 });
+  assert.deepStrictEqual(f2.weeks.map((w) => [w.week, w.records]), [["2026-11-16", 4]], "a later reading in the same week replaces it");
+  assert.deepStrictEqual(f3.weeks.map((w) => [w.week, w.records]), [["2026-11-16", 4], ["2026-11-23", 5]]); assert.strictEqual(f3.latest.records, 5);
+  assert.ok(!/u1|movie-1|endpoint/.test(JSON.stringify(f3)), "no reader, film or subscription in the file");
+  const docs = (o) => ({ get: async () => ({ docs: Object.entries(o).map(([id, v]) => ({ id, data: () => v })) }) });
+  const sub = JSON.stringify({ endpoint: "https://fcm.googleapis.com/fcm/send/x", keys: { p256dh: "p", auth: "a" } });
+  const admin = { connect: () => ({ collection: (n) => docs(n === "alerts" ? { a: { sub, films: subs[0].films }, b: { sub, films: subs[1].films }, bad: { sub: "nope", films: {} } } : sent) }) };
+  assert.deepStrictEqual(await A.syncAlertCounts({ env: {}, admin }), { enabled: false }, "no service account: nothing read, nothing written");
+  assert.ok(!fsx.existsSync("alerts-agg.json"));
+  const r = await A.syncAlertCounts({ env: { FIREBASE_SERVICE_ACCOUNT: "{}" }, admin, today: "2026-11-21" });
+  assert.ok(r.enabled && r.records === 2 && r.alertsSent === 2, "a record without a usable subscription isn't counted");
+  assert.strictEqual(JSON.parse(fsx.readFileSync("alerts-agg.json", "utf8")).latest.records, 2);
+  const wf = fsx.readFileSync(require("path").join(__dirname, "..", ".github", "workflows", "update.yml"), "utf8");
+  assert.ok(/git add -A -- alerts-agg\.json/.test(wf), "the workflow commits the file");
+}));
+test("small repairs: a footer item whose page is gone leaves whole; no '0 of 1 out'; Privacy and DMCA carry the counter the policy names", () => {
+  const S = require("./lib/stylesheets.js"), SR = require("./lib/series.js");
+  const foot = '<ul><li><a href="/new-on-ott/">New on OTT this week</a></li><li><a href="/coming-to-ott/">Coming to OTT</a></li><li><a href="/released-last-week/">Released last week</a></li></ul>';
+  assert.strictEqual(S.unlinkMissingPages(foot, (h) => h === "/coming-to-ott/"),
+    '<ul><li><a href="/new-on-ott/">New on OTT this week</a></li><li><a href="/released-last-week/">Released last week</a></li></ul>', "no dead text left in the column");
+  const ep = (list, extra = {}) => ({ count: 48, seasons: 2, season: 2, list, ...extra });
+  assert.strictEqual(SR.episodeProgress(ep([{ e: 1, date: "2027-01-14" }]), "2026-11-21"), null, "nothing out yet: no count");
+  assert.deepStrictEqual(SR.episodeProgress(ep([{ e: 1, date: "2026-11-14" }, { e: 2, date: "2026-11-28" }]), "2026-11-21"), { of: 2, out: 1, done: false, last: null }, "a count once an episode is out");
+  for (const p of ["privacy", "dmca"]) {
+    const html = require("fs").readFileSync(require("path").join(__dirname, "..", p, "index.html"), "utf8");
+    assert.ok(!/goatcounter|gc\.zgo\.at/i.test(html), `${p}: GoatCounter's tag and sources are gone`);
+    assert.ok(/googletagmanager\.com/.test(html), `${p}: Google Analytics, as the privacy page says`);
+  }
 });
 
 (async () => {

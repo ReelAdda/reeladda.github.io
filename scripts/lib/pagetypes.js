@@ -35,7 +35,7 @@ const PAGE_TYPES = [
   { id: "released last week", match: re(`${ED}released-last-week/index\\.html`),
     gate: "one per edition with 5+ films released the previous week (lib/lastweek.js LAST_WEEK_MIN)", links: "footer", google: "yes", exit: "removed below 5 films" },
   { id: "coming to OTT", match: re(`${ED}coming-to-ott/index\\.html`),
-    gate: "one per edition with dated arrivals", links: "footer", google: "yes", exit: "removed when empty" },
+    gate: "one per edition with 3+ announced dates, or 5+ films waiting past their language's usual window (lib/dated.js COMING_MIN, WAITING_PAGE_MIN)", links: "footer, the installed app's shortcut", google: "yes", exit: "removed below both" },
   { id: "streaming finder", match: re(`${ED}streaming/index\\.html`),
     gate: "one per edition with 30+ confirmed streaming titles (lib/evergreen.js FINDER_MIN)", links: "weekly page, platform lists",
     google: "no (hidden: a tool page whose rows repeat the platform lists)", exit: "removed below 30 titles" },

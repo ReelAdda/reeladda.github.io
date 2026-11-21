@@ -2857,6 +2857,11 @@ async function main() {
         const v = await syncVotes({ dataByCode, note: healthNote });
         if (v.enabled) console.log(`Votes: ${v.fetched} new, ${v.touched} films re-counted, ${v.films} films with votes`);
       } catch (e) { stageFailed("votes", e); }
+      // The alert loop in totals (lib/alerts.js alertCounts): alerts-agg.json, beside the votes.
+      try {
+        const a = await require("./lib/alerts.js").syncAlertCounts({ note: healthNote });
+        if (a.enabled) console.log(`Alerts: ${a.records} browser(s) with alerts on (${a.digestOn} take the digest), ${a.filmsSaved} film(s) saved, median ${a.medianFilms}; ${a.alertsSent} alert(s) sent so far, ${a.alertsSentLast7} in the last 7 days`);
+      } catch (e) { stageFailed("alert counts", e, { optional: true }); }
       // (factsModes / factsResults: lib/factsq.js — loaded here, decided after the self-audit.)
       // Frozen pages move to "facts rendered by the live template" (lib/migrate.js): pages
       // already moved are rendered from their facts (after every sweep above, whose changes are

@@ -209,6 +209,62 @@ function nextSent(was = {}, key, today) {
   return { ...(was && was.digest ? { digest: was.digest } : {}), films, last: today };
 }
 
+// COUNTING THE LOOP (21 Nov 2026). Alerts, the alert button and the Friday digest were live with
+// no number anywhere saying whether anyone used them. Each build now writes the totals to
+// alerts-agg.json beside votes-agg.json: how many browsers have alerts on, how many of those take
+// the digest, how many films a reader saves, and how many alerts have gone out. Totals only: no
+// reader, subscription or film is named. One row per week is kept so a change can be seen.
+const ALERTS_AGG_FILE = "alerts-agg.json";
+function alertCounts(subs = [], sent = {}, today) {
+  const sizes = subs.map((s) => Object.keys((s && s.films) || {}).filter((k) => FILM_KEY.test(k)).length);
+  const sorted = sizes.slice().sort((a, b) => a - b);
+  const mid = sorted.length ? (sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2) : 0;
+  const days = Object.values(sent || {}).flatMap((x) => Object.values((x && x.films) || {}).filter((d) => DAY.test(String(d))));
+  return {
+    at: today, records: subs.length, digestOn: subs.filter((s) => s && s.films && s.films[DIGEST_KEY]).length,
+    filmsSaved: sizes.reduce((n, x) => n + x, 0), medianFilms: mid,
+    readersAlerted: Object.values(sent || {}).filter((x) => x && x.films && Object.keys(x.films).length).length,
+    alertsSent: days.length, alertsSentLast7: days.filter((d) => daysBetween(d, today) >= 0 && daysBetween(d, today) < 7).length,
+  };
+}
+// Pure: the file with today's counts as "latest" and as this week's row (the Monday's date).
+function withAlertCounts(file, counts) {
+  const week = mondayOf(counts.at);
+  const weeks = (Array.isArray(file && file.weeks) ? file.weeks : []).filter((w) => w && w.week !== week);
+  const { at, ...row } = counts;
+  weeks.push({ week, ...row });
+  weeks.sort((a, b) => String(a.week).localeCompare(String(b.week)));
+  return { _about: "Arrival alerts in totals (lib/alerts.js alertCounts): browsers with alerts on, how many take the Friday digest, films saved, alerts sent. No reader or film is named. One row per week.",
+    latest: counts, weeks: weeks.slice(-52) };
+}
+async function syncAlertCounts({ env = process.env, admin = null, today = new Date().toISOString().slice(0, 10), file = ALERTS_AGG_FILE, note = () => {} } = {}) {
+  const res = { enabled: false };
+  if (!env.FIREBASE_SERVICE_ACCOUNT) return res;
+  let creds;
+  try { creds = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT); } catch { note("alert counts: FIREBASE_SERVICE_ACCOUNT isn't valid JSON"); return res; }
+  let db;
+  try {
+    const store = admin || (() => {
+      const app = require("firebase-admin/app"), fst = require("firebase-admin/firestore");
+      return { connect: (c) => fst.getFirestore(app.getApps().length ? app.getApps()[0] : app.initializeApp({ credential: app.cert(c) })) };
+    })();
+    db = store.connect(creds);
+  } catch (e) { note(`alert counts: Firestore unavailable (${e.message})`); return res; }
+  const subs = [];
+  for (const d of (await db.collection("alerts").get()).docs) {
+    const x = d.data() || {};
+    if (parseSubscription(x.sub)) subs.push({ films: x.films && typeof x.films === "object" ? x.films : {} });
+  }
+  const sent = {};
+  for (const d of (await db.collection("alertSent").get()).docs) sent[d.id] = d.data() || {};
+  const counts = alertCounts(subs, sent, today);
+  const fsx = require("fs");
+  let was = null;
+  try { was = JSON.parse(fsx.readFileSync(file, "utf8")); } catch { /* first run */ }
+  fsx.writeFileSync(file, JSON.stringify(withAlertCounts(was, counts), null, 1) + "\n");
+  return { enabled: true, ...counts };
+}
+
 const TEST_PAYLOAD = { title: "FilmyChill alerts are on", body: "This is a test. You'll get a ping like this when a saved film starts streaming.", url: "/", tag: "fc-test" };
 
 // The build step. Fails soft: every problem is a note, never a failed build.
@@ -284,4 +340,4 @@ async function sendAlerts({ env = process.env, manifest = null, today = new Date
   return res;
 }
 
-module.exports = { listStatus, writeListStatus, DIGEST_KEY, digestPayload, editionClock, mondayOf, pickDigests, ARRIVAL_DAYS, FEATURE, TEST_PAYLOAD, alertPayload, alertsEnabled, arrivalOf, filmIndex, filmPath, nextSent, parseSubscription, pickAlerts, publicKey, sendAlerts };
+module.exports = { ALERTS_AGG_FILE, alertCounts, withAlertCounts, syncAlertCounts, listStatus, writeListStatus, DIGEST_KEY, digestPayload, editionClock, mondayOf, pickDigests, ARRIVAL_DAYS, FEATURE, TEST_PAYLOAD, alertPayload, alertsEnabled, arrivalOf, filmIndex, filmPath, nextSent, parseSubscription, pickAlerts, publicKey, sendAlerts };
