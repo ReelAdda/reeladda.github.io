@@ -12564,6 +12564,55 @@ testAsync("Best Picture nominees: only in season, only with exactly ten films, e
 });
 
 
+group("21 Nov 2026: a language chosen on the homepage links to its larger list");
+test("language link: India's language pages, otherwise the edition's finder, and only when it holds more", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "app.js"), "utf8");
+  const fn = /function langMoreHtml\(lang, shown, more\) \{[\s\S]*?\n\}/.exec(src);
+  assert.ok(fn, "langMoreHtml is in js/app.js");
+  const esc = (x) => String(x).replace(/[&<>"']/g, (c) => "&#" + c.charCodeAt(0) + ";");
+  const langMoreHtml = new Function("esc", `${fn[0]}; return langMoreHtml;`)(esc);
+  const more = { Tamil: ["/tamil/", 0], Korean: ["/streaming/#l=Korean", 13], English: ["/us/streaming/#l=English", 576], Bad: ["https://elsewhere.example/", 99], Odd: "x" };
+  assert.strictEqual(langMoreHtml("Tamil", 2, more), '<a href="/tamil/">See every new Tamil release →</a>');
+  assert.strictEqual(langMoreHtml("Tamil", 40, more), '<a href="/tamil/">See every new Tamil release →</a>', "a language page is always offered");
+  assert.strictEqual(langMoreHtml("Korean", 2, more), '<a href="/streaming/#l=Korean">See all Korean titles streaming now →</a>');
+  assert.strictEqual(langMoreHtml("Korean", 13, more), "", "the finder holds no more than the page shows: no link");
+  assert.strictEqual(langMoreHtml("English", 10, more), '<a href="/us/streaming/#l=English">See all English titles streaming now →</a>');
+  for (const [l, n] of [["All", 0], ["", 0], ["Bengali", 1], ["Bad", 1], ["Odd", 1]]) assert.strictEqual(langMoreHtml(l, n, more), "", `no line for ${l || "nothing"}`);
+  assert.strictEqual(langMoreHtml("Tamil", 2, null), "");
+  assert.ok(/renderLangMore\(t\.length \+ o\.length\);/.test(src) && /myListOnly \? '' : langMoreHtml\(activeLang, shown, FC_MORE_LANG\)/.test(src), "drawn with the lists, and not with My List only");
+  const tpl = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  assert.ok(/<div class="lang-more" id="langMore" hidden><\/div>/.test(tpl), "the line's place in the toolbar, empty until a language is chosen");
+});
+test("language link: the build names only lists that exist, and adds no page", () => inTempDirSync(() => {
+  const fsx = require("fs"), S = require("./lib/surfaces.js");
+  assert.deepStrictEqual(S.moreByLanguage("us"), {}, "no finder: nothing");
+  const row = (lang) => ["s", "T", 2026, 0, lang, "Drama", 2, 7, "", [0]];
+  fsx.mkdirSync("us/streaming", { recursive: true }); fsx.mkdirSync("streaming", { recursive: true }); fsx.mkdirSync("tamil", { recursive: true });
+  const rows = [...Array(6).fill(row("English")), ...Array(3).fill(row("Korean")), row("French"), row("French"), row("")];
+  fsx.writeFileSync("us/streaming/titles.json", JSON.stringify({ services: ["Netflix"], rows }));
+  fsx.writeFileSync("streaming/titles.json", JSON.stringify({ services: ["Netflix"], rows: [...Array(4).fill(row("Tamil")), ...Array(5).fill(row("Hindi")), ...Array(3).fill(row("English"))] }));
+  fsx.writeFileSync("tamil/index.html", "x");
+  assert.deepStrictEqual(S.moreByLanguage("us"), { English: ["/us/streaming/#l=English", 6], Korean: ["/us/streaming/#l=Korean", 3] }, "three titles or more; two is no larger list");
+  assert.deepStrictEqual(S.moreByLanguage("in"), { Hindi: ["/streaming/#l=Hindi", 5], Tamil: ["/tamil/", 0], English: ["/streaming/#l=English", 3] }, "a language page that exists wins; one that doesn't falls back to the finder");
+  const before = fsx.readdirSync(".").sort().join();
+  S.moreByLanguage("in"); S.moreByLanguage("de");
+  assert.strictEqual(fsx.readdirSync(".").sort().join(), before, "nothing is written");
+}));
+test("language link: Tonight's pick keeps to the chosen language and carries the same link", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "app.js"), "utf8");
+  const fn = /function moodLangPool\(all, lang\) \{[\s\S]*?\n\}/.exec(src);
+  assert.ok(fn, "moodLangPool is in js/app.js");
+  const moodLangPool = new Function(`${fn[0]}; return moodLangPool;`)();
+  const all = [{ x: { language: "Tamil", title: "A" } }, { x: { language: "Hindi", title: "B" } }, { x: { language: "Tamil", title: "C" } }];
+  assert.deepStrictEqual(moodLangPool(all, "Tamil").map((e) => e.x.title), ["A", "C"], "only the chosen language");
+  assert.strictEqual(moodLangPool(all, "All"), all); assert.strictEqual(moodLangPool(all, ""), all);
+  assert.strictEqual(moodLangPool(all, "Korean"), all, "no title in that language this week: everything, as before");
+  assert.ok(/const all = moodLangPool\(moodAll\(\), activeLang\);/.test(src), "the pick is drawn from that pool");
+  assert.ok(/kept \? langMoreHtml\(activeLang, pool\.length, FC_MORE_LANG\) : ''/.test(src), "the pop-up carries the toolbar's link");
+  const tpl = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  assert.ok(/<p id="moodSub">I'll pick something from this week's releases<\/p>/.test(tpl) && /<div class="lang-more mood-more" id="moodMore" hidden><\/div>/.test(tpl));
+});
+
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");
   for (const [name, fn, grp] of ASYNC_TESTS) {

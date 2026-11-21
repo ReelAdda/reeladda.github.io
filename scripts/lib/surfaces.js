@@ -982,6 +982,27 @@ function heroPreload(data) {
     + `<link rel="preload" as="image" href="${escHtml(heroBgUrl(pick.backdrop))}" media="(min-width: ${HERO_PHONE_MAX + 1}px)" fetchpriority="high">`;
 }
 
+// Where a language chosen in the homepage menu leads for a larger list (21 Nov 2026; read by
+// js/app.js langMoreHtml). India's five language pages where they exist; otherwise this
+// edition's streaming finder with the language chosen, and the number of titles it holds there
+// so the page links only when that is more than it is showing. Nothing new is written: both
+// targets already exist. A finder language needs MORE_LANG_MIN titles.
+const MORE_LANG_MIN = 3;
+function moreByLanguage(code) {
+  const out = {};
+  try {
+    const d = JSON.parse(fs.readFileSync(require("./evergreen.js").finderDataPath(code), "utf8"));
+    const n = new Map();
+    for (const r of d.rows || []) if (r[4]) n.set(r[4], (n.get(r[4]) || 0) + 1);
+    const base = code === "in" ? "/streaming/" : `/${code}/streaming/`;
+    for (const [lang, c] of [...n.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))) {
+      if (c >= MORE_LANG_MIN && /^[A-Za-z ]+$/.test(lang)) out[lang] = [`${base}#l=${encodeURIComponent(lang)}`, c];
+    }
+  } catch { /* no finder for this edition: no finder links */ }
+  if (code === "in") for (const [name, slug] of LANGUAGE_PAGES) if (fs.existsSync(`${slug}/index.html`)) out[name] = [`/${slug}/`, 0];
+  return out;
+}
+
 const HOME_OG_IMAGE = "https://filmychill.com/og-image.png";
 function renderCountryPage(templateHtml, cfg, data) {
   const isIndia = cfg.code === "in";
@@ -995,7 +1016,7 @@ function renderCountryPage(templateHtml, cfg, data) {
   // runtime (My List tracking states, watchlist alerts) and must use the same word this
   // page is written in, without re-deriving it from a duplicated country list.
   html = replaceBetween(html, "PAGECODE",
-    `<meta name="fc-page" content="${cfg.code}"><meta name="fc-stream-word" content="${escHtml(V.word)}"><meta name="fc-locale" content="${escHtml(localeFor(cfg.code))}">${alertsOn ? `<meta name="fc-push-key" content="${escHtml(alertsPublicKey())}">` : ""}`);
+    `<meta name="fc-page" content="${cfg.code}"><meta name="fc-stream-word" content="${escHtml(V.word)}"><meta name="fc-locale" content="${escHtml(localeFor(cfg.code))}">${alertsOn ? `<meta name="fc-push-key" content="${escHtml(alertsPublicKey())}">` : ""}<meta name="fc-more-lang" content="${escHtml(JSON.stringify(moreByLanguage(cfg.code)))}">`);
   // Visible copy that names the concept. India/UAE keep "OTT"; every other market reads
   // "streaming" — the word its visitors actually use and search with.
   html = replaceBetween(html, "TAGLINE", `New movies &amp; ${escHtml(V.releases)} this week`);
@@ -1085,7 +1106,7 @@ module.exports = {
   choosePick,
   PICK_FRESH_DAYS,
   ABOUT_LASTMOD,
-  buildDataPage, buildCountryDataPage,
+  buildDataPage, buildCountryDataPage, moreByLanguage,
   buildDigitalCsv,
   indiaDataSection,
   medianBarChart,
