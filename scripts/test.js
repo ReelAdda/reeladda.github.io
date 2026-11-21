@@ -12696,6 +12696,176 @@ test("small repairs: a footer item whose page is gone leaves whole; no '0 of 1 o
   }
 });
 
+group("16 Nov 2026: regional OTT titles count from their streaming arrival; homepage regional slots go by score");
+test("arrivals: a film that started streaming in the last 30 days qualifies whatever its cinema date (Jailer 2)", () => {
+  const S = require("./lib/ottslots.js");
+  const live = (since, providers = ["Prime Video"]) => ({ since, providers, lastCheck: since, misses: 0 });
+  const edition = {
+    "jailer-2": { tmdbId: 1234139, kind: "movie", lang: "Tamil", released: "2026-10-15", archivedOn: "2026-11-14", live: live("2026-11-12") },
+    "hi": { tmdbId: 11, kind: "movie", lang: "Tamil", released: "2026-08-28", live: live("2026-11-08", ["Zee5"]) },
+    "day-one": { tmdbId: 12, kind: "movie", lang: "Hindi", released: "2026-11-05", live: live("2026-11-05") },
+    "long-ago": { tmdbId: 13, kind: "movie", lang: "Hindi", released: "2026-08-01", live: live("2026-10-10") },
+    "old-film": { tmdbId: 14, kind: "movie", lang: "Telugu", released: "2025-12-01", live: live("2026-11-10") },
+    "gone": { tmdbId: 15, kind: "movie", lang: "Telugu", released: "2026-09-18", live: live("2026-11-10", []) },
+    "not-yet": { tmdbId: 16, kind: "movie", lang: "Telugu", released: "2026-10-01" },
+    "catalogue-built": { tmdbId: 17, kind: "movie", lang: "Malayalam", released: "2026-07-01", catalog: true, archivedOn: "2026-11-09", live: live("2026-11-09") },
+    "catalogue-arrived": { tmdbId: 18, kind: "tv", lang: "Malayalam", released: "2026-07-01", catalog: true, archivedOn: "2026-10-20", live: live("2026-11-09") },
+    "no-id": { kind: "movie", lang: "Tamil", released: "2026-09-18", live: live("2026-11-10") },
+  };
+  const got = S.arrivalEntries(edition, { today: "2026-11-15" });
+  assert.deepStrictEqual(got.map((a) => a.slug), ["jailer-2", "catalogue-arrived", "hi"], "newest arrival first");
+  assert.deepStrictEqual(got[0], { slug: "jailer-2", kind: "movie", tmdbId: 1234139, lang: "Tamil", since: "2026-11-12", released: "2026-10-15" });
+  // Why each of the others is left out.
+  const out = (slug) => !got.some((a) => a.slug === slug);
+  assert.ok(out("day-one"), "streaming from its release day: its release date already finds it");
+  assert.ok(out("long-ago"), "arrived more than 30 days ago");
+  assert.ok(out("old-film"), "an old film a service has just picked up is not new");
+  assert.ok(out("gone"), "no longer streaming");
+  assert.ok(out("not-yet"), "not streaming yet");
+  assert.ok(out("catalogue-built"), "a catalogue page's build day is not an arrival");
+  // The window is 30 days from the arrival, to the day.
+  assert.strictEqual(S.arrivalEntries(edition, { today: "2026-12-12" }).some((a) => a.slug === "jailer-2"), true, "day 30");
+  assert.strictEqual(S.arrivalEntries(edition, { today: "2026-12-13" }).some((a) => a.slug === "jailer-2"), false, "day 31");
+  assert.deepStrictEqual(S.arrivalEntries(null, { today: "2026-11-15" }), []);
+  assert.deepStrictEqual(S.arrivalEntries(edition, {}), [], "no date, no arrivals");
+});
+test("arrivals: a TMDB detail answer becomes a list candidate (genre ids, kind)", () => {
+  const S = require("./lib/ottslots.js");
+  const c = S.candidateFromDetail({ id: 9, title: "Jailer 2", original_language: "ta", release_date: "2026-10-15", vote_average: 8, vote_count: 36, popularity: 41.2, genres: [{ id: 28, name: "Action" }, { id: 35, name: "Comedy" }], overview: "x" }, "movie");
+  assert.deepStrictEqual(c.genre_ids, [28, 35]);
+  assert.strictEqual(c.kind, "movie");
+  assert.strictEqual(c.vote_count, 36);
+  assert.strictEqual(S.candidateFromDetail(null, "movie"), null);
+  assert.strictEqual(S.candidateFromDetail({}, "movie"), null, "an answer without an id is not a film");
+});
+test("regional slots: one for the first language, the other three to the best scores of any language", () => {
+  const S = require("./lib/ottslots.js");
+  const it = (id, w) => ({ tmdbId: id, _w: w });
+  const ids = (xs) => xs.map((x) => x.tmdbId);
+  // The week Jailer 2 arrived: four Hindi titles used to take all four slots.
+  const week = new Map([["hi", [it(1, 0.5), it(2, 0.45), it(3, 0.44), it(4, 0.43), it(5, 0.42)]], ["ta", [it(21, 0.62), it(22, 0.3)]], ["te", [it(31, 0.44)]]]);
+  assert.deepStrictEqual(ids(S.pickRegionalSlots(week, ["hi", "ta", "te"], 4)), [1, 21, 2, 3], "Hindi's best, then by score: the Tamil arrival is in");
+  // Hindi still takes all four when its scores win.
+  const hindiWeek = new Map([["hi", [it(1, 0.9), it(2, 0.8), it(3, 0.7), it(4, 0.6)]], ["ta", [it(21, 0.5)]]]);
+  assert.deepStrictEqual(ids(S.pickRegionalSlots(hindiWeek, ["hi", "ta"], 4)), [1, 2, 3, 4]);
+  // Hindi keeps its one slot in a week when every other language outscores it.
+  const weakHindi = new Map([["hi", [it(1, 0.2), it(2, 0.1)]], ["ta", [it(21, 0.9), it(22, 0.8)]], ["te", [it(31, 0.7), it(32, 0.6)]]]);
+  assert.deepStrictEqual(ids(S.pickRegionalSlots(weakHindi, ["hi", "ta", "te"], 4)), [1, 21, 22, 31]);
+  // No Hindi title at all: all four by score.
+  assert.deepStrictEqual(ids(S.pickRegionalSlots(new Map([["ta", [it(21, 0.9)]], ["te", [it(31, 0.95), it(32, 0.1)]]]), ["hi", "ta", "te"], 4)), [31, 21, 32]);
+  // Titles already on the list are passed over, and a title in two pools is taken once.
+  assert.deepStrictEqual(ids(S.pickRegionalSlots(week, ["hi", "ta", "te"], 4, new Set([1, 21]))), [2, 3, 31, 4]);
+  assert.deepStrictEqual(ids(S.pickRegionalSlots(new Map([["hi", [it(1, 0.5)]], ["ta", [it(1, 0.5), it(2, 0.4)]]]), ["hi", "ta"], 4)), [1, 2]);
+  // Equal scores keep the edition's language order.
+  assert.deepStrictEqual(ids(S.pickRegionalSlots(new Map([["hi", [it(1, 0.5)]], ["ta", [it(21, 0.4)]], ["te", [it(31, 0.4)]]]), ["hi", "te", "ta"], 3)), [1, 31, 21]);
+  assert.deepStrictEqual(S.pickRegionalSlots(week, ["hi"], 0), [], "an edition with no regional slots");
+  assert.deepStrictEqual(S.pickRegionalSlots(new Map(), [], 4), []);
+});
+testAsync("regional arrivals reach the lists: a Tamil film in cinemas months ago, streaming for three days, is on India's lists with its arrival date", () => isolatedBuild(async (reset) => {
+  const fsx = require("fs");
+  const T = require("./lib/tmdb.js"), { makeMock } = require("./testdata/tmdbmock.js"), { COUNTRIES } = require("./lib/core.js");
+  for (const [id, name] of GENRES) U.gmap[id] = name;
+  const mock = makeMock(), IN = COUNTRIES.find((c) => c.code === "in");
+  const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
+  const everyTitle = (d) => [...d.ott, ...(d.ottExtra || []), ...Object.values(d.langPools || {}).flatMap((p) => p.ott || [])];
+  // Without an arrival record the film is on no list: /discover never returns it (the fake TMDB
+  // lists ids x100 to x139 only) and it left cinemas months ago.
+  U.ARRIVALS_BY_EDITION.clear(); reset();
+  const before = await T.withReplay(mock, () => U.buildCountry(IN));
+  // The most popular Tamil film the lists don't already have (the pool keeps a language's twelve
+  // most popular candidates before it scores them): streaming in India, well rated, released 60 to
+  // 190 days ago.
+  let pick = null;
+  for (let id = 2140; id < 2200; id++) {
+    const d = await mock(`/movie/${id}`);
+    const age = (Date.now() - Date.parse(d.release_date)) / 864e5;
+    const inIndia = ((d["watch/providers"].results.IN || {}).flatrate || []).length > 0;
+    if (!inIndia || age < 60 || age > 190 || d.vote_average < 7.5 || d.vote_count < 300) continue;
+    if (!pick || d.popularity > pick.popularity) pick = d;
+  }
+  assert.ok(pick, "the fake TMDB has a Tamil film to use");
+  assert.ok(!everyTitle(before).some((x) => x.tmdbId === pick.id), "not on any list before its arrival is recorded");
+  const since = iso(Date.now() - 3 * 864e5);
+  fsx.writeFileSync("pages-manifest.json", JSON.stringify({ in: { "the-arrival": { tmdbId: pick.id, kind: "movie", lang: "Tamil", title: pick.title, released: pick.release_date, live: { since, providers: ["Netflix"], lastCheck: since, misses: 0 } } } }));
+  U.ARRIVALS_BY_EDITION.clear(); reset();
+  const legacy = U.builtFingerprint(await T.withReplay(mock, () => U.buildCountryLegacy(IN)));
+  U.ARRIVALS_BY_EDITION.clear(); reset();
+  const after = await T.withReplay(mock, () => U.buildCountry(IN));
+  assert.strictEqual(U.builtFingerprint(after), legacy, "the legacy builder makes the same lists, so the split proof stays like for like");
+  const found = everyTitle(after).filter((x) => x.tmdbId === pick.id);
+  assert.ok(found.length, "on India's lists once its arrival is recorded");
+  assert.ok(found.every((x) => x.ottSince === since), `the card's arrival date is the film page's (${since}), not the day the list first saw it`);
+  assert.ok((after.langPools.Tamil.ott || []).some((x) => x.tmdbId === pick.id) || after.ott.some((x) => x.tmdbId === pick.id), "on the Tamil page or the homepage ten");
+  U.ARRIVALS_BY_EDITION.clear();
+}));
+testAsync("homepage regional slots: India's four are Hindi's best plus the three best scores, and never five", () => isolatedBuild(async (reset) => {
+  const T = require("./lib/tmdb.js"), { makeMock } = require("./testdata/tmdbmock.js"), { COUNTRIES } = require("./lib/core.js");
+  for (const [id, name] of GENRES) U.gmap[id] = name;
+  U.ARRIVALS_BY_EDITION.clear(); reset();
+  const d = await T.withReplay(makeMock(), () => U.buildCountry(COUNTRIES.find((c) => c.code === "in")));
+  const regionalNames = new Set(["Hindi", "Tamil", "Telugu", "Malayalam", "Kannada", "Punjabi", "Marathi", "Bengali"]);
+  const regional = d.ott.filter((x) => regionalNames.has(x.language));
+  assert.ok(regional.length <= 4, `at most four regional titles in the ten (${regional.length})`);
+  assert.ok(d.ott.length <= 10);
+  const hindiPool = (d.langPools.Hindi && d.langPools.Hindi.ott) || [];
+  if (hindiPool.length || regional.some((x) => x.language === "Hindi")) assert.ok(regional.some((x) => x.language === "Hindi"), "Hindi keeps a slot when it has a title");
+}));
+
+group("21 Nov 2026 freshness review: new seasons, late arrivals outside the local languages, waiting pages nobody checked");
+test("returning series: a new season of an older show is a candidate; soaps and stale shows are not (Dhindora)", () => {
+  const R = require("./lib/rules.js");
+  const res = [
+    { id: 275204, name: "Dhindora", first_air_date: "2021-10-14", popularity: 30, genre_ids: [35, 18] },
+    { id: 2, name: "Daily Soap", first_air_date: "2020-07-13", popularity: 900, genre_ids: [10766, 18] },
+    { id: 3, name: "Reality Show", first_air_date: "2019-01-01", popularity: 500, genre_ids: [10764] },
+    { id: 4, name: "Already A Candidate", first_air_date: "2026-11-01", popularity: 80, genre_ids: [18] },
+    { id: 5, name: "Long Drama", first_air_date: "2022-01-01", popularity: 60, genre_ids: [18] },
+  ];
+  const got = R.returningCandidates(res, new Set([4]));
+  assert.deepStrictEqual(got.map((c) => c.id), [5, 275204], "most popular first; the soap, the reality show and the one already found are out");
+  assert.ok(got.every((c) => c.kind === "tv" && c._returning === true));
+  assert.strictEqual(R.returningCandidates(Array.from({ length: 20 }, (_, i) => ({ id: 100 + i, popularity: i })), new Set()).length, R.RETURNING_TRIES, "a few tries, no more");
+  assert.deepStrictEqual(R.returningCandidates(null), []);
+  // What decides it once built: the latest season's date, not the series' first episode.
+  const fresh = R.deriveFreshDate("tv", { first_air_date: "2021-10-14", seasons: [{ season_number: 1, air_date: "2021-10-14" }, { season_number: 2, air_date: "2026-11-20" }] });
+  assert.strictEqual(fresh, "2026-11-20");
+  assert.ok(R.isOttFresh(fresh, Date.parse("2026-11-21T00:00:00Z")), "Dhindora's second season is new");
+  assert.ok(!R.isOttFresh(R.deriveFreshDate("tv", { seasons: [{ season_number: 1, air_date: "2022-01-01" }], last_air_date: "2026-11-20" }), Date.parse("2026-11-21T00:00:00Z")), "a show still airing its first season from 2022 is not");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  const n = (re) => (src.match(re) || []).length;
+  assert.strictEqual(n(/"air_date\.gte": freshCutoff, "first_air_date\.lte": freshCutoff/g), 4, "asked per local language and once per edition, in both copies of the list builder");
+  assert.strictEqual(n(/if \(it && c\._returning && !ottIsFresh\(it\)\)/g), 2, "a local-language returning show is checked once built");
+  assert.strictEqual(n(/cands\.slice\(0, CAND_CAP\)\.concat\(returning\)/g), 2, "never at a new title's expense");
+  assert.strictEqual(n(/!local\.has\(c\.original_language\)/g), 2, "the any-language question leaves the local languages to their own pool");
+  assert.strictEqual(n(/\(c\._returning \|\| c\._arrival \|\| !looksReRelease\(c\)\)/g), 2, "not dropped for being well known; the date decides");
+  assert.ok(n(/if \(it && ottIsFresh\(it\)\) \{ intl\.push\(it\)/g) >= 2, "every international candidate still passes the freshness check");
+});
+test("late arrivals outside the local languages are candidates too, from the film page's own arrival date", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(/async function otherArrivalCands\(cfg, have, seenCountry, todayStr\)/.test(src));
+  assert.ok(/all\.filter\(\(x\) => !local\.has\(x\.lang\)\)\.slice\(0, ARRIVAL_CAND_CAP\)/.test(src), "the arrivals the local-language pools don't take, capped");
+  assert.ok(/out\.push\(\{ \.\.\.c, _arrival: true \}\)/.test(src) && /if \(!seenCountry\[key\]\) seenCountry\[key\] = \{ first: a\.since, last: todayStr \};[\s\S]{0,60}_arrival/.test(src), "first sighting from the page's date, so the card and the page agree");
+  assert.strictEqual((src.match(/intlCands\.push\(\.\.\.\(await otherArrivalCands\(cfg, intlCands, seenCountry, todayStr\)\)/g) || []).length, 2, "in both copies of the list builder");
+  const O = require("./lib/ottslots.js");
+  const ed = { "late-film": { tmdbId: 9, kind: "movie", lang: "English", released: "2026-08-01", live: { since: "2026-11-15", providers: ["Netflix"] } } };
+  assert.deepStrictEqual(O.arrivalEntries(ed, { today: "2026-11-21" }).map((x) => [x.slug, x.lang, x.since]), [["late-film", "English", "2026-11-15"]], "an English film that reached Netflix three months after cinemas");
+});
+test("a released film with no platform recorded gets the waiting section, so the arrival check finds it (The Invite)", () => {
+  const F = require("./lib/filmpage.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const base = { title: "The Invite", slug: "the-invite-x", kind: "movie", released: "2026-07-10", language: "English", genre: "Drama", providers: [], rentBuy: [], tmdbId: 950028, rating: 7.2, votes: 971, cast: [], castPics: [], fcScore: null };
+  const off = F.buildFilmPage({ ...base, platform: "" }, "2026-11-21", new Set(), IN);
+  assert.ok(/<!--SW:pending--><h2>[^<]*<\/h2><p>Not streaming yet in India\. No platform has announced an OTT release date\. We re-check every day\.<\/p><!--\/SW:pending-->/.test(off), (/<!--SW:pending-->[\s\S]{0,300}/.exec(off) || ["no section"])[0]);
+  assert.ok(!/opened in theatres|theatrical run|usually take|typically reach/.test((/<!--SW:pending-->[\s\S]*?<!--\/SW:pending-->/.exec(off) || [""])[0]), "nothing about cinemas or a usual window, which this page never recorded");
+  const life = require("fs").readFileSync(require("path").join(__dirname, "lib", "lifecycle.js"), "utf8");
+  assert.ok(/includes\("<!--SW:pending-->"\)/.test(life), "the marker is what the arrival sweep looks for");
+  const cinema = F.buildFilmPage({ ...base, platform: "Theatres" }, "2026-11-21", new Set(), IN);
+  assert.ok(/<!--SW:pending-->/.test(cinema) && /opened in theatres|theatrical run|released in theatres/.test(cinema), "a film from the In Theatres list reads as before");
+  const tv = F.buildFilmPage({ ...base, kind: "tv", platform: "" }, "2026-11-21", new Set(), IN);
+  assert.ok(!/<!--SW:pending-->/.test(tv), "series are not given a film's waiting section");
+  const streaming = F.buildFilmPage({ ...base, platform: "Netflix", providers: ["Netflix"] }, "2026-11-21", new Set(), IN);
+  assert.ok(!/<!--SW:pending-->/.test(streaming), "a streaming page has no waiting section");
+});
+
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");
   for (const [name, fn, grp] of ASYNC_TESTS) {

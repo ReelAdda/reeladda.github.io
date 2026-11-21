@@ -402,6 +402,7 @@ const {
   ssrSoonCard,
   writeRssFeed,
 } = require("./lib/weekly.js");
+const { ARRIVAL_CAND_CAP, arrivalEntries, candidateFromDetail, pickRegionalSlots } = require("./lib/ottslots.js");
 
 
 if (!API_KEY && !process.env.PAGES_ONLY && require.main === module) {
@@ -481,6 +482,66 @@ const genres = (ids) => (ids || []).slice(0, 2).map((i) => gmap[i]).filter(Boole
 
   // Build all sections for one country from its config. Closes over shared helpers
   // (genres, baseItem, withImdb, verdict). Returns the data object for that country.
+// Regional titles that started streaming in this edition in the last 30 days, whatever their
+// cinema date (16 Nov 2026, lib/ottslots.js): the film pages whose arrival the build has already
+// recorded, looked up on TMDB so they compete with the release-dated candidates on the same
+// score. `have` is what /discover already returned for the language. A title the OTT step has
+// never observed gets its first sighting from the page's own arrival date, not from today, so
+// the card and the page give one date. The edition's arrivals are read once per run, so the
+// split proof's replay sees the list the real build saw.
+const ARRIVALS_BY_EDITION = new Map();
+async function regionalArrivalCands(cfg, lang, have, seenCountry, todayStr) {
+  let all = ARRIVALS_BY_EDITION.get(cfg.code);
+  if (!all) {
+    try { all = arrivalEntries((loadPagesManifest() || {})[cfg.code], { today: editionToday(cfg.code) }); }
+    catch (e) { console.warn(`ott-arrivals [${cfg.code}]: ${e.message}`); all = []; }
+    ARRIVALS_BY_EDITION.set(cfg.code, all);
+  }
+  const name = langName(lang);
+  const haveKeys = new Set((have || []).map((c) => `${c.kind}:${c.id}`));
+  const out = [];
+  for (const a of all.filter((x) => x.lang === name).slice(0, ARRIVAL_CAND_CAP)) {
+    const key = `${a.kind}:${a.tmdbId}`;
+    if (haveKeys.has(key)) continue;
+    try {
+      const c = candidateFromDetail(await tmdb(`/${a.kind}/${a.tmdbId}`), a.kind);
+      await sleep(150);
+      if (!c || langCode(c) !== lang) continue;
+      if (!seenCountry[key]) seenCountry[key] = { first: a.since, last: todayStr };
+      out.push(c);
+    } catch (e) { console.warn(`ott-arrival ${lang}/${a.tmdbId}: ${e.message}`); }
+  }
+  return out;
+}
+
+// The same for every language that is not one of the edition's local ones (21 Nov 2026): an
+// English film that reaches a service months after cinemas was listed only if it happened to be
+// trending worldwide that week. Marked _arrival so the catalogue-title guard leaves it to the
+// freshness check.
+async function otherArrivalCands(cfg, have, seenCountry, todayStr) {
+  let all = ARRIVALS_BY_EDITION.get(cfg.code);
+  if (!all) {
+    try { all = arrivalEntries((loadPagesManifest() || {})[cfg.code], { today: editionToday(cfg.code) }); }
+    catch (e) { console.warn(`ott-arrivals [${cfg.code}]: ${e.message}`); all = []; }
+    ARRIVALS_BY_EDITION.set(cfg.code, all);
+  }
+  const local = new Set((cfg.ottRegionalLangs || []).map((l) => langName(l)));
+  const haveKeys = new Set((have || []).map((c) => `${c.kind}:${c.id}`));
+  const out = [];
+  for (const a of all.filter((x) => !local.has(x.lang)).slice(0, ARRIVAL_CAND_CAP)) {
+    const key = `${a.kind}:${a.tmdbId}`;
+    if (haveKeys.has(key)) continue;
+    try {
+      const c = candidateFromDetail(await tmdb(`/${a.kind}/${a.tmdbId}`), a.kind);
+      await sleep(150);
+      if (!c || (cfg.ottRegionalLangs || []).includes(langCode(c))) continue;
+      if (!seenCountry[key]) seenCountry[key] = { first: a.since, last: todayStr };
+      out.push({ ...c, _arrival: true });
+    } catch (e) { console.warn(`ott-arrival other/${a.tmdbId}: ${e.message}`); }
+  }
+  return out;
+}
+
 // One edition's data: four steps (review, Oct 2026: buildCountry was one 890-line function).
 // The theatre step also produces the ranking context the OTT step scores with (the pool's
 // scales, the suspicion and re-release tests); de-duplication across lists and the Pick of
@@ -1011,12 +1072,33 @@ async function buildOtt(cfg, { isRegional, todayStr, isSuspicious, looksReReleas
     ...trMovies.results.map((m) => ({ ...m, kind: "movie" })),
     ...trTv.results.map((t) => ({ ...t, kind: "tv" })),
   ].filter((c) => !isRegional(c) && !isExcluded(c));
+  // What trending misses (21 Nov 2026). Trending holds about twenty films and twenty series, so
+  // two kinds of new title were found in no edition unless the world was watching them that
+  // week, and the UK, Australia and New Zealand have no local-language pool to catch them:
+  //   - a new season of an older series (lib/rules.js returningCandidates), any language;
+  //   - a film or series that reached a service here in the last 30 days, long after it opened
+  //     (otherArrivalCands: the film page's own arrival date, as the local languages use).
+  // The local languages keep their own pool below. These compete with the trending titles on
+  // quality, and the freshness check (ottIsFresh) decides, as it does for every candidate.
+  try {
+    const d = await tmdb("/discover/tv", {
+      watch_region: cfg.watchRegion, with_watch_monetization_types: "flatrate",
+      sort_by: "popularity.desc", "air_date.gte": freshCutoff, "first_air_date.lte": freshCutoff, page: "1",
+    });
+    await sleep(150);
+    const local = new Set(cfg.ottRegionalLangs || []);
+    intlCands.push(...require("./lib/rules.js").returningCandidates(d.results, new Set(intlCands.filter((c) => c.kind === "tv").map((c) => c.id)))
+      .filter((c) => !isRegional(c) && !local.has(c.original_language) && !isExcluded(c)));
+  } catch (e) { console.warn(`ott-intl returning: ${e.message}`); }
+  intlCands.push(...(await otherArrivalCands(cfg, intlCands, seenCountry, todayStr)).filter((c) => !isRegional(c) && !isExcluded(c)));
   for (const c of intlCands) { await attachImdb(c); await sleep(150); }
   // Drop fake/manipulated entries AND famous-but-not-currently-buzzing catalogue titles
   // (looksReRelease) — the same buzz guard theatres use, which the OTT intl pool previously
   // skipped. This is the cheap first cut; the authoritative recency check (ottIsFresh) runs
   // after build, once enrich() has resolved each title's real freshDate.
-  intlCands = intlCands.filter((c) => !isSuspicious(c) && !looksReRelease(c));
+  // (A returning series or a late arrival is an older, well-known title by definition; its
+  // season date or its arrival date, checked once built, is what says whether it is new.)
+  intlCands = intlCands.filter((c) => !isSuspicious(c) && (c._returning || c._arrival || !looksReRelease(c)));
   intlCands.sort((a, b) => weighted402535(b) - weighted402535(a));
 
   const intl = [], usedIds = new Set();
@@ -1073,13 +1155,29 @@ async function buildOtt(cfg, { isRegional, todayStr, isSuspicious, looksReReleas
         cands.push(...(d.results || []).map((m) => ({ ...m, kind })));
       } catch (e) { console.warn(`ott-regional ${lang}/${kind}: ${e.message}`); }
     }
+    // Plus the titles that reached a service here in the last 30 days, however long ago they
+    // opened in cinemas (regionalArrivalCands; 16 Nov 2026).
+    cands.push(...await regionalArrivalCands(cfg, lang, cands, seenCountry, todayStr));
+    // A new season of an older series (lib/rules.js returningCandidates): began before the
+    // window, aired inside it. Kept apart from the cap below so it never costs a new title its
+    // place, and counted only if its latest season is inside the window once built.
+    let returning = [];
+    try {
+      const d = await tmdb(`/discover/tv`, {
+        with_original_language: lang, watch_region: cfg.watchRegion, with_watch_monetization_types: "flatrate",
+        sort_by: "popularity.desc", "air_date.gte": freshCutoff, "first_air_date.lte": freshCutoff, page: "1",
+      });
+      await sleep(150);
+      returning = require("./lib/rules.js").returningCandidates(d.results, new Set(cands.filter((c) => c.kind === "tv").map((c) => c.id)))
+        .filter((c) => !usedIds.has(c.id) && !isExcluded(c));
+    } catch (e) { console.warn(`ott-regional ${lang}/returning: ${e.message}`); }
     cands = cands.filter((c) => !usedIds.has(c.id) && !isExcluded(c));
     // Trim by raw popularity BEFORE the rating lookups. Running every language now means
     // ~8x the candidates, and attachImdb costs a detail call each; the titles below the
     // popularity cap were never going to win a slot or a pool place. No-op in TMDB mode
     // beyond the trim itself, where attachImdb returns immediately.
     cands.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    cands = cands.slice(0, CAND_CAP);
+    cands = cands.slice(0, CAND_CAP).concat(returning);
     for (const c of cands) { await attachImdb(c); if (USE_IMDB) await sleep(150); }
     // Quality floor on the best rating we have: IMDb if present, else TMDB. A film is
     // only allowed through unfloored when it has NO usable rating at all (genuinely too
@@ -1100,7 +1198,11 @@ async function buildOtt(cfg, { isRegional, todayStr, isSuspicious, looksReReleas
     for (const c of cands) {
       if (built.length >= depth) break;
       if (usedIds.has(c.id)) continue;
-      try { const it = await buildOttItem(c); if (it) built.push(it); }
+      try {
+        const it = await buildOttItem(c);
+        if (it && c._returning && !ottIsFresh(it)) console.log(`  ott-regional skip (no new season): ${it.title} freshDate=${it.freshDate}`);
+        else if (it) { built.push(it); if (c._returning) console.log(`  ott-regional new season: ${it.title} freshDate=${it.freshDate}`); }
+      }
       catch (e) { console.warn(`ott-regional-build ${c.id}: ${e.message}`); }
       await sleep(150);
     }
@@ -1111,20 +1213,16 @@ async function buildOtt(cfg, { isRegional, todayStr, isSuspicious, looksReReleas
     }
   }
 
-  // Homepage regional slots: unchanged cap, filled in the config's language priority order
-  // so Hindi still leads. Everything not selected stays in langPool for the language pages,
-  // which is the whole point of fetching it. usedIds is only marked for the titles that
-  // actually take a homepage slot, so a pool title can still appear on its language page.
-  const regional = [];
-  for (const lang of regionalOrder) {
-    if (regional.length >= OTT_REGIONAL_TARGET) break;
-    for (const it of regionalByLang.get(lang) || []) {
-      if (regional.length >= OTT_REGIONAL_TARGET) break;
-      if (usedIds.has(it.tmdbId)) continue;
-      regional.push(it);
-      usedIds.add(it.tmdbId);
-    }
-  }
+  // Homepage regional slots: unchanged cap. One is kept for the edition's first regional
+  // language (Hindi in India); the rest go to the best scores of any language (16 Nov 2026,
+  // lib/ottslots.js). They used to be filled in language order, so the first language took all
+  // four. Everything not selected stays in langPool for the language pages, which is the whole
+  // point of fetching it. usedIds is only marked for the titles that actually take a homepage
+  // slot, so a pool title can still appear on its language page.
+  const regional = pickRegionalSlots(regionalByLang, regionalOrder, OTT_REGIONAL_TARGET, usedIds);
+  for (const it of regional) usedIds.add(it.tmdbId);
+  // In the build log: which regional titles took the homepage slots, with the score each won on.
+  console.log(`  ott-regional [${cfg.code}]: homepage slots: ${regional.map((it) => `${it.title} (${it.language}, ${(it._w || 0).toFixed(3)})`).join("; ") || "none"}`);
 
   // --- Backfill with more international if regional fell short, so list reaches 10 ---
   if (regional.length < OTT_REGIONAL_TARGET) {
@@ -1935,12 +2033,33 @@ function assembleCountry(cfg, { theatres, langTheatres }, { ott, ottOverflow, su
     ...trMovies.results.map((m) => ({ ...m, kind: "movie" })),
     ...trTv.results.map((t) => ({ ...t, kind: "tv" })),
   ].filter((c) => !isRegional(c) && !isExcluded(c));
+  // What trending misses (21 Nov 2026). Trending holds about twenty films and twenty series, so
+  // two kinds of new title were found in no edition unless the world was watching them that
+  // week, and the UK, Australia and New Zealand have no local-language pool to catch them:
+  //   - a new season of an older series (lib/rules.js returningCandidates), any language;
+  //   - a film or series that reached a service here in the last 30 days, long after it opened
+  //     (otherArrivalCands: the film page's own arrival date, as the local languages use).
+  // The local languages keep their own pool below. These compete with the trending titles on
+  // quality, and the freshness check (ottIsFresh) decides, as it does for every candidate.
+  try {
+    const d = await tmdb("/discover/tv", {
+      watch_region: cfg.watchRegion, with_watch_monetization_types: "flatrate",
+      sort_by: "popularity.desc", "air_date.gte": freshCutoff, "first_air_date.lte": freshCutoff, page: "1",
+    });
+    await sleep(150);
+    const local = new Set(cfg.ottRegionalLangs || []);
+    intlCands.push(...require("./lib/rules.js").returningCandidates(d.results, new Set(intlCands.filter((c) => c.kind === "tv").map((c) => c.id)))
+      .filter((c) => !isRegional(c) && !local.has(c.original_language) && !isExcluded(c)));
+  } catch (e) { console.warn(`ott-intl returning: ${e.message}`); }
+  intlCands.push(...(await otherArrivalCands(cfg, intlCands, seenCountry, todayStr)).filter((c) => !isRegional(c) && !isExcluded(c)));
   for (const c of intlCands) { await attachImdb(c); await sleep(150); }
   // Drop fake/manipulated entries AND famous-but-not-currently-buzzing catalogue titles
   // (looksReRelease) — the same buzz guard theatres use, which the OTT intl pool previously
   // skipped. This is the cheap first cut; the authoritative recency check (ottIsFresh) runs
   // after build, once enrich() has resolved each title's real freshDate.
-  intlCands = intlCands.filter((c) => !isSuspicious(c) && !looksReRelease(c));
+  // (A returning series or a late arrival is an older, well-known title by definition; its
+  // season date or its arrival date, checked once built, is what says whether it is new.)
+  intlCands = intlCands.filter((c) => !isSuspicious(c) && (c._returning || c._arrival || !looksReRelease(c)));
   intlCands.sort((a, b) => weighted402535(b) - weighted402535(a));
 
   const intl = [], usedIds = new Set();
@@ -1997,13 +2116,29 @@ function assembleCountry(cfg, { theatres, langTheatres }, { ott, ottOverflow, su
         cands.push(...(d.results || []).map((m) => ({ ...m, kind })));
       } catch (e) { console.warn(`ott-regional ${lang}/${kind}: ${e.message}`); }
     }
+    // Plus the titles that reached a service here in the last 30 days, however long ago they
+    // opened in cinemas (regionalArrivalCands; 16 Nov 2026).
+    cands.push(...await regionalArrivalCands(cfg, lang, cands, seenCountry, todayStr));
+    // A new season of an older series (lib/rules.js returningCandidates): began before the
+    // window, aired inside it. Kept apart from the cap below so it never costs a new title its
+    // place, and counted only if its latest season is inside the window once built.
+    let returning = [];
+    try {
+      const d = await tmdb(`/discover/tv`, {
+        with_original_language: lang, watch_region: cfg.watchRegion, with_watch_monetization_types: "flatrate",
+        sort_by: "popularity.desc", "air_date.gte": freshCutoff, "first_air_date.lte": freshCutoff, page: "1",
+      });
+      await sleep(150);
+      returning = require("./lib/rules.js").returningCandidates(d.results, new Set(cands.filter((c) => c.kind === "tv").map((c) => c.id)))
+        .filter((c) => !usedIds.has(c.id) && !isExcluded(c));
+    } catch (e) { console.warn(`ott-regional ${lang}/returning: ${e.message}`); }
     cands = cands.filter((c) => !usedIds.has(c.id) && !isExcluded(c));
     // Trim by raw popularity BEFORE the rating lookups. Running every language now means
     // ~8x the candidates, and attachImdb costs a detail call each; the titles below the
     // popularity cap were never going to win a slot or a pool place. No-op in TMDB mode
     // beyond the trim itself, where attachImdb returns immediately.
     cands.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-    cands = cands.slice(0, CAND_CAP);
+    cands = cands.slice(0, CAND_CAP).concat(returning);
     for (const c of cands) { await attachImdb(c); if (USE_IMDB) await sleep(150); }
     // Quality floor on the best rating we have: IMDb if present, else TMDB. A film is
     // only allowed through unfloored when it has NO usable rating at all (genuinely too
@@ -2024,7 +2159,11 @@ function assembleCountry(cfg, { theatres, langTheatres }, { ott, ottOverflow, su
     for (const c of cands) {
       if (built.length >= depth) break;
       if (usedIds.has(c.id)) continue;
-      try { const it = await buildOttItem(c); if (it) built.push(it); }
+      try {
+        const it = await buildOttItem(c);
+        if (it && c._returning && !ottIsFresh(it)) console.log(`  ott-regional skip (no new season): ${it.title} freshDate=${it.freshDate}`);
+        else if (it) { built.push(it); if (c._returning) console.log(`  ott-regional new season: ${it.title} freshDate=${it.freshDate}`); }
+      }
       catch (e) { console.warn(`ott-regional-build ${c.id}: ${e.message}`); }
       await sleep(150);
     }
@@ -2035,20 +2174,14 @@ function assembleCountry(cfg, { theatres, langTheatres }, { ott, ottOverflow, su
     }
   }
 
-  // Homepage regional slots: unchanged cap, filled in the config's language priority order
-  // so Hindi still leads. Everything not selected stays in langPool for the language pages,
-  // which is the whole point of fetching it. usedIds is only marked for the titles that
-  // actually take a homepage slot, so a pool title can still appear on its language page.
-  const regional = [];
-  for (const lang of regionalOrder) {
-    if (regional.length >= OTT_REGIONAL_TARGET) break;
-    for (const it of regionalByLang.get(lang) || []) {
-      if (regional.length >= OTT_REGIONAL_TARGET) break;
-      if (usedIds.has(it.tmdbId)) continue;
-      regional.push(it);
-      usedIds.add(it.tmdbId);
-    }
-  }
+  // Homepage regional slots: unchanged cap. One is kept for the edition's first regional
+  // language (Hindi in India); the rest go to the best scores of any language (16 Nov 2026,
+  // lib/ottslots.js). They used to be filled in language order, so the first language took all
+  // four. Everything not selected stays in langPool for the language pages, which is the whole
+  // point of fetching it. usedIds is only marked for the titles that actually take a homepage
+  // slot, so a pool title can still appear on its language page.
+  const regional = pickRegionalSlots(regionalByLang, regionalOrder, OTT_REGIONAL_TARGET, usedIds);
+  for (const it of regional) usedIds.add(it.tmdbId);
 
   // --- Backfill with more international if regional fell short, so list reaches 10 ---
   if (regional.length < OTT_REGIONAL_TARGET) {
@@ -3239,6 +3372,7 @@ module.exports = {
   buildCountry,
   builtFingerprint,
   proveSplitBuilder,
+  ARRIVALS_BY_EDITION,
   buildCountryLegacy,
   gmap,
   filmScore, confidenceTier, rankValue, rankFilms,
