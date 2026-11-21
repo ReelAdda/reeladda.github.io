@@ -12439,31 +12439,64 @@ test("studio windows: medians by studio, small studios counted but not given a r
   assert.deepStrictEqual(SW.windowIn({ r: { GB: { th: "2025-03-01" } } }, "US"), { why: "noCinemaDate" });
   assert.strictEqual(SW.studioStats(SW_STORE(), "GB", { today: "2026-11-20" }).films, 0, "another country has its own films");
 });
-test("data page: the sections outside India appear only with enough behind them, and India's page is byte for byte the same without them", () => {
-  const SW = require("./lib/studiowindows.js");
+test("country data: a country's figures are on its own page, and /data/ only links to it", () => {
+  const SW = require("./lib/studiowindows.js"), S = require("./lib/surfaces.js");
   const store = SW_STORE();
-  const html = SW.worldSectionsHtml(store, { today: "2026-11-20" });
-  assert.ok(/<h2 id="studios">Outside India: cinema to digital release, by studio<\/h2>/.test(html));
-  assert.ok(/<h3 id="studios-us">United States<\/h3>/.test(html) && !/United Kingdom<\/h3>|Australia<\/h3>|Canada<\/h3>/.test(html), "only the country with 40 measured films");
-  assert.ok(/Median 50 days across 42 films/.test(html) && /TMDB has a digital date for 42 of the 50 films read/.test(html), "the coverage is stated");
+  const us = SW.MARKETS.find((m) => m.code === "us"), uk = SW.MARKETS.find((m) => m.code === "uk");
+  assert.deepStrictEqual(SW.shownMarkets(store, { today: "2026-11-20" }).map((m) => m.code), ["us"], "only the country with 40 measured films and three studio rows");
+  assert.strictEqual(SW.marketSections(store, uk, { today: "2026-11-20" }), null);
+  const sec = SW.marketSections(store, us, { today: "2026-11-20" });
+  const html = sec.html;
+  assert.ok(/<div class="big">50 days<\/div>/.test(html) && /across 42 films that opened in cinemas in the United States/.test(html) && /TMDB has a digital date for 42 of the 50 films read/.test(html), "the median and the coverage are stated");
   assert.ok(/<td>Universal<\/td><td class="n">30<\/td><td class="n">9<\/td>/.test(html) && !/<td>A24<\/td>/.test(html));
   assert.ok(/plus 15 films from other studios, or from studios with fewer than 8 films/.test(html), "27 in rows + 15 = 42");
   assert.ok(/<td>In Cinemas Now<\/td><td>Disney<\/td><td>6 November 2026<\/td><td>5 January 2027<\/td>/.test(html) && /An estimate:.*No studio has announced these dates\./.test(html));
-  assert.ok(/usually the first day a film can be bought or rented at home/.test(html) && /a film's distributor can differ/.test(html), "says what a digital date is and what the studio is");
   assert.ok(!/nominees/i.test(html), "no nominees table without a stored ceremony");
-  // Too little: nothing is drawn.
+  const page = S.buildCountryDataPage(us, sec, "20 November 2026", [uk]);
+  assert.ok(/<title>Cinema to digital release in the United States, by studio: FilmyChill data<\/title>/.test(page));
+  assert.ok(/<link rel="canonical" href="https:\/\/filmychill\.com\/us\/data\/">/.test(page) && /<a href="\/us\/">← FilmyChill<\/a>/.test(page), "its own address, back to its own homepage");
+  assert.ok(/usually the first day a film can be bought or[\s\S]{0,12}rented at home/.test(page) && /a film's distributor can differ/.test(page), "says what a digital date is and what the studio is");
+  assert.ok(/Other countries: <a href="\/data\/">India<\/a> · <a href="\/uk\/data\/">United Kingdom<\/a>/.test(page));
+  assert.ok(!/Hindi|Tamil|Telugu|Indian|OTT/.test(page.replace(/<a href="\/data\/">India<\/a>/, "")), "nothing about India on a country's page but the link");
+  assert.ok(!/JustWatch/.test(page), "no credit for a source the page did not use");
+  for (const m of page.matchAll(/<table>[\s\S]*?<\/table>/g)) assert.ok((m[0].match(/<tr>/g) || []).length >= 2, "no empty table");
+  // /data/ carries one line of links, and nothing else changes on it.
+  const links = SW.countryLinksHtml(store, { today: "2026-11-20" });
+  assert.ok(/<h2 id="countries">Other countries<\/h2>/.test(links) && /<a href="\/us\/data\/">United States<\/a>/.test(links) && !/uk\/data|<table/.test(links));
   const thin = SW_STORE(); for (const k of Object.keys(thin.world.films).slice(0, 20)) delete thin.world.films[k];
-  assert.strictEqual(SW.worldSectionsHtml(thin, { today: "2026-11-20" }), "", "under 40 measured films: no section at all");
-  assert.strictEqual(SW.worldSectionsHtml({ films: {} }, { today: "2026-11-20" }), "");
-  assert.strictEqual(SW.worldSectionsHtml(null, { today: "2026-11-20" }), "");
+  assert.strictEqual(SW.countryLinksHtml(thin, { today: "2026-11-20" }), "", "under 40 measured films: no page, no link");
+  assert.strictEqual(SW.countryLinksHtml({ films: {} }, { today: "2026-11-20" }), "");
+  assert.strictEqual(SW.countryLinksHtml(null, { today: "2026-11-20" }), "");
   const recs = [{ c: "in", k: "movie", id: 1, t: "A", lang: "Tamil", th: "2026-09-01", rel: "2026-09-01", first: "2026-10-01", seen: "2026-10-01T00:00:00Z", p: ["Netflix"] }];
   const base = U.buildDataPage(recs, "20 November 2026", { inCinemas: 2 });
-  assert.strictEqual(U.buildDataPage(recs, "20 November 2026", { inCinemas: 2, world: "" }), base, "no sections: the page is unchanged");
-  const withWorld = U.buildDataPage(recs, "20 November 2026", { inCinemas: 2, world: html });
-  assert.ok(withWorld.indexOf('id="studios"') > withWorld.indexOf('class="method"') && withWorld.indexOf('id="studios"') < withWorld.indexOf("<h2>Use the data</h2>"), "after the existing sections, before Use the data");
-  assert.strictEqual(withWorld.replace(`${html}\n\n  `, ""), base, "and everything else on the page is untouched");
-  for (const m of withWorld.matchAll(/<table>[\s\S]*?<\/table>/g)) assert.ok((m[0].match(/<tr>/g) || []).length >= 2, "no empty table");
+  assert.strictEqual(U.buildDataPage(recs, "20 November 2026", { inCinemas: 2, world: "" }), base, "no country pages: the page is unchanged");
+  const withWorld = U.buildDataPage(recs, "20 November 2026", { inCinemas: 2, world: links });
+  assert.strictEqual(withWorld.replace(`${links}\n\n  `, ""), base, "and everything else on the page is untouched");
+  assert.ok(!/By studio|Median days/.test(withWorld), "no other country's table on India's page");
 });
+test("country data: the build writes a page per country, removes one that falls short, and links each edition to its own", () => inTempDirSync(() => {
+  const fsx = require("fs"), S = require("./lib/surfaces.js"), SW = require("./lib/studiowindows.js"), P = require("./lib/pagetypes.js");
+  fsx.writeFileSync("ott-history.jsonl", "");
+  fsx.writeFileSync("ott-digital.json", JSON.stringify(SW_STORE()));
+  fsx.mkdirSync("uk/data", { recursive: true }); fsx.writeFileSync("uk/data/index.html", "left from an earlier build");
+  S.writeDataPage("20 November 2026", { today: "2026-11-20" });
+  assert.ok(fsx.existsSync("us/data/index.html") && /How long from cinema to digital release in the United States\?/.test(fsx.readFileSync("us/data/index.html", "utf8")));
+  assert.ok(!fsx.existsSync("uk/data/index.html") && !fsx.existsSync("au/data") && !fsx.existsSync("ca/data"), "a country without enough has no page, and a stale one goes");
+  const india = fsx.readFileSync("data/index.html", "utf8");
+  assert.ok(/<a href="\/us\/data\/">United States<\/a>/.test(india) && !/Median days<\/th>[\s\S]*Universal/.test(india), "India's page links to it and holds none of its figures");
+  assert.strictEqual(P.pageTypeOf("us/data/index.html").id, "country data page");
+  assert.strictEqual(P.pageTypeOf("data/index.html").id, "trust page");
+  assert.strictEqual(P.pageTypeOf("de/data/index.html"), null, "no data page for an edition outside the four");
+  // Footers: India its own, the US its own, an edition without a page none.
+  assert.deepStrictEqual(SW.dataPageCodes({ today: "2026-11-20" }), ["us"]);
+  const real = Date.now; Date.now = () => Date.parse("2026-11-20T06:00:00Z");
+  try {
+    assert.ok(/<a href="\/data\/">Streaming data<\/a>/.test(S.buildMoreLinks("in")));
+    const us = S.buildMoreLinks("us");
+    assert.ok(/<a href="\/us\/data\/">Streaming data<\/a>/.test(us) && !/href="\/data\/"/.test(us), "the US footer opens the US page, not India's");
+    assert.ok(!/Streaming data/.test(S.buildMoreLinks("de")) && !/Streaming data/.test(S.buildMoreLinks("uk")), "no link where there is no page");
+  } finally { Date.now = real; }
+}));
 testAsync("studio backfill: within its budget, resumable, one call per film, and India's record is never touched", async () => {
   const SW = require("./lib/studiowindows.js");
   const calls = [];
@@ -12519,10 +12552,13 @@ testAsync("Best Picture nominees: only in season, only with exactly ten films, e
   assert.deepStrictEqual(saved.films, { 7: {} }, "India's record untouched");
   await SW.runAwards({ api, today: "2027-01-25", fetchImpl, store: saved, save });
   assert.strictEqual(asked, 1, "once a day");
-  const html = SW.worldSectionsHtml(saved, { today: "2027-01-26" });
-  assert.ok(/<h2 id="nominees">Where to stream the Best Picture nominees<\/h2>/.test(html) && /99th Academy Awards, 14 March 2027\. Nominees as listed on Wikidata/.test(html));
-  assert.ok(/<td>Title 500<\/td><td>Netflix<\/td><td>Rent or buy<\/td><td>Not streaming<\/td><td>Not streaming<\/td>/.test(html), "the film's TMDB title where Wikidata has no English label");
-  assert.strictEqual(SW.worldSectionsHtml(saved, { today: "2027-05-10" }), "", "gone 45 days after the ceremony");
+  const withFilms = SW_STORE(); withFilms.world.awards = saved.world.awards;
+  const [usM, ukM] = [SW.MARKETS.find((m) => m.code === "us"), SW.MARKETS.find((m) => m.code === "uk")];
+  const html = SW.marketSections(withFilms, usM, { today: "2027-01-26" }).html;
+  assert.ok(/<h2 id="nominees">Where to stream the Best Picture nominees in the United States<\/h2>/.test(html) && /99th Academy Awards, 14 March 2027\. Nominees as listed on Wikidata/.test(html));
+  assert.ok(/<td>Title 500<\/td><td>Netflix<\/td><\/tr>/.test(html) && !/Rent or buy<\/td>/.test(html), "that country's column only; the film's TMDB title where Wikidata has no English label");
+  assert.strictEqual(SW.marketSections(withFilms, ukM, { today: "2027-01-26" }), null, "a country without a page shows no nominees either");
+  assert.ok(!/nominees/i.test(SW.marketSections(withFilms, usM, { today: "2027-05-10" }).html), "gone 45 days after the ceremony");
   const down = await SW.runAwards({ api, today: "2027-01-26", fetchImpl: async () => { throw new Error("503"); }, store: saved, save });
   assert.ok(/Wikidata not read/.test(down.why) && saved.world.awards.films.length === 10, "an outage keeps yesterday's table");
 });

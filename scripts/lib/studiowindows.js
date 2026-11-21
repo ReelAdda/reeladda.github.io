@@ -25,8 +25,9 @@
 //
 // State: a "world" key inside ott-digital.json, beside India's own keys, which this module never
 // reads or writes. That file is already committed by the workflow and never published.
-// Everything here appears as sections of the one /data/ page; a section with too little behind
-// it is not drawn, so the page is unchanged until the record has filled.
+// Each country's figures go on that country's own page (/us/data/, /uk/data/ and so on, 21 Nov
+// 2026): a reader or a desk in the US sees the US, not India. /data/ keeps India's figures and
+// links to these. A country with too little behind it gets no page.
 // ============================================================================
 "use strict";
 
@@ -260,45 +261,69 @@ async function runAwards({ api, today, fetchImpl = fetch, file = DIGITAL_FILE, s
 }
 
 // ---------------------------------------------------------------------------
-// The sections for /data/. Returns "" while nothing has enough behind it.
+// One page per country (21 Nov 2026). Each country's figures sit on its own page, /us/data/ and
+// so on, written by lib/surfaces.js writeDataPage; /data/ keeps India's and only links to these.
+// A country gets a page with MARKET_MIN measured films and three studio rows, and loses it below.
 // ---------------------------------------------------------------------------
-function worldSectionsHtml(store, { today = iso(Date.now()) } = {}) {
+const placeName = (m) => (m.code === "us" || m.code === "uk" ? `the ${m.name}` : m.name);
+const qualifies = (s) => s.measured >= MARKET_MIN && s.byStudio.length >= 3;
+function shownMarkets(store, { today = iso(Date.now()) } = {}) {
+  return MARKETS.filter((m) => qualifies(studioStats(store, m.region, { today })));
+}
+
+// The body of one country's page: its median, studio table, estimates and, in awards season,
+// where the Best Picture nominees stream there. null while the country has too little.
+function marketSections(store, m, { today = iso(Date.now()) } = {}) {
   const e = escHtml;
-  const parts = [];
-  const shown = [];
-  for (const m of MARKETS) {
-    const s = studioStats(store, m.region, { today });
-    if (s.measured < MARKET_MIN || s.byStudio.length < 3) continue;
-    shown.push(m.name);
-    const rows = s.byStudio.map((r) => `<tr><td>${e(r.key)}</td><td class="n">${r.median}</td><td class="n">${r.n}</td></tr>`).join("");
-    const rest = s.measured - s.inRows;
-    const exp = s.expected.length ? `<h3>${e(m.name)}: expected digital release for films now in cinemas</h3>
+  const s = studioStats(store, m.region, { today });
+  if (!qualifies(s)) return null;
+  const rows = s.byStudio.map((r) => `<tr><td>${e(r.key)}</td><td class="n">${r.median}</td><td class="n">${r.n}</td></tr>`).join("");
+  const rest = s.measured - s.inRows;
+  const parts = [`<div class="big">${s.overall} days</div>
+  <div class="sub">median from cinema release to digital release, across ${s.measured} films that opened in cinemas in ${e(placeName(m))}, ${e(monthHuman(s.from))} to ${e(monthHuman(s.to))}. Coverage: TMDB has a digital date for ${s.measured} of the ${s.films} films read.</div>`,
+  `<h2 id="studios">By studio</h2>
+  <table><thead><tr><th>Studio</th><th class="n">Median days</th><th class="n">Films</th></tr></thead><tbody>${rows}</tbody></table>
+  ${rest > 0 ? `<p class="plus">plus ${rest} film${rest === 1 ? "" : "s"} from other studios, or from studios with fewer than ${STUDIO_MIN} films, counted in the total but not given a row.</p>` : ""}`];
+  if (s.expected.length) parts.push(`<h2 id="expected">Expected digital release for films now in cinemas</h2>
   <table><thead><tr><th>Film</th><th>Studio</th><th>Opened</th><th>Expected around</th></tr></thead><tbody>${s.expected.map((x) =>
     `<tr><td>${e(x.title)}</td><td>${e(x.studio)}</td><td>${e(dayHuman(x.th))}</td><td>${e(dayHuman(x.date))}</td></tr>`).join("")}</tbody></table>
-  <p class="plus">An estimate: the cinema date plus that studio's median above. No studio has announced these dates.</p>` : "";
-    parts.push(`<h3 id="studios-${m.code}">${e(m.name)}</h3>
-  <div class="sub">Median ${s.overall} days across ${s.measured} films that opened in cinemas there, ${e(monthHuman(s.from))} to ${e(monthHuman(s.to))}. Coverage: TMDB has a digital date for ${s.measured} of the ${s.films} films read.</div>
-  <table><thead><tr><th>Studio</th><th class="n">Median days</th><th class="n">Films</th></tr></thead><tbody>${rows}</tbody></table>
-  ${rest > 0 ? `<p class="plus">plus ${rest} film${rest === 1 ? "" : "s"} from other studios, or from studios with fewer than ${STUDIO_MIN} films, counted in the total but not given a row.</p>` : ""}
-  ${exp}`);
-  }
-  if (parts.length) {
-    parts.unshift(`<h2 id="studios">Outside India: cinema to digital release, by studio</h2>
-  <p>From TMDB's release dates for ${e(shown.join(", ").replace(/, ([^,]*)$/, shown.length > 1 ? " and $1" : ", $1"))}: the days from a film's cinema release in that country to its digital release there. Outside India a digital release is usually the first day a film can be bought or rented at home, which comes before it reaches a subscription service. The studio is the producing studio TMDB lists first among the major groups; a film's distributor can differ. The dates are entered by TMDB's contributors, so each country shows how many films have one.</p>`);
-  }
+  <p class="plus">An estimate: the cinema date plus that studio's median above. No studio has announced these dates.</p>`);
   const a = store && store.world && store.world.awards;
   if (a && Array.isArray(a.films) && a.films.length === 10 && a.date >= addDays(today, -AWARDS_AFTER_DAYS)) {
     const cell = (v) => (Array.isArray(v) && v.length ? e(v.join(", ")) : v === "rent" ? "Rent or buy" : "Not streaming");
-    parts.push(`<h2 id="nominees">Where to stream the Best Picture nominees</h2>
+    parts.push(`<h2 id="nominees">Where to stream the Best Picture nominees in ${e(placeName(m))}</h2>
   <div class="sub">${e(a.name)}, ${e(dayHuman(a.date))}. Nominees as listed on Wikidata; availability from JustWatch through TMDB, checked ${e(dayHuman(a.at))}.</div>
-  <table><thead><tr><th>Film</th>${MARKETS.map((m) => `<th>${e(m.name)}</th>`).join("")}</tr></thead><tbody>${a.films.map((f) =>
-    `<tr><td>${e(f.title)}</td>${MARKETS.map((m) => `<td>${cell(f.where && f.where[m.region])}</td>`).join("")}</tr>`).join("")}</tbody></table>
+  <table><thead><tr><th>Film</th><th>Where</th></tr></thead><tbody>${a.films.map((f) =>
+    `<tr><td>${e(f.title)}</td><td>${cell(f.where && f.where[m.region])}</td></tr>`).join("")}</tbody></table>
   <p class="plus">Subscription services are named; "Rent or buy" means it can be paid for at home but is on no subscription service there.</p>`);
   }
-  return parts.join("\n\n  ");
+  return { html: parts.join("\n\n  "), stats: s };
+}
+
+// The editions that have a page, read from the stored record (so a footer written before the
+// page itself in the same build already links it). Read once per state of the file.
+let shownMemo = { key: "", codes: [] };
+function dataPageCodes({ file = DIGITAL_FILE, today = iso(Date.now()) } = {}) {
+  let key = "";
+  try { const st = fs.statSync(file); key = `${process.cwd()}|${file}|${st.mtimeMs}|${st.size}|${today}`; } catch { return []; }
+  if (shownMemo.key !== key) {
+    let codes = [];
+    try { codes = shownMarkets(JSON.parse(fs.readFileSync(file, "utf8")), { today }).map((m) => m.code); } catch { /* unreadable: no pages */ }
+    shownMemo = { key, codes };
+  }
+  return shownMemo.codes;
+}
+
+// The one thing /data/ says about other countries: where their pages are. "" when there are none.
+function countryLinksHtml(store, { today = iso(Date.now()) } = {}) {
+  const shown = shownMarkets(store, { today });
+  if (!shown.length) return "";
+  return `<h2 id="countries">Other countries</h2>
+  <p>Cinema to digital release by studio, each on its own page: ${shown.map((m) => `<a href="/${m.code}/data/">${escHtml(m.name)}</a>`).join(" · ")}.</p>`;
 }
 
 module.exports = {
   MARKETS, STUDIO_MIN, MARKET_MIN, AWARDS_AFTER_DAYS, NOMINEES_QUERY,
-  studioOf, windowIn, studioStats, pickCeremony, inSeason, runStudioBackfill, runAwards, worldSectionsHtml,
+  studioOf, windowIn, studioStats, pickCeremony, inSeason, runStudioBackfill, runAwards,
+  placeName, shownMarkets, marketSections, countryLinksHtml, dataPageCodes,
 };
