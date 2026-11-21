@@ -12598,6 +12598,20 @@ test("language link: the build names only lists that exist, and adds no page", (
   S.moreByLanguage("in"); S.moreByLanguage("de");
   assert.strictEqual(fsx.readdirSync(".").sort().join(), before, "nothing is written");
 }));
+test("language link: Tonight's pick keeps to the chosen language and carries the same link", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "..", "js", "app.js"), "utf8");
+  const fn = /function moodLangPool\(all, lang\) \{[\s\S]*?\n\}/.exec(src);
+  assert.ok(fn, "moodLangPool is in js/app.js");
+  const moodLangPool = new Function(`${fn[0]}; return moodLangPool;`)();
+  const all = [{ x: { language: "Tamil", title: "A" } }, { x: { language: "Hindi", title: "B" } }, { x: { language: "Tamil", title: "C" } }];
+  assert.deepStrictEqual(moodLangPool(all, "Tamil").map((e) => e.x.title), ["A", "C"], "only the chosen language");
+  assert.strictEqual(moodLangPool(all, "All"), all); assert.strictEqual(moodLangPool(all, ""), all);
+  assert.strictEqual(moodLangPool(all, "Korean"), all, "no title in that language this week: everything, as before");
+  assert.ok(/const all = moodLangPool\(moodAll\(\), activeLang\);/.test(src), "the pick is drawn from that pool");
+  assert.ok(/kept \? langMoreHtml\(activeLang, pool\.length, FC_MORE_LANG\) : ''/.test(src), "the pop-up carries the toolbar's link");
+  const tpl = require("fs").readFileSync(require("path").join(__dirname, "..", "index.html"), "utf8");
+  assert.ok(/<p id="moodSub">I'll pick something from this week's releases<\/p>/.test(tpl) && /<div class="lang-more mood-more" id="moodMore" hidden><\/div>/.test(tpl));
+});
 
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");

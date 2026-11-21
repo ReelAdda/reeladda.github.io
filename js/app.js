@@ -768,7 +768,25 @@ const MOODS = {
   feels:  ['Drama', 'Romance', 'History', 'War'],
   family: ['Family', 'Animation', 'Adventure', 'Fantasy'],
 };
-function openMood() { document.getElementById('moodOverlay').classList.add('open'); document.body.style.overflow = 'hidden'; }
+// The pick keeps to the language chosen in the menu (21 Nov 2026): with Tamil chosen the page
+// shows Tamil titles, so Tonight picks a Tamil one, says so, and carries the same link to the
+// larger Tamil list. With no title in that language this week it picks from everything, as before.
+function moodLangPool(all, lang) {
+  if (!lang || lang === 'All') return all;
+  const inLang = all.filter(e => e.x.language === lang);
+  return inLang.length ? inLang : all;
+}
+function moodAll() {
+  return [...DATA.theatres.map((x, i) => ({ x, k: 'theatres', i })), ...DATA.ott.map((x, i) => ({ x, k: 'ott', i }))];
+}
+function openMood() {
+  const all = moodAll(), pool = moodLangPool(all, activeLang), kept = pool.length < all.length;
+  const sub = document.getElementById('moodSub');
+  if (sub) sub.textContent = "I'll pick something from this week's " + (kept ? activeLang + ' ' : '') + 'releases';
+  const more = document.getElementById('moodMore');
+  if (more) { const html = kept ? langMoreHtml(activeLang, pool.length, FC_MORE_LANG) : ''; more.innerHTML = html; more.hidden = !html; }
+  document.getElementById('moodOverlay').classList.add('open'); document.body.style.overflow = 'hidden';
+}
 function closeMood() { document.getElementById('moodOverlay').classList.remove('open'); document.body.style.overflow = ''; }
 let moodTime = 'any';
 function setMoodTime(t, el) {
@@ -777,7 +795,7 @@ function setMoodTime(t, el) {
   if (el) el.classList.add('on');
 }
 function moodPick(mood) {
-  const all = [...DATA.theatres.map((x, i) => ({ x, k: 'theatres', i })), ...DATA.ott.map((x, i) => ({ x, k: 'ott', i }))];
+  const all = moodLangPool(moodAll(), activeLang);
   const wanted = MOODS[mood] || [];
   let pool = all.filter(e => wanted.some(g => (e.x.genre || '').includes(g)));
   if (!pool.length) pool = all;

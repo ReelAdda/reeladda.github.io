@@ -153,6 +153,7 @@
   #personalBar { flex-basis: 100%; order: 10; } #personalBar:empty { display: none; }
   #langSel { font-weight: 600; }
   .lang-more { flex-basis: 100%; font-size: 14px; } .lang-more[hidden] { display: none; }
+  .mood-more { margin-top: 14px; text-align: center; }
   .lang-more a { color: var(--indigo); font-weight: 700; text-decoration: none; } .lang-more a:hover { text-decoration: underline; }
   .chip { background: var(--card); border: 1px solid var(--line); color: var(--mute); border-radius: 999px;
     padding: 8px 16px; font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; transition: all .15s; }
@@ -857,7 +858,7 @@
   <div class="mood-box">
     <button class="modal-close" data-click="closeMood" aria-label="Close" style="background:var(--bg);color:var(--ink)">×</button>
     <h2>What's the mood tonight?</h2>
-    <p>I'll pick something from this week's releases</p>
+    <p id="moodSub">I'll pick something from this week's releases</p>
     <div class="time-row">
       <button class="time-chip on" data-click="setMoodTime" data-arg="any">Any length</button>
       <button class="time-chip" data-click="setMoodTime" data-arg="95">&lt; 90 min</button>
@@ -869,6 +870,7 @@
       <button class="mood" data-click="moodPick" data-arg="feels"><div class="emo">💔</div><div class="lbl">In the Feels</div></button>
       <button class="mood" data-click="moodPick" data-arg="family"><div class="emo">👨‍👩‍👧</div><div class="lbl">Family Time</div></button>
     </div>
+    <div class="lang-more mood-more" id="moodMore" hidden></div>
   </div>
 </div>
 
