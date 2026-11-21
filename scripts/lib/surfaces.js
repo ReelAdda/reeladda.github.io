@@ -767,11 +767,49 @@ const HOME_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsaf
 // request. js/app.js stays the source (and stays published); the template keeps its <script
 // src> inside the APPJS markers as the fallback when the file can't be inlined safely.
 const APP_JS = path.join(__dirname, "..", "..", "js", "app.js");
+// Pure: the script without what only its authors read (15 Nov 2026). js/app.js is a quarter
+// comments, and every visit downloaded them inside the page: 28 KB compressed, 19 KB without.
+// Dropped: blank lines, whole-line // comments, block comments that start a line, and leading
+// indentation. Nothing inside a multi-line template string is touched (its whitespace is page
+// text), and no code is rewritten, so this is not a minifier and needs no package. Anything it
+// isn't sure of returns the script as it is: a block comment or template string left open, a
+// line continued with a backslash, or a result that no longer compiles.
+function leanScript(src) {
+  const ticks = (line) => (line.replace(/\\[\s\S]/g, "").match(/`/g) || []).length;
+  const out = [];
+  let inTpl = false, inBlock = false;
+  for (const line of String(src).split("\n")) {
+    if (line.endsWith("\\")) return src;
+    if (inBlock) {
+      const end = line.indexOf("*/");
+      if (end < 0) continue;
+      if (line.slice(end + 2).trim()) return src;
+      inBlock = false;
+      continue;
+    }
+    const odd = ticks(line) % 2 === 1;
+    if (inTpl) { out.push(line); if (odd) inTpl = false; continue; }
+    const t = line.trim();
+    if (!t || t.startsWith("//")) continue;
+    if (t.startsWith("/*")) {
+      const end = t.indexOf("*/", 2);
+      if (end < 0) { inBlock = true; continue; }
+      if (!t.slice(end + 2).trim()) continue;
+    }
+    // A line that opens a template string keeps its tail: that part is inside the string.
+    if (odd) { out.push(line.replace(/^\s+/, "")); inTpl = true; } else out.push(t);
+  }
+  if (inTpl || inBlock) return src;
+  const lean = out.join("\n") + "\n";
+  try { new (require("vm").Script)(lean); } catch { return src; }
+  return lean;
+}
 function homeScript(file = APP_JS) {
   let src;
   try { src = fs.readFileSync(file, "utf8"); } catch { return null; }
   // Text that would end or confuse the <script> element can't be inlined; use the file.
   if (/<\/script|<!--/i.test(src)) return null;
+  src = leanScript(src);
   return { tag: `<script>${src}</script>`, hash: `'sha256-${crypto.createHash("sha256").update(src, "utf8").digest("base64")}'` };
 }
 // The homepage policy, allowing the inlined script by its hash when there is one.
@@ -992,7 +1030,7 @@ module.exports = {
   patchAboutPage,
   prerenderIndex,
   homeCsp,
-  homeScript,
+  homeScript, leanScript,
   langOptions,
   renderCountryPage,
   sectionCounts,

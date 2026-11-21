@@ -187,9 +187,19 @@ jobs:
       # the built pages, as one commit with no parent, replaced on every build. Serving the site
       # never adds history (Oct 2026: main grew ~16 MB a day, nearly all of it pages). Skips the
       # push when nothing changed.
+      # The build's memory (facts/, pages-manifest.json) on its own branch, `state`: one commit
+      # with no parent, replaced on every build, like `site` (scripts/site.js). These two were
+      # nine tenths of main's growth. Before the pages, so the site is never published ahead of
+      # the facts it was built from. While main still tracks the files (shadow stage) a failure
+      # here is a warning; once it doesn't, it stops the publish.
+      - name: Publish state branch
+        id: state
+        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
+        run: node scripts/site.js publish-state
+
       - name: Publish site branch
         id: site
-        if: ${{ !cancelled() && steps.commit.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.commit.outcome == 'success' && steps.state.outcome == 'success' }}
         run: node scripts/site.js publish
 
       # Cloudflare Workers Static Assets deploy. Dormant until the CLOUDFLARE_API_TOKEN secret
