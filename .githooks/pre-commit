@@ -1,0 +1,10 @@
+#!/bin/sh
+# Plain-wording check (scripts/prose-check.js, after Wikipedia:Signs of AI writing): stops a commit
+# whose templates or hand-written pages would publish signs of AI writing. Runs only when the commit
+# touches page-writing code or pages. Turned on per clone with: git config core.hooksPath .githooks
+files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(scripts/(lib/[^/]+|update)\.js|js/[^/]+\.js|index\.html|[a-z0-9-]+/index\.html|404\.html)$')
+[ -z "$files" ] && exit 0
+node scripts/prose-check.js || {
+  echo "Commit stopped by the plain-wording check: rewrite the sentences listed above, then commit again." >&2
+  exit 1
+}
