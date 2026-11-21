@@ -1,9 +1,9 @@
 {
  "_about": "Published reviews of recent titles, from the outlets' RSS feeds (lib/reviews.js): outlet, link, headline, date, and a star rating only when the feed states one. Keyed by kind:tmdbId; pruned 90 days after release.",
- "fetched": "2026-11-20",
+ "fetched": "2026-11-21",
  "feeds": {
   "https://www.thehindu.com/entertainment/reviews/feeder/default.rss": {
-   "ok": "2026-11-20",
+   "ok": "2026-11-21",
    "items": 60
   },
   "https://indianexpress.com/section/entertainment/movie-review/feed/": {
@@ -23,31 +23,31 @@
    "error": "HTTP 403"
   },
   "https://www.hindustantimes.com/feeds/rss/entertainment/rssfeed.xml": {
-   "ok": "2026-11-20",
-   "items": 74
+   "ok": "2026-11-21",
+   "items": 73
   },
   "https://feeds.feedburner.com/ndtvmovies-latest": {
    "ok": "2026-11-05",
    "items": 100
   },
   "https://www.firstpost.com/commonfeeds/v1/mfp/rss/entertainment.xml": {
-   "failed": "2026-11-20",
+   "failed": "2026-11-21",
    "error": "HTTP 403"
   },
   "https://www.news18.com/rss/movies.xml": {
-   "failed": "2026-11-20",
+   "failed": "2026-11-21",
    "error": "HTTP 403"
   },
   "https://feeds.feedburner.com/ScrollinArticles.rss": {
-   "ok": "2026-11-20",
+   "ok": "2026-11-21",
    "items": 100
   },
   "https://www.koimoi.com/feed/": {
-   "failed": "2026-11-20",
+   "failed": "2026-11-21",
    "error": "HTTP 403"
   },
   "https://timesofindia.indiatimes.com/rssfeeds/2886704.cms": {
-   "ok": "2026-11-20",
+   "ok": "2026-11-21",
    "items": 20
   },
   "https://www.indiatoday.in/rss/1206611": {
@@ -55,44 +55,44 @@
    "items": 20
   },
   "https://www.dnaindia.com/feeds/entertainment.xml": {
-   "ok": "2026-11-20",
+   "ok": "2026-11-21",
    "items": 20
   },
   "https://www.freepressjournal.in/stories.rss?section=entertainment": {
-   "ok": "2026-11-20",
-   "items": 21
+   "ok": "2026-11-21",
+   "items": 83
   },
   "https://www.123telugu.com/category/reviews/feed": {
-   "ok": "2026-11-20",
+   "ok": "2026-11-21",
    "items": 30
   },
   "https://www.telugu360.com/feed/": {
-   "ok": "2026-11-20",
+   "ok": "2026-11-21",
    "items": 10
   },
   "https://www.cinemaexpress.com/feed": {
-   "ok": "2026-11-20",
-   "items": 6
+   "ok": "2026-11-21",
+   "items": 11
   },
   "https://www.vikatan.com/feed": {
-   "ok": "2026-11-20",
-   "items": 2
+   "ok": "2026-11-21",
+   "items": 19
   },
   "https://www.prajavani.net/feed": {
-   "ok": "2026-11-20",
-   "items": 2
+   "ok": "2026-11-21",
+   "items": 128
   },
   "https://www.amarujala.com/rss/entertainment.xml": {
-   "ok": "2026-11-20",
+   "ok": "2026-11-21",
    "items": 40
   },
   "https://www.sangbadpratidin.in/feed/": {
-   "ok": "2026-11-20",
+   "ok": "2026-11-21",
    "items": 20
   },
   "https://www.rediff.com/rss/moviesreviewsrss.xml": {
-   "ok": "2026-11-20",
-   "items": 227
+   "ok": "2026-11-21",
+   "items": 228
   }
  },
  "films": {
@@ -356,7 +356,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1395215": {
    "title": "Sigma",
@@ -400,7 +400,7 @@
      "d": "2026-10-30"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "tv:289517": {
    "title": "Dead-End Job",
@@ -426,7 +426,7 @@
      "d": "2026-10-31"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1374689": {
    "title": "Pyre",
@@ -641,7 +641,7 @@
      "d": "2026-10-23"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1081010": {
    "title": "Prahaar: The Untold Story of Ujjwal Nikam",
@@ -673,7 +673,7 @@
      "d": "2026-11-12"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "tv:302882": {
    "title": "#Love",
@@ -724,7 +724,7 @@
      "d": "2026-10-24"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:656908": {
    "title": "Ramayana: Rise of a Legend",
@@ -768,7 +768,7 @@
      "d": "2026-11-05"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1810711": {
    "title": "Dilwali Diwali",
@@ -799,7 +799,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1555847": {
    "title": "Garividi Lakshmi",
@@ -843,7 +843,7 @@
      "d": "2026-11-07"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1402181": {
    "title": "Scene",
@@ -880,7 +880,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:926867": {
    "title": "Nooru Kodi Vaanavil",
@@ -906,7 +906,7 @@
      "d": "2026-11-06"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1803837": {
    "title": "Summer Holidays",
@@ -1013,7 +1013,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1733518": {
    "title": "Bouma",
@@ -1032,7 +1032,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1641520": {
    "title": "DNK",
@@ -1045,7 +1045,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1440539": {
    "title": "Itllu Arjuna",
@@ -1064,7 +1064,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1493572": {
    "title": "Parivarik ManuRanjan",
@@ -1101,7 +1101,7 @@
      "d": "2026-11-16"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1286656": {
    "title": "I Play Rocky",
@@ -1132,7 +1132,7 @@
      "d": "2026-11-16"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1562642": {
    "title": "Ghost Soldier",
@@ -1164,7 +1164,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1655020": {
    "title": "John Doe",
@@ -1189,7 +1189,7 @@
      "d": "2026-11-14"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "tv:291507": {
    "title": "The Body",
@@ -1202,7 +1202,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1445172": {
    "title": "Dark Chocolate",
@@ -1215,7 +1215,7 @@
      "d": "2026-11-13"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "tv:334412": {
    "title": "Student of the Year: After Dark",
@@ -1246,7 +1246,7 @@
      "d": "2026-11-17"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1543469": {
    "title": "Heartland",
@@ -1259,7 +1259,7 @@
      "d": "2026-11-14"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1434462": {
    "title": "Melcow Pondicherry",
@@ -1272,7 +1272,7 @@
      "d": "2026-11-16"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1263337": {
    "title": "Heart of the Beast",
@@ -1285,7 +1285,7 @@
      "d": "2026-09-23"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1505644": {
    "title": "ENE Repeat",
@@ -1310,7 +1310,7 @@
      "d": "2026-11-19"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1533928": {
    "title": "Bachelor Party D'eux",
@@ -1329,7 +1329,7 @@
      "d": "2026-11-20"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1698932": {
    "title": "Kaali Kheti",
@@ -1373,7 +1373,7 @@
      "d": "2026-11-20"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1300968": {
    "title": "The Hunger Games: Sunrise on the Reaping",
@@ -1398,7 +1398,7 @@
      "d": "2026-11-20"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1381071": {
    "title": "Godzilla Minus Zero",
@@ -1417,7 +1417,7 @@
      "d": "2026-11-20"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1322273": {
    "title": "Aakasamlo Oka Tara",
@@ -1442,7 +1442,7 @@
      "d": "2026-11-20"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1680033": {
    "title": "Appa Kutty",
@@ -1474,7 +1474,7 @@
      "d": "2026-11-20"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   },
   "movie:1808244": {
    "title": "Pratap",
@@ -1493,7 +1493,7 @@
      "d": "2026-11-20"
     }
    ],
-   "updated": "2026-11-20"
+   "updated": "2026-11-21"
   }
  }
 }

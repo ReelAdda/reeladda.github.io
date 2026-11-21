@@ -1,10 +1,46 @@
 {
- "date": "2026-11-20",
- "checked": 107,
- "errors": 1,
- "pagesDisagreeing": 0,
- "high": 0,
- "correctable": 0,
- "byField": {},
- "rows": []
+ "date": "2026-11-21",
+ "checked": 108,
+ "errors": 0,
+ "pagesDisagreeing": 4,
+ "high": 4,
+ "correctable": 3,
+ "byField": {
+  "platform": 3,
+  "language": 1
+ },
+ "rows": [
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Prime Video, Peacock, YouTube TV, TNT",
+   "tmdb": "Prime Video, Hulu, Peacock, YouTube TV",
+   "code": "us",
+   "slug": "charmed"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "iciTouTV, BritBox, AcornTV, Acorn TV",
+   "tmdb": "BritBox, AcornTV, Acorn TV",
+   "code": "ca",
+   "slug": "midsomer-murders"
+  },
+  {
+   "field": "platform",
+   "severity": "high",
+   "page": "Netflix, WeTV",
+   "tmdb": "Netflix, Tencent Video",
+   "code": "sg",
+   "slug": "shine-on-me"
+  },
+  {
+   "field": "language",
+   "severity": "high",
+   "page": "French",
+   "tmdb": "English",
+   "code": "fr",
+   "slug": "bunker"
+  }
+ ]
 }
