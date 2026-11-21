@@ -280,6 +280,25 @@ function deriveFreshDate(kind, d) {
   return seasonDates.length ? seasonDates.sort().pop() : (d.last_air_date || d.first_air_date || null);
 }
 
+// A NEW SEASON OF AN OLDER SERIES (21 Nov 2026). The lists asked TMDB for series by the date of
+// their first episode, so a returning show never qualified: Dhindora's second season reached
+// Netflix in India on 20 Nov 2026 and appeared on no list, because the series began in 2021.
+// (Worldwide trending carries about twenty series a week, and a local-language title rarely
+// reaches it.) The build now also asks for series that began before the window and aired an
+// episode inside it: once per local language, and once per edition for every other language.
+// Daily soaps, news, reality and talk shows match that every week, so those genres are dropped
+// here; what is left, most popular first and RETURNING_TRIES at most, must still show a season
+// that began inside the window once it is built (isOttFresh on the latest season's date), which
+// is what a long-running daily show fails. Pure.
+const RETURNING_TRIES = 6;
+const NOT_A_NEW_SEASON = new Set([10763, 10764, 10766, 10767]);   // TMDB TV genres: News, Reality, Soap, Talk
+function returningCandidates(results, have = new Set(), max = RETURNING_TRIES) {
+  return (results || [])
+    .filter((r) => r && r.id && !have.has(r.id) && !(r.genre_ids || []).some((g) => NOT_A_NEW_SEASON.has(g)))
+    .sort((a, b) => (b.popularity || 0) - (a.popularity || 0)).slice(0, max)
+    .map((r) => ({ ...r, kind: "tv", _returning: true }));
+}
+
 // Is an OTT item fresh enough to list? A null freshDate means TMDB has no date yet (genuinely
 // too new) -> kept, so we never punish brand-new titles. A future or within-window date passes;
 // anything older than OTT_FRESH_DAYS is a rewatch/catalogue title and is dropped. `now` is
@@ -512,7 +531,7 @@ function streamingProviders(region) {
 }
 
 module.exports = {
-  adTierProviders, streamingProviders, AD_TIER_ON,
+  adTierProviders, streamingProviders, AD_TIER_ON, returningCandidates, RETURNING_TRIES,
   MAX_SPAN_WEEKS,
   useMeasuredWindows,
   windowInfo,

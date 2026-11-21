@@ -2012,7 +2012,14 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
     // it the notice had nowhere to go and the next render erased it (Oct 2026 audit).
     if (item.state === "gone" && !providers.length) return "<!--SW:pending--><!--/SW:pending-->";
     if (item.kind === "tv" || providers.length) return "";
-    if (item.platform !== "Theatres" && !upcoming) return "";
+    // A released film with no platform that never sat on the In Theatres list (its page was
+    // made from Coming Soon, so platform is ""). It had no section here, so no marker, so the
+    // arrival sweep, which looks for the marker, never checked it: 241 pages said "not on OTT
+    // yet" with nobody looking (The Invite, India: released 10 Jul 2026, last touched 24 Oct;
+    // 21 Nov 2026 freshness review). It now gets the plain waiting section and is checked like
+    // the rest. Nothing is said about cinemas, which this page never recorded.
+    const offList = !item.platform && !upcoming && item.kind === "movie" && !!item.released;
+    if (item.platform !== "Theatres" && !upcoming && !offList) return "";
     const V = streamVocab(cfg);
     if (upcoming) {
       // The due date is stamped into the marker so refreshDuePages() can find this block on a
@@ -2045,8 +2052,10 @@ ${v3 ? V2.v3Header(homeUrl, country) : v2 ? V2.v2Header(homeUrl, country) : `<di
         + `<p><strong>Streaming from ${e(fmtDateFull(item.digitalDate, localeFor(code)))}${on}.</strong> ${e(digitalAnnounceText(item.title, item.digitalDate, item.digitalNote, country, cfg))} This page switches to \u201cstreaming now\u201d the day it lands.</p><!--/SW:pending-->`;
     }
     if (digitalPassed(item)) return digitalPassedBlock(item.title, item.digitalDate, item.digitalNote, country, cfg);
-    const est = streamWindowEstimate(item.released, item.language, asOfDate);
-    const body = est && !est.passed
+    const est = offList ? null : streamWindowEstimate(item.released, item.language, asOfDate);
+    const body = offList
+      ? `<p>Not streaming yet in ${e(country)}. No platform has announced ${e(V.article.toLowerCase())} ${e(V.releaseDate)}. We re-check every day.</p>`
+      : est && !est.passed
       ? `<p>Not streaming yet — ${e(item.title)} is in its theatrical run in ${e(country)}${item.released ? `, released ${e(item.released)}` : ""}. ${e(item.language || "Films like this")} releases typically reach streaming about ${est.lo}–${est.hi} weeks after opening, which would put it somewhere around <strong>${e(est.span)}</strong>.</p><p style="color:var(--mute);font-size:13px">That's the usual pattern, not a confirmed date — no platform has announced one. We re-check every day and this page updates the moment it lands.</p>`
       : item._plain
         // Plain wording (lib/humanprose.js): two sentences, and the date as the edition writes dates.

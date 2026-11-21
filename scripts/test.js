@@ -12811,6 +12811,61 @@ testAsync("homepage regional slots: India's four are Hindi's best plus the three
   if (hindiPool.length || regional.some((x) => x.language === "Hindi")) assert.ok(regional.some((x) => x.language === "Hindi"), "Hindi keeps a slot when it has a title");
 }));
 
+group("21 Nov 2026 freshness review: new seasons, late arrivals outside the local languages, waiting pages nobody checked");
+test("returning series: a new season of an older show is a candidate; soaps and stale shows are not (Dhindora)", () => {
+  const R = require("./lib/rules.js");
+  const res = [
+    { id: 275204, name: "Dhindora", first_air_date: "2021-10-14", popularity: 30, genre_ids: [35, 18] },
+    { id: 2, name: "Daily Soap", first_air_date: "2020-07-13", popularity: 900, genre_ids: [10766, 18] },
+    { id: 3, name: "Reality Show", first_air_date: "2019-01-01", popularity: 500, genre_ids: [10764] },
+    { id: 4, name: "Already A Candidate", first_air_date: "2026-11-01", popularity: 80, genre_ids: [18] },
+    { id: 5, name: "Long Drama", first_air_date: "2022-01-01", popularity: 60, genre_ids: [18] },
+  ];
+  const got = R.returningCandidates(res, new Set([4]));
+  assert.deepStrictEqual(got.map((c) => c.id), [5, 275204], "most popular first; the soap, the reality show and the one already found are out");
+  assert.ok(got.every((c) => c.kind === "tv" && c._returning === true));
+  assert.strictEqual(R.returningCandidates(Array.from({ length: 20 }, (_, i) => ({ id: 100 + i, popularity: i })), new Set()).length, R.RETURNING_TRIES, "a few tries, no more");
+  assert.deepStrictEqual(R.returningCandidates(null), []);
+  // What decides it once built: the latest season's date, not the series' first episode.
+  const fresh = R.deriveFreshDate("tv", { first_air_date: "2021-10-14", seasons: [{ season_number: 1, air_date: "2021-10-14" }, { season_number: 2, air_date: "2026-11-20" }] });
+  assert.strictEqual(fresh, "2026-11-20");
+  assert.ok(R.isOttFresh(fresh, Date.parse("2026-11-21T00:00:00Z")), "Dhindora's second season is new");
+  assert.ok(!R.isOttFresh(R.deriveFreshDate("tv", { seasons: [{ season_number: 1, air_date: "2022-01-01" }], last_air_date: "2026-11-20" }), Date.parse("2026-11-21T00:00:00Z")), "a show still airing its first season from 2022 is not");
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  const n = (re) => (src.match(re) || []).length;
+  assert.strictEqual(n(/"air_date\.gte": freshCutoff, "first_air_date\.lte": freshCutoff/g), 4, "asked per local language and once per edition, in both copies of the list builder");
+  assert.strictEqual(n(/if \(it && c\._returning && !ottIsFresh\(it\)\)/g), 2, "a local-language returning show is checked once built");
+  assert.strictEqual(n(/cands\.slice\(0, CAND_CAP\)\.concat\(returning\)/g), 2, "never at a new title's expense");
+  assert.strictEqual(n(/!local\.has\(c\.original_language\)/g), 2, "the any-language question leaves the local languages to their own pool");
+  assert.strictEqual(n(/\(c\._returning \|\| c\._arrival \|\| !looksReRelease\(c\)\)/g), 2, "not dropped for being well known; the date decides");
+  assert.ok(n(/if \(it && ottIsFresh\(it\)\) \{ intl\.push\(it\)/g) >= 2, "every international candidate still passes the freshness check");
+});
+test("late arrivals outside the local languages are candidates too, from the film page's own arrival date", () => {
+  const src = require("fs").readFileSync(require("path").join(__dirname, "update.js"), "utf8");
+  assert.ok(/async function otherArrivalCands\(cfg, have, seenCountry, todayStr\)/.test(src));
+  assert.ok(/all\.filter\(\(x\) => !local\.has\(x\.lang\)\)\.slice\(0, ARRIVAL_CAND_CAP\)/.test(src), "the arrivals the local-language pools don't take, capped");
+  assert.ok(/out\.push\(\{ \.\.\.c, _arrival: true \}\)/.test(src) && /if \(!seenCountry\[key\]\) seenCountry\[key\] = \{ first: a\.since, last: todayStr \};[\s\S]{0,60}_arrival/.test(src), "first sighting from the page's date, so the card and the page agree");
+  assert.strictEqual((src.match(/intlCands\.push\(\.\.\.\(await otherArrivalCands\(cfg, intlCands, seenCountry, todayStr\)\)/g) || []).length, 2, "in both copies of the list builder");
+  const O = require("./lib/ottslots.js");
+  const ed = { "late-film": { tmdbId: 9, kind: "movie", lang: "English", released: "2026-08-01", live: { since: "2026-11-15", providers: ["Netflix"] } } };
+  assert.deepStrictEqual(O.arrivalEntries(ed, { today: "2026-11-21" }).map((x) => [x.slug, x.lang, x.since]), [["late-film", "English", "2026-11-15"]], "an English film that reached Netflix three months after cinemas");
+});
+test("a released film with no platform recorded gets the waiting section, so the arrival check finds it (The Invite)", () => {
+  const F = require("./lib/filmpage.js"), IN = require("./lib/core.js").COUNTRIES[0];
+  const base = { title: "The Invite", slug: "the-invite-x", kind: "movie", released: "2026-07-10", language: "English", genre: "Drama", providers: [], rentBuy: [], tmdbId: 950028, rating: 7.2, votes: 971, cast: [], castPics: [], fcScore: null };
+  const off = F.buildFilmPage({ ...base, platform: "" }, "2026-11-21", new Set(), IN);
+  assert.ok(/<!--SW:pending--><h2>[^<]*<\/h2><p>Not streaming yet in India\. No platform has announced an OTT release date\. We re-check every day\.<\/p><!--\/SW:pending-->/.test(off), (/<!--SW:pending-->[\s\S]{0,300}/.exec(off) || ["no section"])[0]);
+  assert.ok(!/opened in theatres|theatrical run|usually take|typically reach/.test((/<!--SW:pending-->[\s\S]*?<!--\/SW:pending-->/.exec(off) || [""])[0]), "nothing about cinemas or a usual window, which this page never recorded");
+  const life = require("fs").readFileSync(require("path").join(__dirname, "lib", "lifecycle.js"), "utf8");
+  assert.ok(/includes\("<!--SW:pending-->"\)/.test(life), "the marker is what the arrival sweep looks for");
+  const cinema = F.buildFilmPage({ ...base, platform: "Theatres" }, "2026-11-21", new Set(), IN);
+  assert.ok(/<!--SW:pending-->/.test(cinema) && /opened in theatres|theatrical run|released in theatres/.test(cinema), "a film from the In Theatres list reads as before");
+  const tv = F.buildFilmPage({ ...base, kind: "tv", platform: "" }, "2026-11-21", new Set(), IN);
+  assert.ok(!/<!--SW:pending-->/.test(tv), "series are not given a film's waiting section");
+  const streaming = F.buildFilmPage({ ...base, platform: "Netflix", providers: ["Netflix"] }, "2026-11-21", new Set(), IN);
+  assert.ok(!/<!--SW:pending-->/.test(streaming), "a streaming page has no waiting section");
+});
+
 (async () => {
   if (ASYNC_TESTS.length) console.log("\nasync");
   for (const [name, fn, grp] of ASYNC_TESTS) {
