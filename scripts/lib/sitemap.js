@@ -494,6 +494,10 @@ function writeMultiCountrySitemap(countries, pagesManifest = null) {
   // It refreshes whenever the archive grows, hence changefreq weekly.
   const dataUrls = fs.existsSync("data/index.html")
     ? [`  <url><loc>https://filmychill.com/data/</loc><lastmod>${lm("https://filmychill.com/data/", "data/index.html")}</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>`] : [];
+  // Each country's own data page (lib/surfaces.js buildCountryDataPage), where it exists.
+  for (const m of require("./studiowindows.js").MARKETS) {
+    if (fs.existsSync(`${m.code}/data/index.html`)) dataUrls.push(`  <url><loc>https://filmychill.com/${m.code}/data/</loc><lastmod>${lm(`https://filmychill.com/${m.code}/data/`, `${m.code}/data/index.html`)}</lastmod><changefreq>weekly</changefreq><priority>0.5</priority></url>`);
+  }
   // The /embed/ instructions page is indexable (people should find it); the widget pages
   // under /embed/week/ are noindex, so they're intentionally NOT listed here.
   const embedUrls = fs.existsSync("embed/index.html")

@@ -634,6 +634,7 @@ function indexNowUrls(builtCountries, dataByCode = {}) {
     if (cfg.code !== "in") urls.push(`https://filmychill.com/${cfg.code}/`, `https://filmychill.com/${cfg.code}/new-on-ott/`);
   }
   for (const [, slug] of LANGUAGE_PAGES) urls.push(`https://filmychill.com/${slug}/`);
+  for (const m of require("./studiowindows.js").MARKETS) if (fs.existsSync(`${m.code}/data/index.html`)) urls.push(`https://filmychill.com/${m.code}/data/`);
   return [...new Set(urls)].slice(0, 900);
 }
 function writeIndexNowPayload(builtCountries, dataByCode = {}) {

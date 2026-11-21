@@ -377,7 +377,9 @@ function buildMoreLinks(code, data = null) {
   const site = [
     li("/about/", "About"),
     li("/privacy/", "Privacy"),
-    li("/data/", "Streaming data"),
+    // Each edition links its own data page; an edition with none has no link (21 Nov 2026).
+    code === "in" ? li("/data/", "Streaming data")
+      : require("./studiowindows.js").dataPageCodes().includes(code) ? li(`/${code}/data/`, "Streaming data") : "",
     code === "in" ? li("/embed/", "Embed widget") : "",
     li("https://whatsapp.com/channel/0029Vb81Fe8C6ZvdMR2oxH3j", "WhatsApp channel"),
     li("https://www.instagram.com/filmychillofficial/", "Instagram"),
@@ -532,9 +534,32 @@ function arrivalsSection(records, { code = "in", today = new Date().toISOString(
   <table><thead><tr><th>Month</th><th class="n">Arrivals</th><th>Biggest services</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-// `world`: sections for countries outside India (lib/studiowindows.js worldSectionsHtml), drawn
-// after everything else and before "Use the data". Empty until that record has filled, and then
-// the page is byte for byte what it was.
+// The data pages' styles: /data/ and each country's own page (buildCountryDataPage).
+const DATA_STYLE = `
+  body { font-family: system-ui,-apple-system,sans-serif; max-width: 780px; margin: 0 auto;
+         padding: 26px 18px 70px; background: #FFF7EC; color: #1A1633; line-height: 1.65; }
+  h1 { font-size: 28px; margin-bottom: 6px; } h2 { font-size: 21px; margin-top: 38px; } h3 { font-size: 16px; margin: 24px 0 4px; }
+  .sub { color: #5E5A80; font-size: 14px; }
+  .plus { color: #5E5A80; font-size: 13px; margin: 6px 0 0; }
+  .big { font-size: 46px; font-weight: 800; color: #4038C7; margin: 14px 0 2px; }
+  .quote { background: #fff; border: 1px solid #E7DFD0; border-radius: 12px; padding: 14px 18px; margin-top: 20px; }
+  .quote .qh { font-weight: 700; } .quote ul { margin: 6px 0 0; padding-left: 20px; } .quote li { margin: 6px 0; }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 15px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #E7DFD0; }
+  th { font-size: 13px; color: #5E5A80; font-weight: 600; } .n { text-align: right; }
+  .chart { margin: 26px 0 0; } .chart figcaption { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .chart svg { width: 100%; max-width: 640px; height: auto; display: block; }
+  .chart .cl { font-size: 16px; fill: #1A1633; } .chart .cb { fill: #4038C7; } .chart .cv { font-size: 16px; font-weight: 700; fill: #1A1633; } .chart .cn { font-size: 15px; fill: #5E5A80; }
+  .chart .src { font-size: 12px; color: #5E5A80; }
+  .method { background: #fff; border-radius: 10px; padding: 14px 16px; margin-top: 26px; font-size: 14px; }
+  .cite { background: #fff; border-left: 4px solid #FFAD1F; padding: 10px 14px; font-size: 14px; }
+  a { color: #4038C7; } code { background: #fff; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #E7DFD0; font-size: 13px; color: #5E5A80; }
+`;
+
+// `world`: the links to the other countries' own pages (lib/studiowindows.js countryLinksHtml),
+// drawn after everything else and before "Use the data". Empty while no country has a page, and
+// then the page is byte for byte what it was.
 function buildDataPage(records, updatedHuman, { inCinemas = 0, digital = null, world = "" } = {}) {
   const e = escHtml;
   const s = windowStats(records);
@@ -564,27 +589,7 @@ ${ICON_LINKS}
 <meta name="robots" content="max-image-preview:large">
 <meta property="og:title" content="How long films take to reach streaming — FilmyChill data">
 <meta property="og:url" content="https://filmychill.com/data/">
-<style>
-  body { font-family: system-ui,-apple-system,sans-serif; max-width: 780px; margin: 0 auto;
-         padding: 26px 18px 70px; background: #FFF7EC; color: #1A1633; line-height: 1.65; }
-  h1 { font-size: 28px; margin-bottom: 6px; } h2 { font-size: 21px; margin-top: 38px; } h3 { font-size: 16px; margin: 24px 0 4px; }
-  .sub { color: #5E5A80; font-size: 14px; }
-  .plus { color: #5E5A80; font-size: 13px; margin: 6px 0 0; }
-  .big { font-size: 46px; font-weight: 800; color: #4038C7; margin: 14px 0 2px; }
-  .quote { background: #fff; border: 1px solid #E7DFD0; border-radius: 12px; padding: 14px 18px; margin-top: 20px; }
-  .quote .qh { font-weight: 700; } .quote ul { margin: 6px 0 0; padding-left: 20px; } .quote li { margin: 6px 0; }
-  table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 15px; }
-  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #E7DFD0; }
-  th { font-size: 13px; color: #5E5A80; font-weight: 600; } .n { text-align: right; }
-  .chart { margin: 26px 0 0; } .chart figcaption { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
-  .chart svg { width: 100%; max-width: 640px; height: auto; display: block; }
-  .chart .cl { font-size: 16px; fill: #1A1633; } .chart .cb { fill: #4038C7; } .chart .cv { font-size: 16px; font-weight: 700; fill: #1A1633; } .chart .cn { font-size: 15px; fill: #5E5A80; }
-  .chart .src { font-size: 12px; color: #5E5A80; }
-  .method { background: #fff; border-radius: 10px; padding: 14px 16px; margin-top: 26px; font-size: 14px; }
-  .cite { background: #fff; border-left: 4px solid #FFAD1F; padding: 10px 14px; font-size: 14px; }
-  a { color: #4038C7; } code { background: #fff; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
-  footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid #E7DFD0; font-size: 13px; color: #5E5A80; }
-</style></head><body>
+<style>${DATA_STYLE}</style></head><body>
   <h1>How long does a film take to reach streaming?</h1>
   <div class="sub">Updated ${e(updatedHuman)} · two sources, kept apart: FilmyChill's own daily checks in ${COUNTRIES.length} countries, and TMDB's digital release dates for India</div>
 
@@ -647,6 +652,58 @@ ${ICON_LINKS}
 </body></html>`;
 }
 
+// One country's own data page (21 Nov 2026): /us/data/, /uk/data/, /ca/data/, /au/data/. Only
+// that country's figures (lib/studiowindows.js marketSections); India's stay on /data/. `others`
+// are the other countries with a page, for the one line of links in the footer.
+function buildCountryDataPage(m, sections, updatedHuman, others = []) {
+  const e = escHtml;
+  const SWm = require("./studiowindows.js");
+  const place = SWm.placeName(m);
+  const url = `https://filmychill.com/${m.code}/data/`;
+  const h1 = `How long from cinema to digital release in ${place}?`;
+  const title = `Cinema to digital release in ${place}, by studio: FilmyChill data`;
+  const s = sections.stats;
+  const elsewhere = [`<a href="/data/">India</a>`, ...others.map((o) => `<a href="/${o.code}/data/">${e(o.name)}</a>`)].join(" · ");
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+${analyticsTag()}
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${e(title)}</title>
+<meta name="description" content="Days from cinema release to digital release in ${e(place)}, by studio: ${s.measured} films from TMDB's release dates, median ${s.overall} days. Free to use with attribution.">
+${ICON_LINKS}
+<link rel="canonical" href="${url}">
+<meta name="robots" content="max-image-preview:large">
+<meta property="og:title" content="${e(title)}">
+<meta property="og:url" content="${url}">
+<style>${DATA_STYLE}</style></head><body>
+  <h1>${e(h1)}</h1>
+  <div class="sub">Updated ${e(updatedHuman)} · from TMDB's release dates for ${e(place)}</div>
+
+  ${sections.html}
+
+  <div class="method">
+    <b>Method.</b> The window runs from a film's cinema release in ${e(place)} to its digital release there,
+    both from TMDB's release dates. A digital release is usually the first day a film can be bought or
+    rented at home, which comes before it reaches a subscription service. The studio is the producing
+    studio TMDB lists first among the major groups; a film's distributor can differ. The dates are entered
+    by TMDB's contributors, so the coverage line says how many films have one. Films whose digital date
+    comes before their cinema date, or more than a year after it, are left out. A studio gets a row once
+    it has ${SWm.STUDIO_MIN} films with both dates.
+  </div>
+
+  <h2>Use the data</h2>
+  <p>Free to cite and quote with credit to FilmyChill and a link to this page. Release dates come from
+  TMDB; reuse of that underlying data is governed by
+  <a href="https://www.themoviedb.org/api-terms-of-use" rel="noopener">TMDB's API terms</a>. If you're
+  writing something and want a cut we don't publish here, ask.</p>
+  <p class="cite"><b>Cite as:</b> FilmyChill, "${e(h1)}", updated ${e(updatedHuman)}, ${url}</p>
+
+  <footer><a href="/${m.code}/">← FilmyChill</a> · <a href="/about/">About</a>
+  <br>Other countries: ${elsewhere}
+  <br>Release dates from <a href="https://www.themoviedb.org" rel="noopener">TMDB</a>${/id="nominees"/.test(sections.html) ? ` · Streaming availability data by <a href="https://www.justwatch.com" rel="noopener">JustWatch</a>` : ""}
+  <br>${require("./pagekit.js").TMDB_NOTICE}</footer>
+</body></html>`;
+}
+
 // Exactly the rows behind the published medians — same columns as before; theatrical_release
 // is now the film's cinema date in that country.
 function buildWindowsCsv(records) {
@@ -686,14 +743,27 @@ function buildDigitalCsv(store) {
   return rows.map((r) => r.join(",")).join("\n") + "\n";
 }
 
-function writeDataPage(updatedHuman) {
+function writeDataPage(updatedHuman, { today = new Date().toISOString().slice(0, 10) } = {}) {
   const records = readHistory();
   let store = null;
   try { store = JSON.parse(fs.readFileSync(DIGITAL_FILE, "utf8")); } catch { /* not built yet */ }
   const digital = store ? digitalStats(store) : null;
   fs.mkdirSync("data", { recursive: true });
+  // Each country outside India has its own page; /data/ only links to them. A country that no
+  // longer has enough behind it loses its page.
   let world = "";
-  try { world = require("./studiowindows.js").worldSectionsHtml(store); } catch (e) { console.warn(`  /data/ sections outside India not drawn: ${e.message}`); }
+  try {
+    const SWm = require("./studiowindows.js");
+    const shown = SWm.shownMarkets(store, { today });
+    for (const m of SWm.MARKETS) {
+      const sec = shown.includes(m) ? SWm.marketSections(store, m, { today }) : null;
+      if (!sec) { fs.rmSync(`${m.code}/data`, { recursive: true, force: true }); continue; }
+      fs.mkdirSync(`${m.code}/data`, { recursive: true });
+      writeIfChanged(`${m.code}/data/index.html`, buildCountryDataPage(m, sec, updatedHuman, shown.filter((o) => o !== m)));
+    }
+    world = SWm.countryLinksHtml(store, { today });
+    if (shown.length) console.log(`  country data pages: ${shown.map((m) => m.code).join(", ")}`);
+  } catch (e) { console.warn(`  country data pages not written: ${e.message}`); }
   writeIfChanged("data/index.html", buildDataPage(records, updatedHuman, { inCinemas: filmsInCinemas(), digital, world }));
   fs.writeFileSync("data/streaming-windows.csv", buildWindowsCsv(records));
   if (store) fs.writeFileSync("data/india-digital-windows.csv", buildDigitalCsv(store));
@@ -977,7 +1047,7 @@ module.exports = {
   choosePick,
   PICK_FRESH_DAYS,
   ABOUT_LASTMOD,
-  buildDataPage,
+  buildDataPage, buildCountryDataPage,
   buildDigitalCsv,
   indiaDataSection,
   medianBarChart,
